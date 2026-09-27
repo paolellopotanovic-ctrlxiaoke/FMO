@@ -1,0 +1,500 @@
+{
+  "name": "cc-ccsd-gly.log",
+  "validation": [
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "WAVEFUNCTION NORMALIZATION",
+      "value": "1.0000000000",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "ONE ELECTRON ENERGY",
+      "value": "-740.0288685030",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TWO ELECTRON ENERGY",
+      "value": "277.9552506242",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "NUCLEAR REPULSION ENERGY",
+      "value": "178.4092335628",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TOTAL ENERGY",
+      "value": "-283.6643843160",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "NUCLEUS-NUCLEUS POTENTIAL ENERGY",
+      "value": "178.4092335628",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "ELECTRON-ELECTRON POTENTIAL ENERGY",
+      "value": "277.9552506242",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "NUCLEUS-ELECTRON POTENTIAL ENERGY",
+      "value": "-1022.8098551028",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TOTAL POTENTIAL ENERGY",
+      "value": "-566.4453709158",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TOTAL KINETIC ENERGY",
+      "value": "282.7809865998",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "VIRIAL RATIO (V/T)",
+      "value": "2.0031239643",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-282.8324072998",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER",
+      "name": "MBPT(2) ENERGY",
+      "value": "-283.6350703406",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER",
+      "name": "CCSD    ENERGY",
+      "value": "-283.6643843160",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DIAGNOSTIC",
+      "name": "T1 DIAGNOSTIC",
+      "value": "0.01446178",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 1e-07
+    },
+    {
+      "header": "COUPLED-CLUSTER : DIAGNOSTIC",
+      "name": "NORM OF THE T1 VECTOR",
+      "value": "0.07921044",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 1e-07
+    },
+    {
+      "header": "COUPLED-CLUSTER : DIAGNOSTIC",
+      "name": "NORM OF THE T2 VECTOR",
+      "value": "0.46357786",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 1e-07
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "2.528325",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "ELECTRIC FIELD GRADIENT XX - LAST POINT",
+      "value": "-0.374613",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "ELECTRIC FIELD GRADIENT YY - LAST POINT",
+      "value": "0.166297",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "ELECTRIC FIELD GRADIENT ZZ - LAST POINT",
+      "value": "0.208315",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "ELECTRIC FIELD GRADIENT XY - LAST POINT",
+      "value": "0.147116",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "ELECTRIC FIELD GRADIENT XZ - LAST POINT",
+      "value": "-0.154632",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "ELECTRIC FIELD GRADIENT YZ - LAST POINT",
+      "value": "0.032712",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXXX - LAST POINT",
+      "value": "15.661311",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXXY - LAST POINT",
+      "value": "21.064869",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXXZ - LAST POINT",
+      "value": "10.739808",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXYY - LAST POINT",
+      "value": "-2.446143",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXXZ - LAST POINT",
+      "value": "-14.040789",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OYYZ - LAST POINT",
+      "value": "-6.737380",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXZZ - LAST POINT",
+      "value": "-13.215168",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OYZZ - LAST POINT",
+      "value": "-7.024080",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OZZZ - LAST POINT",
+      "value": "-4.002429",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "MOMENTS OXYZ - LAST POINT",
+      "value": "1.583749",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 1",
+      "value": "-29.991048",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 2",
+      "value": "-25.896169",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 3",
+      "value": "-24.459390",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 4",
+      "value": "-30.332329",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 5",
+      "value": "-26.218413",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 6",
+      "value": "-10.875722",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 7",
+      "value": "-10.898900",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 8",
+      "value": "-11.191984",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : ELECTRONIC : POINT 9",
+      "value": "-10.252753",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 1",
+      "value": "7.692581",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 2",
+      "value": "11.280040",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 3",
+      "value": "9.760301",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 4",
+      "value": "8.090329",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 5",
+      "value": "7.860552",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 6",
+      "value": "9.773519",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 7",
+      "value": "9.798846",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 8",
+      "value": "10.133926",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : NUCLEAR    : POINT 9",
+      "value": "9.198847",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 1",
+      "value": "-22.298467",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 2",
+      "value": "-14.616129",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 3",
+      "value": "-14.699089",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 4",
+      "value": "-22.241999",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 5",
+      "value": "-18.357860",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 6",
+      "value": "-1.102203",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 7",
+      "value": "-1.100055",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 8",
+      "value": "-1.058058",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "ELECTROSTATIC POTENTIAL (ESP)",
+      "name": "ESP : TOTAL      : POINT 9",
+      "value": "-1.053906",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 1e-05
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

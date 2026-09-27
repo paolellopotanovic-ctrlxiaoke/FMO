@@ -1,0 +1,241 @@
+!#define DEBUG
+! Protecting macro for compilers which does not support OpenMP 4.0
+#define OMPSIMD (_OPENMP >= 201307)
+
+!> @brief Gauss-Hermite quadrature used in one-electron integral code
+!> @author   Vladimir Mironov
+!
+!     REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!
+ MODULE mod_gauss_hermite
+
+    USE prec, ONLY: fp
+
+    IMPLICIT NONE
+
+    REAL(KIND=fp), SAVE :: h2d(10,10), w2d(10,10)  !< roots and weights of Hermite quadrature up to order 10
+    LOGICAL, SAVE :: quad_prepared = .FALSE.  !< indicates whether `h2d` and `w2d` arrays are filled with numbers
+
+    PRIVATE
+    PUBLIC prepQuadGaussHermite
+    PUBLIC doQuadGaussHermite
+!   PUBLIC derQuadGaussHermite
+!   PUBLIC h2d, w2d
+
+CONTAINS
+!--------------------------------------------------------------------------------
+
+!> @brief At first call fill in `h2d` and `w2d` arrays with data from
+!>  `HERMIT` and `WERMIT` common blocks. Next calls to this subroutine
+!>  will immediately return.
+!> @details The goal of this subroutine is to make square arrays of
+!>  quadrature roots and weigths, with transparent indexing, probably
+!>  aligned by a compiler
+!> @note After calling to this subroutine `quad_prepared` variable will
+!>  be set to `.TRUE.`
+!
+!> @author   Vladimir Mironov
+!
+!> @todo remove link to GAMESS common blocks
+!     REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!
+ SUBROUTINE prepQuadGaussHermite
+    USE gausshermite, ONLY: H, W
+
+    INTEGER :: i, j, n
+
+    IF (quad_prepared) RETURN
+
+    h2d(:,:) = 0.0
+    w2d(:,:) = 0.0
+
+    n = 0
+    DO i = 1, 10
+        DO j = 1, i
+            n = n + 1
+            h2d(j, i) = h(n)
+            w2d(j, i) = w(n)
+        END DO
+    END DO
+
+    quad_prepared = .TRUE.
+
+ END SUBROUTINE
+
+!--------------------------------------------------------------------------------
+
+!> @brief Gauss-Hermite quadrature using minimum point formula
+!> @details Compute:
+!>  xint = sum( w(1:npts,npts) * (h(1:npts,npts)*t+dxi)**(ni-1) * (h(1:npts,npts)*t+dxj)**(nj-1) )
+!>  yint = sum( w(1:npts,npts) * (h(1:npts,npts)*t+dyi)**(ni-1) * (h(1:npts,npts)*t+dyj)**(nj-1) )
+!>  zint = sum( w(1:npts,npts) * (h(1:npts,npts)*t+dzi)**(ni-1) * (h(1:npts,npts)*t+dzj)**(nj-1) )
+!> @note Use of I functions will let NI run up to 7 (S=1, P=2, ..., I=7)
+!>       Use of I functions will let NJ run up to 9 (for K.E. ints)
+!>       Use of I functions requires NPTS=8 to do kinetic energy integrals.
+!> @param[out]      xint        x-component of the integral
+!> @param[out]      yint        y-component of the integral
+!> @param[out]      zint        z-component of the integral
+!> @param[out]      t           inverse square root of total exponent
+!> @param[out]      x0          `x`-coord. of the center of primitive pair
+!> @param[out]      y0          `y`-coord. of the center of primitive pair
+!> @param[out]      z0          `z`-coord. of the center of primitive pair
+!> @param[out]      xi          `x`-coord. of the center of 1st primitive
+!> @param[out]      yi          `y`-coord. of the center of 1st primitive
+!> @param[out]      zi          `z`-coord. of the center of 1st primitive
+!> @param[out]      xj          `x`-coord. of the center of 2nd primitive
+!> @param[out]      yj          `y`-coord. of the center of 2nd primitive
+!> @param[out]      zj          `z`-coord. of the center of 2nd primitive
+!> @param[out]      ni          current angular momentum on center i
+!> @param[out]      nj          current angular momentum on center j
+!
+!> @note based on STVINT from int1.src
+!
+!> @author   Vladimir Mironov
+!
+!     REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!
+ SUBROUTINE doQuadGaussHermite(tint, t, rij, ri, rj, ni, nj)
+!dir$ attributes forceinline :: doQuadGaussHermite
+
+ REAL(KIND=fp), INTENT(OUT) :: tint(3)
+ REAL(KIND=fp), INTENT(IN)  :: t
+ REAL(KIND=fp), INTENT(IN)  :: rij(3), ri(3), rj(3)
+ INTEGER, INTENT(IN) :: ni, nj
+
+ REAL(KIND=fp) :: dqi(3), dqj(3), p(3)
+ INTEGER :: i, j, npts
+
+#ifdef DEBUG
+    IF ( ni>7 .OR. nj>9 .OR. ni<1 .OR. nj<1 ) THEN
+        WRITE (*,'(" STVINT: EXCEEDED LIMITATIONS, WITH NI,NJ=",2I5)') ni, nj
+        CALL abrt
+        RETURN
+    END IF
+#endif
+
+    npts = (ni+nj-2)/2 + 1
+
+    dqi = rij - ri
+
+    dqj = rij - rj
+
+    tint = 0.0
+
+#if OMPSIMD
+!!$omp simd reduction(+:tint) &
+!!$omp   private(p)
+#endif
+    DO i = 1, npts
+
+        p = w2d(i,npts)
+
+        DO j = 2, ni
+            p = p*(h2d(i,npts)*t + dqi)
+        END DO
+
+        DO j = 2, nj
+            p = p*(h2d(i,npts)*t + dqj)
+        END DO
+
+        tint = tint + p
+
+    END DO
+
+ END SUBROUTINE
+
+!--------------------------------------------------------------------------------
+
+!> @brief Gauss-Hermite quadrature using minimum point formula. Coulomb 1e derivatives variant.
+!> @details Compute:
+!> `xint = sum( (h(1:npts,npts)*t+dxc) * w(1:npts,npts) * (h(1:npts,npts)*t+dxi)**(ni-1) * (h(1:npts,npts)*t+dxj)**(nj-1) )`
+!> `yint = sum( (h(1:npts,npts)*t+dyc) * w(1:npts,npts) * (h(1:npts,npts)*t+dyi)**(ni-1) * (h(1:npts,npts)*t+dyj)**(nj-1) )`
+!> `zint = sum( (h(1:npts,npts)*t+dzc) * w(1:npts,npts) * (h(1:npts,npts)*t+dzi)**(ni-1) * (h(1:npts,npts)*t+dzj)**(nj-1) )`
+!
+!> @param[out]      xint        x-component of the integral
+!> @param[out]      yint        y-component of the integral
+!> @param[out]      zint        z-component of the integral
+!> @param[out]      t           inverse square root of total exponent
+!> @param[out]      x0          `x`-coord. of the center of primitive pair
+!> @param[out]      y0          `y`-coord. of the center of primitive pair
+!> @param[out]      z0          `z`-coord. of the center of primitive pair
+!> @param[out]      xi          `x`-coord. of the center of 1st primitive
+!> @param[out]      yi          `y`-coord. of the center of 1st primitive
+!> @param[out]      zi          `z`-coord. of the center of 1st primitive
+!> @param[out]      xj          `x`-coord. of the center of 2nd primitive
+!> @param[out]      yj          `y`-coord. of the center of 2nd primitive
+!> @param[out]      zj          `z`-coord. of the center of 2nd primitive
+!> @param[out]      cx          `x`-coord. of the charged particle
+!> @param[out]      cy          `y`-coord. of the charged particle
+!> @param[out]      cz          `z`-coord. of the charged particle
+!> @param[out]      ni          current angular momentum on center i
+!> @param[out]      nj          current angular momentum on center j
+!
+!> @note based on DVINT from grd1.src
+!> @note currently not used, left for debugging purposes
+!
+!> @author   Vladimir Mironov
+!
+!     REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!
+ SUBROUTINE derQuadGaussHermite(xint, yint, zint, t, x0, y0, z0, xi, yi, zi, xj, yj, zj, cx, cy, cz, ni, nj)
+!dir$ attributes forceinline :: derQuadGaussHermite
+
+ REAL(KIND=fp), INTENT(OUT) :: xint, yint, zint
+ REAL(KIND=fp), INTENT(IN)  :: t, x0, y0, z0, xi, yi, zi, xj, yj, zj, cx, cy, cz
+ INTEGER, INTENT(IN) :: ni, nj
+
+ REAL(KIND=fp) :: dxi, dyi, dzi, dxj, dyj, dzj, dxc, dyc, dzc, px, py, pz
+ INTEGER :: i, j, npts
+
+    npts = (ni+nj-2+1)/2 + 1
+
+    dxi = x0 - xi
+    dyi = y0 - yi
+    dzi = z0 - zi
+
+    dxj = x0 - xj
+    dyj = y0 - yj
+    dzj = z0 - zj
+
+    dxc = x0 - cx
+    dyc = y0 - cy
+    dzc = z0 - cz
+
+    xint = 0.0
+    yint = 0.0
+    zint = 0.0
+
+#if OMPSIMD
+!$omp simd reduction(+:xint,yint,zint) &
+!$omp   private(px,py,pz)
+#endif
+    DO i = 1, npts
+
+        px = h2d(i,npts)*t + dxc
+        py = h2d(i,npts)*t + dyc
+        pz = h2d(i,npts)*t + dzc
+
+        DO j = 2, ni
+            px = px*(h2d(i,npts)*t + dxi)
+            py = py*(h2d(i,npts)*t + dyi)
+            pz = pz*(h2d(i,npts)*t + dzi)
+        END DO
+
+        DO j = 2, nj
+            px = px*(h2d(i,npts)*t + dxj)
+            py = py*(h2d(i,npts)*t + dyj)
+            pz = pz*(h2d(i,npts)*t + dzj)
+        END DO
+
+        xint = xint + w2d(i,npts)*px
+        yint = yint + w2d(i,npts)*py
+        zint = zint + w2d(i,npts)*pz
+    END DO
+
+ END SUBROUTINE
+
+ END MODULE

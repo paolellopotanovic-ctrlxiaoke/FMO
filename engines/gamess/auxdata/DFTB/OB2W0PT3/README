@@ -1,0 +1,16 @@
+An SK parametrization with the range-separation parameter omega = 0.3
+referred to as the OB2 set, was recently reported for the H, C, N, and O
+elements [1]. The SK files in this directory contain re-parametrization
+of this OB2 set, which includes sulfur and was optimized for five different
+values of the range-separation parameter, namely, omega = 0.1, 0.2, 0.3, 0.4, 
+and 0.5. The omega = 0.3 parameter set was used in ref. [2].
+
+Note that GAMESS calls the omega parameter as EMU ($DFTB).
+
+[1] V. Q. Vuong, J. A. Kuriappan, M. Kubillus, J. Kranz, T. Mast, T. A. Niehaus,
+S. Irle, M. Elstner, Parametrization and Benchmark of LC-DFTB2 for Organic
+Molecules, J. Chem. Theory Comput. 14(1), 115–125 (2018). 
+
+[2] M. T. do N. Varella, L. Stojanovic, V. Q. Vuong, S. Irle, T. A. Niehaus,
+M. Barbatti, How size and density of charge transfer excitons depend on
+heterojunction’s architecture, J. Phys. Chem. C 125, 5458–5474 (2021).

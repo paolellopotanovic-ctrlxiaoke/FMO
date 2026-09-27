@@ -1,0 +1,181 @@
+!  formaldehyde: Time-dependent DFT calculation on singlet excited states
+!  B3LYP functional, AO integrals stored on disk.
+!
+!  Adapted from 'tddft-h2co-sing.inp' by Christian Friedl in 2019 to show
+!  the TRNSD flag for TDDFT property calulations. All properties that are
+!  calculated using the transition density are printed directly after the
+!  stance:
+!
+!  PROPERTIES FOR THE B3LYP    DFT FUNCTIONAL
+!   USING THE TRANSITION DENSITY BETWEEN
+!   THE GROUND STATE AND EXCITED STATE    2
+!
+!  The value of the transition dipole moment is the same
+!  when calculated using the TDDFT module:
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  2  B1        -114.2419066769    6.391     0.3807 -0.0000 -0.0000    0.0227
+!
+!  and when calculated using the PROPERTY module:
+!
+!      DX          DY          DZ         /D/  (DEBYE)
+!  0.967544   -0.000000   -0.000000    0.967544
+!
+!  A comparison of the values requires a conversion from A.U to Debye.
+!
+!  Finally we compare the values of the electrostatic potential
+!  of the transition density at several evaluation points to the
+!  respective values that we can get using Q-Chem 4.3 when using the
+!  same functional, basis set and convergence thresholds.
+!
+!  ESP from GAMESS:
+!
+!  POINT      X          Y          Z           ELECTRONIC      NUCLEAR         TOTAL
+!                      (BOHR)                                    (A.U.)
+!     1   -5.29123   -0.75589   -1.68123        -0.017985       0.000000      -0.017985
+!     2   -3.77945   -0.75589   -3.19301        -0.024017       0.000000      -0.024017
+!     3   -2.26767   -0.75589   -4.70479        -0.014109       0.000000      -0.014109
+!     4   -2.26767   -0.75589    5.87767         0.001840       0.000000       0.001840
+!     5   -0.75589   -0.75589    5.87767         0.000765       0.000000       0.000765
+!     6    0.75589   -0.75589    5.87767        -0.000765       0.000000      -0.000765
+!     7    2.26767   -0.75589   -4.70479         0.014109       0.000000       0.014109
+!     8    2.26767   -0.75589    5.87767        -0.001840       0.000000      -0.001840
+!     9    3.77945   -0.75589   -3.19301         0.024017       0.000000       0.024017
+!    10    5.29123   -0.75589   -1.68123         0.017985       0.000000       0.017985
+!
+!  ESP from Q-Chem 'plot.esp':
+!
+!  Grid positions and esp values for unrelaxed transition density (all in a.u.)
+!
+!        X            Y            Z         ES2
+!
+!  -0.529123E+01 -0.755890E+00 -0.168123E+01  0.180949E-01
+!  -0.377945E+01 -0.755890E+00 -0.319301E+01  0.241644E-01
+!  -0.226767E+01 -0.755890E+00 -0.470479E+01  0.141543E-01
+!  -0.226767E+01 -0.755890E+00  0.587767E+01 -0.187656E-02
+!  -0.755890E+00 -0.755890E+00  0.587767E+01 -0.789411E-03
+!   0.755890E+00 -0.755890E+00  0.587767E+01  0.777788E-03
+!   0.226767E+01 -0.755890E+00 -0.470479E+01 -0.141614E-01
+!   0.226767E+01 -0.755890E+00  0.587767E+01  0.186931E-02
+!   0.377945E+01 -0.755890E+00 -0.319301E+01 -0.241794E-01
+!   0.529123E+01 -0.755890E+00 -0.168123E+01 -0.181003E-01
+!
+ $contrl scftyp=rhf dfttyp=b3lyp tddft=excite $end
+ $system mwords=24 $end
+ $dft    nrad=96 nleb=302 $end
+ $tddft  nrad=24 nleb=194
+         nstate=5 iroot=2 mult=1
+         tdprp=.true. trnsd=.true. $end
+ $elpot  iepot=1 where=points output=paper $end
+ $scf    dirscf=.false. $end
+ $guess  guess=Huckel $end
+ $data
+H2CO/TDDFT/B3LYP/augmented Sadlej basis set
+CNV 2
+
+H    1.0      .935567   0.0       -.582339
+ S   4
+  1          33.86501400         0.00606800
+  2           5.09478800         0.04531600
+  3           1.15878600         0.20284600
+  4           0.32584000         0.50370900
+ S   1
+  1           0.10274100         1.00000000
+ S   1
+  1           0.03240000         1.00000000
+ P   2
+  1           1.15880000         0.18844000
+  2           0.32580000         0.88242000
+ P   2
+  1           0.10270000         0.11780000
+  2           0.03240000         0.00420000
+
+C    6.0
+ S   5
+  1        5240.63530000         0.00093700
+  2         782.20480000         0.00722800
+  3         178.35083000         0.03634400
+  4          50.81594200         0.13060000
+  5          16.82356200         0.31893100
+ S   2
+  1           6.17577600         0.43874200
+  2           2.41804900         0.21497400
+ S   1
+  1           0.51190000         1.00000000
+ S   1
+  1           0.15659000         1.00000000
+ S   1
+  1           0.04790000         1.00000000
+ P   4
+  1          18.84180000         0.01388700
+  2           4.15924000         0.08627900
+  3           1.20671000         0.28874400
+  4           0.38554000         0.49941100
+ P   1
+  1           0.12194000         1.00000000
+ P   1
+  1           0.03856800         1.00000000
+ D   2
+  1           1.20670000         0.26285000
+  2           0.38550000         0.80430000
+ D   2
+  1           0.12190000         0.65350000
+  2           0.03860000         0.86360000
+ S   1
+  1           0.014700           1.0000000
+ S   1
+  1           0.004480           1.0000000
+ P   1
+  1           0.012000           1.0000000
+ D   1
+  1           0.012000           1.0000000
+
+O    8.0     0.0    0.0      1.203000
+ S   5
+  1       10662.28500000         0.00079900
+  2        1599.70970000         0.00615300
+  3         364.72526000         0.03115700
+  4         103.65179000         0.11559600
+  5          33.90580500         0.30155200
+ S   2
+  1          12.28746900         0.44487000
+  2           4.75680500         0.24317200
+ S   1
+  1           1.00427100         1.00000000
+ S   1
+  1           0.30068600         1.00000000
+ S   1
+  1           0.09003000         1.00000000
+ P   4
+  1          34.85646300         0.01564800
+  2           7.84313100         0.09819700
+  3           2.30624900         0.30776800
+  4           0.72316400         0.49247000
+ P   1
+  1           0.21488200         1.00000000
+ P   1
+  1           0.06385000         1.00000000
+ D   2
+  1           2.30620000         0.20270000
+  2           0.72320000         0.57910000
+ D   2
+  1           0.21490000         0.78545000
+  2           0.06390000         0.53387000
+
+ $end
+ $points
+BOHR 10
+-5.29123   -0.75589   -1.68123
+-3.77945   -0.75589   -3.19301
+-2.26767   -0.75589   -4.70479
+-2.26767   -0.75589    5.87767
+-0.75589   -0.75589    5.87767
+ 0.75589   -0.75589    5.87767
+ 2.26767   -0.75589   -4.70479
+ 2.26767   -0.75589    5.87767
+ 3.77945   -0.75589   -3.19301
+ 5.29123   -0.75589   -1.68123
+ $end
+
+! TRAVIS-CI SMALL

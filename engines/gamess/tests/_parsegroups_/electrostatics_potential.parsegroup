@@ -1,0 +1,38 @@
+{
+  "parse_header" : "ELECTROSTATIC POTENTIAL (ESP)",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)POINT(\\s*)X(\\s*)Y(\\s*)Z(\\s*)ELECTRONIC(\\s*)NUCLEAR.*$",
+     "parse_name"   : "ESP : ELECTRONIC",
+     "parse_precision" : 6,
+     "parse_tolerance" : 1e-5,
+     "parse_value_index" : 3,
+     "parse_line_offset" : 2,
+     "parse_instance" : -1,
+     "parse_multiple_lines" : 9,
+     "parse_multiple_label" : "POINT"
+   },
+   {
+     "regex_string" : "^(\\s*)POINT(\\s*)X(\\s*)Y(\\s*)Z(\\s*)ELECTRONIC(\\s*)NUCLEAR.*$",
+     "parse_name"   : "ESP : NUCLEAR   ",
+     "parse_precision" : 6,
+     "parse_tolerance" : 1e-5,
+     "parse_value_index" : 4,
+     "parse_line_offset" : 2,
+     "parse_instance" : -1,
+     "parse_multiple_lines" : 9,
+     "parse_multiple_label" : "POINT"
+   },
+   {
+     "regex_string" : "^(\\s*)POINT(\\s*)X(\\s*)Y(\\s*)Z(\\s*)ELECTRONIC(\\s*)NUCLEAR.*$",
+     "parse_name"   : "ESP : TOTAL     ",
+     "parse_precision" : 6,
+     "parse_tolerance" : 1e-5,
+     "parse_value_index" : 5,
+     "parse_line_offset" : 2,
+     "parse_instance" : -1,
+     "parse_multiple_lines" : 9,
+     "parse_multiple_label" : "POINT"
+   }
+  ]
+}

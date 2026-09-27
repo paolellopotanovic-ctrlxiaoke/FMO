@@ -1,0 +1,3617 @@
+      SUBROUTINE RIMP2_X_FORM_I32_X022 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAtm,DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+      
+      use shellProcessing,only: CCD
+      use shellpairs,only: dd_PAV_PRE, &
+                           dd_P_PRE,   &
+                           dd_DUM0_PRE,&
+                           dd_DUM_PRE, &
+                           dd_AB_PRE,  &
+                           dd_VAL_PRE, &
+                           LOCdd,   &
+                           N_dd_PRE
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! 
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(3),W(3)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      ! double precision :: GG(NI*NJ*NK)
+      ! double precision :: GG(MXBSH*MXBSH*MXBSH)
+      double precision :: VALL
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          CAB(3,0:MXLTOT),                  &
+                          P(3),PAV(3),CPV(3),               &
+                          A1(3,3),B1(3),C1(3),           &
+                          A2(3,3),B2(3),F00(3)
+
+      double precision :: GGID(36)
+      double precision :: DK
+      double precision :: G3ID(81)
+      double precision :: DBID(36) 
+                        
+      double precision :: VAL(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+      ! double precision :: TL(NK*NKS)
+      ! double precision :: TLL(15,9,25)
+
+      ! double precision :: T1(NKS*NI*NJ)
+
+      ! double precision :: TL(*)
+      ! double precision :: T1(MXBSH*MXBSH*MXBSH)
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,LOCKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NI,NGI, &
+                 LI,LOCI,I1,IG, &
+                 JSH,JAT,NJ,&
+                 NGJ,LJ,LOCJ,J1,JG
+
+      integer :: LTOT,LB,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: U2,T2
+      double precision :: VAL1,VAL2,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,N3I,N3B,N3IJ,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ,iijj,iijj_tmp,JI
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+LI = 2
+NI = 6
+LJ = 2
+NJ = 6
+NROOTS=3
+
+!$omp parallel do default(none) &
+!$omp shared(I_D_SHL,KNG,KLOC,DD_VAL_PRE,KAUX_ELSE,KAUXNG) &
+!$omp shared(KAUXST,KAUXAT,C,LOCSPH,LOCKT_INIT,DAUX,LOCDD) &
+!$omp shared(DD_DUM_PRE,TOL,DD_P_PRE,DD_PAV_PRE,DD_DUM0_PRE) &
+!$omp shared(CCD,EXAUX,I32,N_ELSE,N_D_SHL,DD_AB_PRE) &
+!$omp shared(LI,NI,LJ,NJ,NROOTS) &
+!$omp private(ISH,JSH,MINK,MAXK,MINKT,MAXKT) &
+!$omp private(NGI,LOCI,NGJ,LOCJ,KAUXSH,NGK,K1,KAT) &
+!$omp private(CC,IAUXSTART,DK,GGID,IJ,DBID,G3ID,VALL,IBF,JBF,LIJ) &
+!$omp private(VAL,AB,DUM,CPV,PAV,RR,DUM0,DUM2,AK,RHO,XX,U) &
+!$omp private(VAL1,A1,B1,F00,III,JJJ,IIJJ,N3,N3B,N3I,N3IJ,JI,AIJINV) &
+!$omp private(AIINV,AJINV,AIINV2,AIJINVSQ,W)
+
+
+         ! DO ISH = 1,NSHELL
+         !    DO JSH = 1,ISH
+DO iijj_tmp = 0, N_D_SHL*(N_D_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+      ISH = I_D_SHL(III)
+      JSH = I_D_SHL(JJJ)
+
+
+               NGI   = KNG(ISH)
+               LOCI  = KLOC(ISH)-1
+
+               NGJ   = KNG(JSH)
+               LOCJ  = KLOC(JSH)-1
+
+         VAL(1:3) = dd_VAL_PRE(1:3,iijj)
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+      ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+      DO I_ELSE=1,N_ELSE
+         ! DO ISH = 1,NSHELL
+         KAUXSH = KAUX_ELSE(I_ELSE)
+         NGK   = KAUXNG(KAUXSH)
+         K1    = KAUXST(KAUXSH)
+
+
+         KAT = KAUXAT(KAUXSH)
+         CC(1) = C(1,KAT)
+         CC(2) = C(2,KAT)
+         CC(3) = C(3,KAT)
+
+         ! AUX POINTER FOR I32
+         IauxStart = LOCSPH(KAUXSH)
+         IauxStart = IauxStart-LOCKT_init+1
+
+               DK = PI252 * DAux(KAUXSH,1,1)
+
+               ! ZERO OUT INTEGRAL ARRAY
+               DO II=1,36
+                  GGID(II)=zero
+               ENDDO
+
+            JI=0
+               ! PRIMITIVE IN I-SHELL
+               DO IG = 1, NGI                 
+                  ! PRIMITIVE IN J-SHELL
+                  DO JG = 1, NGJ
+                  JI = JI + 1
+                     AB = dd_AB_PRE(LOCdd(iijj)+JI)
+                     DUM = dd_DUM_PRE(LOCdd(iijj)+JI)
+                     IF (DUM > TOL) CYCLE
+                     CPV(1:3) = dd_P_PRE(1:3,LOCdd(iijj)+JI)
+                     PAV(1:3) = dd_PAV_PRE(1:3,LOCdd(iijj)+JI)
+                     CPV(1:3) = CC(1:3)-CPV(1:3)
+                     RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+                     DUM0 = dd_DUM0_PRE(LOCdd(iijj)+JI)
+
+                     IJ = 0
+                     DO I=1,NI
+                        DUM2 = DUM0*CCD(I,IG,III)
+                        DO J=1,NJ
+                           IJ = IJ+1
+                           DBID(IJ) = DUM2*CCD(J,JG,JJJ)
+                        ENDDO
+                     ENDDO !I
+
+
+                     ! PRIMITIVE IN K-SHELL
+                     DO KG = 1, NGK
+                        AK = EXAUX(K1+KG-1)
+                        RHO = AB*AK/(AB+AK)
+                        XX = RHO*RR
+
+                        ! RYS ROOTS AND WEIGHT
+                        CALL RT3_gpu(XX,U,W,NROOTS)
+! I32_AO_BOYS_gpu
+                        AIJINV = one/(AB+AK)
+                        RHO = AB*AK*AIJINV
+                        AIINV  = one/AB
+                        AJINV  = one/AK
+                        AIINV2 = half*AIINV
+                        AIJINVSQ = SQRT(AIJINV)
+
+                        DO IR = 1, NROOTS
+                           U(IR) = U(IR)*RHO
+                           U(IR) = U(IR)/(RHO+U(IR))
+                           VAL1 = RHO*AIINV*U(IR)
+                           A1(1:3,IR) = PAV(1:3)+VAL1*CPV(1:3)
+                           B1(IR) = AIINV2-AIINV2*VAL1
+                           F00(IR) = AIJINVSQ*W(IR)
+                           G3ID(3 + 3*(IR-1)) = F00(IR)
+                        ENDDO
+
+DO IR=1,3
+  G3ID(7+IR*3) = A1(1,IR)
+  G3ID(8+IR*3) = A1(2,IR)
+  G3ID(9+IR*3) = A1(3,IR)*F00(IR)
+ENDDO
+DO IR=1,3
+  G3ID(16+IR*3) = A1(1,IR)*G3ID(7+IR*3) +  (1)*B1(IR)
+  G3ID(17+IR*3) = A1(2,IR)*G3ID(8+IR*3) +  (1)*B1(IR)
+  G3ID(18+IR*3) = A1(3,IR)*G3ID(9+IR*3) +  (1)*B1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(70+IR*3) = A1(1,IR)*G3ID(16+IR*3) +  (2)*B1(IR)*G3ID(7+IR*3)
+  G3ID(71+IR*3) = A1(2,IR)*G3ID(17+IR*3) +  (2)*B1(IR)*G3ID(8+IR*3)
+  G3ID(72+IR*3) = A1(3,IR)*G3ID(18+IR*3) +  (2)*B1(IR)*G3ID(9+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(52+IR*3) = A1(1,IR)*G3ID(70+IR*3) +  (3)*B1(IR)*G3ID(16+IR*3)
+  G3ID(53+IR*3) = A1(2,IR)*G3ID(71+IR*3) +  (3)*B1(IR)*G3ID(17+IR*3)
+  G3ID(54+IR*3) = A1(3,IR)*G3ID(72+IR*3) +  (3)*B1(IR)*G3ID(18+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(25+IR*3) = VAL(1)  +  G3ID(7+IR*3)
+  G3ID(26+IR*3) = VAL(2)  +  G3ID(8+IR*3)
+  G3ID(27+IR*3) = VAL(3)*G3ID(IR*3) +  G3ID(9+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(34+IR*3) = VAL(1)*G3ID(7+IR*3) +  G3ID(16+IR*3)
+  G3ID(35+IR*3) = VAL(2)*G3ID(8+IR*3) +  G3ID(17+IR*3)
+  G3ID(36+IR*3) = VAL(3)*G3ID(9+IR*3) +  G3ID(18+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(43+IR*3) = VAL(1)*G3ID(16+IR*3) +  G3ID(70+IR*3)
+  G3ID(44+IR*3) = VAL(2)*G3ID(17+IR*3) +  G3ID(71+IR*3)
+  G3ID(45+IR*3) = VAL(3)*G3ID(18+IR*3) +  G3ID(72+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(70+IR*3) = VAL(1)*G3ID(70+IR*3) +  G3ID(52+IR*3)
+  G3ID(71+IR*3) = VAL(2)*G3ID(71+IR*3) +  G3ID(53+IR*3)
+  G3ID(72+IR*3) = VAL(3)*G3ID(72+IR*3) +  G3ID(54+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(52+IR*3) = VAL(1)*G3ID(25+IR*3) +  G3ID(34+IR*3)
+  G3ID(53+IR*3) = VAL(2)*G3ID(26+IR*3) +  G3ID(35+IR*3)
+  G3ID(54+IR*3) = VAL(3)*G3ID(27+IR*3) +  G3ID(36+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(61+IR*3) = VAL(1)*G3ID(34+IR*3) +  G3ID(43+IR*3)
+  G3ID(62+IR*3) = VAL(2)*G3ID(35+IR*3) +  G3ID(44+IR*3)
+  G3ID(63+IR*3) = VAL(3)*G3ID(36+IR*3) +  G3ID(45+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(70+IR*3) = VAL(1)*G3ID(43+IR*3) +  G3ID(70+IR*3)
+  G3ID(71+IR*3) = VAL(2)*G3ID(44+IR*3) +  G3ID(71+IR*3)
+  G3ID(72+IR*3) = VAL(3)*G3ID(45+IR*3) +  G3ID(72+IR*3)
+ENDDO
+
+VALL = G3ID(73)*G3ID(3) + G3ID(76)*G3ID(6) + G3ID(79)*G3ID(9)
+GGID(1) = GGID(1) + DBID(1)*DK*VALL
+VALL = G3ID(19)*G3ID(56)*G3ID(3) + G3ID(22)*G3ID(59)*G3ID(6) + G3ID(25)*G3ID(62)*G3ID(9)
+GGID(2) = GGID(2) + DBID(2)*DK*VALL
+VALL = G3ID(19)*G3ID(57) + G3ID(22)*G3ID(60) + G3ID(25)*G3ID(63)
+GGID(3) = GGID(3) + DBID(3)*DK*VALL
+VALL = G3ID(46)*G3ID(29)*G3ID(3) + G3ID(49)*G3ID(32)*G3ID(6) + G3ID(52)*G3ID(35)*G3ID(9)
+GGID(4) = GGID(4) + DBID(4)*DK*VALL
+VALL = G3ID(46)*G3ID(30) + G3ID(49)*G3ID(33) + G3ID(52)*G3ID(36)
+GGID(5) = GGID(5) + DBID(5)*DK*VALL
+VALL = G3ID(19)*G3ID(29)*G3ID(30) + G3ID(22)*G3ID(32)*G3ID(33) + G3ID(25)*G3ID(35)*G3ID(36)
+GGID(6) = GGID(6) + DBID(6)*DK*VALL
+VALL = G3ID(55)*G3ID(20)*G3ID(3) + G3ID(58)*G3ID(23)*G3ID(6) + G3ID(61)*G3ID(26)*G3ID(9)
+GGID(7) = GGID(7) + DBID(7)*DK*VALL
+VALL = G3ID(74)*G3ID(3) + G3ID(77)*G3ID(6) + G3ID(80)*G3ID(9)
+GGID(8) = GGID(8) + DBID(8)*DK*VALL
+VALL = G3ID(20)*G3ID(57) + G3ID(23)*G3ID(60) + G3ID(26)*G3ID(63)
+GGID(9) = GGID(9) + DBID(9)*DK*VALL
+VALL = G3ID(28)*G3ID(47)*G3ID(3) + G3ID(31)*G3ID(50)*G3ID(6) + G3ID(34)*G3ID(53)*G3ID(9)
+GGID(10) = GGID(10) + DBID(10)*DK*VALL
+VALL = G3ID(28)*G3ID(20)*G3ID(30) + G3ID(31)*G3ID(23)*G3ID(33) + G3ID(34)*G3ID(26)*G3ID(36)
+GGID(11) = GGID(11) + DBID(11)*DK*VALL
+VALL = G3ID(47)*G3ID(30) + G3ID(50)*G3ID(33) + G3ID(53)*G3ID(36)
+GGID(12) = GGID(12) + DBID(12)*DK*VALL
+VALL = G3ID(55)*G3ID(21) + G3ID(58)*G3ID(24) + G3ID(61)*G3ID(27)
+GGID(13) = GGID(13) + DBID(13)*DK*VALL
+VALL = G3ID(56)*G3ID(21) + G3ID(59)*G3ID(24) + G3ID(62)*G3ID(27)
+GGID(14) = GGID(14) + DBID(14)*DK*VALL
+VALL = G3ID(75) + G3ID(78) + G3ID(81)
+GGID(15) = GGID(15) + DBID(15)*DK*VALL
+VALL = G3ID(28)*G3ID(29)*G3ID(21) + G3ID(31)*G3ID(32)*G3ID(24) + G3ID(34)*G3ID(35)*G3ID(27)
+GGID(16) = GGID(16) + DBID(16)*DK*VALL
+VALL = G3ID(28)*G3ID(48) + G3ID(31)*G3ID(51) + G3ID(34)*G3ID(54)
+GGID(17) = GGID(17) + DBID(17)*DK*VALL
+VALL = G3ID(29)*G3ID(48) + G3ID(32)*G3ID(51) + G3ID(35)*G3ID(54)
+GGID(18) = GGID(18) + DBID(18)*DK*VALL
+VALL = G3ID(64)*G3ID(11)*G3ID(3) + G3ID(67)*G3ID(14)*G3ID(6) + G3ID(70)*G3ID(17)*G3ID(9)
+GGID(19) = GGID(19) + DBID(19)*DK*VALL
+VALL = G3ID(10)*G3ID(65)*G3ID(3) + G3ID(13)*G3ID(68)*G3ID(6) + G3ID(16)*G3ID(71)*G3ID(9)
+GGID(20) = GGID(20) + DBID(20)*DK*VALL
+VALL = G3ID(10)*G3ID(11)*G3ID(57) + G3ID(13)*G3ID(14)*G3ID(60) + G3ID(16)*G3ID(17)*G3ID(63)
+GGID(21) = GGID(21) + DBID(21)*DK*VALL
+VALL = G3ID(37)*G3ID(38)*G3ID(3) + G3ID(40)*G3ID(41)*G3ID(6) + G3ID(43)*G3ID(44)*G3ID(9)
+GGID(22) = GGID(22) + DBID(22)*DK*VALL
+VALL = G3ID(37)*G3ID(11)*G3ID(30) + G3ID(40)*G3ID(14)*G3ID(33) + G3ID(43)*G3ID(17)*G3ID(36)
+GGID(23) = GGID(23) + DBID(23)*DK*VALL
+VALL = G3ID(10)*G3ID(38)*G3ID(30) + G3ID(13)*G3ID(41)*G3ID(33) + G3ID(16)*G3ID(44)*G3ID(36)
+GGID(24) = GGID(24) + DBID(24)*DK*VALL
+VALL = G3ID(64)*G3ID(12) + G3ID(67)*G3ID(15) + G3ID(70)*G3ID(18)
+GGID(25) = GGID(25) + DBID(25)*DK*VALL
+VALL = G3ID(10)*G3ID(56)*G3ID(12) + G3ID(13)*G3ID(59)*G3ID(15) + G3ID(16)*G3ID(62)*G3ID(18)
+GGID(26) = GGID(26) + DBID(26)*DK*VALL
+VALL = G3ID(10)*G3ID(66) + G3ID(13)*G3ID(69) + G3ID(16)*G3ID(72)
+GGID(27) = GGID(27) + DBID(27)*DK*VALL
+VALL = G3ID(37)*G3ID(29)*G3ID(12) + G3ID(40)*G3ID(32)*G3ID(15) + G3ID(43)*G3ID(35)*G3ID(18)
+GGID(28) = GGID(28) + DBID(28)*DK*VALL
+VALL = G3ID(37)*G3ID(39) + G3ID(40)*G3ID(42) + G3ID(43)*G3ID(45)
+GGID(29) = GGID(29) + DBID(29)*DK*VALL
+VALL = G3ID(10)*G3ID(29)*G3ID(39) + G3ID(13)*G3ID(32)*G3ID(42) + G3ID(16)*G3ID(35)*G3ID(45)
+GGID(30) = GGID(30) + DBID(30)*DK*VALL
+VALL = G3ID(55)*G3ID(11)*G3ID(12) + G3ID(58)*G3ID(14)*G3ID(15) + G3ID(61)*G3ID(17)*G3ID(18)
+GGID(31) = GGID(31) + DBID(31)*DK*VALL
+VALL = G3ID(65)*G3ID(12) + G3ID(68)*G3ID(15) + G3ID(71)*G3ID(18)
+GGID(32) = GGID(32) + DBID(32)*DK*VALL
+VALL = G3ID(11)*G3ID(66) + G3ID(14)*G3ID(69) + G3ID(17)*G3ID(72)
+GGID(33) = GGID(33) + DBID(33)*DK*VALL
+VALL = G3ID(28)*G3ID(38)*G3ID(12) + G3ID(31)*G3ID(41)*G3ID(15) + G3ID(34)*G3ID(44)*G3ID(18)
+GGID(34) = GGID(34) + DBID(34)*DK*VALL
+VALL = G3ID(28)*G3ID(11)*G3ID(39) + G3ID(31)*G3ID(14)*G3ID(42) + G3ID(34)*G3ID(17)*G3ID(45)
+GGID(35) = GGID(35) + DBID(35)*DK*VALL
+VALL = G3ID(38)*G3ID(39) + G3ID(41)*G3ID(42) + G3ID(44)*G3ID(45)
+GGID(36) = GGID(36) + DBID(36)*DK*VALL
+
+
+
+                     ENDDO !KG
+                  ENDDO !JG
+               ENDDO !IG
+
+               ! COPY INTEGRAL GG(P|MN) TO I32
+               DO II=1,NI
+                  DO JJ=1,NJ
+                     IBF = LOCI+II
+                     JBF = LOCJ+JJ
+                     LIJ = JJ+(II-1)*NJ
+                     I32(IBF,JBF,IauxStart) = GGID(LIJ) 
+                     I32(JBF,IBF,IauxStart) = GGID(LIJ) 
+                  ENDDO
+               ENDDO
+
+
+         ENDDO 
+      ENDDO 
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X122 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAtm,DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+      
+      use shellProcessing,only: CCD
+      use shellpairs,only: dd_PAV_PRE, &
+                           dd_P_PRE,   &
+                           dd_DUM0_PRE,&
+                           dd_DUM_PRE, &
+                           dd_AB_PRE,  &
+                           dd_VAL_PRE, &
+                           LOCdd,   &
+                           N_dd_PRE
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! 
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(3),W(3)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      double precision :: VALL
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          CAB(3,0:MXLTOT),                  &
+                          P(3),PAV(3),CPV(3),               &
+                          A1(3,3),B1(3),C1(3),           &
+                          A2(3,3),B2(3),F00(3)
+
+      double precision :: GGID(108)
+      double precision :: DK(3)
+      double precision :: G3ID(162) !3*nroots*LI*LJ*LK
+      double precision :: DBID(36) 
+                        
+      double precision :: TMP(3),VAL(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,LOCKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NI,NGI, &
+                 LI,LOCI,I1,IG, &
+                 JSH,JAT,NJ,&
+                 NGJ,LJ,LOCJ,J1,JG
+
+      integer :: LTOT,LB,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: U2,T2
+      double precision :: VAL1,VAL2,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,N3I,N3B,N3IJ,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ,iijj,iijj_tmp,JI
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+LI=2
+NI=6
+LJ=2
+NJ=6
+
+LK = 1
+NKS = 3
+NK = 3
+ 
+NROOTS=3
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_D_SHL,KNG,KLOC,DD_VAL_PRE,KAUX_ELSE,KAUXNG) &
+!$omp shared(KAUXST,KAUXAT,C,LOCSPH,LOCKT_INIT,DAUX,LOCDD) &
+!$omp shared(DD_DUM_PRE,TOL,DD_P_PRE,DD_PAV_PRE,DD_DUM0_PRE) &
+!$omp shared(CCD,EXAUX,I32,N_ELSE,N_D_SHL,DD_AB_PRE) &
+!$omp shared(LI,NI,LJ,NJ,NROOTS,NKS,NK) &
+!$omp private(ISH,JSH,MINK,MAXK,MINKT,MAXKT) &
+!$omp private(NGI,LOCI,NGJ,LOCJ,KAUXSH,NGK,K1,KAT) &
+!$omp private(CC,IAUXSTART,DK,GGID,IJ,DBID,G3ID,VALL,IBF,JBF,LIJ) &
+!$omp private(VAL,AB,DUM,CPV,PAV,RR,DUM0,DUM2,AK,RHO,XX,U) &
+!$omp private(VAL1,A1,B1,F00,III,JJJ,IIJJ,N3,N3B,N3I,N3IJ,JI,AIJINV) &
+!$omp private(AIINV,AJINV,AIINV2,AIJINVSQ,W,AIJINV2,VAL2,A2,C1,NLJ)
+
+
+         ! DO ISH = 1,NSHELL
+         !    DO JSH = 1,ISH
+DO iijj_tmp = 0, N_D_SHL*(N_D_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+      ISH = I_D_SHL(III)
+      JSH = I_D_SHL(JJJ)
+
+
+               NGI   = KNG(ISH)
+               LOCI  = KLOC(ISH)-1
+
+               NGJ   = KNG(JSH)
+               LOCJ  = KLOC(JSH)-1
+
+         VAL(1:3) = dd_VAL_PRE(1:3,iijj)
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+      ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+      DO I_ELSE=1,N_ELSE
+         ! DO ISH = 1,NSHELL
+         KAUXSH = KAUX_ELSE(I_ELSE)
+         NGK   = KAUXNG(KAUXSH)
+         K1    = KAUXST(KAUXSH)
+
+
+         KAT = KAUXAT(KAUXSH)
+         CC(1) = C(1,KAT)
+         CC(2) = C(2,KAT)
+         CC(3) = C(3,KAT)
+
+
+         ! AUX POINTER FOR I32
+         IauxStart = LOCSPH(KAUXSH)
+         IauxStart = IauxStart-LOCKT_init+1
+               ! DENSITY FACTOR
+               DO K=1,NK
+                  DK(K) = PI252 * DAux(KAUXSH,1,K)
+               ENDDO
+
+               ! ZERO OUT INTEGRAL ARRAY
+               DO II=1,36*NK
+                  GGID(II)=zero
+               ENDDO
+            JI=0
+               ! PRIMITIVE IN I-SHELL
+               DO IG = 1, NGI                 
+                  ! PRIMITIVE IN J-SHELL
+                  DO JG = 1, NGJ
+                  JI = JI + 1
+                     AB = dd_AB_PRE(LOCdd(iijj)+JI)
+                     DUM = dd_DUM_PRE(LOCdd(iijj)+JI)
+                     IF (DUM > TOL) CYCLE
+                     CPV(1:3) = dd_P_PRE(1:3,LOCdd(iijj)+JI)
+                     PAV(1:3) = dd_PAV_PRE(1:3,LOCdd(iijj)+JI)
+                     CPV(1:3) = CC(1:3)-CPV(1:3)
+                     RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+                     DUM0 = dd_DUM0_PRE(LOCdd(iijj)+JI)
+
+                     IJ = 0
+                     DO I=1,NI
+                        DUM2 = DUM0*CCD(I,IG,III)
+                        DO J=1,NJ
+                           IJ = IJ+1
+                           DBID(IJ) = DUM2*CCD(J,JG,JJJ)
+                        ENDDO
+                     ENDDO !I
+
+
+                     ! PRIMITIVE IN K-SHELL
+                     DO KG = 1, NGK
+                        AK = EXAUX(K1+KG-1)
+                        RHO = AB*AK/(AB+AK)
+                        XX = RHO*RR
+
+                        ! RYS ROOTS AND WEIGHT
+                        CALL RT3_gpu(XX,U,W,NROOTS)
+
+                        AIJINV = one/(AB+AK)
+                        RHO = AB*AK*AIJINV
+                        AIINV  = one/AB
+                        AJINV  = one/AK
+                        AIINV2 = half*AIINV
+                        AIJINV2 = half*AIJINV
+                        AIJINVSQ = SQRT(AIJINV)
+
+                        DO IR = 1, NROOTS
+                           U(IR) = U(IR)*RHO
+                           U(IR) = U(IR)/(RHO+U(IR))
+                           VAL1 = RHO*AIINV*U(IR)
+                           VAL2 = RHO*AJINV*U(IR)
+                           A1(1:3,IR) = PAV(1:3)+VAL1*CPV(1:3)
+                           A2(1:3,IR) = -VAL2*CPV(1:3)
+                           B1(IR) = AIINV2-AIINV2*VAL1
+                           C1(IR) = AIJINV2*U(IR)
+                           F00(IR) = AIJINVSQ*W(IR)
+                           G3ID(3 + 3*(IR-1)) = F00(IR)
+                        ENDDO
+
+DO IR=1,3
+  G3ID(7+IR*3) = A1(1,IR)
+  G3ID(8+IR*3) = A1(2,IR)
+  G3ID(9+IR*3) = A1(3,IR)*F00(IR)
+ENDDO
+DO IR=1,3
+  G3ID(16+IR*3) = A1(1,IR)*G3ID(7+IR*3) +  B1(IR)
+  G3ID(17+IR*3) = A1(2,IR)*G3ID(8+IR*3) +  B1(IR)
+  G3ID(18+IR*3) = A1(3,IR)*G3ID(9+IR*3) +  B1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(70+IR*3) = A1(1,IR)*G3ID(16+IR*3) +  2*B1(IR)*G3ID(7+IR*3)
+  G3ID(71+IR*3) = A1(2,IR)*G3ID(17+IR*3) +  2*B1(IR)*G3ID(8+IR*3)
+  G3ID(72+IR*3) = A1(3,IR)*G3ID(18+IR*3) +  2*B1(IR)*G3ID(9+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(52+IR*3) = A1(1,IR)*G3ID(70+IR*3) +  3*B1(IR)*G3ID(16+IR*3)
+  G3ID(53+IR*3) = A1(2,IR)*G3ID(71+IR*3) +  3*B1(IR)*G3ID(17+IR*3)
+  G3ID(54+IR*3) = A1(3,IR)*G3ID(72+IR*3) +  3*B1(IR)*G3ID(18+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(79+IR*3) = A2(1,IR)
+  G3ID(80+IR*3) = A2(2,IR)
+  G3ID(81+IR*3) = A2(3,IR)*F00(IR)
+ENDDO
+DO IR=1,3
+  G3ID(88+IR*3) = A1(1,IR)*G3ID(79+IR*3) +  C1(IR)
+  G3ID(89+IR*3) = A1(2,IR)*G3ID(80+IR*3) +  C1(IR)
+  G3ID(90+IR*3) = A1(3,IR)*G3ID(81+IR*3) +  C1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(97+IR*3) = A1(1,IR)*G3ID(88+IR*3) +  B1(IR)*G3ID(79+IR*3) +  C1(IR)*G3ID(7+IR*3)
+  G3ID(98+IR*3) = A1(2,IR)*G3ID(89+IR*3) +  B1(IR)*G3ID(80+IR*3) +  C1(IR)*G3ID(8+IR*3)
+  G3ID(99+IR*3) = A1(3,IR)*G3ID(90+IR*3) +  B1(IR)*G3ID(81+IR*3) +  C1(IR)*G3ID(9+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(151+IR*3) = A1(1,IR)*G3ID(97+IR*3) +  2*B1(IR)*G3ID(88+IR*3) +  C1(IR)*G3ID(16+IR*3)
+  G3ID(152+IR*3) = A1(2,IR)*G3ID(98+IR*3) +  2*B1(IR)*G3ID(89+IR*3) +  C1(IR)*G3ID(17+IR*3)
+  G3ID(153+IR*3) = A1(3,IR)*G3ID(99+IR*3) +  2*B1(IR)*G3ID(90+IR*3) +  C1(IR)*G3ID(18+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(133+IR*3) = A1(1,IR)*G3ID(151+IR*3) +  3*B1(IR)*G3ID(97+IR*3) +  C1(IR)*G3ID(70+IR*3)
+  G3ID(134+IR*3) = A1(2,IR)*G3ID(152+IR*3) +  3*B1(IR)*G3ID(98+IR*3) +  C1(IR)*G3ID(71+IR*3)
+  G3ID(135+IR*3) = A1(3,IR)*G3ID(153+IR*3) +  3*B1(IR)*G3ID(99+IR*3) +  C1(IR)*G3ID(72+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(25+IR*3) = VAL(1)          +  G3ID(7+IR*3)
+  G3ID(26+IR*3) = VAL(2)          +  G3ID(8+IR*3)
+  G3ID(27+IR*3) = VAL(3)*G3ID(IR*3) +  G3ID(9+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(34+IR*3) = VAL(1)*G3ID(7+IR*3) +  G3ID(16+IR*3)
+  G3ID(35+IR*3) = VAL(2)*G3ID(8+IR*3) +  G3ID(17+IR*3)
+  G3ID(36+IR*3) = VAL(3)*G3ID(9+IR*3) +  G3ID(18+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(43+IR*3) = VAL(1)*G3ID(16+IR*3) +  G3ID(70+IR*3)
+  G3ID(44+IR*3) = VAL(2)*G3ID(17+IR*3) +  G3ID(71+IR*3)
+  G3ID(45+IR*3) = VAL(3)*G3ID(18+IR*3) +  G3ID(72+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(70+IR*3) = VAL(1)*G3ID(70+IR*3) +  G3ID(52+IR*3)
+  G3ID(71+IR*3) = VAL(2)*G3ID(71+IR*3) +  G3ID(53+IR*3)
+  G3ID(72+IR*3) = VAL(3)*G3ID(72+IR*3) +  G3ID(54+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(52+IR*3) = VAL(1)*G3ID(25+IR*3) +  G3ID(34+IR*3)
+  G3ID(53+IR*3) = VAL(2)*G3ID(26+IR*3) +  G3ID(35+IR*3)
+  G3ID(54+IR*3) = VAL(3)*G3ID(27+IR*3) +  G3ID(36+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(61+IR*3) = VAL(1)*G3ID(34+IR*3) +  G3ID(43+IR*3)
+  G3ID(62+IR*3) = VAL(2)*G3ID(35+IR*3) +  G3ID(44+IR*3)
+  G3ID(63+IR*3) = VAL(3)*G3ID(36+IR*3) +  G3ID(45+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(70+IR*3) = VAL(1)*G3ID(43+IR*3) +  G3ID(70+IR*3)
+  G3ID(71+IR*3) = VAL(2)*G3ID(44+IR*3) +  G3ID(71+IR*3)
+  G3ID(72+IR*3) = VAL(3)*G3ID(45+IR*3) +  G3ID(72+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(106+IR*3) = VAL(1)*G3ID(79+IR*3) +  G3ID(88+IR*3)
+  G3ID(107+IR*3) = VAL(2)*G3ID(80+IR*3) +  G3ID(89+IR*3)
+  G3ID(108+IR*3) = VAL(3)*G3ID(81+IR*3) +  G3ID(90+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(115+IR*3) = VAL(1)*G3ID(88+IR*3) +  G3ID(97+IR*3)
+  G3ID(116+IR*3) = VAL(2)*G3ID(89+IR*3) +  G3ID(98+IR*3)
+  G3ID(117+IR*3) = VAL(3)*G3ID(90+IR*3) +  G3ID(99+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(124+IR*3) = VAL(1)*G3ID(97+IR*3) +  G3ID(151+IR*3)
+  G3ID(125+IR*3) = VAL(2)*G3ID(98+IR*3) +  G3ID(152+IR*3)
+  G3ID(126+IR*3) = VAL(3)*G3ID(99+IR*3) +  G3ID(153+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(151+IR*3) = VAL(1)*G3ID(151+IR*3) +  G3ID(133+IR*3)
+  G3ID(152+IR*3) = VAL(2)*G3ID(152+IR*3) +  G3ID(134+IR*3)
+  G3ID(153+IR*3) = VAL(3)*G3ID(153+IR*3) +  G3ID(135+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(133+IR*3) = VAL(1)*G3ID(106+IR*3) +  G3ID(115+IR*3)
+  G3ID(134+IR*3) = VAL(2)*G3ID(107+IR*3) +  G3ID(116+IR*3)
+  G3ID(135+IR*3) = VAL(3)*G3ID(108+IR*3) +  G3ID(117+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(142+IR*3) = VAL(1)*G3ID(115+IR*3) +  G3ID(124+IR*3)
+  G3ID(143+IR*3) = VAL(2)*G3ID(116+IR*3) +  G3ID(125+IR*3)
+  G3ID(144+IR*3) = VAL(3)*G3ID(117+IR*3) +  G3ID(126+IR*3)
+ENDDO
+DO IR=1,3
+  G3ID(151+IR*3) = VAL(1)*G3ID(124+IR*3) +  G3ID(151+IR*3)
+  G3ID(152+IR*3) = VAL(2)*G3ID(125+IR*3) +  G3ID(152+IR*3)
+  G3ID(153+IR*3) = VAL(3)*G3ID(126+IR*3) +  G3ID(153+IR*3)
+ENDDO
+
+VALL = G3ID(154)*G3ID(3) + G3ID(157)*G3ID(6) + G3ID(160)*G3ID(9)
+GGID(1) = GGID(1) + DBID(1)*DK(1)*VALL
+VALL = G3ID( 73)*G3ID( 83)*G3ID(3) + G3ID( 76)*G3ID( 86)*G3ID(6) + G3ID( 79)*G3ID( 89)*G3ID(9)
+GGID(2) = GGID(2) + DBID(1)*DK(2)*VALL
+VALL = G3ID( 73)*G3ID(84) + G3ID( 76)*G3ID( 87) + G3ID( 79)*G3ID( 90)
+GGID(3) = GGID(3) + DBID(1)*DK(3)*VALL
+VALL = G3ID(100)*G3ID( 56)*G3ID(3) + G3ID(103)*G3ID( 59)*G3ID(6) + G3ID(106)*G3ID( 62)*G3ID(9)
+GGID(4) = GGID(4) + DBID(2)*DK(1)*VALL
+VALL = G3ID( 19)*G3ID(137)*G3ID(3) + G3ID( 22)*G3ID(140)*G3ID(6) + G3ID( 25)*G3ID(143)*G3ID(9)
+GGID(5) = GGID(5) + DBID(2)*DK(2)*VALL
+VALL = G3ID( 19)*G3ID( 56)*G3ID(84) + G3ID( 22)*G3ID( 59)*G3ID( 87) + G3ID( 25)*G3ID( 62)*G3ID( 90)
+GGID(6) = GGID(6) + DBID(2)*DK(3)*VALL
+VALL = G3ID(100)*G3ID(57) + G3ID(103)*G3ID( 60) + G3ID(106)*G3ID( 63)
+GGID(7) = GGID(7) + DBID(3)*DK(1)*VALL
+VALL = G3ID( 19)*G3ID( 83)*G3ID(57) + G3ID( 22)*G3ID( 86)*G3ID( 60) + G3ID( 25)*G3ID( 89)*G3ID( 63)
+GGID(8) = GGID(8) + DBID(3)*DK(2)*VALL
+VALL = G3ID( 19)*G3ID(138) + G3ID( 22)*G3ID(141) + G3ID( 25)*G3ID(144)
+GGID(9) = GGID(9) + DBID(3)*DK(3)*VALL
+VALL = G3ID(127)*G3ID( 29)*G3ID(3) + G3ID(130)*G3ID( 32)*G3ID(6) + G3ID(133)*G3ID( 35)*G3ID(9)
+GGID( 10) = GGID( 10) + DBID(4)*DK(1)*VALL
+VALL = G3ID( 46)*G3ID(110)*G3ID(3) + G3ID( 49)*G3ID(113)*G3ID(6) + G3ID( 52)*G3ID(116)*G3ID(9)
+GGID( 11) = GGID( 11) + DBID(4)*DK(2)*VALL
+VALL = G3ID( 46)*G3ID( 29)*G3ID(84) + G3ID( 49)*G3ID( 32)*G3ID( 87) + G3ID( 52)*G3ID( 35)*G3ID( 90)
+GGID( 12) = GGID( 12) + DBID(4)*DK(3)*VALL
+VALL = G3ID(127)*G3ID(30) + G3ID(130)*G3ID( 33) + G3ID(133)*G3ID( 36)
+GGID( 13) = GGID( 13) + DBID(5)*DK(1)*VALL
+VALL = G3ID( 46)*G3ID( 83)*G3ID(30) + G3ID( 49)*G3ID( 86)*G3ID( 33) + G3ID( 52)*G3ID( 89)*G3ID( 36)
+GGID( 14) = GGID( 14) + DBID(5)*DK(2)*VALL
+VALL = G3ID( 46)*G3ID(111) + G3ID( 49)*G3ID(114) + G3ID( 52)*G3ID(117)
+GGID( 15) = GGID( 15) + DBID(5)*DK(3)*VALL
+VALL = G3ID(100)*G3ID( 29)*G3ID(30) + G3ID(103)*G3ID( 32)*G3ID( 33) + G3ID(106)*G3ID( 35)*G3ID( 36)
+GGID( 16) = GGID( 16) + DBID(6)*DK(1)*VALL
+VALL = G3ID( 19)*G3ID(110)*G3ID(30) + G3ID( 22)*G3ID(113)*G3ID( 33) + G3ID( 25)*G3ID(116)*G3ID( 36)
+GGID( 17) = GGID( 17) + DBID(6)*DK(2)*VALL
+VALL = G3ID( 19)*G3ID( 29)*G3ID(111) + G3ID( 22)*G3ID( 32)*G3ID(114) + G3ID( 25)*G3ID( 35)*G3ID(117)
+GGID( 18) = GGID( 18) + DBID(6)*DK(3)*VALL
+VALL = G3ID(136)*G3ID( 20)*G3ID(3) + G3ID(139)*G3ID( 23)*G3ID(6) + G3ID(142)*G3ID( 26)*G3ID(9)
+GGID( 19) = GGID( 19) + DBID(7)*DK(1)*VALL
+VALL = G3ID( 55)*G3ID(101)*G3ID(3) + G3ID( 58)*G3ID(104)*G3ID(6) + G3ID( 61)*G3ID(107)*G3ID(9)
+GGID( 20) = GGID( 20) + DBID(7)*DK(2)*VALL
+VALL = G3ID( 55)*G3ID( 20)*G3ID(84) + G3ID( 58)*G3ID( 23)*G3ID( 87) + G3ID( 61)*G3ID( 26)*G3ID( 90)
+GGID( 21) = GGID( 21) + DBID(7)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 74)*G3ID(3) + G3ID( 85)*G3ID( 77)*G3ID(6) + G3ID( 88)*G3ID( 80)*G3ID(9)
+GGID( 22) = GGID( 22) + DBID(8)*DK(1)*VALL
+VALL = G3ID(155)*G3ID(3) + G3ID(158)*G3ID(6) + G3ID(161)*G3ID(9)
+GGID( 23) = GGID( 23) + DBID(8)*DK(2)*VALL
+VALL = G3ID( 74)*G3ID(84) + G3ID( 77)*G3ID( 87) + G3ID( 80)*G3ID( 90)
+GGID( 24) = GGID( 24) + DBID(8)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 20)*G3ID(57) + G3ID( 85)*G3ID( 23)*G3ID( 60) + G3ID( 88)*G3ID( 26)*G3ID( 63)
+GGID( 25) = GGID( 25) + DBID(9)*DK(1)*VALL
+VALL = G3ID(101)*G3ID(57) + G3ID(104)*G3ID( 60) + G3ID(107)*G3ID( 63)
+GGID( 26) = GGID( 26) + DBID(9)*DK(2)*VALL
+VALL = G3ID( 20)*G3ID(138) + G3ID( 23)*G3ID(141) + G3ID( 26)*G3ID(144)
+GGID( 27) = GGID( 27) + DBID(9)*DK(3)*VALL
+VALL = G3ID(109)*G3ID( 47)*G3ID(3) + G3ID(112)*G3ID( 50)*G3ID(6) + G3ID(115)*G3ID( 53)*G3ID(9)
+GGID( 28) = GGID( 28) + DBID(10)*DK(1)*VALL
+VALL = G3ID( 28)*G3ID(128)*G3ID(3) + G3ID( 31)*G3ID(131)*G3ID(6) + G3ID( 34)*G3ID(134)*G3ID(9)
+GGID( 29) = GGID( 29) + DBID(10)*DK(2)*VALL
+VALL = G3ID( 28)*G3ID( 47)*G3ID(84) + G3ID( 31)*G3ID( 50)*G3ID( 87) + G3ID( 34)*G3ID( 53)*G3ID( 90)
+GGID( 30) = GGID( 30) + DBID(10)*DK(3)*VALL
+VALL = G3ID(109)*G3ID( 20)*G3ID(30) + G3ID(112)*G3ID( 23)*G3ID( 33) + G3ID(115)*G3ID( 26)*G3ID( 36)
+GGID( 31) = GGID( 31) + DBID(11)*DK(1)*VALL
+VALL = G3ID( 28)*G3ID(101)*G3ID(30) + G3ID( 31)*G3ID(104)*G3ID( 33) + G3ID( 34)*G3ID(107)*G3ID( 36)
+GGID( 32) = GGID( 32) + DBID(11)*DK(2)*VALL
+VALL = G3ID( 28)*G3ID( 20)*G3ID(111) + G3ID( 31)*G3ID( 23)*G3ID(114) + G3ID( 34)*G3ID( 26)*G3ID(117)
+GGID( 33) = GGID( 33) + DBID(11)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 47)*G3ID(30) + G3ID( 85)*G3ID( 50)*G3ID( 33) + G3ID( 88)*G3ID( 53)*G3ID( 36)
+GGID( 34) = GGID( 34) + DBID(12)*DK(1)*VALL
+VALL = G3ID(128)*G3ID(30) + G3ID(131)*G3ID( 33) + G3ID(134)*G3ID( 36)
+GGID( 35) = GGID( 35) + DBID(12)*DK(2)*VALL
+VALL = G3ID( 47)*G3ID(111) + G3ID( 50)*G3ID(114) + G3ID( 53)*G3ID(117)
+GGID( 36) = GGID( 36) + DBID(12)*DK(3)*VALL
+VALL = G3ID(136)*G3ID(21) + G3ID(139)*G3ID( 24) + G3ID(142)*G3ID( 27)
+GGID( 37) = GGID( 37) + DBID(13)*DK(1)*VALL
+VALL = G3ID( 55)*G3ID( 83)*G3ID(21) + G3ID( 58)*G3ID( 86)*G3ID( 24) + G3ID( 61)*G3ID( 89)*G3ID( 27)
+GGID( 38) = GGID( 38) + DBID(13)*DK(2)*VALL
+VALL = G3ID( 55)*G3ID(102) + G3ID( 58)*G3ID(105) + G3ID( 61)*G3ID(108)
+GGID( 39) = GGID( 39) + DBID(13)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 56)*G3ID(21) + G3ID( 85)*G3ID( 59)*G3ID( 24) + G3ID( 88)*G3ID( 62)*G3ID( 27)
+GGID( 40) = GGID( 40) + DBID(14)*DK(1)*VALL
+VALL = G3ID(137)*G3ID(21) + G3ID(140)*G3ID( 24) + G3ID(143)*G3ID( 27)
+GGID( 41) = GGID( 41) + DBID(14)*DK(2)*VALL
+VALL = G3ID( 56)*G3ID(102) + G3ID( 59)*G3ID(105) + G3ID( 62)*G3ID(108)
+GGID( 42) = GGID( 42) + DBID(14)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID(75) + G3ID( 85)*G3ID( 78) + G3ID( 88)*G3ID( 81)
+GGID( 43) = GGID( 43) + DBID(15)*DK(1)*VALL
+VALL = G3ID( 83)*G3ID(75) + G3ID( 86)*G3ID( 78) + G3ID( 89)*G3ID( 81)
+GGID( 44) = GGID( 44) + DBID(15)*DK(2)*VALL
+VALL = G3ID(156) + G3ID(159) + G3ID(162)
+GGID( 45) = GGID( 45) + DBID(15)*DK(3)*VALL
+VALL = G3ID(109)*G3ID( 29)*G3ID(21) + G3ID(112)*G3ID( 32)*G3ID( 24) + G3ID(115)*G3ID( 35)*G3ID( 27)
+GGID( 46) = GGID( 46) + DBID(16)*DK(1)*VALL
+VALL = G3ID( 28)*G3ID(110)*G3ID(21) + G3ID( 31)*G3ID(113)*G3ID( 24) + G3ID( 34)*G3ID(116)*G3ID( 27)
+GGID( 47) = GGID( 47) + DBID(16)*DK(2)*VALL
+VALL = G3ID( 28)*G3ID( 29)*G3ID(102) + G3ID( 31)*G3ID( 32)*G3ID(105) + G3ID( 34)*G3ID( 35)*G3ID(108)
+GGID( 48) = GGID( 48) + DBID(16)*DK(3)*VALL
+VALL = G3ID(109)*G3ID(48) + G3ID(112)*G3ID( 51) + G3ID(115)*G3ID( 54)
+GGID( 49) = GGID( 49) + DBID(17)*DK(1)*VALL
+VALL = G3ID( 28)*G3ID( 83)*G3ID(48) + G3ID( 31)*G3ID( 86)*G3ID( 51) + G3ID( 34)*G3ID( 89)*G3ID( 54)
+GGID( 50) = GGID( 50) + DBID(17)*DK(2)*VALL
+VALL = G3ID( 28)*G3ID(129) + G3ID( 31)*G3ID(132) + G3ID( 34)*G3ID(135)
+GGID( 51) = GGID( 51) + DBID(17)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 29)*G3ID(48) + G3ID( 85)*G3ID( 32)*G3ID( 51) + G3ID( 88)*G3ID( 35)*G3ID( 54)
+GGID( 52) = GGID( 52) + DBID(18)*DK(1)*VALL
+VALL = G3ID(110)*G3ID(48) + G3ID(113)*G3ID( 51) + G3ID(116)*G3ID( 54)
+GGID( 53) = GGID( 53) + DBID(18)*DK(2)*VALL
+VALL = G3ID( 29)*G3ID(129) + G3ID( 32)*G3ID(132) + G3ID( 35)*G3ID(135)
+GGID( 54) = GGID( 54) + DBID(18)*DK(3)*VALL
+VALL = G3ID(145)*G3ID( 11)*G3ID(3) + G3ID(148)*G3ID( 14)*G3ID(6) + G3ID(151)*G3ID( 17)*G3ID(9)
+GGID( 55) = GGID( 55) + DBID(19)*DK(1)*VALL
+VALL = G3ID( 64)*G3ID( 92)*G3ID(3) + G3ID( 67)*G3ID( 95)*G3ID(6) + G3ID( 70)*G3ID( 98)*G3ID(9)
+GGID( 56) = GGID( 56) + DBID(19)*DK(2)*VALL
+VALL = G3ID( 64)*G3ID( 11)*G3ID(84) + G3ID( 67)*G3ID( 14)*G3ID( 87) + G3ID( 70)*G3ID( 17)*G3ID( 90)
+GGID( 57) = GGID( 57) + DBID(19)*DK(3)*VALL
+VALL = G3ID( 91)*G3ID( 65)*G3ID(3) + G3ID( 94)*G3ID( 68)*G3ID(6) + G3ID( 97)*G3ID( 71)*G3ID(9)
+GGID( 58) = GGID( 58) + DBID(20)*DK(1)*VALL
+VALL = G3ID( 10)*G3ID(146)*G3ID(3) + G3ID( 13)*G3ID(149)*G3ID(6) + G3ID( 16)*G3ID(152)*G3ID(9)
+GGID( 59) = GGID( 59) + DBID(20)*DK(2)*VALL
+VALL = G3ID( 10)*G3ID( 65)*G3ID(84) + G3ID( 13)*G3ID( 68)*G3ID( 87) + G3ID( 16)*G3ID( 71)*G3ID( 90)
+GGID( 60) = GGID( 60) + DBID(20)*DK(3)*VALL
+VALL = G3ID( 91)*G3ID( 11)*G3ID(57) + G3ID( 94)*G3ID( 14)*G3ID( 60) + G3ID( 97)*G3ID( 17)*G3ID( 63)
+GGID( 61) = GGID( 61) + DBID(21)*DK(1)*VALL
+VALL = G3ID( 10)*G3ID( 92)*G3ID(57) + G3ID( 13)*G3ID( 95)*G3ID( 60) + G3ID( 16)*G3ID( 98)*G3ID( 63)
+GGID( 62) = GGID( 62) + DBID(21)*DK(2)*VALL
+VALL = G3ID( 10)*G3ID( 11)*G3ID(138) + G3ID( 13)*G3ID( 14)*G3ID(141) + G3ID( 16)*G3ID( 17)*G3ID(144)
+GGID( 63) = GGID( 63) + DBID(21)*DK(3)*VALL
+VALL = G3ID(118)*G3ID( 38)*G3ID(3) + G3ID(121)*G3ID( 41)*G3ID(6) + G3ID(124)*G3ID( 44)*G3ID(9)
+GGID( 64) = GGID( 64) + DBID(22)*DK(1)*VALL
+VALL = G3ID( 37)*G3ID(119)*G3ID(3) + G3ID( 40)*G3ID(122)*G3ID(6) + G3ID( 43)*G3ID(125)*G3ID(9)
+GGID( 65) = GGID( 65) + DBID(22)*DK(2)*VALL
+VALL = G3ID( 37)*G3ID( 38)*G3ID(84) + G3ID( 40)*G3ID( 41)*G3ID( 87) + G3ID( 43)*G3ID( 44)*G3ID( 90)
+GGID( 66) = GGID( 66) + DBID(22)*DK(3)*VALL
+VALL = G3ID(118)*G3ID( 11)*G3ID(30) + G3ID(121)*G3ID( 14)*G3ID( 33) + G3ID(124)*G3ID( 17)*G3ID( 36)
+GGID( 67) = GGID( 67) + DBID(23)*DK(1)*VALL
+VALL = G3ID( 37)*G3ID( 92)*G3ID(30) + G3ID( 40)*G3ID( 95)*G3ID( 33) + G3ID( 43)*G3ID( 98)*G3ID( 36)
+GGID( 68) = GGID( 68) + DBID(23)*DK(2)*VALL
+VALL = G3ID( 37)*G3ID( 11)*G3ID(111) + G3ID( 40)*G3ID( 14)*G3ID(114) + G3ID( 43)*G3ID( 17)*G3ID(117)
+GGID( 69) = GGID( 69) + DBID(23)*DK(3)*VALL
+VALL = G3ID( 91)*G3ID( 38)*G3ID(30) + G3ID( 94)*G3ID( 41)*G3ID( 33) + G3ID( 97)*G3ID( 44)*G3ID( 36)
+GGID( 70) = GGID( 70) + DBID(24)*DK(1)*VALL
+VALL = G3ID( 10)*G3ID(119)*G3ID(30) + G3ID( 13)*G3ID(122)*G3ID( 33) + G3ID( 16)*G3ID(125)*G3ID( 36)
+GGID( 71) = GGID( 71) + DBID(24)*DK(2)*VALL
+VALL = G3ID( 10)*G3ID( 38)*G3ID(111) + G3ID( 13)*G3ID( 41)*G3ID(114) + G3ID( 16)*G3ID( 44)*G3ID(117)
+GGID( 72) = GGID( 72) + DBID(24)*DK(3)*VALL
+VALL = G3ID(145)*G3ID(12) + G3ID(148)*G3ID( 15) + G3ID(151)*G3ID( 18)
+GGID( 73) = GGID( 73) + DBID(25)*DK(1)*VALL
+VALL = G3ID( 64)*G3ID( 83)*G3ID(12) + G3ID( 67)*G3ID( 86)*G3ID( 15) + G3ID( 70)*G3ID( 89)*G3ID( 18)
+GGID( 74) = GGID( 74) + DBID(25)*DK(2)*VALL
+VALL = G3ID( 64)*G3ID(93) + G3ID( 67)*G3ID( 96) + G3ID( 70)*G3ID( 99)
+GGID( 75) = GGID( 75) + DBID(25)*DK(3)*VALL
+VALL = G3ID( 91)*G3ID( 56)*G3ID(12) + G3ID( 94)*G3ID( 59)*G3ID( 15) + G3ID( 97)*G3ID( 62)*G3ID( 18)
+GGID( 76) = GGID( 76) + DBID(26)*DK(1)*VALL
+VALL = G3ID( 10)*G3ID(137)*G3ID(12) + G3ID( 13)*G3ID(140)*G3ID( 15) + G3ID( 16)*G3ID(143)*G3ID( 18)
+GGID( 77) = GGID( 77) + DBID(26)*DK(2)*VALL
+VALL = G3ID( 10)*G3ID( 56)*G3ID(93) + G3ID( 13)*G3ID( 59)*G3ID( 96) + G3ID( 16)*G3ID( 62)*G3ID( 99)
+GGID( 78) = GGID( 78) + DBID(26)*DK(3)*VALL
+VALL = G3ID( 91)*G3ID(66) + G3ID( 94)*G3ID( 69) + G3ID( 97)*G3ID( 72)
+GGID( 79) = GGID( 79) + DBID(27)*DK(1)*VALL
+VALL = G3ID( 10)*G3ID( 83)*G3ID(66) + G3ID( 13)*G3ID( 86)*G3ID( 69) + G3ID( 16)*G3ID( 89)*G3ID( 72)
+GGID( 80) = GGID( 80) + DBID(27)*DK(2)*VALL
+VALL = G3ID( 10)*G3ID(147) + G3ID( 13)*G3ID(150) + G3ID( 16)*G3ID(153)
+GGID( 81) = GGID( 81) + DBID(27)*DK(3)*VALL
+VALL = G3ID(118)*G3ID( 29)*G3ID(12) + G3ID(121)*G3ID( 32)*G3ID( 15) + G3ID(124)*G3ID( 35)*G3ID( 18)
+GGID( 82) = GGID( 82) + DBID(28)*DK(1)*VALL
+VALL = G3ID( 37)*G3ID(110)*G3ID(12) + G3ID( 40)*G3ID(113)*G3ID( 15) + G3ID( 43)*G3ID(116)*G3ID( 18)
+GGID( 83) = GGID( 83) + DBID(28)*DK(2)*VALL
+VALL = G3ID( 37)*G3ID( 29)*G3ID(93) + G3ID( 40)*G3ID( 32)*G3ID( 96) + G3ID( 43)*G3ID( 35)*G3ID( 99)
+GGID( 84) = GGID( 84) + DBID(28)*DK(3)*VALL
+VALL = G3ID(118)*G3ID(39) + G3ID(121)*G3ID( 42) + G3ID(124)*G3ID( 45)
+GGID( 85) = GGID( 85) + DBID(29)*DK(1)*VALL
+VALL = G3ID( 37)*G3ID( 83)*G3ID(39) + G3ID( 40)*G3ID( 86)*G3ID( 42) + G3ID( 43)*G3ID( 89)*G3ID( 45)
+GGID( 86) = GGID( 86) + DBID(29)*DK(2)*VALL
+VALL = G3ID( 37)*G3ID(120) + G3ID( 40)*G3ID(123) + G3ID( 43)*G3ID(126)
+GGID( 87) = GGID( 87) + DBID(29)*DK(3)*VALL
+VALL = G3ID( 91)*G3ID( 29)*G3ID(39) + G3ID( 94)*G3ID( 32)*G3ID( 42) + G3ID( 97)*G3ID( 35)*G3ID( 45)
+GGID( 88) = GGID( 88) + DBID(30)*DK(1)*VALL
+VALL = G3ID( 10)*G3ID(110)*G3ID(39) + G3ID( 13)*G3ID(113)*G3ID( 42) + G3ID( 16)*G3ID(116)*G3ID( 45)
+GGID( 89) = GGID( 89) + DBID(30)*DK(2)*VALL
+VALL = G3ID( 10)*G3ID( 29)*G3ID(120) + G3ID( 13)*G3ID( 32)*G3ID(123) + G3ID( 16)*G3ID( 35)*G3ID(126)
+GGID( 90) = GGID( 90) + DBID(30)*DK(3)*VALL
+VALL = G3ID(136)*G3ID( 11)*G3ID(12) + G3ID(139)*G3ID( 14)*G3ID( 15) + G3ID(142)*G3ID( 17)*G3ID( 18)
+GGID( 91) = GGID( 91) + DBID(31)*DK(1)*VALL
+VALL = G3ID( 55)*G3ID( 92)*G3ID(12) + G3ID( 58)*G3ID( 95)*G3ID( 15) + G3ID( 61)*G3ID( 98)*G3ID( 18)
+GGID( 92) = GGID( 92) + DBID(31)*DK(2)*VALL
+VALL = G3ID( 55)*G3ID( 11)*G3ID(93) + G3ID( 58)*G3ID( 14)*G3ID( 96) + G3ID( 61)*G3ID( 17)*G3ID( 99)
+GGID( 93) = GGID( 93) + DBID(31)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 65)*G3ID(12) + G3ID( 85)*G3ID( 68)*G3ID( 15) + G3ID( 88)*G3ID( 71)*G3ID( 18)
+GGID( 94) = GGID( 94) + DBID(32)*DK(1)*VALL
+VALL = G3ID(146)*G3ID(12) + G3ID(149)*G3ID( 15) + G3ID(152)*G3ID( 18)
+GGID( 95) = GGID( 95) + DBID(32)*DK(2)*VALL
+VALL = G3ID( 65)*G3ID(93) + G3ID( 68)*G3ID( 96) + G3ID( 71)*G3ID( 99)
+GGID( 96) = GGID( 96) + DBID(32)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 11)*G3ID(66) + G3ID( 85)*G3ID( 14)*G3ID( 69) + G3ID( 88)*G3ID( 17)*G3ID( 72)
+GGID( 97) = GGID( 97) + DBID(33)*DK(1)*VALL
+VALL = G3ID( 92)*G3ID(66) + G3ID( 95)*G3ID( 69) + G3ID( 98)*G3ID( 72)
+GGID( 98) = GGID( 98) + DBID(33)*DK(2)*VALL
+VALL = G3ID( 11)*G3ID(147) + G3ID( 14)*G3ID(150) + G3ID( 17)*G3ID(153)
+GGID( 99) = GGID( 99) + DBID(33)*DK(3)*VALL
+VALL = G3ID(109)*G3ID( 38)*G3ID(12) + G3ID(112)*G3ID( 41)*G3ID( 15) + G3ID(115)*G3ID( 44)*G3ID( 18)
+GGID(100) = GGID(100) + DBID(34)*DK(1)*VALL
+VALL = G3ID( 28)*G3ID(119)*G3ID(12) + G3ID( 31)*G3ID(122)*G3ID( 15) + G3ID( 34)*G3ID(125)*G3ID( 18)
+GGID(101) = GGID(101) + DBID(34)*DK(2)*VALL
+VALL = G3ID( 28)*G3ID( 38)*G3ID(93) + G3ID( 31)*G3ID( 41)*G3ID( 96) + G3ID( 34)*G3ID( 44)*G3ID( 99)
+GGID(102) = GGID(102) + DBID(34)*DK(3)*VALL
+VALL = G3ID(109)*G3ID( 11)*G3ID(39) + G3ID(112)*G3ID( 14)*G3ID( 42) + G3ID(115)*G3ID( 17)*G3ID( 45)
+GGID(103) = GGID(103) + DBID(35)*DK(1)*VALL
+VALL = G3ID( 28)*G3ID( 92)*G3ID(39) + G3ID( 31)*G3ID( 95)*G3ID( 42) + G3ID( 34)*G3ID( 98)*G3ID( 45)
+GGID(104) = GGID(104) + DBID(35)*DK(2)*VALL
+VALL = G3ID( 28)*G3ID( 11)*G3ID(120) + G3ID( 31)*G3ID( 14)*G3ID(123) + G3ID( 34)*G3ID( 17)*G3ID(126)
+GGID(105) = GGID(105) + DBID(35)*DK(3)*VALL
+VALL = G3ID( 82)*G3ID( 38)*G3ID(39) + G3ID( 85)*G3ID( 41)*G3ID( 42) + G3ID( 88)*G3ID( 44)*G3ID( 45)
+GGID(106) = GGID(106) + DBID(36)*DK(1)*VALL
+VALL = G3ID(119)*G3ID(39) + G3ID(122)*G3ID( 42) + G3ID(125)*G3ID( 45)
+GGID(107) = GGID(107) + DBID(36)*DK(2)*VALL
+VALL = G3ID( 38)*G3ID(120) + G3ID( 41)*G3ID(123) + G3ID( 44)*G3ID(126)
+GGID(108) = GGID(108) + DBID(36)*DK(3)*VALL
+
+
+                     ENDDO !KG
+                  ENDDO !JG
+               ENDDO !IG
+
+
+               ! COPY INTEGRAL GG(P|MN) TO I32
+               NLJ = NKS*NJ
+               DO LNKS=1,NKS
+                  DO II=1,NI
+                     DO JJ=1,NJ
+                        IBF = LOCI+II
+                        JBF = LOCJ+JJ
+                        LIJ = LNKS+(JJ-1)*NKS+(II-1)*NLJ
+                        I32(IBF,JBF,IauxStart+LNKS-1) = GGID(LIJ) 
+                        I32(JBF,IBF,IauxStart+LNKS-1) = GGID(LIJ) 
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+         ENDDO 
+      ENDDO 
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X222 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAtm,DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+      
+      use shellProcessing,only: CCD
+      use shellpairs,only: dd_PAV_PRE, &
+                           dd_P_PRE,   &
+                           dd_DUM0_PRE,&
+                           dd_DUM_PRE, &
+                           dd_AB_PRE,  &
+                           dd_VAL_PRE, &
+                           LOCdd,   &
+                           N_dd_PRE
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! 
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(4),W(4)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      ! double precision :: GG(NI*NJ*NK)
+      ! double precision :: GG(MXBSH*MXBSH*MXBSH)
+      double precision :: VALL
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          CAB(3,0:MXLTOT),                  &
+                          P(3),PAV(3),CPV(3),               &
+                          A1(3,4),B1(4),C1(4),           &
+                          A2(3,4),B2(4),F00(4)
+
+      double precision :: GGID(108)
+      double precision :: DK(6),T1(180)
+      double precision :: G3ID(324) !3*nroots*LI*LJ*LK
+      double precision :: DBID(36) 
+                        
+      double precision :: TMP(3),VAL(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,LOCKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NI,NGI, &
+                 LI,LOCI,I1,IG, &
+                 JSH,JAT,NJ,&
+                 NGJ,LJ,LOCJ,J1,JG
+
+      integer :: LTOT,LB,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: U2,T2
+      double precision :: VAL1,VAL2,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL,a127
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,N3I,N3B,N3IJ,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ,iijj,iijj_tmp,JI
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+a127 = TLL(1,2,7)
+
+LI = 2
+NI = 6
+LJ = 2
+NJ = 6
+
+LK = 2
+NKS = 5
+NK = 6
+NROOTS=4
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_D_SHL,KNG,KLOC,DD_VAL_PRE,KAUX_ELSE,KAUXNG) &
+!$omp shared(KAUXST,KAUXAT,C,LOCSPH,LOCKT_INIT,DAUX,LOCDD) &
+!$omp shared(DD_DUM_PRE,TOL,DD_P_PRE,DD_PAV_PRE,DD_DUM0_PRE) &
+!$omp shared(CCD,EXAUX,I32,N_ELSE,N_D_SHL,DD_AB_PRE,A127) &
+!$omp shared(LI,NI,LJ,NJ,NROOTS,NKS,NK) &
+!$omp private(T1,ISH,JSH,MINK,MAXK,MINKT,MAXKT,AJINV2,B2) &
+!$omp private(NGI,LOCI,NGJ,LOCJ,KAUXSH,NGK,K1,KAT) &
+!$omp private(CC,IAUXSTART,DK,GGID,IJ,DBID,G3ID,VALL,IBF,JBF,LIJ) &
+!$omp private(VAL,AB,DUM,CPV,PAV,RR,DUM0,DUM2,AK,RHO,XX,U) &
+!$omp private(VAL1,A1,B1,F00,III,JJJ,IIJJ,N3,N3B,N3I,N3IJ,JI,AIJINV) &
+!$omp private(AIINV,AJINV,AIINV2,AIJINVSQ,W,AIJINV2,VAL2,A2,C1,NLJ)
+
+         ! DO ISH = 1,NSHELL
+         !    DO JSH = 1,ISH
+DO iijj_tmp = 0, N_D_SHL*(N_D_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+      ISH = I_D_SHL(III)
+      JSH = I_D_SHL(JJJ)
+
+               NGI   = KNG(ISH)
+               LOCI  = KLOC(ISH)-1
+
+               NGJ   = KNG(JSH)
+               LOCJ  = KLOC(JSH)-1
+
+         VAL(1:3) = dd_VAL_PRE(1:3,iijj)
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+      ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+      DO I_ELSE=1,N_ELSE
+         ! DO ISH = 1,NSHELL
+         KAUXSH = KAUX_ELSE(I_ELSE)
+         NGK   = KAUXNG(KAUXSH)
+         K1    = KAUXST(KAUXSH)
+
+
+         KAT = KAUXAT(KAUXSH)
+         CC(1) = C(1,KAT)
+         CC(2) = C(2,KAT)
+         CC(3) = C(3,KAT)
+
+               ! AUX POINTER FOR I32
+               IauxStart = LOCSPH(KAUXSH)
+               IauxStart = IauxStart-LOCKT_init+1
+
+               ! DENSITY FACTOR
+               DO K=1,NK
+                  DK(K) = PI252 * DAux(KAUXSH,1,K)
+               ENDDO
+
+               ! ZERO OUT INTEGRAL ARRAY
+               DO II=1,108
+                  GGID(II)=zero
+               ENDDO
+
+               DO II=1,36
+                  T1(II*5-2) = zero
+                  T1(II*5-1) = zero
+                  T1(II*5  ) = zero
+               ENDDO
+
+
+
+            JI=0
+               ! PRIMITIVE IN I-SHELL
+               DO IG = 1, NGI                 
+                  ! PRIMITIVE IN J-SHELL
+                  DO JG = 1, NGJ
+                  JI = JI + 1
+                     AB = dd_AB_PRE(LOCdd(iijj)+JI)
+                     DUM = dd_DUM_PRE(LOCdd(iijj)+JI)
+                     IF (DUM > TOL) CYCLE
+                     CPV(1:3) = dd_P_PRE(1:3,LOCdd(iijj)+JI)
+                     PAV(1:3) = dd_PAV_PRE(1:3,LOCdd(iijj)+JI)
+                     CPV(1:3) = CC(1:3)-CPV(1:3)
+                     RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+                     DUM0 = dd_DUM0_PRE(LOCdd(iijj)+JI)
+
+                     IJ = 0
+                     DO I=1,NI
+                        DUM2 = DUM0*CCD(I,IG,III)
+                        DO J=1,NJ
+                           IJ = IJ+1
+                           DBID(IJ) = DUM2*CCD(J,JG,JJJ)
+                        ENDDO
+                     ENDDO !I
+
+
+                     ! PRIMITIVE IN K-SHELL
+                     DO KG = 1, NGK
+                        AK = EXAUX(K1+KG-1)
+                        RHO = AB*AK/(AB+AK)
+                        XX = RHO*RR
+
+                        ! RYS ROOTS AND WEIGHT
+                        CALL ROOT4_gpu(XX,U,W,NROOTS)
+
+                        AIJINV = one/(AB+AK)
+                        RHO = AB*AK*AIJINV
+                        AIINV  = one/AB
+                        AJINV  = one/AK
+                        AIINV2 = half*AIINV
+                        AJINV2 = half*AJINV
+                        AIJINV2 = half*AIJINV
+                        AIJINVSQ = SQRT(AIJINV)
+
+                        DO IR = 1, NROOTS
+                           U(IR) = U(IR)*RHO
+                           U(IR) = U(IR)/(RHO+U(IR))
+                           VAL1 = RHO*AIINV*U(IR)
+                           VAL2 = RHO*AJINV*U(IR)
+                           A1(1:3,IR) = PAV(1:3)+VAL1*CPV(1:3)
+                           A2(1:3,IR) = -VAL2*CPV(1:3)
+                           B1(IR) = AIINV2-AIINV2*VAL1
+                           B2(IR) = AJINV2-AJINV2*VAL2
+                           C1(IR) = AIJINV2*U(IR)
+                           F00(IR) = AIJINVSQ*W(IR)
+                           G3ID(3 + 3*(IR-1)) = F00(IR)
+                        ENDDO
+
+DO IR=1,4
+  G3ID(10+IR*3) = A1(1,IR)
+  G3ID(11+IR*3) = A1(2,IR)
+  G3ID(12+IR*3) = A1(3,IR)*F00(IR)
+ENDDO
+DO IR=1,4
+  G3ID(22+IR*3) = A1(1,IR)*G3ID(10+IR*3) +  B1(IR)
+  G3ID(23+IR*3) = A1(2,IR)*G3ID(11+IR*3) +  B1(IR)
+  G3ID(24+IR*3) = A1(3,IR)*G3ID(12+IR*3) +  B1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(94+IR*3) = A1(1,IR)*G3ID(22+IR*3) +  2*B1(IR)*G3ID(10+IR*3)
+  G3ID(95+IR*3) = A1(2,IR)*G3ID(23+IR*3) +  2*B1(IR)*G3ID(11+IR*3)
+  G3ID(96+IR*3) = A1(3,IR)*G3ID(24+IR*3) +  2*B1(IR)*G3ID(12+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(70+IR*3) = A1(1,IR)*G3ID(94+IR*3) +  3*B1(IR)*G3ID(22+IR*3)
+  G3ID(71+IR*3) = A1(2,IR)*G3ID(95+IR*3) +  3*B1(IR)*G3ID(23+IR*3)
+  G3ID(72+IR*3) = A1(3,IR)*G3ID(96+IR*3) +  3*B1(IR)*G3ID(24+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(106+IR*3) = A2(1,IR)
+  G3ID(107+IR*3) = A2(2,IR)
+  G3ID(108+IR*3) = A2(3,IR)*F00(IR)
+ENDDO
+DO IR=1,4
+  G3ID(118+IR*3) = A1(1,IR)*G3ID(106+IR*3) +  C1(IR)
+  G3ID(119+IR*3) = A1(2,IR)*G3ID(107+IR*3) +  C1(IR)
+  G3ID(120+IR*3) = A1(3,IR)*G3ID(108+IR*3) +  C1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(130+IR*3) = A1(1,IR)*G3ID(118+IR*3) +  B1(IR)*G3ID(106+IR*3) +  C1(IR)*G3ID(10+IR*3)
+  G3ID(131+IR*3) = A1(2,IR)*G3ID(119+IR*3) +  B1(IR)*G3ID(107+IR*3) +  C1(IR)*G3ID(11+IR*3)
+  G3ID(132+IR*3) = A1(3,IR)*G3ID(120+IR*3) +  B1(IR)*G3ID(108+IR*3) +  C1(IR)*G3ID(12+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(202+IR*3) = A1(1,IR)*G3ID(130+IR*3) +  2*B1(IR)*G3ID(118+IR*3) +  C1(IR)*G3ID(22+IR*3)
+  G3ID(203+IR*3) = A1(2,IR)*G3ID(131+IR*3) +  2*B1(IR)*G3ID(119+IR*3) +  C1(IR)*G3ID(23+IR*3)
+  G3ID(204+IR*3) = A1(3,IR)*G3ID(132+IR*3) +  2*B1(IR)*G3ID(120+IR*3) +  C1(IR)*G3ID(24+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(178+IR*3) = A1(1,IR)*G3ID(202+IR*3) +  3*B1(IR)*G3ID(130+IR*3) +  C1(IR)*G3ID(94+IR*3)
+  G3ID(179+IR*3) = A1(2,IR)*G3ID(203+IR*3) +  3*B1(IR)*G3ID(131+IR*3) +  C1(IR)*G3ID(95+IR*3)
+  G3ID(180+IR*3) = A1(3,IR)*G3ID(204+IR*3) +  3*B1(IR)*G3ID(132+IR*3) +  C1(IR)*G3ID(96+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(214+IR*3) = A2(1,IR)*G3ID(106+IR*3) +  B2(IR)
+  G3ID(215+IR*3) = A2(2,IR)*G3ID(107+IR*3) +  B2(IR)
+  G3ID(216+IR*3) = A2(3,IR)*G3ID(108+IR*3) +  B2(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(226+IR*3) = A1(1,IR)*G3ID(214+IR*3) +  2*C1(IR)*G3ID(106+IR*3)
+  G3ID(227+IR*3) = A1(2,IR)*G3ID(215+IR*3) +  2*C1(IR)*G3ID(107+IR*3)
+  G3ID(228+IR*3) = A1(3,IR)*G3ID(216+IR*3) +  2*C1(IR)*G3ID(108+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(238+IR*3) = A1(1,IR)*G3ID(226+IR*3) +  B1(IR)*G3ID(214+IR*3) +  2*C1(IR)*G3ID(118+IR*3)
+  G3ID(239+IR*3) = A1(2,IR)*G3ID(227+IR*3) +  B1(IR)*G3ID(215+IR*3) +  2*C1(IR)*G3ID(119+IR*3)
+  G3ID(240+IR*3) = A1(3,IR)*G3ID(228+IR*3) +  B1(IR)*G3ID(216+IR*3) +  2*C1(IR)*G3ID(120+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(310+IR*3) = A1(1,IR)*G3ID(238+IR*3) +  2*B1(IR)*G3ID(226+IR*3) +  2*C1(IR)*G3ID(130+IR*3)
+  G3ID(311+IR*3) = A1(2,IR)*G3ID(239+IR*3) +  2*B1(IR)*G3ID(227+IR*3) +  2*C1(IR)*G3ID(131+IR*3)
+  G3ID(312+IR*3) = A1(3,IR)*G3ID(240+IR*3) +  2*B1(IR)*G3ID(228+IR*3) +  2*C1(IR)*G3ID(132+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(286+IR*3) = A1(1,IR)*G3ID(310+IR*3) +  3*B1(IR)*G3ID(238+IR*3) +  2*C1(IR)*G3ID(202+IR*3)
+  G3ID(287+IR*3) = A1(2,IR)*G3ID(311+IR*3) +  3*B1(IR)*G3ID(239+IR*3) +  2*C1(IR)*G3ID(203+IR*3)
+  G3ID(288+IR*3) = A1(3,IR)*G3ID(312+IR*3) +  3*B1(IR)*G3ID(240+IR*3) +  2*C1(IR)*G3ID(204+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(34+IR*3) = VAL(1)             +  G3ID(10+IR*3)
+  G3ID(35+IR*3) = VAL(2)             +  G3ID(11+IR*3)
+  G3ID(36+IR*3) = VAL(3)*G3ID(IR*3) +  G3ID(12+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(46+IR*3) = VAL(1)*G3ID(10+IR*3) +  G3ID(22+IR*3)
+  G3ID(47+IR*3) = VAL(2)*G3ID(11+IR*3) +  G3ID(23+IR*3)
+  G3ID(48+IR*3) = VAL(3)*G3ID(12+IR*3) +  G3ID(24+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(58+IR*3) = VAL(1)*G3ID(22+IR*3) +  G3ID(94+IR*3)
+  G3ID(59+IR*3) = VAL(2)*G3ID(23+IR*3) +  G3ID(95+IR*3)
+  G3ID(60+IR*3) = VAL(3)*G3ID(24+IR*3) +  G3ID(96+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(94+IR*3) = VAL(1)*G3ID(94+IR*3) +  G3ID(70+IR*3)
+  G3ID(95+IR*3) = VAL(2)*G3ID(95+IR*3) +  G3ID(71+IR*3)
+  G3ID(96+IR*3) = VAL(3)*G3ID(96+IR*3) +  G3ID(72+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(70+IR*3) = VAL(1)*G3ID(34+IR*3) +  G3ID(46+IR*3)
+  G3ID(71+IR*3) = VAL(2)*G3ID(35+IR*3) +  G3ID(47+IR*3)
+  G3ID(72+IR*3) = VAL(3)*G3ID(36+IR*3) +  G3ID(48+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(82+IR*3) = VAL(1)*G3ID(46+IR*3) +  G3ID(58+IR*3)
+  G3ID(83+IR*3) = VAL(2)*G3ID(47+IR*3) +  G3ID(59+IR*3)
+  G3ID(84+IR*3) = VAL(3)*G3ID(48+IR*3) +  G3ID(60+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(94+IR*3) = VAL(1)*G3ID(58+IR*3) +  G3ID(94+IR*3)
+  G3ID(95+IR*3) = VAL(2)*G3ID(59+IR*3) +  G3ID(95+IR*3)
+  G3ID(96+IR*3) = VAL(3)*G3ID(60+IR*3) +  G3ID(96+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(142+IR*3) = VAL(1)*G3ID(106+IR*3) +  G3ID(118+IR*3)
+  G3ID(143+IR*3) = VAL(2)*G3ID(107+IR*3) +  G3ID(119+IR*3)
+  G3ID(144+IR*3) = VAL(3)*G3ID(108+IR*3) +  G3ID(120+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(154+IR*3) = VAL(1)*G3ID(118+IR*3) +  G3ID(130+IR*3)
+  G3ID(155+IR*3) = VAL(2)*G3ID(119+IR*3) +  G3ID(131+IR*3)
+  G3ID(156+IR*3) = VAL(3)*G3ID(120+IR*3) +  G3ID(132+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(166+IR*3) = VAL(1)*G3ID(130+IR*3) +  G3ID(202+IR*3)
+  G3ID(167+IR*3) = VAL(2)*G3ID(131+IR*3) +  G3ID(203+IR*3)
+  G3ID(168+IR*3) = VAL(3)*G3ID(132+IR*3) +  G3ID(204+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(202+IR*3) = VAL(1)*G3ID(202+IR*3) +  G3ID(178+IR*3)
+  G3ID(203+IR*3) = VAL(2)*G3ID(203+IR*3) +  G3ID(179+IR*3)
+  G3ID(204+IR*3) = VAL(3)*G3ID(204+IR*3) +  G3ID(180+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(178+IR*3) = VAL(1)*G3ID(142+IR*3) +  G3ID(154+IR*3)
+  G3ID(179+IR*3) = VAL(2)*G3ID(143+IR*3) +  G3ID(155+IR*3)
+  G3ID(180+IR*3) = VAL(3)*G3ID(144+IR*3) +  G3ID(156+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(190+IR*3) = VAL(1)*G3ID(154+IR*3) +  G3ID(166+IR*3)
+  G3ID(191+IR*3) = VAL(2)*G3ID(155+IR*3) +  G3ID(167+IR*3)
+  G3ID(192+IR*3) = VAL(3)*G3ID(156+IR*3) +  G3ID(168+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(202+IR*3) = VAL(1)*G3ID(166+IR*3) +  G3ID(202+IR*3)
+  G3ID(203+IR*3) = VAL(2)*G3ID(167+IR*3) +  G3ID(203+IR*3)
+  G3ID(204+IR*3) = VAL(3)*G3ID(168+IR*3) +  G3ID(204+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(250+IR*3) = VAL(1)*G3ID(214+IR*3) +  G3ID(226+IR*3)
+  G3ID(251+IR*3) = VAL(2)*G3ID(215+IR*3) +  G3ID(227+IR*3)
+  G3ID(252+IR*3) = VAL(3)*G3ID(216+IR*3) +  G3ID(228+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(262+IR*3) = VAL(1)*G3ID(226+IR*3) +  G3ID(238+IR*3)
+  G3ID(263+IR*3) = VAL(2)*G3ID(227+IR*3) +  G3ID(239+IR*3)
+  G3ID(264+IR*3) = VAL(3)*G3ID(228+IR*3) +  G3ID(240+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(274+IR*3) = VAL(1)*G3ID(238+IR*3) +  G3ID(310+IR*3)
+  G3ID(275+IR*3) = VAL(2)*G3ID(239+IR*3) +  G3ID(311+IR*3)
+  G3ID(276+IR*3) = VAL(3)*G3ID(240+IR*3) +  G3ID(312+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(310+IR*3) = VAL(1)*G3ID(310+IR*3) +  G3ID(286+IR*3)
+  G3ID(311+IR*3) = VAL(2)*G3ID(311+IR*3) +  G3ID(287+IR*3)
+  G3ID(312+IR*3) = VAL(3)*G3ID(312+IR*3) +  G3ID(288+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(286+IR*3) = VAL(1)*G3ID(250+IR*3) +  G3ID(262+IR*3)
+  G3ID(287+IR*3) = VAL(2)*G3ID(251+IR*3) +  G3ID(263+IR*3)
+  G3ID(288+IR*3) = VAL(3)*G3ID(252+IR*3) +  G3ID(264+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(298+IR*3) = VAL(1)*G3ID(262+IR*3) +  G3ID(274+IR*3)
+  G3ID(299+IR*3) = VAL(2)*G3ID(263+IR*3) +  G3ID(275+IR*3)
+  G3ID(300+IR*3) = VAL(3)*G3ID(264+IR*3) +  G3ID(276+IR*3)
+ENDDO
+DO IR=1,4
+  G3ID(310+IR*3) = VAL(1)*G3ID(274+IR*3) +  G3ID(310+IR*3)
+  G3ID(311+IR*3) = VAL(2)*G3ID(275+IR*3) +  G3ID(311+IR*3)
+  G3ID(312+IR*3) = VAL(3)*G3ID(276+IR*3) +  G3ID(312+IR*3)
+ENDDO
+
+VALL = G3ID(313)*G3ID(3) + G3ID(316)*G3ID(6) + G3ID(319)*G3ID(9) + G3ID(322)*G3ID(12)
+GGID(1)= GGID(1)+ DBID(1)*DK(1)*VALL
+VALL = G3ID(97)*G3ID(218)*G3ID(3) + G3ID(100)*G3ID(221)*G3ID(6) + G3ID(103)*G3ID(224)*G3ID(9) + G3ID(106)*G3ID(227)*G3ID(12)
+GGID(2)= GGID(2)+ DBID(1)*DK(2)*VALL
+VALL = G3ID(97)*G3ID(219) + G3ID(100)*G3ID(222) + G3ID(103)*G3ID(225) + G3ID(106)*G3ID(228)
+GGID(3)= GGID(3)+ DBID(1)*DK(3)*VALL
+VALL = G3ID(241)*G3ID(74)*G3ID(3) + G3ID(244)*G3ID(77)*G3ID(6) + G3ID(247)*G3ID(80)*G3ID(9) + G3ID(250)*G3ID(83)*G3ID(12)
+GGID(4)= GGID(4)+ DBID(2)*DK(1)*VALL
+VALL = G3ID(25)*G3ID(290)*G3ID(3) + G3ID(28)*G3ID(293)*G3ID(6) + G3ID(31)*G3ID(296)*G3ID(9) + G3ID(34)*G3ID(299)*G3ID(12)
+GGID(5)= GGID(5)+ DBID(2)*DK(2)*VALL
+VALL = G3ID(25)*G3ID(74)*G3ID(219) + G3ID(28)*G3ID(77)*G3ID(222) + G3ID(31)*G3ID(80)*G3ID(225) + G3ID(34)*G3ID(83)*G3ID(228)
+GGID(6)= GGID(6)+ DBID(2)*DK(3)*VALL
+VALL = G3ID(241)*G3ID(75) + G3ID(244)*G3ID(78) + G3ID(247)*G3ID(81) + G3ID(250)*G3ID(84)
+GGID(7)= GGID(7)+ DBID(3)*DK(1)*VALL
+VALL = G3ID(25)*G3ID(218)*G3ID(75) + G3ID(28)*G3ID(221)*G3ID(78) + G3ID(31)*G3ID(224)*G3ID(81) + G3ID(34)*G3ID(227)*G3ID(84)
+GGID(8)= GGID(8)+ DBID(3)*DK(2)*VALL
+VALL = G3ID(25)*G3ID(291) + G3ID(28)*G3ID(294) + G3ID(31)*G3ID(297) + G3ID(34)*G3ID(300)
+GGID(9)= GGID(9)+ DBID(3)*DK(3)*VALL
+VALL = G3ID(277)*G3ID(38)*G3ID(3) + G3ID(280)*G3ID(41)*G3ID(6) + G3ID(283)*G3ID(44)*G3ID(9) + G3ID(286)*G3ID(47)*G3ID(12)
+GGID(10)= GGID(10)+ DBID(4)*DK(1)*VALL
+VALL = G3ID(61)*G3ID(254)*G3ID(3) + G3ID(64)*G3ID(257)*G3ID(6) + G3ID(67)*G3ID(260)*G3ID(9) + G3ID(70)*G3ID(263)*G3ID(12)
+GGID(11)= GGID(11)+ DBID(4)*DK(2)*VALL
+VALL = G3ID(61)*G3ID(38)*G3ID(219) + G3ID(64)*G3ID(41)*G3ID(222) + G3ID(67)*G3ID(44)*G3ID(225) + G3ID(70)*G3ID(47)*G3ID(228)
+GGID(12)= GGID(12)+ DBID(4)*DK(3)*VALL
+VALL = G3ID(277)*G3ID(39) + G3ID(280)*G3ID(42) + G3ID(283)*G3ID(45) + G3ID(286)*G3ID(48)
+GGID(13)= GGID(13)+ DBID(5)*DK(1)*VALL
+VALL = G3ID(61)*G3ID(218)*G3ID(39) + G3ID(64)*G3ID(221)*G3ID(42) + G3ID(67)*G3ID(224)*G3ID(45) + G3ID(70)*G3ID(227)*G3ID(48)
+GGID(14)= GGID(14)+ DBID(5)*DK(2)*VALL
+VALL = G3ID(61)*G3ID(255) + G3ID(64)*G3ID(258) + G3ID(67)*G3ID(261) + G3ID(70)*G3ID(264)
+GGID(15)= GGID(15)+ DBID(5)*DK(3)*VALL
+VALL = G3ID(241)*G3ID(38)*G3ID(39) + G3ID(244)*G3ID(41)*G3ID(42) + G3ID(247)*G3ID(44)*G3ID(45) + G3ID(250)*G3ID(47)*G3ID(48)
+GGID(16)= GGID(16)+ DBID(6)*DK(1)*VALL
+VALL = G3ID(25)*G3ID(254)*G3ID(39) + G3ID(28)*G3ID(257)*G3ID(42) + G3ID(31)*G3ID(260)*G3ID(45) + G3ID(34)*G3ID(263)*G3ID(48)
+GGID(17)= GGID(17)+ DBID(6)*DK(2)*VALL
+VALL = G3ID(25)*G3ID(38)*G3ID(255) + G3ID(28)*G3ID(41)*G3ID(258) + G3ID(31)*G3ID(44)*G3ID(261) + G3ID(34)*G3ID(47)*G3ID(264)
+GGID(18)= GGID(18)+ DBID(6)*DK(3)*VALL
+VALL = G3ID(289)*G3ID(26)*G3ID(3) + G3ID(292)*G3ID(29)*G3ID(6) + G3ID(295)*G3ID(32)*G3ID(9) + G3ID(298)*G3ID(35)*G3ID(12)
+GGID(19)= GGID(19)+ DBID(7)*DK(1)*VALL
+VALL = G3ID(73)*G3ID(242)*G3ID(3) + G3ID(76)*G3ID(245)*G3ID(6) + G3ID(79)*G3ID(248)*G3ID(9) + G3ID(82)*G3ID(251)*G3ID(12)
+GGID(20)= GGID(20)+ DBID(7)*DK(2)*VALL
+VALL = G3ID(73)*G3ID(26)*G3ID(219) + G3ID(76)*G3ID(29)*G3ID(222) + G3ID(79)*G3ID(32)*G3ID(225) + G3ID(82)*G3ID(35)*G3ID(228)
+GGID(21)= GGID(21)+ DBID(7)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(98)*G3ID(3) + G3ID(220)*G3ID(101)*G3ID(6) + G3ID(223)*G3ID(104)*G3ID(9) + G3ID(226)*G3ID(107)*G3ID(12)
+GGID(22)= GGID(22)+ DBID(8)*DK(1)*VALL
+VALL = G3ID(314)*G3ID(3) + G3ID(317)*G3ID(6) + G3ID(320)*G3ID(9) + G3ID(323)*G3ID(12)
+GGID(23)= GGID(23)+ DBID(8)*DK(2)*VALL
+VALL = G3ID(98)*G3ID(219) + G3ID(101)*G3ID(222) + G3ID(104)*G3ID(225) + G3ID(107)*G3ID(228)
+GGID(24)= GGID(24)+ DBID(8)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(26)*G3ID(75) + G3ID(220)*G3ID(29)*G3ID(78) + G3ID(223)*G3ID(32)*G3ID(81) + G3ID(226)*G3ID(35)*G3ID(84)
+GGID(25)= GGID(25)+ DBID(9)*DK(1)*VALL
+VALL = G3ID(242)*G3ID(75) + G3ID(245)*G3ID(78) + G3ID(248)*G3ID(81) + G3ID(251)*G3ID(84)
+GGID(26)= GGID(26)+ DBID(9)*DK(2)*VALL
+VALL = G3ID(26)*G3ID(291) + G3ID(29)*G3ID(294) + G3ID(32)*G3ID(297) + G3ID(35)*G3ID(300)
+GGID(27)= GGID(27)+ DBID(9)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(62)*G3ID(3) + G3ID(256)*G3ID(65)*G3ID(6) + G3ID(259)*G3ID(68)*G3ID(9) + G3ID(262)*G3ID(71)*G3ID(12)
+GGID(28)= GGID(28)+ DBID(10)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(278)*G3ID(3) + G3ID(40)*G3ID(281)*G3ID(6) + G3ID(43)*G3ID(284)*G3ID(9) + G3ID(46)*G3ID(287)*G3ID(12)
+GGID(29)= GGID(29)+ DBID(10)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(62)*G3ID(219) + G3ID(40)*G3ID(65)*G3ID(222) + G3ID(43)*G3ID(68)*G3ID(225) + G3ID(46)*G3ID(71)*G3ID(228)
+GGID(30)= GGID(30)+ DBID(10)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(26)*G3ID(39) + G3ID(256)*G3ID(29)*G3ID(42) + G3ID(259)*G3ID(32)*G3ID(45) + G3ID(262)*G3ID(35)*G3ID(48)
+GGID(31)= GGID(31)+ DBID(11)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(242)*G3ID(39) + G3ID(40)*G3ID(245)*G3ID(42) + G3ID(43)*G3ID(248)*G3ID(45) + G3ID(46)*G3ID(251)*G3ID(48)
+GGID(32)= GGID(32)+ DBID(11)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(26)*G3ID(255) + G3ID(40)*G3ID(29)*G3ID(258) + G3ID(43)*G3ID(32)*G3ID(261) + G3ID(46)*G3ID(35)*G3ID(264)
+GGID(33)= GGID(33)+ DBID(11)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(62)*G3ID(39) + G3ID(220)*G3ID(65)*G3ID(42) + G3ID(223)*G3ID(68)*G3ID(45) + G3ID(226)*G3ID(71)*G3ID(48)
+GGID(34)= GGID(34)+ DBID(12)*DK(1)*VALL
+VALL = G3ID(278)*G3ID(39) + G3ID(281)*G3ID(42) + G3ID(284)*G3ID(45) + G3ID(287)*G3ID(48)
+GGID(35)= GGID(35)+ DBID(12)*DK(2)*VALL
+VALL = G3ID(62)*G3ID(255) + G3ID(65)*G3ID(258) + G3ID(68)*G3ID(261) + G3ID(71)*G3ID(264)
+GGID(36)= GGID(36)+ DBID(12)*DK(3)*VALL
+VALL = G3ID(289)*G3ID(27) + G3ID(292)*G3ID(30) + G3ID(295)*G3ID(33) + G3ID(298)*G3ID(36)
+GGID(37)= GGID(37)+ DBID(13)*DK(1)*VALL
+VALL = G3ID(73)*G3ID(218)*G3ID(27) + G3ID(76)*G3ID(221)*G3ID(30) + G3ID(79)*G3ID(224)*G3ID(33) + G3ID(82)*G3ID(227)*G3ID(36)
+GGID(38)= GGID(38)+ DBID(13)*DK(2)*VALL
+VALL = G3ID(73)*G3ID(243) + G3ID(76)*G3ID(246) + G3ID(79)*G3ID(249) + G3ID(82)*G3ID(252)
+GGID(39)= GGID(39)+ DBID(13)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(74)*G3ID(27) + G3ID(220)*G3ID(77)*G3ID(30) + G3ID(223)*G3ID(80)*G3ID(33) + G3ID(226)*G3ID(83)*G3ID(36)
+GGID(40)= GGID(40)+ DBID(14)*DK(1)*VALL
+VALL = G3ID(290)*G3ID(27) + G3ID(293)*G3ID(30) + G3ID(296)*G3ID(33) + G3ID(299)*G3ID(36)
+GGID(41)= GGID(41)+ DBID(14)*DK(2)*VALL
+VALL = G3ID(74)*G3ID(243) + G3ID(77)*G3ID(246) + G3ID(80)*G3ID(249) + G3ID(83)*G3ID(252)
+GGID(42)= GGID(42)+ DBID(14)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(99) + G3ID(220)*G3ID(102) + G3ID(223)*G3ID(105) + G3ID(226)*G3ID(108)
+GGID(43)= GGID(43)+ DBID(15)*DK(1)*VALL
+VALL = G3ID(218)*G3ID(99) + G3ID(221)*G3ID(102) + G3ID(224)*G3ID(105) + G3ID(227)*G3ID(108)
+GGID(44)= GGID(44)+ DBID(15)*DK(2)*VALL
+VALL = G3ID(315) + G3ID(318) + G3ID(321) + G3ID(324)
+GGID(45)= GGID(45)+ DBID(15)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(38)*G3ID(27) + G3ID(256)*G3ID(41)*G3ID(30) + G3ID(259)*G3ID(44)*G3ID(33) + G3ID(262)*G3ID(47)*G3ID(36)
+GGID(46)= GGID(46)+ DBID(16)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(254)*G3ID(27) + G3ID(40)*G3ID(257)*G3ID(30) + G3ID(43)*G3ID(260)*G3ID(33) + G3ID(46)*G3ID(263)*G3ID(36)
+GGID(47)= GGID(47)+ DBID(16)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(38)*G3ID(243) + G3ID(40)*G3ID(41)*G3ID(246) + G3ID(43)*G3ID(44)*G3ID(249) + G3ID(46)*G3ID(47)*G3ID(252)
+GGID(48)= GGID(48)+ DBID(16)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(63) + G3ID(256)*G3ID(66) + G3ID(259)*G3ID(69) + G3ID(262)*G3ID(72)
+GGID(49)= GGID(49)+ DBID(17)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(218)*G3ID(63) + G3ID(40)*G3ID(221)*G3ID(66) + G3ID(43)*G3ID(224)*G3ID(69) + G3ID(46)*G3ID(227)*G3ID(72)
+GGID(50)= GGID(50)+ DBID(17)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(279) + G3ID(40)*G3ID(282) + G3ID(43)*G3ID(285) + G3ID(46)*G3ID(288)
+GGID(51)= GGID(51)+ DBID(17)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(38)*G3ID(63) + G3ID(220)*G3ID(41)*G3ID(66) + G3ID(223)*G3ID(44)*G3ID(69) + G3ID(226)*G3ID(47)*G3ID(72)
+GGID(52)= GGID(52)+ DBID(18)*DK(1)*VALL
+VALL = G3ID(254)*G3ID(63) + G3ID(257)*G3ID(66) + G3ID(260)*G3ID(69) + G3ID(263)*G3ID(72)
+GGID(53)= GGID(53)+ DBID(18)*DK(2)*VALL
+VALL = G3ID(38)*G3ID(279) + G3ID(41)*G3ID(282) + G3ID(44)*G3ID(285) + G3ID(47)*G3ID(288)
+GGID(54)= GGID(54)+ DBID(18)*DK(3)*VALL
+VALL = G3ID(301)*G3ID(14)*G3ID(3) + G3ID(304)*G3ID(17)*G3ID(6) + G3ID(307)*G3ID(20)*G3ID(9) + G3ID(310)*G3ID(23)*G3ID(12)
+GGID(55)= GGID(55)+ DBID(19)*DK(1)*VALL
+VALL = G3ID(85)*G3ID(230)*G3ID(3) + G3ID(88)*G3ID(233)*G3ID(6) + G3ID(91)*G3ID(236)*G3ID(9) + G3ID(94)*G3ID(239)*G3ID(12)
+GGID(56)= GGID(56)+ DBID(19)*DK(2)*VALL
+VALL = G3ID(85)*G3ID(14)*G3ID(219) + G3ID(88)*G3ID(17)*G3ID(222) + G3ID(91)*G3ID(20)*G3ID(225) + G3ID(94)*G3ID(23)*G3ID(228)
+GGID(57)= GGID(57)+ DBID(19)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(86)*G3ID(3) + G3ID(232)*G3ID(89)*G3ID(6) + G3ID(235)*G3ID(92)*G3ID(9) + G3ID(238)*G3ID(95)*G3ID(12)
+GGID(58)= GGID(58)+ DBID(20)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(302)*G3ID(3) + G3ID(16)*G3ID(305)*G3ID(6) + G3ID(19)*G3ID(308)*G3ID(9) + G3ID(22)*G3ID(311)*G3ID(12)
+GGID(59)= GGID(59)+ DBID(20)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(86)*G3ID(219) + G3ID(16)*G3ID(89)*G3ID(222) + G3ID(19)*G3ID(92)*G3ID(225) + G3ID(22)*G3ID(95)*G3ID(228)
+GGID(60)= GGID(60)+ DBID(20)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(14)*G3ID(75) + G3ID(232)*G3ID(17)*G3ID(78) + G3ID(235)*G3ID(20)*G3ID(81) + G3ID(238)*G3ID(23)*G3ID(84)
+GGID(61)= GGID(61)+ DBID(21)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(230)*G3ID(75) + G3ID(16)*G3ID(233)*G3ID(78) + G3ID(19)*G3ID(236)*G3ID(81) + G3ID(22)*G3ID(239)*G3ID(84)
+GGID(62)= GGID(62)+ DBID(21)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(14)*G3ID(291) + G3ID(16)*G3ID(17)*G3ID(294) + G3ID(19)*G3ID(20)*G3ID(297) + G3ID(22)*G3ID(23)*G3ID(300)
+GGID(63)= GGID(63)+ DBID(21)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(50)*G3ID(3) + G3ID(268)*G3ID(53)*G3ID(6) + G3ID(271)*G3ID(56)*G3ID(9) + G3ID(274)*G3ID(59)*G3ID(12)
+GGID(64)= GGID(64)+ DBID(22)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(266)*G3ID(3) + G3ID(52)*G3ID(269)*G3ID(6) + G3ID(55)*G3ID(272)*G3ID(9) + G3ID(58)*G3ID(275)*G3ID(12)
+GGID(65)= GGID(65)+ DBID(22)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(50)*G3ID(219) + G3ID(52)*G3ID(53)*G3ID(222) + G3ID(55)*G3ID(56)*G3ID(225) + G3ID(58)*G3ID(59)*G3ID(228)
+GGID(66)= GGID(66)+ DBID(22)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(14)*G3ID(39) + G3ID(268)*G3ID(17)*G3ID(42) + G3ID(271)*G3ID(20)*G3ID(45) + G3ID(274)*G3ID(23)*G3ID(48)
+GGID(67)= GGID(67)+ DBID(23)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(230)*G3ID(39) + G3ID(52)*G3ID(233)*G3ID(42) + G3ID(55)*G3ID(236)*G3ID(45) + G3ID(58)*G3ID(239)*G3ID(48)
+GGID(68)= GGID(68)+ DBID(23)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(14)*G3ID(255) + G3ID(52)*G3ID(17)*G3ID(258) + G3ID(55)*G3ID(20)*G3ID(261) + G3ID(58)*G3ID(23)*G3ID(264)
+GGID(69)= GGID(69)+ DBID(23)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(50)*G3ID(39) + G3ID(232)*G3ID(53)*G3ID(42) + G3ID(235)*G3ID(56)*G3ID(45) + G3ID(238)*G3ID(59)*G3ID(48)
+GGID(70)= GGID(70)+ DBID(24)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(266)*G3ID(39) + G3ID(16)*G3ID(269)*G3ID(42) + G3ID(19)*G3ID(272)*G3ID(45) + G3ID(22)*G3ID(275)*G3ID(48)
+GGID(71)= GGID(71)+ DBID(24)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(50)*G3ID(255) + G3ID(16)*G3ID(53)*G3ID(258) + G3ID(19)*G3ID(56)*G3ID(261) + G3ID(22)*G3ID(59)*G3ID(264)
+GGID(72)= GGID(72)+ DBID(24)*DK(3)*VALL
+VALL = G3ID(301)*G3ID(15) + G3ID(304)*G3ID(18) + G3ID(307)*G3ID(21) + G3ID(310)*G3ID(24)
+GGID(73)= GGID(73)+ DBID(25)*DK(1)*VALL
+VALL = G3ID(85)*G3ID(218)*G3ID(15) + G3ID(88)*G3ID(221)*G3ID(18) + G3ID(91)*G3ID(224)*G3ID(21) + G3ID(94)*G3ID(227)*G3ID(24)
+GGID(74)= GGID(74)+ DBID(25)*DK(2)*VALL
+VALL = G3ID(85)*G3ID(231) + G3ID(88)*G3ID(234) + G3ID(91)*G3ID(237) + G3ID(94)*G3ID(240)
+GGID(75)= GGID(75)+ DBID(25)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(74)*G3ID(15) + G3ID(232)*G3ID(77)*G3ID(18) + G3ID(235)*G3ID(80)*G3ID(21) + G3ID(238)*G3ID(83)*G3ID(24)
+GGID(76)= GGID(76)+ DBID(26)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(290)*G3ID(15) + G3ID(16)*G3ID(293)*G3ID(18) + G3ID(19)*G3ID(296)*G3ID(21) + G3ID(22)*G3ID(299)*G3ID(24)
+GGID(77)= GGID(77)+ DBID(26)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(74)*G3ID(231) + G3ID(16)*G3ID(77)*G3ID(234) + G3ID(19)*G3ID(80)*G3ID(237) + G3ID(22)*G3ID(83)*G3ID(240)
+GGID(78)= GGID(78)+ DBID(26)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(87) + G3ID(232)*G3ID(90) + G3ID(235)*G3ID(93) + G3ID(238)*G3ID(96)
+GGID(79)= GGID(79)+ DBID(27)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(218)*G3ID(87) + G3ID(16)*G3ID(221)*G3ID(90) + G3ID(19)*G3ID(224)*G3ID(93) + G3ID(22)*G3ID(227)*G3ID(96)
+GGID(80)= GGID(80)+ DBID(27)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(303) + G3ID(16)*G3ID(306) + G3ID(19)*G3ID(309) + G3ID(22)*G3ID(312)
+GGID(81)= GGID(81)+ DBID(27)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(38)*G3ID(15) + G3ID(268)*G3ID(41)*G3ID(18) + G3ID(271)*G3ID(44)*G3ID(21) + G3ID(274)*G3ID(47)*G3ID(24)
+GGID(82)= GGID(82)+ DBID(28)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(254)*G3ID(15) + G3ID(52)*G3ID(257)*G3ID(18) + G3ID(55)*G3ID(260)*G3ID(21) + G3ID(58)*G3ID(263)*G3ID(24)
+GGID(83)= GGID(83)+ DBID(28)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(38)*G3ID(231) + G3ID(52)*G3ID(41)*G3ID(234) + G3ID(55)*G3ID(44)*G3ID(237) + G3ID(58)*G3ID(47)*G3ID(240)
+GGID(84)= GGID(84)+ DBID(28)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(51) + G3ID(268)*G3ID(54) + G3ID(271)*G3ID(57) + G3ID(274)*G3ID(60)
+GGID(85)= GGID(85)+ DBID(29)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(218)*G3ID(51) + G3ID(52)*G3ID(221)*G3ID(54) + G3ID(55)*G3ID(224)*G3ID(57) + G3ID(58)*G3ID(227)*G3ID(60)
+GGID(86)= GGID(86)+ DBID(29)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(267) + G3ID(52)*G3ID(270) + G3ID(55)*G3ID(273) + G3ID(58)*G3ID(276)
+GGID(87)= GGID(87)+ DBID(29)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(38)*G3ID(51) + G3ID(232)*G3ID(41)*G3ID(54) + G3ID(235)*G3ID(44)*G3ID(57) + G3ID(238)*G3ID(47)*G3ID(60)
+GGID(88)= GGID(88)+ DBID(30)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(254)*G3ID(51) + G3ID(16)*G3ID(257)*G3ID(54) + G3ID(19)*G3ID(260)*G3ID(57) + G3ID(22)*G3ID(263)*G3ID(60)
+GGID(89)= GGID(89)+ DBID(30)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(38)*G3ID(267) + G3ID(16)*G3ID(41)*G3ID(270) + G3ID(19)*G3ID(44)*G3ID(273) + G3ID(22)*G3ID(47)*G3ID(276)
+GGID(90)= GGID(90)+ DBID(30)*DK(3)*VALL
+VALL = G3ID(289)*G3ID(14)*G3ID(15) + G3ID(292)*G3ID(17)*G3ID(18) + G3ID(295)*G3ID(20)*G3ID(21) + G3ID(298)*G3ID(23)*G3ID(24)
+GGID(91)= GGID(91)+ DBID(31)*DK(1)*VALL
+VALL = G3ID(73)*G3ID(230)*G3ID(15) + G3ID(76)*G3ID(233)*G3ID(18) + G3ID(79)*G3ID(236)*G3ID(21) + G3ID(82)*G3ID(239)*G3ID(24)
+GGID(92)= GGID(92)+ DBID(31)*DK(2)*VALL
+VALL = G3ID(73)*G3ID(14)*G3ID(231) + G3ID(76)*G3ID(17)*G3ID(234) + G3ID(79)*G3ID(20)*G3ID(237) + G3ID(82)*G3ID(23)*G3ID(240)
+GGID(93)= GGID(93)+ DBID(31)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(86)*G3ID(15) + G3ID(220)*G3ID(89)*G3ID(18) + G3ID(223)*G3ID(92)*G3ID(21) + G3ID(226)*G3ID(95)*G3ID(24)
+GGID(94)= GGID(94)+ DBID(32)*DK(1)*VALL
+VALL = G3ID(302)*G3ID(15) + G3ID(305)*G3ID(18) + G3ID(308)*G3ID(21) + G3ID(311)*G3ID(24)
+GGID(95)= GGID(95)+ DBID(32)*DK(2)*VALL
+VALL = G3ID(86)*G3ID(231) + G3ID(89)*G3ID(234) + G3ID(92)*G3ID(237) + G3ID(95)*G3ID(240)
+GGID(96)= GGID(96)+ DBID(32)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(14)*G3ID(87) + G3ID(220)*G3ID(17)*G3ID(90) + G3ID(223)*G3ID(20)*G3ID(93) + G3ID(226)*G3ID(23)*G3ID(96)
+GGID(97)= GGID(97)+ DBID(33)*DK(1)*VALL
+VALL = G3ID(230)*G3ID(87) + G3ID(233)*G3ID(90) + G3ID(236)*G3ID(93) + G3ID(239)*G3ID(96)
+GGID(98)= GGID(98)+ DBID(33)*DK(2)*VALL
+VALL = G3ID(14)*G3ID(303) + G3ID(17)*G3ID(306) + G3ID(20)*G3ID(309) + G3ID(23)*G3ID(312)
+GGID(99)= GGID(99)+ DBID(33)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(50)*G3ID(15) + G3ID(256)*G3ID(53)*G3ID(18) + G3ID(259)*G3ID(56)*G3ID(21) + G3ID(262)*G3ID(59)*G3ID(24)
+GGID(100)= GGID(100)+ DBID(34)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(266)*G3ID(15) + G3ID(40)*G3ID(269)*G3ID(18) + G3ID(43)*G3ID(272)*G3ID(21) + G3ID(46)*G3ID(275)*G3ID(24)
+GGID(101)= GGID(101)+ DBID(34)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(50)*G3ID(231) + G3ID(40)*G3ID(53)*G3ID(234) + G3ID(43)*G3ID(56)*G3ID(237) + G3ID(46)*G3ID(59)*G3ID(240)
+GGID(102)= GGID(102)+ DBID(34)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(14)*G3ID(51) + G3ID(256)*G3ID(17)*G3ID(54) + G3ID(259)*G3ID(20)*G3ID(57) + G3ID(262)*G3ID(23)*G3ID(60)
+GGID(103)= GGID(103)+ DBID(35)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(230)*G3ID(51) + G3ID(40)*G3ID(233)*G3ID(54) + G3ID(43)*G3ID(236)*G3ID(57) + G3ID(46)*G3ID(239)*G3ID(60)
+GGID(104)= GGID(104)+ DBID(35)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(14)*G3ID(267) + G3ID(40)*G3ID(17)*G3ID(270) + G3ID(43)*G3ID(20)*G3ID(273) + G3ID(46)*G3ID(23)*G3ID(276)
+GGID(105)= GGID(105)+ DBID(35)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(50)*G3ID(51) + G3ID(220)*G3ID(53)*G3ID(54) + G3ID(223)*G3ID(56)*G3ID(57) + G3ID(226)*G3ID(59)*G3ID(60)
+GGID(106)= GGID(106)+ DBID(36)*DK(1)*VALL
+VALL = G3ID(266)*G3ID(51) + G3ID(269)*G3ID(54) + G3ID(272)*G3ID(57) + G3ID(275)*G3ID(60)
+GGID(107)= GGID(107)+ DBID(36)*DK(2)*VALL
+VALL = G3ID(50)*G3ID(267) + G3ID(53)*G3ID(270) + G3ID(56)*G3ID(273) + G3ID(59)*G3ID(276)
+GGID(108)= GGID(108)+ DBID(36)*DK(3)*VALL
+
+
+
+VALL = G3ID(205)*G3ID(110)*G3ID(3) + G3ID(208)*G3ID(113)*G3ID(6) + G3ID(211)*G3ID(116)*G3ID(9) + G3ID(214)*G3ID(119)*G3ID(12)
+T1(3) = T1(3) + DBID(1)*DK(4)*VALL
+VALL = G3ID(205)*G3ID(111) + G3ID(208)*G3ID(114) + G3ID(211)*G3ID(117) + G3ID(214)*G3ID(120)
+T1(4) = T1(4) + DBID(1)*DK(5)*VALL
+VALL = G3ID(97)*G3ID(110)*G3ID(111) + G3ID(100)*G3ID(113)*G3ID(114) + G3ID(103)*G3ID(116)*G3ID(117) + G3ID(106)*G3ID(119)*G3ID(120)
+T1(5) = T1(5) + DBID(1)*DK(6)*VALL
+VALL = G3ID(133)*G3ID(182)*G3ID(3) + G3ID(136)*G3ID(185)*G3ID(6) + G3ID(139)*G3ID(188)*G3ID(9) + G3ID(142)*G3ID(191)*G3ID(12)
+T1(8) = T1(8) + DBID(2)*DK(4)*VALL
+VALL = G3ID(133)*G3ID(74)*G3ID(111) + G3ID(136)*G3ID(77)*G3ID(114) + G3ID(139)*G3ID(80)*G3ID(117) + G3ID(142)*G3ID(83)*G3ID(120)
+T1(9) = T1(9) + DBID(2)*DK(5)*VALL
+VALL = G3ID(25)*G3ID(182)*G3ID(111) + G3ID(28)*G3ID(185)*G3ID(114) + G3ID(31)*G3ID(188)*G3ID(117) + G3ID(34)*G3ID(191)*G3ID(120)
+T1(10) = T1(10) + DBID(2)*DK(6)*VALL
+VALL = G3ID(133)*G3ID(110)*G3ID(75) + G3ID(136)*G3ID(113)*G3ID(78) + G3ID(139)*G3ID(116)*G3ID(81) + G3ID(142)*G3ID(119)*G3ID(84)
+T1(13) = T1(13) + DBID(3)*DK(4)*VALL
+VALL = G3ID(133)*G3ID(183) + G3ID(136)*G3ID(186) + G3ID(139)*G3ID(189) + G3ID(142)*G3ID(192)
+T1(14) = T1(14) + DBID(3)*DK(5)*VALL
+VALL = G3ID(25)*G3ID(110)*G3ID(183) + G3ID(28)*G3ID(113)*G3ID(186) + G3ID(31)*G3ID(116)*G3ID(189) + G3ID(34)*G3ID(119)*G3ID(192)
+T1(15) = T1(15) + DBID(3)*DK(6)*VALL
+VALL = G3ID(169)*G3ID(146)*G3ID(3) + G3ID(172)*G3ID(149)*G3ID(6) + G3ID(175)*G3ID(152)*G3ID(9) + G3ID(178)*G3ID(155)*G3ID(12)
+T1(18) = T1(18) + DBID(4)*DK(4)*VALL
+VALL = G3ID(169)*G3ID(38)*G3ID(111) + G3ID(172)*G3ID(41)*G3ID(114) + G3ID(175)*G3ID(44)*G3ID(117) + G3ID(178)*G3ID(47)*G3ID(120)
+T1(19) = T1(19) + DBID(4)*DK(5)*VALL
+VALL = G3ID(61)*G3ID(146)*G3ID(111) + G3ID(64)*G3ID(149)*G3ID(114) + G3ID(67)*G3ID(152)*G3ID(117) + G3ID(70)*G3ID(155)*G3ID(120)
+T1(20) = T1(20) + DBID(4)*DK(6)*VALL
+VALL = G3ID(169)*G3ID(110)*G3ID(39) + G3ID(172)*G3ID(113)*G3ID(42) + G3ID(175)*G3ID(116)*G3ID(45) + G3ID(178)*G3ID(119)*G3ID(48)
+T1(23) = T1(23) + DBID(5)*DK(4)*VALL
+VALL = G3ID(169)*G3ID(147) + G3ID(172)*G3ID(150) + G3ID(175)*G3ID(153) + G3ID(178)*G3ID(156)
+T1(24) = T1(24) + DBID(5)*DK(5)*VALL
+VALL = G3ID(61)*G3ID(110)*G3ID(147) + G3ID(64)*G3ID(113)*G3ID(150) + G3ID(67)*G3ID(116)*G3ID(153) + G3ID(70)*G3ID(119)*G3ID(156)
+T1(25) = T1(25) + DBID(5)*DK(6)*VALL
+VALL = G3ID(133)*G3ID(146)*G3ID(39) + G3ID(136)*G3ID(149)*G3ID(42) + G3ID(139)*G3ID(152)*G3ID(45) + G3ID(142)*G3ID(155)*G3ID(48)
+T1(28) = T1(28) + DBID(6)*DK(4)*VALL
+VALL = G3ID(133)*G3ID(38)*G3ID(147) + G3ID(136)*G3ID(41)*G3ID(150) + G3ID(139)*G3ID(44)*G3ID(153) + G3ID(142)*G3ID(47)*G3ID(156)
+T1(29) = T1(29) + DBID(6)*DK(5)*VALL
+VALL = G3ID(25)*G3ID(146)*G3ID(147) + G3ID(28)*G3ID(149)*G3ID(150) + G3ID(31)*G3ID(152)*G3ID(153) + G3ID(34)*G3ID(155)*G3ID(156)
+T1(30) = T1(30) + DBID(6)*DK(6)*VALL
+VALL = G3ID(181)*G3ID(134)*G3ID(3) + G3ID(184)*G3ID(137)*G3ID(6) + G3ID(187)*G3ID(140)*G3ID(9) + G3ID(190)*G3ID(143)*G3ID(12)
+T1(33) = T1(33) + DBID(7)*DK(4)*VALL
+VALL = G3ID(181)*G3ID(26)*G3ID(111) + G3ID(184)*G3ID(29)*G3ID(114) + G3ID(187)*G3ID(32)*G3ID(117) + G3ID(190)*G3ID(35)*G3ID(120)
+T1(34) = T1(34) + DBID(7)*DK(5)*VALL
+VALL = G3ID(73)*G3ID(134)*G3ID(111) + G3ID(76)*G3ID(137)*G3ID(114) + G3ID(79)*G3ID(140)*G3ID(117) + G3ID(82)*G3ID(143)*G3ID(120)
+T1(35) = T1(35) + DBID(7)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(206)*G3ID(3) + G3ID(112)*G3ID(209)*G3ID(6) + G3ID(115)*G3ID(212)*G3ID(9) + G3ID(118)*G3ID(215)*G3ID(12)
+T1(38) = T1(38) + DBID(8)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(98)*G3ID(111) + G3ID(112)*G3ID(101)*G3ID(114) + G3ID(115)*G3ID(104)*G3ID(117) + G3ID(118)*G3ID(107)*G3ID(120)
+T1(39) = T1(39) + DBID(8)*DK(5)*VALL
+VALL = G3ID(206)*G3ID(111) + G3ID(209)*G3ID(114) + G3ID(212)*G3ID(117) + G3ID(215)*G3ID(120)
+T1(40) = T1(40) + DBID(8)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(134)*G3ID(75) + G3ID(112)*G3ID(137)*G3ID(78) + G3ID(115)*G3ID(140)*G3ID(81) + G3ID(118)*G3ID(143)*G3ID(84)
+T1(43) = T1(43) + DBID(9)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(26)*G3ID(183) + G3ID(112)*G3ID(29)*G3ID(186) + G3ID(115)*G3ID(32)*G3ID(189) + G3ID(118)*G3ID(35)*G3ID(192)
+T1(44) = T1(44) + DBID(9)*DK(5)*VALL
+VALL = G3ID(134)*G3ID(183) + G3ID(137)*G3ID(186) + G3ID(140)*G3ID(189) + G3ID(143)*G3ID(192)
+T1(45) = T1(45) + DBID(9)*DK(6)*VALL
+VALL = G3ID(145)*G3ID(170)*G3ID(3) + G3ID(148)*G3ID(173)*G3ID(6) + G3ID(151)*G3ID(176)*G3ID(9) + G3ID(154)*G3ID(179)*G3ID(12)
+T1(48) = T1(48) + DBID(10)*DK(4)*VALL
+VALL = G3ID(145)*G3ID(62)*G3ID(111) + G3ID(148)*G3ID(65)*G3ID(114) + G3ID(151)*G3ID(68)*G3ID(117) + G3ID(154)*G3ID(71)*G3ID(120)
+T1(49) = T1(49) + DBID(10)*DK(5)*VALL
+VALL = G3ID(37)*G3ID(170)*G3ID(111) + G3ID(40)*G3ID(173)*G3ID(114) + G3ID(43)*G3ID(176)*G3ID(117) + G3ID(46)*G3ID(179)*G3ID(120)
+T1(50) = T1(50) + DBID(10)*DK(6)*VALL
+VALL = G3ID(145)*G3ID(134)*G3ID(39) + G3ID(148)*G3ID(137)*G3ID(42) + G3ID(151)*G3ID(140)*G3ID(45) + G3ID(154)*G3ID(143)*G3ID(48)
+T1(53) = T1(53) + DBID(11)*DK(4)*VALL
+VALL = G3ID(145)*G3ID(26)*G3ID(147) + G3ID(148)*G3ID(29)*G3ID(150) + G3ID(151)*G3ID(32)*G3ID(153) + G3ID(154)*G3ID(35)*G3ID(156)
+T1(54) = T1(54) + DBID(11)*DK(5)*VALL
+VALL = G3ID(37)*G3ID(134)*G3ID(147) + G3ID(40)*G3ID(137)*G3ID(150) + G3ID(43)*G3ID(140)*G3ID(153) + G3ID(46)*G3ID(143)*G3ID(156)
+T1(55) = T1(55) + DBID(11)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(170)*G3ID(39) + G3ID(112)*G3ID(173)*G3ID(42) + G3ID(115)*G3ID(176)*G3ID(45) + G3ID(118)*G3ID(179)*G3ID(48)
+T1(58) = T1(58) + DBID(12)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(62)*G3ID(147) + G3ID(112)*G3ID(65)*G3ID(150) + G3ID(115)*G3ID(68)*G3ID(153) + G3ID(118)*G3ID(71)*G3ID(156)
+T1(59) = T1(59) + DBID(12)*DK(5)*VALL
+VALL = G3ID(170)*G3ID(147) + G3ID(173)*G3ID(150) + G3ID(176)*G3ID(153) + G3ID(179)*G3ID(156)
+T1(60) = T1(60) + DBID(12)*DK(6)*VALL
+VALL = G3ID(181)*G3ID(110)*G3ID(27) + G3ID(184)*G3ID(113)*G3ID(30) + G3ID(187)*G3ID(116)*G3ID(33) + G3ID(190)*G3ID(119)*G3ID(36)
+T1(63) = T1(63) + DBID(13)*DK(4)*VALL
+VALL = G3ID(181)*G3ID(135) + G3ID(184)*G3ID(138) + G3ID(187)*G3ID(141) + G3ID(190)*G3ID(144)
+T1(64) = T1(64) + DBID(13)*DK(5)*VALL
+VALL = G3ID(73)*G3ID(110)*G3ID(135) + G3ID(76)*G3ID(113)*G3ID(138) + G3ID(79)*G3ID(116)*G3ID(141) + G3ID(82)*G3ID(119)*G3ID(144)
+T1(65) = T1(65) + DBID(13)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(182)*G3ID(27) + G3ID(112)*G3ID(185)*G3ID(30) + G3ID(115)*G3ID(188)*G3ID(33) + G3ID(118)*G3ID(191)*G3ID(36)
+T1(68) = T1(68) + DBID(14)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(74)*G3ID(135) + G3ID(112)*G3ID(77)*G3ID(138) + G3ID(115)*G3ID(80)*G3ID(141) + G3ID(118)*G3ID(83)*G3ID(144)
+T1(69) = T1(69) + DBID(14)*DK(5)*VALL
+VALL = G3ID(182)*G3ID(135) + G3ID(185)*G3ID(138) + G3ID(188)*G3ID(141) + G3ID(191)*G3ID(144)
+T1(70) = T1(70) + DBID(14)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(110)*G3ID(99) + G3ID(112)*G3ID(113)*G3ID(102) + G3ID(115)*G3ID(116)*G3ID(105) + G3ID(118)*G3ID(119)*G3ID(108)
+T1(73) = T1(73) + DBID(15)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(207) + G3ID(112)*G3ID(210) + G3ID(115)*G3ID(213) + G3ID(118)*G3ID(216)
+T1(74) = T1(74) + DBID(15)*DK(5)*VALL
+VALL = G3ID(110)*G3ID(207) + G3ID(113)*G3ID(210) + G3ID(116)*G3ID(213) + G3ID(119)*G3ID(216)
+T1(75) = T1(75) + DBID(15)*DK(6)*VALL
+VALL = G3ID(145)*G3ID(146)*G3ID(27) + G3ID(148)*G3ID(149)*G3ID(30) + G3ID(151)*G3ID(152)*G3ID(33) + G3ID(154)*G3ID(155)*G3ID(36)
+T1(78) = T1(78) + DBID(16)*DK(4)*VALL
+VALL = G3ID(145)*G3ID(38)*G3ID(135) + G3ID(148)*G3ID(41)*G3ID(138) + G3ID(151)*G3ID(44)*G3ID(141) + G3ID(154)*G3ID(47)*G3ID(144)
+T1(79) = T1(79) + DBID(16)*DK(5)*VALL
+VALL = G3ID(37)*G3ID(146)*G3ID(135) + G3ID(40)*G3ID(149)*G3ID(138) + G3ID(43)*G3ID(152)*G3ID(141) + G3ID(46)*G3ID(155)*G3ID(144)
+T1(80) = T1(80) + DBID(16)*DK(6)*VALL
+VALL = G3ID(145)*G3ID(110)*G3ID(63) + G3ID(148)*G3ID(113)*G3ID(66) + G3ID(151)*G3ID(116)*G3ID(69) + G3ID(154)*G3ID(119)*G3ID(72)
+T1(83) = T1(83) + DBID(17)*DK(4)*VALL
+VALL = G3ID(145)*G3ID(171) + G3ID(148)*G3ID(174) + G3ID(151)*G3ID(177) + G3ID(154)*G3ID(180)
+T1(84) = T1(84) + DBID(17)*DK(5)*VALL
+VALL = G3ID(37)*G3ID(110)*G3ID(171) + G3ID(40)*G3ID(113)*G3ID(174) + G3ID(43)*G3ID(116)*G3ID(177) + G3ID(46)*G3ID(119)*G3ID(180)
+T1(85) = T1(85) + DBID(17)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(146)*G3ID(63) + G3ID(112)*G3ID(149)*G3ID(66) + G3ID(115)*G3ID(152)*G3ID(69) + G3ID(118)*G3ID(155)*G3ID(72)
+T1(88) = T1(88) + DBID(18)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(38)*G3ID(171) + G3ID(112)*G3ID(41)*G3ID(174) + G3ID(115)*G3ID(44)*G3ID(177) + G3ID(118)*G3ID(47)*G3ID(180)
+T1(89) = T1(89) + DBID(18)*DK(5)*VALL
+VALL = G3ID(146)*G3ID(171) + G3ID(149)*G3ID(174) + G3ID(152)*G3ID(177) + G3ID(155)*G3ID(180)
+T1(90) = T1(90) + DBID(18)*DK(6)*VALL
+VALL = G3ID(193)*G3ID(122)*G3ID(3) + G3ID(196)*G3ID(125)*G3ID(6) + G3ID(199)*G3ID(128)*G3ID(9) + G3ID(202)*G3ID(131)*G3ID(12)
+T1(93) = T1(93) + DBID(19)*DK(4)*VALL
+VALL = G3ID(193)*G3ID(14)*G3ID(111) + G3ID(196)*G3ID(17)*G3ID(114) + G3ID(199)*G3ID(20)*G3ID(117) + G3ID(202)*G3ID(23)*G3ID(120)
+T1(94) = T1(94) + DBID(19)*DK(5)*VALL
+VALL = G3ID(85)*G3ID(122)*G3ID(111) + G3ID(88)*G3ID(125)*G3ID(114) + G3ID(91)*G3ID(128)*G3ID(117) + G3ID(94)*G3ID(131)*G3ID(120)
+T1(95) = T1(95) + DBID(19)*DK(6)*VALL
+VALL = G3ID(121)*G3ID(194)*G3ID(3) + G3ID(124)*G3ID(197)*G3ID(6) + G3ID(127)*G3ID(200)*G3ID(9) + G3ID(130)*G3ID(203)*G3ID(12)
+T1(98) = T1(98) + DBID(20)*DK(4)*VALL
+VALL = G3ID(121)*G3ID(86)*G3ID(111) + G3ID(124)*G3ID(89)*G3ID(114) + G3ID(127)*G3ID(92)*G3ID(117) + G3ID(130)*G3ID(95)*G3ID(120)
+T1(99) = T1(99) + DBID(20)*DK(5)*VALL
+VALL = G3ID(13)*G3ID(194)*G3ID(111) + G3ID(16)*G3ID(197)*G3ID(114) + G3ID(19)*G3ID(200)*G3ID(117) + G3ID(22)*G3ID(203)*G3ID(120)
+T1(100) = T1(100) + DBID(20)*DK(6)*VALL
+VALL = G3ID(121)*G3ID(122)*G3ID(75) + G3ID(124)*G3ID(125)*G3ID(78) + G3ID(127)*G3ID(128)*G3ID(81) + G3ID(130)*G3ID(131)*G3ID(84)
+T1(103) = T1(103) + DBID(21)*DK(4)*VALL
+VALL = G3ID(121)*G3ID(14)*G3ID(183) + G3ID(124)*G3ID(17)*G3ID(186) + G3ID(127)*G3ID(20)*G3ID(189) + G3ID(130)*G3ID(23)*G3ID(192)
+T1(104) = T1(104) + DBID(21)*DK(5)*VALL
+VALL = G3ID(13)*G3ID(122)*G3ID(183) + G3ID(16)*G3ID(125)*G3ID(186) + G3ID(19)*G3ID(128)*G3ID(189) + G3ID(22)*G3ID(131)*G3ID(192)
+T1(105) = T1(105) + DBID(21)*DK(6)*VALL
+VALL = G3ID(157)*G3ID(158)*G3ID(3) + G3ID(160)*G3ID(161)*G3ID(6) + G3ID(163)*G3ID(164)*G3ID(9) + G3ID(166)*G3ID(167)*G3ID(12)
+T1(108) = T1(108) + DBID(22)*DK(4)*VALL
+VALL = G3ID(157)*G3ID(50)*G3ID(111) + G3ID(160)*G3ID(53)*G3ID(114) + G3ID(163)*G3ID(56)*G3ID(117) + G3ID(166)*G3ID(59)*G3ID(120)
+T1(109) = T1(109) + DBID(22)*DK(5)*VALL
+VALL = G3ID(49)*G3ID(158)*G3ID(111) + G3ID(52)*G3ID(161)*G3ID(114) + G3ID(55)*G3ID(164)*G3ID(117) + G3ID(58)*G3ID(167)*G3ID(120)
+T1(110) = T1(110) + DBID(22)*DK(6)*VALL
+VALL = G3ID(157)*G3ID(122)*G3ID(39) + G3ID(160)*G3ID(125)*G3ID(42) + G3ID(163)*G3ID(128)*G3ID(45) + G3ID(166)*G3ID(131)*G3ID(48)
+T1(113) = T1(113) + DBID(23)*DK(4)*VALL
+VALL = G3ID(157)*G3ID(14)*G3ID(147) + G3ID(160)*G3ID(17)*G3ID(150) + G3ID(163)*G3ID(20)*G3ID(153) + G3ID(166)*G3ID(23)*G3ID(156)
+T1(114) = T1(114) + DBID(23)*DK(5)*VALL
+VALL = G3ID(49)*G3ID(122)*G3ID(147) + G3ID(52)*G3ID(125)*G3ID(150) + G3ID(55)*G3ID(128)*G3ID(153) + G3ID(58)*G3ID(131)*G3ID(156)
+T1(115) = T1(115) + DBID(23)*DK(6)*VALL
+VALL = G3ID(121)*G3ID(158)*G3ID(39) + G3ID(124)*G3ID(161)*G3ID(42) + G3ID(127)*G3ID(164)*G3ID(45) + G3ID(130)*G3ID(167)*G3ID(48)
+T1(118) = T1(118) + DBID(24)*DK(4)*VALL
+VALL = G3ID(121)*G3ID(50)*G3ID(147) + G3ID(124)*G3ID(53)*G3ID(150) + G3ID(127)*G3ID(56)*G3ID(153) + G3ID(130)*G3ID(59)*G3ID(156)
+T1(119) = T1(119) + DBID(24)*DK(5)*VALL
+VALL = G3ID(13)*G3ID(158)*G3ID(147) + G3ID(16)*G3ID(161)*G3ID(150) + G3ID(19)*G3ID(164)*G3ID(153) + G3ID(22)*G3ID(167)*G3ID(156)
+T1(120) = T1(120) + DBID(24)*DK(6)*VALL
+VALL = G3ID(193)*G3ID(110)*G3ID(15) + G3ID(196)*G3ID(113)*G3ID(18) + G3ID(199)*G3ID(116)*G3ID(21) + G3ID(202)*G3ID(119)*G3ID(24)
+T1(123) = T1(123) + DBID(25)*DK(4)*VALL
+VALL = G3ID(193)*G3ID(123) + G3ID(196)*G3ID(126) + G3ID(199)*G3ID(129) + G3ID(202)*G3ID(132)
+T1(124) = T1(124) + DBID(25)*DK(5)*VALL
+VALL = G3ID(85)*G3ID(110)*G3ID(123) + G3ID(88)*G3ID(113)*G3ID(126) + G3ID(91)*G3ID(116)*G3ID(129) + G3ID(94)*G3ID(119)*G3ID(132)
+T1(125) = T1(125) + DBID(25)*DK(6)*VALL
+VALL = G3ID(121)*G3ID(182)*G3ID(15) + G3ID(124)*G3ID(185)*G3ID(18) + G3ID(127)*G3ID(188)*G3ID(21) + G3ID(130)*G3ID(191)*G3ID(24)
+T1(128) = T1(128) + DBID(26)*DK(4)*VALL
+VALL = G3ID(121)*G3ID(74)*G3ID(123) + G3ID(124)*G3ID(77)*G3ID(126) + G3ID(127)*G3ID(80)*G3ID(129) + G3ID(130)*G3ID(83)*G3ID(132)
+T1(129) = T1(129) + DBID(26)*DK(5)*VALL
+VALL = G3ID(13)*G3ID(182)*G3ID(123) + G3ID(16)*G3ID(185)*G3ID(126) + G3ID(19)*G3ID(188)*G3ID(129) + G3ID(22)*G3ID(191)*G3ID(132)
+T1(130) = T1(130) + DBID(26)*DK(6)*VALL
+VALL = G3ID(121)*G3ID(110)*G3ID(87) + G3ID(124)*G3ID(113)*G3ID(90) + G3ID(127)*G3ID(116)*G3ID(93) + G3ID(130)*G3ID(119)*G3ID(96)
+T1(133) = T1(133) + DBID(27)*DK(4)*VALL
+VALL = G3ID(121)*G3ID(195) + G3ID(124)*G3ID(198) + G3ID(127)*G3ID(201) + G3ID(130)*G3ID(204)
+T1(134) = T1(134) + DBID(27)*DK(5)*VALL
+VALL = G3ID(13)*G3ID(110)*G3ID(195) + G3ID(16)*G3ID(113)*G3ID(198) + G3ID(19)*G3ID(116)*G3ID(201) + G3ID(22)*G3ID(119)*G3ID(204)
+T1(135) = T1(135) + DBID(27)*DK(6)*VALL
+VALL = G3ID(157)*G3ID(146)*G3ID(15) + G3ID(160)*G3ID(149)*G3ID(18) + G3ID(163)*G3ID(152)*G3ID(21) + G3ID(166)*G3ID(155)*G3ID(24)
+T1(138) = T1(138) + DBID(28)*DK(4)*VALL
+VALL = G3ID(157)*G3ID(38)*G3ID(123) + G3ID(160)*G3ID(41)*G3ID(126) + G3ID(163)*G3ID(44)*G3ID(129) + G3ID(166)*G3ID(47)*G3ID(132)
+T1(139) = T1(139) + DBID(28)*DK(5)*VALL
+VALL = G3ID(49)*G3ID(146)*G3ID(123) + G3ID(52)*G3ID(149)*G3ID(126) + G3ID(55)*G3ID(152)*G3ID(129) + G3ID(58)*G3ID(155)*G3ID(132)
+T1(140) = T1(140) + DBID(28)*DK(6)*VALL
+VALL = G3ID(157)*G3ID(110)*G3ID(51) + G3ID(160)*G3ID(113)*G3ID(54) + G3ID(163)*G3ID(116)*G3ID(57) + G3ID(166)*G3ID(119)*G3ID(60)
+T1(143) = T1(143) + DBID(29)*DK(4)*VALL
+VALL = G3ID(157)*G3ID(159) + G3ID(160)*G3ID(162) + G3ID(163)*G3ID(165) + G3ID(166)*G3ID(168)
+T1(144) = T1(144) + DBID(29)*DK(5)*VALL
+VALL = G3ID(49)*G3ID(110)*G3ID(159) + G3ID(52)*G3ID(113)*G3ID(162) + G3ID(55)*G3ID(116)*G3ID(165) + G3ID(58)*G3ID(119)*G3ID(168)
+T1(145) = T1(145) + DBID(29)*DK(6)*VALL
+VALL = G3ID(121)*G3ID(146)*G3ID(51) + G3ID(124)*G3ID(149)*G3ID(54) + G3ID(127)*G3ID(152)*G3ID(57) + G3ID(130)*G3ID(155)*G3ID(60)
+T1(148) = T1(148) + DBID(30)*DK(4)*VALL
+VALL = G3ID(121)*G3ID(38)*G3ID(159) + G3ID(124)*G3ID(41)*G3ID(162) + G3ID(127)*G3ID(44)*G3ID(165) + G3ID(130)*G3ID(47)*G3ID(168)
+T1(149) = T1(149) + DBID(30)*DK(5)*VALL
+VALL = G3ID(13)*G3ID(146)*G3ID(159) + G3ID(16)*G3ID(149)*G3ID(162) + G3ID(19)*G3ID(152)*G3ID(165) + G3ID(22)*G3ID(155)*G3ID(168)
+T1(150) = T1(150) + DBID(30)*DK(6)*VALL
+VALL = G3ID(181)*G3ID(122)*G3ID(15) + G3ID(184)*G3ID(125)*G3ID(18) + G3ID(187)*G3ID(128)*G3ID(21) + G3ID(190)*G3ID(131)*G3ID(24)
+T1(153) = T1(153) + DBID(31)*DK(4)*VALL
+VALL = G3ID(181)*G3ID(14)*G3ID(123) + G3ID(184)*G3ID(17)*G3ID(126) + G3ID(187)*G3ID(20)*G3ID(129) + G3ID(190)*G3ID(23)*G3ID(132)
+T1(154) = T1(154) + DBID(31)*DK(5)*VALL
+VALL = G3ID(73)*G3ID(122)*G3ID(123) + G3ID(76)*G3ID(125)*G3ID(126) + G3ID(79)*G3ID(128)*G3ID(129) + G3ID(82)*G3ID(131)*G3ID(132)
+T1(155) = T1(155) + DBID(31)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(194)*G3ID(15) + G3ID(112)*G3ID(197)*G3ID(18) + G3ID(115)*G3ID(200)*G3ID(21) + G3ID(118)*G3ID(203)*G3ID(24)
+T1(158) = T1(158) + DBID(32)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(86)*G3ID(123) + G3ID(112)*G3ID(89)*G3ID(126) + G3ID(115)*G3ID(92)*G3ID(129) + G3ID(118)*G3ID(95)*G3ID(132)
+T1(159) = T1(159) + DBID(32)*DK(5)*VALL
+VALL = G3ID(194)*G3ID(123) + G3ID(197)*G3ID(126) + G3ID(200)*G3ID(129) + G3ID(203)*G3ID(132)
+T1(160) = T1(160) + DBID(32)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(122)*G3ID(87) + G3ID(112)*G3ID(125)*G3ID(90) + G3ID(115)*G3ID(128)*G3ID(93) + G3ID(118)*G3ID(131)*G3ID(96)
+T1(163) = T1(163) + DBID(33)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(14)*G3ID(195) + G3ID(112)*G3ID(17)*G3ID(198) + G3ID(115)*G3ID(20)*G3ID(201) + G3ID(118)*G3ID(23)*G3ID(204)
+T1(164) = T1(164) + DBID(33)*DK(5)*VALL
+VALL = G3ID(122)*G3ID(195) + G3ID(125)*G3ID(198) + G3ID(128)*G3ID(201) + G3ID(131)*G3ID(204)
+T1(165) = T1(165) + DBID(33)*DK(6)*VALL
+VALL = G3ID(145)*G3ID(158)*G3ID(15) + G3ID(148)*G3ID(161)*G3ID(18) + G3ID(151)*G3ID(164)*G3ID(21) + G3ID(154)*G3ID(167)*G3ID(24)
+T1(168) = T1(168) + DBID(34)*DK(4)*VALL
+VALL = G3ID(145)*G3ID(50)*G3ID(123) + G3ID(148)*G3ID(53)*G3ID(126) + G3ID(151)*G3ID(56)*G3ID(129) + G3ID(154)*G3ID(59)*G3ID(132)
+T1(169) = T1(169) + DBID(34)*DK(5)*VALL
+VALL = G3ID(37)*G3ID(158)*G3ID(123) + G3ID(40)*G3ID(161)*G3ID(126) + G3ID(43)*G3ID(164)*G3ID(129) + G3ID(46)*G3ID(167)*G3ID(132)
+T1(170) = T1(170) + DBID(34)*DK(6)*VALL
+VALL = G3ID(145)*G3ID(122)*G3ID(51) + G3ID(148)*G3ID(125)*G3ID(54) + G3ID(151)*G3ID(128)*G3ID(57) + G3ID(154)*G3ID(131)*G3ID(60)
+T1(173) = T1(173) + DBID(35)*DK(4)*VALL
+VALL = G3ID(145)*G3ID(14)*G3ID(159) + G3ID(148)*G3ID(17)*G3ID(162) + G3ID(151)*G3ID(20)*G3ID(165) + G3ID(154)*G3ID(23)*G3ID(168)
+T1(174) = T1(174) + DBID(35)*DK(5)*VALL
+VALL = G3ID(37)*G3ID(122)*G3ID(159) + G3ID(40)*G3ID(125)*G3ID(162) + G3ID(43)*G3ID(128)*G3ID(165) + G3ID(46)*G3ID(131)*G3ID(168)
+T1(175) = T1(175) + DBID(35)*DK(6)*VALL
+VALL = G3ID(109)*G3ID(158)*G3ID(51) + G3ID(112)*G3ID(161)*G3ID(54) + G3ID(115)*G3ID(164)*G3ID(57) + G3ID(118)*G3ID(167)*G3ID(60)
+T1(178) = T1(178) + DBID(36)*DK(4)*VALL
+VALL = G3ID(109)*G3ID(50)*G3ID(159) + G3ID(112)*G3ID(53)*G3ID(162) + G3ID(115)*G3ID(56)*G3ID(165) + G3ID(118)*G3ID(59)*G3ID(168)
+T1(179) = T1(179) + DBID(36)*DK(5)*VALL
+VALL = G3ID(158)*G3ID(159) + G3ID(161)*G3ID(162) + G3ID(164)*G3ID(165) + G3ID(167)*G3ID(168)
+T1(180) = T1(180) + DBID(36)*DK(6)*VALL
+
+                     ENDDO !KG
+                  ENDDO !JG
+               ENDDO !IG
+
+               DO II=1,36
+                  T1(II*5-4) = -half*(GGID(II*3-2)+GGID(II*3-1))+GGID(II*3)
+                  T1(II*5-3) =  a127*(GGID(II*3-2)-GGID(II*3-1))
+               ENDDO
+            
+               ! COPY INTEGRAL GG(P|MN) TO I32
+               NLJ = NKS*NJ
+               DO LNKS=1,NKS
+                  DO II=1,NI
+                     DO JJ=1,NJ
+                        IBF = LOCI+II
+                        JBF = LOCJ+JJ
+                        LIJ = LNKS+(JJ-1)*NKS+(II-1)*NLJ
+                        I32(IBF,JBF,IauxStart+LNKS-1) = T1(LIJ) 
+                        I32(JBF,IBF,IauxStart+LNKS-1) = T1(LIJ) 
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+         ENDDO 
+      ENDDO 
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X322 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAtm,DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+      
+      use shellProcessing,only: CCD
+      use shellpairs,only: dd_PAV_PRE, &
+                           dd_P_PRE,   &
+                           dd_DUM0_PRE,&
+                           dd_DUM_PRE, &
+                           dd_AB_PRE,  &
+                           dd_VAL_PRE, &
+                           LOCdd,   &
+                           N_dd_PRE
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! 
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(4),W(4)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      ! double precision :: GG(NI*NJ*NK)
+      ! double precision :: GG(MXBSH*MXBSH*MXBSH)
+      double precision :: VALL
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          CAB(3,0:MXLTOT),                  &
+                          P(3),PAV(3),CPV(3),               &
+                          A1(3,4),B1(4),C1(4),           &
+                          A2(3,4),B2(4),F00(4)
+
+      double precision :: GGID(360)
+      double precision :: DK(10),T1(256)
+      ! double precision :: G2ID(728) !3*nroots*(LI+LJ)*LK
+      double precision :: G3ID(432) !3*nroots*LI*LJ*LK
+      double precision :: DBID(36) 
+                        
+      double precision :: TMP(3),VAL(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,LOCKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NI,NGI, &
+                 LI,LOCI,I1,IG, &
+                 JSH,JAT,NJ,&
+                 NGJ,LJ,LOCJ,J1,JG
+
+      integer :: LTOT,LB,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: U2,T2
+      double precision :: VAL1,VAL2,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+      double precision :: a1114,a4714,a5214,a1314,a6314,a8314,a5414
+
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,N3I,N3B,N3IJ,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ,iijj,iijj_tmp,JI
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+a1114 = TLL(1,1,14)  
+a4714 = TLL(4,7,14)  
+a5214 = TLL(5,2,14)  
+a1314 = TLL(1,3,14)  
+a6314 = TLL(6,3,14)  
+a8314 = TLL(8,3,14)  
+a5414 = TLL(5,4,14)  
+
+
+
+
+LI = 2
+NI = 6
+LJ = 2
+NJ = 6
+
+LK = 3
+NKS = 7
+NK = 10
+NROOTS=4
+
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_D_SHL,KNG,KLOC,DD_VAL_PRE,KAUX_ELSE,KAUXNG) &
+!$omp shared(KAUXST,KAUXAT,C,LOCSPH,LOCKT_INIT,DAUX,LOCDD) &
+!$omp shared(DD_DUM_PRE,TOL,DD_P_PRE,DD_PAV_PRE,DD_DUM0_PRE) &
+!$omp shared(CCD,EXAUX,I32,N_ELSE,N_D_SHL,DD_AB_PRE) &
+!$omp shared(LI,NI,LJ,NJ,NROOTS,NKS,NK) &
+!$omp shared(a1114,a4714,a5214,a1314,a6314,a8314,a5414) &
+!$omp private(T1,ISH,JSH,MINK,MAXK,MINKT,MAXKT,AJINV2,B2) &
+!$omp private(NGI,LOCI,NGJ,LOCJ,KAUXSH,NGK,K1,KAT) &
+!$omp private(CC,IAUXSTART,DK,GGID,IJ,DBID,G3ID,VALL,IBF,JBF,LIJ) &
+!$omp private(VAL,AB,DUM,CPV,PAV,RR,DUM0,DUM2,AK,RHO,XX,U) &
+!$omp private(VAL1,A1,B1,F00,III,JJJ,IIJJ,N3,N3B,N3I,N3IJ,JI,AIJINV) &
+!$omp private(AIINV,AJINV,AIINV2,AIJINVSQ,W,AIJINV2,VAL2,A2,C1,NLJ)
+
+
+
+
+         ! DO ISH = 1,NSHELL
+         !    DO JSH = 1,ISH
+DO iijj_tmp = 0, N_D_SHL*(N_D_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+      ISH = I_D_SHL(III)
+      JSH = I_D_SHL(JJJ)
+
+               NGI   = KNG(ISH)
+               LOCI  = KLOC(ISH)-1
+
+               NGJ   = KNG(JSH)
+               LOCJ  = KLOC(JSH)-1
+
+         VAL(1:3) = dd_VAL_PRE(1:3,iijj)
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+      ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+      DO I_ELSE=1,N_ELSE
+         ! DO ISH = 1,NSHELL
+         KAUXSH = KAUX_ELSE(I_ELSE)
+         NGK   = KAUXNG(KAUXSH)
+         K1    = KAUXST(KAUXSH)
+
+
+         KAT = KAUXAT(KAUXSH)
+         CC(1) = C(1,KAT)
+         CC(2) = C(2,KAT)
+         CC(3) = C(3,KAT)
+
+
+               ! AUX POINTER FOR I32
+               IauxStart = LOCSPH(KAUXSH)
+               IauxStart = IauxStart-LOCKT_init+1
+
+               ! DENSITY FACTOR
+               DO K=1,NK
+                  DK(K) = PI252 * DAux(KAUXSH,1,K)
+               ENDDO
+
+
+               ! ZERO OUT INTEGRAL ARRAY
+               DO II=1,36*NK
+                  GGID(II)=zero
+               ENDDO
+            JI=0
+               ! PRIMITIVE IN I-SHELL
+               DO IG = 1, NGI                 
+                  ! PRIMITIVE IN J-SHELL
+                  DO JG = 1, NGJ
+                  JI = JI + 1
+                     AB = dd_AB_PRE(LOCdd(iijj)+JI)
+                     DUM = dd_DUM_PRE(LOCdd(iijj)+JI)
+                     IF (DUM > TOL) CYCLE
+                     CPV(1:3) = dd_P_PRE(1:3,LOCdd(iijj)+JI)
+                     PAV(1:3) = dd_PAV_PRE(1:3,LOCdd(iijj)+JI)
+                     CPV(1:3) = CC(1:3)-CPV(1:3)
+                     RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+                     DUM0 = dd_DUM0_PRE(LOCdd(iijj)+JI)
+
+                     IJ = 0
+                     DO I=1,NI
+                        DUM2 = DUM0*CCD(I,IG,III)
+                        DO J=1,NJ
+                           IJ = IJ+1
+                           DBID(IJ) = DUM2*CCD(J,JG,JJJ)
+                        ENDDO
+                     ENDDO !I
+
+
+                     ! PRIMITIVE IN K-SHELL
+                     DO KG = 1, NGK
+                        AK = EXAUX(K1+KG-1)
+                        RHO = AB*AK/(AB+AK)
+                        XX = RHO*RR
+
+                        ! RYS ROOTS AND WEIGHT
+                        CALL ROOT4_gpu(XX,U,W,NROOTS)
+
+                        AIJINV = one/(AB+AK)
+                        RHO = AB*AK*AIJINV
+                        AIINV  = one/AB
+                        AJINV  = one/AK
+                        AIINV2 = half*AIINV
+                        AJINV2 = half*AJINV
+                        AIJINV2 = half*AIJINV
+                        AIJINVSQ = SQRT(AIJINV)
+
+                        DO IR = 1, NROOTS
+                           U(IR) = U(IR)*RHO
+                           U(IR) = U(IR)/(RHO+U(IR))
+                           VAL1 = RHO*AIINV*U(IR)
+                           VAL2 = RHO*AJINV*U(IR)
+                           A1(1:3,IR) = PAV(1:3)+VAL1*CPV(1:3)
+                           A2(1:3,IR) = -VAL2*CPV(1:3)
+                           B1(IR) = AIINV2-AIINV2*VAL1
+                           B2(IR) = AJINV2-AJINV2*VAL2
+                           C1(IR) = AIJINV2*U(IR)
+                           F00(IR) = AIJINVSQ*W(IR)
+                           G3ID(3 + 3*(IR-1)) = F00(IR)
+                        ENDDO
+DO IR=1,4
+   G3ID(10+IR*3) = A1(1,IR)
+   G3ID(11+IR*3) = A1(2,IR)
+   G3ID(12+IR*3) = A1(3,IR)*F00(IR)
+ENDDO
+DO IR=1,4
+   G3ID(22+IR*3) = A1(1,IR)*G3ID(10+IR*3) +  B1(IR)
+   G3ID(23+IR*3) = A1(2,IR)*G3ID(11+IR*3) +  B1(IR)
+   G3ID(24+IR*3) = A1(3,IR)*G3ID(12+IR*3) +  B1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(94+IR*3) = A1(1,IR)*G3ID(22+IR*3) +  2*B1(IR)*G3ID(10+IR*3)
+   G3ID(95+IR*3) = A1(2,IR)*G3ID(23+IR*3) +  2*B1(IR)*G3ID(11+IR*3)
+   G3ID(96+IR*3) = A1(3,IR)*G3ID(24+IR*3) +  2*B1(IR)*G3ID(12+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(70+IR*3) = A1(1,IR)*G3ID(94+IR*3) +  3*B1(IR)*G3ID(22+IR*3)
+   G3ID(71+IR*3) = A1(2,IR)*G3ID(95+IR*3) +  3*B1(IR)*G3ID(23+IR*3)
+   G3ID(72+IR*3) = A1(3,IR)*G3ID(96+IR*3) +  3*B1(IR)*G3ID(24+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(106+IR*3) = A2(1,IR)
+   G3ID(107+IR*3) = A2(2,IR)
+   G3ID(108+IR*3) = A2(3,IR)*F00(IR)
+ENDDO
+DO IR=1,4
+   G3ID(118+IR*3) = A1(1,IR)*G3ID(106+IR*3) +  C1(IR)
+   G3ID(119+IR*3) = A1(2,IR)*G3ID(107+IR*3) +  C1(IR)
+   G3ID(120+IR*3) = A1(3,IR)*G3ID(108+IR*3) +  C1(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(130+IR*3) = A1(1,IR)*G3ID(118+IR*3) +  B1(IR)*G3ID(106+IR*3) +  C1(IR)*G3ID(10+IR*3)
+   G3ID(131+IR*3) = A1(2,IR)*G3ID(119+IR*3) +  B1(IR)*G3ID(107+IR*3) +  C1(IR)*G3ID(11+IR*3)
+   G3ID(132+IR*3) = A1(3,IR)*G3ID(120+IR*3) +  B1(IR)*G3ID(108+IR*3) +  C1(IR)*G3ID(12+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(202+IR*3) = A1(1,IR)*G3ID(130+IR*3) +  2*B1(IR)*G3ID(118+IR*3) +  C1(IR)*G3ID(22+IR*3)
+   G3ID(203+IR*3) = A1(2,IR)*G3ID(131+IR*3) +  2*B1(IR)*G3ID(119+IR*3) +  C1(IR)*G3ID(23+IR*3)
+   G3ID(204+IR*3) = A1(3,IR)*G3ID(132+IR*3) +  2*B1(IR)*G3ID(120+IR*3) +  C1(IR)*G3ID(24+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(178+IR*3) = A1(1,IR)*G3ID(202+IR*3) +  3*B1(IR)*G3ID(130+IR*3) +  C1(IR)*G3ID(94+IR*3)
+   G3ID(179+IR*3) = A1(2,IR)*G3ID(203+IR*3) +  3*B1(IR)*G3ID(131+IR*3) +  C1(IR)*G3ID(95+IR*3)
+   G3ID(180+IR*3) = A1(3,IR)*G3ID(204+IR*3) +  3*B1(IR)*G3ID(132+IR*3) +  C1(IR)*G3ID(96+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(214+IR*3) = A2(1,IR)*G3ID(106+IR*3) +  B2(IR)
+   G3ID(215+IR*3) = A2(2,IR)*G3ID(107+IR*3) +  B2(IR)
+   G3ID(216+IR*3) = A2(3,IR)*G3ID(108+IR*3) +  B2(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(226+IR*3) = A1(1,IR)*G3ID(214+IR*3) +  2*C1(IR)*G3ID(106+IR*3)
+   G3ID(227+IR*3) = A1(2,IR)*G3ID(215+IR*3) +  2*C1(IR)*G3ID(107+IR*3)
+   G3ID(228+IR*3) = A1(3,IR)*G3ID(216+IR*3) +  2*C1(IR)*G3ID(108+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(238+IR*3) = A1(1,IR)*G3ID(226+IR*3) +  B1(IR)*G3ID(214+IR*3) +  2*C1(IR)*G3ID(118+IR*3)
+   G3ID(239+IR*3) = A1(2,IR)*G3ID(227+IR*3) +  B1(IR)*G3ID(215+IR*3) +  2*C1(IR)*G3ID(119+IR*3)
+   G3ID(240+IR*3) = A1(3,IR)*G3ID(228+IR*3) +  B1(IR)*G3ID(216+IR*3) +  2*C1(IR)*G3ID(120+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(310+IR*3) = A1(1,IR)*G3ID(238+IR*3) +  2*B1(IR)*G3ID(226+IR*3) +  2*C1(IR)*G3ID(130+IR*3)
+   G3ID(311+IR*3) = A1(2,IR)*G3ID(239+IR*3) +  2*B1(IR)*G3ID(227+IR*3) +  2*C1(IR)*G3ID(131+IR*3)
+   G3ID(312+IR*3) = A1(3,IR)*G3ID(240+IR*3) +  2*B1(IR)*G3ID(228+IR*3) +  2*C1(IR)*G3ID(132+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(286+IR*3) = A1(1,IR)*G3ID(310+IR*3) +  3*B1(IR)*G3ID(238+IR*3) +  2*C1(IR)*G3ID(202+IR*3)
+   G3ID(287+IR*3) = A1(2,IR)*G3ID(311+IR*3) +  3*B1(IR)*G3ID(239+IR*3) +  2*C1(IR)*G3ID(203+IR*3)
+   G3ID(288+IR*3) = A1(3,IR)*G3ID(312+IR*3) +  3*B1(IR)*G3ID(240+IR*3) +  2*C1(IR)*G3ID(204+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(322+IR*3) = A2(1,IR)*G3ID(214+IR*3) +  2*B2(IR)*G3ID(106+IR*3)
+   G3ID(323+IR*3) = A2(2,IR)*G3ID(215+IR*3) +  2*B2(IR)*G3ID(107+IR*3)
+   G3ID(324+IR*3) = A2(3,IR)*G3ID(216+IR*3) +  2*B2(IR)*G3ID(108+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(334+IR*3) = A1(1,IR)*G3ID(322+IR*3) +  3*C1(IR)*G3ID(214+IR*3)
+   G3ID(335+IR*3) = A1(2,IR)*G3ID(323+IR*3) +  3*C1(IR)*G3ID(215+IR*3)
+   G3ID(336+IR*3) = A1(3,IR)*G3ID(324+IR*3) +  3*C1(IR)*G3ID(216+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(346+IR*3) = A1(1,IR)*G3ID(334+IR*3) +  B1(IR)*G3ID(322+IR*3) +  3*C1(IR)*  G3ID(226+IR*3)
+   G3ID(347+IR*3) = A1(2,IR)*G3ID(335+IR*3) +  B1(IR)*G3ID(323+IR*3) +  3*C1(IR)*  G3ID(227+IR*3)
+   G3ID(348+IR*3) = A1(3,IR)*G3ID(336+IR*3) +  B1(IR)*G3ID(324+IR*3) +  3*C1(IR)*  G3ID(228+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(418+IR*3) = A1(1,IR)*G3ID(346+IR*3) +  2*B1(IR)*G3ID(334+IR*3) +  3*C1(IR)*G3ID(238+IR*3)
+   G3ID(419+IR*3) = A1(2,IR)*G3ID(347+IR*3) +  2*B1(IR)*G3ID(335+IR*3) +  3*C1(IR)*G3ID(239+IR*3)
+   G3ID(420+IR*3) = A1(3,IR)*G3ID(348+IR*3) +  2*B1(IR)*G3ID(336+IR*3) +  3*C1(IR)*G3ID(240+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(394+IR*3) = A1(1,IR)*G3ID(418+IR*3) +  3*B1(IR)*G3ID(346+IR*3) +  3*C1(IR)*G3ID(310+IR*3)
+   G3ID(395+IR*3) = A1(2,IR)*G3ID(419+IR*3) +  3*B1(IR)*G3ID(347+IR*3) +  3*C1(IR)*G3ID(311+IR*3)
+   G3ID(396+IR*3) = A1(3,IR)*G3ID(420+IR*3) +  3*B1(IR)*G3ID(348+IR*3) +  3*C1(IR)*G3ID(312+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(34+IR*3) = VAL(1)  +  G3ID(10+IR*3)
+   G3ID(35+IR*3) = VAL(2)  +  G3ID(11+IR*3)
+   G3ID(36+IR*3) = VAL(3)*G3ID(IR*3) +  G3ID(12+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(46+IR*3) = VAL(1)*G3ID(10+IR*3) +  G3ID(22+IR*3)
+   G3ID(47+IR*3) = VAL(2)*G3ID(11+IR*3) +  G3ID(23+IR*3)
+   G3ID(48+IR*3) = VAL(3)*G3ID(12+IR*3) +  G3ID(24+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(58+IR*3) = VAL(1)*G3ID(22+IR*3) +  G3ID(94+IR*3)
+   G3ID(59+IR*3) = VAL(2)*G3ID(23+IR*3) +  G3ID(95+IR*3)
+   G3ID(60+IR*3) = VAL(3)*G3ID(24+IR*3) +  G3ID(96+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(94+IR*3) = VAL(1)*G3ID(94+IR*3) +  G3ID(70+IR*3)
+   G3ID(95+IR*3) = VAL(2)*G3ID(95+IR*3) +  G3ID(71+IR*3)
+   G3ID(96+IR*3) = VAL(3)*G3ID(96+IR*3) +  G3ID(72+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(70+IR*3) = VAL(1)*G3ID(34+IR*3) +  G3ID(46+IR*3)
+   G3ID(71+IR*3) = VAL(2)*G3ID(35+IR*3) +  G3ID(47+IR*3)
+   G3ID(72+IR*3) = VAL(3)*G3ID(36+IR*3) +  G3ID(48+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(82+IR*3) = VAL(1)*G3ID(46+IR*3) +  G3ID(58+IR*3)
+   G3ID(83+IR*3) = VAL(2)*G3ID(47+IR*3) +  G3ID(59+IR*3)
+   G3ID(84+IR*3) = VAL(3)*G3ID(48+IR*3) +  G3ID(60+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(94+IR*3) = VAL(1)*G3ID(58+IR*3) +  G3ID(94+IR*3)
+   G3ID(95+IR*3) = VAL(2)*G3ID(59+IR*3) +  G3ID(95+IR*3)
+   G3ID(96+IR*3) = VAL(3)*G3ID(60+IR*3) +  G3ID(96+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(142+IR*3) = VAL(1)*G3ID(106+IR*3) +  G3ID(118+IR*3)
+   G3ID(143+IR*3) = VAL(2)*G3ID(107+IR*3) +  G3ID(119+IR*3)
+   G3ID(144+IR*3) = VAL(3)*G3ID(108+IR*3) +  G3ID(120+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(154+IR*3) = VAL(1)*G3ID(118+IR*3) +  G3ID(130+IR*3)
+   G3ID(155+IR*3) = VAL(2)*G3ID(119+IR*3) +  G3ID(131+IR*3)
+   G3ID(156+IR*3) = VAL(3)*G3ID(120+IR*3) +  G3ID(132+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(166+IR*3) = VAL(1)*G3ID(130+IR*3) +  G3ID(202+IR*3)
+   G3ID(167+IR*3) = VAL(2)*G3ID(131+IR*3) +  G3ID(203+IR*3)
+   G3ID(168+IR*3) = VAL(3)*G3ID(132+IR*3) +  G3ID(204+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(202+IR*3) = VAL(1)*G3ID(202+IR*3) +  G3ID(178+IR*3)
+   G3ID(203+IR*3) = VAL(2)*G3ID(203+IR*3) +  G3ID(179+IR*3)
+   G3ID(204+IR*3) = VAL(3)*G3ID(204+IR*3) +  G3ID(180+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(178+IR*3) = VAL(1)*G3ID(142+IR*3) +  G3ID(154+IR*3)
+   G3ID(179+IR*3) = VAL(2)*G3ID(143+IR*3) +  G3ID(155+IR*3)
+   G3ID(180+IR*3) = VAL(3)*G3ID(144+IR*3) +  G3ID(156+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(190+IR*3) = VAL(1)*G3ID(154+IR*3) +  G3ID(166+IR*3)
+   G3ID(191+IR*3) = VAL(2)*G3ID(155+IR*3) +  G3ID(167+IR*3)
+   G3ID(192+IR*3) = VAL(3)*G3ID(156+IR*3) +  G3ID(168+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(202+IR*3) = VAL(1)*G3ID(166+IR*3) +  G3ID(202+IR*3)
+   G3ID(203+IR*3) = VAL(2)*G3ID(167+IR*3) +  G3ID(203+IR*3)
+   G3ID(204+IR*3) = VAL(3)*G3ID(168+IR*3) +  G3ID(204+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(250+IR*3) = VAL(1)*G3ID(214+IR*3) +  G3ID(226+IR*3)
+   G3ID(251+IR*3) = VAL(2)*G3ID(215+IR*3) +  G3ID(227+IR*3)
+   G3ID(252+IR*3) = VAL(3)*G3ID(216+IR*3) +  G3ID(228+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(262+IR*3) = VAL(1)*G3ID(226+IR*3) +  G3ID(238+IR*3)
+   G3ID(263+IR*3) = VAL(2)*G3ID(227+IR*3) +  G3ID(239+IR*3)
+   G3ID(264+IR*3) = VAL(3)*G3ID(228+IR*3) +  G3ID(240+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(274+IR*3) = VAL(1)*G3ID(238+IR*3) +  G3ID(310+IR*3)
+   G3ID(275+IR*3) = VAL(2)*G3ID(239+IR*3) +  G3ID(311+IR*3)
+   G3ID(276+IR*3) = VAL(3)*G3ID(240+IR*3) +  G3ID(312+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(310+IR*3) = VAL(1)*G3ID(310+IR*3) +  G3ID(286+IR*3)
+   G3ID(311+IR*3) = VAL(2)*G3ID(311+IR*3) +  G3ID(287+IR*3)
+   G3ID(312+IR*3) = VAL(3)*G3ID(312+IR*3) +  G3ID(288+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(286+IR*3) = VAL(1)*G3ID(250+IR*3) +  G3ID(262+IR*3)
+   G3ID(287+IR*3) = VAL(2)*G3ID(251+IR*3) +  G3ID(263+IR*3)
+   G3ID(288+IR*3) = VAL(3)*G3ID(252+IR*3) +  G3ID(264+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(298+IR*3) = VAL(1)*G3ID(262+IR*3) +  G3ID(274+IR*3)
+   G3ID(299+IR*3) = VAL(2)*G3ID(263+IR*3) +  G3ID(275+IR*3)
+   G3ID(300+IR*3) = VAL(3)*G3ID(264+IR*3) +  G3ID(276+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(310+IR*3) = VAL(1)*G3ID(274+IR*3) +  G3ID(310+IR*3)
+   G3ID(311+IR*3) = VAL(2)*G3ID(275+IR*3) +  G3ID(311+IR*3)
+   G3ID(312+IR*3) = VAL(3)*G3ID(276+IR*3) +  G3ID(312+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(358+IR*3) = VAL(1)*G3ID(322+IR*3) +  G3ID(334+IR*3)
+   G3ID(359+IR*3) = VAL(2)*G3ID(323+IR*3) +  G3ID(335+IR*3)
+   G3ID(360+IR*3) = VAL(3)*G3ID(324+IR*3) +  G3ID(336+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(370+IR*3) = VAL(1)*G3ID(334+IR*3) +  G3ID(346+IR*3)
+   G3ID(371+IR*3) = VAL(2)*G3ID(335+IR*3) +  G3ID(347+IR*3)
+   G3ID(372+IR*3) = VAL(3)*G3ID(336+IR*3) +  G3ID(348+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(382+IR*3) = VAL(1)*G3ID(346+IR*3) +  G3ID(418+IR*3)
+   G3ID(383+IR*3) = VAL(2)*G3ID(347+IR*3) +  G3ID(419+IR*3)
+   G3ID(384+IR*3) = VAL(3)*G3ID(348+IR*3) +  G3ID(420+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(418+IR*3) = VAL(1)*G3ID(418+IR*3) +  G3ID(394+IR*3)
+   G3ID(419+IR*3) = VAL(2)*G3ID(419+IR*3) +  G3ID(395+IR*3)
+   G3ID(420+IR*3) = VAL(3)*G3ID(420+IR*3) +  G3ID(396+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(394+IR*3) = VAL(1)*G3ID(358+IR*3) +  G3ID(370+IR*3)
+   G3ID(395+IR*3) = VAL(2)*G3ID(359+IR*3) +  G3ID(371+IR*3)
+   G3ID(396+IR*3) = VAL(3)*G3ID(360+IR*3) +  G3ID(372+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(406+IR*3) = VAL(1)*G3ID(370+IR*3) +  G3ID(382+IR*3)
+   G3ID(407+IR*3) = VAL(2)*G3ID(371+IR*3) +  G3ID(383+IR*3)
+   G3ID(408+IR*3) = VAL(3)*G3ID(372+IR*3) +  G3ID(384+IR*3)
+ENDDO
+DO IR=1,4
+   G3ID(418+IR*3) = VAL(1)*G3ID(382+IR*3) +  G3ID(418+IR*3)
+   G3ID(419+IR*3) = VAL(2)*G3ID(383+IR*3) +  G3ID(419+IR*3)
+   G3ID(420+IR*3) = VAL(3)*G3ID(384+IR*3) +  G3ID(420+IR*3)
+ENDDO
+
+
+VALL = G3ID(421)*G3ID(3) + G3ID(424)*G3ID(6) + G3ID(427)*G3ID(9) + G3ID(430)*G3ID(12)
+GGID(1) = GGID(1) + DBID(1)*DK(1)*VALL
+VALL = G3ID(97)*G3ID(326)*G3ID(3) + G3ID(100)*G3ID(329)*G3ID(6) + G3ID(103)*G3ID(332)*G3ID(9) + G3ID(106)*G3ID(335)*G3ID(12)
+GGID(2) = GGID(2) + DBID(1)*DK(2)*VALL
+VALL = G3ID(97)*G3ID(327) + G3ID(100)*G3ID(330) + G3ID(103)*G3ID(333) + G3ID(106)*G3ID(336)
+GGID(3) = GGID(3) + DBID(1)*DK(3)*VALL
+VALL = G3ID(313)*G3ID(110)*G3ID(3) + G3ID(316)*G3ID(113)*G3ID(6) + G3ID(319)*G3ID(116)*G3ID(9) + G3ID(322)*G3ID(119)*G3ID(12)
+GGID(4) = GGID(4) + DBID(1)*DK(4)*VALL
+VALL = G3ID(313)*G3ID(111) + G3ID(316)*G3ID(114) + G3ID(319)*G3ID(117) + G3ID(322)*G3ID(120)
+GGID(5) = GGID(5) + DBID(1)*DK(5)*VALL
+VALL = G3ID(205)*G3ID(218)*G3ID(3) + G3ID(208)*G3ID(221)*G3ID(6) + G3ID(211)*G3ID(224)*G3ID(9) + G3ID(214)*G3ID(227)*G3ID(12)
+GGID(6) = GGID(6) + DBID(1)*DK(6)*VALL
+VALL = G3ID(97)*G3ID(218)*G3ID(111) + G3ID(100)*G3ID(221)*G3ID(114) + G3ID(103)*G3ID(224)*G3ID(117) + G3ID(106)*G3ID(227)*G3ID(120)
+GGID(7) = GGID(7) + DBID(1)*DK(7)*VALL
+VALL = G3ID(205)*G3ID(219) + G3ID(208)*G3ID(222) + G3ID(211)*G3ID(225) + G3ID(214)*G3ID(228)
+GGID(8) = GGID(8) + DBID(1)*DK(8)*VALL
+VALL = G3ID(97)*G3ID(110)*G3ID(219) + G3ID(100)*G3ID(113)*G3ID(222) + G3ID(103)*G3ID(116)*G3ID(225) + G3ID(106)*G3ID(119)*G3ID(228)
+GGID(9) = GGID(9) + DBID(1)*DK(9)*VALL
+VALL = G3ID(205)*G3ID(110)*G3ID(111) + G3ID(208)*G3ID(113)*G3ID(114) + G3ID(211)*G3ID(116)*G3ID(117) + G3ID(214)*G3ID(119)*G3ID(120)
+GGID(10) = GGID(10) + DBID(1)*DK(10)*VALL
+VALL = G3ID(349)*G3ID(74)*G3ID(3) + G3ID(352)*G3ID(77)*G3ID(6) + G3ID(355)*G3ID(80)*G3ID(9) + G3ID(358)*G3ID(83)*G3ID(12)
+GGID(11) = GGID(11) + DBID(2)*DK(1)*VALL
+VALL = G3ID(25)*G3ID(398)*G3ID(3) + G3ID(28)*G3ID(401)*G3ID(6) + G3ID(31)*G3ID(404)*G3ID(9) + G3ID(34)*G3ID(407)*G3ID(12)
+GGID(12) = GGID(12) + DBID(2)*DK(2)*VALL
+VALL = G3ID(25)*G3ID(74)*G3ID(327) + G3ID(28)*G3ID(77)*G3ID(330) + G3ID(31)*G3ID(80)*G3ID(333) + G3ID(34)*G3ID(83)*G3ID(336)
+GGID(13) = GGID(13) + DBID(2)*DK(3)*VALL
+VALL = G3ID(241)*G3ID(182)*G3ID(3) + G3ID(244)*G3ID(185)*G3ID(6) + G3ID(247)*G3ID(188)*G3ID(9) + G3ID(250)*G3ID(191)*G3ID(12)
+GGID(14) = GGID(14) + DBID(2)*DK(4)*VALL
+VALL = G3ID(241)*G3ID(74)*G3ID(111) + G3ID(244)*G3ID(77)*G3ID(114) + G3ID(247)*G3ID(80)*G3ID(117) + G3ID(250)*G3ID(83)*G3ID(120)
+GGID(15) = GGID(15) + DBID(2)*DK(5)*VALL
+VALL = G3ID(133)*G3ID(290)*G3ID(3) + G3ID(136)*G3ID(293)*G3ID(6) + G3ID(139)*G3ID(296)*G3ID(9) + G3ID(142)*G3ID(299)*G3ID(12)
+GGID(16) = GGID(16) + DBID(2)*DK(6)*VALL
+VALL = G3ID(25)*G3ID(290)*G3ID(111) + G3ID(28)*G3ID(293)*G3ID(114) + G3ID(31)*G3ID(296)*G3ID(117) + G3ID(34)*G3ID(299)*G3ID(120)
+GGID(17) = GGID(17) + DBID(2)*DK(7)*VALL
+VALL = G3ID(133)*G3ID(74)*G3ID(219) + G3ID(136)*G3ID(77)*G3ID(222) + G3ID(139)*G3ID(80)*G3ID(225) + G3ID(142)*G3ID(83)*G3ID(228)
+GGID(18) = GGID(18) + DBID(2)*DK(8)*VALL
+VALL = G3ID(25)*G3ID(182)*G3ID(219) + G3ID(28)*G3ID(185)*G3ID(222) + G3ID(31)*G3ID(188)*G3ID(225) + G3ID(34)*G3ID(191)*G3ID(228)
+GGID(19) = GGID(19) + DBID(2)*DK(9)*VALL
+VALL = G3ID(133)*G3ID(182)*G3ID(111) + G3ID(136)*G3ID(185)*G3ID(114) + G3ID(139)*G3ID(188)*G3ID(117) + G3ID(142)*G3ID(191)*G3ID(120)
+GGID(20) = GGID(20) + DBID(2)*DK(10)*VALL
+VALL = G3ID(349)*G3ID(75) + G3ID(352)*G3ID(78) + G3ID(355)*G3ID(81) + G3ID(358)*G3ID(84)
+GGID(21) = GGID(21) + DBID(3)*DK(1)*VALL
+VALL = G3ID(25)*G3ID(326)*G3ID(75) + G3ID(28)*G3ID(329)*G3ID(78) + G3ID(31)*G3ID(332)*G3ID(81) + G3ID(34)*G3ID(335)*G3ID(84)
+GGID(22) = GGID(22) + DBID(3)*DK(2)*VALL
+VALL = G3ID(25)*G3ID(399) + G3ID(28)*G3ID(402) + G3ID(31)*G3ID(405) + G3ID(34)*G3ID(408)
+GGID(23) = GGID(23) + DBID(3)*DK(3)*VALL
+VALL = G3ID(241)*G3ID(110)*G3ID(75) + G3ID(244)*G3ID(113)*G3ID(78) + G3ID(247)*G3ID(116)*G3ID(81) + G3ID(250)*G3ID(119)*G3ID(84)
+GGID(24) = GGID(24) + DBID(3)*DK(4)*VALL
+VALL = G3ID(241)*G3ID(183) + G3ID(244)*G3ID(186) + G3ID(247)*G3ID(189) + G3ID(250)*G3ID(192)
+GGID(25) = GGID(25) + DBID(3)*DK(5)*VALL
+VALL = G3ID(133)*G3ID(218)*G3ID(75) + G3ID(136)*G3ID(221)*G3ID(78) + G3ID(139)*G3ID(224)*G3ID(81) + G3ID(142)*G3ID(227)*G3ID(84)
+GGID(26) = GGID(26) + DBID(3)*DK(6)*VALL
+VALL = G3ID(25)*G3ID(218)*G3ID(183) + G3ID(28)*G3ID(221)*G3ID(186) + G3ID(31)*G3ID(224)*G3ID(189) + G3ID(34)*G3ID(227)*G3ID(192)
+GGID(27) = GGID(27) + DBID(3)*DK(7)*VALL
+VALL = G3ID(133)*G3ID(291) + G3ID(136)*G3ID(294) + G3ID(139)*G3ID(297) + G3ID(142)*G3ID(300)
+GGID(28) = GGID(28) + DBID(3)*DK(8)*VALL
+VALL = G3ID(25)*G3ID(110)*G3ID(291) + G3ID(28)*G3ID(113)*G3ID(294) + G3ID(31)*G3ID(116)*G3ID(297) + G3ID(34)*G3ID(119)*G3ID(300)
+GGID(29) = GGID(29) + DBID(3)*DK(9)*VALL
+VALL = G3ID(133)*G3ID(110)*G3ID(183) + G3ID(136)*G3ID(113)*G3ID(186) + G3ID(139)*G3ID(116)*G3ID(189) + G3ID(142)*G3ID(119)*G3ID(192)
+GGID(30) = GGID(30) + DBID(3)*DK(10)*VALL
+VALL = G3ID(385)*G3ID(38)*G3ID(3) + G3ID(388)*G3ID(41)*G3ID(6) + G3ID(391)*G3ID(44)*G3ID(9) + G3ID(394)*G3ID(47)*G3ID(12)
+GGID(31) = GGID(31) + DBID(4)*DK(1)*VALL
+VALL = G3ID(61)*G3ID(362)*G3ID(3) + G3ID(64)*G3ID(365)*G3ID(6) + G3ID(67)*G3ID(368)*G3ID(9) + G3ID(70)*G3ID(371)*G3ID(12)
+GGID(32) = GGID(32) + DBID(4)*DK(2)*VALL
+VALL = G3ID(61)*G3ID(38)*G3ID(327) + G3ID(64)*G3ID(41)*G3ID(330) + G3ID(67)*G3ID(44)*G3ID(333) + G3ID(70)*G3ID(47)*G3ID(336)
+GGID(33) = GGID(33) + DBID(4)*DK(3)*VALL
+VALL = G3ID(277)*G3ID(146)*G3ID(3) + G3ID(280)*G3ID(149)*G3ID(6) + G3ID(283)*G3ID(152)*G3ID(9) + G3ID(286)*G3ID(155)*G3ID(12)
+GGID(34) = GGID(34) + DBID(4)*DK(4)*VALL
+VALL = G3ID(277)*G3ID(38)*G3ID(111) + G3ID(280)*G3ID(41)*G3ID(114) + G3ID(283)*G3ID(44)*G3ID(117) + G3ID(286)*G3ID(47)*G3ID(120)
+GGID(35) = GGID(35) + DBID(4)*DK(5)*VALL
+VALL = G3ID(169)*G3ID(254)*G3ID(3) + G3ID(172)*G3ID(257)*G3ID(6) + G3ID(175)*G3ID(260)*G3ID(9) + G3ID(178)*G3ID(263)*G3ID(12)
+GGID(36) = GGID(36) + DBID(4)*DK(6)*VALL
+VALL = G3ID(61)*G3ID(254)*G3ID(111) + G3ID(64)*G3ID(257)*G3ID(114) + G3ID(67)*G3ID(260)*G3ID(117) + G3ID(70)*G3ID(263)*G3ID(120)
+GGID(37) = GGID(37) + DBID(4)*DK(7)*VALL
+VALL = G3ID(169)*G3ID(38)*G3ID(219) + G3ID(172)*G3ID(41)*G3ID(222) + G3ID(175)*G3ID(44)*G3ID(225) + G3ID(178)*G3ID(47)*G3ID(228)
+GGID(38) = GGID(38) + DBID(4)*DK(8)*VALL
+VALL = G3ID(61)*G3ID(146)*G3ID(219) + G3ID(64)*G3ID(149)*G3ID(222) + G3ID(67)*G3ID(152)*G3ID(225) + G3ID(70)*G3ID(155)*G3ID(228)
+GGID(39) = GGID(39) + DBID(4)*DK(9)*VALL
+VALL = G3ID(169)*G3ID(146)*G3ID(111) + G3ID(172)*G3ID(149)*G3ID(114) + G3ID(175)*G3ID(152)*G3ID(117) + G3ID(178)*G3ID(155)*G3ID(120)
+GGID(40) = GGID(40) + DBID(4)*DK(10)*VALL
+VALL = G3ID(385)*G3ID(39) + G3ID(388)*G3ID(42) + G3ID(391)*G3ID(45) + G3ID(394)*G3ID(48)
+GGID(41) = GGID(41) + DBID(5)*DK(1)*VALL
+VALL = G3ID(61)*G3ID(326)*G3ID(39) + G3ID(64)*G3ID(329)*G3ID(42) + G3ID(67)*G3ID(332)*G3ID(45) + G3ID(70)*G3ID(335)*G3ID(48)
+GGID(42) = GGID(42) + DBID(5)*DK(2)*VALL
+VALL = G3ID(61)*G3ID(363) + G3ID(64)*G3ID(366) + G3ID(67)*G3ID(369) + G3ID(70)*G3ID(372)
+GGID(43) = GGID(43) + DBID(5)*DK(3)*VALL
+VALL = G3ID(277)*G3ID(110)*G3ID(39) + G3ID(280)*G3ID(113)*G3ID(42) + G3ID(283)*G3ID(116)*G3ID(45) + G3ID(286)*G3ID(119)*G3ID(48)
+GGID(44) = GGID(44) + DBID(5)*DK(4)*VALL
+VALL = G3ID(277)*G3ID(147) + G3ID(280)*G3ID(150) + G3ID(283)*G3ID(153) + G3ID(286)*G3ID(156)
+GGID(45) = GGID(45) + DBID(5)*DK(5)*VALL
+VALL = G3ID(169)*G3ID(218)*G3ID(39) + G3ID(172)*G3ID(221)*G3ID(42) + G3ID(175)*G3ID(224)*G3ID(45) + G3ID(178)*G3ID(227)*G3ID(48)
+GGID(46) = GGID(46) + DBID(5)*DK(6)*VALL
+VALL = G3ID(61)*G3ID(218)*G3ID(147) + G3ID(64)*G3ID(221)*G3ID(150) + G3ID(67)*G3ID(224)*G3ID(153) + G3ID(70)*G3ID(227)*G3ID(156)
+GGID(47) = GGID(47) + DBID(5)*DK(7)*VALL
+VALL = G3ID(169)*G3ID(255) + G3ID(172)*G3ID(258) + G3ID(175)*G3ID(261) + G3ID(178)*G3ID(264)
+GGID(48) = GGID(48) + DBID(5)*DK(8)*VALL
+VALL = G3ID(61)*G3ID(110)*G3ID(255) + G3ID(64)*G3ID(113)*G3ID(258) + G3ID(67)*G3ID(116)*G3ID(261) + G3ID(70)*G3ID(119)*G3ID(264)
+GGID(49) = GGID(49) + DBID(5)*DK(9)*VALL
+VALL = G3ID(169)*G3ID(110)*G3ID(147) + G3ID(172)*G3ID(113)*G3ID(150) + G3ID(175)*G3ID(116)*G3ID(153) + G3ID(178)*G3ID(119)*G3ID(156)
+GGID(50) = GGID(50) + DBID(5)*DK(10)*VALL
+VALL = G3ID(349)*G3ID(38)*G3ID(39) + G3ID(352)*G3ID(41)*G3ID(42) + G3ID(355)*G3ID(44)*G3ID(45) + G3ID(358)*G3ID(47)*G3ID(48)
+GGID(51) = GGID(51) + DBID(6)*DK(1)*VALL
+VALL = G3ID(25)*G3ID(362)*G3ID(39) + G3ID(28)*G3ID(365)*G3ID(42) + G3ID(31)*G3ID(368)*G3ID(45) + G3ID(34)*G3ID(371)*G3ID(48)
+GGID(52) = GGID(52) + DBID(6)*DK(2)*VALL
+VALL = G3ID(25)*G3ID(38)*G3ID(363) + G3ID(28)*G3ID(41)*G3ID(366) + G3ID(31)*G3ID(44)*G3ID(369) + G3ID(34)*G3ID(47)*G3ID(372)
+GGID(53) = GGID(53) + DBID(6)*DK(3)*VALL
+VALL = G3ID(241)*G3ID(146)*G3ID(39) + G3ID(244)*G3ID(149)*G3ID(42) + G3ID(247)*G3ID(152)*G3ID(45) + G3ID(250)*G3ID(155)*G3ID(48)
+GGID(54) = GGID(54) + DBID(6)*DK(4)*VALL
+VALL = G3ID(241)*G3ID(38)*G3ID(147) + G3ID(244)*G3ID(41)*G3ID(150) + G3ID(247)*G3ID(44)*G3ID(153) + G3ID(250)*G3ID(47)*G3ID(156)
+GGID(55) = GGID(55) + DBID(6)*DK(5)*VALL
+VALL = G3ID(133)*G3ID(254)*G3ID(39) + G3ID(136)*G3ID(257)*G3ID(42) + G3ID(139)*G3ID(260)*G3ID(45) + G3ID(142)*G3ID(263)*G3ID(48)
+GGID(56) = GGID(56) + DBID(6)*DK(6)*VALL
+VALL = G3ID(25)*G3ID(254)*G3ID(147) + G3ID(28)*G3ID(257)*G3ID(150) + G3ID(31)*G3ID(260)*G3ID(153) + G3ID(34)*G3ID(263)*G3ID(156)
+GGID(57) = GGID(57) + DBID(6)*DK(7)*VALL
+VALL = G3ID(133)*G3ID(38)*G3ID(255) + G3ID(136)*G3ID(41)*G3ID(258) + G3ID(139)*G3ID(44)*G3ID(261) + G3ID(142)*G3ID(47)*G3ID(264)
+GGID(58) = GGID(58) + DBID(6)*DK(8)*VALL
+VALL = G3ID(25)*G3ID(146)*G3ID(255) + G3ID(28)*G3ID(149)*G3ID(258) + G3ID(31)*G3ID(152)*G3ID(261) + G3ID(34)*G3ID(155)*G3ID(264)
+GGID(59) = GGID(59) + DBID(6)*DK(9)*VALL
+VALL = G3ID(133)*G3ID(146)*G3ID(147) + G3ID(136)*G3ID(149)*G3ID(150) + G3ID(139)*G3ID(152)*G3ID(153) + G3ID(142)*G3ID(155)*G3ID(156)
+GGID(60) = GGID(60) + DBID(6)*DK(10)*VALL
+VALL = G3ID(397)*G3ID(26)*G3ID(3) + G3ID(400)*G3ID(29)*G3ID(6) + G3ID(403)*G3ID(32)*G3ID(9) + G3ID(406)*G3ID(35)*G3ID(12)
+GGID(61) = GGID(61) + DBID(7)*DK(1)*VALL
+VALL = G3ID(73)*G3ID(350)*G3ID(3) + G3ID(76)*G3ID(353)*G3ID(6) + G3ID(79)*G3ID(356)*G3ID(9) + G3ID(82)*G3ID(359)*G3ID(12)
+GGID(62) = GGID(62) + DBID(7)*DK(2)*VALL
+VALL = G3ID(73)*G3ID(26)*G3ID(327) + G3ID(76)*G3ID(29)*G3ID(330) + G3ID(79)*G3ID(32)*G3ID(333) + G3ID(82)*G3ID(35)*G3ID(336)
+GGID(63) = GGID(63) + DBID(7)*DK(3)*VALL
+VALL = G3ID(289)*G3ID(134)*G3ID(3) + G3ID(292)*G3ID(137)*G3ID(6) + G3ID(295)*G3ID(140)*G3ID(9) + G3ID(298)*G3ID(143)*G3ID(12)
+GGID(64) = GGID(64) + DBID(7)*DK(4)*VALL
+VALL = G3ID(289)*G3ID(26)*G3ID(111) + G3ID(292)*G3ID(29)*G3ID(114) + G3ID(295)*G3ID(32)*G3ID(117) + G3ID(298)*G3ID(35)*G3ID(120)
+GGID(65) = GGID(65) + DBID(7)*DK(5)*VALL
+VALL = G3ID(181)*G3ID(242)*G3ID(3) + G3ID(184)*G3ID(245)*G3ID(6) + G3ID(187)*G3ID(248)*G3ID(9) + G3ID(190)*G3ID(251)*G3ID(12)
+GGID(66) = GGID(66) + DBID(7)*DK(6)*VALL
+VALL = G3ID(73)*G3ID(242)*G3ID(111) + G3ID(76)*G3ID(245)*G3ID(114) + G3ID(79)*G3ID(248)*G3ID(117) + G3ID(82)*G3ID(251)*G3ID(120)
+GGID(67) = GGID(67) + DBID(7)*DK(7)*VALL
+VALL = G3ID(181)*G3ID(26)*G3ID(219) + G3ID(184)*G3ID(29)*G3ID(222) + G3ID(187)*G3ID(32)*G3ID(225) + G3ID(190)*G3ID(35)*G3ID(228)
+GGID(68) = GGID(68) + DBID(7)*DK(8)*VALL
+VALL = G3ID(73)*G3ID(134)*G3ID(219) + G3ID(76)*G3ID(137)*G3ID(222) + G3ID(79)*G3ID(140)*G3ID(225) + G3ID(82)*G3ID(143)*G3ID(228)
+GGID(69) = GGID(69) + DBID(7)*DK(9)*VALL
+VALL = G3ID(181)*G3ID(134)*G3ID(111) + G3ID(184)*G3ID(137)*G3ID(114) + G3ID(187)*G3ID(140)*G3ID(117) + G3ID(190)*G3ID(143)*G3ID(120)
+GGID(70) = GGID(70) + DBID(7)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(98)*G3ID(3) + G3ID(328)*G3ID(101)*G3ID(6) + G3ID(331)*G3ID(104)*G3ID(9) + G3ID(334)*G3ID(107)*G3ID(12)
+GGID(71) = GGID(71) + DBID(8)*DK(1)*VALL
+VALL = G3ID(422)*G3ID(3) + G3ID(425)*G3ID(6) + G3ID(428)*G3ID(9) + G3ID(431)*G3ID(12)
+GGID(72) = GGID(72) + DBID(8)*DK(2)*VALL
+VALL = G3ID(98)*G3ID(327) + G3ID(101)*G3ID(330) + G3ID(104)*G3ID(333) + G3ID(107)*G3ID(336)
+GGID(73) = GGID(73) + DBID(8)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(206)*G3ID(3) + G3ID(220)*G3ID(209)*G3ID(6) + G3ID(223)*G3ID(212)*G3ID(9) + G3ID(226)*G3ID(215)*G3ID(12)
+GGID(74) = GGID(74) + DBID(8)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(98)*G3ID(111) + G3ID(220)*G3ID(101)*G3ID(114) + G3ID(223)*G3ID(104)*G3ID(117) + G3ID(226)*G3ID(107)*G3ID(120)
+GGID(75) = GGID(75) + DBID(8)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(314)*G3ID(3) + G3ID(112)*G3ID(317)*G3ID(6) + G3ID(115)*G3ID(320)*G3ID(9) + G3ID(118)*G3ID(323)*G3ID(12)
+GGID(76) = GGID(76) + DBID(8)*DK(6)*VALL
+VALL = G3ID(314)*G3ID(111) + G3ID(317)*G3ID(114) + G3ID(320)*G3ID(117) + G3ID(323)*G3ID(120)
+GGID(77) = GGID(77) + DBID(8)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(98)*G3ID(219) + G3ID(112)*G3ID(101)*G3ID(222) + G3ID(115)*G3ID(104)*G3ID(225) + G3ID(118)*G3ID(107)*G3ID(228)
+GGID(78) = GGID(78) + DBID(8)*DK(8)*VALL
+VALL = G3ID(206)*G3ID(219) + G3ID(209)*G3ID(222) + G3ID(212)*G3ID(225) + G3ID(215)*G3ID(228)
+GGID(79) = GGID(79) + DBID(8)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(206)*G3ID(111) + G3ID(112)*G3ID(209)*G3ID(114) + G3ID(115)*G3ID(212)*G3ID(117) + G3ID(118)*G3ID(215)*G3ID(120)
+GGID(80) = GGID(80) + DBID(8)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(26)*G3ID(75) + G3ID(328)*G3ID(29)*G3ID(78) + G3ID(331)*G3ID(32)*G3ID(81) + G3ID(334)*G3ID(35)*G3ID(84)
+GGID(81) = GGID(81) + DBID(9)*DK(1)*VALL
+VALL = G3ID(350)*G3ID(75) + G3ID(353)*G3ID(78) + G3ID(356)*G3ID(81) + G3ID(359)*G3ID(84)
+GGID(82) = GGID(82) + DBID(9)*DK(2)*VALL
+VALL = G3ID(26)*G3ID(399) + G3ID(29)*G3ID(402) + G3ID(32)*G3ID(405) + G3ID(35)*G3ID(408)
+GGID(83) = GGID(83) + DBID(9)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(134)*G3ID(75) + G3ID(220)*G3ID(137)*G3ID(78) + G3ID(223)*G3ID(140)*G3ID(81) + G3ID(226)*G3ID(143)*G3ID(84)
+GGID(84) = GGID(84) + DBID(9)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(26)*G3ID(183) + G3ID(220)*G3ID(29)*G3ID(186) + G3ID(223)*G3ID(32)*G3ID(189) + G3ID(226)*G3ID(35)*G3ID(192)
+GGID(85) = GGID(85) + DBID(9)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(242)*G3ID(75) + G3ID(112)*G3ID(245)*G3ID(78) + G3ID(115)*G3ID(248)*G3ID(81) + G3ID(118)*G3ID(251)*G3ID(84)
+GGID(86) = GGID(86) + DBID(9)*DK(6)*VALL
+VALL = G3ID(242)*G3ID(183) + G3ID(245)*G3ID(186) + G3ID(248)*G3ID(189) + G3ID(251)*G3ID(192)
+GGID(87) = GGID(87) + DBID(9)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(26)*G3ID(291) + G3ID(112)*G3ID(29)*G3ID(294) + G3ID(115)*G3ID(32)*G3ID(297) + G3ID(118)*G3ID(35)*G3ID(300)
+GGID(88) = GGID(88) + DBID(9)*DK(8)*VALL
+VALL = G3ID(134)*G3ID(291) + G3ID(137)*G3ID(294) + G3ID(140)*G3ID(297) + G3ID(143)*G3ID(300)
+GGID(89) = GGID(89) + DBID(9)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(134)*G3ID(183) + G3ID(112)*G3ID(137)*G3ID(186) + G3ID(115)*G3ID(140)*G3ID(189) + G3ID(118)*G3ID(143)*G3ID(192)
+GGID(90) = GGID(90) + DBID(9)*DK(10)*VALL
+VALL = G3ID(361)*G3ID(62)*G3ID(3) + G3ID(364)*G3ID(65)*G3ID(6) + G3ID(367)*G3ID(68)*G3ID(9) + G3ID(370)*G3ID(71)*G3ID(12)
+GGID(91) = GGID(91) + DBID(10)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(386)*G3ID(3) + G3ID(40)*G3ID(389)*G3ID(6) + G3ID(43)*G3ID(392)*G3ID(9) + G3ID(46)*G3ID(395)*G3ID(12)
+GGID(92) = GGID(92) + DBID(10)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(62)*G3ID(327) + G3ID(40)*G3ID(65)*G3ID(330) + G3ID(43)*G3ID(68)*G3ID(333) + G3ID(46)*G3ID(71)*G3ID(336)
+GGID(93) = GGID(93) + DBID(10)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(170)*G3ID(3) + G3ID(256)*G3ID(173)*G3ID(6) + G3ID(259)*G3ID(176)*G3ID(9) + G3ID(262)*G3ID(179)*G3ID(12)
+GGID(94) = GGID(94) + DBID(10)*DK(4)*VALL
+VALL = G3ID(253)*G3ID(62)*G3ID(111) + G3ID(256)*G3ID(65)*G3ID(114) + G3ID(259)*G3ID(68)*G3ID(117) + G3ID(262)*G3ID(71)*G3ID(120)
+GGID(95) = GGID(95) + DBID(10)*DK(5)*VALL
+VALL = G3ID(145)*G3ID(278)*G3ID(3) + G3ID(148)*G3ID(281)*G3ID(6) + G3ID(151)*G3ID(284)*G3ID(9) + G3ID(154)*G3ID(287)*G3ID(12)
+GGID(96) = GGID(96) + DBID(10)*DK(6)*VALL
+VALL = G3ID(37)*G3ID(278)*G3ID(111) + G3ID(40)*G3ID(281)*G3ID(114) + G3ID(43)*G3ID(284)*G3ID(117) + G3ID(46)*G3ID(287)*G3ID(120)
+GGID(97) = GGID(97) + DBID(10)*DK(7)*VALL
+VALL = G3ID(145)*G3ID(62)*G3ID(219) + G3ID(148)*G3ID(65)*G3ID(222) + G3ID(151)*G3ID(68)*G3ID(225) + G3ID(154)*G3ID(71)*G3ID(228)
+GGID(98) = GGID(98) + DBID(10)*DK(8)*VALL
+VALL = G3ID(37)*G3ID(170)*G3ID(219) + G3ID(40)*G3ID(173)*G3ID(222) + G3ID(43)*G3ID(176)*G3ID(225) + G3ID(46)*G3ID(179)*G3ID(228)
+GGID(99) = GGID(99) + DBID(10)*DK(9)*VALL
+VALL = G3ID(145)*G3ID(170)*G3ID(111) + G3ID(148)*G3ID(173)*G3ID(114) + G3ID(151)*G3ID(176)*G3ID(117) + G3ID(154)*G3ID(179)*G3ID(120)
+GGID(100) = GGID(100) + DBID(10)*DK(10)*VALL
+VALL = G3ID(361)*G3ID(26)*G3ID(39) + G3ID(364)*G3ID(29)*G3ID(42) + G3ID(367)*G3ID(32)*G3ID(45) + G3ID(370)*G3ID(35)*G3ID(48)
+GGID(101) = GGID(101) + DBID(11)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(350)*G3ID(39) + G3ID(40)*G3ID(353)*G3ID(42) + G3ID(43)*G3ID(356)*G3ID(45) + G3ID(46)*G3ID(359)*G3ID(48)
+GGID(102) = GGID(102) + DBID(11)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(26)*G3ID(363) + G3ID(40)*G3ID(29)*G3ID(366) + G3ID(43)*G3ID(32)*G3ID(369) + G3ID(46)*G3ID(35)*G3ID(372)
+GGID(103) = GGID(103) + DBID(11)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(134)*G3ID(39) + G3ID(256)*G3ID(137)*G3ID(42) + G3ID(259)*G3ID(140)*G3ID(45) + G3ID(262)*G3ID(143)*G3ID(48)
+GGID(104) = GGID(104) + DBID(11)*DK(4)*VALL
+VALL = G3ID(253)*G3ID(26)*G3ID(147) + G3ID(256)*G3ID(29)*G3ID(150) + G3ID(259)*G3ID(32)*G3ID(153) + G3ID(262)*G3ID(35)*G3ID(156)
+GGID(105) = GGID(105) + DBID(11)*DK(5)*VALL
+VALL = G3ID(145)*G3ID(242)*G3ID(39) + G3ID(148)*G3ID(245)*G3ID(42) + G3ID(151)*G3ID(248)*G3ID(45) + G3ID(154)*G3ID(251)*G3ID(48)
+GGID(106) = GGID(106) + DBID(11)*DK(6)*VALL
+VALL = G3ID(37)*G3ID(242)*G3ID(147) + G3ID(40)*G3ID(245)*G3ID(150) + G3ID(43)*G3ID(248)*G3ID(153) + G3ID(46)*G3ID(251)*G3ID(156)
+GGID(107) = GGID(107) + DBID(11)*DK(7)*VALL
+VALL = G3ID(145)*G3ID(26)*G3ID(255) + G3ID(148)*G3ID(29)*G3ID(258) + G3ID(151)*G3ID(32)*G3ID(261) + G3ID(154)*G3ID(35)*G3ID(264)
+GGID(108) = GGID(108) + DBID(11)*DK(8)*VALL
+VALL = G3ID(37)*G3ID(134)*G3ID(255) + G3ID(40)*G3ID(137)*G3ID(258) + G3ID(43)*G3ID(140)*G3ID(261) + G3ID(46)*G3ID(143)*G3ID(264)
+GGID(109) = GGID(109) + DBID(11)*DK(9)*VALL
+VALL = G3ID(145)*G3ID(134)*G3ID(147) + G3ID(148)*G3ID(137)*G3ID(150) + G3ID(151)*G3ID(140)*G3ID(153) + G3ID(154)*G3ID(143)*G3ID(156)
+GGID(110) = GGID(110) + DBID(11)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(62)*G3ID(39) + G3ID(328)*G3ID(65)*G3ID(42) + G3ID(331)*G3ID(68)*G3ID(45) + G3ID(334)*G3ID(71)*G3ID(48)
+GGID(111) = GGID(111) + DBID(12)*DK(1)*VALL
+VALL = G3ID(386)*G3ID(39) + G3ID(389)*G3ID(42) + G3ID(392)*G3ID(45) + G3ID(395)*G3ID(48)
+GGID(112) = GGID(112) + DBID(12)*DK(2)*VALL
+VALL = G3ID(62)*G3ID(363) + G3ID(65)*G3ID(366) + G3ID(68)*G3ID(369) + G3ID(71)*G3ID(372)
+GGID(113) = GGID(113) + DBID(12)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(170)*G3ID(39) + G3ID(220)*G3ID(173)*G3ID(42) + G3ID(223)*G3ID(176)*G3ID(45) + G3ID(226)*G3ID(179)*G3ID(48)
+GGID(114) = GGID(114) + DBID(12)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(62)*G3ID(147) + G3ID(220)*G3ID(65)*G3ID(150) + G3ID(223)*G3ID(68)*G3ID(153) + G3ID(226)*G3ID(71)*G3ID(156)
+GGID(115) = GGID(115) + DBID(12)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(278)*G3ID(39) + G3ID(112)*G3ID(281)*G3ID(42) + G3ID(115)*G3ID(284)*G3ID(45) + G3ID(118)*G3ID(287)*G3ID(48)
+GGID(116) = GGID(116) + DBID(12)*DK(6)*VALL
+VALL = G3ID(278)*G3ID(147) + G3ID(281)*G3ID(150) + G3ID(284)*G3ID(153) + G3ID(287)*G3ID(156)
+GGID(117) = GGID(117) + DBID(12)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(62)*G3ID(255) + G3ID(112)*G3ID(65)*G3ID(258) + G3ID(115)*G3ID(68)*G3ID(261) + G3ID(118)*G3ID(71)*G3ID(264)
+GGID(118) = GGID(118) + DBID(12)*DK(8)*VALL
+VALL = G3ID(170)*G3ID(255) + G3ID(173)*G3ID(258) + G3ID(176)*G3ID(261) + G3ID(179)*G3ID(264)
+GGID(119) = GGID(119) + DBID(12)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(170)*G3ID(147) + G3ID(112)*G3ID(173)*G3ID(150) + G3ID(115)*G3ID(176)*G3ID(153) + G3ID(118)*G3ID(179)*G3ID(156)
+GGID(120) = GGID(120) + DBID(12)*DK(10)*VALL
+VALL = G3ID(397)*G3ID(27) + G3ID(400)*G3ID(30) + G3ID(403)*G3ID(33) + G3ID(406)*G3ID(36)
+GGID(121) = GGID(121) + DBID(13)*DK(1)*VALL
+VALL = G3ID(73)*G3ID(326)*G3ID(27) + G3ID(76)*G3ID(329)*G3ID(30) + G3ID(79)*G3ID(332)*G3ID(33) + G3ID(82)*G3ID(335)*G3ID(36)
+GGID(122) = GGID(122) + DBID(13)*DK(2)*VALL
+VALL = G3ID(73)*G3ID(351) + G3ID(76)*G3ID(354) + G3ID(79)*G3ID(357) + G3ID(82)*G3ID(360)
+GGID(123) = GGID(123) + DBID(13)*DK(3)*VALL
+VALL = G3ID(289)*G3ID(110)*G3ID(27) + G3ID(292)*G3ID(113)*G3ID(30) + G3ID(295)*G3ID(116)*G3ID(33) + G3ID(298)*G3ID(119)*G3ID(36)
+GGID(124) = GGID(124) + DBID(13)*DK(4)*VALL
+VALL = G3ID(289)*G3ID(135) + G3ID(292)*G3ID(138) + G3ID(295)*G3ID(141) + G3ID(298)*G3ID(144)
+GGID(125) = GGID(125) + DBID(13)*DK(5)*VALL
+VALL = G3ID(181)*G3ID(218)*G3ID(27) + G3ID(184)*G3ID(221)*G3ID(30) + G3ID(187)*G3ID(224)*G3ID(33) + G3ID(190)*G3ID(227)*G3ID(36)
+GGID(126) = GGID(126) + DBID(13)*DK(6)*VALL
+VALL = G3ID(73)*G3ID(218)*G3ID(135) + G3ID(76)*G3ID(221)*G3ID(138) + G3ID(79)*G3ID(224)*G3ID(141) + G3ID(82)*G3ID(227)*G3ID(144)
+GGID(127) = GGID(127) + DBID(13)*DK(7)*VALL
+VALL = G3ID(181)*G3ID(243) + G3ID(184)*G3ID(246) + G3ID(187)*G3ID(249) + G3ID(190)*G3ID(252)
+GGID(128) = GGID(128) + DBID(13)*DK(8)*VALL
+VALL = G3ID(73)*G3ID(110)*G3ID(243) + G3ID(76)*G3ID(113)*G3ID(246) + G3ID(79)*G3ID(116)*G3ID(249) + G3ID(82)*G3ID(119)*G3ID(252)
+GGID(129) = GGID(129) + DBID(13)*DK(9)*VALL
+VALL = G3ID(181)*G3ID(110)*G3ID(135) + G3ID(184)*G3ID(113)*G3ID(138) + G3ID(187)*G3ID(116)*G3ID(141) + G3ID(190)*G3ID(119)*G3ID(144)
+GGID(130) = GGID(130) + DBID(13)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(74)*G3ID(27) + G3ID(328)*G3ID(77)*G3ID(30) + G3ID(331)*G3ID(80)*G3ID(33) + G3ID(334)*G3ID(83)*G3ID(36)
+GGID(131) = GGID(131) + DBID(14)*DK(1)*VALL
+VALL = G3ID(398)*G3ID(27) + G3ID(401)*G3ID(30) + G3ID(404)*G3ID(33) + G3ID(407)*G3ID(36)
+GGID(132) = GGID(132) + DBID(14)*DK(2)*VALL
+VALL = G3ID(74)*G3ID(351) + G3ID(77)*G3ID(354) + G3ID(80)*G3ID(357) + G3ID(83)*G3ID(360)
+GGID(133) = GGID(133) + DBID(14)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(182)*G3ID(27) + G3ID(220)*G3ID(185)*G3ID(30) + G3ID(223)*G3ID(188)*G3ID(33) + G3ID(226)*G3ID(191)*G3ID(36)
+GGID(134) = GGID(134) + DBID(14)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(74)*G3ID(135) + G3ID(220)*G3ID(77)*G3ID(138) + G3ID(223)*G3ID(80)*G3ID(141) + G3ID(226)*G3ID(83)*G3ID(144)
+GGID(135) = GGID(135) + DBID(14)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(290)*G3ID(27) + G3ID(112)*G3ID(293)*G3ID(30) + G3ID(115)*G3ID(296)*G3ID(33) + G3ID(118)*G3ID(299)*G3ID(36)
+GGID(136) = GGID(136) + DBID(14)*DK(6)*VALL
+VALL = G3ID(290)*G3ID(135) + G3ID(293)*G3ID(138) + G3ID(296)*G3ID(141) + G3ID(299)*G3ID(144)
+GGID(137) = GGID(137) + DBID(14)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(74)*G3ID(243) + G3ID(112)*G3ID(77)*G3ID(246) + G3ID(115)*G3ID(80)*G3ID(249) + G3ID(118)*G3ID(83)*G3ID(252)
+GGID(138) = GGID(138) + DBID(14)*DK(8)*VALL
+VALL = G3ID(182)*G3ID(243) + G3ID(185)*G3ID(246) + G3ID(188)*G3ID(249) + G3ID(191)*G3ID(252)
+GGID(139) = GGID(139) + DBID(14)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(182)*G3ID(135) + G3ID(112)*G3ID(185)*G3ID(138) + G3ID(115)*G3ID(188)*G3ID(141) + G3ID(118)*G3ID(191)*G3ID(144)
+GGID(140) = GGID(140) + DBID(14)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(99) + G3ID(328)*G3ID(102) + G3ID(331)*G3ID(105) + G3ID(334)*G3ID(108)
+GGID(141) = GGID(141) + DBID(15)*DK(1)*VALL
+VALL = G3ID(326)*G3ID(99) + G3ID(329)*G3ID(102) + G3ID(332)*G3ID(105) + G3ID(335)*G3ID(108)
+GGID(142) = GGID(142) + DBID(15)*DK(2)*VALL
+VALL = G3ID(423) + G3ID(426) + G3ID(429) + G3ID(432)
+GGID(143) = GGID(143) + DBID(15)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(110)*G3ID(99) + G3ID(220)*G3ID(113)*G3ID(102) + G3ID(223)*G3ID(116)*G3ID(105) + G3ID(226)*G3ID(119)*G3ID(108)
+GGID(144) = GGID(144) + DBID(15)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(207) + G3ID(220)*G3ID(210) + G3ID(223)*G3ID(213) + G3ID(226)*G3ID(216)
+GGID(145) = GGID(145) + DBID(15)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(218)*G3ID(99) + G3ID(112)*G3ID(221)*G3ID(102) + G3ID(115)*G3ID(224)*G3ID(105) + G3ID(118)*G3ID(227)*G3ID(108)
+GGID(146) = GGID(146) + DBID(15)*DK(6)*VALL
+VALL = G3ID(218)*G3ID(207) + G3ID(221)*G3ID(210) + G3ID(224)*G3ID(213) + G3ID(227)*G3ID(216)
+GGID(147) = GGID(147) + DBID(15)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(315) + G3ID(112)*G3ID(318) + G3ID(115)*G3ID(321) + G3ID(118)*G3ID(324)
+GGID(148) = GGID(148) + DBID(15)*DK(8)*VALL
+VALL = G3ID(110)*G3ID(315) + G3ID(113)*G3ID(318) + G3ID(116)*G3ID(321) + G3ID(119)*G3ID(324)
+GGID(149) = GGID(149) + DBID(15)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(110)*G3ID(207) + G3ID(112)*G3ID(113)*G3ID(210) + G3ID(115)*G3ID(116)*G3ID(213) + G3ID(118)*G3ID(119)*G3ID(216)
+GGID(150) = GGID(150) + DBID(15)*DK(10)*VALL
+VALL = G3ID(361)*G3ID(38)*G3ID(27) + G3ID(364)*G3ID(41)*G3ID(30) + G3ID(367)*G3ID(44)*G3ID(33) + G3ID(370)*G3ID(47)*G3ID(36)
+GGID(151) = GGID(151) + DBID(16)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(362)*G3ID(27) + G3ID(40)*G3ID(365)*G3ID(30) + G3ID(43)*G3ID(368)*G3ID(33) + G3ID(46)*G3ID(371)*G3ID(36)
+GGID(152) = GGID(152) + DBID(16)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(38)*G3ID(351) + G3ID(40)*G3ID(41)*G3ID(354) + G3ID(43)*G3ID(44)*G3ID(357) + G3ID(46)*G3ID(47)*G3ID(360)
+GGID(153) = GGID(153) + DBID(16)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(146)*G3ID(27) + G3ID(256)*G3ID(149)*G3ID(30) + G3ID(259)*G3ID(152)*G3ID(33) + G3ID(262)*G3ID(155)*G3ID(36)
+GGID(154) = GGID(154) + DBID(16)*DK(4)*VALL
+VALL = G3ID(253)*G3ID(38)*G3ID(135) + G3ID(256)*G3ID(41)*G3ID(138) + G3ID(259)*G3ID(44)*G3ID(141) + G3ID(262)*G3ID(47)*G3ID(144)
+GGID(155) = GGID(155) + DBID(16)*DK(5)*VALL
+VALL = G3ID(145)*G3ID(254)*G3ID(27) + G3ID(148)*G3ID(257)*G3ID(30) + G3ID(151)*G3ID(260)*G3ID(33) + G3ID(154)*G3ID(263)*G3ID(36)
+GGID(156) = GGID(156) + DBID(16)*DK(6)*VALL
+VALL = G3ID(37)*G3ID(254)*G3ID(135) + G3ID(40)*G3ID(257)*G3ID(138) + G3ID(43)*G3ID(260)*G3ID(141) + G3ID(46)*G3ID(263)*G3ID(144)
+GGID(157) = GGID(157) + DBID(16)*DK(7)*VALL
+VALL = G3ID(145)*G3ID(38)*G3ID(243) + G3ID(148)*G3ID(41)*G3ID(246) + G3ID(151)*G3ID(44)*G3ID(249) + G3ID(154)*G3ID(47)*G3ID(252)
+GGID(158) = GGID(158) + DBID(16)*DK(8)*VALL
+VALL = G3ID(37)*G3ID(146)*G3ID(243) + G3ID(40)*G3ID(149)*G3ID(246) + G3ID(43)*G3ID(152)*G3ID(249) + G3ID(46)*G3ID(155)*G3ID(252)
+GGID(159) = GGID(159) + DBID(16)*DK(9)*VALL
+VALL = G3ID(145)*G3ID(146)*G3ID(135) + G3ID(148)*G3ID(149)*G3ID(138) + G3ID(151)*G3ID(152)*G3ID(141) + G3ID(154)*G3ID(155)*G3ID(144)
+GGID(160) = GGID(160) + DBID(16)*DK(10)*VALL
+VALL = G3ID(361)*G3ID(63) + G3ID(364)*G3ID(66) + G3ID(367)*G3ID(69) + G3ID(370)*G3ID(72)
+GGID(161) = GGID(161) + DBID(17)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(326)*G3ID(63) + G3ID(40)*G3ID(329)*G3ID(66) + G3ID(43)*G3ID(332)*G3ID(69) + G3ID(46)*G3ID(335)*G3ID(72)
+GGID(162) = GGID(162) + DBID(17)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(387) + G3ID(40)*G3ID(390) + G3ID(43)*G3ID(393) + G3ID(46)*G3ID(396)
+GGID(163) = GGID(163) + DBID(17)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(110)*G3ID(63) + G3ID(256)*G3ID(113)*G3ID(66) + G3ID(259)*G3ID(116)*G3ID(69) + G3ID(262)*G3ID(119)*G3ID(72)
+GGID(164) = GGID(164) + DBID(17)*DK(4)*VALL
+VALL = G3ID(253)*G3ID(171) + G3ID(256)*G3ID(174) + G3ID(259)*G3ID(177) + G3ID(262)*G3ID(180)
+GGID(165) = GGID(165) + DBID(17)*DK(5)*VALL
+VALL = G3ID(145)*G3ID(218)*G3ID(63) + G3ID(148)*G3ID(221)*G3ID(66) + G3ID(151)*G3ID(224)*G3ID(69) + G3ID(154)*G3ID(227)*G3ID(72)
+GGID(166) = GGID(166) + DBID(17)*DK(6)*VALL
+VALL = G3ID(37)*G3ID(218)*G3ID(171) + G3ID(40)*G3ID(221)*G3ID(174) + G3ID(43)*G3ID(224)*G3ID(177) + G3ID(46)*G3ID(227)*G3ID(180)
+GGID(167) = GGID(167) + DBID(17)*DK(7)*VALL
+VALL = G3ID(145)*G3ID(279) + G3ID(148)*G3ID(282) + G3ID(151)*G3ID(285) + G3ID(154)*G3ID(288)
+GGID(168) = GGID(168) + DBID(17)*DK(8)*VALL
+VALL = G3ID(37)*G3ID(110)*G3ID(279) + G3ID(40)*G3ID(113)*G3ID(282) + G3ID(43)*G3ID(116)*G3ID(285) + G3ID(46)*G3ID(119)*G3ID(288)
+GGID(169) = GGID(169) + DBID(17)*DK(9)*VALL
+VALL = G3ID(145)*G3ID(110)*G3ID(171) + G3ID(148)*G3ID(113)*G3ID(174) + G3ID(151)*G3ID(116)*G3ID(177) + G3ID(154)*G3ID(119)*G3ID(180)
+GGID(170) = GGID(170) + DBID(17)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(38)*G3ID(63) + G3ID(328)*G3ID(41)*G3ID(66) + G3ID(331)*G3ID(44)*G3ID(69) + G3ID(334)*G3ID(47)*G3ID(72)
+GGID(171) = GGID(171) + DBID(18)*DK(1)*VALL
+VALL = G3ID(362)*G3ID(63) + G3ID(365)*G3ID(66) + G3ID(368)*G3ID(69) + G3ID(371)*G3ID(72)
+GGID(172) = GGID(172) + DBID(18)*DK(2)*VALL
+VALL = G3ID(38)*G3ID(387) + G3ID(41)*G3ID(390) + G3ID(44)*G3ID(393) + G3ID(47)*G3ID(396)
+GGID(173) = GGID(173) + DBID(18)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(146)*G3ID(63) + G3ID(220)*G3ID(149)*G3ID(66) + G3ID(223)*G3ID(152)*G3ID(69) + G3ID(226)*G3ID(155)*G3ID(72)
+GGID(174) = GGID(174) + DBID(18)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(38)*G3ID(171) + G3ID(220)*G3ID(41)*G3ID(174) + G3ID(223)*G3ID(44)*G3ID(177) + G3ID(226)*G3ID(47)*G3ID(180)
+GGID(175) = GGID(175) + DBID(18)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(254)*G3ID(63) + G3ID(112)*G3ID(257)*G3ID(66) + G3ID(115)*G3ID(260)*G3ID(69) + G3ID(118)*G3ID(263)*G3ID(72)
+GGID(176) = GGID(176) + DBID(18)*DK(6)*VALL
+VALL = G3ID(254)*G3ID(171) + G3ID(257)*G3ID(174) + G3ID(260)*G3ID(177) + G3ID(263)*G3ID(180)
+GGID(177) = GGID(177) + DBID(18)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(38)*G3ID(279) + G3ID(112)*G3ID(41)*G3ID(282) + G3ID(115)*G3ID(44)*G3ID(285) + G3ID(118)*G3ID(47)*G3ID(288)
+GGID(178) = GGID(178) + DBID(18)*DK(8)*VALL
+VALL = G3ID(146)*G3ID(279) + G3ID(149)*G3ID(282) + G3ID(152)*G3ID(285) + G3ID(155)*G3ID(288)
+GGID(179) = GGID(179) + DBID(18)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(146)*G3ID(171) + G3ID(112)*G3ID(149)*G3ID(174) + G3ID(115)*G3ID(152)*G3ID(177) + G3ID(118)*G3ID(155)*G3ID(180)
+GGID(180) = GGID(180) + DBID(18)*DK(10)*VALL
+VALL = G3ID(409)*G3ID(14)*G3ID(3) + G3ID(412)*G3ID(17)*G3ID(6) + G3ID(415)*G3ID(20)*G3ID(9) + G3ID(418)*G3ID(23)*G3ID(12)
+GGID(181) = GGID(181) + DBID(19)*DK(1)*VALL
+VALL = G3ID(85)*G3ID(338)*G3ID(3) + G3ID(88)*G3ID(341)*G3ID(6) + G3ID(91)*G3ID(344)*G3ID(9) + G3ID(94)*G3ID(347)*G3ID(12)
+GGID(182) = GGID(182) + DBID(19)*DK(2)*VALL
+VALL = G3ID(85)*G3ID(14)*G3ID(327) + G3ID(88)*G3ID(17)*G3ID(330) + G3ID(91)*G3ID(20)*G3ID(333) + G3ID(94)*G3ID(23)*G3ID(336)
+GGID(183) = GGID(183) + DBID(19)*DK(3)*VALL
+VALL = G3ID(301)*G3ID(122)*G3ID(3) + G3ID(304)*G3ID(125)*G3ID(6) + G3ID(307)*G3ID(128)*G3ID(9) + G3ID(310)*G3ID(131)*G3ID(12)
+GGID(184) = GGID(184) + DBID(19)*DK(4)*VALL
+VALL = G3ID(301)*G3ID(14)*G3ID(111) + G3ID(304)*G3ID(17)*G3ID(114) + G3ID(307)*G3ID(20)*G3ID(117) + G3ID(310)*G3ID(23)*G3ID(120)
+GGID(185) = GGID(185) + DBID(19)*DK(5)*VALL
+VALL = G3ID(193)*G3ID(230)*G3ID(3) + G3ID(196)*G3ID(233)*G3ID(6) + G3ID(199)*G3ID(236)*G3ID(9) + G3ID(202)*G3ID(239)*G3ID(12)
+GGID(186) = GGID(186) + DBID(19)*DK(6)*VALL
+VALL = G3ID(85)*G3ID(230)*G3ID(111) + G3ID(88)*G3ID(233)*G3ID(114) + G3ID(91)*G3ID(236)*G3ID(117) + G3ID(94)*G3ID(239)*G3ID(120)
+GGID(187) = GGID(187) + DBID(19)*DK(7)*VALL
+VALL = G3ID(193)*G3ID(14)*G3ID(219) + G3ID(196)*G3ID(17)*G3ID(222) + G3ID(199)*G3ID(20)*G3ID(225) + G3ID(202)*G3ID(23)*G3ID(228)
+GGID(188) = GGID(188) + DBID(19)*DK(8)*VALL
+VALL = G3ID(85)*G3ID(122)*G3ID(219) + G3ID(88)*G3ID(125)*G3ID(222) + G3ID(91)*G3ID(128)*G3ID(225) + G3ID(94)*G3ID(131)*G3ID(228)
+GGID(189) = GGID(189) + DBID(19)*DK(9)*VALL
+VALL = G3ID(193)*G3ID(122)*G3ID(111) + G3ID(196)*G3ID(125)*G3ID(114) + G3ID(199)*G3ID(128)*G3ID(117) + G3ID(202)*G3ID(131)*G3ID(120)
+GGID(190) = GGID(190) + DBID(19)*DK(10)*VALL
+VALL = G3ID(337)*G3ID(86)*G3ID(3) + G3ID(340)*G3ID(89)*G3ID(6) + G3ID(343)*G3ID(92)*G3ID(9) + G3ID(346)*G3ID(95)*G3ID(12)
+GGID(191) = GGID(191) + DBID(20)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(410)*G3ID(3) + G3ID(16)*G3ID(413)*G3ID(6) + G3ID(19)*G3ID(416)*G3ID(9) + G3ID(22)*G3ID(419)*G3ID(12)
+GGID(192) = GGID(192) + DBID(20)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(86)*G3ID(327) + G3ID(16)*G3ID(89)*G3ID(330) + G3ID(19)*G3ID(92)*G3ID(333) + G3ID(22)*G3ID(95)*G3ID(336)
+GGID(193) = GGID(193) + DBID(20)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(194)*G3ID(3) + G3ID(232)*G3ID(197)*G3ID(6) + G3ID(235)*G3ID(200)*G3ID(9) + G3ID(238)*G3ID(203)*G3ID(12)
+GGID(194) = GGID(194) + DBID(20)*DK(4)*VALL
+VALL = G3ID(229)*G3ID(86)*G3ID(111) + G3ID(232)*G3ID(89)*G3ID(114) + G3ID(235)*G3ID(92)*G3ID(117) + G3ID(238)*G3ID(95)*G3ID(120)
+GGID(195) = GGID(195) + DBID(20)*DK(5)*VALL
+VALL = G3ID(121)*G3ID(302)*G3ID(3) + G3ID(124)*G3ID(305)*G3ID(6) + G3ID(127)*G3ID(308)*G3ID(9) + G3ID(130)*G3ID(311)*G3ID(12)
+GGID(196) = GGID(196) + DBID(20)*DK(6)*VALL
+VALL = G3ID(13)*G3ID(302)*G3ID(111) + G3ID(16)*G3ID(305)*G3ID(114) + G3ID(19)*G3ID(308)*G3ID(117) + G3ID(22)*G3ID(311)*G3ID(120)
+GGID(197) = GGID(197) + DBID(20)*DK(7)*VALL
+VALL = G3ID(121)*G3ID(86)*G3ID(219) + G3ID(124)*G3ID(89)*G3ID(222) + G3ID(127)*G3ID(92)*G3ID(225) + G3ID(130)*G3ID(95)*G3ID(228)
+GGID(198) = GGID(198) + DBID(20)*DK(8)*VALL
+VALL = G3ID(13)*G3ID(194)*G3ID(219) + G3ID(16)*G3ID(197)*G3ID(222) + G3ID(19)*G3ID(200)*G3ID(225) + G3ID(22)*G3ID(203)*G3ID(228)
+GGID(199) = GGID(199) + DBID(20)*DK(9)*VALL
+VALL = G3ID(121)*G3ID(194)*G3ID(111) + G3ID(124)*G3ID(197)*G3ID(114) + G3ID(127)*G3ID(200)*G3ID(117) + G3ID(130)*G3ID(203)*G3ID(120)
+GGID(200) = GGID(200) + DBID(20)*DK(10)*VALL
+VALL = G3ID(337)*G3ID(14)*G3ID(75) + G3ID(340)*G3ID(17)*G3ID(78) + G3ID(343)*G3ID(20)*G3ID(81) + G3ID(346)*G3ID(23)*G3ID(84)
+GGID(201) = GGID(201) + DBID(21)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(338)*G3ID(75) + G3ID(16)*G3ID(341)*G3ID(78) + G3ID(19)*G3ID(344)*G3ID(81) + G3ID(22)*G3ID(347)*G3ID(84)
+GGID(202) = GGID(202) + DBID(21)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(14)*G3ID(399) + G3ID(16)*G3ID(17)*G3ID(402) + G3ID(19)*G3ID(20)*G3ID(405) + G3ID(22)*G3ID(23)*G3ID(408)
+GGID(203) = GGID(203) + DBID(21)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(122)*G3ID(75) + G3ID(232)*G3ID(125)*G3ID(78) + G3ID(235)*G3ID(128)*G3ID(81) + G3ID(238)*G3ID(131)*G3ID(84)
+GGID(204) = GGID(204) + DBID(21)*DK(4)*VALL
+VALL = G3ID(229)*G3ID(14)*G3ID(183) + G3ID(232)*G3ID(17)*G3ID(186) + G3ID(235)*G3ID(20)*G3ID(189) + G3ID(238)*G3ID(23)*G3ID(192)
+GGID(205) = GGID(205) + DBID(21)*DK(5)*VALL
+VALL = G3ID(121)*G3ID(230)*G3ID(75) + G3ID(124)*G3ID(233)*G3ID(78) + G3ID(127)*G3ID(236)*G3ID(81) + G3ID(130)*G3ID(239)*G3ID(84)
+GGID(206) = GGID(206) + DBID(21)*DK(6)*VALL
+VALL = G3ID(13)*G3ID(230)*G3ID(183) + G3ID(16)*G3ID(233)*G3ID(186) + G3ID(19)*G3ID(236)*G3ID(189) + G3ID(22)*G3ID(239)*G3ID(192)
+GGID(207) = GGID(207) + DBID(21)*DK(7)*VALL
+VALL = G3ID(121)*G3ID(14)*G3ID(291) + G3ID(124)*G3ID(17)*G3ID(294) + G3ID(127)*G3ID(20)*G3ID(297) + G3ID(130)*G3ID(23)*G3ID(300)
+GGID(208) = GGID(208) + DBID(21)*DK(8)*VALL
+VALL = G3ID(13)*G3ID(122)*G3ID(291) + G3ID(16)*G3ID(125)*G3ID(294) + G3ID(19)*G3ID(128)*G3ID(297) + G3ID(22)*G3ID(131)*G3ID(300)
+GGID(209) = GGID(209) + DBID(21)*DK(9)*VALL
+VALL = G3ID(121)*G3ID(122)*G3ID(183) + G3ID(124)*G3ID(125)*G3ID(186) + G3ID(127)*G3ID(128)*G3ID(189) + G3ID(130)*G3ID(131)*G3ID(192)
+GGID(210) = GGID(210) + DBID(21)*DK(10)*VALL
+VALL = G3ID(373)*G3ID(50)*G3ID(3) + G3ID(376)*G3ID(53)*G3ID(6) + G3ID(379)*G3ID(56)*G3ID(9) + G3ID(382)*G3ID(59)*G3ID(12)
+GGID(211) = GGID(211) + DBID(22)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(374)*G3ID(3) + G3ID(52)*G3ID(377)*G3ID(6) + G3ID(55)*G3ID(380)*G3ID(9) + G3ID(58)*G3ID(383)*G3ID(12)
+GGID(212) = GGID(212) + DBID(22)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(50)*G3ID(327) + G3ID(52)*G3ID(53)*G3ID(330) + G3ID(55)*G3ID(56)*G3ID(333) + G3ID(58)*G3ID(59)*G3ID(336)
+GGID(213) = GGID(213) + DBID(22)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(158)*G3ID(3) + G3ID(268)*G3ID(161)*G3ID(6) + G3ID(271)*G3ID(164)*G3ID(9) + G3ID(274)*G3ID(167)*G3ID(12)
+GGID(214) = GGID(214) + DBID(22)*DK(4)*VALL
+VALL = G3ID(265)*G3ID(50)*G3ID(111) + G3ID(268)*G3ID(53)*G3ID(114) + G3ID(271)*G3ID(56)*G3ID(117) + G3ID(274)*G3ID(59)*G3ID(120)
+GGID(215) = GGID(215) + DBID(22)*DK(5)*VALL
+VALL = G3ID(157)*G3ID(266)*G3ID(3) + G3ID(160)*G3ID(269)*G3ID(6) + G3ID(163)*G3ID(272)*G3ID(9) + G3ID(166)*G3ID(275)*G3ID(12)
+GGID(216) = GGID(216) + DBID(22)*DK(6)*VALL
+VALL = G3ID(49)*G3ID(266)*G3ID(111) + G3ID(52)*G3ID(269)*G3ID(114) + G3ID(55)*G3ID(272)*G3ID(117) + G3ID(58)*G3ID(275)*G3ID(120)
+GGID(217) = GGID(217) + DBID(22)*DK(7)*VALL
+VALL = G3ID(157)*G3ID(50)*G3ID(219) + G3ID(160)*G3ID(53)*G3ID(222) + G3ID(163)*G3ID(56)*G3ID(225) + G3ID(166)*G3ID(59)*G3ID(228)
+GGID(218) = GGID(218) + DBID(22)*DK(8)*VALL
+VALL = G3ID(49)*G3ID(158)*G3ID(219) + G3ID(52)*G3ID(161)*G3ID(222) + G3ID(55)*G3ID(164)*G3ID(225) + G3ID(58)*G3ID(167)*G3ID(228)
+GGID(219) = GGID(219) + DBID(22)*DK(9)*VALL
+VALL = G3ID(157)*G3ID(158)*G3ID(111) + G3ID(160)*G3ID(161)*G3ID(114) + G3ID(163)*G3ID(164)*G3ID(117) + G3ID(166)*G3ID(167)*G3ID(120)
+GGID(220) = GGID(220) + DBID(22)*DK(10)*VALL
+VALL = G3ID(373)*G3ID(14)*G3ID(39) + G3ID(376)*G3ID(17)*G3ID(42) + G3ID(379)*G3ID(20)*G3ID(45) + G3ID(382)*G3ID(23)*G3ID(48)
+GGID(221) = GGID(221) + DBID(23)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(338)*G3ID(39) + G3ID(52)*G3ID(341)*G3ID(42) + G3ID(55)*G3ID(344)*G3ID(45) + G3ID(58)*G3ID(347)*G3ID(48)
+GGID(222) = GGID(222) + DBID(23)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(14)*G3ID(363) + G3ID(52)*G3ID(17)*G3ID(366) + G3ID(55)*G3ID(20)*G3ID(369) + G3ID(58)*G3ID(23)*G3ID(372)
+GGID(223) = GGID(223) + DBID(23)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(122)*G3ID(39) + G3ID(268)*G3ID(125)*G3ID(42) + G3ID(271)*G3ID(128)*G3ID(45) + G3ID(274)*G3ID(131)*G3ID(48)
+GGID(224) = GGID(224) + DBID(23)*DK(4)*VALL
+VALL = G3ID(265)*G3ID(14)*G3ID(147) + G3ID(268)*G3ID(17)*G3ID(150) + G3ID(271)*G3ID(20)*G3ID(153) + G3ID(274)*G3ID(23)*G3ID(156)
+GGID(225) = GGID(225) + DBID(23)*DK(5)*VALL
+VALL = G3ID(157)*G3ID(230)*G3ID(39) + G3ID(160)*G3ID(233)*G3ID(42) + G3ID(163)*G3ID(236)*G3ID(45) + G3ID(166)*G3ID(239)*G3ID(48)
+GGID(226) = GGID(226) + DBID(23)*DK(6)*VALL
+VALL = G3ID(49)*G3ID(230)*G3ID(147) + G3ID(52)*G3ID(233)*G3ID(150) + G3ID(55)*G3ID(236)*G3ID(153) + G3ID(58)*G3ID(239)*G3ID(156)
+GGID(227) = GGID(227) + DBID(23)*DK(7)*VALL
+VALL = G3ID(157)*G3ID(14)*G3ID(255) + G3ID(160)*G3ID(17)*G3ID(258) + G3ID(163)*G3ID(20)*G3ID(261) + G3ID(166)*G3ID(23)*G3ID(264)
+GGID(228) = GGID(228) + DBID(23)*DK(8)*VALL
+VALL = G3ID(49)*G3ID(122)*G3ID(255) + G3ID(52)*G3ID(125)*G3ID(258) + G3ID(55)*G3ID(128)*G3ID(261) + G3ID(58)*G3ID(131)*G3ID(264)
+GGID(229) = GGID(229) + DBID(23)*DK(9)*VALL
+VALL = G3ID(157)*G3ID(122)*G3ID(147) + G3ID(160)*G3ID(125)*G3ID(150) + G3ID(163)*G3ID(128)*G3ID(153) + G3ID(166)*G3ID(131)*G3ID(156)
+GGID(230) = GGID(230) + DBID(23)*DK(10)*VALL
+VALL = G3ID(337)*G3ID(50)*G3ID(39) + G3ID(340)*G3ID(53)*G3ID(42) + G3ID(343)*G3ID(56)*G3ID(45) + G3ID(346)*G3ID(59)*G3ID(48)
+GGID(231) = GGID(231) + DBID(24)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(374)*G3ID(39) + G3ID(16)*G3ID(377)*G3ID(42) + G3ID(19)*G3ID(380)*G3ID(45) + G3ID(22)*G3ID(383)*G3ID(48)
+GGID(232) = GGID(232) + DBID(24)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(50)*G3ID(363) + G3ID(16)*G3ID(53)*G3ID(366) + G3ID(19)*G3ID(56)*G3ID(369) + G3ID(22)*G3ID(59)*G3ID(372)
+GGID(233) = GGID(233) + DBID(24)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(158)*G3ID(39) + G3ID(232)*G3ID(161)*G3ID(42) + G3ID(235)*G3ID(164)*G3ID(45) + G3ID(238)*G3ID(167)*G3ID(48)
+GGID(234) = GGID(234) + DBID(24)*DK(4)*VALL
+VALL = G3ID(229)*G3ID(50)*G3ID(147) + G3ID(232)*G3ID(53)*G3ID(150) + G3ID(235)*G3ID(56)*G3ID(153) + G3ID(238)*G3ID(59)*G3ID(156)
+GGID(235) = GGID(235) + DBID(24)*DK(5)*VALL
+VALL = G3ID(121)*G3ID(266)*G3ID(39) + G3ID(124)*G3ID(269)*G3ID(42) + G3ID(127)*G3ID(272)*G3ID(45) + G3ID(130)*G3ID(275)*G3ID(48)
+GGID(236) = GGID(236) + DBID(24)*DK(6)*VALL
+VALL = G3ID(13)*G3ID(266)*G3ID(147) + G3ID(16)*G3ID(269)*G3ID(150) + G3ID(19)*G3ID(272)*G3ID(153) + G3ID(22)*G3ID(275)*G3ID(156)
+GGID(237) = GGID(237) + DBID(24)*DK(7)*VALL
+VALL = G3ID(121)*G3ID(50)*G3ID(255) + G3ID(124)*G3ID(53)*G3ID(258) + G3ID(127)*G3ID(56)*G3ID(261) + G3ID(130)*G3ID(59)*G3ID(264)
+GGID(238) = GGID(238) + DBID(24)*DK(8)*VALL
+VALL = G3ID(13)*G3ID(158)*G3ID(255) + G3ID(16)*G3ID(161)*G3ID(258) + G3ID(19)*G3ID(164)*G3ID(261) + G3ID(22)*G3ID(167)*G3ID(264)
+GGID(239) = GGID(239) + DBID(24)*DK(9)*VALL
+VALL = G3ID(121)*G3ID(158)*G3ID(147) + G3ID(124)*G3ID(161)*G3ID(150) + G3ID(127)*G3ID(164)*G3ID(153) + G3ID(130)*G3ID(167)*G3ID(156)
+GGID(240) = GGID(240) + DBID(24)*DK(10)*VALL
+VALL = G3ID(409)*G3ID(15) + G3ID(412)*G3ID(18) + G3ID(415)*G3ID(21) + G3ID(418)*G3ID(24)
+GGID(241) = GGID(241) + DBID(25)*DK(1)*VALL
+VALL = G3ID(85)*G3ID(326)*G3ID(15) + G3ID(88)*G3ID(329)*G3ID(18) + G3ID(91)*G3ID(332)*G3ID(21) + G3ID(94)*G3ID(335)*G3ID(24)
+GGID(242) = GGID(242) + DBID(25)*DK(2)*VALL
+VALL = G3ID(85)*G3ID(339) + G3ID(88)*G3ID(342) + G3ID(91)*G3ID(345) + G3ID(94)*G3ID(348)
+GGID(243) = GGID(243) + DBID(25)*DK(3)*VALL
+VALL = G3ID(301)*G3ID(110)*G3ID(15) + G3ID(304)*G3ID(113)*G3ID(18) + G3ID(307)*G3ID(116)*G3ID(21) + G3ID(310)*G3ID(119)*G3ID(24)
+GGID(244) = GGID(244) + DBID(25)*DK(4)*VALL
+VALL = G3ID(301)*G3ID(123) + G3ID(304)*G3ID(126) + G3ID(307)*G3ID(129) + G3ID(310)*G3ID(132)
+GGID(245) = GGID(245) + DBID(25)*DK(5)*VALL
+VALL = G3ID(193)*G3ID(218)*G3ID(15) + G3ID(196)*G3ID(221)*G3ID(18) + G3ID(199)*G3ID(224)*G3ID(21) + G3ID(202)*G3ID(227)*G3ID(24)
+GGID(246) = GGID(246) + DBID(25)*DK(6)*VALL
+VALL = G3ID(85)*G3ID(218)*G3ID(123) + G3ID(88)*G3ID(221)*G3ID(126) + G3ID(91)*G3ID(224)*G3ID(129) + G3ID(94)*G3ID(227)*G3ID(132)
+GGID(247) = GGID(247) + DBID(25)*DK(7)*VALL
+VALL = G3ID(193)*G3ID(231) + G3ID(196)*G3ID(234) + G3ID(199)*G3ID(237) + G3ID(202)*G3ID(240)
+GGID(248) = GGID(248) + DBID(25)*DK(8)*VALL
+VALL = G3ID(85)*G3ID(110)*G3ID(231) + G3ID(88)*G3ID(113)*G3ID(234) + G3ID(91)*G3ID(116)*G3ID(237) + G3ID(94)*G3ID(119)*G3ID(240)
+GGID(249) = GGID(249) + DBID(25)*DK(9)*VALL
+VALL = G3ID(193)*G3ID(110)*G3ID(123) + G3ID(196)*G3ID(113)*G3ID(126) + G3ID(199)*G3ID(116)*G3ID(129) + G3ID(202)*G3ID(119)*G3ID(132)
+GGID(250) = GGID(250) + DBID(25)*DK(10)*VALL
+VALL = G3ID(337)*G3ID(74)*G3ID(15) + G3ID(340)*G3ID(77)*G3ID(18) + G3ID(343)*G3ID(80)*G3ID(21) + G3ID(346)*G3ID(83)*G3ID(24)
+GGID(251) = GGID(251) + DBID(26)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(398)*G3ID(15) + G3ID(16)*G3ID(401)*G3ID(18) + G3ID(19)*G3ID(404)*G3ID(21) + G3ID(22)*G3ID(407)*G3ID(24)
+GGID(252) = GGID(252) + DBID(26)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(74)*G3ID(339) + G3ID(16)*G3ID(77)*G3ID(342) + G3ID(19)*G3ID(80)*G3ID(345) + G3ID(22)*G3ID(83)*G3ID(348)
+GGID(253) = GGID(253) + DBID(26)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(182)*G3ID(15) + G3ID(232)*G3ID(185)*G3ID(18) + G3ID(235)*G3ID(188)*G3ID(21) + G3ID(238)*G3ID(191)*G3ID(24)
+GGID(254) = GGID(254) + DBID(26)*DK(4)*VALL
+VALL = G3ID(229)*G3ID(74)*G3ID(123) + G3ID(232)*G3ID(77)*G3ID(126) + G3ID(235)*G3ID(80)*G3ID(129) + G3ID(238)*G3ID(83)*G3ID(132)
+GGID(255) = GGID(255) + DBID(26)*DK(5)*VALL
+VALL = G3ID(121)*G3ID(290)*G3ID(15) + G3ID(124)*G3ID(293)*G3ID(18) + G3ID(127)*G3ID(296)*G3ID(21) + G3ID(130)*G3ID(299)*G3ID(24)
+GGID(256) = GGID(256) + DBID(26)*DK(6)*VALL
+VALL = G3ID(13)*G3ID(290)*G3ID(123) + G3ID(16)*G3ID(293)*G3ID(126) + G3ID(19)*G3ID(296)*G3ID(129) + G3ID(22)*G3ID(299)*G3ID(132)
+GGID(257) = GGID(257) + DBID(26)*DK(7)*VALL
+VALL = G3ID(121)*G3ID(74)*G3ID(231) + G3ID(124)*G3ID(77)*G3ID(234) + G3ID(127)*G3ID(80)*G3ID(237) + G3ID(130)*G3ID(83)*G3ID(240)
+GGID(258) = GGID(258) + DBID(26)*DK(8)*VALL
+VALL = G3ID(13)*G3ID(182)*G3ID(231) + G3ID(16)*G3ID(185)*G3ID(234) + G3ID(19)*G3ID(188)*G3ID(237) + G3ID(22)*G3ID(191)*G3ID(240)
+GGID(259) = GGID(259) + DBID(26)*DK(9)*VALL
+VALL = G3ID(121)*G3ID(182)*G3ID(123) + G3ID(124)*G3ID(185)*G3ID(126) + G3ID(127)*G3ID(188)*G3ID(129) + G3ID(130)*G3ID(191)*G3ID(132)
+GGID(260) = GGID(260) + DBID(26)*DK(10)*VALL
+VALL = G3ID(337)*G3ID(87) + G3ID(340)*G3ID(90) + G3ID(343)*G3ID(93) + G3ID(346)*G3ID(96)
+GGID(261) = GGID(261) + DBID(27)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(326)*G3ID(87) + G3ID(16)*G3ID(329)*G3ID(90) + G3ID(19)*G3ID(332)*G3ID(93) + G3ID(22)*G3ID(335)*G3ID(96)
+GGID(262) = GGID(262) + DBID(27)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(411) + G3ID(16)*G3ID(414) + G3ID(19)*G3ID(417) + G3ID(22)*G3ID(420)
+GGID(263) = GGID(263) + DBID(27)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(110)*G3ID(87) + G3ID(232)*G3ID(113)*G3ID(90) + G3ID(235)*G3ID(116)*G3ID(93) + G3ID(238)*G3ID(119)*G3ID(96)
+GGID(264) = GGID(264) + DBID(27)*DK(4)*VALL
+VALL = G3ID(229)*G3ID(195) + G3ID(232)*G3ID(198) + G3ID(235)*G3ID(201) + G3ID(238)*G3ID(204)
+GGID(265) = GGID(265) + DBID(27)*DK(5)*VALL
+VALL = G3ID(121)*G3ID(218)*G3ID(87) + G3ID(124)*G3ID(221)*G3ID(90) + G3ID(127)*G3ID(224)*G3ID(93) + G3ID(130)*G3ID(227)*G3ID(96)
+GGID(266) = GGID(266) + DBID(27)*DK(6)*VALL
+VALL = G3ID(13)*G3ID(218)*G3ID(195) + G3ID(16)*G3ID(221)*G3ID(198) + G3ID(19)*G3ID(224)*G3ID(201) + G3ID(22)*G3ID(227)*G3ID(204)
+GGID(267) = GGID(267) + DBID(27)*DK(7)*VALL
+VALL = G3ID(121)*G3ID(303) + G3ID(124)*G3ID(306) + G3ID(127)*G3ID(309) + G3ID(130)*G3ID(312)
+GGID(268) = GGID(268) + DBID(27)*DK(8)*VALL
+VALL = G3ID(13)*G3ID(110)*G3ID(303) + G3ID(16)*G3ID(113)*G3ID(306) + G3ID(19)*G3ID(116)*G3ID(309) + G3ID(22)*G3ID(119)*G3ID(312)
+GGID(269) = GGID(269) + DBID(27)*DK(9)*VALL
+VALL = G3ID(121)*G3ID(110)*G3ID(195) + G3ID(124)*G3ID(113)*G3ID(198) + G3ID(127)*G3ID(116)*G3ID(201) + G3ID(130)*G3ID(119)*G3ID(204)
+GGID(270) = GGID(270) + DBID(27)*DK(10)*VALL
+VALL = G3ID(373)*G3ID(38)*G3ID(15) + G3ID(376)*G3ID(41)*G3ID(18) + G3ID(379)*G3ID(44)*G3ID(21) + G3ID(382)*G3ID(47)*G3ID(24)
+GGID(271) = GGID(271) + DBID(28)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(362)*G3ID(15) + G3ID(52)*G3ID(365)*G3ID(18) + G3ID(55)*G3ID(368)*G3ID(21) + G3ID(58)*G3ID(371)*G3ID(24)
+GGID(272) = GGID(272) + DBID(28)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(38)*G3ID(339) + G3ID(52)*G3ID(41)*G3ID(342) + G3ID(55)*G3ID(44)*G3ID(345) + G3ID(58)*G3ID(47)*G3ID(348)
+GGID(273) = GGID(273) + DBID(28)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(146)*G3ID(15) + G3ID(268)*G3ID(149)*G3ID(18) + G3ID(271)*G3ID(152)*G3ID(21) + G3ID(274)*G3ID(155)*G3ID(24)
+GGID(274) = GGID(274) + DBID(28)*DK(4)*VALL
+VALL = G3ID(265)*G3ID(38)*G3ID(123) + G3ID(268)*G3ID(41)*G3ID(126) + G3ID(271)*G3ID(44)*G3ID(129) + G3ID(274)*G3ID(47)*G3ID(132)
+GGID(275) = GGID(275) + DBID(28)*DK(5)*VALL
+VALL = G3ID(157)*G3ID(254)*G3ID(15) + G3ID(160)*G3ID(257)*G3ID(18) + G3ID(163)*G3ID(260)*G3ID(21) + G3ID(166)*G3ID(263)*G3ID(24)
+GGID(276) = GGID(276) + DBID(28)*DK(6)*VALL
+VALL = G3ID(49)*G3ID(254)*G3ID(123) + G3ID(52)*G3ID(257)*G3ID(126) + G3ID(55)*G3ID(260)*G3ID(129) + G3ID(58)*G3ID(263)*G3ID(132)
+GGID(277) = GGID(277) + DBID(28)*DK(7)*VALL
+VALL = G3ID(157)*G3ID(38)*G3ID(231) + G3ID(160)*G3ID(41)*G3ID(234) + G3ID(163)*G3ID(44)*G3ID(237) + G3ID(166)*G3ID(47)*G3ID(240)
+GGID(278) = GGID(278) + DBID(28)*DK(8)*VALL
+VALL = G3ID(49)*G3ID(146)*G3ID(231) + G3ID(52)*G3ID(149)*G3ID(234) + G3ID(55)*G3ID(152)*G3ID(237) + G3ID(58)*G3ID(155)*G3ID(240)
+GGID(279) = GGID(279) + DBID(28)*DK(9)*VALL
+VALL = G3ID(157)*G3ID(146)*G3ID(123) + G3ID(160)*G3ID(149)*G3ID(126) + G3ID(163)*G3ID(152)*G3ID(129) + G3ID(166)*G3ID(155)*G3ID(132)
+GGID(280) = GGID(280) + DBID(28)*DK(10)*VALL
+VALL = G3ID(373)*G3ID(51) + G3ID(376)*G3ID(54) + G3ID(379)*G3ID(57) + G3ID(382)*G3ID(60)
+GGID(281) = GGID(281) + DBID(29)*DK(1)*VALL
+VALL = G3ID(49)*G3ID(326)*G3ID(51) + G3ID(52)*G3ID(329)*G3ID(54) + G3ID(55)*G3ID(332)*G3ID(57) + G3ID(58)*G3ID(335)*G3ID(60)
+GGID(282) = GGID(282) + DBID(29)*DK(2)*VALL
+VALL = G3ID(49)*G3ID(375) + G3ID(52)*G3ID(378) + G3ID(55)*G3ID(381) + G3ID(58)*G3ID(384)
+GGID(283) = GGID(283) + DBID(29)*DK(3)*VALL
+VALL = G3ID(265)*G3ID(110)*G3ID(51) + G3ID(268)*G3ID(113)*G3ID(54) + G3ID(271)*G3ID(116)*G3ID(57) + G3ID(274)*G3ID(119)*G3ID(60)
+GGID(284) = GGID(284) + DBID(29)*DK(4)*VALL
+VALL = G3ID(265)*G3ID(159) + G3ID(268)*G3ID(162) + G3ID(271)*G3ID(165) + G3ID(274)*G3ID(168)
+GGID(285) = GGID(285) + DBID(29)*DK(5)*VALL
+VALL = G3ID(157)*G3ID(218)*G3ID(51) + G3ID(160)*G3ID(221)*G3ID(54) + G3ID(163)*G3ID(224)*G3ID(57) + G3ID(166)*G3ID(227)*G3ID(60)
+GGID(286) = GGID(286) + DBID(29)*DK(6)*VALL
+VALL = G3ID(49)*G3ID(218)*G3ID(159) + G3ID(52)*G3ID(221)*G3ID(162) + G3ID(55)*G3ID(224)*G3ID(165) + G3ID(58)*G3ID(227)*G3ID(168)
+GGID(287) = GGID(287) + DBID(29)*DK(7)*VALL
+VALL = G3ID(157)*G3ID(267) + G3ID(160)*G3ID(270) + G3ID(163)*G3ID(273) + G3ID(166)*G3ID(276)
+GGID(288) = GGID(288) + DBID(29)*DK(8)*VALL
+VALL = G3ID(49)*G3ID(110)*G3ID(267) + G3ID(52)*G3ID(113)*G3ID(270) + G3ID(55)*G3ID(116)*G3ID(273) + G3ID(58)*G3ID(119)*G3ID(276)
+GGID(289) = GGID(289) + DBID(29)*DK(9)*VALL
+VALL = G3ID(157)*G3ID(110)*G3ID(159) + G3ID(160)*G3ID(113)*G3ID(162) + G3ID(163)*G3ID(116)*G3ID(165) + G3ID(166)*G3ID(119)*G3ID(168)
+GGID(290) = GGID(290) + DBID(29)*DK(10)*VALL
+VALL = G3ID(337)*G3ID(38)*G3ID(51) + G3ID(340)*G3ID(41)*G3ID(54) + G3ID(343)*G3ID(44)*G3ID(57) + G3ID(346)*G3ID(47)*G3ID(60)
+GGID(291) = GGID(291) + DBID(30)*DK(1)*VALL
+VALL = G3ID(13)*G3ID(362)*G3ID(51) + G3ID(16)*G3ID(365)*G3ID(54) + G3ID(19)*G3ID(368)*G3ID(57) + G3ID(22)*G3ID(371)*G3ID(60)
+GGID(292) = GGID(292) + DBID(30)*DK(2)*VALL
+VALL = G3ID(13)*G3ID(38)*G3ID(375) + G3ID(16)*G3ID(41)*G3ID(378) + G3ID(19)*G3ID(44)*G3ID(381) + G3ID(22)*G3ID(47)*G3ID(384)
+GGID(293) = GGID(293) + DBID(30)*DK(3)*VALL
+VALL = G3ID(229)*G3ID(146)*G3ID(51) + G3ID(232)*G3ID(149)*G3ID(54) + G3ID(235)*G3ID(152)*G3ID(57) + G3ID(238)*G3ID(155)*G3ID(60)
+GGID(294) = GGID(294) + DBID(30)*DK(4)*VALL
+VALL = G3ID(229)*G3ID(38)*G3ID(159) + G3ID(232)*G3ID(41)*G3ID(162) + G3ID(235)*G3ID(44)*G3ID(165) + G3ID(238)*G3ID(47)*G3ID(168)
+GGID(295) = GGID(295) + DBID(30)*DK(5)*VALL
+VALL = G3ID(121)*G3ID(254)*G3ID(51) + G3ID(124)*G3ID(257)*G3ID(54) + G3ID(127)*G3ID(260)*G3ID(57) + G3ID(130)*G3ID(263)*G3ID(60)
+GGID(296) = GGID(296) + DBID(30)*DK(6)*VALL
+VALL = G3ID(13)*G3ID(254)*G3ID(159) + G3ID(16)*G3ID(257)*G3ID(162) + G3ID(19)*G3ID(260)*G3ID(165) + G3ID(22)*G3ID(263)*G3ID(168)
+GGID(297) = GGID(297) + DBID(30)*DK(7)*VALL
+VALL = G3ID(121)*G3ID(38)*G3ID(267) + G3ID(124)*G3ID(41)*G3ID(270) + G3ID(127)*G3ID(44)*G3ID(273) + G3ID(130)*G3ID(47)*G3ID(276)
+GGID(298) = GGID(298) + DBID(30)*DK(8)*VALL
+VALL = G3ID(13)*G3ID(146)*G3ID(267) + G3ID(16)*G3ID(149)*G3ID(270) + G3ID(19)*G3ID(152)*G3ID(273) + G3ID(22)*G3ID(155)*G3ID(276)
+GGID(299) = GGID(299) + DBID(30)*DK(9)*VALL
+VALL = G3ID(121)*G3ID(146)*G3ID(159) + G3ID(124)*G3ID(149)*G3ID(162) + G3ID(127)*G3ID(152)*G3ID(165) + G3ID(130)*G3ID(155)*G3ID(168)
+GGID(300) = GGID(300) + DBID(30)*DK(10)*VALL
+VALL = G3ID(397)*G3ID(14)*G3ID(15) + G3ID(400)*G3ID(17)*G3ID(18) + G3ID(403)*G3ID(20)*G3ID(21) + G3ID(406)*G3ID(23)*G3ID(24)
+GGID(301) = GGID(301) + DBID(31)*DK(1)*VALL
+VALL = G3ID(73)*G3ID(338)*G3ID(15) + G3ID(76)*G3ID(341)*G3ID(18) + G3ID(79)*G3ID(344)*G3ID(21) + G3ID(82)*G3ID(347)*G3ID(24)
+GGID(302) = GGID(302) + DBID(31)*DK(2)*VALL
+VALL = G3ID(73)*G3ID(14)*G3ID(339) + G3ID(76)*G3ID(17)*G3ID(342) + G3ID(79)*G3ID(20)*G3ID(345) + G3ID(82)*G3ID(23)*G3ID(348)
+GGID(303) = GGID(303) + DBID(31)*DK(3)*VALL
+VALL = G3ID(289)*G3ID(122)*G3ID(15) + G3ID(292)*G3ID(125)*G3ID(18) + G3ID(295)*G3ID(128)*G3ID(21) + G3ID(298)*G3ID(131)*G3ID(24)
+GGID(304) = GGID(304) + DBID(31)*DK(4)*VALL
+VALL = G3ID(289)*G3ID(14)*G3ID(123) + G3ID(292)*G3ID(17)*G3ID(126) + G3ID(295)*G3ID(20)*G3ID(129) + G3ID(298)*G3ID(23)*G3ID(132)
+GGID(305) = GGID(305) + DBID(31)*DK(5)*VALL
+VALL = G3ID(181)*G3ID(230)*G3ID(15) + G3ID(184)*G3ID(233)*G3ID(18) + G3ID(187)*G3ID(236)*G3ID(21) + G3ID(190)*G3ID(239)*G3ID(24)
+GGID(306) = GGID(306) + DBID(31)*DK(6)*VALL
+VALL = G3ID(73)*G3ID(230)*G3ID(123) + G3ID(76)*G3ID(233)*G3ID(126) + G3ID(79)*G3ID(236)*G3ID(129) + G3ID(82)*G3ID(239)*G3ID(132)
+GGID(307) = GGID(307) + DBID(31)*DK(7)*VALL
+VALL = G3ID(181)*G3ID(14)*G3ID(231) + G3ID(184)*G3ID(17)*G3ID(234) + G3ID(187)*G3ID(20)*G3ID(237) + G3ID(190)*G3ID(23)*G3ID(240)
+GGID(308) = GGID(308) + DBID(31)*DK(8)*VALL
+VALL = G3ID(73)*G3ID(122)*G3ID(231) + G3ID(76)*G3ID(125)*G3ID(234) + G3ID(79)*G3ID(128)*G3ID(237) + G3ID(82)*G3ID(131)*G3ID(240)
+GGID(309) = GGID(309) + DBID(31)*DK(9)*VALL
+VALL = G3ID(181)*G3ID(122)*G3ID(123) + G3ID(184)*G3ID(125)*G3ID(126) + G3ID(187)*G3ID(128)*G3ID(129) + G3ID(190)*G3ID(131)*G3ID(132)
+GGID(310) = GGID(310) + DBID(31)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(86)*G3ID(15) + G3ID(328)*G3ID(89)*G3ID(18) + G3ID(331)*G3ID(92)*G3ID(21) + G3ID(334)*G3ID(95)*G3ID(24)
+GGID(311) = GGID(311) + DBID(32)*DK(1)*VALL
+VALL = G3ID(410)*G3ID(15) + G3ID(413)*G3ID(18) + G3ID(416)*G3ID(21) + G3ID(419)*G3ID(24)
+GGID(312) = GGID(312) + DBID(32)*DK(2)*VALL
+VALL = G3ID(86)*G3ID(339) + G3ID(89)*G3ID(342) + G3ID(92)*G3ID(345) + G3ID(95)*G3ID(348)
+GGID(313) = GGID(313) + DBID(32)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(194)*G3ID(15) + G3ID(220)*G3ID(197)*G3ID(18) + G3ID(223)*G3ID(200)*G3ID(21) + G3ID(226)*G3ID(203)*G3ID(24)
+GGID(314) = GGID(314) + DBID(32)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(86)*G3ID(123) + G3ID(220)*G3ID(89)*G3ID(126) + G3ID(223)*G3ID(92)*G3ID(129) + G3ID(226)*G3ID(95)*G3ID(132)
+GGID(315) = GGID(315) + DBID(32)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(302)*G3ID(15) + G3ID(112)*G3ID(305)*G3ID(18) + G3ID(115)*G3ID(308)*G3ID(21) + G3ID(118)*G3ID(311)*G3ID(24)
+GGID(316) = GGID(316) + DBID(32)*DK(6)*VALL
+VALL = G3ID(302)*G3ID(123) + G3ID(305)*G3ID(126) + G3ID(308)*G3ID(129) + G3ID(311)*G3ID(132)
+GGID(317) = GGID(317) + DBID(32)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(86)*G3ID(231) + G3ID(112)*G3ID(89)*G3ID(234) + G3ID(115)*G3ID(92)*G3ID(237) + G3ID(118)*G3ID(95)*G3ID(240)
+GGID(318) = GGID(318) + DBID(32)*DK(8)*VALL
+VALL = G3ID(194)*G3ID(231) + G3ID(197)*G3ID(234) + G3ID(200)*G3ID(237) + G3ID(203)*G3ID(240)
+GGID(319) = GGID(319) + DBID(32)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(194)*G3ID(123) + G3ID(112)*G3ID(197)*G3ID(126) + G3ID(115)*G3ID(200)*G3ID(129) + G3ID(118)*G3ID(203)*G3ID(132)
+GGID(320) = GGID(320) + DBID(32)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(14)*G3ID(87) + G3ID(328)*G3ID(17)*G3ID(90) + G3ID(331)*G3ID(20)*G3ID(93) + G3ID(334)*G3ID(23)*G3ID(96)
+GGID(321) = GGID(321) + DBID(33)*DK(1)*VALL
+VALL = G3ID(338)*G3ID(87) + G3ID(341)*G3ID(90) + G3ID(344)*G3ID(93) + G3ID(347)*G3ID(96)
+GGID(322) = GGID(322) + DBID(33)*DK(2)*VALL
+VALL = G3ID(14)*G3ID(411) + G3ID(17)*G3ID(414) + G3ID(20)*G3ID(417) + G3ID(23)*G3ID(420)
+GGID(323) = GGID(323) + DBID(33)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(122)*G3ID(87) + G3ID(220)*G3ID(125)*G3ID(90) + G3ID(223)*G3ID(128)*G3ID(93) + G3ID(226)*G3ID(131)*G3ID(96)
+GGID(324) = GGID(324) + DBID(33)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(14)*G3ID(195) + G3ID(220)*G3ID(17)*G3ID(198) + G3ID(223)*G3ID(20)*G3ID(201) + G3ID(226)*G3ID(23)*G3ID(204)
+GGID(325) = GGID(325) + DBID(33)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(230)*G3ID(87) + G3ID(112)*G3ID(233)*G3ID(90) + G3ID(115)*G3ID(236)*G3ID(93) + G3ID(118)*G3ID(239)*G3ID(96)
+GGID(326) = GGID(326) + DBID(33)*DK(6)*VALL
+VALL = G3ID(230)*G3ID(195) + G3ID(233)*G3ID(198) + G3ID(236)*G3ID(201) + G3ID(239)*G3ID(204)
+GGID(327) = GGID(327) + DBID(33)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(14)*G3ID(303) + G3ID(112)*G3ID(17)*G3ID(306) + G3ID(115)*G3ID(20)*G3ID(309) + G3ID(118)*G3ID(23)*G3ID(312)
+GGID(328) = GGID(328) + DBID(33)*DK(8)*VALL
+VALL = G3ID(122)*G3ID(303) + G3ID(125)*G3ID(306) + G3ID(128)*G3ID(309) + G3ID(131)*G3ID(312)
+GGID(329) = GGID(329) + DBID(33)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(122)*G3ID(195) + G3ID(112)*G3ID(125)*G3ID(198) + G3ID(115)*G3ID(128)*G3ID(201) + G3ID(118)*G3ID(131)*G3ID(204)
+GGID(330) = GGID(330) + DBID(33)*DK(10)*VALL
+VALL = G3ID(361)*G3ID(50)*G3ID(15) + G3ID(364)*G3ID(53)*G3ID(18) + G3ID(367)*G3ID(56)*G3ID(21) + G3ID(370)*G3ID(59)*G3ID(24)
+GGID(331) = GGID(331) + DBID(34)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(374)*G3ID(15) + G3ID(40)*G3ID(377)*G3ID(18) + G3ID(43)*G3ID(380)*G3ID(21) + G3ID(46)*G3ID(383)*G3ID(24)
+GGID(332) = GGID(332) + DBID(34)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(50)*G3ID(339) + G3ID(40)*G3ID(53)*G3ID(342) + G3ID(43)*G3ID(56)*G3ID(345) + G3ID(46)*G3ID(59)*G3ID(348)
+GGID(333) = GGID(333) + DBID(34)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(158)*G3ID(15) + G3ID(256)*G3ID(161)*G3ID(18) + G3ID(259)*G3ID(164)*G3ID(21) + G3ID(262)*G3ID(167)*G3ID(24)
+GGID(334) = GGID(334) + DBID(34)*DK(4)*VALL
+VALL = G3ID(253)*G3ID(50)*G3ID(123) + G3ID(256)*G3ID(53)*G3ID(126) + G3ID(259)*G3ID(56)*G3ID(129) + G3ID(262)*G3ID(59)*G3ID(132)
+GGID(335) = GGID(335) + DBID(34)*DK(5)*VALL
+VALL = G3ID(145)*G3ID(266)*G3ID(15) + G3ID(148)*G3ID(269)*G3ID(18) + G3ID(151)*G3ID(272)*G3ID(21) + G3ID(154)*G3ID(275)*G3ID(24)
+GGID(336) = GGID(336) + DBID(34)*DK(6)*VALL
+VALL = G3ID(37)*G3ID(266)*G3ID(123) + G3ID(40)*G3ID(269)*G3ID(126) + G3ID(43)*G3ID(272)*G3ID(129) + G3ID(46)*G3ID(275)*G3ID(132)
+GGID(337) = GGID(337) + DBID(34)*DK(7)*VALL
+VALL = G3ID(145)*G3ID(50)*G3ID(231) + G3ID(148)*G3ID(53)*G3ID(234) + G3ID(151)*G3ID(56)*G3ID(237) + G3ID(154)*G3ID(59)*G3ID(240)
+GGID(338) = GGID(338) + DBID(34)*DK(8)*VALL
+VALL = G3ID(37)*G3ID(158)*G3ID(231) + G3ID(40)*G3ID(161)*G3ID(234) + G3ID(43)*G3ID(164)*G3ID(237) + G3ID(46)*G3ID(167)*G3ID(240)
+GGID(339) = GGID(339) + DBID(34)*DK(9)*VALL
+VALL = G3ID(145)*G3ID(158)*G3ID(123) + G3ID(148)*G3ID(161)*G3ID(126) + G3ID(151)*G3ID(164)*G3ID(129) + G3ID(154)*G3ID(167)*G3ID(132)
+GGID(340) = GGID(340) + DBID(34)*DK(10)*VALL
+VALL = G3ID(361)*G3ID(14)*G3ID(51) + G3ID(364)*G3ID(17)*G3ID(54) + G3ID(367)*G3ID(20)*G3ID(57) + G3ID(370)*G3ID(23)*G3ID(60)
+GGID(341) = GGID(341) + DBID(35)*DK(1)*VALL
+VALL = G3ID(37)*G3ID(338)*G3ID(51) + G3ID(40)*G3ID(341)*G3ID(54) + G3ID(43)*G3ID(344)*G3ID(57) + G3ID(46)*G3ID(347)*G3ID(60)
+GGID(342) = GGID(342) + DBID(35)*DK(2)*VALL
+VALL = G3ID(37)*G3ID(14)*G3ID(375) + G3ID(40)*G3ID(17)*G3ID(378) + G3ID(43)*G3ID(20)*G3ID(381) + G3ID(46)*G3ID(23)*G3ID(384)
+GGID(343) = GGID(343) + DBID(35)*DK(3)*VALL
+VALL = G3ID(253)*G3ID(122)*G3ID(51) + G3ID(256)*G3ID(125)*G3ID(54) + G3ID(259)*G3ID(128)*G3ID(57) + G3ID(262)*G3ID(131)*G3ID(60)
+GGID(344) = GGID(344) + DBID(35)*DK(4)*VALL
+VALL = G3ID(253)*G3ID(14)*G3ID(159) + G3ID(256)*G3ID(17)*G3ID(162) + G3ID(259)*G3ID(20)*G3ID(165) + G3ID(262)*G3ID(23)*G3ID(168)
+GGID(345) = GGID(345) + DBID(35)*DK(5)*VALL
+VALL = G3ID(145)*G3ID(230)*G3ID(51) + G3ID(148)*G3ID(233)*G3ID(54) + G3ID(151)*G3ID(236)*G3ID(57) + G3ID(154)*G3ID(239)*G3ID(60)
+GGID(346) = GGID(346) + DBID(35)*DK(6)*VALL
+VALL = G3ID(37)*G3ID(230)*G3ID(159) + G3ID(40)*G3ID(233)*G3ID(162) + G3ID(43)*G3ID(236)*G3ID(165) + G3ID(46)*G3ID(239)*G3ID(168)
+GGID(347) = GGID(347) + DBID(35)*DK(7)*VALL
+VALL = G3ID(145)*G3ID(14)*G3ID(267) + G3ID(148)*G3ID(17)*G3ID(270) + G3ID(151)*G3ID(20)*G3ID(273) + G3ID(154)*G3ID(23)*G3ID(276)
+GGID(348) = GGID(348) + DBID(35)*DK(8)*VALL
+VALL = G3ID(37)*G3ID(122)*G3ID(267) + G3ID(40)*G3ID(125)*G3ID(270) + G3ID(43)*G3ID(128)*G3ID(273) + G3ID(46)*G3ID(131)*G3ID(276)
+GGID(349) = GGID(349) + DBID(35)*DK(9)*VALL
+VALL = G3ID(145)*G3ID(122)*G3ID(159) + G3ID(148)*G3ID(125)*G3ID(162) + G3ID(151)*G3ID(128)*G3ID(165) + G3ID(154)*G3ID(131)*G3ID(168)
+GGID(350) = GGID(350) + DBID(35)*DK(10)*VALL
+VALL = G3ID(325)*G3ID(50)*G3ID(51) + G3ID(328)*G3ID(53)*G3ID(54) + G3ID(331)*G3ID(56)*G3ID(57) + G3ID(334)*G3ID(59)*G3ID(60)
+GGID(351) = GGID(351) + DBID(36)*DK(1)*VALL
+VALL = G3ID(374)*G3ID(51) + G3ID(377)*G3ID(54) + G3ID(380)*G3ID(57) + G3ID(383)*G3ID(60)
+GGID(352) = GGID(352) + DBID(36)*DK(2)*VALL
+VALL = G3ID(50)*G3ID(375) + G3ID(53)*G3ID(378) + G3ID(56)*G3ID(381) + G3ID(59)*G3ID(384)
+GGID(353) = GGID(353) + DBID(36)*DK(3)*VALL
+VALL = G3ID(217)*G3ID(158)*G3ID(51) + G3ID(220)*G3ID(161)*G3ID(54) + G3ID(223)*G3ID(164)*G3ID(57) + G3ID(226)*G3ID(167)*G3ID(60)
+GGID(354) = GGID(354) + DBID(36)*DK(4)*VALL
+VALL = G3ID(217)*G3ID(50)*G3ID(159) + G3ID(220)*G3ID(53)*G3ID(162) + G3ID(223)*G3ID(56)*G3ID(165) + G3ID(226)*G3ID(59)*G3ID(168)
+GGID(355) = GGID(355) + DBID(36)*DK(5)*VALL
+VALL = G3ID(109)*G3ID(266)*G3ID(51) + G3ID(112)*G3ID(269)*G3ID(54) + G3ID(115)*G3ID(272)*G3ID(57) + G3ID(118)*G3ID(275)*G3ID(60)
+GGID(356) = GGID(356) + DBID(36)*DK(6)*VALL
+VALL = G3ID(266)*G3ID(159) + G3ID(269)*G3ID(162) + G3ID(272)*G3ID(165) + G3ID(275)*G3ID(168)
+GGID(357) = GGID(357) + DBID(36)*DK(7)*VALL
+VALL = G3ID(109)*G3ID(50)*G3ID(267) + G3ID(112)*G3ID(53)*G3ID(270) + G3ID(115)*G3ID(56)*G3ID(273) + G3ID(118)*G3ID(59)*G3ID(276)
+GGID(358) = GGID(358) + DBID(36)*DK(8)*VALL
+VALL = G3ID(158)*G3ID(267) + G3ID(161)*G3ID(270) + G3ID(164)*G3ID(273) + G3ID(167)*G3ID(276)
+GGID(359) = GGID(359) + DBID(36)*DK(9)*VALL
+VALL = G3ID(109)*G3ID(158)*G3ID(159) + G3ID(112)*G3ID(161)*G3ID(162) + G3ID(115)*G3ID(164)*G3ID(165) + G3ID(118)*G3ID(167)*G3ID(168)
+GGID(360) = GGID(360) + DBID(36)*DK(10)*VALL
+
+
+                     ENDDO !KG
+                  ENDDO !JG
+               ENDDO !IG
+
+
+               DO II=1,36
+                  T1(1+(II-1)*7) =  a1114*GGID(1+(II-1)*10) - a4714*GGID(6+(II-1)*10)
+                  T1(2+(II-1)*7) =  a5214*(GGID(5+(II-1)*10)-GGID(7+(II-1)*10))
+                  T1(3+(II-1)*7) = a1314*GGID(1+(II-1)*10) + a6314*GGID(6+(II-1)*10) + a8314*GGID(8+(II-1)*10)
+                  T1(4+(II-1)*7) = GGID(3+(II-1)*10) + a5414 * (GGID(5+(II-1)*10)+GGID(7+(II-1)*10))
+                  T1(5+(II-1)*7) = a1314*GGID(2+(II-1)*10) + a6314*GGID(4+(II-1)*10) + a8314*GGID(9+(II-1)*10)
+                  T1(6+(II-1)*7) = GGID(10+(II-1)*10)
+                  T1(7+(II-1)*7) = -a1114*GGID(2+(II-1)*10) + a4714*GGID(4+(II-1)*10)
+               ENDDO
+            
+               ! COPY INTEGRAL GG(P|MN) TO I32
+               NLJ = NKS*NJ
+               DO LNKS=1,NKS
+                  DO II=1,NI
+                     DO JJ=1,NJ
+                        IBF = LOCI+II
+                        JBF = LOCJ+JJ
+                        LIJ = LNKS+(JJ-1)*NKS+(II-1)*NLJ
+                        I32(IBF,JBF,IauxStart+LNKS-1) = T1(LIJ) 
+                        I32(JBF,IBF,IauxStart+LNKS-1) = T1(LIJ) 
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+         ENDDO 
+      ENDDO 
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X22 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAtm,DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+      
+      use shellProcessing,only: CCD
+      use shellpairs,only: dd_PAV_PRE, &
+                           dd_P_PRE,   &
+                           dd_DUM0_PRE,&
+                           dd_DUM_PRE, &
+                           dd_AB_PRE,  &
+                           dd_VAL_PRE, &
+                           LOCdd,   &
+                           N_dd_PRE
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! 
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(13),W(13)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      ! double precision :: GG(NI*NJ*NK)
+      ! double precision :: GG(MXBSH*MXBSH*MXBSH)
+      double precision :: VALL
+
+      ! BUFFER
+      double precision :: CC(3,3), EX(MXEX),EXAUX(MXEXAUX), &
+                          CAB(3,0:MXLTOT),                  &
+                          P(3),PAV(3),CPV(3),               &
+                          A1(3,13),B1(13),C1(13),           &
+                          A2(3,13),B2(13),F00(13)
+
+      double precision :: GGID(1000)
+      double precision :: DK(24),T1(1000)
+      double precision :: G2ID(728) !3*nroots*(LI+LJ)*LK
+      double precision :: G3ID(2688) !3*nroots*LI*LJ*LK
+      double precision :: DBID(36) 
+                        
+      integer :: LLIJ(3,6),LLK(3,28)
+
+      double precision :: TMP(3),VAL(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+      ! double precision :: TL(NK*NKS)
+      ! double precision :: TLL(15,9,25)
+
+      ! double precision :: T1(NKS*NI*NJ)
+
+      ! double precision :: TL(*)
+      ! double precision :: T1(MXBSH*MXBSH*MXBSH)
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,LOCKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NI,NGI, &
+                 LI,LOCI,I1,IG, &
+                 JSH,JAT,NJ,&
+                 NGJ,LJ,LOCJ,J1,JG
+
+      integer :: LTOT,LB,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: U2,T2
+      double precision :: VAL1,VAL2,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,N3I,N3B,N3IJ,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ,iijj,iijj_tmp,JI
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+
+      DO I=5,10
+         INI=I-4
+         LLIJ(1,INI) = LX(I)
+         LLIJ(2,INI) = LY(I)
+         LLIJ(3,INI) = LZ(I)
+      ENDDO
+
+
+
+!$omp parallel do default(none) &
+!$omp shared(EXAUX,KAUXAT,KAUXTY,KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO)    &
+!$omp shared(EX,KATOM,C,KTYPE,KNG,KSTART,KLOC,NSHELL)         &
+!$omp shared(MIXS,TLL,DAtm,DAux,LOCSPH,TOL)     &
+!$omp shared(LX,LY,LZ,lockt_init)           &
+!$omp shared(I32) &
+!$omp shared(dd_PAV_PRE,dd_P_PRE,dd_DUM0_PRE,dd_DUM_PRE) &
+!$omp shared(dd_AB_PRE,dd_VAL_PRE,LOCdd,N_dd_PRE) &
+!$omp shared(I_D_SHL,KAUX_ELSE,CCD,N_ELSE,N_D_SHL) &
+!$omp private(G2ID,G3ID,GGID,DBID,VALL) &
+!$omp private(CC,KAUXSH,KAT,LK,NK,NGK,MINK,MAXK,K1,LOCK,             &
+!$omp         ISH,IAT,LI,NI,NGI,I1,LOCI,                   &
+!$omp         JSH,JAT,LJ,NJ,NGJ,J1,LOCJ,                   &
+!$omp         NKS,MINKT,MAXKT,LOCKT,                  &
+!$omp         DK,T1,IauxStart,INDEX, &
+!$omp        NLJ,LNKS,IBF,JBF,LIJ,KJ,IJ) &
+!$omp private(       LB,LTOT) & 
+!$omp private(CAB,VAL,RAB2,IG,AI,TMP,AIRAB) &
+!$omp private(JG,AJ,AB,ABINV,EXPB,P,PAV,CPV,RR,DUM,DUM0,DUM2) &
+!$omp private(XX,U,W,NROOTS,AK,RHO,A1,B1,C1,A2,B2,F00) &
+!$omp private(LL,II,KG,I,J,K) &
+!$omp private(U2,T2,VAL1,VAL2,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2) &
+!$omp private(LLK) &
+!$omp shared(LLIJ) &
+!$omp private(KNK,INI,JNJ) &
+!$omp private(ajinv2,aijinv2,aijinvsq,aiinv2,aijinv,aiinv,ajinv) &
+!$omp private(NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ) &
+!$omp private(I3,N3,N3I,N3B,N3IJ,IDX,IDZ,IDY,IJK,FACTOR) &
+!$omp private(III,JJJ,IIJJ,JI) 
+
+
+         ! DO ISH = 1,NSHELL
+         !    DO JSH = 1,ISH
+DO iijj_tmp = 0, N_D_SHL*(N_D_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+      ISH = I_D_SHL(III)
+      JSH = I_D_SHL(JJJ)
+
+LI = 2
+NI = 6
+LJ = 2
+NJ = 6
+               NGI   = KNG(ISH)
+               LOCI  = KLOC(ISH)-1
+
+               NGJ   = KNG(JSH)
+               LOCJ  = KLOC(JSH)-1
+
+            
+               IAT = KATOM(ISH)
+               CC(1,1) = C(1,IAT)
+               CC(2,1) = C(2,IAT)
+               CC(3,1) = C(3,IAT)
+               I1    = KSTART(ISH)
+
+               JAT = KATOM(JSH)
+               CC(1,2) = C(1,JAT)
+               CC(2,2) = C(2,JAT)
+               CC(3,2) = C(3,JAT)
+               J1    = KSTART(JSH)
+
+         VAL(1:3) = dd_VAL_PRE(1:3,iijj)
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+      ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+      DO I_ELSE=1,N_ELSE
+         ! DO ISH = 1,NSHELL
+         KAUXSH = KAUX_ELSE(I_ELSE)
+         NGK   = KAUXNG(KAUXSH)
+         K1    = KAUXST(KAUXSH)
+
+
+         KAT = KAUXAT(KAUXSH)
+         CC(1,3) = C(1,KAT)
+         CC(2,3) = C(2,KAT)
+         CC(3,3) = C(3,KAT)
+         LK = KAUXTY(KAUXSH)-1
+         MINK  = KAUXMI(KAUXSH)
+         MAXK  = KAUXMX(KAUXSH)
+         NK    = MAXK-MINK+1
+         LOCK  = KAUXLO(KAUXSH)-MINK
+         INDEX = MINK+LK
+         DO K=MINK,MAXK
+            KNK=K-MINK+1
+            LLK(1,KNK) = LX(K)
+            LLK(2,KNK) = LY(K)
+            LLK(3,KNK) = LZ(K)
+         ENDDO
+         MINKT = MIXS(1,INDEX)
+         MAXKT = MIXS(2,INDEX)
+         NKS = MAXKT - MINKT + 1
+
+
+         ! AUX POINTER FOR I32
+         IauxStart = LOCSPH(KAUXSH)
+         IauxStart = IauxStart-LOCKT_init+1
+               ! DENSITY FACTOR
+               DO K=1,NK
+                  DK(K) = PI252 * DAux(KAUXSH,1,K)
+               ENDDO
+
+               ! TOTAL ANG MOM & ROOTS
+               LB = 4
+               LTOT = LB+LK
+               NROOTS = LTOT/2+1
+
+N3=3*NROOTS
+N3B=5*N3
+N3=3*NROOTS
+N3I=3*N3
+N3B=15*NROOTS
+N3IJ=3*N3I
+
+
+               ! ZERO OUT INTEGRAL ARRAY
+               DO II=1,36*NK
+                  GGID(II)=zero
+               ENDDO
+            JI=0
+               ! PRIMITIVE IN I-SHELL
+               DO IG = 1, NGI                 
+                  ! PRIMITIVE IN J-SHELL
+                  DO JG = 1, NGJ
+                  JI = JI + 1
+                     AB = dd_AB_PRE(LOCdd(iijj)+JI)
+                     DUM = dd_DUM_PRE(LOCdd(iijj)+JI)
+                     IF (DUM > TOL) CYCLE
+                     CPV(1:3) = dd_P_PRE(1:3,LOCdd(iijj)+JI)
+                     PAV(1:3) = dd_PAV_PRE(1:3,LOCdd(iijj)+JI)
+                     CPV(1:3) = CC(1:3,3)-CPV(1:3)
+                     RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+                     DUM0 = dd_DUM0_PRE(LOCdd(iijj)+JI)
+
+                     IJ = 0
+                     DO I=1,NI
+                        DUM2 = DUM0*CCD(I,IG,III)
+                        DO J=1,NJ
+                           IJ = IJ+1
+                           DBID(IJ) = DUM2*CCD(J,JG,JJJ)
+                        ENDDO
+                     ENDDO !I
+
+
+                     ! PRIMITIVE IN K-SHELL
+                     DO KG = 1, NGK
+                        AK = EXAUX(K1+KG-1)
+                        RHO = AB*AK/(AB+AK)
+                        XX = RHO*RR
+
+                        ! RYS ROOTS AND WEIGHT
+                        IF(NROOTS.EQ.3) THEN
+                           CALL RT3_gpu(XX,U,W,NROOTS)
+                        ELSEIF(NROOTS.EQ.4) THEN
+                           CALL ROOT4_gpu(XX,U,W,NROOTS)
+                        ELSEIF(NROOTS.EQ.5) THEN
+                           CALL ROOT5_gpu(XX,U,W,NROOTS)                     
+                        ELSEIF(NROOTS.GE.6) THEN
+                           CALL ROOT6_gpu(XX,U,W,NROOTS)                     
+                        ENDIF
+! I32_AO_BOYS_gpu
+                        AIJINV = one/(AB+AK)
+                        RHO = AB*AK*AIJINV
+                        AIINV  = one/AB
+                        AJINV  = one/AK
+                        AIINV2 = half*AIINV
+                        AJINV2 = half*AJINV
+                        AIJINV2 = half*AIJINV
+                        AIJINVSQ = SQRT(AIJINV)
+
+                        DO IR = 1, NROOTS
+                           U(IR) = U(IR)*RHO
+                           U(IR) = U(IR)/(RHO+U(IR))
+                           VAL1 = RHO*AIINV*U(IR)
+                           VAL2 = RHO*AJINV*U(IR)
+                           A1(1:3,IR) = PAV(1:3)+VAL1*CPV(1:3)
+                           A2(1:3,IR) = -VAL2*CPV(1:3)
+                           B1(IR) = AIINV2-AIINV2*VAL1
+                           B2(IR) = AJINV2-AJINV2*VAL2
+                           C1(IR) = AIJINV2*U(IR)
+                           F00(IR) = AIJINVSQ*W(IR)
+                           G2ID(1 + 3*(IR-1)) = one
+                           G2ID(2 + 3*(IR-1)) = one
+                           G2ID(3 + 3*(IR-1)) = F00(IR)
+                        ENDDO
+
+! I32_AO_R1_gpu
+                        DO IR = 1, NROOTS
+                           G2ID(1+(IR-1)*3+3*NROOTS) = A1(1,IR)
+                           G2ID(2+(IR-1)*3+3*NROOTS) = A1(2,IR)
+                           G2ID(3+(IR-1)*3+3*NROOTS) = A1(3,IR)*F00(IR)
+                        END DO
+
+                        DO I = 2, LB
+                           DO IR=1,NROOTS
+                              DO K=1,3
+                                 G2ID(K+3*(IR-1)+ 3*NROOTS*I) = &
+                                          A1(K,IR)*G2ID(K+3*(IR-1)+3*NROOTS*(I-1)) &
+                                    + (I-1)*B1(IR)*G2ID(K+3*(IR-1)+3*NROOTS*(I-2))
+                              ENDDO
+                           ENDDO
+                        ENDDO
+
+! I32_AO_TRIPLET_gpu
+                        IF (LK.EQ.0) GOTO 333
+                        !!!!!!!!!!!!!!!!!!!!!
+
+
+                        DO IR = 1, NROOTS
+                           G2ID(1+3*(IR-1)+N3B) = A2(1,IR)
+                           G2ID(2+3*(IR-1)+N3B) = A2(2,IR)
+                           G2ID(3+3*(IR-1)+N3B) = A2(3,IR)*F00(IR)
+                           DO K=1,3
+                               G2ID(K+3*(IR-1)+N3+N3B) = &
+                                       A1(K,IR)*G2ID(K+3*(IR-1)+N3B) &
+                                       + C1(IR)*G2ID(K+3*(IR-1))
+                           ENDDO
+                        ENDDO
+
+                        DO I = 2, LB
+                           DO IR=1,NROOTS
+                              DO K=1,3
+                                  G2ID(K+3*(IR-1)+N3*I+N3B) = &
+                                          A1(K,IR)*G2ID(K+3*(IR-1)+N3*(I-1)+N3B) &
+                                    + (I-1)*B1(IR)*G2ID(K+3*(IR-1)+N3*(I-2)+N3B) &
+                                          + C1(IR)*G2ID(K+3*(IR-1)+N3*(I-1))
+                              ENDDO
+                           ENDDO
+                        ENDDO
+
+                        IF(LK.EQ.1) GOTO 333
+                        !!!!!!!!!!!!!!!!!!!!
+
+                        DO J=2,LK
+                           DO IR=1,NROOTS
+                              DO K=1,3
+                                 G2ID(K+3*(IR-1)+N3B*J) = &
+                                          A2(K,IR)*G2ID(K+3*(IR-1)+N3B*(J-1)) &
+                                           + (J-1)*B2(IR)*G2ID(K+3*(IR-1)+N3B*(J-2))
+                                 G2ID(K+3*(IR-1)+N3+N3B*J) = &
+                                          A1(K,IR)*G2ID(K+3*(IR-1)+N3B*J) &
+                                        + J*C1(IR)*G2ID(K+3*(IR-1)+N3B*(J-1))
+                              ENDDO
+                           ENDDO
+
+                           DO I = 2, LB
+                              DO IR=1,NROOTS
+                                 DO K=1,3
+                                    G2ID(K+3*(IR-1)+N3*I+N3B*J) = &
+                                             A1(K,IR)*G2ID(K+3*(IR-1)+N3*(I-1)+N3B*J) &
+                                       + (I-1)*B1(IR)*G2ID(K+3*(IR-1)+N3*(I-2)+N3B*J) &
+                                           + J*C1(IR)*G2ID(K+3*(IR-1)+N3*(I-1)+N3B*(J-1))
+                                 ENDDO
+                              ENDDO
+                           ENDDO
+                        ENDDO
+
+  333 CONTINUE
+! I32_AO_PRODXYZ_gpu
+
+                        
+                        DO KK = 0, LK
+                           DO JJ = 0, LJ-1
+
+                              DO IR=1,NROOTS
+                                 DO II=0,LI               
+                                    DO IA=1,3
+                                       G3ID(IA+3*(IR-1)+N3*II+N3I*JJ+N3IJ*KK) = &
+                                                G2ID(IA+3*(IR-1)+N3*II+N3B*KK)
+                                    ENDDO
+                                 ENDDO
+                              ENDDO
+                              
+                              IF(LJ .GT. 0) THEN
+                                 DO II = 0, 3-JJ
+                                    DO IR=1,NROOTS
+                                       DO IA=1,3
+                                          G2ID(IA+3*(IR-1)+N3*II+N3B*KK) = &
+                                                   VAL(IA)*G2ID(IA+3*(IR-1)+N3*II+N3B*KK) &
+                                                 + G2ID(IA+3*(IR-1)+N3*(II+1)+N3B*KK)
+                                       ENDDO
+                                    ENDDO
+                                 ENDDO
+                              ENDIF
+
+                           ENDDO !JJ
+                        ENDDO !KK
+
+                        DO KK=0,LK
+                           DO II=0,LI
+                              DO IR=1,NROOTS
+                                 DO IA=1,3
+                                    G3ID(IA+3*(IR-1)+N3*II+N3I*LJ+N3IJ*KK) = &
+                                             G2ID(IA+3*(IR-1)+N3*II+N3B*KK)
+                                 ENDDO
+                              ENDDO
+                           ENDDO
+                        ENDDO
+
+                        IJ = 0
+                        IJK = 0
+                        DO I = 1, NI
+                           NIX = LLIJ(1,I)
+                           NIY = LLIJ(2,I)
+                           NIZ = LLIJ(3,I)
+                           DO J = 1, NJ
+                              NJX = LLIJ(1,J)
+                              NJY = LLIJ(2,J)
+                              NJZ = LLIJ(3,J)
+                              IJ = IJ+1
+
+                              DO K = 1, NK
+                                 NKX = LLK(1,K)
+                                 NKY = LLK(2,K)
+                                 NKZ = LLK(3,K)
+                                 VALL = zero
+                                 DO IR = 1, NROOTS
+                                    I3=3*(IR-1)
+                                    IDX = I3 + N3*NIX + N3I*NJX + N3IJ*NKX
+                                    IDY = I3 + N3*NIY + N3I*NJY + N3IJ*NKY
+                                    IDZ = I3 + N3*NIZ + N3I*NJZ + N3IJ*NKZ
+                                    VALL = VALL + G3ID(1+IDX)*G3ID(2+IDY)*G3ID(3+IDZ)
+                                 ENDDO
+                                 IJK = IJK+1
+                                 GGID(IJK) = GGID(IJK) + DBID(IJ)*DK(K)*VALL
+                              ENDDO
+
+                           ENDDO
+                        ENDDO
+
+                     ENDDO !KG
+                  ENDDO !JG
+               ENDDO !IG
+
+
+               ! TRANSFORM TO SPHERICAL
+               DO J = 1,36
+                  DO I=1,NKS
+                     IJ = (J-1)*NKS + I
+                     T1(IJ) = zero
+                     DO K=1,NK
+                        KJ = (J-1)*NK + K
+                        T1(IJ) = T1(IJ) + TLL(K,I,INDEX)*GGID(KJ)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            
+               ! COPY INTEGRAL GG(P|MN) TO I32
+               NLJ = NKS*NJ
+               DO LNKS=1,NKS
+                  DO II=1,NI
+                     DO JJ=1,NJ
+                        IBF = LOCI+II
+                        JBF = LOCJ+JJ
+                        LIJ = LNKS+(JJ-1)*NKS+(II-1)*NLJ
+                        I32(IBF,JBF,IauxStart+LNKS-1) = T1(LIJ) 
+                        I32(JBF,IBF,IauxStart+LNKS-1) = T1(LIJ) 
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+         ENDDO 
+      ENDDO 
+!$omp end parallel do
+
+
+      END SUBROUTINE

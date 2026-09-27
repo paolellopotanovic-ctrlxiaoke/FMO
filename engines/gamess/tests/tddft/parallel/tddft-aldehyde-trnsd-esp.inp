@@ -1,0 +1,98 @@
+!  Acetaldehyde at the (frozen core) CIS geometry of the 1st excited state.
+!  Since there is no functional, this is TD-HF rather than TD-DFT.
+!  This input shows Tamm/Dancoff TD-HF and CIS are the same.
+!
+!  Adapted from 'tddft-aldehyde.inp' by Christian Friedl in 2019 to show
+!  the TRNSD flag for TDDFT property calculations. All properties that are
+!  calculated  using the transition density are printed directly after the
+!  stance:
+!
+!  PROPERTIES FOR THE NONE     DFT FUNCTIONAL
+!   USING THE TRANSITION DENSITY BETWEEN
+!   THE GROUND STATE AND EXCITED STATE    1
+!
+!  The value of the transition dipole moment is the same
+!  when calculated using the TDDFT module:
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  1  A         -152.7520243038    4.096     0.0865  0.0937  0.0026    0.0016
+!
+!  and when calculated using the PROPERTY module:
+!
+!      DX          DY          DZ         /D/  (DEBYE)
+!  0.219769    0.238225    0.006617    0.324181
+!
+!  A comparison of the values requires a conversion from A.U to Debye.
+!
+!  Finally we compare the values of the electrostatic potential
+!  of the transition density at several evaluation points to the
+!  respective values that we can get using Q-Chem 4.0.1 when using
+!  the same functional, basis set and convergence thresholds.
+!
+!  ESP from GAMESS:
+!
+!  POINT      X          Y          Z           ELECTRONIC      NUCLEAR         TOTAL
+!                      (BOHR)                                    (A.U.)
+!     1   -4.37489   -4.29235    2.54814        -0.003038       0.000000      -0.003038
+!     2   -4.37489    4.77834   -3.49899         0.000082       0.000000       0.000082
+!     3   -2.86311   -4.29235    2.54814        -0.003138       0.000000      -0.003138
+!     4   -2.86311    4.77834   -3.49899         0.000527       0.000000       0.000527
+!     5   -1.35132   -4.29235    2.54814        -0.002900       0.000000      -0.002900
+!     6   -1.35132    4.77834   -3.49899         0.000810       0.000000       0.000810
+!     7    0.16046   -4.29235    2.54814        -0.002384       0.000000      -0.002384
+!     8    0.16046    4.77834   -3.49899         0.000541       0.000000       0.000541
+!     9    1.67224   -4.29235    2.54814        -0.001197       0.000000      -0.001197
+!    10    3.18402   -4.29235    2.54814         0.000117       0.000000       0.000117
+!
+!  ESP from Q-Chem 'plot.esp':
+!
+!  Grid positions and esp values for unrelaxed transition density (all in a.u.)
+!
+!        X            Y            Z         ES1
+!
+!   -.437489E+01 -.429235E+01 0.254814E+01 -.303753E-02
+!   -.437489E+01 0.477834E+01 -.349899E+01 0.812054E-04
+!   -.286311E+01 -.429235E+01 0.254814E+01 -.313812E-02
+!   -.286311E+01 0.477834E+01 -.349899E+01 0.526424E-03
+!   -.135132E+01 -.429235E+01 0.254814E+01 -.289941E-02
+!   -.135132E+01 0.477834E+01 -.349899E+01 0.809209E-03
+!   0.160460E+00 -.429235E+01 0.254814E+01 -.238377E-02
+!   0.160460E+00 0.477834E+01 -.349899E+01 0.540840E-03
+!   0.167224E+01 -.429235E+01 0.254814E+01 -.119728E-02
+!   0.318402E+01 -.429235E+01 0.254814E+01 0.117232E-03
+!
+
+ $contrl scftyp=rhf runtyp=energy icut=10 $end
+ $system mwords=25 $end
+ $basis  gbasis=n31 ngauss=6 ndfunc=1 npfunc=1 diffsp=.t. $end
+ $guess  guess=huckel $end
+ $scf    conv=1d-7 $end
+ $data
+Acetaldehyde CIS/6-31+G(d,p) ... test Tamm/Dancoff
+C1
+O  8.0   1.1749004953  -0.1879719947   0.4752860569
+C  6.0   0.2556992876   0.3841215944  -0.1614184387
+C  6.0  -1.1717695425  -0.1486126665  -0.0135388684
+H  1.0   0.3743032374   1.4593885056  -0.2865160703
+H  1.0  -1.5455209379  -0.0149684377   0.9993780758
+H  1.0  -1.8050811582   0.3946990293  -0.7025472250
+H  1.0  -1.2003543817  -1.2022130304  -0.2606435302
+ $end
+ $contrl tddft=excite dfttyp=none $end
+ $tddft nstate=2 iroot=1 tammd=.true. tdprp=.true. trnsd=.true.
+        cnvtol=1d-7 $end
+ $elpot iepot=1 where=points output=paper $end
+ $points
+BOHR 10
+-4.37489   -4.29235    2.54814
+-4.37489    4.77834   -3.49899
+-2.86311   -4.29235    2.54814
+-2.86311    4.77834   -3.49899
+-1.35132   -4.29235    2.54814
+-1.35132    4.77834   -3.49899
+ 0.16046   -4.29235    2.54814
+ 0.16046    4.77834   -3.49899
+ 1.67224   -4.29235    2.54814
+ 3.18402   -4.29235    2.54814
+ $end

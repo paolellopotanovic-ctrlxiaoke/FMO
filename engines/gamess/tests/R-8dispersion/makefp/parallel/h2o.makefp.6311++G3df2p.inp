@@ -1,0 +1,15 @@
+ $contrl scftyp=rhf runtyp=makefp ispher=1  $end
+ $system mwords=500 $end
+ $basis  gbasis=n311 ngauss=6 ndfunc=3 nffunc=1 npfunc=2
+         diffsp=.t. diffs=.t. $end
+ $DAMP IFTTYP=3 $END
+ $MAKEFP FRAG=H2O molpol=.f. disp7=.t. disp8=.t. aniso8=.f. $END
+ $SCF dirscf=.f. $end
+ $data
+ default makefp: generate parameters for disp6,disp7 and isotropic disp8 
+ C1
+ O  8.0  -1.551007  -0.114520   0.000000
+ H  1.0  -1.934259   0.762503   0.000000
+ H  1.0  -0.599677   0.040712   0.000000
+$END
+

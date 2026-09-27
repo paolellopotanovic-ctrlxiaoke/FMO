@@ -1,0 +1,36 @@
+!  Note the QUAO populations and charges are the same for
+!  local=svd and local=ruednbrg
+!
+!      TOTAL ATOMIC QUAO POPULATIONS
+!    ATOM      QUAO POP.       CHARGE
+!    1 C        5.639027      0.360973   
+!    2 O        8.384177     -0.384177   
+!    3 CL      17.116362     -0.116362   
+!    4 H        0.860434      0.139566  
+!
+ $contrl
+  scftyp=rhf
+  maxit=200
+  mult=1
+  ispher=1
+!  local=ruednbrg
+  local=svd
+ $end
+ $local orient=.t. extloc=splitq2 $end
+ $scf
+  vvos=.t.
+  soscf=.t. diis=.f. shift=.t. damp=.t.
+ $end
+ $basis gbasis=ccd $end
+ $system mwords=50 memddi=50 $end
+ $data
+Formyl chloride QUAO charges
+Cs
+
+C     6.0    -0.70230    -0.45174     0.00000
+O     8.0    -1.59401     0.28706     0.00000
+Cl    17.0    0.97903     0.06708     0.00000
+H     1.0    -0.76499    -1.53309     0.00000
+ $end
+
+

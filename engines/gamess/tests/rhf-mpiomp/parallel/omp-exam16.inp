@@ -1,0 +1,24 @@
+!
+! Carbon monooxide cation
+! Hartree-Fock test for open shell system.
+!
+! Method: ROHF/6-31G*
+! Geometry optimization
+! Energy on the last step:
+!   TOTAL ENERGY      =     -112.1737776153
+!
+ $CONTRL
+  SCFTYP=rohf
+  RUNTYP=optimize
+  icharg=1 mult=2
+  maxit=50 nprint=4 $END
+ $SYSTEM TIMLIM=5 MEMORY=10000000 $END
+ $SCF    DIRSCF=.TRUE. CONV=1.0d-7 FDIFF=.false. $END
+ $BASIS  GBASIS=n31 NGAUSS=6 npfunc=1 $END
+ $GUESS  GUESS=HUCKEL $END
+ $DATA
+Carbon monooxide cation
+C1
+CARBON      6.0      0.0   0.0   0.0
+OXYGEN      8.0      0.0   0.0   1.128
+ $END

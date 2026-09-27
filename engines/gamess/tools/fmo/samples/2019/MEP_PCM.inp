@@ -1,0 +1,63 @@
+! Molecular electrostatic potential in solution using FMO, described in
+! D. G. Fedorov, A. Brekhov, V. Mironov, Y. Alexeev, 
+! J. Phys. Chem. A 123 (2019) 6281-6290.
+!
+! Ignore this
+!  THE 3D GRID WILL CONTAIN     6 BY     6 BY     1 MESH POINTS.
+! and check:
+! SIZE=    0.3779 bohr,    41 by    40 by    40 grid points.
+!Grid is from     -5.29123277     -5.29123277     -8.82321756
+!         to      10.12597009      9.94547292      6.34418809 (bohr)
+!
+! The stars below appear because the default parameter is huge.
+! It is intended for MEP.
+! n-mer box padding parameter in vdW radii is*********
+!
+! By default, Gaussian broadening is used for solvent charges (alpha=1).
+!
+! Total density   count:            30.0047927098
+! Total potential count:            78.5778436995
+!
+! Two cube files are written to the punch file (.dat file).
+!
+ $contrl runtyp=energy ispher=-1 nprint=-5 $end
+ $system mwords=100 memddi=10 $end
+ $gddi ngroup=1 $end
+ $scf dirscf=.t. npunch=0 $end
+! modprp
+! 564=512+32+16+4
+! 512 use DDI memory to store data on grid
+! 32 compute MEP
+! 16 automatically choose box (cube)
+! 4 compute density
+! grdpad(1)=2 means add an extra space of 2 A from all sides of the system
+! when constructing the cube.
+! You cannot compute only MEP, but you can compute only density.
+! In this run, both are computed.
+!
+ $fmoprp nprint=9 modprp=564 grdpad(1)=2 $end
+ $pcm solvnt=water ifmo=-1 icomp=2 idisp=1 icav=1 modpar=17 $end
+!
+! 0.2 A is the spacing between grid points
+! X,Y,Z-VEC define cube vectors; zeros are default (YVEC(2)=1 means 0,1,0),
+! so normal orthogonal grid is chosen.
+ $grid SIZE=0.2 XVEC(1)=1 YVEC(2)=1 ZVEC(3)=1 $end
+ $basis gbasis=sto ngauss=3 $end
+ $fmo nbody=2 nlayer=1 nfrag=3 nacut=3 $end
+ $data
+
+ C1
+   H.1-1     1
+   O.1-1     8
+ $end
+ $fmoxyz
+ O 8             .000000     .000000     .000000
+ H 1             .000000     .000000     .957200
+ H 1             .926627     .000000    -.239987
+ O 8            2.542027     .893763   -1.001593
+ H 1            1.991815    1.623962   -1.284979
+ H 1            2.958433     .581215   -1.804806
+ O 8             .162059    2.462918   -1.477183
+ H 1            -.189749    1.755643    -.936605
+ H 1            -.375542    2.449889   -2.269046
+ $end

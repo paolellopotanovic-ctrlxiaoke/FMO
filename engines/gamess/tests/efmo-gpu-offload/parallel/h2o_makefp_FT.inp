@@ -1,0 +1,12 @@
+ $contrl scftyp=rhf runtyp=makefp $end
+ $offload rhf=.f. makefp=.t. $end
+ $scf dirscf=.t. $end
+ $system mwords=100 memddi=100 $end
+ $BASIS  GBASIS=N31 NGAUSS=6 $END
+ $data
+water makefp
+C1
+O  8.0     -2.0734259013  -5.1466170318   6.5359029490
+H  1.0     -2.2120592643  -5.9042158112   7.0815249191
+H  1.0     -1.9654716673  -5.4638736264   5.6535353439
+ $end

@@ -1,0 +1,13 @@
+diff --git a/3rd-party/lapack/CMAKE/CheckLAPACKCompilerFlags.cmake b/3rd-party/lapack/CMAKE/CheckLAPACKCompilerFlags.cmake
+index 6525315ee..389e48499 100644
+--- a/3rd-party/lapack/CMAKE/CheckLAPACKCompilerFlags.cmake
++++ b/3rd-party/lapack/CMAKE/CheckLAPACKCompilerFlags.cmake
+@@ -31,6 +31,8 @@ elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "NAG" )
+     else ()
+         set(FOPT_ILP64 -i8)
+     endif()
++elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "PGI" )
++    set(FOPT_ILP64 -i8)
+ elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC" )
+     if ( WIN32 )
+         set(FOPT_ILP64 /i8)

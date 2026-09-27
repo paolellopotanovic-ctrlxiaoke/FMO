@@ -1,0 +1,307 @@
+!> @brief  The old common block
+!>       COMMON /IOFILE/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+!>
+  MODULE comm_INTAC2
+  IMPLICIT NONE
+  DOUBLE PRECISION :: EI1,EI2,CUX
+  COMMON /INTAC2/ EI1,EI2,CUX
+  !DOUBLE PRECISION, parameter :: EI1=   9.9999999999999990E-014
+  !DOUBLE PRECISION, parameter ::  EI2=  1.0000000000000001E-015
+  !DOUBLE PRECISION, parameter ::  CUX=  57.564499999999995
+  end MODULE comm_INTAC2
+
+  MODULE comm_NSHEL_sp
+  use mx_limits, only: mxgtot,mxsh
+  USE prec, ONLY: fp
+  IMPLICIT NONE
+  COMMON /NSHEL / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),     &
+                  cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),     &
+                  kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+  INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+  REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+  END MODULE comm_NSHEL_sp
+
+  MODULE comm_FMTTBL
+  IMPLICIT NONE
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  integer :: NORD
+  double precision :: RXINC
+  double precision :: TMAX 
+  double precision :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision :: XGRID(0:NTX,0:NPX)
+  double precision :: RFINC(0:NGRD), RMR(MXQT),TLGM(0:MXQT)
+  COMMON /FMTTBL/ FGRID,XGRID,TMAX,RFINC,RXINC,RMR,TLGM,NORD
+  end MODULE comm_FMTTBL
+
+  MODULE DATA_IDPOP
+  IMPLICIT NONE
+      INTEGER :: IDPOP(4,10)
+      DATA IDPOP/0,0,0,0,216,36,6,1,432,72,12,2,648,108,18,3,&
+                 0,0,0,0,216,36,6,1,432,72,12,2,648,108,18,3,&
+                 864,144,24,4,1080,180,30,5/
+  END MODULE DATA_IDPOP
+
+  MODULE DATAgenr_SP
+  IMPLICIT NONE
+! data for DPPS, DSPP, DPPP, DDPP cases
+  integer, dimension(4,4) :: INS, INI
+  DATA INS/ 0, 0, 0, 1,  0, 0, 0, 1,  0, 0, 1, 2,  1, 1, 2, 3/
+  DATA INI/ 0, 0, 1, 1,  0, 0, 1, 1,  1, 1, 2, 2,  1, 1, 2, 2/
+  end MODULE DATAgenr_SP
+
+  MODULE DATAgenr_SPD
+  IMPLICIT NONE
+  integer, dimension(6,4) :: INS, INI
+! data for DSDS, DPDS, DDDS, DPDP, DDDP cases
+      DATA INS/ 0, 1, 3, 0, 1, 2,  0, 1, 3, 0, 1, 2,  0, 3, 5, 1, 2, 4,&
+                1, 4, 6, 2, 3, 5/
+      DATA INI/ 0, 2, 2, 1, 1, 2,  0, 2, 2, 1, 1, 2,  1, 3, 3, 2, 2, 3,&
+                1, 3, 3, 2, 2, 3/
+  end MODULE DATAgenr_SPD
+
+  MODULE DATAgenr_DD
+  IMPLICIT NONE
+! data for DDDD case
+  integer, dimension(6,6) :: INS, INI
+      DATA INS/ 0, 1, 3, 0, 1, 2,  1, 6, 8, 3, 4, 7,  3, 8,10, 5, 6, 9,&
+                0, 3, 5, 1, 2, 4,  1, 4, 6, 2, 3, 5,  2, 7, 9, 4, 5, 8/
+      DATA INI/ 0, 2, 2, 1, 1, 2,  2, 4, 4, 3, 3, 4,  2, 4, 4, 3, 3, 4,&
+                1, 3, 3, 2, 2, 3,  1, 3, 3, 2, 2, 3,  2, 4, 4, 3, 3, 4/
+  end MODULE DATAgenr_DD
+
+  MODULE DATAgenr_SPDD
+  IMPLICIT NONE
+  integer, dimension(10,10) :: INS, INI
+  data ins/0, 0, 0, 1, 0, 1,  3, 0, 1, 2, &
+           0, 0, 0, 1, 0, 1,  3, 0, 1, 2, &
+           0, 0, 1, 2, 0, 3,  5, 1, 2, 4, &
+           1, 1, 2, 3, 1, 4,  6, 2, 3, 5, &
+           0, 0, 0, 1, 0, 1,  3, 0, 1, 2, &
+           1, 1, 3, 4, 1, 6,  8, 3, 4, 7, &
+           3, 3, 5, 6, 3, 8, 10, 5, 6, 9, &
+           0, 0, 1, 2, 0, 3,  5, 1, 2, 4, &
+           1, 1, 2, 3, 1, 4,  6, 2, 3, 5, &
+           2, 2, 4, 5, 2, 7,  9, 4, 5, 8 / 
+  data ini/0, 0, 1, 1, 0, 2, 2, 1, 1, 2, & 
+           0, 0, 1, 1, 0, 2, 2, 1, 1, 2, & 
+           1, 1, 2, 2, 1, 3, 3, 2, 2, 3, & 
+           1, 1, 2, 2, 1, 3, 3, 2, 2, 3, & 
+           0, 0, 1, 1, 0, 2, 2, 1, 1, 2, & 
+           2, 2, 3, 3, 2, 4, 4, 3, 3, 4, & 
+           2, 2, 3, 3, 2, 4, 4, 3, 3, 4, & 
+           1, 1, 2, 2, 1, 3, 3, 2, 2, 3, & 
+           1, 1, 2, 2, 1, 3, 3, 2, 2, 3, & 
+           2, 2, 3, 3, 2, 4, 4, 3, 3, 4/  
+  END MODULE DATAgenr_SPDD
+
+  MODULE mod_MCDV21
+  IMPLICIT NONE
+  double precision, dimension(:),     allocatable :: &
+  T531E1,T531E5, V531E1,V531E5, T632E1,T632E5, V632E1,V632E5
+
+  double precision, dimension(:,:),    allocatable :: &
+  T531E2,T531E3,T531E4, V531E2,V531E3,V531E4, U5E1,U5E5,&
+  T632E2,T632E3,T632E4, V632E2,V632E3,V632E4, U6E1,U6E5
+
+  double precision, dimension(:,:,:), allocatable :: &
+  U5E2,U5E3,U5E4, U6E2,U6E3,U6E4
+
+  END MODULE mod_MCDV21
+!!------------------------------------------------------------------
+
+  MODULE comm_GOUT
+  IMPLICIT NONE
+  INTEGER :: NORGP
+  DOUBLE PRECISION, DIMENSION(:), allocatable :: GPOPLE
+  end MODULE comm_GOUT
+
+  MODULE comm_GEOMPQ
+  IMPLICIT NONE
+  integer :: NGANGB
+  double precision :: R12,RAB,X34,X43,AQZ,QPR,QPS
+  double precision, dimension(:), allocatable :: &
+  TX12,TX21,TY01,TY02,D00P,D01P,D10P,D11P
+  end MODULE comm_GEOMPQ
+
+  MODULE comm_JMSGYH_1
+  IMPLICIT NONE
+  double precision, dimension(:), allocatable :: SQ
+  end MODULE comm_JMSGYH_1
+
+!  MODULE comm_MAXC
+!  use mx_limits, only: MXGTOT,MXGSH,MXG2
+!  IMPLICIT NONE
+!  !private
+!  !public ismlq,ismlp,cmax,cmaxa,cmaxb,cmaxc,cmaxd
+!  COMMON /MAXC  / CMAX(MXGTOT),CMAXA(MXGSH),CMAXB(MXGSH), &
+!                  CMAXC(MXGSH),CMAXD(MXGSH),ISMLP(MXG2),ISMLQ
+!  integer :: ismlp, ismlq
+!  double precision :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+!  end MODULE comm_MAXC
+
+  MODULE comm_POPOUT
+  IMPLICIT NONE
+  integer :: LPOPI,LPOPJ,LPOPK,LPOPL
+  end MODULE comm_POPOUT
+
+  MODULE comm_SHLG70_1
+  IMPLICIT NONE
+  integer :: ISHELL,JSHELL,KSHELL,LSHELL
+  integer :: INEW,JNEW,KNEW,LNEW
+  end MODULE comm_SHLG70_1
+
+  MODULE comm_B_1
+  use mx_limits, only: MXSH
+  IMPLICIT NONE
+  private
+  public CO
+  COMMON /B     / CO(MXSH,3)
+  double precision  :: CO
+  end MODULE comm_B_1
+
+  MODULE comm_FLIPS_1
+  IMPLICIT NONE
+  integer, dimension(:,:), allocatable :: IB
+  end MODULE comm_FLIPS_1
+
+  MODULE comm_SHLLFO
+  IMPLICIT NONE
+  integer :: NGA, NGB, NGC, NGD, LA,LB,LC,LD
+  double precision, dimension(:), allocatable :: &
+         EXA,CSA,CPA,EXB,CSB,CPB,EXC,CSC,CPC,EXD,CSD,CPD
+  end MODULE comm_SHLLFO
+
+!----------------------------------------------------------------------------
+
+! modules for rotated axis S, P and D
+  MODULE comm_SHLSPD
+  IMPLICIT NONE
+  double precision, dimension(:), allocatable :: &
+         CDA,CDB, CDC,CDD,D02D,D12D,D22D
+  end MODULE comm_SHLSPD
+
+  MODULE comm_grotspd
+  IMPLICIT NONE
+! rename grotspd to F
+  double precision, dimension(:), allocatable :: F
+  end MODULE comm_grotspd
+
+  MODULE comm_FQ08_1
+  IMPLICIT NONE
+  DOUBLE PRECISION, DIMENSION(:), allocatable :: FQD,FQD0
+  DOUBLE PRECISION, DIMENSION(:,:), allocatable :: &
+         FQD1,FQD2,FQD3,FQD4,FQD5,FQD6,FQD7,FQD8
+  end MODULE comm_FQ08_1
+
+  MODULE comm_KI4_1
+  IMPLICIT NONE
+  double precision, dimension(:,:), allocatable :: &
+         RD0, RD1, RD2, RD3, RD4, RD5, RD6, RD7
+  double precision, dimension(:), allocatable  :: RD8
+  end MODULE comm_KI4_1
+
+  MODULE SPD_EMAT
+  IMPLICIT NONE
+  double precision, dimension(:,:,:,:), allocatable :: E2,E3,E4
+  double precision, dimension(:,:,:), allocatable :: E1,E5
+  END MODULE SPD_EMAT
+
+  MODULE SPD_INDMAT
+  IMPLICIT NONE
+  integer, dimension(:,:,:),allocatable :: IND
+  integer, dimension(:),allocatable :: JND
+  END MODULE SPD_INDMAT
+
+  MODULE SPD_DMAT
+  IMPLICIT NONE
+  double precision, dimension(:,:,:), allocatable ::   D1,D4
+  double precision, dimension(:,:,:,:), allocatable :: D2,D3
+  END MODULE SPD_DMAT
+
+  MODULE SPD_CMAT
+  IMPLICIT NONE
+  double precision, dimension(:,:,:), allocatable :: C3
+  END MODULE SPD_CMAT
+
+  MODULE SPD_SMAT
+  IMPLICIT NONE
+  double precision, dimension(:,:), allocatable :: S1,S2,S3,S4,S5,S6,S7
+  END MODULE SPD_SMAT
+
+!  MODULE SPD_PMAT
+!  IMPLICIT NONE
+!  double precision, dimension(:,:), allocatable :: P12,P34,P,Q
+!  double precision, dimension(:), allocatable :: T
+!  END MODULE SPD_PMAT
+
+  MODULE mod_FCUFCC
+  IMPLICIT NONE
+  double precision, dimension(:,:), allocatable :: FCU,FCC
+  END MODULE mod_FCUFCC
+  MODULE mod_FRIKR
+  double precision,dimension(:,:), allocatable :: FW6,FW7,FWK,FQDW,FW8
+  double precision,dimension(:), allocatable :: WORK
+  END MODULE mod_FRIKR
+!-------------------------------------------------------------------------
+
+  MODULE comm_ERIDAT
+  IMPLICIT NONE
+  integer :: LEN1,LEN2,LEN3,LEN4
+ END MODULE comm_ERIDAT
+
+!module constants
+!    IMPLICIT NONE
+!    double precision, parameter :: ZERO = 0.0D+00
+!    double precision, parameter :: HALF = 0.5D+00
+!    double precision, parameter :: ONE = 1.0D+00
+!    double precision, parameter :: TWO = 2.0D+00
+!    double precision, parameter :: THREE = 3.0D+00
+!    double precision, parameter :: FOUR = 4.0D+00
+!    double precision, parameter :: PI = FOUR*ATAN(ONE)
+!    double precision, parameter :: sqrt_PI = SQRT(PI)
+!! Below is the constant values used in int2b.src. int2r.src
+!    DOUBLE PRECISION, PARAMETER :: ZER=0.0D+00
+!    DOUBLE PRECISION, PARAMETER :: PT5=0.5D+00
+!    DOUBLE PRECISION, PARAMETER :: PT7=0.7D+00
+!    DOUBLE PRECISION, PARAMETER :: PT9=0.9D+00
+!    DOUBLE PRECISION, PARAMETER :: TEN=10.0D+00
+!end module constants
+
+!  MODULE params_SPD
+!  IMPLICIT NONE
+!   DOUBLE PRECISION, PARAMETER :: F02=2.0D+00
+!   DOUBLE PRECISION, PARAMETER :: F03=3.0D+00
+!   DOUBLE PRECISION, PARAMETER :: F04=4.0D+00
+!   DOUBLE PRECISION, PARAMETER :: F05=5.0D+00
+!   DOUBLE PRECISION, PARAMETER :: F06=6.0D+00
+!   DOUBLE PRECISION, PARAMETER :: F07=7.0D+00
+!   DOUBLE PRECISION, PARAMETER :: F10=1.0D+01
+!   DOUBLE PRECISION, PARAMETER :: F15=1.5D+01
+!   DOUBLE PRECISION, PARAMETER :: F21=2.1D+01
+!   DOUBLE PRECISION, PARAMETER :: F28=2.8D+01
+!   DOUBLE PRECISION, PARAMETER :: F210=2.1D+02
+!   DOUBLE PRECISION, PARAMETER :: F420=4.2D+02
+!
+!   DOUBLE PRECISION, PARAMETER :: PI4=0.78539816339744831D+00
+!!                PITO52=(PI +PI )*PI * SQRT(PI )
+!   DOUBLE PRECISION, PARAMETER :: PITO52=34.986836655249726D+00
+!   DOUBLE PRECISION, PARAMETER :: SQRT3=1.732050807568877D+00
+!   DOUBLE PRECISION, PARAMETER :: ACYCUT=1.0D-10
+!   DOUBLE PRECISION, PARAMETER :: TENM12=1.0D-12
+!
+!    double precision, parameter :: ZERO = 0.0D+00
+!    double precision, parameter :: HALF = 0.5D+00
+!    double precision, parameter :: ONE = 1.0D+00
+!    double precision, parameter :: TWO = 2.0D+00
+!    double precision, parameter :: THREE = 3.0D+00
+!    double precision, parameter :: FOUR = 4.0D+00
+!    double precision, parameter :: PI = FOUR*ATAN(ONE)
+!    double precision, parameter :: sqrt_PI = SQRT(PI)
+!! Below is the constant values used in int2b.src. int2r.src
+!    DOUBLE PRECISION, PARAMETER :: ZER=0.0D+00
+!    DOUBLE PRECISION, PARAMETER :: PT5=0.5D+00
+!    DOUBLE PRECISION, PARAMETER :: PT7=0.7D+00
+!    DOUBLE PRECISION, PARAMETER :: PT9=0.9D+00
+!    DOUBLE PRECISION, PARAMETER :: TEN=10.0D+00
+!  end MODULE params_SPD

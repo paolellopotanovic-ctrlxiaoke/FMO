@@ -1,0 +1,15 @@
+!   REFERENCE ENERGY:      -38.2713247488
+!       CCSDt ENERGY:      -38.3877485336   CORR. E=  -0.1164237849
+!
+ $contrl runtyp=energy scftyp=rohf mult=2 cctyp=ccsd3a
+         ispher=1 $end
+ $system mwords=50 $end
+ $basis gbasis=accd $end
+ $ccinp ncore=1 nacto=2 nactu=28 $end
+ $data
+CH, aug-cc-pVDZ at R = Re, full CCSDT
+Cnv 2
+
+ C   6.0      0.0000000     0.0000000     0.0000000
+ H   1.0      0.0000000     0.0000000     1.1197868
+ $end

@@ -1,0 +1,89 @@
+!> @brief variables and functions related to the driver for hpc_chem also known as
+!> LIBCCHEM 2.0
+!> @author Jackson Hayes
+!> @details
+!> enabled: If HPC_CHEM was enabled in the install.info script
+!> mode: The run mode for HPC_CHEM 
+!>      0: Not using HPC_CHEM (default)
+!>      1: Hartree Fock 
+!>      2: GAFO TYPE RUN TODO(JH) How do we actually want to handle this 
+!> print_mode: 
+!>  integer to pass as print mode for LIBCCHEM 2.0 see LIBCCHEM 2.0 documentation for 
+!>  details of what to pass, the numbers are different the GAMESS NPRINT values
+!> energy_convergence_threshold:
+!>   sets what change in energy will mark the end of a SCF 
+!> dynamic_threshold:
+!>  starting value for dynamic integrals screening threshold
+module HPCChem_driver_module
+use, intrinsic :: ISO_C_Binding
+implicit none 
+
+interface 
+
+subroutine C_print_banner() bind(C, name="print_libcchem_banner")
+
+end subroutine C_print_banner
+
+end interface
+
+interface print_libcchem_banner
+  module procedure call_print_libcchem_banner
+end interface print_libcchem_banner
+
+public :: print_libcchem_banner
+
+contains 
+
+subroutine call_print_libcchem_banner
+call C_print_banner()
+end subroutine 
+
+
+end module
+module hpc_chem
+use HPCChem_driver_module
+    implicit none
+    logical :: enabled
+    integer :: mode, print_mode
+    logical :: use_scf, use_fock_build, use_cphf, use_tdhf, use_all
+    double precision :: convergence_threshold, dynamic_threshold
+    
+    ! default values for user defined values 
+    integer :: print_mode_d = 1
+    double precision :: convergence_threshold_d = 1.0d-06
+    double precision :: dynamic_threshold_d = 1.0d-10
+    logical :: use_scf_d = .false.
+    logical :: use_fock_build_d = .false.
+    logical :: use_cphf_d = .false. 
+    logical :: use_tdhf_d = .false.
+    logical :: use_all_d = .false.
+contains
+    subroutine gms_hpcchem_initialize()
+        implicit none
+        character*256 env
+        mode = 0
+        call gms_getenv("GMS_HPCCHEM ", env)
+        if (env.eq."true") then
+            enabled = .true.
+        end if
+    end subroutine
+
+    function gms_hpcchem() result(hpc_enabled)
+        implicit none
+        logical ::  hpc_enabled
+        hpc_enabled = enabled
+    end function
+
+    function gms_hpc_mode() result(hpc_mode)
+        implicit none
+        integer :: hpc_mode
+        hpc_mode = mode
+    end function
+
+        subroutine print_banner_libcchem()
+        implicit none
+            call print_libcchem_banner()
+    end subroutine print_banner_libcchem
+    
+end module hpc_chem
+

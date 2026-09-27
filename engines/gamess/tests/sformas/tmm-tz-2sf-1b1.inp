@@ -1,0 +1,55 @@
+!	SF-ORMAS Geometry optimization of Trimethylmethylene (TMM)
+!	Lowest B1 state in the C2V group
+!
+!	Convergence in 7 steps
+! NSERCH:   0  E=     -154.9756652316  GRAD. MAX=  0.0838804  R.M.S.=  0.0203581
+! NSERCH:   1  E=     -154.9810187611  GRAD. MAX=  0.0085189  R.M.S.=  0.0033158
+! NSERCH:   2  E=     -154.9815908326  GRAD. MAX=  0.0093191  R.M.S.=  0.0031557
+! NSERCH:   3  E=     -154.9819190598  GRAD. MAX=  0.0027709  R.M.S.=  0.0008988
+! NSERCH:   4  E=     -154.9819389855  GRAD. MAX=  0.0009599  R.M.S.=  0.0004604
+! NSERCH:   5  E=     -154.9819589396  GRAD. MAX=  0.0003084  R.M.S.=  0.0001105
+! NSERCH:   6  E=     -154.9819606264  GRAD. MAX=  0.0001597  R.M.S.=  0.0000685
+! NSERCH:   7  E=     -154.9819612580  GRAD. MAX=  0.0000744  R.M.S.=  0.0000276
+!
+!	Final Geometry (C2V):
+!
+!  C           6.0   0.0000000000   0.0000000000   0.0430122990
+!  C           6.0  -0.0000000000   0.0000000000  -1.4598635799
+!  C           6.0  -1.2171699869   0.0000000000   0.7217085557
+!  H           1.0  -1.2477092705   0.0000000000   1.7972376558
+!  H           1.0  -0.9240536716   0.0000000000  -2.0058323703
+!  H           1.0  -2.1547266801   0.0000000000   0.1953117992
+!
+ $contrl scftyp=rohf runtyp=optimize
+  cityp=sform
+  mult=5 maxit=100 $end
+ $scf dirscf=.t. $end
+ $system mwords=300 $end
+ $cidet nstate=3 itermx=400
+   ncore=0 nact=98 nels=30
+   mxxpan=85 nhgss=2000 pures=.t.
+   iroot=1 stsym=b1
+   clobbr=.t. 
+   mulsf=1
+ $end
+ $basis GBASIS=tzv ndfunc=1 $END
+ $ormas
+  nspace=3 mstart(1)=1,14,18 mine(1)=25,3,0
+  maxe(1)=26,5,1
+ $end
+ $data
+TMM molecule
+CNV 2
+
+C     6.0     0.00000     0.00000    -0.00000
+C     6.0     0.00000     0.00000    -1.40806
+C     6.0    -1.21942     0.00000     0.70403
+H     1.0    -1.24146     0.00000     1.77734
+H     1.0    -0.91849     0.00000    -1.96381
+H     1.0    -2.15995     0.00000     0.18647
+ $end
+!TRAVIS-CI MEDIUM
+!TRAVIS-CI SKIP
+!Run completes and passes validaiton with GNU and Intel toolchains
+!Run issue with PGI 19.10 (need to re-verify with NVIDIA HPC SDK)
+

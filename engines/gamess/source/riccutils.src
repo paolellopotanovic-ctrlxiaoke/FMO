@@ -1,0 +1,1197 @@
+!>    MODULE RICC_GMS_globals
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Some essential GAMESS common blocks are put
+!>             in this module, such that defining common blocks 
+!>             within every subroutine can be avoided.
+!>
+!> 
+
+ MODULE RICC_GMS_globals 
+
+ USE prec,     ONLY: dp
+ USE mx_limits,ONLY: mxatm,mxao 
+
+ IMPLICIT NONE
+
+   INTEGER                 :: nat,ich,mul,num,nqmt,ne,na,nb,ian(mxatm)
+   INTEGER                 :: ir,iw,ip,ijk,ijkt,idaf,nav,ioda(950)
+   INTEGER                 :: me,master,nproc,ibtyp,iptim,ispher
+   INTEGER                 :: nprint,itol,icut,normf,normp,nopk
+   INTEGER                 :: nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+   REAL(KIND=dp)           :: zan(mxatm),c(3,mxatm),qmttol,X(1) 
+   LOGICAL                 :: goparr,dskwrk,maswrk
+
+   common /infoa / nat,ich,mul,num,nqmt,ne,na,nb,zan,c,ian
+   common /iofile/ ir,iw,ip,ijk,ijkt,idaf,nav,ioda
+   common /bassph/ qmttol,ispher
+   common /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+   common /output/ nprint,itol,icut,normf,normp,nopk
+   common /fmoinf/ nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+   common /fmcom / X
+
+ END MODULE RICC_GMS_Globals 
+
+!>    MODULE RICC_BasInfo
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Basis set info from Gamess: AO and Aux. bases.
+!>
+!>
+
+ MODULE RICC_BasInfo
+
+ USE prec,     ONLY: dp
+ USE mx_limits,ONLY: mxsh,mxgtot
+
+   INTEGER,PARAMETER       :: mxauxsh=10000,mxaxgtot=20000
+   INTEGER                 :: kstart(mxsh),katom(mxsh),ktype(mxsh),       &
+                              kng(mxsh),kloc(mxsh),kmin(mxsh),            &
+                              kmax(mxsh),naosh,                           &
+                              kauxst(mxauxsh),kauxat(mxauxsh),            &
+                              kauxty(mxauxsh),kauxng(mxauxsh),            &
+                              kauxlo(mxauxsh),kauxmi(mxauxsh),            &
+                              kauxmx(mxauxsh),nauxsh
+   REAL(KIND=dp)           :: ex(mxgtot),cs(mxgtot),cp(mxgtot),           &
+                              cd(mxgtot),cf(mxgtot),cg(mxgtot),           &
+                              ch(mxgtot),ci(mxgtot),                      &
+                              exaux(mxaxgtot),cauxs(mxaxgtot),            &
+                              cauxp(mxaxgtot),cauxd(mxaxgtot),            &
+                              cauxf(mxaxgtot),cauxg(mxaxgtot),            &
+                              cauxh(mxaxgtot),cauxi(mxaxgtot)
+
+   common /nshel / ex,cs,cp,cd,cf,cg,ch,ci,kstart,katom,ktype,kng,        &
+                   kloc,kmin,kmax,naosh
+   common /auxbas/ exaux,cauxs,cauxp,cauxd,cauxf,cauxg,cauxh,cauxi,       &
+                   kauxst,kauxat,kauxty,kauxng,kauxlo,kauxmi,kauxmx,      &
+                   nauxsh
+
+ END MODULE RICC_BasInfo
+
+!>    MODULE RICC_Shared_Data
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Common parameters and constants
+!>             defined and used within the RI-CC module 
+!>                                 
+!>
+!>
+
+ MODULE RICC_Shared_Data
+
+ USE prec,     ONLY: dp
+ USE OMP_lib
+
+ IMPLICIT NONE
+
+   CHARACTER(LEN=10)        :: cclevl
+   INTEGER                  :: LuOut,LpOut,nbas,nbas2,nnbas
+   INTEGER                  :: norbs,nctot,nfc,nfv,nitmax,mxdiis,rstrt
+   INTEGER                  :: erityp,cpmet,nctots
+   INTEGER                  :: nocc,nvir,no,nu,no2,nu2,noo,nou,nuu
+   INTEGER                  :: MaxCor,nauxbas,iauxbf,ivmtd
+   INTEGER,PARAMETER        :: itfile=71
+   INTEGER                  :: ccnumth(15)
+   LOGICAL                  :: memchk,othaux,DBGFLG,usedm3,usedm4
+   REAL(KIND=dp)            :: ccwtim(25)
+   REAL(KIND=dp)            :: athrsh,tolt,vtol,stol,cpu,wall
+   REAL(KIND=dp), PARAMETER :: ZERO=0.0D+00,HALF=0.5D+00,HALFM=-0.5D+00,   &
+                               ONE=1.0D+00,ONEM=-1.0D+00,TWO=2.0D+00,      &
+                               TWOM=-2.0D+00,FOUR=4.0D+00,FOURM=-4.0D+00,  &
+                               SIX=6.0D+00,EIGHT=8.0D+00,TEN=10.0D+00
+
+   common /timing/ cpu,wall
+
+ END MODULE RICC_Shared_Data
+
+!>    MODULE RICC_procs
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Common matrix procedures used within the RI-CC module 
+!>                                 
+!>                                 
+
+ MODULE RICC_procs
+
+ USE RICC_Shared_Data
+
+ IMPLICIT NONE
+
+ CONTAINS
+
+   SUBROUTINE RICC_vzero(lb,ub,VEC)
+
+   INTEGER,INTENT(IN)          :: lb,ub  
+   REAL(KIND=dp),INTENT(INOUT) :: VEC(lb:ub) 
+   INTEGER                     :: i
+ 
+   FORALL(i=lb:ub)
+       VEC(i) = ZERO
+   END FORALL
+
+   END SUBROUTINE RICC_vzero
+
+   SUBROUTINE RICC_dzero(lbr,ubr,lbc,ubc,MAT)
+
+   INTEGER,INTENT(IN)          :: lbr,ubr,lbc,ubc
+   REAL(KIND=dp),INTENT(INOUT) :: MAT(lbr:ubr,lbc:ubc)
+   INTEGER                     :: i,j
+
+   FORALL(i=lbr:ubr, j=lbc:ubc)
+       MAT(i,j) = ZERO
+   END FORALL
+
+   END SUBROUTINE RICC_dzero
+
+   SUBROUTINE RICC_LoopDist(IWD,nprocs,istart,iend)
+
+   INTEGER,INTENT(INOUT)          :: IWD(0:nprocs-1,2)
+   INTEGER,INTENT(IN)             :: nprocs,istart,iend
+   integer                        :: nloops,nchunk,nmod,iproc
+
+   nloops = iend - istart + 1
+
+   IWD = 0
+   block_nchunk: if(nloops .GE. nprocs)then
+                 nchunk = nloops/nprocs
+                 nmod   = MOD(nloops,nprocs)
+
+                 IWD(0,1) = istart
+                 if(nmod.NE.0)then
+                   IWD(0,2)=istart+nchunk
+                   nmod = nmod-1
+                 else
+                   IWD(0,2)=istart+nchunk-1
+                 end if
+
+                 do iproc=1,nprocs-1
+                    IWD(iproc,1)=IWD(iproc-1,2)+1
+                    if(nmod.NE.0)then
+                      IWD(iproc,2)=IWD(iproc-1,2)+nchunk+1
+                      nmod=nmod-1
+                    else
+                      IWD(iproc,2)=IWD(iproc-1,2)+nchunk
+                    end if
+                 end do
+   else block_nchunk
+                 do iproc=0,nloops-1
+                    IWD(iproc,1)=istart+iproc
+                    IWD(iproc,2)=IWD(iproc,1)
+                 end do
+                 do iproc=nloops,nprocs-1
+                    IWD(iproc,1) = 1
+                    IWD(iproc,2) = 0
+                 end do
+   end if block_nchunk
+
+   END SUBROUTINE RICC_LoopDist
+   
+   SUBROUTINE RICC_ESUMMARY(energies)
+
+   USE RICC_GMS_globals, ONLY: maswrk
+
+   REAL(KIND=dp),INTENT(IN) :: energies(:)
+
+   write(LuOut,9000)
+   write(LuOut,9003)
+   write(LuOut,9001)
+   write(LuOut,9004)cclevl
+   write(LuOut,9005)energies(1)
+   write(LuOut,9006)energies(2)
+   SELECT CASE(cpmet)
+       CASE(0)
+         write(LuOut,9007)energies(3)
+       CASE(1)
+         write(LuOut,9017)energies(3)
+       CASE(2)
+         write(LuOut,9027)energies(3)
+       CASE(3)
+         write(LuOut,9027)energies(3)
+         write(LuOut,9037)energies(3)+energies(4)
+   END SELECT
+
+   write(LuOut,9001)
+   write(LuOut,9047)energies(1) + energies(2)
+   SELECT CASE(cpmet)
+       CASE(0)
+         write(LuOut,9057)energies(1) + energies(3)
+       CASE(1)
+         write(LuOut,9067)energies(1) + energies(3)
+       CASE(2)
+         write(LuOut,9077)energies(1) + energies(3)
+       CASE(3)
+         write(LuOut,9077)energies(1) + energies(3)
+         write(LuOut,9087)energies(1) + energies(3) + energies(4)
+   END SELECT
+   write(LuOut,9002)
+
+   9000 format(/,5X,48('-'))
+   9001 format(5X,48('-'))
+   9002 format(5X,48('-'),/)
+
+   9003 format(14X,'SUMMARY OF ENERGY CALCULATIONS')
+   9004 format(6X,'COUPLED-CLUSTER METHOD      ',7X,10A)
+   9005 format(6X,'REFERENCE STATE ENERGY      ',F17.10)
+   9006 format(6X,'MP2 CORRELATION ENERGY      ',F17.10)
+   9007 format(6X,'LCCD CORRELATION ENERGY     ',F17.10)
+   9017 format(6X,'CCD CORRELATION ENERGY      ',F17.10)
+   9027 format(6X,'CCSD CORRELATION ENERGY     ',F17.10)
+   9037 format(6X,'CCSD(T) CORRELATION ENERGY  ',F17.10)
+   9047 format(6X,'TOTAL RI-MP2 ENERGY         ',F17.10)
+   9057 format(6X,'TOTAL RI-LCCD ENERGY        ',F17.10)
+   9067 format(6X,'TOTAL RI-CCD ENERGY         ',F17.10)
+   9077 format(6X,'TOTAL RI-CCSD ENERGY        ',F17.10)
+   9087 format(6X,'TOTAL RI-CCSD(T) ENERGY     ',F17.10)
+
+   END SUBROUTINE RICC_ESUMMARY
+
+   SUBROUTINE RICC_TimeStat
+
+   USE RICC_GMS_globals, ONLY: maswrk
+ 
+   CHARACTER(LEN=2) :: HMSD(25)
+   INTEGER          :: tloc
+
+   do tloc=1,17   ! 17 for now, will increase later
+      call RICC_TUNIT(ccwtim(tloc),HMSD(tloc))
+   end do
+
+   if(maswrk)then
+     write(LuOut,9000)
+     write(LuOut,9001)
+     write(LuOut,9002)
+     write(LuOut,9003)
+     write(LuOut,9000)
+     write(LuOut,9004)            ccwtim(1) ,HMSD(1)
+     write(LuOut,9005)ccnumth(1) ,ccwtim(2) ,HMSD(2)
+     write(LuOut,9006)ccnumth(2) ,ccwtim(3) ,HMSD(3)
+     write(LuOut,9007)ccnumth(3) ,ccwtim(4) ,HMSD(4)
+     write(LuOut,9008)ccnumth(4) ,ccwtim(5) ,HMSD(5)
+     write(LuOut,9009)ccnumth(5) ,ccwtim(6) ,HMSD(6)
+     write(LuOut,9010)ccnumth(6) ,ccwtim(7) ,HMSD(7)
+     write(LuOut,9011)ccnumth(7) ,ccwtim(8) ,HMSD(8)
+     write(LuOut,9012)ccnumth(8) ,ccwtim(9) ,HMSD(9)
+     write(LuOut,9013)ccnumth(9) ,ccwtim(10),HMSD(10)
+     write(LuOut,9014)ccnumth(10),ccwtim(11),HMSD(11)
+     write(LuOut,9015)            ccwtim(12),HMSD(12)
+     write(LuOut,9016)ccnumth(11),ccwtim(13),HMSD(13)
+     write(LuOut,9017)            ccwtim(14),HMSD(14)
+     write(LuOut,9018)ccnumth(12),ccwtim(15),HMSD(15)
+     write(LuOut,9019)            ccwtim(16),HMSD(16)
+     if(cpmet .EQ. 3)then                                                  
+     write(LuOut,9020)ccnumth(13),ccwtim(17),HMSD(17)
+     end if
+     write(LuOut,9000)
+     write(LuOut,9021)
+   end if
+
+   9000 format(1X,60('-'))
+   9001 format(20X,'Wall Time Statistics')
+   9002 format(1X,60('='))
+   9003 format(2X,'    ',20X,'Parallel  ',4X,' # OMP ',4X,'   Wall  ',/,  &
+               2X,'Step',20X,'process(s)',4X,'threads',4X,'   time* ')
+   9004 format(2X,'RI integral generation   ',' DDI+OMP  ',14X,F6.2,2A)
+   9005 format(2X,'Initial MP2 step         ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9006 format(2X,'MP(t1)-0 intermediates   ',' OMP      ',4X,I4,6X,F6.2,2A)
+   9007 format(2X,'MP(t1)-OO intermediates  ',' OMP      ',4X,I4,6X,F6.2,2A)
+   9008 format(2X,'MP(t)-OV intermediates   ',' OMP      ',4X,I4,6X,F6.2,2A)
+   9009 format(2X,'MP(t1)-VV intermediates  ',' OMP      ',4X,I4,6X,F6.2,2A)
+   9010 format(2X,'WiaWjb group (doubles eq)',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9011 format(2X,'Fock matrix terms        ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9012 format(2X,'PPL group (doubles eq)   ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9013 format(2X,'H2P2 group (doubles eq)  ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9014 format(2X,'HHL group (doubles eq)   ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9015 format(2X,'DDI commun. between ranks',' DDI      ',14X,F6.2,2A)
+   9016 format(2X,'Jacobi update for amps.  ',' OMP      ',4X,I4,6X,F6.2,2A)
+   9017 format(2X,'DIIS extrap. (disk I/O)  ',' Serial   ',14X,F6.2,2A)
+   9018 format(2X,'CCSD correlation energy  ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9019 format(2X,'Time for a single CCSD iteration','   ',14X,F6.2,2A)
+   9020 format(2X,'(T) correction to energy ',' DDI+OMP  ',4X,I4,6X,F6.2,2A)
+   9021 format(2X,'*Average time for the steps involved in CCSD iteration.',//)
+
+   END SUBROUTINE RICC_TimeStat
+
+   SUBROUTINE RICC_TUNIT(step_time,HMSD)
+
+   CHARACTER(LEN=2)            :: HMSD
+   REAL(KIND=dp),INTENT(INOUT) :: step_time
+
+   if(step_time .GE. 86400.0D+00)then
+      step_time = step_time/86400.0D+00
+      HMSD = ' d'
+   else if(step_time.GE.3600.0D+00 .AND.                                  &
+           step_time.LT.86400.0D+00)then
+      step_time = step_time/3600.0D+00
+      HMSD = ' h'
+   else if(step_time.GE.60.0D+00 .AND.                                    &
+           step_time.LT.3600.0D+00)then
+      step_time = step_time/60.0D+00
+      HMSD = ' m'
+   else
+      HMSD = ' s'
+   end if
+
+   END SUBROUTINE RICC_TUNIT
+
+ END MODULE RICC_procs 
+
+!>    MODULE RICC_memalloc   
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Core procedures for replicated memory 
+!>             allocation and deallocation for integer  
+!>             and double precision vectors and matrices.
+!>
+!>    @detail  MaxCor is the primary repmem pool, which
+!>             is obtained via a call to GOTFM in the 
+!>             beginning with the argument NgotMx. In
+!>             the beginning, MaxCor = NgotMx.         
+!>             NgotMx is retained constant throughout,
+!>             while memory is allocated from MaxCor
+!>             and is freed into this pool. There is  
+!>             always a check for a possible memory 
+!>             leak. We use the following procedures
+!>             in lieu of FMCOM/X, which is used only
+!>             when calling the RICAUXBAS subroutine.      
+!>
+!>
+
+ MODULE RICC_memalloc
+
+ USE prec, ONLY: dp
+
+ IMPLICIT NONE
+
+ CONTAINS
+
+   SUBROUTINE RICC_ialloc1(ilen,IVEC)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)              :: ilen
+   INTEGER,ALLOCATABLE,INTENT(OUT) :: IVEC(:)
+
+   if(ilen .LE. MaxCor)then
+     ALLOCATE(IVEC(ilen))
+     MaxCor = MaxCor - ilen
+   else
+     write(LuOut,100) MaxCor,ilen 
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_ialloc1
+
+   SUBROUTINE RICC_ialloc20(ilen1,ilen2,IMAT)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)              :: ilen1,ilen2
+   INTEGER,ALLOCATABLE,INTENT(OUT) :: IMAT(:,:)
+
+   if(ilen1*ilen2 .LE. MaxCor)then
+     ALLOCATE(IMAT(0:ilen1-1,ilen2))
+     MaxCor = MaxCor - ilen1*ilen2
+   else
+     write(LuOut,100) MaxCor,ilen1*ilen2
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_ialloc20
+
+   SUBROUTINE RICC_ialloc21(ilen1,ilen2,IMAT)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)              :: ilen1,ilen2
+   INTEGER,ALLOCATABLE,INTENT(OUT) :: IMAT(:,:)
+
+   if(ilen1*ilen2 .LE. MaxCor)then
+     ALLOCATE(IMAT(ilen1,ilen2))
+     MaxCor = MaxCor - ilen1*ilen2
+   else
+     write(LuOut,100) MaxCor,ilen1*ilen2
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_ialloc21
+
+   SUBROUTINE RICC_dalloc1(ilen,DVEC)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: DVEC(:)
+
+   if(ilen .LE. MaxCor)then
+     ALLOCATE(DVEC(ilen))
+     MaxCor = MaxCor - ilen
+   else
+     write(LuOut,100) MaxCor,ilen
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc1
+
+   SUBROUTINE RICC_dalloc2(ilen1,ilen2,DMAT)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen1,ilen2
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: DMAT(:,:)
+
+   if(ilen1*ilen2 .LE. MaxCor)then
+     ALLOCATE(DMAT(ilen1,ilen2))
+     MaxCor = MaxCor - ilen1*ilen2
+   else
+     write(LuOut,100) MaxCor,ilen1*ilen2
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc2
+
+   SUBROUTINE RICC_dalloc3(ilen1,ilen2,ilen3,D3d)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen1,ilen2,ilen3
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: D3d(:,:,:)
+
+   if(ilen1*ilen2*ilen3 .LE. MaxCor)then
+     ALLOCATE(D3d(ilen1,ilen2,ilen3))
+     MaxCor = MaxCor - ilen1*ilen2*ilen3
+   else
+     write(LuOut,100) MaxCor,ilen1*ilen2*ilen3
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc3
+
+   SUBROUTINE RICC_dalloc4(ilen1,ilen2,ilen3,ilen4,D4d)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen1,ilen2,ilen3,ilen4
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: D4d(:,:,:,:)
+
+   if(ilen1*ilen2*ilen3*ilen4 .LE. MaxCor)then
+     ALLOCATE(D4d(ilen1,ilen2,ilen3,ilen4))
+     MaxCor = MaxCor - ilen1*ilen2*ilen3*ilen4
+   else
+     write(LuOut,100) MaxCor,ilen1*ilen2*ilen3*ilen4
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT MEMORY AVAILABLE: ',I12,                   &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc4
+
+   SUBROUTINE RICC_ifree1(IVEC)
+
+   USE RICC_Shared_Data, ONLY: MaxCor
+
+   INTEGER,ALLOCATABLE,INTENT(INOUT) :: IVEC(:)
+
+   if(ALLOCATED(IVEC))then
+     MaxCor = MaxCor + SIZE(IVEC)
+     DEALLOCATE(IVEC) 
+   end if
+
+   END SUBROUTINE RICC_ifree1
+
+   SUBROUTINE RICC_ifree2(IMAT)
+ 
+   USE RICC_Shared_Data, ONLY: MaxCor
+
+   INTEGER,ALLOCATABLE,INTENT(INOUT) :: IMAT(:,:)
+   
+   if(ALLOCATED(IMAT))then
+     MaxCor = MaxCor + SIZE(IMAT)
+     DEALLOCATE(IMAT)
+   end if
+
+   END SUBROUTINE RICC_ifree2
+
+   SUBROUTINE RICC_dfree1(DVEC)
+
+   USE RICC_Shared_Data, ONLY: MaxCor
+
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: DVEC(:)
+
+   if(ALLOCATED(DVEC))then
+     MaxCor = MaxCor + SIZE(DVEC)
+     DEALLOCATE(DVEC)
+   end if
+
+   END SUBROUTINE RICC_dfree1
+
+   SUBROUTINE RICC_dfree2(DMAT)
+ 
+   USE RICC_Shared_Data, ONLY: MaxCor
+
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: DMAT(:,:)
+   
+   if(ALLOCATED(DMAT))then
+     MaxCor = MaxCor + SIZE(DMAT)
+     DEALLOCATE(DMAT)
+   end if
+
+   END SUBROUTINE RICC_dfree2
+
+   SUBROUTINE RICC_dfree3(D3d)
+
+   USE RICC_Shared_Data, ONLY: MaxCor
+
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: D3d(:,:,:)
+
+   if(ALLOCATED(D3d))then
+     MaxCor = MaxCor + SIZE(D3d)
+     DEALLOCATE(D3d)
+   end if
+
+   END SUBROUTINE RICC_dfree3
+
+   SUBROUTINE RICC_dfree4(D4d)
+
+   USE RICC_Shared_Data, ONLY: MaxCor
+
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: D4d(:,:,:,:)
+
+   if(ALLOCATED(D4d))then
+     MaxCor = MaxCor + SIZE(D4d)
+     DEALLOCATE(D4d)
+   end if
+
+   END SUBROUTINE RICC_dfree4
+
+!-------------------------------------------------------------------------
+! The following are used for allocating or freeing private arrays in
+! omp parallel regions. The only difference is that the following routines
+! do not use the global variable MaxCor, but threadprivate copies (MemThrd)
+! of available replicated memory, which in turn are derived from MaxCor.
+!-------------------------------------------------------------------------
+
+   SUBROUTINE RICC_dalloc1thrd(ilen,DVEC,MemThrd)
+
+   USE RICC_Shared_Data, ONLY: LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen
+   INTEGER,INTENT(INOUT)                 :: MemThrd
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: DVEC(:)
+
+   if(ilen .LE. MemThrd)then
+     ALLOCATE(DVEC(ilen))
+     MemThrd = MemThrd - ilen
+   else
+     write(LuOut,100) MemThrd,ilen
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT THREAD MEMORY AVAILABLE: ',I12,            &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc1thrd
+
+   SUBROUTINE RICC_dalloc2thrd(ilen1,ilen2,DMAT,MemThrd)
+
+   USE RICC_Shared_Data, ONLY: LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen1,ilen2
+   INTEGER,INTENT(INOUT)                 :: MemThrd
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: DMAT(:,:)
+
+   if(ilen1*ilen2 .LE. MemThrd)then
+     ALLOCATE(DMAT(ilen1,ilen2))
+     MemThrd = MemThrd - ilen1*ilen2
+   else
+     write(LuOut,100) MemThrd,ilen1*ilen2
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT THREAD MEMORY AVAILABLE: ',I12,            &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc2thrd
+
+   SUBROUTINE RICC_dalloc3thrd(ilen1,ilen2,ilen3,D3d,MemThrd)
+
+   USE RICC_Shared_Data, ONLY: MaxCor,LuOut
+
+   INTEGER,INTENT(IN)                    :: ilen1,ilen2,ilen3
+   INTEGER,INTENT(INOUT)                 :: MemThrd
+   REAL(KIND=dp),ALLOCATABLE,INTENT(OUT) :: D3d(:,:,:)
+
+   if(ilen1*ilen2*ilen3 .LE. MemThrd)then
+     ALLOCATE(D3d(ilen1,ilen2,ilen3))
+     MemThrd = MemThrd - ilen1*ilen2*ilen3
+   else
+     write(LuOut,100) MemThrd,ilen1*ilen2*ilen3
+     call abrt
+   end if
+
+   100 format(1X,'INSUFFICIENT THREAD MEMORY AVAILABLE: ',I12,            &
+              ' REQUIRED: ',I12)
+
+   END SUBROUTINE RICC_dalloc3thrd
+
+   SUBROUTINE RICC_dfree1thrd(DVEC,MemThrd)
+
+   INTEGER,INTENT(INOUT)                   :: MemThrd
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: DVEC(:)
+
+   if(ALLOCATED(DVEC))then
+     MemThrd = MemThrd + SIZE(DVEC)
+     DEALLOCATE(DVEC)
+   end if
+
+   END SUBROUTINE RICC_dfree1thrd
+
+   SUBROUTINE RICC_dfree2thrd(DMAT,MemThrd)
+
+   INTEGER,INTENT(INOUT)                   :: MemThrd
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: DMAT(:,:)
+
+   if(ALLOCATED(DMAT))then
+     MemThrd = MemThrd + SIZE(DMAT)
+     DEALLOCATE(DMAT)
+   end if
+
+   END SUBROUTINE RICC_dfree2thrd
+
+   SUBROUTINE RICC_dfree3thrd(D3d,MemThrd)
+
+   INTEGER,INTENT(INOUT)                   :: MemThrd
+   REAL(KIND=dp),ALLOCATABLE,INTENT(INOUT) :: D3d(:,:,:)
+
+   if(ALLOCATED(D3d))then
+     MemThrd = MemThrd + SIZE(D3d)
+     DEALLOCATE(D3d)
+   end if
+
+   END SUBROUTINE RICC_dfree3thrd
+
+ END MODULE RICC_Memalloc
+
+!>    MODULE RICC_MAT        
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Core module that defines a general 2,4,or
+!>             6 index tensor for use in the RICC implementation.
+!>             
+!>    @detail Type-bound procedures:
+!>            InitMat     : Allocate replicated memory 
+!>            DelMat      : Destroy the array and free memory
+!>            SetZERO     : Set matrix to 'ZILCH'    
+!>            SymUnPack   : For (R)T2, (R)L2, unpack permutational symmetry
+!>                          and sort in a specific order, e.g., 1234, 1324.
+!>                          In addition, form contravariant if necessary.
+!>            SymPack     : The converse of SymUnPack
+!>            PrintTensor : Prints any 2 or 4 index tensor
+!>
+
+ MODULE RICC_MAT
+
+   USE RICC_GMS_globals, ONLY: maswrk
+   USE RICC_Shared_Data
+   USE RICC_memalloc
+   USE RICC_procs
+
+   IMPLICIT NONE
+    
+   PRIVATE
+
+!------------------------------------------------------------------------
+! Declarations
+!------------------------------------------------------------------------
+
+   TYPE, PUBLIC :: WMAT
+         
+         PRIVATE
+         REAL(KIND=dp),ALLOCATABLE,PUBLIC :: MAT(:,:)
+         CHARACTER(LEN=:),ALLOCATABLE     :: MatName 
+         CHARACTER(LEN=:),ALLOCATABLE     :: phtype
+
+         PROCEDURE(PrintMat),POINTER,PRIVATE :: pPrintMat => NULL() 
+
+         CONTAINS
+
+            PROCEDURE :: InitMAT
+            PROCEDURE :: GetName
+            PROCEDURE :: GetPhtype
+            PROCEDURE :: SetZERO 
+            PROCEDURE :: SymPack
+            PROCEDURE :: SymUnPack1234
+            PROCEDURE :: SymUnPack1324
+            PROCEDURE :: PrintTensor
+            PROCEDURE :: DelMat
+
+   END TYPE WMAT
+
+   ABSTRACT INTERFACE 
+       SUBROUTINE PrintMat(this)
+         IMPORT :: WMAT  
+         CLASS(WMAT),INTENT(IN) :: this
+       END SUBROUTINE PrintMat
+   END INTERFACE 
+
+!------------------------------------------------------------------------
+! Type-bound procedures
+!------------------------------------------------------------------------
+
+   CONTAINS
+
+   SUBROUTINE InitMAT(this,matname,phtype)
+
+   CLASS(WMAT),INTENT(INOUT)    :: this
+   CHARACTER(LEN=*),INTENT(IN)  :: MatName
+   CHARACTER(LEN=*),INTENT(IN)  :: phtype
+   CHARACTER(LEN=:),ALLOCATABLE :: lname,ltype
+   INTEGER,ALLOCATABLE          :: bounds(:)
+   INTEGER                      :: i,rdim,cdim,istat
+
+   lname = TRIM(ADJUSTL(MatName))  
+   ltype = TRIM(ADJUSTL(phtype)) 
+
+   this%matname = lname
+   this%phtype  = ltype 
+
+   call RICC_ialloc1(LEN(ltype),bounds)
+
+   do i=1,LEN(ltype)
+      SELECT CASE(ltype(i:i))
+          CASE('h')
+             bounds(i) = no
+          CASE('p')
+             bounds(i) = nu
+          CASE('o')
+             bounds(i) = nocc
+          CASE('x')
+             bounds(i) = nauxbas
+      END SELECT
+   end do
+
+   SELECT CASE(LEN(ltype))
+      CASE(2)
+        rdim = bounds(1)
+        cdim = bounds(2)
+      CASE(3)
+        rdim = bounds(1)*bounds(2)
+        cdim = bounds(3)
+      CASE(4)
+
+!-------------------------------------------------------------------------
+! A permutational symmetry-packed storage for T2/RT2 makes a lot of sense 
+! in the RI-CC context. The T2 matrix needs to be stored on the disk for 
+! DIIS extrapolation during iterative solution of CCSD equations. Symmetry
+! -packed storage not only reduces shared memory requirements, but also 
+! reduces disk I/O. For tensor contractions and for updating RT2 residuals, 
+! we need to unpack the T2 and RT2 arrays. This price is worth paying as 
+! long as disk I/O is diminished.
+!-------------------------------------------------------------------------
+
+        if(lname.EQ.'T2' .OR. lname.EQ.'RT2')then
+          rdim = bounds(1)*bounds(2)
+          cdim = bounds(3)*(bounds(3)+1)/2
+        else if(lname.EQ.'L2' .OR. lname.EQ.'RL2')then
+          rdim = bounds(1)*(bounds(1)+1)/2
+          cdim = bounds(3)*bounds(4)
+        else
+          rdim = bounds(1)*bounds(2)
+          cdim = bounds(3)*bounds(4)
+        end if
+      CASE(6)
+        rdim = bounds(1)*bounds(2)*bounds(3)
+        cdim = bounds(4)*bounds(5)*bounds(6)
+      CASE DEFAULT
+        if(maswrk)write(LuOut,*)'@TYPE WMAT,InitMAT: WE DEAL ONLY WITH',  &
+                                '2,3,4 & 6 INDEX TENSORS'
+        call abrt
+   END SELECT  
+
+   call RICC_dalloc2(rdim,cdim,this%MAT)
+
+   call RICC_ifree1(bounds)  
+
+   END SUBROUTINE InitMAT
+
+   FUNCTION GetName(this) RESULT(mname)
+    
+   CLASS(WMAT),INTENT(IN)       :: this
+   CHARACTER(LEN=:),ALLOCATABLE :: mname   
+
+   mname = this%MatName
+
+   END FUNCTION 
+
+   FUNCTION GetPhtype(this) RESULT(indtype)
+    
+   CLASS(WMAT),INTENT(IN)       :: this
+   CHARACTER(LEN=:),ALLOCATABLE :: indtype  
+
+   indtype = this%phtype
+
+   END FUNCTION 
+
+   SUBROUTINE SetZERO(this)
+
+   CLASS(WMAT),INTENT(INOUT) :: this
+   
+   ASSOCIATE(MAT => this%MAT)
+       call RICC_dzero(1,UBOUND(MAT,1),1,UBOUND(MAT,2),MAT)
+   END ASSOCIATE
+
+   END SUBROUTINE SetZERO
+
+   SUBROUTINE SymPack(this,RMat)
+
+   CLASS(WMAT),INTENT(INOUT) :: this
+   REAL(KIND=dp),INTENT(IN)  :: RMat(:,:)
+   REAL(KIND=dp)             :: x
+   INTEGER                   :: i,j,ijsym,ij,a,b,ab,ba    
+
+   if(this%phtype .EQ. 'pphh' .OR. this%phtype .EQ. 'hhpp')then
+     do ijsym=1,noo
+        x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(ijsym,dp)))
+        i = FLOOR(x)
+        j = ijsym - i*(i-1)/2
+        if(j .EQ. 0)then
+           i = i-1
+           j = i
+        end if
+        ij = (i-1)*no+j
+        do a=1,nu
+        do b=1,a
+           ab = (a-1)*nu+b
+           ba = (b-1)*nu+a
+           if(this%phtype .EQ. 'pphh')then
+                      this%MAT(ab,ijsym) = RMat(ab,ij)
+                      this%MAT(ba,ijsym) = RMat(ba,ij)
+           else if(this%phtype .EQ. 'hhpp')then
+                      this%MAT(ijsym,ab) = RMat(ij,ab)
+                      this%MAT(ijsym,ba) = RMat(ij,ba)
+           end if
+        end do
+        end do
+   end do
+
+   else
+      write(LuOut,*)'SymPack applies only to T2 & L2 matrices or'
+      write(LuOut,*)'the corresponding residuals.'
+      call abrt
+   end if
+
+   END SUBROUTINE SymPack
+
+   SUBROUTINE SymUnPack1234(this,rdim,cdim,RMat)
+
+   CLASS(WMAT),INTENT(IN)    :: this
+   INTEGER,INTENT(IN)        :: rdim,cdim 
+   REAL(KIND=dp),INTENT(OUT) :: RMat(rdim,cdim)
+   REAL(KIND=dp)             :: x
+   INTEGER                   :: i,j,ijsym,ij,ji,a,b,ab,ba    
+   INTEGER                   :: Mxthreads,Nthreads
+
+   if(this%phtype .EQ. 'pphh' .OR. this%phtype .EQ. 'hhpp')then
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,noo)
+   call omp_set_dynamic(.false.)
+
+!$omp parallel do default(none) num_threads(Nthreads) schedule(dynamic,1) &
+#ifndef __ibmxl__
+!$omp shared(this)                                                        &
+#endif
+!$omp shared(no,nu,noo,RMat)                                              &
+!$omp private(ijsym,i,j,ij,ji,a,b,ab,ba,x)
+
+     do ijsym=1,noo
+        x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(ijsym,dp)))
+        i = FLOOR(x)
+        j = ijsym - i*(i-1)/2
+        if(j .EQ. 0)then
+           i = i-1
+           j = i
+        end if
+        ij = (i-1)*no+j
+        ji = (j-1)*no+i
+        do a=1,nu
+        do b=1,a
+           ab = (a-1)*nu+b
+           ba = (b-1)*nu+a
+           if(this%phtype .EQ. 'pphh')then
+                      RMat(ab,ij) = this%MAT(ab,ijsym)
+                      RMat(ba,ij) = this%MAT(ba,ijsym)
+           if(i.NE.j) RMat(ba,ji) = this%MAT(ab,ijsym)
+           if(i.NE.j) RMat(ab,ji) = this%MAT(ba,ijsym)
+           else if(this%phtype .EQ. 'hhpp')then
+                      RMat(ij,ab) = this%MAT(ijsym,ab)
+                      RMat(ij,ba) = this%MAT(ijsym,ba)
+           if(i.NE.j) RMat(ji,ba) = this%MAT(ijsym,ab)
+           if(i.NE.j) RMat(ji,ab) = this%MAT(ijsym,ba)
+           end if
+        end do
+        end do
+   end do
+
+!$omp end parallel do
+
+   else
+      write(LuOut,*)'SymUnPack applies only to T2 & L2 matrices or'
+      write(LuOut,*)'the corresponding residuals.'
+      call abrt
+   end if
+
+   END SUBROUTINE SymUnPack1234
+
+   SUBROUTINE SymUnPack1324(this,dfact,efact,rdim,cdim,RMat)
+
+   CLASS(WMAT),INTENT(IN)    :: this
+   INTEGER,INTENT(IN)        :: rdim,cdim
+   REAL(KIND=dp),INTENT(OUT) :: RMat(rdim,cdim)
+   REAL(KIND=dp),INTENT(IN)  :: dfact,efact
+   REAL(KIND=dp),ALLOCATABLE :: Tab(:,:)
+   REAL(KIND=dp)             :: x
+   INTEGER                   :: i,j,ijsym,Mxthreads,Nthreads
+   INTEGER                   :: iamin,iamax,jbmin,jbmax,MemThrd
+
+   if(this%phtype .EQ. 'pphh' .OR. this%phtype .EQ. 'hhpp')then
+
+   Mxthreads = omp_get_max_threads() 
+   Nthreads  = Min(Mxthreads,noo)
+   call omp_set_dynamic(.false.)
+!-------------------------------------------------------------------------   
+! Check available memory and adjust permissible num_threads
+!-------------------------------------------------------------------------   
+   MemThrd = nu2
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads =  Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads=1 
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+#ifndef __ibmxl__
+!$omp shared(this)                                                        &
+#endif
+!$omp shared(nu,noo,nu2,dfact,efact,RMat)                                 &
+!$omp private(ijsym,i,j,iamin,iamax,jbmin,jbmax,x,Tab)                    &
+!$omp firstprivate(MemThrd)
+      
+   call RICC_dalloc2thrd(nu,nu,Tab,MemThrd)
+
+!$omp do schedule(dynamic,1)
+
+     do ijsym=1,noo
+        x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(ijsym,dp)))
+        i = FLOOR(x)
+        j = ijsym - i*(i-1)/2
+        if(j .EQ. 0)then
+           i = i-1
+           j = i
+        end if
+        iamin = (i-1)*nu+1
+        iamax = i*nu 
+        jbmin = (j-1)*nu+1
+        jbmax = j*nu 
+
+        call RICC_dzero(1,nu,1,nu,Tab)
+
+        block_direx: if(dfact .NE. ZERO)then
+
+                     if(this%phtype .EQ. 'pphh')then
+                       call DAXPY(nu2,dfact,this%MAT(:,ijsym),1,Tab,1)
+                     else if(this%phtype .EQ. 'hhpp')then
+                       call DAXPY(nu2,dfact,this%MAT(ijsym,:),1,Tab,1)
+                     end if
+                     call DAXPY(nu2,efact,TRANSPOSE(Tab),1,Tab,1) 
+
+        else block_direx
+
+                     if(this%phtype .EQ. 'pphh')then
+                       call DCOPY(nu2,this%MAT(:,ijsym),1,Tab,1)
+                     else if(this%phtype .EQ. 'hhpp')then
+                       call DCOPY(nu2,this%MAT(ijsym,:),1,Tab,1)
+                     end if
+
+                     call DCOPY(nu2,TRANSPOSE(Tab),1,Tab,1) 
+                     call DSCAL(nu2,efact,Tab,1)
+
+        end if block_direx
+
+        call DCOPY(nu2,Tab,1,RMat(jbmin:jbmax,iamin:iamax),1)
+        if(j .NE. i)                                                      &
+        call DCOPY(nu2,TRANSPOSE(Tab),1,RMat(iamin:iamax,jbmin:jbmax),1)
+
+     end do
+
+!$omp end do nowait
+
+   call RICC_dfree2thrd(Tab,MemThrd)    
+
+!$omp end parallel
+
+   else
+      write(LuOut,*)'SymUnPack applies only to T2 & L2 matrices or'
+      write(LuOut,*)'the corresponding residuals.'
+      call abrt
+   end if
+
+   END SUBROUTINE SymUnPack1324
+
+   SUBROUTINE DelMat(this)
+
+   CLASS(WMAT),INTENT(INOUT) :: this
+
+   call RICC_dfree2(this%MAT)
+
+   END SUBROUTINE DelMat
+
+   SUBROUTINE PrintMat2(this)
+
+   CLASS(WMAT),INTENT(IN) :: this
+   INTEGER                :: i,j,icount,nsz(2),nskp(2)
+
+   loop_indtype: do i=1,2
+                 SELECT CASE(this%phtype(i:i))
+                     CASE('h')
+                       nsz(i)  = no
+                       nskp(i) = 0
+                     CASE('p')
+                       nsz(i)  = nu
+                       nskp(i) = no
+                 END SELECT
+   end do loop_indtype
+
+   icount=0
+   loop_j: do j=1,nsz(2)
+   loop_i: do i=1,nsz(1)
+           if(ABS(this%MAT(i,j)) .GE. athrsh)then
+             icount = icount + 1
+             if(icount.EQ.1)write(LuOut,9000)this%MatName
+             write(LuOut,9001)i+nskp(1),j+nskp(2),this%MAT(i,j)
+           end if
+   end do loop_i
+   end do loop_j 
+   if(icount .NE. 0)write(LuOut,9002)
+
+   9000 format(/,10X,'------ LARGEST ',A7,' AMPLITUDES -----')
+   9001 format(1X,I4,2X,I4,5X,F15.10)
+   9002 format(10X,'---------------------------------------',/)
+
+   END SUBROUTINE PrintMat2
+
+   SUBROUTINE PrintMat4(this)
+
+   CLASS(WMAT),INTENT(IN)    :: this
+   INTEGER                   :: i,j,k,l,ij,kl,icount,nsz(4),nskp(4)
+   REAL(KIND=dp),ALLOCATABLE :: RMat(:,:)
+
+   if(this%phtype .EQ. 'pphh')then
+     call RICC_dalloc2(nu2,no2,RMat)
+     call this%SymUnPack1234(nu2,no2,RMat)
+   else if(this%phtype .EQ. 'hhpp')then
+     call RICC_dalloc2(no2,nu2,RMat)
+     call this%SymUnPack1234(no2,nu2,RMat)
+   else
+     call RICC_dalloc2(SIZE(this%MAT,1),SIZE(this%MAT,2),RMat)
+     do i=1,SIZE(this%MAT,1)
+        call DCOPY(SIZE(this%MAT,2),this%MAT(i,:),1,RMat(i,:),1)
+     end do
+   end if
+
+   loop_indtype: do i=1,4
+                 SELECT CASE(this%phtype(i:i))
+                     CASE('h')
+                       nsz(i)  = no
+                       nskp(i) = 0
+                     CASE('p')
+                       nsz(i)  = nu
+                       nskp(i) = no
+                 END SELECT
+   end do loop_indtype
+
+   icount = 0
+   loop_k: do k=1,nsz(3)
+   loop_l: do l=1,nsz(4)
+           kl = (k-1)*nsz(4) + l
+   loop_i: do i=1,nsz(1)
+   loop_j: do j=1,nsz(2)
+           ij = (i-1)*nsz(2) + j
+           if(ABS(RMat(ij,kl)) .GE. athrsh)then
+             icount = icount + 1
+             if(icount.EQ.1)write(LuOut,9000)this%MatName
+             write(LuOut,9001)i+nskp(1),j+nskp(2),k+nskp(3),              &
+                              l+nskp(4),RMat(ij,kl)
+          end if
+   end do loop_j
+   end do loop_i
+   end do loop_l
+   end do loop_k
+   if(icount.NE.0)write(LuOut,9002)
+
+   9000 format(/,1X,'------ Largest ',A7,' amplitudes -----')
+   9001 format(1X,I4,2X,I4,2X,I4,2X,I4,2X,F15.10)
+   9002 format(1X,'---------------------------------------',/)
+
+   call RICC_dfree2(RMat)
+
+   END SUBROUTINE PrintMat4
+
+   SUBROUTINE PrintTensor(this)
+
+   CLASS(WMAT),INTENT(INOUT) :: this
+   
+   SELECT CASE(LEN(this%phtype))
+      CASE(2)
+        this%pPrintMat => PrintMat2
+      CASE(4)
+        this%pPrintMat => PrintMat4
+      CASE DEFAULT
+        if(maswrk)write(LuOut,*)'@TYPE WMAT, PrintTensor: WE CAN ONLY',   &
+                                'PRINT 2 & 4 INDEX TENSORS, USE PRSQ'
+        call abrt 
+   END SELECT 
+
+   call this%pPrintMat()
+ 
+   NULLIFY(this%pPrintMat)
+
+   END SUBROUTINE PrintTensor
+   
+ END MODULE RICC_MAT

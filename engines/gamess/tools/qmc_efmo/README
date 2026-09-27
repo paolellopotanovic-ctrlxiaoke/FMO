@@ -1,0 +1,36 @@
+
+   QMCPACK-GAMESS interface for QMC-EFMO method based on Python/Fireworks scritps 
+together with llustrative examples: A) "wat16": a cluster of 16 water molecules 
+and B) "afo": ethanol and water molecules (inculdes fragmentation across a covalent 
+bond). Both examples are addapted for the Edison machine (NERSC).
+
+   Steps of the QMC-EFMO process:
+
+1) ./qmc_efmo_pre.py wat16 (or ./qmc_efmo_pre.py afo) 
+
+(A pre-processing step that parses the GAMESS EFMO "inp" and "dat" input/output files 
+and produces fragment information that is needed for the actual QMC-EFMO run.)
+
+2a) ./qmc_efmo_mon.py
+
+2b) ./qmc_efmo_dim.py
+
+(The actual QMC-EFMO run that consists of GAMESS and QMCPACK runs on monomers and dimers.)
+
+3) ./qmc_efmo_post.py 
+
+(A post-processing step that assembles the energy outputs from GAMESS and QMCPACK into
+the final QMC-EFMO energy and error.)
+
+   The file structure:
+
+* main directory: README file, the driver scripts qmc_efmo_pre.py, qmc_efmo_mon.py, qmc_efmo_dim.py and 
+qmc_efmo_post.py; GAMESS input/output files of the 16 water-cluster and ethanol+water examples: wat16.inp, 
+wat16.log, and wat16.dat; afo.inp, afo.log, and afo.dat.
+
+* scripts (subdirectory): a library of Python scripts
+
+* fireworks (subdirectory): files related to Fireworks
+
+* templ_files (subdirectory): template files
+

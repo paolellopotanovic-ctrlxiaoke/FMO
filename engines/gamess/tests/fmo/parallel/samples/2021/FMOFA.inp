@@ -1,0 +1,30 @@
+! Fluctuation analysis for FMO-MP2/MD (NVE).
+!Averaging         3 steps the energies in a.u.=  627.52056295 kcal/mol are
+!                 Epot0           <DEpot>           Ekin0           <DEkin>
+!En(MD)=     -228.3744703519    0.0003303682      0.0113969377   -0.0003299552
+!
+ $contrl scftyp=rhf runtyp=md ispher=1 mplevl=2 $end
+ $system MWORDS=100 memddi=10 BALTYP=NXTVAL modio=3072 $end
+ $gddi ngroup=1 $end
+ $basis  gbasis=n31 ngauss=6 ndfunc=0 $end
+ $MD dt=1.0d-16 MBT=.t. MBR=.t. nsteps=3 JEVERY=1 KEVERY=1 modflu=1 $END 
+ $scf dirscf=.t. $end
+ $fmo    nfrag=3 nacut=3 modgrd=42 $end
+ $fmoxyz
+O  O        .000000     .000000     .000000
+H  H        .000000     .000000     .957200
+H  H        .926627     .000000    -.239987
+O  O       2.542027     .893763   -1.001593
+H  H       1.991815    1.623962   -1.284979
+H  H       2.958433     .581215   -1.804806
+O  O        .162059    2.462918   -1.477183
+H  H       -.189749    1.755643    -.936605
+H  H       -.375542    2.449889   -2.269046
+ $end
+ $data
+Basis set input, with no atomic coordinates
+C1
+h-1 1
+o-1 8
+ $end
+

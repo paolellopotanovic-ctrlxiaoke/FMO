@@ -1,0 +1,15 @@
+{
+  "parse_header" : "FED COUPLINGS",
+  "parse_group" : [
+   {
+     "regex_string" : "FED COUPLINGS BETWEEN SINGLET EXCITED STATES*.*$",
+     "parse_name"   : "FED COUPLING (EV)",
+     "parse_value_index" : 3,
+     "parse_line_offset" : 3,
+     "parse_precision" : 7,
+     "parse_tolerance" : 0.0000005,
+     "parse_multiple_lines" : 45,
+     "parse_multiple_label" : "COUPLING STATE"
+   }
+  ]
+}

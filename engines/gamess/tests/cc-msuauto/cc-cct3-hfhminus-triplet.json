@@ -1,0 +1,100 @@
+{
+  "name": "cc-cct3-hfhminus-triplet.log",
+  "validation": [
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-100.3591573557",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CCSDt",
+      "name": "CCSDt     ENERGY",
+      "value": "-100.5515302785",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "GROUND-STATE CC(t;3),A ENERGY",
+      "value": "-100.5528015256",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "GROUND-STATE CC(t;3),B ENERGY",
+      "value": "-100.5527672944",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "GROUND-STATE CC(t;3),C ENERGY",
+      "value": "-100.5530525180",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "GROUND-STATE CC(t;3),D ENERGY",
+      "value": "-100.5530489409",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "CCSDt     ENERGY",
+      "value": "-100.5515302785",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "CC(t;3),A ENERGY",
+      "value": "-100.5528015256",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+      "name": "CC(t;3)   ENERGY",
+      "value": "-100.5530489409",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SPIN",
+      "name": "S-SQUARED",
+      "value": "2.000",
+      "type": "float",
+      "precision": 3,
+      "tolerance": 0.5
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "0.000000",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

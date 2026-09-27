@@ -1,0 +1,20 @@
+#!/bin/csh
+set VBE0=-76.0281371380
+set ROH0=0.94965
+set RHH0=1.57044
+
+set VBE=`grep "DIFF OF MACRO" $1 | tail -1 | awk '{ print $8 }'`0
+set nROH=0`grep -n INTERNUCLEAR $1 | tail -1 | cut -d: -f1 | awk '{ print $1+7 }'`
+set ROH=`sed -n -e "$nROH p" $1 | awk '{ print $3 }'`
+set nRHH=0`grep -n INTERNUCLEAR $1 | tail -1 | cut -d: -f1 | awk '{ print $1+7 }'`
+set RHH=`sed -n -e "$nRHH p" $1 | awk '{ print $5 }'`
+
+set ierr=0
+set VBEerr=`$chkabs $VBE $VBE0 $tolE`
+if($status != 0) set ierr=1 
+set ROHerr=`$chkabs $ROH $ROH0 $tolR`
+if($status != 0) set ierr=1
+set RHHerr=`$chkabs $RHH $RHH0 $tolR`
+if($status != 0) set ierr=1
+echo -n "VBEerr=$VBEerr ROHerr=$ROHerr RHHerr=$RHHerr."
+exit $ierr 

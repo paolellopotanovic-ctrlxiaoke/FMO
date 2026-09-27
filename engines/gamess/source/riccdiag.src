@@ -1,0 +1,2995 @@
+
+ MODULE RICCDIAG
+
+   USE RICC_GMS_globals, ONLY: maswrk
+   USE RICC_ints,        ONLY: NormH 
+   USE RICC_Shared_Data
+   USE RICC_memalloc
+   USE RICC_procs
+   USE RICC_MAT
+
+   IMPLICIT NONE
+
+!------------------------------------------------------------------------
+! Declaration:
+!------------------------------------------------------------------------
+
+! The T1/T2-transformed Hamiltonian 
+
+   TYPE, PUBLIC :: HbarT1
+
+         REAL(KIND=dp),ALLOCATABLE :: FBHH(:,:),FBHP(:,:),FBPP(:,:)
+         REAL(KIND=dp),ALLOCATABLE :: WmnX(:,:,:),WmeX(:,:,:),WefX(:,:,:)
+
+         CONTAINS
+
+            PROCEDURE :: Init_HbarT1
+            PROCEDURE :: Del_HbarT1
+            PROCEDURE :: SetZERO
+
+   END TYPE HbarT1
+
+! Triangular index packing in 3D for triples corrections
+
+   TYPE, PRIVATE :: Tri3D
+
+         INTEGER :: ind1,ind2,ind3
+
+   END TYPE Tri3D
+
+!------------------------------------------------------------------------
+! Procedures:
+!------------------------------------------------------------------------
+   CONTAINS
+
+!------------------------------------------------------------------------
+! Type-bound procedures: Creator and destructor for replicated memory
+!------------------------------------------------------------------------
+
+   SUBROUTINE Init_HbarT1(this,MatName)
+
+   CLASS(HbarT1),INTENT(INOUT) :: this
+   CHARACTER(LEN=*),INTENT(IN) :: MatName
+
+   SELECT CASE(MatName)
+   CASE('FBHH')
+        call RICC_dalloc2(no,no,this%FBHH)
+   CASE('FBHP')
+        call RICC_dalloc2(no,nu,this%FBHP)
+   CASE('FBPP')
+        call RICC_dalloc2(nu,nu,this%FBPP)
+   CASE('WmnX')
+        call RICC_dalloc3(no,nauxbas,no,this%WmnX)
+   CASE('WmeX')
+        call RICC_dalloc3(nu,nauxbas,no,this%WmeX)
+   CASE('WefX')
+        call RICC_dalloc3(nu,nauxbas,nu,this%WefX)
+   END SELECT
+
+   END SUBROUTINE Init_HbarT1
+
+   SUBROUTINE Del_HbarT1(this,MatName)
+
+   CLASS(HbarT1),INTENT(INOUT) :: this
+   CHARACTER(LEN=*),INTENT(IN) :: MatName
+
+   SELECT CASE(MatName)
+   CASE('FBHH')
+        call RICC_dfree2(this%FBHH)
+   CASE('FBHP')
+        call RICC_dfree2(this%FBHP)
+   CASE('FBPP')
+        call RICC_dfree2(this%FBPP)
+   CASE('WmnX')
+        call RICC_dfree3(this%WmnX)
+   CASE('WmeX')
+        call RICC_dfree3(this%WmeX)
+   CASE('WefX')
+        call RICC_dfree3(this%WefX)
+   END SELECT
+
+   END SUBROUTINE Del_HbarT1
+
+   SUBROUTINE SetZERO(this,MatName)
+
+   CLASS(HbarT1),INTENT(INOUT) :: this
+   CHARACTER(LEN=*),INTENT(IN) :: MatName
+
+   SELECT CASE(MatName)
+   CASE('FBHH')
+        call RICC_dzero(1,no,1,no,this%FBHH)
+   CASE('FBHP')
+        call RICC_dzero(1,no,1,nu,this%FBHP)
+   CASE('FBPP')
+        call RICC_dzero(1,nu,1,nu,this%FBPP)
+   CASE('WmnX')
+        call RICC_dzero(1,no*nauxbas,1,no,this%WmnX)
+   CASE('WmeX')
+        call RICC_dzero(1,nu*nauxbas,1,no,this%WmeX)
+   CASE('WefX')
+        call RICC_dzero(1,nu*nauxbas,1,nu,this%WefX)
+   END SELECT
+
+   END SUBROUTINE SetZERO
+
+!*MODULE RICCDIAG  * DECK RICC_SD_PPL_A
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    June 8, 2020
+!>
+!>    @brief   Constructs the 'most expensive' particle-particle
+!>             ladder term in doubles residuals. The standard
+!>             method proposed by Scuseria, Janssen and Schaefer
+!>             (JCP, 89, 7382, 1988) is followed. Purely MO-based
+!>             integrals and cluster amplitudes are employed.
+!>             This can be afforded due to the RI factorization
+!>             of the 2-ERIs. 
+!>
+!>
+
+   SUBROUTINE RICC_SD_PPL_A(HBT1,T,RT,fact)
+
+   TYPE(HbarT1),INTENT(IN)   :: HBT1
+   TYPE(WMAT),INTENT(IN)     :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   REAL(KIND=dp),INTENT(IN)  :: fact
+   REAL(KIND=dp),ALLOCATABLE :: WPP(:,:),Tcdij(:,:),VU4(:,:),Sabij(:,:)
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:),OMPWD(:,:)
+   REAL(KIND=dp)             :: x
+   INTEGER                   :: ij,a,b,ab,ba,absym,c,d,cdsym
+   INTEGER                   :: DDI_NP,DDI_ME,abDDIs,abDDIe,abDDIl,abDDIof
+   INTEGER                   :: abOMPs,abOMPe,abOMPl,abOMPm,abOMPof
+   INTEGER                   :: MemIn,MemThrd,Mxthreads,Nthreads,Ithread
+
+   MemIn = MaxCor   
+
+!-------------------------------------------------------------------------
+! Split loop over outer index pair a>=b (length=nuu) over DDI ranks plus
+! OpenMP threads.
+!-------------------------------------------------------------------------
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIWD)
+   call RICC_LoopDist(DDIWD,DDI_NP,1,nuu)
+   abDDIs  = DDIWD(DDI_ME,1)
+   abDDIe  = DDIWD(DDI_ME,2)
+   abDDIl  = abDDIe-abDDIs+1
+                    abDDIof = 0
+   if(DDI_ME .GT. 0)abDDIof = DDIWD(DDI_ME-1,2)
+   call RICC_ifree2(DDIWD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nuu-1)then
+
+   Mxthreads = omp_get_max_threads()
+   call omp_set_dynamic(.false.)
+
+   call RICC_dalloc2(nuu,noo,Tcdij)
+!------------------------------------------------------------------------
+! Symmetric OR antisymmetric combinations of T2 amplitudes:
+! Tpls(a>=b,i>=j) = T2(ab,ij) + T2(ba,ij)*(1-Delta(a,b))
+! Tmns(a>=b,i>=j) = T2(ab,ij) - T2(ba,ij)
+!------------------------------------------------------------------------
+   Nthreads  = MIN(Mxthreads,nuu)
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(nu,noo,nuu,fact,Tcdij,T)                                     &
+!$omp private(ij,a,b,ab,ba,absym,x)
+!$omp do schedule(static)
+
+   loop_t2_sort: do absym=1,nuu
+                 x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(absym,dp)))
+                 a = FLOOR(x)
+                 b = absym - a*(a-1)/2
+                 if(b .EQ. 0)then
+                   a = a-1
+                   b = a
+                 end if
+                 ab = (a-1)*nu+b
+                 ba = (b-1)*nu+a
+
+                 if(fact .EQ. ONE)then
+                   do ij=1,noo
+                      if(a .EQ. b)then
+                        Tcdij(absym,ij)=T(2)%MAT(ab,ij)
+                      else
+                        Tcdij(absym,ij)=T(2)%MAT(ab,ij)+T(2)%MAT(ba,ij)
+                      end if
+                   end do
+                 else if(fact .EQ. ONEM)then
+                   do ij=1,noo
+                      Tcdij(absym,ij)=T(2)%MAT(ab,ij)-T(2)%MAT(ba,ij)
+                   end do
+                 end if
+
+   end do loop_t2_sort
+
+!$omp end do nowait
+!$omp end parallel
+
+   Nthreads   = MIN(Mxthreads,abDDIl)
+   ccnumth(8) = Nthreads
+
+   call RICC_ialloc20(Nthreads,2,OMPWD)
+   call RICC_LoopDist(OMPWD,Nthreads,abDDIs,abDDIe)
+
+   abOMPm = 0
+   do Ithread=0,Nthreads-1
+      abOMPs  = OMPWD(Ithread,1)
+      abOMPe  = OMPWD(Ithread,2)
+      abOMPl  = abOMPe-abOMPs+1
+      if(abOMPl .GT. abOMPm) abOMPm = abOMPl
+   end do
+!------------------------------------------------------------------------
+! (Maximum) memory need per thread. 
+!------------------------------------------------------------------------
+   MemThrd = abOMPm*nuu + abOMPm*noo + nu2
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(nu,noo,nuu,nauxbas,abDDIof,                                  &
+!$omp        OMPWD,fact,HBT1,Tcdij,RT)                                    &
+!$omp private(Ithread,ij,a,b,ab,ba,absym,abOMPs,abOMPe,                   &
+!$omp         abOMPl,abOMPof,c,d,cdsym,x,VU4,Sabij,WPP)                   &
+!$omp firstprivate(MemThrd)
+
+   Ithread = omp_get_thread_num()
+   abOMPs  = OMPWD(Ithread,1)
+   abOMPe  = OMPWD(Ithread,2)
+   abOMPl  = abOMPe-abOMPs+1
+
+                      abOMPof = abDDIof
+   if(ithread .NE. 0) abOMPof = OMPWD(ithread-1,2) 
+
+   call RICC_dalloc2thrd(abOMPl,nuu,VU4,MemThrd)
+   call RICC_dalloc2thrd(abOMPl,noo,Sabij,MemThrd)
+   call RICC_dalloc2thrd(nu,nu,WPP,MemThrd)
+
+   loop_ab: do absym=abOMPs,abOMPe
+            x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(absym,dp)))
+            a = FLOOR(x)
+            b = absym - a*(a-1)/2
+            if(b .EQ. 0)then
+              a = a-1
+              b = a
+            end if
+!------------------------------------------------------------------------
+! Assemble V4 integrals (the t1-transformed W^P_(a,b) intermediates)
+!------------------------------------------------------------------------
+            call DGEMM('N','T',nu,nu,nauxbas,ONE,HBT1%WefX(:,:,a),nu,     &
+                       HBT1%WefX(:,:,b),nu,ZERO,WPP,nu)  
+
+!------------------------------------------------------------------------
+! Symmetric OR antisymmetric combinations of 2ERIs:
+!------------------------------------------------------------------------
+            loop_c: do c=1,nu
+                    do d=1,c
+                    cdsym = c*(c-1)/2 + d
+                    VU4(absym-abOMPof,cdsym) = WPP(c,d)+ fact*WPP(d,c)
+                    end do
+            end do loop_c
+   end do loop_ab
+
+!------------------------------------------------------------------------
+! Now the actual contractions: either of the two at a time. 
+! Spls(i>=j,a>=b) = (1/2) * \sum_c,d Vpls(a>=b,c>=d) * Tpls(c>=d,i>=j)
+! Smns(i>=j,a>=b) = (1/2) * \sum_c,d Vmns(a>=b,c>=d) * Tmns(c>=d,i>=j)
+!------------------------------------------------------------------------
+
+           call DGEMM('N','N',abOMPl,noo,nuu,HALF,VU4,abOMPl,             &
+                      Tcdij,nuu,ZERO,Sabij,abOMPl)
+
+!------------------------------------------------------------------------
+! Finally, update doubles residuals: 
+! For a>=b: R(ab,i>=j) += Spls(i>=j,a>=b) + Smns(i>=j,a>=b)
+! For a<b : R(ba,i>=j) += Spls(i>=j,a>=b) - Smns(i>=j,a>=b)
+!------------------------------------------------------------------------
+
+   loop_ab_res: do absym=abOMPs,abOMPe
+                x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(absym,dp)))
+                a = FLOOR(x)
+                b = absym - a*(a-1)/2
+                if(b .EQ. 0)then
+                  a = a-1
+                  b = a
+                end if
+                ab = (a-1)*nu+b
+                ba = (b-1)*nu+a
+              
+                do ij=1,noo
+                   RT(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij)                    &
+                                      + Sabij(absym-abOMPof,ij)
+                   if(b .NE. a)then
+                   RT(2)%MAT(ba,ij) = RT(2)%MAT(ba,ij)                    &
+                                      + fact*Sabij(absym-abOMPof,ij)
+                   end if
+                end do
+   end do loop_ab_res
+
+   call RICC_dfree2thrd(VU4,MemThrd)
+   call RICC_dfree2thrd(Sabij,MemThrd)
+   call RICC_dfree2thrd(WPP,MemThrd)
+
+!$omp end parallel
+
+   call RICC_ifree2(OMPWD)
+   call RICC_dfree2(Tcdij)
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. nuu)call DDI_SYNC(3021)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_PPL_A.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_PPL_A
+
+!*MODULE RICCDIAG  * DECK RICC_SD_PPL_B
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    April 20, 2020
+!>
+!>    @brief   Constructs the 'most expensive' particle-particle
+!>             ladder term in doubles residuals. The standard
+!>             method proposed by Scuseria, Janssen and Schaefer
+!>             (JCP, 89, 7382, 1988) is followed. Purely MO-based
+!>             integrals and cluster amplitudes are employed. Here,
+!>             we adopt the strategy of minimizing replicated memory 
+!>             needs per thread. In particular, DGEMV is employed 
+!>             for the contraction rather than DGEMM. While
+!>             somewhat slower than RICC_SD_PPL_A, this subroutine
+!>             is anticipated to allow for farely large calculations. 
+!>
+!>
+
+   SUBROUTINE RICC_SD_PPL_B(HBT1,T,RT)
+
+   TYPE(HbarT1),INTENT(IN)   :: HBT1
+   TYPE(WMAT),INTENT(IN)     :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   REAL(KIND=dp),ALLOCATABLE :: WPP(:,:),Tpls(:,:),Tmns(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: Vpls(:),Vmns(:),Spls(:),Smns(:)
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:)
+   REAL(KIND=dp)             :: x
+   INTEGER                   :: ij,a,b,ab,ba,absym,c,d,cc
+   INTEGER                   :: DDI_NP,DDI_ME,abstrt,abend,ablen
+   INTEGER                   :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor   
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIWD)
+   call RICC_LoopDist(DDIWD,DDI_NP,1,nuu)
+   abstrt = DDIWD(DDI_ME,1)
+   abend  = DDIWD(DDI_ME,2)
+   ablen  = abend-abstrt+1
+   call RICC_ifree2(DDIWD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nuu-1)then
+
+   Mxthreads = omp_get_max_threads()
+   call omp_set_dynamic(.false.)
+
+   call RICC_dalloc2(noo,nuu,Tpls)
+   call RICC_dalloc2(noo,nuu,Tmns)
+!------------------------------------------------------------------------
+! Symmetric and antisymmetric combinations of T2 amplitudes:
+! Tpls(ab,ij) = T2(ab,ij) + T2(ba,ij)*(1-Delta(a,b))
+! Tmns(ab,ij) = T2(ab,ij) - T2(ba,ij)
+! Do this step before the actual task, i.e., contraction, in order
+! to avoid unnecessary overcrowding.
+!------------------------------------------------------------------------
+   Nthreads  = MIN(Mxthreads,nuu)
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(nu,noo,nuu,Tpls,Tmns,T)                                      &
+!$omp private(ij,a,b,ab,ba,absym,x)
+!$omp do schedule(static) 
+
+   loop_t2_sort: do absym=1,nuu
+                 x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(absym,dp)))
+                 a = FLOOR(x)
+                 b = absym - a*(a-1)/2
+                 if(b .EQ. 0)then
+                   a = a-1
+                   b = a
+                 end if
+                 ab = (a-1)*nu+b
+                 ba = (b-1)*nu+a
+
+                 do ij=1,noo
+                    if(a .EQ. b)then
+                      Tpls(ij,absym) = T(2)%MAT(ab,ij)
+                    else
+                      Tpls(ij,absym) = T(2)%MAT(ab,ij)+T(2)%MAT(ba,ij)
+                    end if
+                      Tmns(ij,absym) = T(2)%MAT(ab,ij)-T(2)%MAT(ba,ij) 
+                 end do
+   end do loop_t2_sort
+
+!$omp end do nowait 
+!$omp end parallel
+
+   Nthreads = MIN(Mxthreads,ablen)
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = 2*nu + 2*noo + nu2
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1 
+   end do      
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(8) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(nu,noo,nauxbas,abstrt,abend,Tpls,Tmns,HBT1,RT)               &
+!$omp private(ij,a,b,ab,ba,absym,c,d,cc,x,                                &
+!$omp         Vpls,Vmns,Spls,Smns,WPP)                                    &
+!$omp firstprivate(MemThrd)
+
+   call RICC_dalloc1thrd(nu,Vpls,MemThrd)
+   call RICC_dalloc1thrd(nu,Vmns,MemThrd)
+   call RICC_dalloc1thrd(noo,Spls,MemThrd)
+   call RICC_dalloc1thrd(noo,Smns,MemThrd)
+   call RICC_dalloc2thrd(nu,nu,WPP,MemThrd)
+
+!$omp do schedule(static) 
+
+   loop_abtr: do absym=abstrt,abend
+              x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(absym,dp)))
+              a = FLOOR(x)
+              b = absym - a*(a-1)/2
+              if(b .EQ. 0)then
+                a = a-1
+                b = a
+              end if
+              ab = (a-1)*nu+b
+              ba = (b-1)*nu+a
+
+!------------------------------------------------------------------------
+! Assemble V4 integrals (rather the T1-transformed W^P_(a,b) intermediates)
+!------------------------------------------------------------------------
+              call DGEMM('N','T',nu,nu,nauxbas,ONE,HBT1%WefX(:,:,a),nu,   &
+                         HBT1%WefX(:,:,b),nu,ZERO,WPP,nu)  
+
+              call RICC_vzero(1,noo,Spls)
+              call RICC_vzero(1,noo,Smns)
+
+              loop_c: do c=1,nu
+                      cc = c*(c-1)/2
+
+!------------------------------------------------------------------------
+! Symmetric and antisymmetric combinations of 2ERIs:
+!------------------------------------------------------------------------
+              loop_d: do d=1,c
+                      Vpls(d) = WPP(c,d)+WPP(d,c)
+                      Vmns(d) = WPP(c,d)-WPP(d,c)
+              end do loop_d
+
+!------------------------------------------------------------------------
+! Now the actual contractions: the most time-consuming task in this loop!
+! Spls(i>=j,a>=b) = (1/2) * \sum_(c>=d) Vpls(a>=b,c>=d) * Tpls(i>=j,c>=d)
+! Smns(i>=j,a>=b) = (1/2) * \sum_(c>=d) Vmns(a>=b,c>=d) * Tmns(i>=j,c>=d)
+!------------------------------------------------------------------------
+                      call DGEMV('N',noo,c,HALF,Tpls(:,cc+1:cc+c),noo,    &
+                                 Vpls,1,ONE,Spls,1)
+                      call DGEMV('N',noo,c,HALF,Tmns(:,cc+1:cc+c),noo,    &
+                                 Vmns,1,ONE,Smns,1)
+              end do loop_c
+
+!------------------------------------------------------------------------
+! Finally, update the doubles residuals.
+! For a>=b: R(ab,i>=j) += Spls(i>=j,a>=b) + Smns(i>=j,a>=b)
+! For a<b : R(ba,i>=j) += Spls(i>=j,a>=b) - Smns(i>=j,a>=b)
+!------------------------------------------------------------------------
+              do ij=1,noo
+                 RT(2)%MAT(ab,ij)=RT(2)%MAT(ab,ij)+(Spls(ij)+Smns(ij))
+              if(b .NE. a)then
+                 RT(2)%MAT(ba,ij)=RT(2)%MAT(ba,ij)+(Spls(ij)-Smns(ij))
+              end if
+              end do
+
+   end do loop_abtr
+
+!$omp end do nowait
+
+   call RICC_dfree1thrd(Vpls,MemThrd)
+   call RICC_dfree1thrd(Vmns,MemThrd)
+   call RICC_dfree1thrd(Spls,MemThrd)
+   call RICC_dfree1thrd(Smns,MemThrd)
+   call RICC_dfree2thrd(WPP,MemThrd)
+
+!$omp end parallel
+
+   call RICC_dfree2(Tpls)
+   call RICC_dfree2(Tmns)
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. nuu)call DDI_SYNC(3022)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_PPL_B.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_PPL_B
+
+!*MODULE RICCDIAG  * DECK RICC_SD_H3P3A
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    July 21, 2020
+!>
+!>    @brief   Constructs a subgroup of the Ring Terms in CCSD 
+!>             doubles residuals, in particular those requiring 
+!>             unfactorizable 4-index intermediates with a scaling
+!>             of O3V3 (H3P3). 
+!>
+!>
+
+   SUBROUTINE RICC_SD_H3P3A(HNP,HBT1,T,RT)
+
+   TYPE(NormH),INTENT(IN)    :: HNP
+   TYPE(HbarT1),INTENT(IN)   :: HBT1
+   TYPE(WMAT),INTENT(IN)     :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   REAL(KIND=dp),ALLOCATABLE :: T2ia(:,:),Vjb(:,:),Wjba(:,:),Vnf(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: T2ib(:,:),Vja(:,:),Wjab(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: ImnX(:,:),ImeX(:,:),JmeX(:,:)
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:) 
+   REAL(KIND=dp)             :: fact
+   INTEGER                   :: i,j,ij,m,n,im,a,b,c,ab,ba,jb,ac,ca,mc,rlo,rhi
+   INTEGER                   :: DDI_NP,DDI_ME,mcDDIs,mcDDIe,mcDDIl,mcDDIof
+   INTEGER                   :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor   
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIWD) 
+   call RICC_LoopDist(DDIWD,DDI_NP,1,nou)
+   mcDDIs = DDIWD(DDI_ME,1)
+   mcDDIe = DDIWD(DDI_ME,2)
+   mcDDIl = mcDDIe-mcDDIs+1
+                    mcDDIof = 0 
+   if(DDI_ME .GT. 0)mcDDIof = DDIWD(DDI_ME-1,2)
+   call RICC_ifree2(DDIWD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nou-1)then
+
+   call RICC_dalloc2(nou,mcDDIl,Vjb)
+   call RICC_dalloc2(nou,mcDDIl,Vja)
+   call RICC_dalloc2(nou,mcDDIl,Vnf)
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,nou)   
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = 0
+   if(usedm3) MemThrd = MemThrd + (no+2*nu)*nauxbas
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1 
+   end do      
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(9) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nou,nauxbas,mcDDIs,mcDDIe,mcDDIl,mcDDIof,              &
+!$omp        usedm3,HNP,HBT1,T,RT,Vjb,Vja,Vnf)                            &
+!$omp private(m,n,c,mc,ImnX,ImeX,JmeX)                                    &
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,JmeX,MemThrd)
+   end if
+
+!$omp do schedule(dynamic,1)
+
+   loop_mcblock: do mc=mcDDIs,mcDDIe
+                 m = (mc - 1)/nu + 1
+                 c = mc - (m - 1)*nu
+
+                 if(usedm3)then
+                   call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX)
+                 end if
+
+!------------------------------------------------------------------------
+! Linear term: Assemble W^P_(a,b) and W^P_(i,j) intermediates:
+!    I_jb,mc = \sum_P (m)W_(j,P)*(c)W_(b,P), DGEMM: N^3, nu*nauxbas*no
+
+! Quadratic term: Assemble four index integrals:
+!    (c)I_m,nf = \sum_P (m)B_(f,P)*(n)B_(c,P), DGEMM: N^3, nu*nauxbas*no  
+!------------------------------------------------------------------------
+                 call DGEMM('T','N',nu,no,nauxbas,ONE,                    &
+                            HBT1%WefX(c,:,:),nauxbas,                     &
+                            HBT1%WmnX(m,:,:),nauxbas,                     &
+                            ZERO,Vjb(:,mc-mcDDIof),nu)
+                 call DCOPY(nou,Vjb(:,mc-mcDDIof),1,Vja(:,mc-mcDDIof),1)
+
+                 if(.NOT. usedm3) then
+                       call DGEMM('N','N',nu,no,nauxbas,ONE,              &
+                                   HNP%BmeX(:,:,m),nu,HNP%BmeX(c,:,:),    &
+                                   nauxbas,ZERO,Vnf(:,mc-mcDDIof),nu)
+                 else
+                       do n=1,no  
+                          call DDI_GET(HNP%INTS(2),1,nu*nauxbas,n,n,JmeX)
+                          call DCOPY(nauxbas,JmeX(c,:),1,ImnX(n,:),1)
+                       end do
+                          call DGEMM('N','T',nu,no,nauxbas,ONE,ImeX,nu,   &
+                                     ImnX,no,ZERO,Vnf(:,mc-mcDDIof),nu)
+                 end if
+
+   end do loop_mcblock
+
+!$omp end do nowait
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+     call RICC_dfree2thrd(JmeX,MemThrd)
+   end if
+
+!$omp end parallel
+
+   Nthreads  = MIN(Mxthreads,no)   
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = 2*mcDDIl*nu + 2*nu2*no
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1 
+   end do      
+   if(Nthreads .EQ. 0)Nthreads = 1
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nou,mcDDIs,mcDDIe,mcDDIl,mcDDIof,                      &
+!$omp         Vjb,Vja,Vnf,T,RT)                                           &
+!$omp private(i,j,ij,a,b,jb,ab,ba,mc,m,n,im,c,ac,ca,                      &
+!$omp         rlo,rhi,fact,T2ia,T2ib,Wjba,Wjab)                           &
+!$omp firstprivate(MemThrd)
+
+   call RICC_dalloc2thrd(mcDDIl,nu,T2ia,MemThrd)    ! T2 matrices for 
+   call RICC_dalloc2thrd(mcDDIl,nu,T2ib,MemThrd)    ! final contraction
+   call RICC_dalloc2thrd(nou,nu,Wjba,MemThrd)       ! Temporary storage for residuals plus
+   call RICC_dalloc2thrd(nou,nu,Wjab,MemThrd)       ! contravariant t2 for quadratic terms
+
+!$omp do schedule(dynamic,1)
+   
+   loop_jOMP: do j=1,no
+              rlo = (j-1)*nu+1
+              rhi = j*nu
+
+!------------------------------------------------------------------------
+! Sort T2 for the quadratic term \tilde (j)T21_nf,b and (j)T22_nf,b
+!------------------------------------------------------------------------
+              do n=1,no
+                 do a=1,nu
+                 do b=1,nu
+                    ab=(a-1)*nu+b
+                    ba=(b-1)*nu+a
+                    jb=(n-1)*nu+b
+                    if(j .GE. n)then
+                      im = j*(j-1)/2 + n
+                      Wjba(jb,a) = T(2)%MAT(ab,im)-T(2)%MAT(ba,im)
+                      Wjab(jb,a) = HALFM*T(2)%MAT(ba,im)
+                    else
+                      im = n*(n-1)/2 + j
+                      Wjba(jb,a) = T(2)%MAT(ba,im)-T(2)%MAT(ab,im)
+                      Wjab(jb,a) = HALFM*T(2)%MAT(ab,im)
+                 end if
+                 end do
+                 end do
+              end do
+
+!------------------------------------------------------------------------
+! Next, evaluate contractions: DGEMM: (nu)*(nou)*(mcDDIl) ~N^5
+!------------------------------------------------------------------------
+                  call DGEMM('T','N',nu,mcDDIl,nou,ONE,Wjba,nou,          &
+                             Vnf,nou,ONE,Vjb(rlo:rhi,:),nu)
+
+                  call DGEMM('T','N',nu,mcDDIl,nou,ONE,Wjab,nou,          &
+                             Vnf,nou,ONE,Vja(rlo:rhi,:),nu)
+   end do loop_jOMP
+
+!$omp end do
+
+!$omp do schedule(dynamic,1)
+
+   loop_iOMP: do i=1,no
+
+!------------------------------------------------------------------------
+! Symmetry unpacking of the T2 matrix T_mc,ia/T_mc,ib as well as index 
+! transposition necessary for final contraction. 
+!------------------------------------------------------------------------
+      loop_mc_tsort: do mc=mcDDIs,mcDDIe
+                     m = (mc - 1)/nu + 1
+                     c = mc - (m - 1)*nu
+
+                     do a=1,nu
+                        ac = (a-1)*nu+c
+                        ca = (c-1)*nu+a
+                        if(i .GE. m)then
+                          im = i*(i-1)/2 + m
+                          T2ia(mc-mcDDIof,a) = T(2)%MAT(ac,im)
+                          T2ib(mc-mcDDIof,a) = T(2)%MAT(ca,im)
+                        else
+                          im = m*(m-1)/2 + i
+                          T2ia(mc-mcDDIof,a) = T(2)%MAT(ca,im)
+                          T2ib(mc-mcDDIof,a) = T(2)%MAT(ac,im)
+                        end if
+                     end do
+
+      end do loop_mc_tsort
+
+!------------------------------------------------------------------------
+! The final contraction: (a) (i)W_jb,a = -\sum_m,c V_jb,mc * (i)T_mc,a
+!                        (b) (i)W_ja,b = -\sum_m,c V_ja,mc * (i)T_mc,b
+! DGEMM: (nou)*(mcDDIl)*(nu), ~N^5
+!------------------------------------------------------------------------
+              call DGEMM('N','N',nou,nu,mcDDIl,ONEM,Vjb,nou,T2ia,mcDDIl,  &
+                         ZERO,Wjba,nou)
+
+              call DGEMM('N','N',nou,nu,mcDDIl,ONEM,Vja,nou,T2ib,mcDDIl,  &
+                         ZERO,Wjab,nou)
+!------------------------------------------------------------------------
+! Finally, update the doubles residuals. 
+!------------------------------------------------------------------------
+              loop_j: do j=1,no
+                      fact = ONE
+                      if(i .EQ. j)fact = TWO
+                    
+                      do a=1,nu
+                      do b=1,nu
+                         jb = (j-1)*nu+b
+                         ab = (a-1)*nu+b
+                         ba = (b-1)*nu+a
+                         if(i .GE. j)then
+                           ij = i*(i-1)/2 + j
+!$omp atomic update
+                           RT(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij)+fact*Wjba(jb,a)
+!$omp atomic update
+                           RT(2)%MAT(ba,ij) = RT(2)%MAT(ba,ij)+fact*Wjab(jb,a)
+                         else
+                          ij = j*(j-1)/2 + i
+!$omp atomic update
+                           RT(2)%MAT(ba,ij) = RT(2)%MAT(ba,ij)+Wjba(jb,a)
+!$omp atomic update
+                           RT(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij)+Wjab(jb,a)
+                         end if
+                      end do
+                      end do
+              end do loop_j 
+
+   end do loop_iOMP
+
+!$omp end do nowait
+
+   call RICC_dfree2thrd(T2ia,MemThrd)
+   call RICC_dfree2thrd(T2ib,MemThrd)
+   call RICC_dfree2thrd(Wjba,MemThrd)
+   call RICC_dfree2thrd(Wjab,MemThrd)
+
+!$omp end parallel
+
+   call RICC_dfree2(Vjb)
+   call RICC_dfree2(Vja)
+   call RICC_dfree2(Vnf)
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. nou)call DDI_SYNC(3023)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_H3P3A.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_H3P3A
+
+!*MODULE RICCDIAG  * DECK RICC_SD_H3P3B
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 25, 2020
+!>
+!>    @brief   Constructs a subgroup of the Ring Terms in CCSD 
+!>             doubles residuals, in particular those requiring 
+!>             unfactorizable 4-index intermediates. No 4-index 
+!>             quantity is actually stored, however. 
+!>
+!>
+
+   SUBROUTINE RICC_SD_H3P3B(HNP,HBT1,T,RT)
+
+   TYPE(NormH),INTENT(IN)    :: HNP
+   TYPE(HbarT1),INTENT(IN)   :: HBT1
+   TYPE(WMAT),INTENT(IN)     :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   REAL(KIND=dp),ALLOCATABLE :: T2ma(:,:),T2mb(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: Vmjb(:,:),Vmja(:,:),Vmnf(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: WPP(:,:),T2ex(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: ImnX(:,:),ImeX(:,:)
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:) 
+   REAL(KIND=dp)             :: fact
+   INTEGER                   :: i,j,ij,m,n,im,rlo,rhi,a,ia,b,c,ac,ca,f
+   INTEGER                   :: DDI_NP,DDI_ME,cstrt,cend,clen,clo,chi
+   INTEGER                   :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor   
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   
+   if(usedm3)then
+     call DDI_DISTRIB(HNP%INTS(3),DDI_ME,rlo,rhi,cstrt,cend)
+   else
+     call RICC_ialloc20(DDI_NP,2,DDIWD) 
+     call RICC_LoopDist(DDIWD,DDI_NP,1,nu)
+     cstrt = DDIWD(DDI_ME,1)
+     cend  = DDIWD(DDI_ME,2)
+     call RICC_ifree2(DDIWD)
+   end if
+   clen = cend-cstrt+1
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nu-1)then
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,clen)   
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = 5*no2*nu + 2*nu2
+   if(usedm3) MemThrd = MemThrd + nctot*nauxbas
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1 
+   end do      
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(9) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,noo,nou,nu2,nauxbas,cstrt,cend,                        &
+!$omp        usedm3,HNP,HBT1,T,RT)                                        &
+!$omp private(i,j,ij,m,im,a,ia,c,ac,ca,f,rlo,rhi,                         &
+!$omp         clo,chi,fact,ImnX,ImeX,T2ma,T2mb,T2ex,                      &
+!$omp         Vmjb,Vmja,Vmnf,WPP)                                         &
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+   end if
+   call RICC_dalloc2thrd(no,nou,Vmnf,MemThrd)
+   call RICC_dalloc2thrd(no,nou,Vmjb,MemThrd)
+   call RICC_dalloc2thrd(no,nou,Vmja,MemThrd)
+   call RICC_dalloc2thrd(no,nou,T2ma,MemThrd)   ! For V2-T2-1 contraction
+   call RICC_dalloc2thrd(no,nou,T2mb,MemThrd)   ! For V2-T2-2 contraction
+   call RICC_dalloc2thrd(nu,nu,T2ex,MemThrd)    ! Contravariant T2 for V2-T2 nonlinear terms
+   call RICC_dalloc2thrd(nu,nu,WPP,MemThrd)     ! Residual increment/sorted T2 storage
+
+!$omp do schedule(dynamic,1)
+
+   loop_c: do c=cstrt,cend
+                  
+!------------------------------------------------------------------------
+! Symmetry unpacking of the T2 matrix (c)T_m,ia and (c)T_m,ib as well as 
+! index transposition necessary for matrix multiplication. 
+!------------------------------------------------------------------------
+      loop_i_t2sort: do i=1,no
+              
+                     if(usedm3)then
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,i,i,ImeX)
+                       call DCOPY(nauxbas,ImeX(c,:),1,ImnX(i,:),1)
+                     end if
+
+                     do m=1,i
+                        im = i*(i-1)/2 + m
+                        do a=1,nu
+                           ia = (i-1)*nu+a
+                           ac = (a-1)*nu+c
+                           ca = (c-1)*nu+a
+                           T2ma(m,ia) = T(2)%MAT(ac,im)
+                           T2mb(m,ia) = T(2)%MAT(ca,im)
+                           if(m .NE. i)then
+                             ia = (m-1)*nu+a
+                             T2ma(i,ia) = T(2)%MAT(ca,im)
+                             T2mb(i,ia) = T(2)%MAT(ac,im)
+                           end if
+                        end do
+                     end do
+      end do loop_i_t2sort
+
+!------------------------------------------------------------------------
+! Linear term: Assemble W^P_(a,b) and W^P_(i,j) intermediates:
+!    (c)I_m,jb = \sum_P (m)W_(j,P)*(c)W_(b,P), DGEMM: N^3, nu*nauxbas*no
+
+! Quadratic term: Assemble four index integrals:
+!    (c)I_m,nf = \sum_P (m)B_(f,P)*(n)B_(c,P), DGEMM: N^3, nu*nauxbas*no  
+!------------------------------------------------------------------------
+
+             loop_m: do m=1,no
+
+                     call DGEMM('T','N',nu,no,nauxbas,ONE,                &
+                                HBT1%WefX(c,:,:),nauxbas,                 &
+                                HBT1%WmnX(m,:,:),nauxbas,                 &
+                                ZERO,Vmjb(m,:),nu)
+                     call DCOPY(nou,Vmjb(m,:),1,Vmja(m,:),1)  
+
+                     if(.NOT. usedm3)then
+                       call DGEMM('N','N',nu,no,nauxbas,ONE,              &
+                                  HNP%BmeX(:,:,m),nu,HNP%BmeX(c,:,:),     &
+                                  nauxbas,ZERO,Vmnf(m,:),nu)
+                     else 
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX) 
+                       call DGEMM('N','T',nu,no,nauxbas,ONE,              &
+                                  ImeX,nu,ImnX,no,ZERO,                   &
+                                  Vmnf(m,:),nu)
+                     end if
+             end do loop_m
+
+!------------------------------------------------------------------------
+! Form intermediates for quadratic ring terms:
+! 1. (c)I_m,jb += \sum_nf (c)I_m,nf*(j,n)T_f,b, DGEMM: N^3, (no)*(nu)*(nu)
+! 2. (c)I_m,ja += \sum_nf (c)I_m,nf*(j,n)T_f,a, DGEMM: N^3, (no)*(nu)*(nu)
+!------------------------------------------------------------------------
+         loop_j_int: do j=1,no
+                     rlo = (j-1)*nu+1
+                     rhi = j*nu
+
+       loop_n_block: do n=1,no
+                     clo = (n-1)*nu+1
+                     chi = n*nu
+        
+                     do a=1,nu
+                     do f=1,nu
+                        ac = (a-1)*nu+f
+                        ca = (f-1)*nu+a
+                        if(j .GE. n)then
+                          im = j*(j-1)/2 + n
+                          WPP(f,a)  = T(2)%MAT(ac,im)-T(2)%MAT(ca,im)
+                          T2ex(f,a) = HALFM*T(2)%MAT(ca,im)
+                        else
+                          im = n*(n-1)/2 + j
+                          WPP(f,a)  = T(2)%MAT(ca,im)-T(2)%MAT(ac,im)
+                          T2ex(f,a) = HALFM*T(2)%MAT(ac,im)
+                        end if
+                     end do
+                     end do
+
+                     call DGEMM('N','N',no,nu,nu,ONE,Vmnf(:,clo:chi),     &
+                                no,WPP,nu,ONE,Vmjb(:,rlo:rhi),no)
+
+                     call DGEMM('N','N',no,nu,nu,ONE,Vmnf(:,clo:chi),     &
+                                no,T2ex,nu,ONE,Vmja(:,rlo:rhi),no)
+       end do loop_n_block
+         end do loop_j_int
+
+             loop_i: do i=1,no
+                     rlo = (i-1)*nu+1
+                     rhi = i*nu
+
+             loop_j: do j=1,no
+                     clo  = (j-1)*nu+1
+                     chi  = j*nu
+!------------------------------------------------------------------------
+! The final contraction: (1) (i,j,c)I_b,a = \sum_m (j,c)I_m,b * (i,c)T_m,a
+! and                    (2) (i,j,c)I_a,b = \sum_m (j,c)I_m,a * (i,c)T_m,b
+! DGEMM: (nu)*(no)*(nu), N^3
+!------------------------------------------------------------------------
+                     call DGEMM('T','N',nu,nu,no,ONEM,Vmjb(:,clo:chi),    &
+                                no,T2ma(:,rlo:rhi),no,ZERO,WPP,nu)
+
+                     call DGEMM('T','N',nu,nu,no,ONEM,T2mb(:,rlo:rhi),    &
+                                no,Vmja(:,clo:chi),no,ONE,WPP,nu)
+!------------------------------------------------------------------------
+! Finally, update the doubles residuals. 
+!------------------------------------------------------------------------
+                     fact = ONE
+                     if(i .EQ. j)fact = TWO
+                    
+                     do a=1,nu
+                     do f=1,nu
+                        ac = (a-1)*nu+f
+                        ca = (f-1)*nu+a
+                        if(i .GE. j)then
+                          ij = i*(i-1)/2 + j
+!$omp atomic update
+                          RT(2)%MAT(ac,ij) = RT(2)%MAT(ac,ij)+fact*WPP(f,a)
+                        else
+                          ij = j*(j-1)/2 + i
+!$omp atomic update
+                          RT(2)%MAT(ca,ij) = RT(2)%MAT(ca,ij)+WPP(f,a)
+                        end if
+                     end do
+                     end do
+             end do loop_j 
+             end do loop_i
+
+   end do loop_c
+
+!$omp end do nowait
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+   end if
+   call RICC_dfree2thrd(Vmnf,MemThrd)
+   call RICC_dfree2thrd(Vmjb,MemThrd)
+   call RICC_dfree2thrd(Vmja,MemThrd)
+   call RICC_dfree2thrd(T2ma,MemThrd)
+   call RICC_dfree2thrd(T2mb,MemThrd)
+   call RICC_dfree2thrd(T2ex,MemThrd)
+   call RICC_dfree2thrd(WPP,MemThrd)
+
+!$omp end parallel
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. nu)call DDI_SYNC(3024)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_H3P3B.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_H3P3B
+
+!*MODULE RICCDIAG  * DECK RICC_SD_HHL
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 11, 2020
+!>
+!>    @brief   Constructs the hole-hole ladder group in the 
+!>             CCSD doubles residuals. 
+!>
+!>
+
+   SUBROUTINE RICC_SD_HHL(HNP,HBT1,T,RT)
+
+   TYPE(NormH),INTENT(IN)      :: HNP
+   TYPE(HbarT1),INTENT(IN)     :: HBT1
+   TYPE(WMAT),INTENT(IN)       :: T(2)
+   TYPE(WMAT),INTENT(INOUT)    :: RT(2)
+   REAL(KIND=dp),ALLOCATABLE   :: WPPH(:,:),WHH(:),WH3(:,:),Wabj(:,:)
+   REAL(KIND=dp),ALLOCATABLE   :: ImeX(:,:),JmeX(:,:)
+   INTEGER,ALLOCATABLE         :: DDIWD(:,:)
+   INTEGER                     :: i,ii,j,ij,m,n,mn,a,b,ab,ba
+   INTEGER                     :: rlo,rhi,mstrt,mend,mlen,MemIn,MemThrd
+   INTEGER                     :: DDI_NP,DDI_ME,Nthreads,Mxthreads
+
+   MemIn = MaxCor   
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+
+   if(usedm3)then
+      call DDI_DISTRIB(HNP%INTS(1),DDI_ME,rlo,rhi,mstrt,mend)
+   else
+      call RICC_ialloc20(DDI_NP,2,DDIWD)
+      call RICC_LoopDist(DDIWD,DDI_NP,1,no)
+      mstrt = DDIWD(DDI_ME,1)
+      mend  = DDIWD(DDI_ME,2)
+      call RICC_ifree2(DDIWD)
+   end if
+   mlen = mend-mstrt+1
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. no-1)then
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,mlen)
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = no2 + 2*nu2*no + noo*no
+   if(usedm3) MemThrd = MemThrd + 2*nu*nauxbas
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(10) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nauxbas,noo,no2,nu2,usedm3,                            &
+!$omp        mstrt,mend,HNP,HBT1,T,RT)                                    &
+!$omp private(i,ii,j,ij,m,n,mn,rlo,rhi,a,b,ab,ba,                         &
+!$omp         ImeX,JmeX,WHH,WH3,WPPH,Wabj)                                &
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,JmeX,MemThrd)
+   end if
+   call RICC_dalloc1thrd(no2,WHH,MemThrd)
+   call RICC_dalloc2thrd(nu2,no,WPPH,MemThrd)
+   call RICC_dalloc2thrd(nu2,no,Wabj,MemThrd)
+   call RICC_dalloc2thrd(noo,no,WH3,MemThrd)
+
+!$omp do schedule(dynamic,1)
+
+   loop_m: do m=mstrt,mend
+
+              if(usedm3)then  
+                call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX) 
+              end if
+
+         loop_n_eri: do n=1,no
+!------------------------------------------------------------------------
+! Linear term: Assemble W^P_(i,j) intermediates:
+!     (m)I_i>=j,n = \sum_P (m)W_(i,P)*nW_(j,P), DGEMM: N^3, no*nauxbas*no  
+! Caution: HbarT1 is non-Hermitian. Beware of the index to be contracted!
+!
+! Quadratic term: Assemble four index integrals:
+!     (m)I_ef,n   = \sum_P (m)B_(e,P)*nB_(f,P), DGEMM: N^3, nu*nauxbas*nu
+!------------------------------------------------------------------------
+
+                     call DGEMM('T','N',no,no,nauxbas,ONE,                &
+                                HBT1%WmnX(n,:,:),nauxbas,                 &
+                                HBT1%WmnX(m,:,:),nauxbas,                 &
+                                ZERO,WHH,no)
+
+                     do i=1,no
+                        ii  = i*(i-1)/2
+                        rlo = (i-1)*no+1
+                        rhi = (i-1)*no+i
+                        call DCOPY(i,WHH(rlo:rhi),1,                      &
+                                     WH3(ii+1:ii+i,n),1)
+                     end do
+
+                     if(.NOT. usedm3)then
+                        call DGEMM('N','T',nu,nu,nauxbas,ONE,             &
+                                   HNP%BmeX(:,:,n),nu,HNP%BmeX(:,:,m),nu, &
+                                   ZERO,WPPH(:,n),nu)
+                     else
+                        call DDI_GET(HNP%INTS(2),1,nu*nauxbas,n,n,JmeX) 
+                        call DGEMM('N','T',nu,nu,nauxbas,ONE,             &
+                                   JmeX,nu,ImeX,nu,ZERO,                  &
+                                   WPPH(:,n),nu)
+                     end if
+
+         end do loop_n_eri
+
+!------------------------------------------------------------------------
+! Consume (m)I_ef,n: construct (m)I_i>=j,n
+! (m)I_i>=j,n = \sum_(ef) (m)I_ef,n*T2_(ef,i>=j), DGEMM: noo*nu2*no ~N^5
+!------------------------------------------------------------------------
+         call DGEMM('T','N',noo,no,nu2,ONE,T(2)%MAT,nu2,WPPH,nu2,ONE,     &
+                    WH3,noo)            
+
+!------------------------------------------------------------------------
+! The final contraction of (m)I_n,i>=j with T2:  
+! Unpack permutational symmetry of T2 only for a given m.
+! RT2(ab,i>=j) += \sum_n (m)I_n,i>=j * (m)T2(ab,n), for a given m
+! DGEMM: nu2*(no)*no, order N^4
+!------------------------------------------------------------------------
+
+      loop_n_t2sort: do n=1,no
+                     if(m.GE.n)then
+                        mn = m*(m-1)/2 + n
+                        call DCOPY(nu2,T(2)%MAT(:,mn),1,WPPH(:,n),1)
+                     else
+                        mn = n*(n-1)/2 + m
+                        do a=1,nu
+                           do b=1,nu
+                              ab=(a-1)*nu+b
+                              ba=(b-1)*nu+a
+                              WPPH(ab,n) = T(2)%MAT(ba,mn)
+                           end do
+                        end do
+                     end if
+      end do loop_n_t2sort
+
+      loop_i: do i=1,no
+              ii = i*(i-1)/2 
+
+              call DGEMM('N','T',nu2,i,no,ONE,WPPH,nu2,WH3(ii+1:ii+i,:),  &
+                         i,ZERO,Wabj,nu2)
+
+              do j=1,i
+                 ij = ii+j
+                 do a=1,nu
+                 do b=1,nu
+                    ab = (a-1)*nu+b
+!$omp atomic update
+                    RT(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij) + Wabj(ab,j)      
+                 end do
+                 end do
+              end do  
+      end do loop_i
+
+   end do loop_m 
+
+!$omp end do nowait
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImeX,MemThrd)
+     call RICC_dfree2thrd(JmeX,MemThrd)
+   end if
+   call RICC_dfree1thrd(WHH,MemThrd)
+   call RICC_dfree2thrd(WPPH,MemThrd)
+   call RICC_dfree2thrd(Wabj,MemThrd)
+   call RICC_dfree2thrd(WH3,MemThrd)
+
+!$omp end parallel
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. no)call DDI_SYNC(3025)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_HHL.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_HHL
+
+!*MODULE RICCDIAG  * DECK RICC_SD_FOCK
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 27, 2020
+!>
+!>    @brief   Constructs the T1 and T2-transformed Fock matrix 
+!>             contributions to doubles residuals.
+!>
+!>
+
+   SUBROUTINE RICC_SD_FOCK(HBT1,T,RT)
+
+   TYPE(HbarT1),INTENT(IN)   :: HBT1
+   TYPE(WMAT),INTENT(IN)     :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   REAL(KIND=dp),ALLOCATABLE :: Tabj(:,:,:),Wabj(:,:,:),WPP(:,:) 
+   REAL(KIND=dp)             :: fact
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:)
+   INTEGER                   :: i,istrt,iend,ilen,j,ij,a,b,ab,ba
+   INTEGER                   :: MemIn,MemThrd,DDI_NP,DDI_ME,Nthreads,Mxthreads
+
+   MemIn = MaxCor
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIWD)
+   call RICC_LoopDist(DDIWD,DDI_NP,1,no)
+   istrt = DDIWD(DDI_ME,1)
+   iend  = DDIWD(DDI_ME,2)
+   call RICC_ifree2(DDIWD)
+   ilen = iend-istrt+1
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. no-1)then
+
+!-------------------------------------------------------------------------
+! Add FBHP contribution to FBPP. Add to an intermediare array. Do not
+! update FBPP, which is to be used later for RT1.
+!-------------------------------------------------------------------------
+   call RICC_dalloc2(nu,nu,WPP)
+
+   call DCOPY(nu2,HBT1%FBPP,1,WPP,1)
+   call DGEMM('N','N',nu,nu,no,ONEM,T(1)%MAT,nu,HBT1%FBHP,no,ONE,WPP,nu)
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,ilen)
+   call omp_set_dynamic(.false.)
+
+!-------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!-------------------------------------------------------------------------
+   MemThrd = 2*nu2*no
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(7) = Nthreads
+ 
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,istrt,iend,HBT1,T,RT,WPP)                              &
+!$omp private(i,j,ij,a,b,ab,ba,fact,Tabj,Wabj)                            &
+!$omp firstprivate(MemThrd)
+
+   call RICC_dalloc3thrd(nu,nu,no,Tabj,MemThrd)
+   call RICC_dalloc3thrd(nu,nu,no,Wabj,MemThrd)
+
+!$omp do schedule(dynamic,1)
+
+   loop_i: do i=istrt,iend
+
+           loop_j_t2sort: do j=1,no
+                          do a=1,nu
+                          do b=1,nu
+                             ab = (a-1)*nu+b
+                             ba = (b-1)*nu+a
+                             if(i .GE. j)then
+                               ij = i*(i-1)/2 + j
+                               Tabj(a,b,j) = T(2)%MAT(ab,ij)
+                             else
+                               ij = j*(j-1)/2 + i
+                               Tabj(a,b,j) = T(2)%MAT(ba,ij)
+                             end if
+                          end do
+                          end do
+           end do loop_j_t2sort
+
+           loop_a: do a=1,nu
+                   call DGEMM('N','T',nu,no,no,ONEM,Tabj(a,:,:),nu,       &
+                              HBT1%FBHH,no,ZERO,Wabj(a,:,:),nu) 
+           end do loop_a
+
+           loop_j_contra: do j=1,no
+                  call DGEMM('N','T',nu,nu,nu,ONE,Tabj(:,:,j),nu,         &
+                             WPP,nu,ONE,Wabj(:,:,j),nu)
+           end do loop_j_contra
+
+!-------------------------------------------------------------------------
+! Finally, update the doubles residuals.
+!-------------------------------------------------------------------------
+           loop_j_res: do j=1,no
+                       fact = ONE
+                       if(i .EQ. j)fact = TWO
+                       do a=1,nu
+                       do b=1,nu
+                          ab = (a-1)*nu+b
+                          ba = (b-1)*nu+a
+                          if(i .GE. j)then
+                            ij = i*(i-1)/2 + j
+!$omp atomic update
+                            RT(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij) +         &
+                                               fact*Wabj(a,b,j)
+                          else
+                            ij = j*(j-1)/2 + i
+!$omp atomic update
+                            RT(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij) +         &
+                                               Wabj(b,a,j)
+                          end if
+                       end do
+                       end do
+           end do loop_j_res
+
+   end do loop_i
+
+!$omp end do nowait
+
+   call RICC_dfree3thrd(Tabj,MemThrd)
+   call RICC_dfree3thrd(Wabj,MemThrd)
+
+!$omp end parallel
+
+   call RICC_dfree2(WPP)
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. no)call DDI_SYNC(3026)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_FOCK.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_FOCK
+
+!*MODULE RICCDIAG  * DECK RICC_SD_MPT_0
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 22, 2020 First submission to github
+!>
+!>    @brief   Construct and consume T1-transformed RI integrals of 
+!>             type: MPT_0 = \sum_(m,e)2B^P_(m,e)*t_(e,m) (no storage)
+!>
+!>
+
+   SUBROUTINE RICC_SD_MPT_0(HNP,HBT1,T,RT)
+
+   TYPE(WMAT),INTENT(INOUT)   :: RT(2)
+   TYPE(HbarT1),INTENT(INOUT) :: HBT1
+   TYPE(NormH),INTENT(IN)     :: HNP
+   TYPE(WMAT),INTENT(IN)      :: T(2)
+   REAL(KIND=dp),ALLOCATABLE  :: ImnX(:,:),ImeX(:,:),MX0(:)
+   REAL(KIND=dp),ALLOCATABLE  :: HBHH(:,:),HBHP(:,:),HBPP(:,:)
+   INTEGER                    :: i,a,m
+   INTEGER                    :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,no)
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = no2 + nu2 + nou + nauxbas
+   if(usedm3) MemThrd = MemThrd + nctot*nauxbas
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(2) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,no2,nou,nu2,nauxbas,usedm3,                            &
+!$omp        HNP,HBT1,T,RT)                                               &
+!$omp private(i,a,m,ImnX,ImeX,MX0,HBHH,HBHP,HBPP)                         & 
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+   end if
+   call RICC_dalloc1thrd(nauxbas,MX0,MemThrd)
+   call RICC_dalloc2thrd(no,no,HBHH,MemThrd)
+   call RICC_dalloc2thrd(no,nu,HBHP,MemThrd)
+   call RICC_dalloc2thrd(nu,nu,HBPP,MemThrd)
+
+   call RICC_dzero(1,no,1,no,HBHH)
+   call RICC_dzero(1,no,1,nu,HBHP)
+   call RICC_dzero(1,nu,1,nu,HBPP)
+
+!$omp do schedule(dynamic,1)
+
+   loop_m: do m=1,no
+
+!-------------------------------------------------------------------------
+! Construct MPT0 intermediate: (m)M_P = \sum_e 2*(m)B_(e,P)*(m)t_(e)
+!-------------------------------------------------------------------------
+
+           if(.NOT. usedm3)then
+               call DGEMV('T',nu,nauxbas,TWO,HNP%BmeX(:,:,m),nu,          &
+                          T(1)%MAT(:,m),1,ZERO,MX0,1)
+           else
+               call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX)
+               call DGEMV('T',nu,nauxbas,TWO,ImeX,nu,T(1)%MAT(:,m),1,     &
+                          ZERO,MX0,1)
+           end if
+
+!-------------------------------------------------------------------------
+! Now consume MPT0: 1) FBHH, 2) FBHP (also RAux1), 3) FBPP
+!-------------------------------------------------------------------------
+           loop_i: do i=1,no
+                   if(.NOT. usedm3)then
+                       call DGEMV('N',no,nauxbas,ONE,HNP%BmnX(:,:,i),no,  &
+                                  MX0,1,ONE,HBHH(i,:),1)
+                       call DGEMV('N',nu,nauxbas,ONE,HNP%BmeX(:,:,i),nu,  &
+                                  MX0,1,ONE,HBHP(i,:),1)
+                   else
+                       call DDI_GET(HNP%INTS(1),1,no*nauxbas,i,i,ImnX)
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,i,i,ImeX)
+
+                       call DGEMV('N',no,nauxbas,ONE,ImnX,no,MX0,1,ONE,   &
+                                  HBHH(i,:),1)
+                       call DGEMV('N',nu,nauxbas,ONE,ImeX,nu,MX0,1,ONE,   &
+                                  HBHP(i,:),1)
+                   end if
+           end do loop_i 
+
+           loop_a: do a=1,nu
+                   if(.NOT. usedm3)then
+                       call DGEMV('N',nu,nauxbas,ONE,HNP%BefX(:,:,a),nu,  &
+                                  MX0,1,ONE,HBPP(a,:),1)
+                   else
+                       call DDI_GET(HNP%INTS(3),1,nu*nauxbas,a,a,ImeX)
+
+                       call DGEMV('N',nu,nauxbas,ONE,ImeX,nu,MX0,1,ONE,   &
+                                  HBPP(a,:),1)
+                   end if
+           end do loop_a 
+
+   end do loop_m
+
+!$omp end do nowait
+
+!$omp critical
+   call DAXPY(no2,ONE,HBHH,1,HBT1%FBHH,1)
+   call DAXPY(nou,ONE,HBHP,1,HBT1%FBHP,1)
+   call DAXPY(nu2,ONE,HBPP,1,HBT1%FBPP,1)
+   do i=1,no
+      call DAXPY(nu,ONE,HBHP(i,:),1,RT(1)%MAT(:,i),1)  
+   end do
+!$omp end critical
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+   end if
+   call RICC_dfree1thrd(MX0,MemThrd)
+   call RICC_dfree2thrd(HBHH,MemThrd)
+   call RICC_dfree2thrd(HBHP,MemThrd)
+   call RICC_dfree2thrd(HBPP,MemThrd)
+
+!$omp end parallel
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_MPT_0.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_MPT_0
+
+!*MODULE RICCDIAG  * DECK RICC_SD_MPT_OO
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 22, 2020 First submission to github
+!>
+!>    @brief   Construct and consume the T1-transformed
+!>             intermediate:
+!>             MP(T1)_OO = \sum_e B^P_(j,e) * t_(e,i) 
+!>             This intermediate is not stored as such,
+!>             but modified to WmnX for use in HHL, H3P3,
+!>             and WiaWjb groups.
+!>
+!>
+
+   SUBROUTINE RICC_SD_MPT_OO(HNP,HBT1,T)
+
+   TYPE(HbarT1),INTENT(INOUT) :: HBT1
+   TYPE(NormH),INTENT(IN)     :: HNP
+   TYPE(WMAT),INTENT(IN)      :: T(2)
+   REAL(KIND=dp),ALLOCATABLE  :: ImnX(:,:),ImeX(:,:),MPT1(:,:)
+   REAL(KIND=dp),ALLOCATABLE  :: HBHH(:,:),HBHP(:,:)
+   INTEGER                    :: m,n
+   INTEGER                    :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,no)
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = no2 + nou + no*nauxbas
+   if(usedm3) MemThrd = MemThrd + nctot*nauxbas
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(3) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,no2,nou,nauxbas,usedm3,HNP,HBT1,T)                     &
+!$omp private(m,n,ImnX,ImeX,HBHH,HBHP,MPT1) firstprivate(MemThrd) 
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+   end if
+   call RICC_dalloc2thrd(no,nauxbas,MPT1,MemThrd)
+   call RICC_dalloc2thrd(no,no,HBHH,MemThrd)
+   call RICC_dalloc2thrd(no,nu,HBHP,MemThrd)
+
+   call RICC_dzero(1,no,1,no,HBHH)
+   call RICC_dzero(1,no,1,nu,HBHP)
+
+!$omp do schedule(dynamic,1)
+
+   loop_m: do m=1,no
+!-------------------------------------------------------------------------
+! Form MPT1: (m)MPT1_(n,P) = \sum_e (n)B_(e,P) * (m)t_(e) 
+!-------------------------------------------------------------------------
+           loop_n: do n=1,no
+                   if(.NOT. usedm3)then
+                       call DGEMV('T',nu,nauxbas,ONE,HNP%BmeX(:,:,n),nu,  &
+                                  T(1)%MAT(:,m),1,ZERO,MPT1(n,:),1)
+                   else
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,n,n,ImeX)
+              
+                       call DGEMV('T',nu,nauxbas,ONE,ImeX,nu,             &
+                                  T(1)%MAT(:,m),1,ZERO,MPT1(n,:),1)
+                   end if
+           end do loop_n
+
+!-------------------------------------------------------------------------
+! Now consume MPT1 1) FBHP, 2) FBHH
+! Caution: Beware of the non-Hermitian nature of FBHH. Be consistent when
+! adding contributions to it. The second index shall be contracted.
+!-------------------------------------------------------------------------
+                   if(.NOT. usedm3)then
+                       call DGEMM('N','T',no,no,nauxbas,ONEM,             &
+                                  HNP%BmnX(:,:,m),no,MPT1,no,ONE,HBHH,no)
+
+                       call DGEMM('N','T',no,nu,nauxbas,ONEM,MPT1,no,     &
+                                  HNP%BmeX(:,:,m),nu,ONE,HBHP,no)
+
+                       call DAXPY(no*nauxbas,ONE,HNP%BmnX(:,:,m),1,MPT1,1)
+                   else
+                       call DDI_GET(HNP%INTS(1),1,no*nauxbas,m,m,ImnX)
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX)
+
+                       call DGEMM('N','T',no,no,nauxbas,ONEM,ImnX,no,     &
+                                  MPT1,no,ONE,HBHH,no)
+
+                       call DGEMM('N','T',no,nu,nauxbas,ONEM,MPT1,no,     &
+                                  ImeX,nu,ONE,HBHP,no)
+
+                       call DAXPY(no*nauxbas,ONE,ImnX,1,MPT1,1)
+                   end if
+!-------------------------------------------------------------------------
+! Now update W^P_(i,j) = B^P_(i,j) + MPT1^P_(i,j)
+!-------------------------------------------------------------------------
+                   call DAXPY(no*nauxbas,ONE,MPT1,1,HBT1%WmnX(:,:,m),1)
+
+!-------------------------------------------------------------------------
+! Final task: use W^P_(ij) to update W^P_(ia)
+!-------------------------------------------------------------------------
+                   call DGEMM('N','N',nu,nauxbas,no,ONEM,T(1)%MAT,nu,     &
+                              MPT1,no,ONE,HBT1%WmeX(:,:,m),nu)
+
+   end do loop_m
+
+!$omp end do nowait
+
+!$omp critical
+   call DAXPY(no2,ONE,HBHH,1,HBT1%FBHH,1)
+   call DAXPY(nou,ONE,HBHP,1,HBT1%FBHP,1)
+!$omp end critical
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+   end if
+   call RICC_dfree2thrd(MPT1,MemThrd)
+   call RICC_dfree2thrd(HBHH,MemThrd)
+   call RICC_dfree2thrd(HBHP,MemThrd)
+
+!$omp end parallel
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_MPT_OO.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_MPT_OO
+
+!*MODULE RICCDIAG  * DECK RICC_SD_MPT_OV
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 22, 2020 First submission to github
+!>
+!>    @brief   Construct and consume T1 and T2-transformed
+!>             intermediates:
+!>             MP(T1)_OV = \sum_e B^P_(a,e) * t_(e,m) 
+!>             MP(T2)_OV = \sum_(e,m) B^P_(m,e)*(2t_(ae,im)
+!>                                               -t_(ea,im)
+!>             (no storage)
+!>
+!>
+
+   SUBROUTINE RICC_SD_MPT_OV(HNP,HBT1,T,RT)
+
+   TYPE(WMAT),INTENT(INOUT)   :: RT(2)
+   TYPE(HbarT1),INTENT(INOUT) :: HBT1
+   TYPE(NormH),INTENT(IN)     :: HNP
+   TYPE(WMAT),INTENT(IN)      :: T(2)
+   REAL(KIND=dp),ALLOCATABLE  :: ImnX(:,:),ImeX(:,:),WPP(:,:),MPT2(:,:)
+   REAL(KIND=dp),ALLOCATABLE  :: HBPP(:,:),RAux1(:,:),MPT1(:,:)
+   REAL(KIND=dp)              :: DDOT
+   INTEGER                    :: i,a,m,n,mn,e,f,ef,fe
+   INTEGER                    :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,no)
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = 2*nu2 + 2*nu*nauxbas + nou
+   if(usedm3) MemThrd = MemThrd + nctot*nauxbas
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(4) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nou,nu2,nauxbas,usedm3,HNP,HBT1,T,RT)                  &
+!$omp private(i,a,m,n,mn,e,f,ef,fe,ImnX,ImeX,WPP,MPT1,MPT2,               &
+!$omp         HBPP,RAux1)                                                 &
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+   end if
+   call RICC_dalloc2thrd(nu,nauxbas,MPT1,MemThrd)
+   call RICC_dalloc2thrd(nu,nauxbas,MPT2,MemThrd)
+   call RICC_dalloc2thrd(nu,nu,WPP,MemThrd)
+   call RICC_dalloc2thrd(nu,nu,HBPP,MemThrd)
+   call RICC_dalloc2thrd(nu,no,RAux1,MemThrd)
+
+   call RICC_dzero(1,nu,1,nu,HBPP)
+   call RICC_dzero(1,nu,1,no,RAux1)
+
+!$omp do schedule(dynamic,1)
+
+   loop_m: do m=1,no
+
+           call RICC_dzero(1,nu,1,nauxbas,MPT2)
+
+           loop_n: do n=1,no
+!-------------------------------------------------------------------------
+! Form contravariant T2: (m,n)tilde(T)_(e,f) = 2T2(ef,mn)-T2(fe,mn)
+!-------------------------------------------------------------------------
+                   do e=1,nu
+                   do f=1,nu
+                      ef = (e-1)*nu+f
+                      fe = (f-1)*nu+e
+                      if(m .GE. n)then
+                        mn = m*(m-1)/2 + n
+                        WPP(e,f) = TWO*T(2)%MAT(ef,mn)-T(2)%MAT(fe,mn)
+                      else
+                        mn = n*(n-1)/2 + m
+                        WPP(e,f) = TWO*T(2)%MAT(fe,mn)-T(2)%MAT(ef,mn)
+                      end if  
+                   end do
+                   end do
+
+!-------------------------------------------------------------------------
+! Add FBHP*tilde(T2) contribution to the singles residual.
+!-------------------------------------------------------------------------
+                   call DGEMV('N',nu,nu,ONE,WPP,nu,HBT1%FBHP(n,:),1,      &
+                              ONE,RAux1(:,m),1)
+
+!-------------------------------------------------------------------------
+! Form MPT2: (m)MPT2_(e,P) = \sum_f (m,n)tilde(T)_(e,f)*(n)B_(f,P) 
+! DGEMM: nu*nu*nauxbas
+!-------------------------------------------------------------------------
+                   if(.NOT. usedm3)then
+                       call DGEMM('N','N',nu,nauxbas,nu,ONE,WPP,nu,       &
+                                  HNP%BmeX(:,:,n),nu,ONE,MPT2,nu) 
+                   else
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,n,n,ImeX)
+                       call DGEMM('N','N',nu,nauxbas,nu,ONE,WPP,nu,       &
+                                  ImeX,nu,ONE,MPT2,nu) 
+                   end if
+           end do loop_n
+
+           loop_a: do a = 1,nu
+!-------------------------------------------------------------------------
+! Form MPT1: (m)MPT1_(e,P) = \sum_f (m)B^P_(e,f)*(m)t_(f) 
+! Consume MPT1 and MPT2: 1) RT1 residual, 2) FBPP, 3) FBHH, 4) WemX
+!-------------------------------------------------------------------------
+
+                   if(.NOT. usedm3)then
+                       call DGEMV('T',nu,nauxbas,ONE,HNP%BefX(:,:,a),nu,  &
+                                  T(1)%MAT(:,m),1,ZERO,MPT1(a,:),1)
+
+                       RAux1(a,m) = RAux1(a,m) +                          &
+                            DDOT(nu*nauxbas,HNP%BefX(:,:,a),1,MPT2,1)
+                   else
+                       call DDI_GET(HNP%INTS(3),1,nu*nauxbas,a,a,ImeX)
+
+                       call DGEMV('T',nu,nauxbas,ONE,ImeX,nu,             &
+                                  T(1)%MAT(:,m),1,ZERO,MPT1(a,:),1)
+
+                       RAux1(a,m) = RAux1(a,m) +                          &
+                            DDOT(nu*nauxbas,ImeX,1,MPT2,1)
+                   end if
+           end do loop_a 
+
+           loop_i: do i=1,no
+                   if(.NOT. usedm3)then
+                       HBT1%FBHH(m,i) = HBT1%FBHH(m,i) +                  &
+                       DDOT(nu*nauxbas,HNP%BmeX(:,:,i),1,MPT2,1)      
+                   else
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,i,i,ImeX)
+                       HBT1%FBHH(m,i) = HBT1%FBHH(m,i) +                  &
+                                        DDOT(nu*nauxbas,ImeX,1,MPT2,1)      
+                   end if
+           end do loop_i
+
+!-------------------------------------------------------------------------
+! Combine MPT1 and MPT2 for the remaining terms.
+!-------------------------------------------------------------------------
+           call DAXPY(nu*nauxbas,ONE,MPT1,1,MPT2,1)
+
+           if(.NOT. usedm3)then
+               call DGEMM('N','T',nu,no,nauxbas,ONEM,MPT2,nu,             &
+                          HNP%BmnX(:,:,m),no,ONE,RAux1,nu)  
+
+               call DGEMM('N','T',nu,nu,nauxbas,ONEM,MPT2,nu,             &
+                          HNP%BmeX(:,:,m),nu,ONE,HBPP,nu)
+
+               call DAXPY(nu*nauxbas,ONE,HNP%BmeX(:,:,m),1,MPT2,1)
+           else
+               call DDI_GET(HNP%INTS(1),1,no*nauxbas,m,m,ImnX)
+               call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX)
+
+               call DGEMM('N','T',nu,no,nauxbas,ONEM,MPT2,nu,ImnX,no,     &
+                          ONE,RAux1,nu)  
+             
+               call DGEMM('N','T',nu,nu,nauxbas,ONEM,MPT2,nu,ImeX,nu,     &
+                          ONE,HBPP,nu)
+
+               call DAXPY(nu*nauxbas,ONE,ImeX,1,MPT2,1)
+           end if
+
+!-------------------------------------------------------------------------
+! Finally, update WmeX for the Wia * Wjb term in doubles residual.
+!-------------------------------------------------------------------------
+           call DAXPY(nu*nauxbas,ONE,MPT2,1,HBT1%WmeX(:,:,m),1)
+
+   end do loop_m
+
+!$omp end do nowait
+
+!$omp critical
+   call DAXPY(nou,ONE,RAux1,1,RT(1)%MAT,1)
+   call DAXPY(nu2,ONE,HBPP,1,HBT1%FBPP,1)
+!$omp end critical
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+   end if
+   call RICC_dfree2thrd(MPT1,MemThrd)
+   call RICC_dfree2thrd(MPT2,MemThrd)
+   call RICC_dfree2thrd(WPP,MemThrd)
+   call RICC_dfree2thrd(HBPP,MemThrd)
+   call RICC_dfree2thrd(RAux1,MemThrd)
+
+!$omp end parallel
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_MPT_OV.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_MPT_OV
+
+!*MODULE RICCDIAG  * DECK RICC_SD_MPT_VV
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 26, 2020
+!>
+!>    @brief   Constructs the W^P_(a,b) intermediate:          
+!>             W^P_(a,b) = B^P_(a,b) - \sum_m T(a,m)*B^P_(m,b)
+!>             for the construction of the H3P3 & PPL groups.
+!>
+!>
+
+   SUBROUTINE RICC_SD_MPT_VV(HNP,HBT1,T)
+
+   TYPE(HbarT1),INTENT(INOUT) :: HBT1
+   TYPE(NormH),INTENT(IN)     :: HNP
+   TYPE(WMAT),INTENT(IN)      :: T(2)
+   REAL(KIND=dp),ALLOCATABLE  :: ImnX(:,:),ImeX(:,:)
+   INTEGER,ALLOCATABLE        :: DDIWD(:,:) 
+   INTEGER                    :: m,c
+   INTEGER                    :: MemIn,MemThrd,Mxthreads,Nthreads
+
+   MemIn = MaxCor   
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,nu)   
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = 0
+   if(usedm3) MemThrd = MemThrd + nctot*nauxbas
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1 
+   end do      
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(5) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nauxbas,usedm3,HNP,HBT1,T)                             &
+!$omp private(m,c,ImnX,ImeX)                                              &
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+   end if
+
+!$omp do schedule(dynamic,1)
+
+   loop_c: do c=1,nu
+                  
+!-------------------------------------------------------------------------
+! 1. Form T1-transformed intermediate
+! 2. Add the bare RI integral
+!-------------------------------------------------------------------------
+           if(.NOT. usedm3)then
+               call DGEMM('N','T',nauxbas,nu,no,ONEM,HNP%BmeX(c,:,:),     &
+                          nauxbas,T(1)%MAT,nu,ONE,HBT1%WefX(c,:,:),       &
+                          nauxbas)
+
+               call DAXPY(nu*nauxbas,ONE,HNP%BefX(c,:,:),1,               &
+                          HBT1%WefX(c,:,:),1)
+           else
+               do m=1,no
+                  call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX)
+                  call DCOPY(nauxbas,ImeX(c,:),1,ImnX(m,:),1)
+               end do
+
+               call DGEMM('T','T',nauxbas,nu,no,ONEM,ImnX,no,             &
+                          T(1)%MAT,nu,ONE,HBT1%WefX(c,:,:),nauxbas)
+
+               call DDI_GET(HNP%INTS(3),1,nu*nauxbas,c,c,ImeX)
+
+               call DAXPY(nu*nauxbas,ONE,TRANSPOSE(ImeX),1,               &
+                          HBT1%WefX(c,:,:),1)
+           end if
+
+   end do loop_c
+
+!$omp end do nowait
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+   end if
+
+!$omp end parallel
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_MPT_VV.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_MPT_VV
+
+!*MODULE RICCDIAG  * DECK RICC_SD_WiaWjb
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 18, 2020 First submission to github
+!>
+!>    @brief   Construct the leading term in the doubles residual
+!>             with the transformed WmeX intermediate. Add the rest
+!>             that was not added before, and that are nowhere else
+!>             required.
+!>
+!>
+
+   SUBROUTINE RICC_SD_WiaWjb(HBT1,RT)
+
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   TYPE(HbarT1),INTENT(IN)   :: HBT1
+   REAL(KIND=dp)             :: cf
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:)
+   INTEGER                   :: DDI_NP,DDI_ME,MemIn
+   INTEGER                   :: ijstrt,ijend,ijlen,ijsym
+   INTEGER                   :: i,j,Mxthreads,Nthreads
+  
+   MemIn = MaxCor   
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIWD)
+   call RICC_LoopDist(DDIWD,DDI_NP,1,noo)
+   ijstrt = DDIWD(DDI_ME,1)
+   ijend  = DDIWD(DDI_ME,2)
+   ijlen  = ijend-ijstrt+1
+   call RICC_ifree2(DDIWD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. noo-1)then
+
+   Mxthreads  = omp_get_max_threads()
+   Nthreads   = MIN(Mxthreads,ijlen)
+   call omp_set_dynamic(.false.)
+   ccnumth(6) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(nu,nauxbas,ijstrt,ijend,HBT1,RT)                             &
+!$omp private(i,j,ijsym,cf)
+!$omp do schedule(static)
+
+   loop_ijtr: do ijsym=ijstrt,ijend
+              cf = HALF*(ONE + SQRT(ONE + EIGHT*REAL(ijsym,dp)))
+              i = FLOOR(cf)
+              j = ijsym - i*(i-1)/2
+              if(j .EQ. 0)then
+                i = i-1
+                j = i
+              end if
+
+!-------------------------------------------------------------------------
+! Assemble WiaWjb intermediate: (ij)W_(a,b) = \sum_P (i)W_(a,P)*(j)W_(b,P)
+!-------------------------------------------------------------------------
+              call DGEMM('N','T',nu,nu,nauxbas,ONE,                       &
+                         HBT1%WmeX(:,:,j),nu,HBT1%WmeX(:,:,i),nu,         &
+                         ONE,RT(2)%MAT(:,ijsym),nu)  
+   end do loop_ijtr
+
+!$omp end do nowait
+!$omp end parallel
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. noo)call DDI_SYNC(3027)
+
+   END SUBROUTINE RICC_SD_WiaWjb
+
+!*MODULE RICCDIAG  * DECK RICC_nitrip
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    August 18, 2020
+!>
+!>    @brief   Noniterative corrections for triple excitations
+!>             on top of CCSD energy (Driver for (T) correction)
+!>
+!>
+
+   SUBROUTINE RICC_nitrip(HNP,T,T2,ET3COR)
+
+   REAL(KIND=dp),INTENT(OUT) :: ET3COR
+   TYPE(NormH),INTENT(IN)    :: HNP
+   TYPE(WMAT),INTENT(IN)     :: T(1)
+   REAL(KIND=dp),INTENT(IN)  :: T2(:,:,:,:)
+   REAL(KIND=dp),ALLOCATABLE :: VH3P(:,:),VHP3(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: ImnX(:,:,:),ImeX(:,:,:),IefX(:,:,:)
+   REAL(KIND=dp),ALLOCATABLE :: T3(:,:,:),V3i(:,:,:),V3j(:,:,:),V3k(:,:,:)
+   TYPE(Tri3D),ALLOCATABLE   :: ipack3(:)
+   INTEGER,ALLOCATABLE       :: IntYesNo(:)
+   REAL(KIND=dp)             :: tim,wall0  
+   CHARACTER(LEN=2)          :: HMSD
+   INTEGER                   :: i,j,k,b,c,no3,ilen,ijk,ierr,fertig
+   INTEGER                   :: ij,ik,jk,ia,ib,ic,jc,rlo,rhi,clo,chi
+   INTEGER                   :: Mxthreads,Nthreads,MyTask,itask
+   INTEGER                   :: MemIn,MemOld,MemNew,MemTmin,pmin,pmax
+
+   MemIn = MaxCor
+
+   ET3COR = ZERO
+   no3 = no*(no+1)*(no+2)/6
+   no3 = no3-no 
+
+   if(maswrk)write(LuOut,9000)
+   
+   call TSECND(tim)
+   wall0 = wall
+
+!  The following amount is already on hold, not allocated here.
+   MemOld = (no2+nou+nu2+nctot)  + (no*nu+no2*nu2)
+!            -- Fock matrix --     -- CCSD amps --
+   if(.NOT.usedm3) MemOld = MemOld + (no2+nou+nu2)*nauxbas
+!                                     --- DF integrals ---
+!  New allocation in this module: assuming that all (ia|bc) integrals are
+!  to be constructed on the fly (slower algorithm).
+   MemNew = no2*nou + 3*nu2*nu      + nu2*nu + no3 +    no
+!           (ij|ka) (la|bc)/(ij|ab)   T3 amps ijkpack IntYesNo
+   if(usedm3) MemNew = MemNew + (no2+nou+nu2)*nauxbas 
+!        DF integrals are to be fully fetched before ijk loops
+
+   MemTmin = MemNew+MemOld
+   if(maswrk)write(LuOut,9001)REAL(MemTmin,dp)*EIGHT/1.0D+9,              &
+                              REAL(MemTmin,dp)*EIGHT/(TWO**30),           &
+                              REAL((MaxCor+MemOld),dp)*EIGHT/1.0D+9,      &
+                              REAL((MaxCor+MemOld),dp)*EIGHT/(TWO**30)   
+   if(MemNew .GT. MaxCor)then
+     if(maswrk)write(LuOut,9002)
+     RETURN
+   end if
+
+   ALLOCATE(ipack3(no3),stat=ierr)
+   if(ierr .NE. 0)then
+     if(maswrk)write(LuOut,*)'Memory allocation failure in RICC_nitrip'
+     call abrt
+   end if
+   MaxCor = MaxCor-no3
+
+!-------------------------------------------------------------------------
+! Map combined occupied indices onto individual index triplets
+!-------------------------------------------------------------------------
+   ijk = 0
+   do i=1,no
+      do j=1,i
+         do k=1,j
+            if(i.EQ.k) CYCLE
+            ijk = ijk+1
+            ipack3(ijk)%ind1 = i
+            ipack3(ijk)%ind2 = j
+            ipack3(ijk)%ind3 = k
+         end do
+      end do
+   end do
+
+   call RICC_dalloc3(nu,nu,nu,T3)
+   call RICC_dalloc3(nu,nu,nu,V3i)
+   call RICC_dalloc3(nu,nu,nu,V3j)
+   call RICC_dalloc3(nu,nu,nu,V3k)
+   call RICC_dalloc2(no2,nou,VH3P)
+   call RICC_ialloc1(no,IntYesNo)
+   if(usedm3)then
+     call RICC_dalloc3(no,nauxbas,no,ImnX)
+     call RICC_dalloc3(nu,nauxbas,no,ImeX)
+     call RICC_dalloc3(nu,nauxbas,nu,IefX)
+     call RICC_fetch_ddi_ints(HNP,ImnX,ImeX,IefX)
+   end if 
+
+!-------------------------------------------------------------------------
+! Check how far the available memory is sufficient for holding the 
+! preassembled (ia|bc) integrals per DDI rank. This will reduce a lot of 
+! work concerning repeated 4-index ERI assembling within loops. Only those 
+! (ia|bc) integrals that cannot be held in the memory will need to be 
+! assembled on the fly.
+!-------------------------------------------------------------------------
+   IntYesNo=0
+   ilen=0
+   do i=1,no
+      if(i*nu*nu2 .GT. MaxCor) EXIT
+      IntYesNo(i) = 1
+      ilen = ilen+1
+   end do
+
+   if(ilen .EQ. 0)then
+     if(maswrk)write(LuOut,9003)
+   else if(ilen.GT.0 .AND. ilen.LT.no)then
+     if(maswrk)write(LuOut,9004)ilen,no
+     call RICC_dalloc2(ilen*nu,nu2,VHP3)
+   else if(ilen .EQ. no)then
+     if(maswrk)write(LuOut,9005)
+     call RICC_dalloc2(nou,nu2,VHP3)
+   end if
+   call flshbf(LuOut)
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,nu)
+   call omp_set_dynamic(.false.)
+   ccnumth(13) = Nthreads
+!-------------------------------------------------------------------------
+! a priori 4-index integral assembling. 
+!-------------------------------------------------------------------------
+   if(usedm3)then               
+                   call RICC_get_ijka(HNP,VH3P,ImnX,ImeX)
+   if(ilen .GT. 0) call RICC_get_abcl(ilen,HNP,VHP3,ImeX,IefX)
+   else
+                   call RICC_get_ijka(HNP,VH3P)
+   if(ilen .GT. 0) call RICC_get_abcl(ilen,HNP,VHP3)
+   end if
+
+!-------------------------------------------------------------------------
+! Dynamic load balancing among the DDI/MPI tasks is in this case mandatory,
+! as the (ib|ac) integrals are to be assembled only for certain (i,j,k) 
+! values but not all.
+!-------------------------------------------------------------------------
+   itask = -1
+   pmin  =  9
+   pmax  = 19
+   call DDI_DLBRESET
+   call DDI_DLBNEXT(MyTask)
+
+   loop_ijk_mpi: do ijk=1,no3
+
+                 itask = itask+1
+                 if(itask .NE. MyTask) CYCLE
+
+                 i = ipack3(ijk)%ind1
+                 j = ipack3(ijk)%ind2
+                 k = ipack3(ijk)%ind3
+!-------------------------------------------------------------------------
+! Assemble (ib|ac), (jb|ac), and (kb|ac) integrals (ord: a,b,c) if they 
+! are not available already. 
+!-------------------------------------------------------------------------
+                 if(IntYesNO(i).EQ.0)then
+                   if(usedm3)then
+                     call RICC_get_abcl4l(Nthreads,i,HNP,V3i,ImeX,IefX)
+                   else
+                     call RICC_get_abcl4l(Nthreads,i,HNP,V3i)
+                   end if
+                 end if
+                 if(IntYesNO(j).EQ.0)then
+                   if(usedm3)then
+                     call RICC_get_abcl4l(Nthreads,j,HNP,V3j,ImeX,IefX)
+                   else
+                     call RICC_get_abcl4l(Nthreads,j,HNP,V3j)
+                   end if
+                 end if
+                 if(IntYesNO(k).EQ.0)then
+                   if(usedm3)then
+                     call RICC_get_abcl4l(Nthreads,k,HNP,V3k,ImeX,IefX)
+                   else
+                     call RICC_get_abcl4l(Nthreads,k,HNP,V3k)
+                   end if
+                 end if
+
+!-------------------------------------------------------------------------
+! Construct T3 residuals under six pairwise index permutations, while
+! completely bypassing any low-scaling index resort or vector addition.
+!-------------------------------------------------------------------------
+                 call RICC_dzero(1,nu2,1,nu,T3)
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(i,j,k,no,nu,IntYesNo,HNP,T2,T3,V3i,V3j,V3k,VH3P,VHP3)        &
+!$omp private(ij,ik,jk,b,c,ic,ib,jc,rlo,rhi,clo,chi)
+
+!$omp do schedule(dynamic,1)
+   loop_b: do b=1,nu
+
+! Term 1m. -\sum_m (kc|im)*t(jm)_(ba)
+           ik  = (i-1)*no+k
+           call DGEMM('N','T',nu,nu,no,ONEM,T2(:,b,:,j),nu,               &
+                      VH3P(ik,:),nu,ONE,T3(:,b,:),nu)
+
+! Term 2m. -\sum_m (kc|jm)*t(im)_(ab)
+           jk = (j-1)*no+k
+           call DGEMM('N','T',nu,nu,no,ONEM,T2(b,:,:,i),nu,               &
+                      VH3P(jk,:),nu,ONE,T3(:,b,:),nu)
+
+! Term 1e. \sum_e (ia|be)*t(jk)_(ec)
+           SELECT CASE(IntYesNo(i))
+               CASE(0)
+                    call DGEMM('N','T',nu,nu,nu,ONE,V3i(b,:,:),nu,        &
+                               T2(:,:,k,j),nu,ONE,T3(:,b,:),nu)
+               CASE(1)
+                    ib = (i-1)*nu+b
+                    call DGEMM('T','T',nu,nu,nu,ONE,VHP3(ib,:),nu,        &
+                               T2(:,:,k,j),nu,ONE,T3(:,b,:),nu)
+           END SELECT
+
+! Term 2e. \sum_e (jb|ae)*t(ik)_(ec)
+           SELECT CASE(IntYesNo(j))
+               CASE(0)
+                    call DGEMM('N','T',nu,nu,nu,ONE,V3j(:,b,:),nu,        &
+                               T2(:,:,k,i),nu,ONE,T3(:,b,:),nu)
+               CASE(1)
+                    rlo = (j-1)*nu+1
+                    rhi = j*nu
+                    clo = (b-1)*nu+1
+                    chi = b*nu
+                    call DGEMM('N','T',nu,nu,nu,ONE,VHP3(rlo:rhi,clo:chi),&
+                               nu,T2(:,:,k,i),nu,ONE,T3(:,b,:),nu)
+           END SELECT
+   end do loop_b
+!$omp end do
+
+!$omp do schedule(dynamic,1)
+   loop_c: do c=1,nu
+
+! Term 3m. -\sum_m (ia|km)*t(jm)_(bc)
+           ik  = (k-1)*no+i
+           call DGEMM('N','T',nu,nu,no,ONEM,VH3P(ik,:),nu,                &
+                      T2(c,:,:,j),nu,ONE,T3(:,:,c),nu)
+
+! Term 4m. -\sum_m (ia|jm)*t(km)_(cb)
+           ij  = (j-1)*no+i
+           call DGEMM('N','T',nu,nu,no,ONEM,VH3P(ij,:),nu,                &
+                      T2(:,c,:,k),nu,ONE,T3(:,:,c),nu)
+
+! Term 5m. -\sum_m (jb|im)*t(km)_(ca)
+           ij  = (i-1)*no+j
+           call DGEMM('N','T',nu,nu,no,ONEM,T2(:,c,:,k),nu,               &
+                      VH3P(ij,:),nu,ONE,T3(:,:,c),nu)
+
+! Term 6m. -\sum_m (jb|km)*t(im)_(ac)
+           jk  = (k-1)*no+j
+           call DGEMM('N','T',nu,nu,no,ONEM,T2(c,:,:,i),nu,               &
+                      VH3P(jk,:),nu,ONE,T3(:,:,c),nu)
+
+! Term 3e. \sum_e (ia|ce)*t(jk)_(be)
+           SELECT CASE(IntYesNo(i))
+               CASE(0)
+                    call DGEMM('N','N',nu,nu,nu,ONE,V3i(c,:,:),nu,        &
+                               T2(:,:,k,j),nu,ONE,T3(:,:,c),nu)
+               CASE(1)
+                    ic = (i-1)*nu+c
+                    call DGEMM('T','N',nu,nu,nu,ONE,VHP3(ic,:),nu,        &
+                               T2(:,:,k,j),nu,ONE,T3(:,:,c),nu)
+           END SELECT
+
+! Term 4e. \sum_e (jb|ce)*t(ik)_(ae)
+           SELECT CASE(IntYesNo(j))
+               CASE(0)
+                    call DGEMM('T','T',nu,nu,nu,ONE,T2(:,:,k,i),nu,       &
+                               V3j(c,:,:),nu,ONE,T3(:,:,c),nu)
+               CASE(1)
+                    jc = (j-1)*nu+c
+                    call DGEMM('T','N',nu,nu,nu,ONE,T2(:,:,k,i),nu,       &
+                               VHP3(jc,:),nu,ONE,T3(:,:,c),nu)
+           END SELECT
+
+! Term 5e. \sum_e (kc|ae)*t(ij)_(eb)
+! Term 6e. \sum_e (kc|be)*t(ij)_(ae)
+           SELECT CASE(IntYesNo(k))
+               CASE(0)
+                    call DGEMM('N','T',nu,nu,nu,ONE,V3k(:,c,:),nu,        &
+                               T2(:,:,j,i),nu,ONE,T3(:,:,c),nu)
+                    call DGEMM('T','T',nu,nu,nu,ONE,T2(:,:,j,i),nu,       &
+                               V3k(:,c,:),nu,ONE,T3(:,:,c),nu)
+               CASE(1)
+                    rlo = (k-1)*nu+1
+                    rhi = k*nu
+                    clo = (c-1)*nu+1
+                    chi = c*nu
+                    call DGEMM('N','T',nu,nu,nu,ONE,VHP3(rlo:rhi,clo:chi),&
+                               nu,T2(:,:,j,i),nu,ONE,T3(:,:,c),nu)
+
+                    call DGEMM('T','T',nu,nu,nu,ONE,T2(:,:,j,i),nu,       &
+                               VHP3(rlo:rhi,clo:chi),nu,ONE,T3(:,:,c),nu)
+           END SELECT
+   end do loop_c
+!$omp end do nowait
+!$omp end parallel
+
+!-------------------------------------------------------------------------
+! Now construct the fifth-order, i.e., the singles contributions. Assemble
+! Vabij 4-index integrals in steps in V3j and V3k and consume immediately.
+!-------------------------------------------------------------------------
+      call DCOPY(nu2*nu,T3,1,V3i,1)
+
+      if(usedm3)then
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,ImeX(:,:,j),nu,             &
+                    ImeX(:,:,k),nu,ZERO,V3j(:,:,1),nu)
+
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,ImeX(:,:,i),nu,             &
+                    ImeX(:,:,k),nu,ZERO,V3k(:,:,1),nu)
+      else
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,HNP%BmeX(:,:,j),nu,         &
+                    HNP%BmeX(:,:,k),nu,ZERO,V3j(:,:,1),nu)
+
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,HNP%BmeX(:,:,i),nu,         &
+                    HNP%BmeX(:,:,k),nu,ZERO,V3k(:,:,1),nu)
+      end if
+
+!$omp parallel do default(none) num_threads(Nthreads) schedule(dynamic,1) &
+!$omp shared(i,j,nu,T,V3i,V3j,V3k)                                        &
+!$omp private(c)
+      loop_c_t1: do c=1,nu
+                 call DGER(nu,nu,ONE,T(1)%MAT(:,i),1,V3j(:,c,1),1,        &
+                           V3i(:,:,c),nu)
+
+                 call DGER(nu,nu,ONE,V3k(:,c,1),1,T(1)%MAT(:,j),1,        &
+                           V3i(:,:,c),nu)
+      end do loop_c_t1
+!$omp end parallel do
+
+      if(usedm3)then
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,ImeX(:,:,i),nu,             &
+                    ImeX(:,:,j),nu,ZERO,V3j(:,:,1),nu)
+      else 
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,HNP%BmeX(:,:,i),nu,         &
+                    HNP%BmeX(:,:,j),nu,ZERO,V3j(:,:,1),nu)
+      end if
+
+!$omp parallel do default(none) num_threads(Nthreads) schedule(dynamic,1) &
+!$omp shared(k,nu,T,V3i,V3j)                                              &
+!$omp private(b)
+      loop_b_t1: do b=1,nu
+                 call DGER(nu,nu,ONE,V3j(:,b,1),1,T(1)%MAT(:,k),1,        &
+                           V3i(:,b,:),nu)
+      end do loop_b_t1
+!$omp end parallel do
+
+                 call RICC_et4d_et5s(i,j,k,HNP,T3,V3i,ET3COR) 
+
+                 call DDI_DLBNEXT(MyTask)
+
+                 fertig = FLOOR(REAL(ijk,dp)*100.0D+00/REAL(no3,dp)) 
+                 if(maswrk .AND. fertig.GT.pmin .AND. fertig.LT.pmax)then
+                   call TSECND(tim)
+                   tim = wall-wall0
+                   call RICC_TUNIT(tim,HMSD)
+                   write(LuOut,9006)fertig,tim,HMSD
+                   call flshbf(LuOut)
+                   pmin = pmin+10
+                   pmax = pmax+10
+                 end if
+   
+   end do loop_ijk_mpi
+
+   call DDI_GSUMF(3030,ET3COR,1)
+
+   if(ALLOCATED(ipack3))then
+     DEALLOCATE(ipack3)
+     MaxCor = MaxCor+no3
+   end if
+   call RICC_ifree1(IntYesNo)
+   call RICC_dfree2(VH3P)
+   call RICC_dfree3(T3)
+   call RICC_dfree3(V3i) 
+   call RICC_dfree3(V3j)
+   call RICC_dfree3(V3k)
+   if(ilen .GT. 0)call RICC_dfree2(VHP3)
+   if(usedm3)then
+     call RICC_dfree3(ImnX)
+     call RICC_dfree3(ImeX)
+     call RICC_dfree3(IefX)
+   end if
+
+   call DDI_DLBRESET()
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   9000 format(/,27X,' **** NON-ITERATIVE TRIPLES CORRECTIONS **** ')
+   9001 format(/,5X,'MINIMUM MEMORY NEED/PROCESSOR FOR THE (T) STEP: ',F9.2,' GB (',F9.2,' GiB)'     ,/,&
+                 5X,'                              MEMORY AVAILABLE: ',F9.2,' GB (',F9.2,' GiB)')
+   9002 format(//5X,' *** THE AVAILABLE MEMORY IS NOT ENOUGH FOR TRIPLES CORRECTIONS ***'            ,/,&
+                 5X,' THE CCSD ENERGY WILL BE PRINTED AS THE CCSD(T) ENERGY.')
+   9003 format(/,5X,'THE AVAILABLE MEMORY IS NOT ENOUGH FOR HOLDING THE PRE-ASSEMBLED (VV|VO)'       ,/,&
+                 5X,'INTEGRALS. ALL INTEGRALS WILL BE ASSEMBLED ON THE FLY.',/)
+   9004 format(/,5X,'THE AVAILABLE MEMORY IS SUFFICIENT FOR HOLDING THE PRE-ASSEMBLED (VV|VO)'       ,/,&
+                 5X,'INTEGRALS FOR ',I3,' OCCUPIED ORBITAL(S) OUT OF ',I3,'. THE REMAINING INTEGRALS',/,&
+                 5X,'WILL BE ASSEMBLED ON THE FLY.',/)
+   9005 format(/,5X,'THE AVAILABLE MEMORY IS ENOUGH FOR HOLDING ALL PRE-ASSEMBLED (VV|VO) INTEGRALS',/)
+   9006 format(  5X,I4,'% OF THE TASK IS COMPLETE. ELAPSED WALL TIME: ',F6.2,2A)
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_nitrip.'                                ,/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_nitrip
+
+!*MODULE RICCDIAG  * DECK RICC_et4d_et5s
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    August 24, 2020
+!>
+!>    @brief   Compute energy contribution for a specific occupied
+!>             index triplet (i,j,k). 
+!>
+!>
+
+   SUBROUTINE RICC_et4d_et5s(i,j,k,HNP,W3,V3,ET3COR)
+
+   REAL(KIND=dp),INTENT(INOUT) :: ET3COR
+   INTEGER,INTENT(IN)          :: i,j,k
+   TYPE(NormH),INTENT(IN)      :: HNP
+   REAL(KIND=dp),INTENT(IN)    :: W3(:,:,:),V3(:,:,:)
+   REAL(KIND=dp)               :: x,y,z,eijk,eab,denom 
+   REAL(KIND=dp)               :: delijk,delab,delabc
+   INTEGER                     :: a,b,c,absym,Mxthreads,Nthreads
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,nuu)
+   call omp_set_dynamic(.false.)
+
+              delijk = ONE
+   if(i.EQ.j) delijk = delijk+ONE
+   if(j.EQ.k) delijk = delijk+ONE
+   eijk   = HNP%ORBEN(i)+HNP%ORBEN(j)+HNP%ORBEN(k)
+   
+!$omp parallel do default(none) num_threads(Nthreads)                     &
+!$omp schedule(dynamic,1) reduction(+:ET3COR)                             &
+!$omp shared(no,nuu,eijk,delijk,HNP,W3,V3)                                &
+!$omp private(a,b,c,absym,x,y,z,eab,denom,delab,delabc)
+
+   do absym=1,nuu
+      x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(absym,dp)))
+      a = FLOOR(x)
+      b = absym - a*(a-1)/2
+      if(b .EQ. 0)then
+        a = a-1
+        b = a
+      end if
+                 delab = ONE
+      if(a.EQ.b) delab = delab+ONE
+      eab = HNP%ORBEN(a+no)+HNP%ORBEN(b+no)
+ 
+      do c=1,b
+                    delabc = delab
+         if(b.EQ.c) delabc = delab+ONE
+         denom = eijk - eab - HNP%ORBEN(c+no)
+         denom = denom*delabc*delijk
+
+         x =  W3(a,b,c)*V3(a,b,c)                                         & 
+            + W3(b,a,c)*V3(b,a,c)+W3(a,c,b)*V3(a,c,b)+W3(c,b,a)*V3(c,b,a) &
+            + W3(b,c,a)*V3(b,c,a)+W3(c,a,b)*V3(c,a,b) 
+         y =  V3(a,b,c)+V3(b,c,a)+V3(c,a,b)
+         z =  V3(b,a,c)+V3(a,c,b)+V3(c,b,a)
+
+         ET3COR = ET3COR + ((y-TWO*z)*(W3(a,b,c)+W3(b,c,a)+W3(c,a,b))     &
+                         +  (z-TWO*y)*(W3(b,a,c)+W3(a,c,b)+W3(c,b,a))     &
+                         +  3.0D+00*x)*TWO/denom          
+      end do
+   end do
+
+!$omp end parallel do
+
+   END SUBROUTINE RICC_et4d_et5s
+
+!*MODULE RICCDIAG  * DECK RICC_get_ijka
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    August 24, 2020
+!>
+!>    @brief   Assemble (ik|ja) 4-index integrals.
+!>
+!>
+
+   SUBROUTINE RICC_get_ijka(HNP,VH3P,ImnX,ImeX)
+
+   TYPE(NormH),INTENT(IN)            :: HNP
+   REAL(KIND=dp),INTENT(IN),OPTIONAL :: ImnX(:,:,:),ImeX(:,:,:)
+   REAL(KIND=dp),INTENT(OUT)         :: VH3P(:,:)
+   INTEGER                           :: i,j,ij,Mxthreads,Nthreads
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,no2)
+   call omp_set_dynamic(.false.)
+
+!$omp parallel do default(none) num_threads(Nthreads) schedule(dynamic,1) &
+!$omp shared(usedm3,no,no2,nu,nauxbas,HNP,VH3P,ImnX,ImeX)                 &
+!$omp private(i,j,ij)
+   do ij=1,no2
+      i = (ij-1)/no + 1
+      j = ij-(i-1)*no
+      if(usedm3)then
+         call DGEMM('N','T',nu,no,nauxbas,ONE,ImeX(:,:,j),nu,             &
+                    ImnX(:,:,i),no,ZERO,VH3P(ij,:),nu)
+      else
+         call DGEMM('N','T',nu,no,nauxbas,ONE,HNP%BmeX(:,:,j),nu,         &
+                    HNP%BmnX(:,:,i),no,ZERO,VH3P(ij,:),nu)
+      end if
+   end do
+!$omp end parallel do
+
+   END SUBROUTINE RICC_get_ijka
+
+!*MODULE RICCDIAG  * DECK RICC_get_abcl4l
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    August 24, 2020
+!>
+!>    @brief   Assemble (lb|ac) 4-index integrals for a given occupied
+!>             index l. 
+!>
+!>
+
+   SUBROUTINE RICC_get_abcl4l(Nthreads,l,HNP,V3l,ImeX,IefX)
+
+   INTEGER,INTENT(IN)                :: l,Nthreads 
+   TYPE(NormH),INTENT(IN)            :: HNP
+   REAL(KIND=dp),INTENT(IN),OPTIONAL :: ImeX(:,:,:),IefX(:,:,:)
+   REAL(KIND=dp),INTENT(OUT)         :: V3l(:,:,:)
+   INTEGER                           :: a
+
+!$omp parallel do default(none) num_threads(Nthreads) schedule(dynamic,1) &
+!$omp shared(usedm3,l,nu,nauxbas,HNP,V3l,ImeX,IefX)                       &
+!$omp private(a)
+   do a=1,nu
+      if(usedm3)then
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,ImeX(:,:,l),nu,             &
+                    IefX(:,:,a),nu,ZERO,V3l(a,:,:),nu)
+      else
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,HNP%BmeX(:,:,l),nu,         &
+                    HNP%BefX(:,:,a),nu,ZERO,V3l(a,:,:),nu)
+      end if
+   end do
+!$omp end parallel do
+
+   END SUBROUTINE RICC_get_abcl4l
+
+!*MODULE RICCDIAG  * DECK RICC_get_abcl
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    August 24, 2020
+!>
+!>    @brief   Assemble (lb|ac) 4-index integrals for a range ilen 
+!>             of occupied indices (as far as memory allows).
+!>
+!>
+
+   SUBROUTINE RICC_get_abcl(ilen,HNP,VHP3,ImeX,IefX)
+
+   INTEGER,INTENT(IN)                :: ilen
+   TYPE(NormH),INTENT(IN)            :: HNP
+   REAL(KIND=dp),INTENT(IN),OPTIONAL :: ImeX(:,:,:),IefX(:,:,:)
+   REAL(KIND=dp),INTENT(OUT)         :: VHP3(:,:)
+   INTEGER                           :: i,a,ia,Mxthreads,Nthreads
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,ilen*nu)
+   call omp_set_dynamic(.false.)
+
+!$omp parallel do default(none) num_threads(Nthreads) schedule(dynamic,1) &
+!$omp shared(usedm3,ilen,nu,nauxbas,HNP,VHP3,ImeX,IefX)                   &
+!$omp private(i,a,ia)
+   do ia=1,ilen*nu
+      i = (ia-1)/nu + 1
+      a = ia-(i-1)*nu
+      if(usedm3)then
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,IefX(:,:,a),nu,             &
+                    ImeX(:,:,i),nu,ZERO,VHP3(ia,:),nu)
+      else
+         call DGEMM('N','T',nu,nu,nauxbas,ONE,HNP%BefX(:,:,a),nu,         &
+                    HNP%BmeX(:,:,i),nu,ZERO,VHP3(ia,:),nu)
+      end if
+   end do
+!$omp end parallel do
+
+   END SUBROUTINE RICC_get_abcl
+
+!*MODULE RICCDIAG  * DECK RICC_fetch_ddi_ints
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    August 29, 2020
+!>
+!>    @brief   Fetch complete 3-index RI integral arrays from
+!>             distributed memory for triples corrections.
+!>
+!>
+
+   SUBROUTINE RICC_fetch_ddi_ints(HNP,ImnX,ImeX,IefX)
+
+   REAL(KIND=dp),INTENT(OUT) :: ImnX(:,:,:),ImeX(:,:,:),IefX(:,:,:)
+   TYPE(NormH),INTENT(IN)    :: HNP
+   INTEGER                   :: i,a
+
+   do i=1,no
+      call DDI_GET(HNP%INTS(1),1,no*nauxbas,i,i,ImnX(:,:,i))
+      call DDI_GET(HNP%INTS(2),1,nu*nauxbas,i,i,ImeX(:,:,i))
+   end do
+   do a=1,nu
+      call DDI_GET(HNP%INTS(3),1,nu*nauxbas,a,a,IefX(:,:,a))
+   end do
+
+   END SUBROUTINE RICC_fetch_ddi_ints
+
+!*MODULE RICCDIAG  * DECK RICC_MP2guessT2
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!>
+!>    @brief   Obtain RI-MP2 energy and the MP2 guess for T2
+!>             amplitudes. 
+!>
+!>
+
+   SUBROUTINE RICC_MP2guessT2(HNP,T,EMP2)
+
+   REAL(KIND=dp),INTENT(OUT)   :: EMP2 
+   TYPE(NormH),INTENT(IN)      :: HNP
+   TYPE(WMAT),INTENT(INOUT)    :: T(2)
+   REAL(KIND=dp),ALLOCATABLE   :: ImeX(:,:),JmeX(:,:),VPP(:,:)
+   REAL(KIND=dp)               :: cf,denom,Eij
+   INTEGER,ALLOCATABLE         :: DDIWD(:,:)
+   INTEGER                     :: DDI_NP,DDI_ME,MemIn,MemThrd
+   INTEGER                     :: ijstrt,ijend,ijlen,ijsym
+   INTEGER                     :: i,j,a,b,ab,ba,Mxthreads,Nthreads
+  
+   MemIn = MaxCor   
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIWD)
+   call RICC_LoopDist(DDIWD,DDI_NP,1,noo)
+   ijstrt = DDIWD(DDI_ME,1)
+   ijend  = DDIWD(DDI_ME,2)
+   ijlen  = ijend-ijstrt+1
+   call RICC_ifree2(DDIWD)
+
+   EMP2 = ZERO
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. noo-1)then
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,ijlen)
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = nu2  
+   if(usedm3) MemThrd =  MemThrd + 2*nu*nauxbas
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(1) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nauxbas,ijstrt,ijend,usedm3,HNP,T,EMP2)                &
+!$omp private(i,j,ijsym,a,b,ab,ba,cf,denom,ImeX,JmeX,VPP,Eij)             &
+!$omp firstprivate(MemThrd) 
+
+   if(usedm3)then
+      call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+      call RICC_dalloc2thrd(nu,nauxbas,JmeX,MemThrd)
+   end if
+   call RICC_dalloc2thrd(nu,nu,VPP,MemThrd)
+
+   Eij = ZERO
+
+!$omp do schedule(static) 
+
+   loop_ijtr: do ijsym=ijstrt,ijend
+              cf = HALF*(ONE + SQRT(ONE + EIGHT*REAL(ijsym,dp)))
+              i = FLOOR(cf)
+              j = ijsym - i*(i-1)/2
+              if(j .EQ. 0)then
+                i = i-1
+                j = i
+              end if
+
+!------------------------------------------------------------------------
+! Assemble integrals: (ij)I_(a,b) = \sum_P (i)B_(a,P)*(j)B_(b,P)
+!------------------------------------------------------------------------
+              if(.NOT. usedm3)then
+                call DGEMM('N','T',nu,nu,nauxbas,ONE,                     &
+                           HNP%BmeX(:,:,i),nu,HNP%BmeX(:,:,j),nu,         &
+                           ZERO,VPP,nu)  
+              else
+                call DDI_GET(HNP%INTS(2),1,nu*nauxbas,i,i,ImeX)
+                call DDI_GET(HNP%INTS(2),1,nu*nauxbas,j,j,JmeX)
+                call DGEMM('N','T',nu,nu,nauxbas,ONE,                     &
+                           ImeX,nu,JmeX,nu,ZERO,VPP,nu) 
+              end if
+
+              cf = TWO
+              if(i .EQ. j)cf = ONE  
+
+              do a=1,nu
+              do b=1,a 
+                 ab = (a-1)*nu+b
+                 ba = (b-1)*nu+a
+                 denom=  HNP%ORBEN(i)    + HNP%ORBEN(j)                   &
+                       - HNP%ORBEN(no+a) - HNP%ORBEN(no+b) 
+
+                 T(2)%MAT(ab,ijsym) = VPP(a,b)/denom
+                 Eij = Eij + cf*T(2)%MAT(ab,ijsym)*(TWO*VPP(a,b)-VPP(b,a))
+                 if(a .NE. b)then
+                   T(2)%MAT(ba,ijsym) = VPP(b,a)/denom
+                   Eij = Eij + cf*T(2)%MAT(ba,ijsym)*(TWO*VPP(b,a)-VPP(a,b))
+                 end if
+              end do
+              end do
+
+   end do loop_ijtr
+
+!$omp end do nowait
+
+!$omp atomic
+   EMP2 = EMP2 + Eij
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImeX,MemThrd)
+     call RICC_dfree2thrd(JmeX,MemThrd)
+   end if
+   call RICC_dfree2thrd(VPP,MemThrd)
+
+!$omp end parallel
+
+   end if block_mpi_excess 
+
+   call DDI_GSUMF(3028,EMP2,1)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_MP2guessT2.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_MP2guessT2
+
+!*MODULE RICCDIAG  * DECK RICC_SD_ECORR
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 25, 2020 First submission to github
+!>
+!>    @brief   Construct T1 and T2-transformed RI integrals
+!>             and compute their contributions to the CCSD
+!>             correlation energy (no storage)
+!>
+!>
+
+   SUBROUTINE RICC_SD_ECORR(HNP,T,ECCSD)
+
+   REAL(KIND=dp),INTENT(OUT) :: ECCSD
+   TYPE(NormH),INTENT(IN)    :: HNP
+   TYPE(WMAT),INTENT(IN)     :: T(2)
+   REAL(KIND=dp),ALLOCATABLE :: ImnX(:,:),ImeX(:,:),WPP(:,:),MPT2(:,:)
+   REAL(KIND=dp)             :: DDOT,E_m
+   INTEGER,ALLOCATABLE       :: DDIWD(:,:)
+   INTEGER                   :: m,n,mn,e,f,ef,fe,mstrt,mend,mlen,rlo,rhi
+   INTEGER                   :: MemIn,DDI_NP,DDI_ME,Mxthreads,Nthreads,MemThrd
+
+   MemIn = MaxCor
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+
+   if(usedm3)then
+      call DDI_DISTRIB(HNP%INTS(1),DDI_ME,rlo,rhi,mstrt,mend)
+   else
+      call RICC_ialloc20(DDI_NP,2,DDIWD)
+      call RICC_LoopDist(DDIWD,DDI_NP,1,no)
+      mstrt = DDIWD(DDI_ME,1)
+      mend  = DDIWD(DDI_ME,2)
+      call RICC_ifree2(DDIWD)
+   end if
+   mlen = mend-mstrt+1
+
+   ECCSD = ZERO
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. no-1)then
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,mlen)
+   call omp_set_dynamic(.false.)
+
+!------------------------------------------------------------------------
+! Check available memory and adjust num_threads accordingly
+!------------------------------------------------------------------------
+   MemThrd = nu2 + nu*nauxbas
+   if(usedm3) MemThrd = MemThrd + nctot*nauxbas
+   do
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0)Nthreads = 1
+   ccnumth(12) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nauxbas,mstrt,mend,usedm3,HNP,T,ECCSD)                 &
+!$omp private(m,n,mn,e,f,ef,fe,E_m,ImnX,ImeX,WPP,MPT2)                    &
+!$omp firstprivate(MemThrd)
+
+   if(usedm3)then
+     call RICC_dalloc2thrd(no,nauxbas,ImnX,MemThrd)
+     call RICC_dalloc2thrd(nu,nauxbas,ImeX,MemThrd)
+   end if
+   call RICC_dalloc2thrd(nu,nauxbas,MPT2,MemThrd)
+   call RICC_dalloc2thrd(nu,nu,WPP,MemThrd)
+
+   E_m = ZERO
+
+!$omp do schedule(dynamic,1)
+
+   loop_m: do m=mstrt,mend
+
+           call RICC_dzero(1,nu,1,nauxbas,MPT2)
+
+           loop_n: do n=1,no
+!-------------------------------------------------------------------------
+! Form contravariant Tau2: (m,n)tilde(Tau)_(e,f) =  2T2(ef,mn)-T2(fe,mn)
+!                                              +2T(e,m)T(f,n)-T(f,m)T(e,n)
+!-------------------------------------------------------------------------
+                   do e=1,nu
+                   do f=1,nu
+                      ef = (e-1)*nu+f
+                      fe = (f-1)*nu+e
+                      if(m .GE. n)then
+                        mn = m*(m-1)/2 + n
+                        WPP(e,f) = TWO*T(2)%MAT(ef,mn)-T(2)%MAT(fe,mn)
+                      else
+                        mn = n*(n-1)/2 + m
+                        WPP(e,f) = TWO*T(2)%MAT(fe,mn)-T(2)%MAT(ef,mn)
+                      end if  
+                      WPP(e,f) = WPP(e,f)+TWO*T(1)%MAT(e,m)*T(1)%MAT(f,n) &
+                                            - T(1)%MAT(f,m)*T(1)%MAT(e,n)  
+                   end do
+                   end do
+
+!-------------------------------------------------------------------------
+! Form MPT2: (m)MPT2_(e,P) = \sum_b(n) (m,n)tilde(Tau)_(e,f)*(n)B_(f,P) 
+! DGEMM: nu*nu*nauxbas
+!-------------------------------------------------------------------------
+                   if(.NOT. usedm3)then
+                       call DGEMM('N','N',nu,nauxbas,nu,ONE,WPP,nu,       &
+                                  HNP%BmeX(:,:,n),nu,ONE,MPT2,nu) 
+                   else
+                       call DDI_GET(HNP%INTS(2),1,nu*nauxbas,n,n,ImeX)
+                       call DGEMM('N','N',nu,nauxbas,nu,ONE,WPP,nu,       &
+                                  ImeX,nu,ONE,MPT2,nu) 
+                   end if
+           end do loop_n
+ 
+!-------------------------------------------------------------------------
+! Now consume MPT2 contribution to CCSD Correlation Energy
+!-------------------------------------------------------------------------
+
+           if(.NOT. usedm3)then
+               E_m = E_m + DDOT(nu*nauxbas,HNP%BmeX(:,:,m),1,MPT2,1)
+           else
+               call DDI_GET(HNP%INTS(2),1,nu*nauxbas,m,m,ImeX)
+               E_m = E_m + DDOT(nu*nauxbas,ImeX,1,MPT2,1)
+           end if
+
+   end do loop_m
+
+!$omp end do nowait
+
+!$omp atomic
+   ECCSD = ECCSD + E_m
+
+   if(usedm3)then
+     call RICC_dfree2thrd(ImnX,MemThrd)
+     call RICC_dfree2thrd(ImeX,MemThrd)
+   end if
+   call RICC_dfree2thrd(MPT2,MemThrd)
+   call RICC_dfree2thrd(WPP,MemThrd)
+
+!$omp end parallel
+
+   end if block_mpi_excess
+
+   call DDI_GSUMF(3029,ECCSD,1)
+
+!-------------------------------------------------------------------------
+! Finally, add the Fock matrix contribution to ECCSD. This part is done
+! sequentially and redundantly on all DDI ranks, hence post DDI_GSUMF.
+!-------------------------------------------------------------------------
+   do m=1,no
+      ECCSD = ECCSD + TWO*DDOT(nu,HNP%FHP(m,:),1,T(1)%MAT(:,m),1)   
+   end do
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_SD_ECORR.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_SD_ECORR
+
+ END MODULE RICCDIAG

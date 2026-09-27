@@ -1,0 +1,21 @@
+! see  CH-ro-hfx-enrg-singlet.inp and cis-sf-rohf.inp and exam36.inp
+ $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=ENERGY
+   DFTTYP=HFX TDDFT=MRSF $END
+ $SCF
+   COUPLE=.TRUE. ALPHA(1)= 0.5,0.5,0.5 BETA(1) = 0.5,0.5,0.5
+ $END
+ $SYSTEM MWORDS=1 $END
+ $GUESS GUESS=HUCKEL $END
+ $BASIS GBASIS=N31 NGAUSS=6 NDFUNC=1 $END
+ $TDDFT NSTATE=5 IROOT=1 MULT=1 TDPRP=.TRUE. $END
+ $DATA
+C2H4 at rotational saddle point...sigma,pi,pi*,sigma* active
+Dnd 2
+
+C           6.0   0.0000000000   0.0000000000   0.7486926908
+H           1.0   0.6500976762   0.6500976762   1.3062796706
+ $END
+
+!
+!TRAVIS-CI SMALL
+! 

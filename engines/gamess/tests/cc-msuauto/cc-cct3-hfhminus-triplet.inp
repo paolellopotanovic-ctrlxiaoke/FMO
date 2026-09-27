@@ -1,0 +1,19 @@
+! CCSDt         E=     -100.5515302785   CORR. E=  -0.1923729228
+! CC(t;3),A     E=     -100.5528015256   CORR. E=  -0.1936441699
+! CC(t;3)       E=     -100.5530489409   CORR. E=  -0.1938915853
+! J. Chem. Theory Comput. 8, 4968 (2012)
+!
+ $contrl runtyp=energy scftyp=rohf cctyp=cct3 $end
+ $contrl  icharg=-1 mult=3 ispher=1 $end
+ $system mwords=50 $end
+ $basis gbasis=n31 ngauss=6 ndfunc=1 npfunc=1 $end
+ $scf rstrct=.true. $end
+ $guess norder=1 iorder(3)=4,5,3 $end
+ $ccinp ncore=1 nacto=0 nactu=0 $end
+ $data
+HFH-, triplet state at R = 2.0 Angs.
+Dnh 2
+
+ F   9.0      0.00000000      0.00000000      0.0000000
+ H   1.0      0.00000000      0.00000000      2.0000000
+ $end

@@ -1,0 +1,16 @@
+! CCSDt         E=      -75.9520523486   CORR. E=  -0.3643410991
+! CC(t;3),A     E=      -75.9529117591   CORR. E=  -0.3652005095
+! CC(t;3)       E=      -75.9530560282   CORR. E=  -0.3653447787
+!
+ $contrl runtyp=energy scftyp=rohf cctyp=cct3 $end
+ $contrl units=bohr ispher=1 $end
+ $system mwords=50 $end
+ $basis gbasis=ccd $end
+ $ccinp ncore=0 nacto=2 nactu=2 $end
+ $data
+ H2O cc-pVDZ for R = 2Re
+cnv 2
+
+oxygen    8.         0.000000        0.000000      -0.0180
+hydrogen  1.         0.000000        3.030526      -2.117796
+ $end

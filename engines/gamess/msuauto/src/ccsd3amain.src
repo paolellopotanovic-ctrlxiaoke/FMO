@@ -1,0 +1,3258 @@
+C*MODULE CCSD3A DECK OPEN_CCSD3A_DRIVER
+C> @brief Drives the open-shell CCSDt calculation
+C>
+C> @author Jun Shen
+C> - April, 2018
+C> @author Emiliano Deustua
+C> - April, 2018
+C> @date May, 2018 Emiliano Deustua
+C> - Added restart capabilities
+C>
+C> @param IO output file unit number
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and excluding frozen virtual)
+C> @param N0 number of frozen core orbitals
+C> @param NFRV number frozen virtual orbitals
+C> @param MAXIT max number of CC iterations
+C> @param KREST restart calculation flag
+C> @param ITOL convergence tolerance
+C> @param MULT spin multiplicity
+C> @param EREF reference energy (ROHF energy)
+C> @param ECOR output CC correlation energy
+C> @param M1 number of active occupied orbitals
+C> @param M2 number of active unoccupied orbitals
+       SUBROUTINE OPEN_CCSD3A_DRIVER(IO,N1,N2,N3,N0,NFRV,MAXIT,
+     *               KREST,SHIFT,ITOL,MULT,EREF,ECOR,M1,M2,
+     *               NFT825,NFT843,NFT820,NFT821,NFT822,NFT823,NFT826,
+     *               NFT827,NFT828,NFT829,NFT830,NFT833,NFT831,NFT832,
+     *               NFT834,NFT835,NFT836,NFT837,NFT838,NFT839,NFT848)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+        INTEGER,ALLOCATABLE :: ICOE(:)
+C
+        LOGICAL IFRHF
+        REAL(KIND=8) SHIFT,EREF,ECOR
+        INTEGER MARG,NARG,IERR
+        INTEGER KREST
+        PARAMETER (MARG=20)
+        CHARACTER*100 ARG(0:MARG)
+        CHARACTER*800 FNAME
+ 
+        INTEGER TYPARG(0:MARG)
+        INTEGER NFT825,NFT843,NFT820,NFT821,NFT822,NFT823,NFT826
+        INTEGER NFT827,NFT828,NFT829,NFT830,NFT833,NFT831,NFT832
+        INTEGER NFT834,NFT835,NFT836,NFT837,NFT838,NFT839,NFT848
+        CHARACTER LINE*100,INPNAME*100,COMMAND*256
+        INTEGER INP,IO,A,B,C,D
+        PARAMETER(INP=12,ICR1=101)
+        REAL(KIND=8),ALLOCATABLE:: FAHH(:,:)
+        REAL(KIND=8),ALLOCATABLE:: FAHP(:,:)
+        REAL(KIND=8),ALLOCATABLE:: FAPP(:,:)
+        REAL(KIND=8),ALLOCATABLE:: FBHH(:,:)
+        REAL(KIND=8),ALLOCATABLE:: FBHP(:,:)
+        REAL(KIND=8),ALLOCATABLE:: FBPP(:,:)
+        REAL(KIND=8),ALLOCATABLE:: VAHHHH(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VAHHHP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VAHHPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VAHPHP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VAHPPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHHHH(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHHHP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHHPH(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHHPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHPHP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHPPH(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBPHPH(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBHPPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBPHPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VCHHHH(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VCHHHP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VCHHPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VCHPHP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VCHPPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VAAPPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBAPPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBPAPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VCAPPP(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE:: VBPPP(:,:,:)
+ 
+        LOGICAL FILE_EXISTS
+ 
+C Get the restart's file name from GAMESS environment
+        CALL GMS_GETENV("CCSD3AA", FNAME)
+ 
+C Check if closed or open shell
+        IF(N1.EQ.N2) THEN
+            IFRHF = .TRUE.
+        ELSE
+            IFRHF = .FALSE.
+        ENDIF
+ 
+        IFR = 333
+ 
+C [TODO] Implement DIIS fine tuning
+        IDIIS = 8
+ 
+C
+        ICC=1
+        IF(M2.GE.0)THEN
+         M1=MAX(N2-M1,N0)
+         M2=MIN(N1+M2,N3)
+         IF(M1.EQ.N0.AND.M2.EQ.N3)ICC=2
+        ELSE
+          ICC=0
+        ENDIF
+        CALL FLSHBF(IO)
+C
+        ALLOCATE(FAHH(N0+1:N1,N0+1:N1))
+        ALLOCATE(FAHP(N1+1:N3,N0+1:N1))
+        ALLOCATE(FAPP(N1+1:N3,N1+1:N3))
+        ALLOCATE(FBHH(N0+1:N2,N0+1:N2))
+        ALLOCATE(FBHP(N2+1:N3,N0+1:N2))
+        ALLOCATE(FBPP(N2+1:N3,N2+1:N3))
+        ALLOCATE(VAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1))
+        ALLOCATE(VAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1))
+        ALLOCATE(VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1))
+        ALLOCATE(VAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1))
+        ALLOCATE(VAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1))
+        ALLOCATE(VBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1))
+        ALLOCATE(VBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1))
+        ALLOCATE(VBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1))
+        ALLOCATE(VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1))
+        ALLOCATE(VBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1))
+        ALLOCATE(VBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1))
+        ALLOCATE(VBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3))
+        ALLOCATE(VBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1))
+        ALLOCATE(VBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3))
+        ALLOCATE(VCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2))
+        ALLOCATE(VCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2))
+        ALLOCATE(VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2))
+        ALLOCATE(VCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2))
+        ALLOCATE(VCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2))
+C
+C       Catch restart file not found error
+        IF(KREST.NE.0) THEN
+          INQUIRE(FILE=TRIM(FNAME)//'.MOE',EXIST=FILE_EXISTS)
+          IF(.NOT. FILE_EXISTS) THEN
+            WRITE(IO,'(A)') 'ERROR. RESTART FILE NOT FOUND.'
+            CALL ABRT
+          ENDIF
+        ENDIF
+ 
+ 
+C       Open restart files and T vector file for DIIS
+        OPEN(IFR,FILE=TRIM(FNAME)//'.MOE',FORM='UNFORMATTED')
+        IF(IDIIS.GT.0)THEN
+        ALLOCATE(ICOE(IDIIS+2))
+        DO I=1,IDIIS+2
+         ICOE(I)=1000+I
+         OPEN(ICOE(I),FILE=TRIM(FNAME)//'.C'//CHAR(I-1+ICHAR('0')),
+     &   FORM='UNFORMATTED')
+        ENDDO
+        ENDIF
+C
+        K1=N1-N0
+        K2=N2-N0
+        K3=N3-N1
+        K4=N3-N2
+C
+ 
+        READ(NFT843,REC=7)FAHH
+        READ(NFT843,REC=5)FAHP
+        READ(NFT843,REC=9)FAPP
+        READ(NFT843,REC=8)FBHH
+        READ(NFT843,REC=6)FBHP
+        READ(NFT843,REC=10)FBPP
+        I0=0
+        DO I=N0+1,N1;DO J=N0+1,N1
+          I0=I0+1
+          READ(NFT820,REC=I0)((VAHHHH(I,J,K,L),L=N0+1,N1),K=N0+1,N1)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N0+1,N2
+          I0=I0+1
+          READ(NFT821,REC=I0)((VCHHHH(I,J,K,L),L=N0+1,N2),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N0+1,N1
+          I0=I0+1
+          READ(NFT822,REC=I0)((VBHHHH(I,J,K,L),L=N0+1,N1),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N1+1,N3;DO J=N0+1,N1
+          I0=I0+1
+          READ(NFT823,REC=I0)((VAHHHP(I,J,K,L),L=N0+1,N1),K=N0+1,N1)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N2+1,N3;DO J=N0+1,N2
+          I0=I0+1
+          READ(NFT826,REC=I0)((VCHHHP(I,J,K,L),L=N0+1,N2),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N1+1,N3
+          I0=I0+1
+          READ(NFT827,REC=I0)((VBHHPH(I,J,K,L),L=N0+1,N1),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N2+1,N3;DO J=N0+1,N1
+          I0=I0+1
+          READ(NFT828,REC=I0)((VBHHHP(I,J,K,L),L=N0+1,N1),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N1;DO J=N1+1,N3
+          I0=I0+1
+          READ(NFT829,REC=I0)((VAHHPP(L,J,K,I),L=N1+1,N3),K=N0+1,N1)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N2+1,N3
+          I0=I0+1
+          READ(NFT830,REC=I0)((VCHHPP(L,J,K,I),L=N2+1,N3),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N2+1,N3
+          I0=I0+1
+          READ(NFT833,REC=I0)((VBHHPP(J,L,I,K),L=N1+1,N3),K=N0+1,N1)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N1;DO J=N1+1,N3
+          I0=I0+1
+          READ(NFT831,REC=I0)((VAHPHP(J,K,L,I),L=N1+1,N3),K=N0+1,N1)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N2+1,N3
+          I0=I0+1
+          READ(NFT832,REC=I0)((VCHPHP(J,K,L,I),L=N2+1,N3),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N1+1,N3
+          I0=I0+1
+          READ(NFT834,REC=I0)((VBPHPH(I,J,K,L),L=N1+1,N3),K=N0+1,N2)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N1;DO J=N2+1,N3
+          I0=I0+1
+          READ(NFT835,REC=I0)((VBHPHP(L,K,J,I),L=N2+1,N3),K=N0+1,N1)
+        ENDDO;ENDDO
+        DO I=N0+1,N1;DO J=N0+1,N2;DO K=N1+1,N3;DO L=N2+1,N3
+          VBHPPH(J,K,L,I)= VBHHPP(L,K,J,I)
+        ENDDO;ENDDO;ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N1;DO J=N1+1,N3
+          I0=I0+1
+          READ(NFT836,REC=I0)((VAHPPP(L,K,J,I),L=N1+1,N3),K=N1+1,N3)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N2+1,N3
+          I0=I0+1
+          READ(NFT837,REC=I0)((VCHPPP(L,K,J,I),L=N2+1,N3),K=N2+1,N3)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N2+1,N3;DO J=N0+1,N1
+          I0=I0+1
+          READ(NFT838,REC=I0)((VBHPPP(K,L,I,J),L=N1+1,N3),K=N2+1,N3)
+        ENDDO;ENDDO
+        I0=0
+        DO I=N0+1,N2;DO J=N1+1,N3
+          I0=I0+1
+          READ(NFT839,REC=I0)((VBPHPP(K,L,I,J),L=N1+1,N3),K=N2+1,N3)
+        ENDDO;ENDDO
+C
+        ALLOCATE(VAAPPP(N1+1:N3,N1+1:N3,N1+1:N3,N1+1:M2))
+        ALLOCATE(VBAPPP(N2+1:N3,N1+1:N3,N2+1:N3,N1+1:M2))
+        ALLOCATE(VBPAPP(N2+1:N3,N1+1:N3,N2+1:M2,N1+1:N3))
+        ALLOCATE(VCAPPP(N2+1:N3,N2+1:N3,N2+1:N3,N2+1:M2))
+        IF(ICC.EQ.1)THEN
+        ALLOCATE(VBPPP(N2+1:N3,N1+1:N3,N1+1:N3))
+        DO A=N1+1,M2
+          READ(NFT848,REC=A-N1)
+     &   (((VAAPPP(D,C,B,A),D=N1+1,N3),C=N1+1,N3),B=N1+1,N3)
+        ENDDO
+        DO A=N2+1,M2
+          READ(NFT848,REC=A-N2+K3)
+     &   (((VCAPPP(D,C,B,A),D=N2+1,N3),C=N2+1,N3),B=N2+1,N3)
+        ENDDO
+        DO B=N2+1,M2
+          READ(NFT848,REC=B-N2+K3+K4)
+     &   (((VBPAPP(D,A,B,C),C=N1+1,N3),D=N2+1,N3),A=N1+1,N3)
+        ENDDO
+        DO B=N2+1,N3
+          READ(NFT848,REC=B-N2+K3+K4)
+     &  (((VBPPP(D,A,C),C=N1+1,N3),D=N2+1,N3),A=N1+1,N3)
+          DO A=N1+1,M2;DO C=N1+1,N3;DO D=N2+1,N3
+            VBAPPP(D,C,B,A)=VBPPP(D,C,A)
+          ENDDO;ENDDO;ENDDO
+        ENDDO
+        DEALLOCATE(VBPPP)
+        ENDIF
+ 
+C       Proceed with CCSDt calculation
+        CALL SOLVE_CCSD3A(IO,N1,N2,N3,N0,ECOR,SHIFT,
+     & MAXIT,KREST,ITOL,IFR,M1,M2,IFRHF,ICOE,IDIIS,
+     & NFT825,NFT848,ICC,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP)
+C
+ 
+        IF(M2.GE.0)THEN
+        M1 = N2-M1
+        M2 = M2-N1
+        ENDIF
+        IF(IDIIS.NE.0)THEN
+          DO I=1,IDIIS+2
+            CLOSE(ICOE(I),STATUS='DELETE')
+          ENDDO
+        ENDIF
+C
+        END
+C*MODULE CCSD3A *DECK SOLVE_CCSD3A
+C> @brief Solve CCSDt iteratively
+C>
+C> @author Jun Shen
+C> - April, 2018
+C> @author Emiliano Deustua
+C> - April, 2018
+C>
+C> @param IO output file unit number
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param N0 number of frozen core orbitals
+C> @param ECOR output CC correlation energy
+C> @param SHIFT energy to shift update division
+C> @param MAXIT max number of CC iterations
+C> @param KREST restart calculation flag
+C> @param ITOL convergence tolerance
+C> @param IFR amplitudes file unit number
+C> @param M1 number of active occupied orbitals
+C> @param M2 number of active unoccupied orbitals
+C> @param IFRHF true if the calculation is closed shell
+C> @param ICOE array containing the unit numbers for the DIIS vectors
+C> @param IDIIS number of DIIS vectors to use in DIIS
+C> @param NFT825 CC amplitudes (T1 + T2 only)
+C> @param NFT848 VPPPP integrals
+C> @param FAHH Fock alpha HH array
+C> @param FAHP Fock alpha HP array
+C> @param FAPP Fock alpha PP array
+C> @param FBHH Fock beta HH array
+C> @param FBHP Fock beta HP array
+C> @param FBPP Fock beta PP array
+C> @param VAHHHH Twobody alpha-alpha HHHH array
+C> @param VAHHHP Twobody alpha-alpha HHHP array
+C> @param VAHHPP Twobody alpha-alpha HHPP array
+C> @param VAHPHP Twobody alpha-alpha HPHP array
+C> @param VAHPPP Twobody alpha-alpha HPPP array
+C> @param VBHHHH Twobody alpha-beta HHHH array
+C> @param VBHHHP Twobody alpha-beta HHHP array
+C> @param VBHHPH Twobody alpha-beta HHPH array
+C> @param VBHHPP Twobody alpha-beta HHPP array
+C> @param VBHPHP Twobody alpha-beta HPHP array
+C> @param VBHPPH Twobody alpha-beta HPPH array
+C> @param VBPHPH Twobody alpha-beta PHPH array
+C> @param VBHPPP Twobody alpha-beta HPPP array
+C> @param VBPHPP Twobody alpha-beta HPPP array
+C> @param VCHHHH Twobody beta-beta HHHH array
+C> @param VCHHHP Twobody beta-beta HHHP array
+C> @param VCHHPP Twobody beta-beta HHPP array
+C> @param VCHPHP Twobody beta-beta HPHP array
+C> @param VCHPPP Twobody beta-beta HPPP array
+C> @param VAAPPP Twobody alpha-alpha (AP)PPP array
+C> @param VBAPPP Twobody alpha-beta (AP)PPP array
+C> @param VBPAPP Twobody alpha-beta P(AP)PP array
+C> @param VCAPPP Twobody beta-beta (AP)PPP array
+C> @note H stands for hole (occupied orbitals), P stands for particle
+C> (unnocupied orbitals), and AP stands for active-particle (active
+C> unoccupied orbitals)
+C> @todo Restart has to be implemented
+      SUBROUTINE SOLVE_CCSD3A(IO,N1,N2,N3,N0,ECOR,SHIFT,
+     & MAXIT,KREST,ITOL,IFR,M1,M2,IFRHF,ICOE,IDIIS,NFT825,NFT848,ICC,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+ 
+        IMPLICIT NONE
+ 
+        COMMON /ACP   / ACP(5)
+ 
+        ! Many-body system variables
+        INTEGER N1,N2,N3,N0,IFCCSD,INIT_ITER,KK,IFNT,M1,M2,IF1B,IFR
+        INTEGER IDIIS,ICOE(IDIIS+2),NDIIS,II,JJ,IC
+        INTEGER T_SIZE,KKK,NCOE,I0,IPA,IPB,IPC,I1
+        INTEGER K1A,K1B,K2A,K2B,K2C,K3A,K3D,K3B,K3C
+        INTEGER K3C1,K3C2,K3C3,K3C4,K3B1,K3B2,K3B3,K3B4
+        INTEGER K1,K2,K3,K4,K5,K6,K7,K8,K9,K0
+        REAL(KIND=8) ACP
+        REAL(KIND=8) diag1,diag2,diag3,diag4,diag5
+ 
+        ! Calculation control
+        INTEGER IO, IOS,ICC
+        INTEGER KREST
+        INTEGER MAXIT
+        INTEGER ITOL,IFS,IFD,IFT,IFQ,LL,IF3AB,IF3CD,IF3EF,IFFT,IST,IST0
+        LOGICAL IFRHF
+ 
+ 
+        REAL(KIND=8) ET,ET1,ET2,ET3,ET4,ENN,DE1,DE2,ECOR1
+C
+        REAL(KIND=8) E1A,E1B,E2A,E2B,E2C,E1A1A,E1B1B,E1A1B
+        REAL(KIND=8) ECOR,ECORNEW,ECCSD,DE,DE0
+        REAL(KIND=8) EREF,SHIFT
+        INTEGER I,J,K,L,M,N
+        INTEGER A,B,C,D,E,F
+        INTEGER ITER
+        INTEGER NFT848,NFT825
+C
+        REAL(KIND=8) FAHH(N0+1:N1,N0+1:N1)
+        REAL(KIND=8) FAHP(N1+1:N3,N0+1:N1)
+        REAL(KIND=8) FAPP(N1+1:N3,N1+1:N3)
+        REAL(KIND=8) FBHH(N0+1:N2,N0+1:N2)
+        REAL(KIND=8) FBHP(N2+1:N3,N0+1:N2)
+        REAL(KIND=8) FBPP(N2+1:N3,N2+1:N3)
+        REAL(KIND=8) VAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1)
+        REAL(KIND=8) VAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
+        REAL(KIND=8) VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+        REAL(KIND=8) VAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1)
+        REAL(KIND=8) VAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+        REAL(KIND=8) VBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1)
+        REAL(KIND=8) VBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1)
+        REAL(KIND=8) VBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1)
+        REAL(KIND=8) VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+        REAL(KIND=8) VBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1)
+        REAL(KIND=8) VBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1)
+        REAL(KIND=8) VBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3)
+        REAL(KIND=8) VBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1)
+        REAL(KIND=8) VBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3)
+        REAL(KIND=8) VCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2)
+        REAL(KIND=8) VCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+        REAL(KIND=8) VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+        REAL(KIND=8) VCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2)
+        REAL(KIND=8) VCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2)
+        REAL(KIND=8) VAAPPP(N1+1:N3,N1+1:N3,N1+1:N3,N1+1:M2)
+        REAL(KIND=8) VBAPPP(N2+1:N3,N1+1:N3,N2+1:N3,N1+1:M2)
+        REAL(KIND=8) VBPAPP(N2+1:N3,N1+1:N3,N2+1:M2,N1+1:N3)
+        REAL(KIND=8) VCAPPP(N2+1:N3,N2+1:N3,N2+1:N3,N2+1:M2)
+ 
+        REAL(KIND=8),ALLOCATABLE::T(:),T0(:)
+        REAL(KIND=8),ALLOCATABLE::HT1A(:,:)
+        REAL(KIND=8),ALLOCATABLE::HT1B(:,:)
+        REAL(KIND=8),ALLOCATABLE::HT2A(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT2B(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT2C(:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3A(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3B1(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3B2(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3B3(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3B4(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3C1(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3C2(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3C3(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3C4(:,:,:,:,:,:)
+        REAL(KIND=8),allocatable::HT3D(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3B(:,:,:,:,:,:)
+        REAL(KIND=8),ALLOCATABLE::HT3C(:,:,:,:,:,:)
+ 
+        ! K1 = # of occ alpha
+        K1=N1-N0
+        ! K3 = # of unocc alpha
+        K3=N3-N1
+        ! K2 = # of occ beta
+        K2=N2-N0
+        ! K4 = # of unocc beta
+        K4=N3-N2
+        IF(M2.GE.0)THEN
+        ! K5 = # of non-active occ
+        K5=M1-N0
+        ! K6 = # of non-active unocc
+        K6=N3-M2
+        ! K7 = # of active occ alpha
+        K7=N1-M1
+        ! K8 = # of active occ beta
+        K8=N2-M1
+        ! K9 = # of active unocc alpha
+        K9=M2-N1
+        ! K0 = # of active unocc beta
+        K0=M2-N2
+        ENDIF
+ 
+        T_SIZE=0
+ 
+        ! T1 alpha size
+        K1A =T_SIZE+1
+        T_SIZE=T_SIZE+K1*K3
+ 
+        ! T1 beta size
+        K1B =T_SIZE+1
+        T_SIZE=T_SIZE+K2*K4
+ 
+        ! T2 alpha-alpha size
+        K2A =T_SIZE+1
+        T_SIZE=T_SIZE+K1*K1*K3*K3
+ 
+        ! T2 alpha-beta size
+        K2B =T_SIZE+1
+        T_SIZE=T_SIZE+K1*K2*K3*K4
+ 
+        ! T2 beta-beta size
+        K2C =T_SIZE+1
+        T_SIZE=T_SIZE+K2*K2*K4*K4
+ 
+        IF(ICC.EQ.1)THEN
+        ! T3 spin-integrated array sizes
+        K3A =T_SIZE+1
+        T_SIZE=T_SIZE+K3*K3*K9*K1*K1*K7  !1**1**
+        K3B1=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K3*K9*K2*K1*K7  !1**1**
+        K3B2=T_SIZE+1
+        T_SIZE=T_SIZE+K0*K6*K6*K8*K5*K5  !001001
+        K3B3=T_SIZE+1
+        T_SIZE=T_SIZE+K0*K6*K6*K2*K1*K7  !1**001
+        K3B4=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K3*K9*K8*K5*K5  !0011**
+        K3C1=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K0*K3*K2*K8*K1  !*1**1*
+        K3C2=T_SIZE+1
+        T_SIZE=T_SIZE+K6*K6*K9*K5*K5*K7  !100100
+        K3C3=T_SIZE+1
+        T_SIZE=T_SIZE+K6*K6*K9*K2*K8*K1  !*1*100
+        K3C4=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K0*K3*K5*K5*K7  !100*1*
+        K3D =T_SIZE+1
+        T_SIZE=T_SIZE+K4*K4*K0*K2*K2*K8  !1**1**
+        ELSEIF(ICC.EQ.2)THEN
+        K3A=T_SIZE+1
+        T_SIZE=T_SIZE+K3*K3*K3*K1*K1*K1
+        K3B=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K3*K3*K2*K1*K1
+        K3C=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K4*K3*K2*K2*K1
+        K3D=T_SIZE+1
+        T_SIZE=T_SIZE+K4*K4*K4*K2*K2*K2
+        ENDIF
+ 
+        ! Initialize T vector
+        ALLOCATE(T(T_SIZE))
+        T=0.0D0
+ 
+        ! Initialize energies
+        E1A=0.0D0
+        E1B=0.0D0
+        E2A=0.0D0
+        E2B=0.0D0
+        E2C=0.0D0
+        E1A1A=0.0D0
+        E1B1B=0.0D0
+        E1A1B=0.0D0
+        ECOR=0.0D0
+        ECORNEW=0.0D0
+ 
+        INIT_ITER = 0
+        IST = 0
+        IST0 = 1
+ 
+C
+C   ACP:
+C       CCSD  M1,M2<=0 FOR CLOSED SHELL OR M1,M2<0 FOR OPEN SHELL
+C       CCSDT M1=N2-N0 AND M2=N3-N1
+C       CCSDt other M1,M2 values
+C
+        diag1=ACP(1)
+        diag2=ACP(2)
+        diag3=ACP(3)
+        diag4=ACP(4)
+        diag5=ACP(5)
+C
+        ! RESTART CC
+        IF(KREST.NE.0) THEN
+          REWIND(IFR)
+ 
+          READ(IFR,IOSTAT=IOS)
+     &       IST,ECOR,E1A,E1B,E2A,E2B,E2C,E1A1A,E1B1B,E1A1B
+          READ(IFR,IOSTAT=IOS) T
+ 
+          IF(IOS.NE.0) THEN
+            WRITE(IO,'(A)') 'RESTART ERROR!'
+            CALL ABRT
+          ENDIF
+        ENDIF
+ 
+        CALL GAMESS_WRITE
+     &  (NFT825,N0,N1,N2,N3,T(K1A),T(K1B),T(K2A),T(K2B),T(K2C))
+ 
+        ! Start CC iterations
+        ! [TODO] CPU time step implementation
+C       WRITE(IO,'(1X,A4,A15,A15,A16)') 'ITER',  'E (CORR.)',
+C    &  'dE', 'CPU TIME'
+C       WRITE(IO,'(1X,A50)')
+C    &  '--------------------------------------------------'
+        WRITE(IO,'(1X,A4,A15,A15)') 'ITER',  'E (CORR.)',
+     &  'dE'
+        WRITE(IO,'(1X,A36)')
+     &  '------------------------------------'
+ 
+ 
+        ii = 0
+        jj = 0
+        ll = 0
+        dE0 = 0.0d0
+        kk = 0
+        dE1 = 0.0d0
+        dE2 = 0.0d0
+        ECOR1=0.0d0
+ 
+        DO 1000 ITER=1, MAXIT
+          ! [TODO] START CLOCK
+          !TIM1 = JUN_CPUTIM(0)
+ 
+          ! SKIP DIIS IF DISABLED
+          IF(IDIIS.EQ.0)THEN
+            JJ=1
+            GOTO 5000
+          ENDIF
+ 
+          ! DIIS CYCLE COUNTERS
+          JJ=JJ+1
+ 
+          ! SKIP DIIS BETWEEN CYCLES
+          IF (JJ.LE.5) GOTO 5000
+ 
+          JJ=1
+          IF(ITER.LT.INIT_ITER+10)THEN
+            NDIIS=0
+ 
+            IC=ICOE(1)
+            DO I=1,IDIIS+1
+              ICOE(I)=ICOE(I+1)
+            ENDDO
+            ICOE(IDIIS+2)=IC
+            CALL WRITE_COE(IC,T_SIZE,T,NCOE)
+            JJ = JJ + 1
+            GOTO 5000
+          ENDIF
+ 
+          NDIIS=NDIIS+1
+ 
+          WRITE(IO,'(2X,A,1X,I4)') 'DIIS MICROCYCLE', NDIIS
+          CALL FLSHBF(IO)
+ 
+          CALL CCSD3A_DIIS(IO,IDIIS,ICOE,T_SIZE,T,NCOE)
+C
+          GOTO 2000
+ 
+5000      CONTINUE
+ 
+C
+          ALLOCATE(HT2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1),
+     &             source=0.0d0)
+C
+       if(ICC.EQ.0)GOTO 1111
+       if(ICC.EQ.2)THEN
+       call t2B_CCSDT(N0,N1,N2,N3,HT2B,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+        GOTO 1111
+       ENDIF
+C
+       if(K5.ge.1.and.K6.ge.1)then
+       call t2B0000_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K0.ge.1)then
+       call t2B0001_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K9.ge.1)then
+       call t2B0010_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K0.ge.1.and.K9.ge.1)then
+       call t2B0011_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K8.ge.1)then
+       call t2B0100_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K8.ge.1.and.K0.ge.1)then
+       call t2B0101_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K8.ge.1.and.K9.ge.1)then
+       call t2B0110_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.1.and.K9.ge.1.and.k0.ge.1)then
+       call t2B0111_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1)then
+       call t2B1000_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K0.ge.1)then
+       call t2B1001_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.1)then
+       call t2B1010_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K0.ge.1.and.K7.ge.1.and.K9.ge.1)then
+       call t2B1011_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K7.ge.1.and.K8.ge.1)then
+       call t2B1100_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K7.ge.1.and.K8.ge.1.and.K0.ge.1)then
+       call t2B1101_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K7.ge.1.and.K8.ge.1.and.K9.ge.1)then
+       call t2B1110_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K9.ge.1.and.K7.ge.1.and.K8.ge.1.and.K0.ge.1)then
+       call t2B1111_update(N0,N1,N2,N3,HT2B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+1111  CONTINUE
+       HT2B=HT2B+VBHHPP
+       call t2B_update(N0,N1,N2,N3,HT2B,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & diag1,diag2,diag3,diag4,diag5)
+C
+       call t2B_update1(N0,N1,N2,N3,HT2B,shift,
+     & NFT848,K1,K2,K3,K4,
+     & FAHH,FAPP,FBHH,FBPP,t(K1A),t(K1B),t(K2B))
+          deallocate(HT2B)
+C
+       allocate(HT2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1),
+     &          source=0.0d0)
+C
+       if(ICC.EQ.0)GOTO 2222
+       iF(ICC.EQ.2)THEN
+       call t2A_CCSDT(N0,N1,N2,N3,HT2A,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+        GOTO 2222
+       ENDIF
+C
+       if(K5.ge.2.and.K6.ge.2)then
+       call t2A0000_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K6.ge.1.and.K9.ge.1)then
+       call t2A0010_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K9.ge.2)then
+       call t2A0011_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K7.ge.1)then
+       call t2A1000_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.1)then
+       call t2A1010_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.1.and.K9.ge.2)then
+       call t2A1011_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K6.ge.2)then
+       call t2A1100_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K6.ge.1.and.K9.ge.1)then
+       call t2A1110_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K9.ge.2)then
+       call t2A1111_update(N0,N1,N2,N3,HT2A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+2222   CONTINUE
+       HT2A=HT2A+VAHHPP
+       call t2A_update(N0,N1,N2,N3,HT2A,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & diag1,diag2,diag3,diag4,diag5)
+C
+       call t2A_update1(N0,N1,N3,HT2A,shift,
+     & NFT848,K1,K3,FAHH,FAPP,t(K1A),t(K2A))
+       deallocate(HT2A)
+C
+       if(IFRHF) then
+        DO I = K2A, K2B-1
+         t(K2C+I-K2A)=t(I)
+        ENDDO
+       else
+       allocate(HT2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2),
+     &          source=0.0d0)
+C
+       if(ICC.EQ.0)GOTO 3333
+       if(ICC.EQ.2)THEN
+       call t2C_CCSDT(N0,N1,N2,N3,HT2C,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+        GOTO 3333
+       ENDIF
+       if(K5.ge.2.and.K6.ge.2)then
+       call t2C0000_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K6.ge.1.and.K0.ge.1)then
+       call t2C0010_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K0.ge.2)then
+       call t2C0011_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K8.ge.1)then
+       call t2C1000_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K8.ge.1.and.K0.ge.1)then
+       call t2C1010_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.1.and.K0.ge.2)then
+       call t2C1011_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.2.and.K8.ge.2)then
+       call t2C1100_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K8.ge.2.and.K0.ge.1)then
+       call t2C1110_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K8.ge.2.and.K0.ge.2)then
+       call t2C1111_update(N0,N1,N2,N3,HT2C,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+3333   CONTINUE
+       HT2C=HT2C+VCHHPP
+       call t2C_update(N0,N1,N2,N3,HT2C,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & diag1,diag2,diag3,diag4,diag5)
+C
+       call t2C_update1(N0,N2,N3,HT2C,shift,
+     & NFT848,K2,K3,K4,FBHH,FBPP,t(K1B),t(K2C))
+       deallocate(HT2C)
+       endif
+C
+       allocate(HT1A(N1+1:N3,N0+1:N1),
+     &          source=0.0d0)
+C
+       if(ICC.EQ.0)GOTO 4444
+       if(ICC.EQ.2)THEN
+       call t1A_CCSDT(N0,N1,N2,N3,HT1A,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+        GOTO 4444
+       ENDIF
+C
+       if(K5.ge.1.and.K6.ge.1)then
+       call t1A00_update(N0,N1,N2,N3,HT1A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K9.ge.1)then
+       call t1A01_update(N0,N1,N2,N3,HT1A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K7.ge.1)then
+       call t1A10_update(N0,N1,N2,N3,HT1A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K9.ge.1.and.K7.ge.1)then
+C
+       call t1A11_update(N0,N1,N2,N3,HT1A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+4444   CONTINUE
+       HT1A=HT1A+FAHP
+       call t1A_update(N0,N1,N2,N3,HT1A,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C))
+       deallocate(HT1A)
+C
+       if(IFRHF)then
+        DO I = K1A, K1B-1
+         t(K1B+I-K1A)=t(I)
+        ENDDO
+       else
+       allocate(HT1B(N2+1:N3,N0+1:N2),
+     &          source=0.0d0)
+C
+       if(ICC.EQ.0)GOTO 5555
+       if(ICC.EQ.2)THEN
+       call t1B_CCSDT(N0,N1,N2,N3,HT1B,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+        GOTO 5555
+       ENDIF
+C
+       if(K5.ge.1.and.K6.ge.1)then
+       call t1B00_update(N0,N1,N2,N3,HT1B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K0.ge.1)then
+       call t1B01_update(N0,N1,N2,N3,HT1B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K8.ge.1)then
+       call t1B10_update(N0,N1,N2,N3,HT1B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K0.ge.1.and.K8.ge.1)then
+       call t1B11_update(N0,N1,N2,N3,HT1B,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+5555   CONTINUE
+       HT1B=HT1B+FBHP
+       call t1B_update(N0,N1,N2,N3,HT1B,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C))
+       deallocate(HT1B)
+       endif
+C
+       IF(ICC.EQ.0)GOTO 2000
+       IF(ICC.EQ.2)THEN
+       allocate(HT3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1),
+     &          source=0.0d0)
+       call t3B_CCSDT(N0,N1,N2,N3,HT3B,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+       call t3B_update(N0,N1,N2,N3,shift,
+     & K3,K4,NFT848,
+     & FAHH,FAPP,FBHH,FBPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K3B),HT3B)
+       deallocate(HT3B)
+C
+       if(IFRHF)then
+        call t3B3C(N0,N1,N2,N3,t(K3B),t(K3C))
+       ELSE
+       allocate(HT3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1),
+     &          source=0.0d0)
+       call t3C_CCSDT(N0,N1,N2,N3,HT3C,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+       call t3C_update(N0,N1,N2,N3,shift,
+     & K3,K4,NFT848,
+     & FAHH,FAPP,FBHH,FBPP,
+     & t(K1A),t(K1B),t(K2B),t(K2C),t(K3C),HT3C)
+       deallocate(HT3C)
+       endif
+C
+       allocate(HT3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1),
+     &          source=0.0d0)
+       call t3A_CCSDT(N0,N1,N2,N3,HT3A,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+       call t3A_update(N0,N1,N3,shift,
+     & K3,NFT848,FAHH,FAPP,t(K1A),t(K2A),t(K3A),HT3A)
+       deallocate(HT3A)
+C
+       if(IFRHF)then
+        DO I = K3A, K3B-1
+         t(K3D+I-K3A)=t(I)
+        ENDDO
+        goto 2000
+       endif
+C
+       allocate(HT3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2),
+     &          source=0.0d0)
+       call t3D_CCSDT(N0,N1,N2,N3,HT3D,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B),t(K3C),t(K3D))
+       call t3D_update(N0,N2,N3,shift,
+     & K3,K4,NFT848,FBHH,FBPP,t(K1B),t(K2C),t(K3D),HT3D)
+       deallocate(HT3D)
+        GOTO 2000
+       ENDIF
+C
+       allocate(HT3B1(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N2,N0+1:N1,M1+1:N1),
+     &          source=0.0d0)
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.1)then
+       call t3B100100_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.1.and.K0.ge.1)then
+       call t3B100101_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.2)then
+       call t3B100110_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.1.and.K9.ge.2.and.K0.ge.1)then
+       call t3B100111_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.1.and.K8.ge.1)then
+       call t3B101100_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.1.and.K8.ge.1
+     & .and.K0.ge.1)then
+       call t3B101101_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.1.and.K9.ge.2.and.K8.ge.1)then
+       call t3B101110_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K0.ge.1.and.K7.ge.1.and.K9.ge.2.and.K8.ge.1)then
+       call t3B101111_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.2.and.K9.ge.1)then
+       call t3B110100_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.2.and.K9.ge.1.and.K0.ge.1)then
+       call t3B110101_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K7.ge.2.and.K9.ge.2)then
+       call t3B110110_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.2.and.K9.ge.2.and.K0.ge.1)then
+       call t3B110111_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K8.ge.1.and.K9.ge.1.and.K6.ge.1)then
+       call t3B111100_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K8.ge.1.and.K9.ge.1.and.K6.ge.1.and.K0.ge.1)then
+       call t3B111101_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K8.ge.1.and.K9.ge.2.and.K6.ge.1)then
+       call t3B111110_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K8.ge.1.and.K9.ge.2.and.K0.ge.1)then
+       call t3B111111_update(N0,N1,N2,N3,HT3B1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3B4(N2+1:N3,N1+1:N3,N1+1:M2,M1+1:N2,N0+1:M1,N0+1:M1),
+     &          source=0.0d0)
+C
+       if(K5.ge.2.and.K8.ge.1.and.K9.ge.1.and.K6.ge.1)then
+       call t3B001100_update(N0,N1,N2,N3,HT3B4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K8.ge.1.and.K9.ge.1.and.K6.ge.1.and.K0.ge.1)then
+       call t3B001101_update(N0,N1,N2,N3,HT3B4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K8.ge.1.and.K9.ge.2.and.K6.ge.1)then
+       call t3B001110_update(N0,N1,N2,N3,HT3B4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K8.ge.1.and.K9.ge.2.and.K0.ge.1)then
+       call t3B001111_update(N0,N1,N2,N3,HT3B4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3C1(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2,M1+1:N2,N0+1:N1),
+     &          source=0.0d0)
+C
+       if(K5.ge.1.and.K8.ge.1.and.K6.ge.1.and.K0.ge.1)then
+       call t3C010010_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.1.and.K6.ge.1.and.K0.ge.2)then
+       call t3C010011_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.1.and.K6.ge.1.and.K9.ge.1.and.K0.ge.1)then
+       call t3C010110_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.1.and.K9.ge.1.and.K0.ge.2)then
+       call t3C010111_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.2.and.K6.ge.1.and.K0.ge.1)then
+       call t3C011010_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.2.and.K6.ge.1.and.K0.ge.1)then
+       call t3C011011_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.2.and.K6.ge.1.and.K9.ge.1.and.K0.ge.1)then
+       call t3C011110_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.2.and.K9.ge.1.and.K0.ge.2)then
+       call t3C011111_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.1.and.K8.ge.1.and.K6.ge.1.and.K0.ge.1)then
+       call t3C110010_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.1.and.K8.ge.1.and.K6.ge.1.and.K0.ge.2)then
+       call t3C110011_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.1.and.K8.ge.1.and.K6.ge.1.and.K0.ge.1
+     & .and.K9.ge.1)then
+       call t3C110110_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K7.ge.1.and.K8.ge.1.and.K9.ge.1.and.K0.ge.2)then
+       call t3C110111_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K8.ge.2.and.K6.ge.1.and.K0.ge.1)then
+       call t3C111010_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K8.ge.2.and.K6.ge.1.and.K0.ge.2)then
+       call t3C111011_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K8.ge.2.and.K6.ge.1.and.K0.ge.1.and.K9.ge.1)then
+       call t3C111110_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K8.ge.2.and.K0.ge.2.and.K9.ge.1)then
+       call t3C111111_update(N0,N1,N2,N3,HT3C1,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3C4(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:M1,N0+1:M1,M1+1:N1),
+     &          source=0.0d0)
+C
+       if(K7.ge.1.and.K5.ge.2.and.K0.ge.1.and.K6.ge.1)then
+       call t3C100010_update(N0,N1,N2,N3,HT3C4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K5.ge.2.and.K0.ge.2.and.K6.ge.1)then
+       call t3C100011_update(N0,N1,N2,N3,HT3C4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K5.ge.2.and.K0.ge.1.and.K6.ge.1.and.K9.ge.1)then
+       call t3C100110_update(N0,N1,N2,N3,HT3C4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K5.ge.2.and.K0.ge.2.and.K9.ge.1)then
+       call t3C100111_update(N0,N1,N2,N3,HT3C4,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       call t3BC_update(N0,N1,N2,N3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,NFT848,
+     & FAHH,FAPP,FBHH,FBPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3B1),t(K3B4),t(K3C1),t(K3C4),
+     & HT3B1,HT3B4,HT3C1,HT3C4)
+       deallocate(HT3B1,HT3B4,HT3C1,HT3C4)
+C
+       allocate(HT3A(N1+1:N3,N1+1:N3,N1+1:M2,N0+1:N1,N0+1:N1,M1+1:N1),
+     &          source=0.0d0)
+C
+       if(K7.ge.1.and.K5.ge.2.and.K6.ge.2.and.K9.ge.1)then
+       call t3A100100_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K5.ge.2.and.K6.ge.1.and.K9.ge.2)then
+       call t3A100110_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.1.and.K5.ge.2.and.K9.ge.3)then
+       call t3A100111_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K5.ge.1.and.K6.ge.2.and.K9.ge.1)then
+       call t3A110100_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K5.ge.1.and.K6.ge.1.and.K9.ge.2)then
+       call t3A110110_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.2.and.K5.ge.1.and.K9.ge.3)then
+       call t3A110111_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.3.and.K6.ge.2.and.K9.ge.1)then
+       call t3A111100_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.3.and.K6.ge.1.and.K9.ge.2)then
+       call t3A111110_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K7.ge.3.and.K9.ge.3)then
+       call t3A111111_update(N0,N1,N2,N3,HT3A,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3B2(N2+1:M2,M2+1:N3,M2+1:N3,M1+1:N2,N0+1:M1,N0+1:M1),
+     &          source=0.0d0)
+C
+       if(K5.ge.2.and.K6.ge.2.and.K8.ge.1.and.K0.ge.1)then
+       call t3B001001_update(N0,N1,N2,N3,HT3B2,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3B3(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N1,M1+1:N1),
+     &          source=0.0d0)
+C
+       if(K5.ge.1.and.K6.ge.2.and.K7.ge.1.and.K0.ge.1)then
+       call t3B100001_update(N0,N1,N2,N3,HT3B3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K7.ge.1.and.K8.ge.1.and.K0.ge.1)then
+       call t3B101001_update(N0,N1,N2,N3,HT3B3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K7.ge.2.and.K0.ge.1)then
+       call t3B110001_update(N0,N1,N2,N3,HT3B3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.2.and.K7.ge.2.and.K8.ge.1.and.K0.ge.1)then
+       call t3B111001_update(N0,N1,N2,N3,HT3B3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       call t3AB_update(N0,N1,N2,N3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,NFT848,
+     & FAHH,FAPP,FBHH,FBPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B2),t(K3B3),
+     & HT3A,HT3B2,HT3B3)
+       deallocate(HT3A,HT3B2,HT3B3)
+C
+C
+       allocate(HT3C2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:M1,N0+1:M1,M1+1:N1),
+     &          source=0.0d0)
+C
+       if(K5.ge.2.and.K6.ge.2.and.K7.ge.1.and.K9.ge.1)then
+       call t3C100100_update(N0,N1,N2,N3,HT3C2,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3C3(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2,M1+1:N2,N0+1:N1),
+     &          source=0.0d0)
+C
+       if(K5.ge.1.and.K6.ge.2.and.K8.ge.1.and.K9.ge.1)then
+       call t3C010100_update(N0,N1,N2,N3,HT3C3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K8.ge.2.and.K9.ge.1)then
+       call t3C011100_update(N0,N1,N2,N3,HT3C3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K7.ge.1.and.K8.ge.1.and.K9.ge.1)then
+       call t3C110100_update(N0,N1,N2,N3,HT3C3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.2.and.K7.ge.1.and.K8.ge.2.and.K9.ge.1)then
+       call t3C111100_update(N0,N1,N2,N3,HT3C3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       allocate(HT3D(N2+1:N3,N2+1:N3,N2+1:M2,N0+1:N2,N0+1:N2,M1+1:N2),
+     &          source=0.0d0)
+C
+       if(K5.ge.2.and.K6.ge.2.and.K8.ge.1.and.K0.ge.1)then
+       call t3D100100_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K6.ge.1.and.K8.ge.1.and.K0.ge.2)then
+       call t3D100110_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.2.and.K8.ge.1.and.K0.ge.3)then
+       call t3D100111_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.2.and.K8.ge.2.and.K0.ge.1)then
+       call t3D110100_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K6.ge.1.and.K8.ge.2.and.K0.ge.2)then
+       call t3D110110_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K5.ge.1.and.K8.ge.2.and.K0.ge.3)then
+       call t3D110111_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.2.and.K8.ge.3.and.K0.ge.1)then
+       call t3D111100_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K6.ge.1.and.K8.ge.3.and.K0.ge.2)then
+       call t3D111110_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       if(K8.ge.3.and.K0.ge.3)then
+       call t3D111111_update(N0,N1,N2,N3,HT3D,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & VAAPPP,VBAPPP,VBPAPP,VCAPPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3A),t(K3B1),t(K3B2),t(K3B3),t(K3B4),
+     & t(K3C1),t(K3C2),t(K3C3),t(K3C4),t(K3D))
+       endif
+C
+       call t3CD_update(N0,N1,N2,N3,shift,
+     & M1,M2,K1,K2,K3,K4,K5,K6,K7,K8,K9,K0,NFT848,
+     & FAHH,FAPP,FBHH,FBPP,
+     & t(K1A),t(K1B),t(K2A),t(K2B),t(K2C),
+     & t(K3C2),t(K3C3),t(K3D),
+     & HT3C2,HT3C3,HT3D)
+       deallocate(HT3D,HT3C2,HT3C3)
+C
+2000   CONTINUE
+ 
+       CALL CALC_ENERGY(N1,N2,N3,N0,
+     & FAHP,FBHP,VAHHPP,VBHHPP,VCHHPP,T(K1A),T(K1B),T(K2A),T(K2B),
+     & T(K2C),E1A,E1B,E2A,E2B,E2C,E1A1A,E1A1B,E1B1B)
+C
+      ECORNEW=E1A+E1B+E2A+E2B+E2C+E1A1A+E1A1B+E1B1B
+      DE=ECOR-ECORNEW
+C
+      ! [TODO] STOP CLOCK
+      !SEC=JUN_CPUTIM(0)-TIM1
+      !NMIN=SEC/60
+      !SEC=SEC-NMIN*60
+ 
+      ! WRITE ITERATION RESULTS
+      ! [TODO] CPU time step implementation
+C     WRITE(IO,'(1X,I4,F15.10,F15.10,I5,'' MIN'',F5.1,'' S'')')
+C    &ITER-INIT_ITER,ECORNEW,DE,NMIN,SEC
+      WRITE(IO,'(1X,I4,F15.10,F15.10)')
+     &ITER-INIT_ITER,ECORNEW,DE
+      CALL FLSHBF(IO)
+C
+      ! WRITE T VECTOR IF DIIS IS ENABLED
+      IF(IDIIS.GT.0)THEN
+        IC=ICOE(1)
+        DO I=1,IDIIS+1
+          ICOE(I)=ICOE(I+1)
+        ENDDO
+        ICOE(IDIIS+2)=IC
+        CALL WRITE_COE(IC,T_SIZE,T,NCOE)
+      ENDIF
+C
+      ! WRITE RESTART FILE (A.K.A. IFRFILE OR .MOE)
+      REWIND(IFR)
+      WRITE(IFR)IST,ECORNEW,E1A,E1B,E2A,E2B,E2C,E1A1A,E1B1B,E1A1B,T_SIZE
+      WRITE(IFR)T
+       CALL GAMESS_WRITE
+     & (NFT825,N0,N1,N2,N3,T(K1A),T(K1B),T(K2A),T(K2B),T(K2C))
+C
+      IF(ITER.GT.INIT_ITER+1.AND.JJ.EQ.1)THEN
+        IF(IDIIS.GT.0)THEN
+          DE2=ECORNEW-ECOR1
+        ENDIF
+        IF (DABS(DE2).LE.10.0D0**(-ITOL)
+     &     .AND.DABS(DE).LE.10.0D0**(-ITOL)
+     &     .AND.DABS(DE)-DABS(DE0).LE.10.0D0**(-ITOL)
+     &     .AND.DABS(DE2)-DABS(DE1).LE.10.0D0**(-ITOL))THEN
+        ECOR=ECORNEW;DE0=DE
+        ECOR1=ECOR;DE1=DE2
+        WRITE(IO,'(1X,A36)')
+     &  '------------------------------------'
+        WRITE(IO,'(/5X,A)') 'THE CC ITERATIONS HAVE CONVERGED'
+        GOTO 4000
+      ENDIF
+ 
+      ECOR=ECORNEW
+      DE0=DE
+      ECOR1=ECOR
+      DE1=DE2
+ 
+      ENDIF
+ 
+      ECOR=ECORNEW
+      DE0=DE
+ 
+1000  CONTINUE
+        WRITE(IO,'(1X,A36)')
+     &  '------------------------------------'
+      WRITE(IO, '(/5X,A)') 'THE CC ITERATIONS DID NOT CONVERGE'
+      CALL ABRT
+      STOP
+4000  DEALLOCATE(T)
+C
+      RETURN
+C
+      END
+ 
+C*MODULE CCSD3A *DECK GAMESS_WRITE
+C> @brief Write coupled-cluster amplitudes to GAMESS files
+C>
+C> @author Jun Shen
+C> - April, 2018
+C>
+C> @param NFT825 CC amplitudes file unit
+C> @param N0 number of frozen core orbitals
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param T1A one-body alpha cluster components
+C> @param T1B one-body beta cluster components
+C> @param T2A two-body alpha-alpha cluster components
+C> @param T2B two-body alpha-beta cluster components
+C> @param T2C two-body beta-beta cluster components
+C>
+C> @todo This could be achieved by using GAMESS routines directly
+      SUBROUTINE GAMESS_WRITE(NFT825,N0,N1,N2,N3,T1A,T1B,T2A,T2B,T2C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+      INTEGER A,B
+      REAL(KIND=8) T1A(N1+1:N3,N0+1:N1)
+      REAL(KIND=8) T1B(N2+1:N3,N0+1:N2)
+      REAL(KIND=8) T2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+      REAL(KIND=8) T2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+      REAL(KIND=8) T2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+C
+      WRITE(NFT825,REC=1)((T1A(A,I),
+     &I=N0+1,N1),A=N1+1,N3)
+      WRITE(NFT825,REC=2)((T1B(A,I),
+     &I=N0+1,N2),A=N2+1,N3)
+      WRITE(NFT825,REC=3)(((( T2A(B,A,J,I),
+     &I=N0+1,N1),A=N1+1,N3),B=N1+1,N3),J=N0+1,N1)
+      WRITE(NFT825,REC=4)(((( T2C(B,A,J,I),
+     &I=N0+1,N2),A=N2+1,N3),B=N2+1,N3),J=N0+1,N2)
+      WRITE(NFT825,REC=5)((((T2B(B,A,J,I),
+     &I=N0+1,N1),A=N1+1,N3),B=N2+1,N3),J=N0+1,N2)
+C
+      END
+ 
+C*MODULE CCSD3A *DECK CALC_ENERGY
+C> @brief Calculate the CCSDt energy
+C>
+C> @author Jun Shen
+C> - April, 2018
+C>
+C> @param NFT825 CC amplitudes file unit
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param N0 number of frozen core orbitals
+C> @param FAHP Fock alpha HP array
+C> @param FBHP Fock beta HP array
+C> @param VAHHPP Twobody alpha-alpha HHPP array
+C> @param VBHHPP Twobody alpha-beta HHPP array
+C> @param VCHHPP Twobody beta-beta HHPP array
+C> @param T1A one-body alpha cluster components
+C> @param T1B one-body beta cluster components
+C> @param T2A two-body alpha-alpha cluster components
+C> @param T2B two-body alpha-beta cluster components
+C> @param T2C two-body beta-beta cluster components
+C> @param E1A F_N*T_1A energy component
+C> @param E1B F_N*T_1B energy component
+C> @param E2A V_N*T_2A energy component
+C> @param E2B V_N*T_2B energy component
+C> @param E2C V_N*T_2C energy component
+C> @param E1A1A V_N*T_1A*T_1A energy component
+C> @param E1A1B V_N*T_1A*T_1B energy component
+C> @param E1B1B V_N*T_1B*T_1B energy component
+C>
+C> @note H stands for hole (occupied orbitals), P stands for particle
+C> (unnocupied orbitals)
+C>
+C> @todo DGEMMs could be implemented instead of loops
+       SUBROUTINE CALC_ENERGY(N1,N2,N3,N0,
+     & FAHP,FBHP,VAHHPP,VBHHPP,VCHHPP,T1A,T1B,T2A,T2B,T2C,
+     & E1A,E1B,E2A,E2B,E2C,E1A1A,E1A1B,E1B1B)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       REAL(KIND=8) EQNRIGHT,PP
+       INTEGER A,B,C,D,E,F,I,J,K,L,M,N,R,S,T,U
+       REAL(KIND=8) E1A,E1B,E2A,E2B,E2C,E1A1A,E1B1B,E1A1B
+C
+       REAL(KIND=8) FAHP(N1+1:N3,N0+1:N1)
+       REAL(KIND=8) FBHP(N2+1:N3,N0+1:N2)
+       REAL(KIND=8) VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       REAL(KIND=8) VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       REAL(KIND=8) VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+       REAL(KIND=8) T1A(N1+1:N3,N0+1:N1)
+       REAL(KIND=8) T1B(N2+1:N3,N0+1:N2)
+       REAL(KIND=8) T2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       REAL(KIND=8) T2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       REAL(KIND=8) T2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+ 
+C Calculate V_N * T_2
+      E2A=0.0D0
+      E2B=0.0D0
+      E2C=0.0D0
+ 
+C Alpha-alpha case
+      DO M=N0+1,N1
+        DO N=N0+1,N1
+          DO E=N1+1,N3
+            DO F=N1+1,N3
+              E2A=E2A+0.25*VAHHPP(F,E,N,M)*T2A(F,E,N,M)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+ 
+C Alpha-beta case
+      DO M=N0+1,N1
+        DO N=N0+1,N2
+          DO E=N1+1,N3
+            DO F=N2+1,N3
+              E2B=E2B+VBHHPP(F,E,N,M)*T2B(F,E,N,M)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+ 
+C Beta-beta case
+      DO M=N0+1,N2
+        DO N=N0+1,N2
+          DO E=N2+1,N3
+            DO F=N2+1,N3
+              E2C=E2C+0.25*VCHHPP(F,E,N,M)*T2C(F,E,N,M)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+ 
+C Calculate F_N * T_1
+      E1A=0.0D0
+      E1B=0.0D0
+ 
+C Alpha case
+      DO E= N1+1,N3
+        DO M= N0+1,N1
+          E1A=E1A+FAHP(E,M)*T1A(E,M)
+        ENDDO
+      ENDDO
+ 
+C Beta case
+      DO E= N2+1,N3
+        DO M= N0+1,N2
+          E1B=E1B+FBHP(E,M)*T1B(E,M)
+        ENDDO
+      ENDDO
+ 
+ 
+C Calculate V_N * T_1^2
+C Alpha-alpha case
+      E1A1A=0.0D0;E1A1B=0.0D0;E1B1B=0.0D0
+      DO M=N0+1,N1
+        DO N=N0+1,N1
+          DO E=N1+1,N3
+            DO F=N1+1,N3
+              E1A1A=E1A1A+0.50*VAHHPP(F,E,N,M)*T1A(F,N)*T1A(E,M)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+ 
+C Alpha-beta case
+      DO M=N0+1,N1
+        DO N=N0+1,N2
+          DO E=N1+1,N3
+            DO F=N2+1,N3
+              E1A1B=E1A1B+VBHHPP(F,E,N,M)*T1A(E,M)*T1B(F,N)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+ 
+C Beta-beta case
+      DO M=N0+1,N2
+        DO N=N0+1,N2
+          DO E=N2+1,N3
+            DO F=N2+1,N3
+              E1B1B=E1B1B+0.50*VCHHPP(F,E,N,M)*T1B(F,N)*T1B(E,M)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+C
+      END
+ 
+C*MODULE CCSD3A DECK CCSD3A_DIIS
+C> @brief Performs DIIS extrapolation
+C>
+C> @author Jun Shen
+C> - April, 2018
+C> @author Emiliano Deustua
+C> - April, 2018
+C>
+C> @param IO output file unit number
+C> @param IDIIS number of T vectors to consider
+C> @param ICOE array containing past T vectors file unit numbers
+C> @param T_SIZE size of the cluter vector (T_1 + T_2 + t_3)
+C> @param T0 in/out T vector
+C> @param T0 in/out T vector
+C> @param NCOE number of pieces to read the T vectors in. Avoids bombing
+C> memory
+C>
+      SUBROUTINE CCSD3A_DIIS(IO,IDIIS,ICOE,T_SIZE,T0,NCOE)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      IMPLICIT NONE
+      ! INPUT VARS
+      INTEGER IDIIS, T_SIZE, NCOE, IO
+      INTEGER ISTEP, KKK
+      INTEGER IFS
+      INTEGER IC
+      INTEGER I, J, I0, J0 ,II
+      INTEGER WW, KK
+      INTEGER ICOE(IDIIS+2)
+      REAL(KIND=8) :: PP
+      REAL(KIND=8) :: T0(T_SIZE)
+      REAL(KIND=8),ALLOCATABLE :: T(:),T1(:),T2(:),B(:,:),L(:),C(:)
+!      INTEGER (KIND=4) WALL0,TIME
+!      REAL(KIND=8) TIM0,CPUTIM
+      REAL(KIND=8) DDOT, AXPY
+ 
+      CHARACTER(LEN=20) :: MAT_FMT
+ 
+!      TIM0=CPUTIM(0)
+!      WALL0=TIME()
+ 
+      DO I=1,IDIIS
+        I0=I
+        ! SKIP LAST DIIS EXTRAPOLATED VECTOR
+        IF (I.GT.IDIIS/2) I0=I+1
+ 
+        IC=ICOE(I0)
+        REWIND(IC)
+        IC=ICOE(I0+1)
+        REWIND(IC)
+      ENDDO
+ 
+      ALLOCATE(B(IDIIS+1,IDIIS+1))
+      B=0.0D0
+      DO ISTEP=1,NCOE
+        DO I=1,IDIIS
+          I0=I
+          IF(I.GT.IDIIS/2) I0=I+1
+ 
+          ! READ T VECTOR I
+          IC=ICOE(I0)
+          READ(IC) KKK
+          IF(I.EQ.1)ALLOCATE(T(KKK),T1(KKK),T2(KKK))
+          READ(IC)T1
+          BACKSPACE(IC)
+          BACKSPACE(IC)
+ 
+          ! READ T VECTOR I+1
+          IC=ICOE(I0+1)
+          READ(IC)KKK
+          READ(IC)T2
+          BACKSPACE(IC)
+          BACKSPACE(IC)
+ 
+          ! GENERATE ERROR VECTOR I
+          T=T2-T1
+ 
+          DO J=1,IDIIS
+            J0=J
+            IF(J0.GT.IDIIS/2)J0=J0+1
+ 
+            ! READ T VECTOR J
+            IC=ICOE(J0)
+            READ(IC)KKK
+            READ(IC)T1
+            IF (I.NE.IDIIS) THEN
+              BACKSPACE(IC)
+              BACKSPACE(IC)
+            ENDIF
+ 
+            ! READ T VECTOR J+1
+            IC=ICOE(J0+1)
+            READ(IC) KKK
+            READ(IC) T2
+            IF(I.NE.IDIIS.OR.(J.NE.IDIIS.AND.J.NE.IDIIS/2))THEN
+              BACKSPACE(IC)
+              BACKSPACE(IC)
+            ENDIF
+ 
+            ! GENERATE ERROR VECTOR J
+            T1=T2-T1
+ 
+            PP = 0.0D0
+            PP = DDOT(KKK,T,1,T1,1)
+ 
+            B(I,J) = B(I,J) + PP
+          ENDDO
+        ENDDO
+        DEALLOCATE(T,T1,T2)
+      ENDDO
+ 
+      ! GENERATE DIIS MATRIX
+      DO I=1,IDIIS+1
+        B(I,IDIIS+1)=-1.0D0
+        B(IDIIS+1,I)=-1.0D0
+      ENDDO
+ 
+      B(IDIIS+1, IDIIS+1) = 0.0D0
+ 
+      ALLOCATE(L(IDIIS+1),C(IDIIS+1))
+      L=0.0D0
+      C=0.0D0
+      L(IDIIS+1)=-1.0D0
+ 
+      IFS=0
+      CALL CCSD3A_GAUSS(IO,B,C,L,IDIIS+1,IFS)
+ 
+ 
+      IF(IFS.NE.0) GOTO 1000
+ 
+ 
+      T0=0.0D0
+      DO I=1,IDIIS
+        I0=I
+        IF (I0.GT.IDIIS/2) I0=I0+1
+        IC=ICOE(I0)
+        REWIND(IC)
+        II=1
+        DO J=1,NCOE
+          READ(IC)KKK
+          ALLOCATE(T(KKK))
+          READ(IC)T
+          CALL DAXPY(KKK,C(I),T,1,T0(II:II+KKK),1)
+          DEALLOCATE(T)
+          II=II+KKK
+        ENDDO
+      ENDDO
+ 
+1000  CONTINUE
+      END
+ 
+C*MODULE CCSD3A DECK WRITE_COE
+C> @brief Writes DIIS T vectors
+C>
+C> @author Jun Shen
+C> - April, 2018
+C>
+C> @param IC DIIS T vector file unit number
+C> @param T_SIZE size of the cluter vector (T_1 + T_2 + t_3)
+C> @param T0 in/out T vector
+C> @param NCOE number of pieces to read the T vectors in. Avoids bombing
+C> @todo Manage DISK_SIZE which sets the number of
+C> memory
+      SUBROUTINE WRITE_COE(IC,T_SIZE,T0,NCOE)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+        IMPLICIT NONE
+        INTEGER I,J,K,A,B,C
+        INTEGER I1, I2, IC, NCOE
+        INTEGER T_SIZE, CHUNK_SIZE, CHUNK_LIM
+        PARAMETER (CHUNK_SIZE = 10*1024*1024)
+        REAL(KIND=8) T0(T_SIZE)
+        IF(IC.EQ.0)RETURN
+        NCOE = (T_SIZE-1) / CHUNK_SIZE + 1
+        REWIND(IC)
+        DO I=1,NCOE
+          CHUNK_LIM = CHUNK_SIZE
+          I1 = (I-1) * CHUNK_SIZE + 1
+          I2 = I * CHUNK_SIZE
+          IF(I.EQ.NCOE)THEN
+            CHUNK_LIM = T_SIZE - CHUNK_SIZE * (I-1)
+            I2 = T_SIZE
+          ENDIF
+          WRITE(IC) CHUNK_LIM
+          WRITE(IC)(T0(K),K = I1,I2)
+        ENDDO
+      END
+ 
+C*MODULE CCSD3A DECK CCSD3A_GAUSS
+C> @brief DIIS Gaussian elimination
+C>
+C> @author Jun Shen
+C> - April, 2018
+C>
+C> @param IO output file unit number
+C> @param B DIIS B array (error vector array)
+C> @param X extrapolated T vector array
+C> @param L lambda vector array
+C> @param N DIIS size
+C> @param IFS error number (no error is 0)
+      SUBROUTINE CCSD3A_GAUSS(IO,B,X,L,N,IFS)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+        REAL(KIND=8) B(N,N),X(N),L(N),PP
+        REAL(KIND=8),ALLOCATABLE:: A(:,:),S(:)
+        INTEGER WW, KK
+C
+        ALLOCATE(A(N,N+1),S(N))
+C
+        DO I=1,N
+          DO J=1,N
+            A(I,J)=B(I,J)
+          ENDDO
+          A(I,N+1)=L(I)
+        ENDDO
+C
+        S=0.0D0
+        DO I=1,N
+          DO J=1,N
+            IF(DABS(A(I,J)).GT.S(I)) S(I)=DABS(A(I,J))
+          ENDDO
+ 
+          IF(S(I).LT.1.0D-20)THEN
+            !WRITE(IO,*) S(I), I
+            !WRITE(IO,*)'DIIS FIRST ERR'
+            IFS=1
+            RETURN
+          ENDIF
+        ENDDO
+C
+        ! LOOP OVER COLUMNS
+        DO I=1,N-1
+ 
+          M=I
+ 
+          ! LOOP OVER ROWS
+          DO J=I,N
+            IF (DABS(A(J,I)) / S(J) > DABS(A(M,I)) / S(M)) THEN
+              M = J
+            ENDIF
+          ENDDO
+ 
+          IF(DABS(A(M,I)).LT.1.0D-20)THEN
+ 
+            ! ERROR MESSAGE
+            !WRITE(IO,*) A(M,I) ,M,I
+            !WRITE(IO,*)'DIIS SECOND ERR'
+            IFS=1
+            RETURN
+          ENDIF
+ 
+          ! PERMUTE LARGEST VALUE IN ROW I TO ROW M
+          IF(M.NE.I)THEN
+            PP=S(I)
+            S(I)=S(M)
+            S(M)=PP
+          ENDIF
+ 
+          ! PERMUTE ROWS
+          DO J=I,N+1
+            PP=A(I,J)
+            A(I,J)=A(M,J)
+            A(M,J)=PP
+          ENDDO
+ 
+          DO J=I+1,N
+            ! DIVIDE ALL COLUMN BY PIVOT
+            A(J,I)=A(J,I)/A(I,I)
+ 
+            DO K=I+1,N+1
+              A(J,K)=A(J,K)-A(J,I)*A(I,K)
+            ENDDO
+ 
+          ENDDO
+ 
+        ENDDO
+ 
+C
+        IF(DABS(A(N,N)).LT.1.0D-20)THEN
+          !WRITE(IO,*) A(M,N), M,N
+          !WRITE(IO,*)'DIIS THIRD ERR'
+          IFS=1
+          RETURN
+        ENDIF
+        X(N)=A(N,N+1)/A(N,N)
+        DO I=N-1,1,-1
+          PP=0.0D0
+          DO J=I+1,N
+            PP=PP+A(I,J)*X(J)
+          ENDDO
+          X(I)=(A(I,N+1)-PP)/A(I,I)
+        ENDDO
+C
+        DO I=1,N
+          PP=0.0D0
+          DO J=1,N
+            PP=PP+B(I,J)*X(J)
+          ENDDO
+          IF(DABS(PP-L(I)).GT.1.0D-5)WRITE(IO,*)I,PP,L(I)
+        ENDDO
+        PP=0.0D0
+        DO I=1,N-1
+          PP=PP+X(I)
+        ENDDO
+        IF(DABS(PP-1.0D0).GT.1.0D-5)WRITE(IO,*)PP
+C
+      END
+ 
+C*MODULE CCSD3A DECK COUNT_MEM_CCSD3A
+C> @brief Count the number of words needed for CCSDt
+C> @author Emiliano Deustua
+C> - April, 2018
+C> @date June, 2018 Emiliano Deustua
+C> - Fixed the subroutine's interface
+C> @param N0 number of frozen core orbitals
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param M1 number of active occupied orbitals
+C> @param M2 number of active unoccupied orbitals
+C> @param T_SIZE number of words
+      SUBROUTINE COUNT_MEM_CCSD3A(N0,N1,N2,N3,M1,M2,T_SIZE)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      IMPLICIT NONE
+      INTEGER NOACT, NUACT
+      INTEGER N0,N1,N2,N3,M1,M2
+      INTEGER K1,K2,K3,K4,K5,K6,K7,K8,K9,K0
+      INTEGER K3A
+      INTEGER K3B1,K3B2,K3B3,K3B4
+      INTEGER K3C1,K3C2,K3C3,K3C4
+      INTEGER K3D
+      INTEGER T_SIZE
+ 
+      T_SIZE=0
+C     CCSD
+      IF(M1.LT.0.OR.M2.LT.0)RETURN
+      IF(N1.EQ.N2.AND.M1*M2.EQ.0)RETURN
+C
+      NOACT=MAX(N2-M1,N0)
+      NUACT=MIN(N1+M2,N3)
+      ! K1 = # of occ alpha
+      K1=N1-N0
+      ! K3 = # of unocc alpha
+      K3=N3-N1
+      ! K2 = # of occ beta
+      K2=N2-N0
+      ! K4 = # of unocc beta
+      K4=N3-N2
+      ! K5 = # of non-active occ
+      K5=NOACT-N0
+      ! K6 = # of non-active unocc
+      K6=N3-NUACT
+      ! K7 = # of active occ alpha
+      K7=N1-NOACT
+      ! K8 = # of active occ beta
+      K8=N2-NOACT
+      ! K9 = # of active unocc alpha
+      K9=NUACT-N1
+      ! K0 = # of active unocc beta
+      K0=NUACT-N2
+ 
+      ! T3 spin-integrated array sizes
+      K3A =T_SIZE+1
+      T_SIZE=T_SIZE+K3*K3*K9*K1*K1*K7  !1**1**
+      K3B1=T_SIZE+1
+      T_SIZE=T_SIZE+K4*K3*K9*K2*K1*K7  !1**1**
+      K3B2=T_SIZE+1
+      T_SIZE=T_SIZE+K0*K6*K6*K8*K5*K5  !001001
+      K3B3=T_SIZE+1
+      T_SIZE=T_SIZE+K0*K6*K6*K2*K1*K7  !1**001
+      K3B4=T_SIZE+1
+      T_SIZE=T_SIZE+K4*K3*K9*K8*K5*K5  !0011**
+      K3C1=T_SIZE+1
+      T_SIZE=T_SIZE+K4*K0*K3*K2*K8*K1  !*1**1*
+      K3C2=T_SIZE+1
+      T_SIZE=T_SIZE+K6*K6*K9*K5*K5*K7  !100100
+      K3C3=T_SIZE+1
+      T_SIZE=T_SIZE+K6*K6*K9*K2*K8*K1  !*1*100
+      K3C4=T_SIZE+1
+      T_SIZE=T_SIZE+K4*K0*K3*K5*K5*K7  !100*1*
+      K3D =T_SIZE+1
+      T_SIZE=T_SIZE+K4*K4*K0*K2*K2*K8  !1**1**
+ 
+      RETURN
+      END
+ 
+C*MODULE CCSD3A DECK EGEMM
+C> @brief DGEMM wrapper.
+C> @author Jun Shen
+C> - April, 2018
+C> @details This routine helps simplify DGEMM calls from the CCSDt code.
+C> @param A(K3, K1) double precision input array
+C> @param B(K3, K2) double precision input array
+C> @param C(K2, K1) double precision output array
+C> @param K1 array dimension
+C> @param K2 array dimension
+C> @param K3 array dimension
+      SUBROUTINE EGEMM(K1,K2,K3,A,B,C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      IMPLICIT NONE
+      INTEGER K1,K2,K3,I,J,K
+      REAL(KIND=8) A(K3,K1),B(K3,K2),C(K2,K1),PP
+C
+      C=0.0D0
+      IF(K1.LE.0)RETURN
+      IF(K2.LE.0)RETURN
+      IF(K3.LE.0)RETURN
+C
+      CALL DGEMM('T','N',K2,K1,K3,1.0D+0,B,K3,A,K3,0.0D+0,C,K2)
+C
+      END
+C
+C*MODULE CCSD3A DECK EGEMM1
+C> @brief DGEMV wrapper.
+C> @author Jun Shen
+C> - April, 2018
+C> @details This routine helps simplify DGEMV calls from the CCSDt code.
+C> @param A(K3, K1) double precision input array
+C> @param B(K3) double precision input array
+C> @param C(K2) double precision output array
+C> @param K1 array dimension
+C> @param K2 array dimension
+C> @param K3 array dimension
+      SUBROUTINE EGEMM1(K1,K3,A,B,C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      IMPLICIT NONE
+      INTEGER K1,K3,I,J,K
+      REAL(KIND=8) A(K3,K1),B(K3),C(K1),PP
+C
+      C=0.0D0
+      IF(K1.LE.0)RETURN
+      IF(K3.LE.0)RETURN
+C
+      CALL DGEMV('T',K3,K1,1.0D+0,A,K3,B,1,0.0D+0,C,1)
+C
+      END
+C
+C*MODULE CCSD3A DECK EGEMM2
+C> @brief DGEMV wrapper.
+C> @author Jun Shen
+C> - April, 2018
+C> @details This routine helps simplify DGEMV calls from the CCSDt code.
+C> @param A(K3, K1) double precision input array
+C> @param B(K3) double precision input array
+C> @param C(K2) double precision output array
+C> @param K1 array dimension
+C> @param K2 array dimension
+C> @param K3 array dimension
+      SUBROUTINE EGEMM2(K2,K3,A,B,C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      IMPLICIT NONE
+      INTEGER K2,K3,I,J,K
+      REAL(KIND=8) A(K3),B(K3,K2),C(K2),PP
+C
+      C=0.0D0
+      IF(K2.LE.0)RETURN
+      IF(K3.LE.0)RETURN
+C
+      CALL DGEMV('T',K3,K2,1.0D+0,B,K3,A,1,0.0D+0,C,1)
+      END
+C
+C*MODULE CCSD3A DECK T3B3C
+C> @brief T3C=T3B if RHF
+C> @author Jun Shen
+C> - August, 2020
+C> @param N0 number of frozen core orbitals
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param T3B three-body alpha-alpha-beta, alpha-alpha-beta
+C> @param T3C three-body alpha-beta-beta, alpha-beta-beta
+      SUBROUTINE T3B3C(N0,N1,N2,N3,T3B,T3C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      IMPLICIT NONE
+      INTEGER N0,N1,N2,N3
+      INTEGER A,B,C,I,J,K
+      REAL(KIND=8) T3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+      REAL(KIND=8) T3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+C
+      DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N1
+      DO A=N1+1,N3;DO B=N1+1,N3;DO C=N1+1,N3
+       T3C(C,B,A,K,J,I)=T3B(A,C,B,I,K,J)
+      ENDDO;ENDDO;ENDDO
+      ENDDO;ENDDO;ENDDO
+C
+      END

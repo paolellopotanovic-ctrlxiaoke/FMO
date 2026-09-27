@@ -1,0 +1,34 @@
+!  SF-MRMP2 energy on D2H ethylene molecule
+!  ROHF triplet reference used, so single spin-flip required to get singlet state
+!  It's a determinant code, so NSTATE needs to be larger enough
+!  6 states requested:
+!
+!  FINAL ROHF ENERGY IS      -77.9205321560 AFTER   9 ITERATIONS
+!  CI Singlet Energies:
+!  STATE   1  ENERGY=       -78.0662543880  S=  0.00  SZ=  0.00  SPACE SYM=A
+!  STATE   3  ENERGY=       -77.6691860119  S=  0.00  SZ=  0.00  SPACE SYM=A   
+!
+!  SF-MRMP2 Singlet Energies
+!  STATE   1 E(MP2) = -78.051854164
+!  STATE   3 E(MP2) = -78.330661280
+!
+ $CONTRL SCFTYP=rohf RUNTYP=energy mult=3
+  cityp=sfdet mplevl=2 $end
+ $BASIS GBASIS=n311 ngauss=6 ndfunc=1 $END
+ $cidet nstate=3 itermx=400
+   ncore=7 nact=2 nels=2
+   mulsf=1
+  wstate(1)=1.0,1.0
+ $end
+ $SCF DIRSCF=.TRUE. $END
+ $system mwords=400 $end
+ $DATA 
+Title
+C1
+ C           6.0  -0.0000000000  -0.0000000000   0.6732045548
+ C           6.0   0.0000000000  -0.0000000000  -0.6732045548
+ H           1.0  -0.0000000000  -0.9181328152  -1.2369753692
+ H           1.0   0.0000000000   0.9181328152   1.2369753692
+ H           1.0  -0.0000000000  -0.9181328152   1.2369753692
+ H           1.0   0.0000000000   0.9181328152  -1.2369753692
+ $END

@@ -1,0 +1,174 @@
+#!/bin/csh -f
+
+echo $LD_LIBRARY_PATH
+
+# GMSPATH is set by the module environment
+# If GMSPATH is not set by module environment then we are not
+# using GAMESS within a module environment
+
+if (! $?GMSPATH) then
+   set GMSPATH=`pwd`
+endif
+
+# Source install.info to get build information
+source $GMSPATH/install.info
+
+# Process script arguments and if necessary set default values
+set INPUT=$1
+set VERNO=$2
+if (null$VERNO == null) set VERNO=00
+set NUM_COMPUTE_RANKS=$3
+if (null$NUM_COMPUTE_RANKS == null) set NUM_COMPUTE_RANKS=1
+set NUM_COMPUTE_RANKS_PER_NODE=$4
+if (null$NUM_COMPUTE_RANKS_PER_NODE == null) set NUM_COMPUTE_RANKS_PER_NODE=1
+@ NUM_NODES = $NUM_COMPUTE_RANKS / $NUM_COMPUTE_RANKS_PER_NODE
+
+# Handle input path appropriately
+if ($INPUT:r.inp != $INPUT) set INPUT=$1.inp
+if (! -f $INPUT) then
+   echo "Input file $INPUT does not exist."
+   exit 4
+endif
+set JOB=`basename $INPUT`
+set FULL_PATH=`readlink -f $JOB`
+set JOB_PATH=`dirname $FULL_PATH`
+if ($JOB:r.inp == $JOB) set JOB=$JOB:r
+
+# Are we running within a job allocation?
+set SCHED=none
+if ($?SLURM_JOB_ID) set SCHED=SLURM
+
+# Clean up stray smepahores by current user
+if ($SCHED == SLURM) then
+   srun /shared/gamess/bin/my_ipcrm > & /dev/null
+endif
+
+# Directories for scratch and restart
+if ($SCHED == SLURM) then
+   echo "SLURM JOB ID: ${SLURM_JOBID}"
+   echo "SLURM NODES :"
+   scontrol show hostname | uniq
+   set SCR=$TMPDIR/$SLURM_JOBID
+   set USERSCR=$RESTARTPATH/$JOB/$SLURM_JOBID
+   srun mkdir -p $SCR
+   srun mkdir -p $USERSCR
+# Outside of SLURM
+else
+   set SCR=/tmp/$USER/$JOB
+   set USERSCR=$RESTARTPATH/$JOB
+   mkdir -p $SCR
+   mkdir -p $USERSCR
+endif
+
+# Job prep
+# Clean scratch for any previous runs
+set nonomatch
+foreach file ("$SCR/$JOB."*)
+   if (-f "$file" && -w "$file") rm -v "$file"
+end
+unset nonomatch
+unset file
+if ($SCHED == SLURM) sbcast -f $INPUT $SCR/$JOB.F05
+if ($SCHED == none) cp -f $INPUT $SCR/$JOB.F05
+
+# GAMESS environment (we suppress output since we override some variables)
+source $GMSPATH/gms-files.csh
+# We override AUXDATA files to use bolt:/shared
+set echo
+setenv AUXDATA $AUXPATH
+setenv  EXTCAB $AUXDATA/AUXBAS/auxdef21
+setenv DFTBPAR $AUXDATA/DFTB
+setenv ERICFMT $AUXDATA/ericfmt.dat
+setenv MCPPATH $AUXDATA/MCP
+setenv BASPATH $AUXDATA/BASES
+setenv QUANPOL $AUXDATA/QUANPOL
+unset echo
+
+# Set apprioriate stacksize
+if ($GMS_OPENMP_OFFLOAD == true) then
+   limit stacksize  786432
+else
+   limit stacksize  32768
+endif
+
+# GAMESS run banner
+set parent=`hostname`
+echo "================== GAMESS execution script $0 =================="
+echo "Host    : " $parent
+echo "OS      : " `uname`
+echo "Date    : " `date`
+echo "DDI Comm: " $GMS_DDI_COMM
+echo "Comm Lib: " $GMS_MPI_LIB
+echo "Math    : " $GMS_MATHLIB
+echo "Fortran : " $GMS_FORTRAN
+echo ""
+echo "Available scratch disk space at beginning of the job is:"
+df -h $SCR
+echo ""
+echo "GAMESS temporary binary files will be written to    : $SCR"
+echo "GAMESS supplementary output files will be written to: $USERSCR"
+echo ""
+
+# Hostlist
+if ($NNODES > 1) then
+   set NCPUS=$SCR/$JOB.nodes.cpus
+   touch $NCPUS
+   scontrol show hostnames $SLURM_JOB_NODELIST | sort | uniq -c > $NCPUS
+endif
+if (-e $NCPUS) then
+   set HOSTLIST=()
+   @ CPU=1
+   set ncores=0
+   while ($CPU <= $NNODES)
+      set node=`sed -n -e "$CPU p" <$NCPUS`
+      set c=`echo $node | awk '{ print $1 }'`
+      set n=`echo $node | awk '{ print $2 }'`
+      set HOSTLIST=($HOSTLIST ${n}:cpus=$c)
+      @ CPU++
+      @ ncores += $c
+   end
+   echo Using $NNODES nodes and $ncores cores from $NCPUS.
+   set NCPUS=$ncores
+endif
+echo "The generated host list is"
+echo $HOSTLIST
+if ((-x $GMSPATH/gamess.$VERNO.x) && (-x $GMSPATH/ddikick.x)) then
+else
+   echo "The GAMESS executable gamess.$VERNO.x"
+   echo "or else the DDIKICK executable ddikick.x"
+   echo "could not be found in directory $GMSPATH,"
+   echo "or else they did not properly link to executable permission."
+   exit 8
+endif
+
+
+# Launch GAMESS
+(set echo; $GMSPATH/ddikick.x $GMSPATH/gamess.$VERNO.x $JOB -ddi $NNODES $NCPUS $HOSTLIST -scr $SCR < /dev/null)
+
+# GAMESS epilogue
+echo " ======= GAMESS accounting info ========="
+echo Files used on the parent node $parent were:
+ls -lhF $SCR/$JOB.*
+set nonomatch
+foreach file ("$SCR/$JOB.F"*)
+   if (-f "$file" && -w "$file") rm "$file"
+end
+unset nonomatch
+unset file
+
+# Clean up files
+if ($SCHED == SLURM) then
+   cd $SLURM_SUBMIT_DIR
+   srun rm -rf "$SCR"
+else
+   mpiexec rm -rf "$SCR"
+endif
+
+# Clean up stray smepahores by current user
+if ($SCHED == SLURM) then
+   srun /shared/gamess/bin/my_ipcrm > & /dev/null
+endif
+
+date
+time
+exit

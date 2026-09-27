@@ -1,0 +1,80 @@
+! RI-CCSD(T) energy for the coronene molecule using the cc-pVDZ 
+! and aug-cc-pVTZ-RI basis sets.
+!
+! (Please always run an EXETYP=CHECK job to get a detailed
+!  information about MWORDS, MEMDDI in $SYSTEM and IOSIZE in
+!  $CCINP. This is strongly recommended.)
+!
+!    ------------------------------------------------
+!             SUMMARY OF ENERGY CALCULATIONS
+!    ------------------------------------------------
+!     COUPLED-CLUSTER METHOD             CCSD(T)
+!     REFERENCE STATE ENERGY        -916.0111140352
+!     MP2 CORRELATION ENERGY          -3.0797979131
+!     CCSD CORRELATION ENERGY         -3.1325616973
+!     CCSD(T) CORRELATION ENERGY      -3.2966238916
+!    ------------------------------------------------
+!     TOTAL RI-MP2 ENERGY           -919.0909119483
+!     TOTAL RI-CCSD ENERGY          -919.1436757325
+!     TOTAL RI-CCSD(T) ENERGY       -919.3077379268
+!    ------------------------------------------------
+!
+! This job used 4 MPI ranks on 4 compute nodes and 24 OpenMP 
+! threads associated with each MPI rank. The calculation took
+! ~6 hours of wall time (1 hr 15 minutes to complete CCSD 
+! iterations and 4 hr 45 minutes to complete (T) correction).
+! Test case generated on September 3, 2020.
+!
+ $CONTRL ISPHER=1 MULT=1 ICHARG=0 SCFTYP=RHF 
+         CCTYP=CCSD(T) RUNTYP=ENERGY $END
+ $BASIS GBASIS=CCD $END
+ $GUESS GUESS=HUCKEL $END
+ $SCF DIRSCF=.TRUE. $END
+ $INTGRL INTOMP=1 $END
+ $CCINP MAXCC=100 ICONV=7 CCERI=RI $END
+
+ $RICC CABNAM=ACCT EXTCAB=.FALSE. USEDM3=.FALSE. 
+                                  USEDM4=.TRUE. $END
+
+ $SYSTEM PARALL=.TRUE. TIMLIM=100 MWORDS=4500 $END
+ $DATA
+ Coronene cc-pVDZ/aug-cc-pVTZ-RI basis sets
+C1
+C     6.0    -2.27445    -2.39182    -0.00014
+C     6.0    -0.84919    -2.39182    -0.00014
+C     6.0    -0.16661    -1.15956    -0.00014
+C     6.0    -0.90304     0.06522     0.00004
+C     6.0    -2.31149     0.04020    -0.00008
+C     6.0    -2.97987    -1.21862    -0.00014
+C     6.0     1.26228    -1.13419    -0.00009
+C     6.0    -0.21056     1.31536     0.00040
+C     6.0     1.21833     1.34074     0.00080
+C     6.0     1.95476     0.11596     0.00051
+C     6.0     1.90088     2.57300     0.00154
+C     6.0     1.14489     3.78124     0.00169
+C     6.0    -0.22384     3.75693     0.00115
+C     6.0    -0.93646     2.52261     0.00062
+C     6.0    -2.36082     2.47202     0.00031
+C     6.0    -3.02413     1.27451     0.00000
+H     1.0    -4.12441     1.24208    -0.00015
+H     1.0    -2.91696     3.42196     0.00037
+H     1.0    -2.79652    -3.36090    -0.00015
+H     1.0    -4.08060    -1.22527    -0.00013
+H     1.0     1.68949     4.73783     0.00221
+H     1.0    -0.80208     4.69358     0.00117
+C     6.0    -0.09321    -3.60006    -0.00032
+C     6.0     1.27554    -3.57575    -0.00066
+C     6.0     1.98816    -2.34143    -0.00052
+H     1.0    -0.63779    -4.55668    -0.00024
+H     1.0     1.85376    -4.51241    -0.00090
+C     6.0     3.41253    -2.29084    -0.00048
+C     6.0     4.07584    -1.09333     0.00036
+C     6.0     3.36319     0.14097     0.00092
+H     1.0     3.96866    -3.24077    -0.00098
+H     1.0     5.17612    -1.06090     0.00061
+C     6.0     3.32615     2.57300     0.00233
+H     1.0     3.84821     3.54211     0.00334
+C     6.0     4.03157     1.39980     0.00192
+H     1.0     5.13231     1.40649     0.00237
+ $END
+!TRAVIS-CI LARGE

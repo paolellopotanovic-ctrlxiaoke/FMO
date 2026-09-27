@@ -1,0 +1,26 @@
+ $contrl
+  runtyp=energy
+  scftyp=rhf
+  ispher=1
+  mult=1
+  pp=mcp
+  local=svd
+ $end
+
+ $scf vvos=.t. soscf=.t. diis=.f. damp=.t. shift=.t. $end
+
+ $basis gbasis=MCP-TZP $end
+
+ $guess guess=huckel $end
+
+ $system mwords=15 memddi=10 $end
+
+ $data
+AAMBS MCP test
+Oh
+
+Kr 36.0
+ $end
+
+! 
+

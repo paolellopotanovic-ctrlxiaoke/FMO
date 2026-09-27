@@ -1,0 +1,25 @@
+ $CONTRL
+    SCFTYP=RHF
+    MPLEVL=2
+    RUNTYP=ENERGY
+    ICHARG=0
+    MULT=1
+    PP=MCP
+    ISPHER=1
+ $END
+ $BASIS
+    GBASIS=ZFK3-DK3
+ $END
+
+ $SCF DIRSCF=.T. $END
+ $MP2 CODE=DDI $END
+ $SYSTEM MEMDDI=5 $END
+
+ $DATA
+     LiBr
+     Cn 2
+     
+     Li    3   0.0   0.0   0.00
+     Br   35   0.0   0.0   2.05
+ $END
+ 

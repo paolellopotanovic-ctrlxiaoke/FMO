@@ -1,0 +1,2016 @@
+C  6 Jun 18 - DGF - tweaks for FMO 5.3
+C 18 Apr 16 - DGF - pad common blocks
+C 22 Aug 14 - FZ  - PAD THE INFOTD COMMON FOR ALPHKWD
+C  4 Jul 14 - FZ  - PAD THE INFOTD COMMON FOR BETA
+C 19 Oct 12 - MWS - synchronize FRGINF common
+C  2 Sep 12 - NM  - CNCLTD2: read density to skip SCF part
+C  9 APR 12 - FZ  - PAD THE INFOTD COMMON FOR TPA
+C 14 Mar 12 - MWS - NSTATMC: ALSO PRINT STATE'S WEIGHTINGS
+C  7 MAR 12 - MWS - ALIGN DETWFN COMMON
+C 17 Feb 12 - LBR - updated DETWFN common block
+C 11 AUG 11 - NM  - NEW MODULE TO FIND CONICAL INTERSECTION POINTS
+C
+C*MODULE OPTCIX  *DECK CNCLIN
+
+C>    @date    Oct, 2021 -- added three state conical intersection by
+C>             penalty-constrained optimization method,
+c>             Y. S. Baek, et al, J. Phys. Chem. A 125, 1994 (2021)
+C>    @author  Yong Su Baek
+
+      SUBROUTINE CNCLIN(METHOD)
+C***********************************************************************
+C
+C CONICAL INTERSECTION SEARCH (RUNTYP=CONICAL)
+C PROGRAMMED BY NORIYUKI MINEZAWA.
+C
+C THREE OPTIMIZERS HAVE BEEN IMPLEMENTED.
+C
+C (1) GRADIENT PROJECTION METHOD USING NONADIABATIC COUPLING MATRIX
+C     ELEMENT (NACME)
+C
+C  REFERENCE: M. J. BEARPARK, M. A. ROBB, AND  H. B. SCHLEGEL,
+C             CHEM. PHYS. LETT. 223, 269 (1994)
+C
+C (2) BRANCHING PLANE UPDATING METHOD *WITHOUT* NACME.
+C
+C  REFERENCE: S. MAEDA, K. OHNO, AND K. MOROKUMA,
+C             J. CHEM. THEORY COMPUT. 6, 1538 (2010).
+C
+C (3) PENALTY-CONSTRAINED OPTIMIZATION METHOD.
+C
+C  REFERENCES: B. G. LEVINE, C. KO, J. QUENNEVILLE, AND T. J. MARTINEZ,
+C              MOL. PHYS. 104, 1039 (2006).
+C              B. G. LEVINE, J. D. COE, AND T. J. MARTINEZ,
+C              J. PHYS. CHEM. B 112, 405 (2008).
+C  QM METHOD
+C  ---------
+C
+C STATE-AVERAGED MCSCF (SA-MCSCF) AND TDDFT WITHIN THE TAMM-DANCOFF
+C APPROXIMATION (TDDFT/TDA) ARE AVAILABLE.
+C
+C SA-MCSCF: (1)-(3), TDDFT/TDA: (2) AND (3)
+C
+C TDDFT NACME WILL BE IMPLEMENTED IN THE FORTHCOMING CODE.
+C
+C***********************************************************************
+      USE MX_LIMITS,ONLY:MXFRG,MXDFG,MXDPPT,mxatm,mxsh
+      USE comm_FRGINF
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DOUBLE PRECISION METHOD
+C
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,LINEAR,ALPHKWD,BETAKWD
+      LOGICAL ABEL,SYMOFF,DEBUG,MASWRK,GOPARR,DSKWRK
+      LOGICAL MREKT,MRDEA
+C
+C
+      COMMON /C0NICL/ PNTSTP,PNTGRD,PNALFA,PNSIGM,NCVGPN,NCNCL,NEG2CL,
+     *                NDBGCI,IXROOT(2),IXSTAT(2),ITROOT(3),ITSTAT(3)
+      COMMON /FMOINF/ NFG,NLAYER,NATFMO,NBDFG,NAOTYP,NBODY,NSEGM
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /PCMPAR/ IPCM,NFT26,NFT27,IKREP,IEF,IP_F,NFMOPCM,IHET
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /SYMMOL/ GROUP,COMPLEX,IGROUP,NAXIS,ILABMO,ABEL
+      COMMON /SYMTRY/ MAPSHL(MXSH,48),MAPCTR(MXATM,48),
+     *                T(432),INVT(48),NT
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+      COMMON /ZMAT  / NZMAT,NZVAR,NVAR,NSYMC,LINEAR
+C
+      PARAMETER (NNAM=9)
+      DIMENSION QNAM(NNAM),KQNAM(NNAM)
+      DATA CONICAL/8HCONICAL /
+      DATA CONICL/8HCONICL  /
+      DATA QNAM /8HOPTTYP  ,8HIXROOT  ,8HTOLSTP  ,8HTOLGRD  ,8HALPHA   ,
+     *           8HSIGMA   ,8HSYMOFF  ,8HDEBUG   ,8HITROOT  /
+      DATA KQNAM/5,21,3,3,3,  3,0,0,31/
+C
+      DOUBLE PRECISION MRSF
+      DATA MRSF/8HMRSF    / 
+      DATA RNONE /8HNONE    /, RMC   /8HMCSCF   /
+      DATA GPWNAC/8HGPWNAC  /, BPUPD /8HBPUPD   /, PENLTY/8HPENALTY /
+      DATA PENLTT/8HPENALTT /
+      DATA SCHLGL/8HSCHLEGEL/, SCNOPT/8HCONOPT  /
+      DATA C1    /8HC1      /
+      DATA SFORM/8HSFORM   /      
+C
+      NCNCL  = 0
+      IF(RUNTYP.NE.CONICAL) RETURN
+C
+C***********************************************************************
+C
+C $CONICL GROUP (FOR RUNTYP=CONICAL)
+C
+C OPTTYP    = OPTIMIZATION ALGORITH SELECTIONS. PICK FROM
+C
+C   GPWNAC   GRADIENT PROJECTION METHOD WITH NONADIABATIC COUPLING
+C            MATRIX ELEMENT (NACME).
+C
+C   BPUPD    BRANCHING SPACE UPDATING METHOD WITHOUT NACME (DEFAULT)
+C
+C   PENALTY  PENALTY-CONSTRAINED OPTIMIZATION METHOD
+C
+C   PENALTYT PENALTY-CONSTRAINED OPTIMIZATION METHOD FOR THREE STATE
+C
+C                     GPWNAC  BPUPD  PENALTY
+C         SA-MCSCF  :   OK      OK     OK
+C         TDDFT/TDA :  N/A      OK     OK
+C         FULL TDDFT:  N/A     N/A     N/A
+C
+C IXROOT(2) = THE SAME MEANING OF IROOT IN $DET OR $TDDFT GROUP.
+C             SPECIFY TWO CROSSING STATES (THERE IS NO DEFAULT).
+C
+C SYMOFF    = A FLAG TO TURN OFF THE SYMMETRY. (DEFAULT=.TRUE.)
+C
+C DEBUG     = A FLAG TO GIVE DEBUG PRINT. (DEFAULT=.FALSE.)
+C
+C --- TOLSTP, TOLGRD, ALPHA, SIGMA APPLY ONLY TO PENALTY ---
+C
+C TOLSTP    = ENERGY DIFFERENCE TOLERANCE, IN HARTEE.
+C             (DEFAULT=1.0E-06)
+C
+C TOLGRD    = GRADIENT CONVERGENCE TOLERANCE, IN HARTREE/BOHR.
+C             (DEFAULT=5.0E-03)
+C
+C ALPHA     = PARAMETER TO ENSURE A SINGULARITY-FREE PENALTY,
+C             IN HARTREE. (DEFAULT=0.02)
+C
+C SIGMA     = LAGRANGE MULTIPLIER OR THE WEIGHT OF PENALTY TERM.
+C             INCREASE THE VALUE AND RESTART THE OPTIMIZATION
+C             IF THE ENERGY GAP BETWEEN TWO STATES IS NOT ACCEPTABLE
+C             AT THE CI POINT. (DEFAULT=3.5)
+C
+C ITROOT(3) = THE SAME MEANING OF IROOT IN $DET OR $TDDFT GROUP.
+C             SPECIFY THREE CROSSING STATES (THERE IS NO DEFAULT).
+C
+C***********************************************************************
+C
+      IF(MASWRK) WRITE(IW,9000)
+C
+      OPTTYP = RNONE
+      IXROOT(1) = -1
+      IXROOT(2) = -1
+      ITROOT(1) = -1
+      ITROOT(2) = -1
+      ITROOT(3) = -1
+      TOLSTP = 1.0D-06
+      TOLGRD = 5.0D-03
+      ALPHA  = 2.0D-02
+      SIGMA  = 3.5D+00
+      SYMOFF = .TRUE.
+      DEBUG  = .FALSE.
+C
+      JRET = 0
+      CALL NAMEIO(IR,JRET,CONICL,NNAM,QNAM,
+     *            KQNAM,OPTTYP,IXROOT,TOLSTP,TOLGRD,
+     *            ALPHA,SIGMA,SYMOFF,DEBUG,ITROOT,
+     *         0,0,   0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0
+     *   0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0
+     *   0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0)
+C
+      IF(JRET.EQ.2) THEN
+         IF(MASWRK) WRITE(IW,9999)
+         CALL ABRT
+      END IF
+C
+C     ----- CHECK ERRORS -----
+C
+      NERR = 0
+      NCNCL = -1
+      IF(OPTTYP.EQ.RNONE) OPTTYP = BPUPD
+      IF(OPTTYP.EQ.GPWNAC) NCNCL = 1
+      IF(OPTTYP.EQ.BPUPD ) NCNCL = 2
+      IF(OPTTYP.EQ.PENLTY) NCNCL = 3
+      IF(OPTTYP.EQ.PENLTT) NCNCL = 4
+      IF(NCNCL.LT.0) THEN
+         IF(MASWRK) WRITE(IW,9998) OPTTYP
+         NERR = NERR + 1
+      END IF
+C
+      IF(IXROOT(1).GT.IXROOT(2) .AND. NCNCL.NE.4) THEN
+         IDUM = IXROOT(1)
+         IXROOT(1) = IXROOT(2)
+         IXROOT(2) = IDUM
+      ELSE IF(IXROOT(1).EQ.IXROOT(2) .AND. NCNCL.NE.4) THEN
+         IF(MASWRK) WRITE(IW,9995)
+         NERR = NERR + 1
+      END IF
+      IF(ITROOT(1).GT.ITROOT(3)) THEN
+         IDUM = ITROOT(1)
+         ITROOT(1) = ITROOT(3)
+         ITROOT(3) = IDUM
+         IF(ITROOT(1).GT.ITROOT(2)) THEN
+            IDUM = ITROOT(1)
+            ITROOT(1) = ITROOT(2)
+            ITROOT(2) = IDUM
+         ELSE IF(ITROOT(2).GT.ITROOT(3)) THEN
+            IDUM = ITROOT(2)
+            ITROOT(2) = ITROOT(3)
+            ITROOT(3) = IDUM
+         END IF
+      ELSE IF(ITROOT(1).GT.ITROOT(2)) THEN
+         IDUM = ITROOT(1)
+         ITROOT(1) = ITROOT(2)
+         ITROOT(2) = IDUM
+      ELSE IF(ITROOT(2).GT.ITROOT(3)) THEN
+         IDUM = ITROOT(2)
+         ITROOT(2) = ITROOT(3)
+         ITROOT(3) = IDUM
+      ELSE IF(ITROOT(1).EQ.ITROOT(2) .AND. NCNCL.EQ.4) THEN
+         IF(MASWRK) WRITE(IW,9996)
+         NERR = NERR + 1
+      END IF
+C
+      MNSTAT = -1
+      IF(TDDFTYP.EQ.MRSF) THEN
+         TAMMD = .TRUE.
+      END IF
+      IF(TDDFTYP.NE.RNONE) THEN
+         IF(TAMMD) THEN
+            MNSTAT = 0
+         ELSE
+            IF(MASWRK) WRITE(IW,9993)
+            NERR = NERR + 1
+         END IF
+         IF(NCNCL.EQ.1) THEN
+            IF(MASWRK) WRITE(IW,9992)
+            NERR = NERR + 1
+         END IF
+      ELSE IF(SCFTYP.EQ.RMC) THEN
+         MNSTAT = 1
+      ELSE IF(CITYP.EQ.SFORM) THEN
+         MNSTAT = 1
+      ELSE  
+         WRITE(IW,9991)
+         NERR = NERR + 1
+      END IF
+      IF(NCNCL.NE.4) THEN
+         IF(IXROOT(1).LT.MNSTAT .OR. IXROOT(2).LT.MNSTAT) THEN
+            IF(MASWRK) WRITE(IW,9989) MNSTAT
+            NERR = NERR + 1
+         END IF
+      END IF
+      IF(NCNCL.EQ.4) THEN
+         IF(ITROOT(1).LT.MNSTAT .OR. ITROOT(2).LT.MNSTAT
+     *      .OR. ITROOT(3).LT.MNSTAT) THEN
+            IF(MASWRK) WRITE(IW,9990) MNSTAT
+            NERR = NERR + 1
+         END IF
+      END IF
+C
+      IF(METHOD.EQ.SCHLGL .OR. METHOD.EQ.SCNOPT) THEN
+         IF(MASWRK) WRITE(IW,9987) METHOD
+         NERR = NERR + 1
+      END IF
+C
+      IF(NZVAR.GT.0) THEN
+         IF(MASWRK) WRITE(IW,9985)
+         NERR = NERR + 1
+      END IF
+C
+      IF(SCFTYP.EQ.RMC .AND. NFRG.GT.0) THEN
+         IF(MASWRK) WRITE(IW,9983)
+         NERR = NERR + 1
+      END IF
+C
+      IF(IPCM.NE.0) THEN
+         IF(MASWRK) WRITE(IW,9982)
+         NERR = NERR + 1
+      END IF
+C
+      IF(NFG.GT.0) THEN
+         IF(MASWRK) WRITE(IW,9981)
+         NERR = NERR + 1
+      END IF
+C
+C     ----- SET VARIABLES -----
+C
+      PNTSTP = TOLSTP
+      PNTGRD = TOLGRD
+      PNALFA = ALPHA
+      PNSIGM = SIGMA
+      NCVGPN = 0
+C
+C NEG2CL: GRADIENTS ARE OBTAINED BY
+C   0   ... A SINGLE CALCULATION (SA-MCSCF)
+C  +/-1 ... TWO SEPARATE CALCULATIONS (TDDFT)
+C           +1 FOR FIRST AND -1 FOR SECOND
+C
+C  -1, 1, -2 ... THREE SEPARATE CALCULATIONS (TDDFT)
+C           +1 FOR FIRST AND -1 FOR SECOND -2 FOR THIRD
+C
+      NEG2CL = -1
+      IF(SCFTYP.EQ.RMC) THEN
+         NEG2CL = 0
+      ELSE IF(CITYP.EQ.SFORM) THEN
+         NEG2CL = 1
+      ELSE IF(TDDFTYP.NE.RNONE) THEN
+         NEG2CL = 1
+      END IF
+      IF(NEG2CL.LT.0) NERR=NERR+1
+C INITIAL IXSTAT VALUES
+      IXSTAT(1) = IXROOT(1)
+      IXSTAT(2) = IXROOT(2)
+C INITIAL ITSTAT VALUES
+      ITSTAT(1) = ITROOT(1)
+      ITSTAT(2) = ITROOT(2)
+      ITSTAT(3) = ITROOT(3)
+C
+C     ----- PRINT OUT SUMMARY -----
+C
+      NDBGCI = 0
+      IF(DEBUG) NDBGCI = 1
+C
+      IF(MASWRK) THEN
+         IF(ITROOT(1).GE.0) THEN
+            WRITE(IW,9002) ITROOT(1),ITROOT(2),ITROOT(3),SYMOFF,DEBUG,
+     *                     TOLSTP,TOLGRD,ALPHA,SIGMA
+         ELSE
+            WRITE(IW,9001) IXROOT(1),IXROOT(2),SYMOFF,DEBUG,TOLSTP,
+     *                     TOLGRD,ALPHA,SIGMA
+         END IF
+         IF(NCNCL.EQ.1) WRITE(IW,9011)
+         IF(NCNCL.EQ.2) WRITE(IW,9012)
+         IF(NCNCL.EQ.3) WRITE(IW,9013)
+         IF(NCNCL.EQ.4) WRITE(IW,9014)
+         WRITE(IW,9020)
+      END IF
+C
+      IF(NERR.GT.0) CALL ABRT
+C
+C     ----- TURN OFF SYMMETRY -----
+C
+      IF(SYMOFF .AND. IGROUP.GT.1) THEN
+         GROUP = C1
+         IGROUP = 1
+         NAXIS = 1
+         NT = 1
+         IF(MASWRK) WRITE(IW,9050)
+      END IF
+C
+      RETURN
+ 9000 FORMAT(//10X,39(1H-)/
+     *         10X,'CONICAL INTERSECTION POINT LOCATION RUN'/
+     *         10X,39(1H-))
+ 9001 FORMAT(/10X,'IXROOT(1)= ',I10,     10X,'IXROOT(2)= ',I10/
+     *        10X,'SYMOFF   = ',L10,     10X,'DEBUG    = ',L10/
+     *        10X,'TOLSTP   = ',1P,E10.3,10X,'TOLGRD   = ',1P,E10.3/
+     *        10X,'ALPHA    = ',1P,E10.3,10X,'SIGMA    = ',1P,E10.3)
+ 9002 FORMAT(/10X,'ITROOT(1)= ',I10,     10X,'ITROOT(2)= ',I10/
+     *        10X,'ITROOT(3)= ',I10,     10X,'SYMOFF   = ',L10/
+     *        10X,'DEBUG    = ',L10,     10X,'TOLSTP   = ',1P,E10.3/
+     *        10X,'TOLGRD   = ',1P,E10.3,10X,'ALPHA    = ',1P,E10.3/
+     *        10X,'SIGMA    = ',1P,E10.3)
+ 9011 FORMAT(/1X,'CONICAL INTERSECTION SEARCH WITH INTERSTATE ',
+     *           'COUPLING VECTOR'//
+     *        1X,'REFERENCE: M. J. BEARPARK, M. A. ROBB, AND ',
+     *          'H. B. SCHLEGEL,'/
+     *       12X,'CHEM. PHYS. LETT. 223, 269 (1994)')
+ 9012 FORMAT(/1X,'CONICAL INTERSECTION SEARCH BY BRANCHING PLANE ',
+     *           'UPDATING METHOD'//
+     *        1X,'REFERENCE: S. MAEDA, K. OHNO, AND K. MOROKUMA,'/
+     *       12X,'J. CHEM. THEORY COMPUT. 6, 1538 (2010).')
+ 9013 FORMAT(/1X,'CONICAL INTERSECTION SEARCH BY PENALTY-CONSTRAINED',
+     *           ' OPTIMIZATION METHOD'//
+     *        1X,'REFERENCES: (1) B. G. LEVINE, C. KO, ',
+     *           'J. QUENNEVILLE, AND T. J. MARTINEZ,'/
+     *       17X,'MOL. PHYS. 104, 1039 (2006).'/
+     *       13X,'(2) B. G. LEVINE, J. D. COE, AND T. J. MARTINEZ,'/
+     *       17X,'J. PHYS. CHEM. B 112, 405 (2008).')
+ 9014 FORMAT(/1X,'THREE STATE CONICAL INTERSECTION SEARCH BY',
+     *           ' PENALTY-CONSTRAINED OPTIMIZATION METHOD'//
+     *        1X,'REFERENCES: Y. S. BAEK, S. LEE, M. FILATOV, AND',
+     *           ' C. H. CHOI,'/
+     *       12X,'J. PHYS. CHEM. A 125, 1994 (2021).')
+ 9020 FORMAT(/1X,'PROGRAMMED BY NORIYUKI MINEZAWA'/)
+ 9050 FORMAT(1X,'SYMMETRY HAS BEEN TURNED OFF BY THE $CONICAL GROUP')
+ 9981 FORMAT(1X,'***** ERROR. FMO METHOD IS NOT SUPPORTED')
+ 9982 FORMAT(1X,'***** ERROR. PCM SOLVENT MODEL IS NOT SUPPORTED')
+ 9983 FORMAT(1X,'***** ERROR. SA-MCSCF/EFP SOLVENT IS NOT SUPPORTED')
+ 9985 FORMAT(1X,'***** ERROR. INTERNAL COORDINATES ARE NOT SUPPORTED.')
+ 9987 FORMAT(1X,'***** ERROR. METHOD IN $STATPT= ',A8,
+     *          ' IS NOT SUPPORTED.')
+ 9989 FORMAT(1X,'***** ERROR. IXROOT MUST BE LARGER THAN ',I5)
+ 9990 FORMAT(1X,'***** ERROR. ITROOT MUST BE LARGER THAN ',I5)
+ 9991 FORMAT(1X,'***** ERROR. SELECT THE STATE-AVERAGED MCSCF ',
+     *          'TDDFT/TDA (NOT FULL TDDFT), or SF-ORMAS.')
+ 9992 FORMAT(1X,'***** ERROR. NACME IS NOT AVAILABLE FOR TDDFT.')
+ 9993 FORMAT(1X,'***** ERROR. FULL TDDFT IS NOT SUPPORTED.'/
+     *       1X,'      USE THE TAMM-DANCOFF APPROXIMATION (TAMMD=.T.)')
+ 9995 FORMAT(1X,'***** ERROR. IXROOT(1)=IXROOT(2) DOES NOT WORK.')
+ 9996 FORMAT(1X,'***** ERROR. ITROOT(1)=ITROOT(2) DOES NOT WORK.')
+ 9998 FORMAT(1X,'***** ERROR. OPTTYP=',A8,' IS NOT AVAILABLE.')
+ 9999 FORMAT(1X,'SYNTAX ERROR IN $CONICAL INPUT.')
+      END
+C*MODULE OPTCIX  *DECK CNCLTD2
+      SUBROUTINE CNCLTD2(NRUN,NEG2CL,IXROOT,NCVAL,NFRG)
+C
+C THIS ROUTINE MANAGES TWO SEPARATE (TD)DFT GRADIENT CALCULATIONS
+C IN THE CONICAL INTERSECTION SEARCH.
+C
+      USE MX_LIMITS,ONLY:MXFRG,MXFGPT,mxatm,mxrt
+      USE comm_FGRAD
+      USE comm_EFPTDG
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+C
+C
+      COMMON /DETWFN/ WSTATE(MXRT),SPINS(MXRT),CRIT,PRTTOL,S,SZ,
+     *                GRPDET,STSYM,GLIST,DWPARM,
+     *                NFLGDM(MXRT),IWTS(MXRT),NCORSV,NCOR,NACT,NORB,
+     *                NAD,NBD,K,KST,IROOT,IPURES,MAXW1,NITER,MAXP,NCI,
+     *                IGPDET,KSTSYM,NFTGCI,IDWEIGH,
+     *                fstate(mxrt),ifts(mxrt)
+      COMMON /FMCOM / X(1)
+      COMMON /FUNCT / E,EG(3*MXATM)
+      common /infoa / nat,ich,mul,num,nqmt,ne,na,nb,
+     *                zan(mxatm),c(3*mxatm),ian(mxatm)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DIMENSION IXROOT(2)
+C
+      SAVE ITDEFGSV
+      DATA ITDEFGSV/0/
+C
+      SAVE TDTYPSV
+      DATA TDTYPSV/8HNONE    /, RNONE/8HNONE    /
+      data excite/8HEXCITE  /, SPNFLP/8HSPNFLP  /
+      DOUBLE PRECISION MRSF
+      DATA MRSF/8HMRSF    /
+C
+      IF(NEG2CL.EQ.0) RETURN
+C
+      IF(NRUN.EQ.0) THEN
+         NEG2CL = 1
+C
+C     ----- BEFORE THE CALCULATION FOR THE 1ST STATE  -----
+C     ----- AFTER  THE CALCULATION FOR THE 2ND STATE  -----
+C
+         IF(IXROOT(1).EQ.0) THEN
+C GROUND-STATE DFT
+            TDTYPSV = TDDFTYP
+            TDDFTYP = RNONE
+            IF(NFRG.GT.0) THEN
+C DFT/EFP
+               ITDEFGSV = ITDEFG
+               ITDEFG   = 0
+            END IF
+         ELSE
+            NTHST = IXROOT(1)
+            IROOT = IXROOT(1)  ! CI CASE
+         END IF
+C RISM
+         CALL RSM_GETDAT4(0)
+C RISM
+      ELSE
+         NEG2CL = -1
+         NCVF = NCVAL + 6*NFRG
+         CALL VALFM(LOADFM)
+         LSCR = 1    + LOADFM
+         LAST = LSCR + NCVF
+         if(tddftyp.ne.rnone) then
+            nbf2 = (num*num+num)/2
+            lwrk = last
+            last = lwrk + nbf2
+         end if 
+         NEED = LAST - LOADFM - 1
+         CALL GETFM(NEED)
+C
+C     ----- AFTER THE CALCULATION FOR THE 1ST STATE -----
+C
+C SAVE THE GRADIENT FOR THE 1ST STATE
+         CALL EGMOVE(X(LSCR),EG,DEFT,TORQ,NCVAL,NFRG)
+         CALL DAWRIT(IDAF,IODA,X(LSCR),NCVF,497,0)
+C
+         CALL VCLR(EG,1,3*MXATM)
+         IF(NFRG.GT.0) THEN
+            CALL VCLR(DEFT,1,3*MXFRG)
+            CALL VCLR(TORQ,1,3*MXFRG)
+         END IF
+C
+         IF(IXROOT(1).EQ.0) THEN
+            TDDFTYP = TDTYPSV
+            ITDEFG  = ITDEFGSV
+         else
+c write reference-state density
+            if(tddftyp.eq.excite) then
+               call daread(idaf,ioda,x(lwrk),nbf2,308,0)
+               call dawrit(idaf,ioda,x(lwrk),nbf2, 16,0)
+            else if(tddftyp.eq.spnflp.or.tddftyp.eq.mrsf) then
+               call daread(idaf,ioda,x(lwrk),nbf2,418,0)
+               call dawrit(idaf,ioda,x(lwrk),nbf2, 16,0)
+               call daread(idaf,ioda,x(lwrk),nbf2,428,0)
+               call dawrit(idaf,ioda,x(lwrk),nbf2, 20,0)
+            end if
+         END IF 
+         NTHST = IXROOT(2)
+         IROOT = IXROOT(2)  ! CI CASE
+         CALL RETFM(NEED)
+C RISM
+         CALL RSM_GETDAT4(1)
+C RISM
+      END IF
+C
+      RETURN
+      END
+C
+C*MODULE OPTCIX  *DECK CNCLTD3
+
+C>     @brief  THIS ROUTINE MANAGES THREE SEPARATE 
+C>             (TD)DFT GRADIENT CALCULATIONS IN 
+C>             THE CONICAL INTERSECTION SEARCH
+C>
+C>     @author Yong Su Baek, 2021, Oct
+C>
+      SUBROUTINE CNCLTD3(NRUN,NEG2CL,ITROOT,NCVAL,NFRG)
+C
+C
+      USE mx_limits, ONLY: mxatm, mxfrg, mxfgpt
+      USE prec, ONLY: dp                        
+      IMPLICIT NONE
+C
+      LOGICAL :: ALPHKWD, BETAKWD, MRDEA, MREKT, SG1T, TAMMD, TPA,      &
+     &           TRIPLET
+      REAL(KIND=dp), DIMENSION(3,MXFRG) :: ATORQ, DEFT, EFCENT, TORQ
+      REAL(KIND=dp), DIMENSION(3*mxatm) :: C
+      REAL(KIND=dp) :: CCTYP, CITYP, CNVTOL, DFTYPE, E, SCFTYP, TDDFTYP, &
+     &                VBTYP
+      REAL(KIND=dp), DIMENSION(3,MXFGPT) :: DEF
+      REAL(KIND=dp), DIMENSION(3*MXATM) :: EG
+      REAL(KIND=dp), DIMENSION(MXFRG) :: FRGMAS
+      REAL(KIND=dp), DIMENSION(6,MXFRG) :: FRGMI
+      INTEGER, DIMENSION(mxatm) :: IAN
+      INTEGER :: ICH, IDAF, IJK, IJKT, IP, IR, IRECTD, ITDEFG, ITDFG,   &
+     &           ITDPRP, IW, JANST, MAXVEC, MODTD, MPCTYP, MPLEVL, MUL, &
+     &           MTHST, MULTD, NA, NAT, NAV, NB, NE, NLEBT, NONEQR,     &
+     &           NPHIT, NQMT, NRADT, NSTAT, NTHET, NTHST, NTRIAL, NUM
+      INTEGER, DIMENSION(4) :: IFEDAT
+      INTEGER, DIMENSION(950) :: IODA
+      REAL(KIND=dp), DIMENSION(2) :: PFREQ
+      REAL(KIND=dp), DIMENSION(3) :: SPCP
+      REAL(KIND=dp), DIMENSION(1) :: X
+      REAL(KIND=dp), DIMENSION(mxatm) :: ZAN
+      COMMON /EFPTDG/ ITDEFG
+      COMMON /FGRAD / DEF, DEFT, TORQ, EFCENT, FRGMAS, FRGMI, ATORQ
+      COMMON /FMCOM / X
+      COMMON /FUNCT / E, EG
+      COMMON /INFOA / NAT, ICH, MUL, NUM, NQMT, NE, NA, NB, ZAN, C, IAN
+      COMMON /INFOTD/ CNVTOL, PFREQ, MODTD, JANST, NRADT, NTHET, NPHIT, &
+     &                NLEBT, NSTAT, NTRIAL, MAXVEC, NTHST, IRECTD,      &
+     &                ITDFG, ITDPRP, TRIPLET, SG1T, NONEQR, TAMMD, TPA, &
+     &                ALPHKWD, BETAKWD, SPCP, MULTD, MREKT, MRDEA,      &
+     &                MTHST, IFEDAT
+      COMMON /IOFILE/ IR, IW, IP, IJK, IJKT, IDAF, NAV, IODA
+      COMMON /WFNOPT/ SCFTYP, VBTYP, DFTYPE, TDDFTYP, CITYP, CCTYP,     &
+     &                MPLEVL, MPCTYP
+C
+      INTEGER :: NCVAL, NEG2CL, NFRG, NRUN
+      INTEGER, DIMENSION(3) :: ITROOT
+C
+      INTEGER :: LAST, LOADFM, LSCR, LWRK, NBF2, NCVF, NEED
+C
+      INTEGER, SAVE :: ITDEFGSV
+      DATA ITDEFGSV/0/
+C
+      REAL(KIND=dp), PARAMETER :: EXCITE = transfer('EXCITE  ',1.0d0)
+      REAL(KIND=dp), PARAMETER :: RNONE = transfer('NONE    ',1.0d0)
+      REAL(KIND=dp), PARAMETER :: SPNFLP = transfer('SPNFLP  ',1.0d0)
+      REAL(KIND=dp) :: TDTYPSV
+C
+      TDTYPSV = transfer('NONE    ',1.0d0)
+C
+      IF(NEG2CL.EQ.0) RETURN
+C
+      IF(NRUN.EQ.0) THEN
+         NEG2CL = 1
+C
+C     ----- BEFORE THE CALCULATION FOR THE 1ST STATE  -----
+C     ----- AFTER  THE CALCULATION FOR THE 2ND STATE  -----
+C
+         IF(ITROOT(1).EQ.0) THEN
+C GROUND-STATE DFT
+            TDTYPSV = TDDFTYP
+            TDDFTYP = RNONE
+            IF(NFRG.GT.0) THEN
+C DFT/EFP
+               ITDEFGSV = ITDEFG
+               ITDEFG   = 0
+            END IF
+         ELSE
+            NTHST = ITROOT(1)
+         END IF
+      ELSE IF(NRUN.EQ.1) THEN
+         NEG2CL = -1
+         NCVF = NCVAL + 6*NFRG
+         CALL VALFM(LOADFM)
+         LSCR = 1    + LOADFM
+         LAST = LSCR + NCVF
+         if(tddftyp.ne.rnone) then
+            nbf2 = (num*num+num)/2
+            lwrk = last
+            last = lwrk + nbf2
+         end if
+         NEED = LAST - LOADFM - 1
+         CALL GETFM(NEED)
+C
+C     ----- AFTER THE CALCULATION FOR THE 1ST STATE -----
+C
+C SAVE THE GRADIENT FOR THE 1ST STATE
+         CALL EGMOVE(X(LSCR),EG,DEFT,TORQ,NCVAL,NFRG)
+         CALL DAWRIT(IDAF,IODA,X(LSCR),NCVF,497,0)
+C
+         CALL VCLR(EG,1,3*MXATM)
+         IF(NFRG.GT.0) THEN
+            CALL VCLR(DEFT,1,3*MXFRG)
+            CALL VCLR(TORQ,1,3*MXFRG)
+         END IF
+C
+         IF(ITROOT(1).EQ.0) THEN
+            TDDFTYP = TDTYPSV
+            ITDEFG  = ITDEFGSV
+         else
+c write reference-state density
+            if(tddftyp.eq.excite) then
+               call daread(idaf,ioda,x(lwrk),nbf2,308,0)
+               call dawrit(idaf,ioda,x(lwrk),nbf2, 16,0)
+            else if(tddftyp.eq.spnflp) then
+               call daread(idaf,ioda,x(lwrk),nbf2,418,0)
+               call dawrit(idaf,ioda,x(lwrk),nbf2, 16,0)
+               call daread(idaf,ioda,x(lwrk),nbf2,428,0)
+               call dawrit(idaf,ioda,x(lwrk),nbf2, 20,0)
+            end if
+         END IF
+         NTHST = ITROOT(2)
+         CALL RETFM(NEED)
+      ELSE IF(NRUN.EQ.2) THEN
+         NEG2CL = -2
+         NCVF = NCVAL + 6*NFRG
+         CALL VALFM(LOADFM)
+         LSCR = 1    + LOADFM
+         LAST = LSCR + NCVF
+         if(tddftyp.ne.rnone) then
+            nbf2 = (num*num+num)/2
+            lwrk = last
+            last = lwrk + nbf2
+         end if
+         NEED = LAST - LOADFM - 1
+         CALL GETFM(NEED)
+C
+C     ----- AFTER THE CALCULATION FOR THE 2ND STATE -----
+C asign 499 as temp storage of gradient of 2nd state in CI search
+C
+C SAVE THE GRADIENT FOR THE 2ND STATE
+         CALL EGMOVE(X(LSCR),EG,DEFT,TORQ,NCVAL,NFRG)
+         CALL DAWRIT(IDAF,IODA,X(LSCR),NCVF,499,0)
+C
+         CALL VCLR(EG,1,3*MXATM)
+         IF(NFRG.GT.0) THEN
+            CALL VCLR(DEFT,1,3*MXFRG)
+            CALL VCLR(TORQ,1,3*MXFRG)
+         END IF
+         NTHST = ITROOT(3)
+         CALL RETFM(NEED)
+      END IF
+C
+      RETURN
+      END SUBROUTINE CNCLTD3
+C
+C*MODULE OPTCIX  *DECK DBGCNCL
+C>
+C>     @brief  THIS ROUTINE USES FOR DEBUG 
+C>             THREE CONICAL INTERSECTION SEARCH
+C>
+C>     @author Yong Su Baek, 2021, Oct
+C>
+      SUBROUTINE DBGCNCL(V,NCVF,PRTEG)
+C
+      USE mx_limits, ONLY: mxfrg, mxatm, mxao
+      USE comm_FRGINF, ONLY: nfrg
+      USE prec, ONLY: dp                        
+      USE constants, ONLY: zero
+      IMPLICIT NONE
+C
+      REAL(KIND=dp), DIMENSION(MXATM) :: ANAM, BNAM, ZAN
+      REAL(KIND=dp), DIMENSION(MXAO) :: BFLAB
+      REAL(KIND=dp), DIMENSION(3*MXATM) :: C
+      INTEGER, DIMENSION(MXATM) :: IAN
+      INTEGER :: ICH, IDAF, IP, IPK, IR, IS, IW, MUL, NA, NAT, NAV, NB, &
+     &           NE, NQMT, NSYMC, NUM, NVAR, NZMAT, NZVAR
+      INTEGER, DIMENSION(950) :: IODA
+      LOGICAL :: LINEAR
+      REAL(KIND=dp), DIMENSION(10) :: TITLE
+      REAL(KIND=dp), DIMENSION(1) :: X
+      COMMON /FMCOM / X
+      COMMON /INFOA / NAT, ICH, MUL, NUM, NQMT, NE, NA, NB, ZAN, C, IAN
+      COMMON /IOFILE/ IR, IW, IP, IS, IPK, IDAF, NAV, IODA
+      COMMON /RUNLAB/ TITLE, ANAM, BNAM, BFLAB
+      COMMON /ZMAT  / NZMAT, NZVAR, NVAR, NSYMC, LINEAR
+C
+      INTEGER :: NCVF
+      LOGICAL :: PRTEG
+      REAL(KIND=dp), DIMENSION(*) :: V
+C
+      REAL(KIND=dp), DIMENSION(3), SAVE :: DNAM
+      INTEGER :: I, INF, IPOINT, IROT, ITRANS, J, JMAX, JMIN, LAST,     &
+     &           LEF3, LEF3T, LEG, LOADFM, LTORQ, NEED, NTEST
+C
+      DATA DNAM /4HE_X ,4HE_Y ,4HE_Z /
+C
+      IF(NZVAR.GT.0) THEN
+         WRITE(IW,*) ' INTERNAL COORDINATE IS NOT SUPPORTED'
+         CALL ABRT
+      END IF
+C
+      NTEST = 3*NAT + 6*NFRG
+      IF(NTEST.NE.NCVF) THEN
+         WRITE(IW,*) ' NTEST/NCVF= ',NTEST,NCVF
+         CALL ABRT
+      END IF
+C
+C     ----- MEMORY ALLOCATION -----
+C
+      CALL VALFM(LOADFM)
+      LEG  = LOADFM + 1
+      LAST = LEG  + 3*NAT
+      IF(NFRG.GT.0) THEN
+         LEF3  = LAST 
+         LEF3T = LEF3  + 3*MXFRG
+         LTORQ = LEF3T + 3
+         LAST  = LTORQ + 3*MXFRG
+      END IF
+      NEED = LAST - LOADFM - 1
+      CALL GETFM(NEED)
+C
+C     ----- ENERGY GRADIENT -----
+C
+      CALL DCOPY(3*NAT,V,1,X(LEG),1)
+C
+C     ----- EFP -----
+C
+      IF(NFRG.GT.0) THEN
+         DO J=1,3
+            X(LEF3T+J-1) = ZERO
+         END DO
+         IPOINT = 3*NAT
+         ITRANS = LEF3  - 1
+         IROT   = LTORQ - 1
+         DO INF=1,NFRG
+C TRANSLATION
+            DO J=1,3
+               IPOINT = IPOINT + 1
+               ITRANS = ITRANS + 1
+               X(ITRANS) = V(IPOINT)  
+               X(LEF3T+J-1) = X(LEF3T+J-1) + V(IPOINT)
+            END DO
+C ROTATION
+            DO J=1,3
+               IPOINT = IPOINT + 1
+               IROT   = IROT   + 1
+               X(IROT) = V(IPOINT)  
+            END DO
+         END DO 
+      END IF
+C
+C     ----- PRINT OUT -----
+C
+      IF(PRTEG) THEN
+         CALL EGOUT(X(LEG),NAT)
+         IF(NFRG.GT.0) CALL EFOUT(X(LEF3),X(LEF3T),X(LTORQ))
+      ELSE
+         WRITE(IW,9000) (DNAM(J),J=1,3)
+         JMIN = -2
+         DO I=1,NAT
+            JMIN = JMIN + 3
+            JMAX = JMIN + 2
+            WRITE(IW,9010) I,ANAM(I),BNAM(I),(V(J),J=JMIN,JMAX)
+         END DO
+         IF(NFRG.GT.0) THEN
+            JMIN = -2
+            DO INF=1,NFRG
+               JMIN = JMIN + 3
+               JMAX = JMIN + 2
+               WRITE (IW,8000) INF,(DNAM(J),J=1,3)
+               WRITE (IW,8020) (X(LEF3 +J-1),J=JMIN,JMAX)
+               WRITE (IW,8030) (X(LTORQ+J-1),J=JMIN,JMAX)
+            END DO
+         END IF
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+ 9000 FORMAT(/1X,'                      ',4X,A4,14X,A4,14X,A4)
+ 9010 FORMAT(1X,I4,1X,A8,A2,3F18.9)
+ 8000 FORMAT(/6X,'FRAGMENT NO.',I5,10X,A4,14X,A4,14X,A4)
+ 8020 FORMAT(6X,'TRANSLATIONAL :',3F18.9)
+ 8030 FORMAT(6X,'   ROTATIONAL :',3F18.9)
+      END SUBROUTINE DBGCNCL
+C*MODULE OPTCIX  *DECK EGCONICL
+      SUBROUTINE EGCONICL
+C
+C THIS ROUTINE COMPUTES GRADIENT USED IN CONICAL INTERSECTION SEARCH
+C
+      USE MX_LIMITS,ONLY:MXFRG,MXFGPT,MXDFG,MXDPPT,mxatm,mxrt
+      USE comm_FGRAD
+      USE comm_FRGINF
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+      LOGICAL DEBUG,MASWRK,GOPARR,DSKWRK
+C
+C
+      COMMON /C0NICL/ PNTSTP,PNTGRD,PNALFA,PNSIGM,NCVGPN,NCNCL,NEG2CL,
+     *                NDBGCI,IXROOT(2),IXSTAT(2),ITROOT(3),ITSTAT(3)
+C
+      COMMON /DETWFN/ WSTATE(MXRT),SPINS(MXRT),CRIT,PRTTOL,SDET,SZDET,
+     *                GRPDET,STSYM,GLIST,DWPARM,
+     *                NFLGDM(MXRT),IWTS(MXRT),
+     *                NCORSVDET,NCORDET,NACTDET,NORBDET,NADET,NBDET,
+     *                KDET,KSTDET,IROOTDET,IPURES,MAXW1,NITERDET,
+     *                MAXP,NCIDET,IGPDET,KSTSYMDET,NFTGCI,IDWEIGH,
+     *                fstate(mxrt),ifts(mxrt)
+      COMMON /ENRGYS/ ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2,
+     *                VEN,VEE,EPOT,EKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+      COMMON /FUNCT / E,EG(3*MXATM)
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IJKO,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RMC/8HMCSCF   /,RNONE/8HNONE    /
+      DATA SFORM/8HSFORM   /
+C
+      DEBUG = MASWRK .AND. NDBGCI.NE.0
+      NCVAL = 3*NAT
+      NCVF  = 3*NAT + 6*NFRG
+C
+      IF(SCFTYP.EQ.RMC) THEN
+         IF(NFRG.GT.0) CALL ABRT
+         NUMST = NSTATMC()
+         M1 = NUMST
+         M2 = (M1*(M1-1))/2
+      ELSE IF(TDDFTYP.NE.RNONE) THEN
+         NUMST = NSTAT
+         M1 = 0
+         M2 = 0
+      ELSE IF(CITYP.EQ.SFORM) THEN
+         NUMST=KDET
+         M1=NUMST
+         M2=(M1*(M1-1))/2
+      END IF
+C
+      IF(IXROOT(1).GT.NUMST .OR. IXROOT(2).GT.NUMST) THEN
+         IF(MASWRK) WRITE(IW,9999) IXROOT(1),IXROOT(2),NUMST
+         CALL ABRT
+      END IF
+C
+      IF(ITROOT(1).GT.NUMST .OR. ITROOT(2).GT.NUMST
+     *   .OR. ITROOT(3).GT.NUMST) THEN
+         IF(MASWRK) WRITE(IW,9997) ITROOT(1),ITROOT(2),ITROOT(3),NUMST
+         CALL ABRT
+      END IF
+C
+C     ----- MEMORY ALLOCATION -----
+C
+      CALL VALFM(LOADFM)
+      LTMP = 1    + LOADFM
+      LEG1 = LTMP + MAX(M1,M2)*NCVF
+      LEG2 = LEG1 + NCVF
+      LEG3 = LEG2 + NCVF
+      LEG4 = LEG3 + NCVF
+      LFV  = LEG4 + NCVF
+      LWRK = LFV  + NCVF
+      LWRK1 = LWRK  + NCVF
+      LWRK2 = LWRK1  + NCVF
+      LWRK3 = LWRK2  + NCVF
+      LAST = LWRK3 + NCVF
+C
+      IF(NCNCL.EQ.1) THEN
+         LGV  = LAST
+         LDG  = LGV  + NCVF
+         LDC  = LDG  + NCVF + 1 ! NCVF COMPONENTS AND NORM
+         LPM  = LDC  + NCVF
+         LAST = LPM  + NCVF*NCVF
+      ELSE IF(NCNCL.EQ.2) THEN
+         LGV  = LAST
+         LDG  = LGV  + NCVF
+         LDC  = LDG  + NCVF + 1 ! NCVF COMPONENTS AND NORM
+         LPM  = LDC  + NCVF
+         LDG0 = LPM  + NCVF*NCVF
+         LDC0 = LDG0 + NCVF + 1 ! NCVF COMPONENTS AND NORM
+         LAST = LDC0 + NCVF
+      ELSE IF(NCNCL.EQ.3 .OR. NCNCL.EQ.4) THEN
+         LDC  = LAST
+         LAST = LDC
+      END IF
+C
+      NEED = LAST - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      IF(SCFTYP.EQ.RMC) THEN 
+         CALL RDSAGRAD(X(LEG1),X(LEG2),X(LDC),X(LTMP),
+     *                 NUMST,NCVF,NCNCL,IXROOT,IXSTAT,DEBUG)
+      ELSE IF(CITYP.EQ.SFORM) THEN
+         CALL RDCIGRAD(X(LEG1),X(LEG2),X(LTMP),
+     *        NUMST,NCVF,IXROOT,IXSTAT,DEBUG)
+      ELSE IF(TDDFTYP.NE.RNONE .AND. NCNCL.NE.4) THEN
+         CALL DAREAD(IDAF,IODA,X(LEG1),NCVF,497,0)
+         CALL EGMOVE(X(LEG2),EG,DEFT,TORQ,NCVAL,NFRG)
+         IF(DEBUG) THEN
+            WRITE(IW,*) ' LOWER STATE TDDFT GRADIENT'
+            CALL DBGCNCL(X(LEG1),NCVF,.TRUE.)
+            WRITE(IW,*) ' UPPER STATE TDDFT GRADIENT'
+            CALL DBGCNCL(X(LEG2),NCVF,.TRUE.)
+         END IF
+      ELSE IF(TDDFTYP.NE.RNONE .AND. NCNCL.EQ.4) THEN
+         CALL DAREAD(IDAF,IODA,X(LEG1),NCVF,497,0)
+         CALL DAREAD(IDAF,IODA,X(LEG2),NCVF,499,0)
+         CALL EGMOVE(X(LEG3),EG,DEFT,TORQ,NCVAL,NFRG)
+         IF(DEBUG) THEN
+            WRITE(IW,*) ' LOWEST STATE TDDFT GRADIENT'
+            CALL DBGCNCL(X(LEG1),NCVF,.TRUE.)
+            WRITE(IW,*) ' MIDDLE STATE TDDFT GRADIENT'
+            CALL DBGCNCL(X(LEG2),NCVF,.TRUE.)
+            WRITE(IW,*) ' HIGHEST STATE TDDFT GRADIENT'
+            CALL DBGCNCL(X(LEG3),NCVF,.TRUE.)
+         END IF
+      END IF
+C SET ENERGIES
+      IF(NCNCL.EQ.4) THEN
+         IF(ITSTAT(1).EQ.0) THEN
+            ENG1 = ESCF
+         ELSE
+            ENG1 = ESCF + ESTATE(ITSTAT(1))
+         END IF
+         ENG2 = ESCF + ESTATE(ITSTAT(2))
+         ENG3 = ESCF + ESTATE(ITSTAT(3))
+         IF(MASWRK) WRITE(IW,9001) ENG3-ENG2
+         IF(MASWRK) WRITE(IW,9002) ENG2-ENG1
+         IF(DEBUG) THEN
+            WRITE(IW,9983) 'NUMST = ',NUMST
+            WRITE(IW,9983) 'ITROOT= ',ITROOT(1),ITROOT(2),ITROOT(3)
+            WRITE(IW,9983) 'ITSTAT= ',ITSTAT(1),ITSTAT(2),ITSTAT(3)
+            WRITE(IW,9984) 'ENG1,2,3= ',ENG1,ENG2,ENG3
+         END IF
+      ELSE
+         IF(IXSTAT(1).EQ.0) THEN
+            ENG1 = ESCF
+         ELSE
+            ENG1 = ESCF + ESTATE(IXSTAT(1))
+         END IF
+         ENG2 = ESCF + ESTATE(IXSTAT(2))
+C RISM
+         CALL RSM_MODENG(IXSTAT,NAT,TDDFTYP,ENG1,ENG2,X(LEG1),X(LEG2))
+C RISM
+         IF(MASWRK) WRITE(IW,9000) ENG2-ENG1
+         IF(DEBUG) THEN
+            WRITE(IW,9981) 'NUMST = ',NUMST
+            WRITE(IW,9981) 'IXROOT= ',IXROOT(1),IXROOT(2)
+            WRITE(IW,9981) 'IXSTAT= ',IXSTAT(1),IXSTAT(2)
+            WRITE(IW,9982) 'ENG1,2= ',ENG1,ENG2
+         END IF
+      END IF
+C COMPUTE GRADIENT USED IN CI SEARCH
+      IF(NCNCL.EQ.1) THEN
+         CALL EGCNCL1(X(LDG),X(LDC),X(LFV),X(LGV),X(LPM),
+     *                X(LEG1),X(LEG2),X(LWRK),
+     *                ENG1,ENG2,NCVF,IXROOT,IXSTAT,DEBUG)
+      ELSE IF(NCNCL.EQ.2) THEN
+         CALL EGCNCL2(X(LDG),X(LDC),X(LDG0),X(LDC0),X(LFV),X(LGV),
+     *                X(LPM),X(LEG1),X(LEG2),X(LWRK),
+     *                ENG1,ENG2,NCVF,IXROOT,IXSTAT,DEBUG)
+      ELSE IF(NCNCL.EQ.3) THEN
+         CALL EGCNCL3(EVAL,X(LFV),X(LEG1),X(LEG2),X(LWRK),
+     *                ENG1,ENG2,PNTSTP,PNTGRD,PNALFA,PNSIGM,NCVGPN,
+     *                NCVF,DEBUG)
+         E = EVAL
+      ELSE IF(NCNCL.EQ.4) THEN
+         CALL EGCNCL4(EVAL,X(LFV),X(LEG1),X(LEG2),X(LEG3),X(LEG4),
+     *                X(LWRK),X(LWRK1),X(LWRK2),X(LWRK3),ENG1,ENG2,
+     *                ENG3,PNTSTP,PNTGRD,PNALFA,PNSIGM,NCVGPN,NCVF,
+     *                DEBUG)
+         E = EVAL
+      END IF
+      CALL DCOPY(NCVAL,X(LFV),1,EG,1)
+      IF(NFRG.GT.0) THEN
+         IPOINT = LFV + NCVAL - 1
+         DO INF=1,NFRG
+            DO IXYZ=1,3
+               IPOINT = IPOINT + 1
+               DEFT(IXYZ,INF) = X(IPOINT)
+            END DO
+            DO IXYZ=1,3
+               IPOINT = IPOINT + 1
+               TORQ(IXYZ,INF) = X(IPOINT)
+            END DO
+         END DO
+      END IF
+C
+      CALL RETFM(NEED)
+C
+      RETURN
+ 9000 FORMAT(/1X,'ENERGY GAP= ',F15.10)
+ 9001 FORMAT(/1X,'ENG3-ENG2= ',F15.10)
+ 9002 FORMAT(/1X,'ENG2-ENG1= ',F15.10)
+ 9981 FORMAT(1X,A8,3X,2I3)
+ 9982 FORMAT(1X,A8,3X,2F20.10)
+ 9983 FORMAT(1X,A8,3X,3I3)
+ 9984 FORMAT(1X,A8,3X,3F20.10)
+ 9997 FORMAT(1X,'***** ERROR. ITROOT(1), ITROOT(2), AND ITROOT(3)',
+     *          ' MUST BE LESS THAN NUMST,'/
+     *       1X,'BUT ITROOT(1)/ITROOT(2)/ITROOT(3)/NUMST= ',4I5)
+ 9999 FORMAT(1X,'***** ERROR. IXROOT(1) AND IXROOT(2) MUST BE LESS',
+     *          ' THAN NUMST,'/
+     *       1X,'BUT IXROOT(1)/IXROOT(2)/NUMST= ',3I5)
+      END
+C*MODULE OPTCIX  *DECK EGCNCL1
+      SUBROUTINE EGCNCL1(X,Y,F,G,P,EGRAD1,EGRAD2,WORK,
+     *                   ENG1,ENG2,NCVF,IXROOT,IXSTAT,DEBUG)
+C
+C CI SEARCH USING THE METHOD BY BEARPARK ET AL.
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (HALF=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      LOGICAL DEBUG,MASWRK,GOPARR,DSKWRK
+C
+      COMMON /IOFILE/ IR,IW,IP,IJKO,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION P(NCVF,NCVF)
+      DIMENSION EGRAD1(*),EGRAD2(*),X(*),Y(*),F(*),G(*),WORK(*)
+      DIMENSION IXROOT(2),IXSTAT(2)
+C
+C     ----- GRADIENT DIFFERENCE VECTOR -----
+C
+      CALL VSUB(EGRAD1,1,EGRAD2,1,X,1,NCVF) ! X:= EGRAD2 - EGRAD1
+      IF(MASWRK) THEN
+         WRITE(IW,9100) IXROOT(1),IXSTAT(1)
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,9100) IXROOT(2),IXSTAT(2)
+         CALL DBGCNCL(EGRAD2,NCVF,.TRUE.)
+      END IF
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A32)') 'GRADIENT DIFFERENCE VECTOR (GDV)'
+         CALL DBGCNCL(X,NCVF,.TRUE.)
+      END IF
+C NORMALIZE
+      XNORM = SQRT( DDOT(NCVF,X,1,X,1) )
+      DUM = ONE/XNORM
+      CALL DSCAL(NCVF,DUM,X,1)
+C SAVE NORM
+      X(NCVF+1) = XNORM
+      IF(DEBUG) THEN
+         WRITE(IW,'(/1X,A14)') 'NORMALIZED GDV'
+         CALL DBGCNCL(X,NCVF,.FALSE.)
+         WRITE(IW,*) ' NORM= ',XNORM
+      END IF
+C F:= 2*(ENG2-ENG1)*X
+      CALL DCOPY(NCVF,X,1,F,1)
+      DUM = TWO*(ENG2 - ENG1)
+      CALL DSCAL(NCVF,DUM,F,1)
+C
+C     ----- MEAN ENERGY GRADIENT VECTOR -----
+C
+      CALL VADD(EGRAD1,1,EGRAD2,1,G,1,NCVF)
+      CALL DSCAL(NCVF,HALF,G,1)
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' VECTOR F:= 2*(ENG2-ENG1)*(NORMALIZED GDV)'
+         CALL DBGCNCL(F,NCVF,.FALSE.)
+         WRITE(IW,*) ' MEAN ENERGY GRADIENT VECTOR'
+         CALL DBGCNCL(G,NCVF,.TRUE.)
+      END IF
+C
+C     ----- ADJUST Y -----
+C
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A32)') 'DERIVATIVE COUPLING VECTOR (DCV)'
+         CALL DBGCNCL(Y,NCVF,.TRUE.)
+      END IF
+      YNORM = SQRT( DDOT(NCVF,Y,1,Y,1) )
+      DUM = ONE/YNORM
+      CALL DSCAL(NCVF,DUM,Y,1)
+C ORTHOGONALIZE W.R.T. X
+      XDOTY = DDOT(NCVF,X,1,Y,1)
+      CALL DAXPY(NCVF,-XDOTY,X,1,Y,1)
+C THEN NORMALIZE
+      YNORM = SQRT( DDOT(NCVF,Y,1,Y,1) )
+      DUM = ONE/YNORM
+      CALL DSCAL(NCVF,DUM,Y,1)
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A20)') 'ORTHO-NORMALIZED DCV'
+         CALL DBGCNCL(Y,NCVF,.FALSE.)
+      END IF
+      DUM = DDOT(NCVF,X,1,Y,1)
+      IF(MASWRK) WRITE(IW,9010) XDOTY,DUM
+C MEAN GRADIENT VECTOR
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A20)') 'MEAN GRADIENT VECTOR'
+         CALL DBGCNCL(G,NCVF,.TRUE.)
+      END IF
+C
+C     ----- PROJECTION MATRIX -----
+C
+      DO J=1,NCVF
+         DO I=1,J
+            DUM = X(I)*X(J) + Y(I)*Y(J)
+            IF(I.EQ.J) THEN
+               DUM = ONE - DUM
+            ELSE
+               DUM =     - DUM
+            END IF
+            P(I,J) = DUM
+            P(J,I) = DUM
+         END DO
+      END DO
+C
+      IF(DEBUG) THEN
+         CALL VCLR(WORK,1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,P,NCVF,X,1,ZERO,WORK,1)
+         DUM = SQRT( DDOT(NCVF,WORK,1,WORK,1) )
+         WRITE(IW,9900) '|P*X|=  ', DUM
+         CALL VCLR(WORK,1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,P,NCVF,Y,1,ZERO,WORK,1)
+         DUM = SQRT( DDOT(NCVF,WORK,1,WORK,1) )
+         WRITE(IW,9900) '|P*Y|=  ', DUM
+      END IF
+C
+C     ----- PROJECTED GRADIENT -----
+C
+C F: PARALLEL TO X
+      IF(MASWRK) THEN
+         WRITE(IW,9050)
+         CALL DBGCNCL(F,NCVF,.FALSE.)
+      END IF
+C P*G: PERPENDICULAR TO X AND Y
+      CALL DGEMV('N',NCVF,NCVF,ONE,P,NCVF,G,1,ZERO,WORK,1)
+      CALL VADD(F,1,WORK,1,F,1,NCVF)
+      IF(MASWRK) THEN
+         WRITE(IW,9060)
+         CALL DBGCNCL(WORK,NCVF,.TRUE.)
+         WRITE(IW,9080)
+         CALL DBGCNCL(F,NCVF,.TRUE.)
+      END IF
+C
+C     ----- SAVE X AND Y VECTORS      -----
+C     ----- SAVE MEAN ENERGY GRADIENT -----
+C
+      CALL DAWRIT(IDAF,IODA,X,NCVF+1,493,0)
+      CALL DAWRIT(IDAF,IODA,Y,NCVF  ,494,0)
+      CALL DAWRIT(IDAF,IODA,G,NCVF  ,495,0)
+C
+      RETURN
+ 9010 FORMAT(/1X,'OVERLAP BETWEEN       NORMALIZED GDV AND ',
+     *           'DCV= ',F15.10/
+     *        1X,'OVERLAP BETWEEN ORTHO-NORMALIZED GDV AND ',
+     *           'DCV= ',F15.10)
+ 9050 FORMAT(/1X,'GRADIENT INSIDE BRANCHING PLANE')
+ 9060 FORMAT(/1X,'GRADIENT INSIDE INTERSECTION SPACE')
+ 9080 FORMAT(/1X,'PROJECTED GRADIENT:= F + P*G'/
+     *        1X,'UNIT=HARTREE/BOHR MAY BE INAPPROPRIATE UNLESS F=0.')
+ 9100 FORMAT(/1X,'GRADIENT FOR STATE IXROOT/IXSTAT= ',2I5)
+ 9900 FORMAT(1X,A8,3X,2F20.10)
+      END
+C*MODULE OPTCIX  *DECK EGCNCL2
+      SUBROUTINE EGCNCL2(X,Y,XOLD,YOLD,F,G,P,EGRAD1,EGRAD2,WORK,
+     *                   ENG1,ENG2,NCVF,IXROOT,IXSTAT,DEBUG)
+C
+C CI SEARCH USING THE BP UPDATING METHOD BY MAEDA ET AL.
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (HALF=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      LOGICAL INIT,DEBUG,MASWRK,GOPARR,DSKWRK
+C
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION P(NCVF,NCVF)
+      DIMENSION X(*),Y(*),XOLD(*),YOLD(*),F(*),G(*),
+     *          EGRAD1(*),EGRAD2(*),WORK(*)
+      DIMENSION IXROOT(2),IXSTAT(2)
+C
+      SAVE INIT
+      DATA INIT/.TRUE./
+C
+C     ----- GRADIENT DIFFERENCE VECTOR -----
+C
+      CALL VSUB(EGRAD1,1,EGRAD2,1,X,1,NCVF) ! X:= EGRAD2 - EGRAD1
+      IF(MASWRK) THEN
+         WRITE(IW,9100) IXROOT(1),IXSTAT(1)
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,9100) IXROOT(2),IXSTAT(2)
+         CALL DBGCNCL(EGRAD2,NCVF,.TRUE.)
+         WRITE(IW,'(/1X,A30)') 'GRADIENT DIFFERENCE VECTOR (X)'
+         CALL DBGCNCL(X,NCVF,.TRUE.)
+      END IF
+C NORMALIZE
+      XNORM = SQRT( DDOT(NCVF,X,1,X,1) )
+      DUM = ONE/XNORM
+      CALL DSCAL(NCVF,DUM,X,1)
+C SAVE NORM
+      X(NCVF+1) = XNORM
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' NORM= ',XNORM
+         WRITE(IW,*) ' NORMALIZED X'
+         CALL DBGCNCL(X,NCVF,.FALSE.)
+      END IF
+C F:= 2*(ENG2-ENG1)*X
+      CALL DCOPY(NCVF,X,1,F,1)
+      DUM = TWO*(ENG2 - ENG1)
+      CALL DSCAL(NCVF,DUM,F,1)
+C
+C     ----- MEAN ENERGY GRADIENT VECTOR -----
+C
+      CALL VADD(EGRAD1,1,EGRAD2,1,G,1,NCVF)
+      CALL DSCAL(NCVF,HALF,G,1)
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' VECTOR F:= 2*(ENG2-ENG1)*(NORMALIZED X)'
+         CALL DBGCNCL(F,NCVF,.FALSE.)
+         WRITE(IW,*) ' MEAN ENERGY GRADIENT VECTOR'
+         CALL DBGCNCL(G,NCVF,.TRUE.)
+      END IF
+C
+C      ----- ESTIMATE Y USING THE CURRENT X AND THE LAST X,Y -----
+C
+      IF(INIT) THEN
+         DX0X1 = DDOT(NCVF,XOLD,1,X,1)
+C USE MEAN ENEGY GRADIENT FOR Y
+         CALL DCOPY(NCVF,G,1,Y,1)
+         IF(DEBUG) THEN
+            WRITE(IW,*) ' INITIAL Y (=MEAN ENERGY GRADIENT)'
+            CALL DBGCNCL(Y,NCVF,.FALSE.)
+         END IF
+      ELSE
+C READ X AND Y IN THE PREVIOUS STEP (XOLD AND YOLD)
+         CALL DAREAD(IDAF,IODA,XOLD,NCVF+1,493,0)
+         CALL DAREAD(IDAF,IODA,YOLD,NCVF  ,494,0)
+         IF(DEBUG) THEN
+            DUM = DDOT(NCVF,XOLD,1,YOLD,1)
+            WRITE(IW,'(A16,3X,F15.10)') ' XOLD DOT YOLD= ',DUM
+         END IF
+C ESTIMATE Y
+         DX0X1 = DDOT(NCVF,XOLD,1,X,1)
+         DY0X1 = DDOT(NCVF,YOLD,1,X,1)
+         DO I=1,NCVF
+            Y(I) = DY0X1*XOLD(I) - DX0X1*YOLD(I)
+         END DO
+      END IF
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A11)') 'ESTIMATED Y'
+         CALL DBGCNCL(Y,NCVF,.FALSE.)
+      END IF
+C
+C     ----- ADJUST Y -----
+C
+      YNORM = SQRT( DDOT(NCVF,Y,1,Y,1) )
+      DUM = ONE/YNORM
+      CALL DSCAL(NCVF,DUM,Y,1)
+C ORTHOGONALIZE W.R.T. X
+      XDOTY = DDOT(NCVF,X,1,Y,1)
+      CALL DAXPY(NCVF,-XDOTY,X,1,Y,1)
+C THEN NORMALIZE
+      YNORM = SQRT( DDOT(NCVF,Y,1,Y,1) )
+      DUM = ONE/YNORM
+      CALL DSCAL(NCVF,DUM,Y,1)
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A18)') 'ORTHO-NORMALIZED Y'
+         CALL DBGCNCL(Y,NCVF,.FALSE.)
+      END IF
+      IF(DEBUG) THEN
+         IF(.NOT.INIT) THEN
+            DUM = DDOT(NCVF,X,1,XOLD,1)
+            WRITE(IW,'(A13,3X,F15.10)') ' X DOT XOLD= ',DUM
+            DUM = DDOT(NCVF,X,1,YOLD,1)
+            WRITE(IW,'(A13,3X,F15.10)') ' X DOT YOLD= ',DUM
+            DUM = DDOT(NCVF,Y,1,XOLD,1)
+            WRITE(IW,'(A13,3X,F15.10)') ' Y DOT XOLD= ',DUM
+            DUM = DDOT(NCVF,Y,1,YOLD,1)
+            WRITE(IW,'(A13,3X,F15.10)') ' Y DOT YOLD= ',DUM
+         END IF
+      END IF
+      DUM = DDOT(NCVF,X,1,Y,1)
+      IF(MASWRK) WRITE(IW,9010) XDOTY,DUM
+C MEAN GRADIENT VECTOR
+      IF(MASWRK) THEN
+         WRITE(IW,'(/1X,A20)') 'MEAN GRADIENT VECTOR'
+         CALL DBGCNCL(G,NCVF,.TRUE.)
+      END IF
+C
+C     ----- PROJECTION MATRIX -----
+C
+      DO J=1,NCVF
+         DO I=1,J
+            DUM = X(I)*X(J) + Y(I)*Y(J)
+            IF(I.EQ.J) THEN
+               DUM = ONE - DUM
+            ELSE
+               DUM =     - DUM
+            END IF
+            P(I,J) = DUM
+            P(J,I) = DUM
+         END DO
+      END DO
+C
+      IF(DEBUG) THEN
+         CALL VCLR(WORK,1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,P,NCVF,X,1,ZERO,WORK,1)
+         DUM = SQRT( DDOT(NCVF,WORK,1,WORK,1) )
+         WRITE(IW,9900) '|P*X|=  ', DUM
+         CALL VCLR(WORK,1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,P,NCVF,Y,1,ZERO,WORK,1)
+         DUM = SQRT( DDOT(NCVF,WORK,1,WORK,1) )
+         WRITE(IW,9900) '|P*Y|=  ', DUM
+      END IF
+C
+C     ----- PROJECTED GRADIENT -----
+C
+C F: PARALLEL TO X
+      IF(MASWRK) THEN
+         WRITE(IW,9050)
+         CALL DBGCNCL(F,NCVF,.FALSE.)
+      END IF
+C P*G: PERPENDICULAR TO X AND Y
+      CALL DGEMV('N',NCVF,NCVF,ONE,P,NCVF,G,1,ZERO,WORK,1)
+      CALL VADD(F,1,WORK,1,F,1,NCVF)
+      IF(MASWRK) THEN
+         WRITE(IW,9060)
+         CALL DBGCNCL(WORK,NCVF,.TRUE.)
+         WRITE(IW,9080)
+         CALL DBGCNCL(F,NCVF,.TRUE.)
+      END IF
+C
+C     ----- SAVE X AND Y VECTORS      -----
+C     ----- SAVE MEAN ENERGY GRADIENT -----
+C
+      CALL DAWRIT(IDAF,IODA,X,NCVF+1,493,0)
+      CALL DAWRIT(IDAF,IODA,Y,NCVF  ,494,0)
+      CALL DAWRIT(IDAF,IODA,G,NCVF  ,495,0)
+C
+      INIT = .FALSE.
+      RETURN
+ 9010 FORMAT(/1X,'OVERLAP BETWEEN       NORMALIZED X AND Y=',F15.10/
+     *        1X,'OVERLAP BETWEEN ORTHO-NORMALIZED X AND Y=',F15.10)
+ 9050 FORMAT(/1X,'GRADIENT INSIDE BRANCHING PLANE')
+ 9060 FORMAT(/1X,'GRADIENT INSIDE INTERSECTION SPACE')
+ 9080 FORMAT(/1X,'PROJECTED GRADIENT:= F + P*G'/
+     *        1X,'UNIT=HARTREE/BOHR MAY BE INAPPROPRIATE UNLESS F=0.')
+ 9100 FORMAT(/1X,'GRADIENT FOR STATE IXROOT/IXSTAT= ',2I5)
+ 9900 FORMAT(1X,A8,3X,2F20.10)
+      END
+C*MODULE OPTCIX  *DECK EGCNCL3
+      SUBROUTINE EGCNCL3(EVAL,F,EGRAD1,EGRAD2,U,ENG1,ENG2,
+     *                   TOLSTP,TOLGRD,ALPHA,SIGMA,NCVGPN,
+     *                   NCVF,DEBUG)
+C
+C CI SEARCH USING THE PENALTY-CONSTRAINED OPTIMIZATION METHOD
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL DEBUG,GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (HALF=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      COMMON /IOFILE/ IR,IW,IP,IS,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION F(*),EGRAD1(*),EGRAD2(*),U(*)
+C
+      SAVE E_PREV
+      DATA E_PREV/0.0D+00/
+C
+C     ----- OBJECTIVE FUNCTION -----
+C
+C ENERGY
+      DE = ENG2 - ENG1
+      DUM1 = (ENG2 + ENG1)*HALF
+      DUM2 = SIGMA*DE*DE/(DE + ALPHA)
+      EVAL = DUM1 + DUM2
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' IN -EGCNCL3-'
+         WRITE(IW,*) 'EVAL  = ',EVAL
+         WRITE(IW,*) 'E_PREV= ',E_PREV
+         WRITE(IW,*) 'LOWER STATE GRADIENT'
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,*) 'UPPER STATE GRADIENT'
+         CALL DBGCNCL(EGRAD2,NCVF,.TRUE.)
+      END IF
+C GRADIENT
+      FACT = DE*(DE + ALPHA + ALPHA) / (DE + ALPHA)**2
+      DO I=1,NCVF
+         DUM1 = (EGRAD2(I) + EGRAD1(I))*HALF
+         DUM2 =  EGRAD2(I) - EGRAD1(I)
+         EGRAD1(I) = DUM1 + SIGMA*FACT*DUM2
+              U(I) =              FACT*DUM2
+      END DO
+      CALL DCOPY(NCVF,EGRAD1,1,F,1)
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' GRADIENT OF OBJECTIVE FUNCTION'
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,*) ' GRADIENT OF PENALTY TERM'
+         CALL DBGCNCL(U,NCVF,.TRUE.)
+      END IF
+C NORMALIZE U
+      UNORM = SQRT( DDOT(NCVF,U,1,U,1) )
+      DUM = ONE/UNORM
+      CALL DSCAL(NCVF,DUM,U,1)
+C
+C     ----- CHECK CONVERGENCE -----
+C
+C THREE CRITERIA
+      NCONV = 0
+C
+C (1) TOLSTP
+C
+      DUM1 = EVAL - E_PREV
+      IF(ABS(DUM1).LT.TOLSTP) NCONV = NCONV + 1
+      E_PREV = EVAL
+C
+C (2) TOLGRD (PARALLEL TO U)
+C
+      DUM2 = DDOT(NCVF,EGRAD1,1,U,1) / SIGMA
+      IF(ABS(DUM2).LT.TOLGRD) NCONV = NCONV + 1
+C
+C (3) TOLGRD (PERPENDICULAR TO U)
+C
+      DO I=1,NCVF
+         EGRAD2(I) = EGRAD1(I) - DUM2*U(I)
+      END DO
+      DUM3 = SQRT( DDOT(NCVF,EGRAD2,1,EGRAD2,1) )
+      IF(ABS(DUM3).LT.TOLGRD) NCONV = NCONV + 1
+C
+      IF(MASWRK) WRITE(IW,9000) DUM1,TOLSTP,DUM2,TOLGRD,DUM3,TOLGRD
+C
+      IF(NCONV.EQ.3) THEN
+         NCVGPN = 1
+         IF(MASWRK) WRITE(IW,9100)
+       END IF
+C
+      RETURN
+ 9000 FORMAT(/1X,'TEST1/TOLSTP= ',1P,E13.5,1P,E13.5/
+     *        1X,'TEST2/TOLGRD= ',1P,E13.5,1P,E13.5/
+     *        1X,'TEST3/TOLGRD= ',1P,E13.5,1P,E13.5)
+ 9100 FORMAT(/5X,'***** EQUILIBRIUM CI GEOMETRY LOCATED *****')
+      END
+C
+C*MODULE OPTCIX  *DECK EGCNCL4
+C>
+C>     @brief  CI SEARCH USING THE PENALTY-CONSTRAINED
+C>             OPTIMIZATION METHOD
+C>
+C>     @author Yong Su Baek, 2021, Oct
+C>
+      SUBROUTINE EGCNCL4(EVAL,F,EGRAD1,EGRAD2,EGRAD3,EGRAD,U,U_1,U_2,   &
+     &                   U_3,ENG1,ENG2,ENG3,TOLSTP,TOLGRD,ALPHA,SIGMA,  &
+     &                   NCVGPN,NCVF,DEBUG)
+C
+C
+      USE prec, ONLY: dp                        
+      USE constants, ONLY: one
+      IMPLICIT NONE
+C
+      REAL(KIND=dp), PARAMETER :: THIRD = 1/3.0D+00
+      REAL(KIND=dp), PARAMETER :: EGAP = 1.0E-04
+C
+      LOGICAL :: DSKWRK, GOPARR, MASWRK
+      INTEGER :: IBTYP, IDAF, IJKT, IP, IPTIM, IR, IS, IW, MASTER, ME,  &
+     &           NAV, NPROC
+      INTEGER, DIMENSION(950) :: IODA
+      COMMON /IOFILE/ IR, IW, IP, IS, IJKT, IDAF, NAV, IODA
+      COMMON /PAR   / ME, MASTER, NPROC, IBTYP, IPTIM, GOPARR, DSKWRK,  &
+     &                MASWRK
+C
+      REAL(KIND=dp) :: ALPHA, ENG1, ENG2, ENG3, EVAL, SIGMA, TOLGRD,    &
+     &                 TOLSTP
+      LOGICAL :: DEBUG
+      INTEGER :: NCVF, NCVGPN
+      REAL(KIND=dp), DIMENSION(*) :: EGRAD, EGRAD1, EGRAD2, EGRAD3, F,  &
+     &                               U, U_1, U_2, U_3
+C
+      REAL(KIND=dp) :: DDOT
+      REAL(KIND=dp) :: DE_1, DE_2, DE_3, DUM, DUM1, DUM2, DUM2_1,       &
+     &                 DUM2_2, DUM2_3, DUM3, FACT_1, FACT_2, FACT_3,    &
+     &                 UNORM
+      INTEGER :: I, NCONV
+C
+      REAL(KIND=dp), SAVE :: E_PREV
+      DATA E_PREV/0.0D+00/
+C
+C     ----- OBJECTIVE FUNCTION -----
+C
+C ENERGY
+      DE_1 = ENG2 - ENG1
+      DE_2 = ENG3 - ENG2
+      DE_3 = ENG3 - ENG1
+      DUM1 = (ENG1 + ENG2 + ENG3)*THIRD
+      DUM2_1 = SIGMA*DE_1*DE_1/(DE_1 + ALPHA)
+      DUM2_2 = SIGMA*DE_2*DE_2/(DE_2 + ALPHA)
+      DUM2_3 = SIGMA*DE_3*DE_3/(DE_3 + ALPHA)
+      DUM2 = DUM2_1 + DUM2_2
+      EVAL = DUM1 + DUM2
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' IN -EGCNCL4-'
+         WRITE(IW,*) 'E_AVER= ',DUM1
+         WRITE(IW,*) 'E_DEL = ',DUM2
+         WRITE(IW,*) 'DEL/AVER = ',DUM2/DUM1
+         WRITE(IW,*) 'EVAL  = ',EVAL
+         WRITE(IW,*) 'E_PREV= ',E_PREV
+         WRITE(IW,*) 'LOWEST STATE GRADIENT'
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,*) 'MIDDLE STATE GRADIENT'
+         CALL DBGCNCL(EGRAD2,NCVF,.TRUE.)
+         WRITE(IW,*) 'HIGHEST STATE GRADIENT'
+         CALL DBGCNCL(EGRAD3,NCVF,.TRUE.)
+      END IF
+C GRADIENT
+      FACT_1 = DE_1*(DE_1 + ALPHA + ALPHA) / (DE_1 + ALPHA)**2
+      FACT_2 = DE_2*(DE_2 + ALPHA + ALPHA) / (DE_2 + ALPHA)**2
+      FACT_3 = DE_3*(DE_3 + ALPHA + ALPHA) / (DE_3 + ALPHA)**2
+      DO I=1,NCVF
+         DUM1 = (EGRAD1(I) + EGRAD2(I) + EGRAD3(I))*THIRD
+         DUM2_1 =  EGRAD2(I) - EGRAD1(I)
+         DUM2_2 =  EGRAD3(I) - EGRAD2(I)
+         DUM2_3 =  EGRAD3(I) - EGRAD1(I)
+          EGRAD1(I) = (EGRAD1(I) + EGRAD2(I) + EGRAD3(I))*THIRD
+          EGRAD(I) = DUM1 + SIGMA*(FACT_1*DUM2_1+FACT_2*DUM2_2)
+            U(I) =              FACT_1*DUM2_1+FACT_2*DUM2_2
+            U_1(I) =              FACT_1*DUM2_1
+            U_2(I) =              FACT_2*DUM2_2
+            U_3(I) =              FACT_3*DUM2_3
+          EGRAD2(I) = DUM1*U(I)
+      END DO
+      CALL DCOPY(NCVF,EGRAD,1,F,1)
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' GRADIENT OF OBJECTIVE FUNCTION'
+         CALL DBGCNCL(EGRAD,NCVF,.TRUE.)
+         WRITE(IW,*) ' GRADIENT OF PENALTY TERM'
+         CALL DBGCNCL(U,NCVF,.TRUE.)
+      END IF
+C NORMALIZE U
+      UNORM = SQRT( DDOT(NCVF,U,1,U,1) )
+      DUM = ONE/UNORM
+      CALL DSCAL(NCVF,DUM,U,1)
+      UNORM = SQRT( DDOT(NCVF,U_1,1,U_1,1) )
+      DUM = ONE/UNORM
+      CALL DSCAL(NCVF,DUM,U_1,1)
+      UNORM = SQRT( DDOT(NCVF,U_2,1,U_2,1) )
+      DUM = ONE/UNORM
+      CALL DSCAL(NCVF,DUM,U_2,1)
+      UNORM = SQRT( DDOT(NCVF,U_3,1,U_3,1) )
+      DUM = ONE/UNORM
+      CALL DSCAL(NCVF,DUM,U_3,1)
+      IF(DEBUG) THEN
+         WRITE(IW,*) 'U_1 DOT U_2 = ',DDOT(NCVF,U_1,1,U_2,1)
+         WRITE(IW,*) 'U_1 DOT U_3 = ',DDOT(NCVF,U_1,1,U_3,1)
+         WRITE(IW,*) 'U_2 DOT U_3 = ',DDOT(NCVF,U_2,1,U_3,1)
+         WRITE(IW,*) 'U DOT U_1 = ',DDOT(NCVF,U,1,U_1,1)
+         WRITE(IW,*) 'U DOT U_2 = ',DDOT(NCVF,U,1,U_2,1)
+         WRITE(IW,*) 'U DOT U_3 = ',DDOT(NCVF,U,1,U_3,1)
+      END IF
+C
+C     ----- CHECK CONVERGENCE -----
+C
+C THREE CRITERIA
+      NCONV = 0
+C
+C (1) TOLSTP
+C
+      DUM1 = EVAL - E_PREV
+      IF(ABS(DUM1).LT.TOLSTP) NCONV = NCONV + 1
+      E_PREV = EVAL
+C
+C
+C (2) TOLGRD (PARALLEL TO U)
+C
+      DUM2 = DDOT(NCVF,EGRAD,1,U,1) / SIGMA
+      IF(ABS(DUM2).LT.TOLGRD) NCONV = NCONV + 1
+C
+C (3) TOLGRD (PERPENDICULAR TO U)
+C
+      DO I=1,NCVF
+         EGRAD2(I) = EGRAD(I) - DUM2*U(I)
+      END DO
+      DUM3 = SQRT( DDOT(NCVF,EGRAD2,1,EGRAD2,1) )
+      IF(ABS(DUM3).LT.TOLGRD) NCONV = NCONV + 1
+C
+C (4) EGAP(ENG3-ENG1)
+C
+      IF(NCONV.EQ.3 .AND. DE_3.GE.EGAP ) THEN
+         IF(SIGMA.GE.300 .AND. SIGMA.LT.500) THEN
+            SIGMA = SIGMA + 500
+         ELSE IF (SIGMA.GE.500 .AND. SIGMA.LT.2000) THEN
+            SIGMA = SIGMA + 1000
+         ELSE IF (SIGMA.GE.2000) THEN
+            SIGMA = SIGMA + 2000
+         ELSE IF (SIGMA.LT.300) THEN
+            SIGMA = SIGMA + 300
+         END IF
+         IF(MASWRK) WRITE(IW,9050) SIGMA
+      ELSE
+         NCONV = NCONV + 1
+      ENDIF
+C
+      IF(MASWRK) WRITE(IW,9000) DUM1,TOLSTP,DUM2,TOLGRD,
+     *                          DUM3,TOLGRD,DE_3,EGAP
+C
+      IF(NCONV.EQ.4) THEN
+         NCVGPN = 1
+         IF(MASWRK) WRITE(IW,9100)
+       END IF
+C
+      RETURN
+ 9000 FORMAT(/1X,'TEST1/TOLSTP= ',1P,E13.5,1P,E13.5/
+     *        1X,'TEST2/TOLGRD= ',1P,E13.5,1P,E13.5/
+     *        1X,'TEST3/TOLGRD= ',1P,E13.5,1P,E13.5/
+     *        1X,'TEST4/EGAP  = ',1P,E13.5,1P,E13.5)
+ 9050 FORMAT(/5X,'***** SIGMA UPDATED *****'/
+     *        1X,'NEW SIGMA   = ',1P,E13.5)
+ 9100 FORMAT(/5X,'***** EQUILIBRIUM CI GEOMETRY LOCATED *****')
+      END SUBROUTINE EGCNCL4
+C
+C*MODULE OPTCIX  *DECK NSTATMC
+      INTEGER FUNCTION NSTATMC()
+      use mx_limits, only: mxrt
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL MASWRK,GOPARR,DSKWRK
+C
+      PARAMETER (ZERO=0.0D+00)
+C
+      COMMON /DETWFN/ WSTATE(MXRT),SPINS(MXRT),CRIT,PRTTOL,SDET,SZDET,
+     *                GRPDET,STSYM,GLIST,DWPARM,
+     *                NFLGDM(MXRT),IWTS(MXRT),
+     *                NCORSVDET,NCORDET,NACTDET,NORBDET,NADET,NBDET,
+     *                KDET,KSTDET,IROOTDET,IPURES,MAXW1,NITERDET,
+     *                MAXP,NCIDET,IGPDET,KSTSYMDET,NFTGCI,IDWEIGH,
+     *                fstate(mxrt),ifts(mxrt)
+      COMMON /ENRGYS/ ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2,
+     *                VEN,VEE,EPOT,EKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+      COMMON /IOFILE/ IR,IW,IP,IJKO,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      IF(MASWRK) WRITE(IW,9000)
+      IWST = 0
+      NSTATS = 0
+      DO 100 IST=1,KDET
+         IF(IPURES.EQ.1) THEN
+            IF(ABS(SPINS(IST)-SDET) .GT. 0.03D+00) GO TO 100
+            IWST = IWST + 1
+         ELSE
+            IWST = IWST + 1
+         END IF
+C
+         IF(WSTATE(IWST).EQ.ZERO) GO TO 100
+         NSTATS = NSTATS + 1
+         IF(MASWRK) THEN
+            WRITE(IW,9010) IST,ESTATE(IST),WSTATE(IWST),SPINS(IST)
+         END IF
+ 100  CONTINUE
+C
+      NSTATMC = NSTATS
+      RETURN
+ 9000 FORMAT(/5X,'STATE-SPECIFIC MCSCF ENERGIES   WEIGHTS  SPINS'/
+     *        5X,46(1H-))
+ 9010 FORMAT(5X,I5,F20.10,5X,F9.6,F7.2)
+      END
+C*MODULE OPTCIX  *DECK PHPCNCL
+      SUBROUTINE PHPCNCL(FC,NCVF)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL DEBUG,MASWRK,GOPARR,DSKWRK,LINEAR
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (HALF=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+C
+      COMMON /C0NICL/ PNTSTP,PNTGRD,PNALFA,PNSIGM,NCVGPN,NCNCL,NEG2CL,
+     *                NDBGCI,IXROOT(2),IXSTAT(2),ITROOT(3),ITSTAT(3)
+C
+      COMMON /FMCOM / X(1)
+      COMMON /IOFILE/ IR,IW,IP,IJKO,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /ZMAT  / NZMAT,NZVAR,NVAR,NSYMC,LINEAR
+C
+      DIMENSION FC(NCVF,NCVF)
+C
+      DEBUG = MASWRK .AND. NDBGCI.NE.0
+C
+      CALL VALFM(LOADFM)
+      LXV  = LOADFM + 1
+      LYV  = LXV    + NCVF + 1 ! NCVF COMPONENTS AND NORM
+      LPM  = LYV    + NCVF
+      LSCR = LPM    + NCVF*NCVF
+      LAST = LSCR   + NCVF*NCVF
+      NEED = LAST - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      IF(NZVAR.NE.0) CALL ABRT
+C
+C     ----- READ X AND Y VECTORS -----
+C
+      CALL DAREAD(IDAF,IODA,X(LXV),NCVF+1,493,0)
+      CALL DAREAD(IDAF,IODA,X(LYV),NCVF  ,494,0)
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' NORM OF XV= ',X(LXV+NCVF)
+         WRITE(IW,*) ' UNIT XV IN -PHPCNCL-'
+         CALL DBGCNCL(X(LXV),NCVF,.FALSE.)
+         WRITE(IW,*) ' UNIT YV IN -PHPCNCL-'
+         CALL DBGCNCL(X(LYV),NCVF,.FALSE.)
+      END IF
+C
+C     ----- PROJECTION MATRIX ----
+C
+      DO J=1,NCVF
+         DO I=1,J
+            DUM = X(LXV+I-1)*X(LXV+J-1) + X(LYV+I-1)*X(LYV+J-1)
+            IF(I.EQ.J) THEN
+               DUM = ONE - DUM
+            ELSE
+               DUM =     - DUM
+            END IF
+            X(LPM+(J-1)*NCVF+I-1) = DUM
+            X(LPM+(I-1)*NCVF+J-1) = DUM
+         END DO
+      END DO
+C
+C     ----- PROJECTED HESSIAN (P*H*P)-----
+C
+      CALL DGEMM('N','N',NCVF,NCVF,NCVF,ONE,X(LPM),NCVF,FC,NCVF,
+     *           ZERO,X(LSCR),NCVF)
+      CALL DGEMM('N','N',NCVF,NCVF,NCVF,ONE,X(LSCR),NCVF,X(LPM),NCVF,
+     *           ZERO,FC,NCVF)
+C
+      IF(DEBUG) THEN
+         CALL VCLR(X(LSCR),1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,FC,NCVF,X(LXV),1,ZERO,X(LSCR),1)
+         DUM = SQRT( DDOT(NCVF,X(LSCR),1,X(LSCR),1) )
+         WRITE(IW,9999) '|(P*H*P)*X|= ',DUM 
+         CALL VCLR(X(LSCR),1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,FC,NCVF,X(LYV),1,ZERO,X(LSCR),1)
+         DUM = SQRT( DDOT(NCVF,X(LSCR),1,X(LSCR),1) )
+         WRITE(IW,9999) '|(P*H*P)*Y|= ',DUM 
+      END IF
+C
+C     ----- ADD (X,X) ELEMENT -----
+C
+      XNORM = X(LXV+NCVF)
+      DO J=1,NCVF
+         DO I=1,J
+            DUM = X(LXV+I-1)*(XNORM+XNORM)*X(LXV+J-1)
+            IF(I.EQ.J) DUM = HALF*DUM
+            FC(I,J) = FC(I,J) + DUM
+            FC(J,I) = FC(J,I) + DUM
+         END DO
+      END DO
+C
+C     ----- ENFORCE SYMMETRY UPON F.C.M. -----
+C
+      DO J=1,NCVF
+         DO I=1,J
+            DUM = (FC(I,J)+FC(J,I))*HALF
+            FC(I,J) = DUM
+            FC(J,I) = DUM
+         END DO
+      END DO
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' PROJECTED HESSIAN'
+         CALL PRTRI(FC,NCVF)
+         CALL VCLR(X(LSCR),1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,FC,NCVF,X(LXV),1,ZERO,X(LSCR),1)
+         DUM = SQRT( DDOT(NCVF,X(LSCR),1,X(LSCR),1) )
+         WRITE(IW,9998) '| (P*H*P + 2*X*|X|*X)*X |=',DUM 
+         DUM = XNORM + XNORM
+         WRITE(IW,9998) '|                   2*X |=',DUM
+         CALL VCLR(X(LSCR),1,NCVF)
+         CALL DGEMV('N',NCVF,NCVF,ONE,FC,NCVF,X(LYV),1,ZERO,X(LSCR),1)
+         DUM = SQRT( DDOT(NCVF,X(LSCR),1,X(LSCR),1) )
+         WRITE(IW,9998) '| (P*H*P + 2*X*|X|*X)*Y |=',DUM 
+      END IF
+C
+      CALL RETFM(NEED)
+C
+      RETURN
+ 9998 FORMAT(1X,A26,3X,F15.10)
+ 9999 FORMAT(1X,A12,3X,F15.10)
+      END
+C*MODULE OPTCIX  *DECK RDSAGRAD
+      SUBROUTINE RDSAGRAD(EGRAD1,EGRAD2,DCV,TMP,
+     *                    NSTATS,NCVF,NCNCL,IXROOT,IXSTAT,DEBUG)
+      use mx_limits, only: mxrt
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL DEBUG
+C
+      PARAMETER (ZERO=0.0D+00)
+C
+      COMMON /DETWFN/ WSTATE(MXRT),SPINS(MXRT),CRIT,PRTTOL,S,SZ,
+     *                GRPDET,STSYM,GLIST,DWPARM,
+     *                NFLGDM(MXRT),IWTS(MXRT),NCORSV,NCOR,NACT,NORB,
+     *                NA,NB,K,KST,IROOT,IPURES,MAXW1,NITER,MAXP,NCI,
+     *                IGPDET,KSTSYM,NFTGCI,IDWEIGH,
+     *                fstate(mxrt),ifts(mxrt)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      DATA CHECK /8HCHECK   /
+C
+      DIMENSION EGRAD1(*),EGRAD2(*),DCV(*),TMP(*)
+      DIMENSION IXROOT(2),IXSTAT(2)
+C
+      NXRT = 0
+      DO 10 IST=1,K
+         IF(IPURES.EQ.1) THEN
+            IF(ABS(SPINS(IST)-S).GT.0.03D+00) GO TO 10
+            NXRT = NXRT + 1
+         ELSE
+            NXRT = NXRT + 1
+         END IF
+         IF(IXROOT(1) .EQ. NXRT) IXSTAT(1) = IST
+         IF(IXROOT(2) .EQ. NXRT) IXSTAT(2) = IST
+ 10   CONTINUE
+C
+C     ----- SA-MCSCF GRADIENTS -----
+C
+C READ SA-MCSCF GRADIENTS FOR ALL STATES
+      IF(EXETYP.NE.CHECK)
+     * CALL DAREAD(IDAF,IODA,TMP,NSTATS*NCVF,491,0)
+C PICK UP FOR STATES 1 AND 2
+      IND1 = (IXROOT(1) - 1)*NCVF + 1
+      IND2 = (IXROOT(2) - 1)*NCVF + 1
+      CALL DCOPY(NCVF,TMP(IND1),1,EGRAD1,1)
+      CALL DCOPY(NCVF,TMP(IND2),1,EGRAD2,1)
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' IN -RDSAGRAD-'
+         WRITE(IW,*) ' SA-MCSCF GRADIENT FOR STATE ',IXROOT(1),IXSTAT(1)
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,*) ' SA-MCSCF GRADIENT FOR STATE ',IXROOT(2),IXSTAT(2)
+         CALL DBGCNCL(EGRAD2,NCVF,.TRUE.)
+      END IF
+C
+      IF(NCNCL.NE.1) RETURN
+C
+C     ----- NACME -----
+C
+      ISTATM=0 ! COUNTS STATES MATCHING DESIRED MULTIPLICITY
+      ISTAT =0 ! COUNTS SUCH STATES THAT ALSO HAVE NON-ZERO WEIGHT
+      DO 20 IST=1,K
+         IF(ABS(SPINS(IST)-S) .GT. 0.03D+00) GO TO 20
+         ISTATM = ISTATM + 1
+         IF(WSTATE(ISTATM).EQ.ZERO) GO TO 20
+         ISTAT  = ISTAT  + 1
+ 20   CONTINUE
+      IJG = (ISTAT*(ISTAT-1))/2
+C READ THE NACME ELEMENTS FOR ALL I>J PAIRS OF STATES 
+      IF(EXETYP.NE.CHECK)
+     * CALL DAREAD(IDAF,IODA,TMP,IJG*NCVF,492,0)
+C
+      IJG = 0
+      ISTATM=0 ! COUNTS STATES MATCHING DESIRED MULTIPLICITY
+      ISTAT =0 ! COUNTS SUCH STATES THAT ALSO HAVE NON-ZERO WEIGHT
+      DO 110 IST=1,K
+         IF(ABS(SPINS(IST)-S) .GT. 0.03D+00) GO TO 110
+         ISTATM = ISTATM + 1
+         IF(WSTATE(ISTATM).EQ.ZERO) GO TO 110
+         ISTAT  = ISTAT  + 1
+         JSTATM=0
+         JSTAT =0
+         DO 100 JST=1,IST-1
+            IF(ABS(SPINS(JST)-S) .GT. 0.03D+00) GO TO 100
+            JSTATM = JSTATM + 1
+            IF(WSTATE(JSTATM).EQ.ZERO) GO TO 100
+            JSTAT  = JSTAT  + 1
+            IJG = IJG + 1
+            IF(IST.EQ.IXSTAT(2) .AND. JST.EQ.IXSTAT(1)) THEN
+C DERIVATIVE COUPLING VECTOR
+               IND3 = (IJG - 1)*NCVF + 1
+               CALL DCOPY(NCVF,TMP(IND3),1,DCV,1)
+               IF(DEBUG) THEN
+                  WRITE(IW,*) ' NACME IN -RDSAGRAD-'
+                  CALL DBGCNCL(DCV,NCVF,.TRUE.)
+               END IF
+            END IF
+  100    CONTINUE
+  110 CONTINUE
+C
+      RETURN
+      END
+C*MODULE OPTCIX  *DECK RDCIGRAD
+      SUBROUTINE RDCIGRAD(EGRAD1,EGRAD2,TMP,
+     *                    NSTATS,NCVF,IXROOT,IXSTAT,DEBUG)
+C-------------------------------------
+C> @brief Read CI gradient for 2 states 
+C>
+C> @author Joani Mato
+C>
+C> @details Directly copied and pasted from RDSAGRAD
+C>          with a few modifications. 
+C>          
+C>
+C> @param EGRAD1 - Gradient of state 1
+C> @param EGRAD2 - Gradient of state 2
+C> @param 
+C> @param 
+C> @param 
+C> @param 
+C
+      use mx_limits, only: mxrt
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL DEBUG
+C
+      PARAMETER (ZERO=0.0D+00)
+C
+      COMMON /DETWFN/ WSTATE(MXRT),SPINS(MXRT),CRIT,PRTTOL,S,SZ,
+     *                GRPDET,STSYM,GLIST,DWPARM,
+     *                NFLGDM(MXRT),IWTS(MXRT),NCORSV,NCOR,NACT,NORB,
+     *                NA,NB,K,KST,IROOT,IPURES,MAXW1,NITER,MAXP,NCI,
+     *                IGPDET,KSTSYM,NFTGCI,IDWEIGH,
+     *                fstate(mxrt),ifts(mxrt)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      DATA CHECK /8HCHECK   /
+C
+      DIMENSION EGRAD1(*),EGRAD2(*),TMP(*)
+      DIMENSION IXROOT(2),IXSTAT(2)
+C
+      NXRT = 0
+      DO 10 IST=1,K
+         IF(IPURES.EQ.1) THEN
+            IF(ABS(SPINS(IST)-S).GT.0.03D+00) GO TO 10
+            NXRT = NXRT + 1
+         ELSE
+            NXRT = NXRT + 1
+         END IF
+         IF(IXROOT(1) .EQ. NXRT) IXSTAT(1) = IST
+         IF(IXROOT(2) .EQ. NXRT) IXSTAT(2) = IST
+ 10   CONTINUE
+C
+C     ----- SA-MCSCF GRADIENTS -----
+C
+C READ SA-MCSCF GRADIENTS FOR ALL STATES
+      
+C STATE1
+      IF(EXETYP.NE.CHECK)
+     *     CALL DAREAD(IDAF,IODA,EGRAD1,NCVF,499,0)
+
+C STATE 2 
+      IF(EXETYP.NE.CHECK)
+     *     CALL DAREAD(IDAF,IODA,EGRAD2,NCVF,500,0)
+
+      NAT=NCVF/3
+
+
+C
+      IF(DEBUG) THEN
+         WRITE(IW,*) ' IN -RDSAGRAD-'
+         WRITE(IW,*) ' SA-MCSCF GRADIENT FOR STATE ',IXROOT(1),IXSTAT(1)
+         CALL DBGCNCL(EGRAD1,NCVF,.TRUE.)
+         WRITE(IW,*) ' SA-MCSCF GRADIENT FOR STATE ',IXROOT(2),IXSTAT(2)
+         CALL DBGCNCL(EGRAD2,NCVF,.TRUE.)
+      END IF
+C
+
+      RETURN
+      END

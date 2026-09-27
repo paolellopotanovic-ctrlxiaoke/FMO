@@ -1,0 +1,236 @@
+C
+C*MODULE NEOEPC  *DECK CALCNECORR
+C> @brief driver for possible exchange/correlation KS contributions
+C>
+C>
+C>           --- INPUT ---
+C>    @param EEPCATPOINT epc energy at grid point
+C>    @param ROA         alpha ele density at grid point
+C>    @param ROB         beta ele density at grid point
+C>    @param ROANUC      alpha nuc density at grid point
+C>    @param ROBNUC      beta nuc density at grid point
+C>    @param FTOTWT      weight at grid point
+C>    @param VCORRAELEBYNUC derivative of epc functional wrt alpha
+C>                          ele density
+C>    @param VCORRBELEBYNUC derivative of epc functional wrt beta
+C>                          ele density
+C>    @param VCORRANUCBYELE derivative of epc functional wrt alpha
+C>                          nuc density
+C>    @param VCORRBNUCBYELE derivative of epc functional wrt beta
+C>                          nuc density
+C>
+C
+      SUBROUTINE CALCNECORR(EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,FTOTWT,
+     *                    VCORRAELEBYNUC,VCORRBELEBYNUC,VCORRANUCBYELE,
+     *                    VCORRBNUCBYELE)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+      DOUBLE PRECISION NEOSCF,NEOCI,NEODFT
+      COMMON /NEOMTD/ NEOSCF,NEOCI,NEODFT,YANGA,YANGB,YANGC
+      DATA RNONE/8HNONE    /
+      DATA CS1,CS2,CS3,CS4/8HCS1     ,8HCS2     ,8HCS3     ,8HCS4     /
+C
+      LOGICAL UROHF
+C
+      DATA RHF,UHF,ROHF/8HRHF     ,8HUHF     ,8HROHF     /
+C***********************************************************************
+      UROHF = SCFTYP.EQ.UHF  .OR.  SCFTYP.EQ.ROHF
+Ci
+C
+      IF(NEODFT.EQ.CS1) THEN
+         CALL NEOCS1(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,FTOTWT,
+     *             VCORRAELEBYNUC,VCORRBELEBYNUC,VCORRANUCBYELE,
+     *             VCORRBNUCBYELE,YANGA,YANGB,YANGC)
+      ELSE IF(NEODFT.EQ.CS2) THEN
+         CALL NEOCS2(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,FTOTWT,
+     *             VCORRAELEBYNUC,VCORRBELEBYNUC,VCORRANUCBYELE,
+     *             VCORRBNUCBYELE,YANGA,YANGB,YANGC)
+      ELSE IF(NEODFT.EQ.CS3) THEN
+         CALL NEOCS3(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,FTOTWT,
+     *             VCORRAELEBYNUC,VCORRBELEBYNUC,VCORRANUCBYELE,
+     *             VCORRBNUCBYELE,YANGA,YANGB,YANGC)
+      ELSE IF(NEODFT.EQ.CS4) THEN
+         CALL NEOCS4(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,FTOTWT,
+     *             VCORRAELEBYNUC,VCORRBELEBYNUC,VCORRANUCBYELE,
+     *             VCORRBNUCBYELE,YANGA,YANGB,YANGC)
+      ELSE
+         WRITE(IW,*) 'CANNOT USE THIS CORRELATIONAL FUNCTIONAL'
+      ENDIF
+      RETURN
+      END
+C*MODULE NEOEPC  *DECK NEOCS1
+      SUBROUTINE NEOCS1(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,
+     *                FTOTWT,VC1,VC2,VC3,VC4,YANGA,YANGB,YANGC)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL UROHF, RHFGVB
+      PARAMETER (ONE=1.0D+00, TWO=2.0D+00, 
+     *           THREE=3.0D+00, FOUR=4.00D+00)
+C      PARAMETER (C1=-1.0D-01,C2=7.0D-02,C3=-5.0D-01)
+C      PARAMETER (C1=-8.0D-02,C2=3.0D-01,C3=-1.0D-00)
+!CS1      PARAMETER (C1=-4.0D-03,C2=2.96D-01,C3=-1.03D-00)
+      PARAMETER (C1=-0.8D-02,C2=2.45D-01,C3=-0.94D-00)
+      IF (UROHF) THEN
+      ELSE
+         RHO13 = (TWO*ROANUC)**(ONE/THREE)
+         RHO43 = RHO13**4
+         RHO23 = RHO13**2
+c         VC1 = VC1 + (FOUR/THREE)*RHO13
+         VC3 = VC3 + (FOUR/THREE)*RHO13
+         EEPCATPOINT = EEPCATPOINT+FTOTWT*RHO43
+      END IF
+      RETURN
+      END
+C*MODULE NEOEPC  *DECK NEOCS2
+      SUBROUTINE NEOCS2(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,
+     *                FTOTWT,VC1,VC2,VC3,VC4,YANGA,YANGB,YANGC)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL UROHF, RHFGVB
+      PARAMETER (ONE=1.0D+00, TWO=2.0D+00, THREE=3.0D+00)
+C      PARAMETER (C1=-1.0D-01,C2=7.0D-02,C3=-5.0D-01)
+C      PARAMETER (C1=-8.0D-02,C2=3.0D-01,C3=-1.0D-00)
+!CS2      PARAMETER (C1=-4.0D-03,C2=3.0D-01,C3=-1.0D-00)
+      PARAMETER (C1=-0.8D-02,C2=2.45D-01,C3=-0.94D-00)
+      IF (UROHF) THEN
+      ELSE
+         RHO   = TWO*ROA
+         BETA  = RHO**(ONE/THREE)+ROANUC**(ONE/THREE)
+
+         VC1 = VC1 + (rho*roanuc*(-(((rho**(ONE/THREE) +
+     -    roanuc**(ONE/THREE))**2*yangb)/rho**(TWO/THREE)) +
+     -    (2*(rho**(ONE/THREE)+roanuc**(ONE/THREE))**5*yangc)
+     -    /rho**(TWO/THREE)))/
+     -    (yanga-(rho**(ONE/THREE)+roanuc**(ONE/THREE))**3*yangb+
+     -    (rho**(ONE/THREE) + roanuc**(ONE/THREE))**6*yangc)**2 -
+     -    roanuc/(yanga - (rho**(ONE/THREE)
+     -    +roanuc**(ONE/THREE))**3*yangb+
+     -    (rho**(ONE/THREE) + roanuc**(ONE/THREE))**6*yangc)
+
+         VC3 = VC3 -(rho/(yanga - (rho**(ONE/THREE)
+     -    + roanuc**(ONE/THREE))**3*yangb +
+     -    (rho**(ONE/THREE) + roanuc**(ONE/THREE))**6*yangc)) +
+     -    (rho*roanuc*(-(((rho**(ONE/THREE) +
+     -    roanuc**(ONE/THREE))**2*yangb)/roanuc**(TWO/THREE)) +
+     -    (2*(rho**(ONE/THREE)+
+     -    roanuc**(ONE/THREE))**5*yangc)/roanuc**(TWO/THREE)))/
+     -    (yanga - (rho**(ONE/THREE) + roanuc**(ONE/THREE))**3*yangb +
+     -    (rho**(ONE/THREE) + roanuc**(ONE/THREE))**6*yangc)**2
+
+         EEPCATPOINT = EEPCATPOINT-FTOTWT*
+     -    rho*roanuc/(yanga-yangb*beta**3+yangc*beta**6)
+
+      END IF
+      RETURN
+      END
+C*MODULE NEOEPC  *DECK NEOCS3
+      SUBROUTINE NEOCS3(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,
+     *                FTOTWT,VC1,VC2,VC3,VC4,YANGA,YANGB,YANGC)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL UROHF, RHFGVB
+      PARAMETER (ONE=1.0D+00, TWO=2.0D+00, THREE=3.0D+00, SIX=6.0D+00)
+      PARAMETER (FIVE=5.0D+00, PI=ATAN(1.00D+00)*4.00D+00)
+C      PARAMETER (C1=3.3D-02,C2=0.71D+00,C3=-1.03D-00)
+C      COMMON /DFTEXC/ PI,QOP,NEXFG,NCORFG,NPFFG,NXCFG
+      IF (UROHF) THEN
+      ELSE
+         RHO = TWO*ROA
+         Q = YANGB
+         P = YANGA * PI / (Q*Q*Q*Q*Q*Q)
+         PD = YANGA * PI / SIX
+         BETA = Q * RHO**(ONE/SIX) * ROANUC**(ONE/SIX)
+         VC1 = VC1 - PD * ROANUC * (60.00D+00 - 38.4D+00*BETA**THREE)
+     *   / (0.5D+00 - 0.64D+00*BETA**THREE + BETA**SIX)**TWO
+         VC3 = VC3 - PD * RHO * (60.00D+00 - 38.4D+00*BETA**THREE)
+     *   / (0.5D+00 - 0.64D+00*BETA**THREE + BETA**SIX)**TWO
+         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(20.00D+00*BETA**SIX)
+     *   / (0.5D+00 - 0.64D+00*BETA**THREE + BETA**SIX)
+!         VC1 = VC1 - PD * ROANUC * (38.584D+00 - 31.834D+00*BETA**THREE)
+!     *   / (0.463D+00 - 0.764D+00*BETA**THREE + BETA**SIX)**TWO
+!         VC3 = VC3 - PD * RHO * (38.584D+00 - 31.834D+00*BETA**THREE)
+!     *   / (0.463D+00 - 0.764D+00*BETA**THREE + BETA**SIX)**TWO
+!         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(13.889D+00*BETA**SIX)
+!     *   / (0.463D+00 - 0.764D+00*BETA**THREE + BETA**SIX)
+!         VC1 = VC1 - PD * ROANUC * (4.378D+00 - 4.647D+00 * BETA**FIVE)
+!     *   / (0.138D+00 - 0.878D+00 * BETA**FIVE + BETA**SIX)**TWO
+!         VC3 = VC3 - PD * RHO * (4.378D+00 - 4.647D+00 * BETA**FIVE)
+!     *   / (0.138D+00 - 0.878D+00 * BETA**FIVE + BETA**SIX)**TWO
+!         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(5.291D+00 * BETA**SIX)
+!     *   / (0.138D+00 - 0.878D+00 * BETA**FIVE + BETA**SIX)
+!         VC1 = VC1 - PD * ROANUC * (27.893D+00 - 28.8D+00*BETA**THREE)
+!     *   / (0.3998D+00 - 0.8256D+00*BETA**THREE + BETA**SIX)**TWO
+!         VC3 = VC3 - PD * RHO * (27.893D+00 - 28.8D+00*BETA**THREE)
+!     *   / (0.3998D+00 - 0.8256D+00*BETA**THREE + BETA**SIX)**TWO
+!         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(11.6279D+00*BETA**SIX)
+!     *   / (0.3998D+00 - 0.8256D+00*BETA**THREE + BETA**SIX)
+!      write(*,*)ROA,ROANUC,BETA,VC1,VC3,EEPCATPOINT
+      END IF
+      RETURN
+      END
+
+C*MODULE NEOEPC  *DECK NEOCS4
+      SUBROUTINE NEOCS4(UROHF,EEPCATPOINT,ROA,ROB,ROANUC,ROBNUC,
+     *                FTOTWT,VC1,VC2,VC3,VC4,YANGA,YANGB,YANGC)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL UROHF, RHFGVB
+      PARAMETER (ONE=1.0D+00, TWO=2.0D+00, THREE=3.0D+00)
+C      PARAMETER (C1=3.3D-02,C2=0.71D+00,C3=-1.03D-00)
+      IF (UROHF) THEN
+C-@ZCT
+C         if the total electronic density is just the sum
+C         of alpha and beta density for Wigner beta
+         RHO=ROA+ROB
+         AVERHO2 = RHO * ROANUC
+         AVERHO = AVERHO2**(ONE/TWO)
+         VC1 = VC1 - ROANUC * (YANGA - YANGB*AVERHO/TWO)
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)**TWO
+         VC2 = VC2 - ROANUC * (YANGA - YANGB*AVERHO/TWO)
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)**TWO
+         VC3 = VC3 - RHO * (YANGA - YANGB*AVERHO/TWO)
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)**TWO
+         EEPCATPOINT = EEPCATPOINT - FTOTWT*AVERHO2
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)
+      ELSE
+         RHO = TWO*ROA
+         AVERHO2 = RHO * ROANUC
+         AVERHO = AVERHO2**(ONE/TWO)
+         VC1 = VC1 - ROANUC * (YANGA - YANGB*AVERHO/TWO)
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)**TWO
+         VC3 = VC3 - RHO * (YANGA - YANGB*AVERHO/TWO)
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)**TWO
+         EEPCATPOINT = EEPCATPOINT - FTOTWT*AVERHO2
+     *   / (YANGA - YANGB*AVERHO + YANGC*AVERHO2)
+!         VC1 = VC1 - PD * ROANUC * (38.584D+00 - 31.834D+00*BETA**THREE)
+!     *   / (0.463D+00 - 0.764D+00*BETA**THREE + BETA**SIX)**TWO
+!         VC3 = VC3 - PD * RHO * (38.584D+00 - 31.834D+00*BETA**THREE)
+!     *   / (0.463D+00 - 0.764D+00*BETA**THREE + BETA**SIX)**TWO
+!         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(13.889D+00*BETA**SIX)
+!     *   / (0.463D+00 - 0.764D+00*BETA**THREE + BETA**SIX)
+!         VC1 = VC1 - PD * ROANUC * (4.378D+00 - 4.647D+00 * BETA**FIVE)
+!     *   / (0.138D+00 - 0.878D+00 * BETA**FIVE + BETA**SIX)**TWO
+!         VC3 = VC3 - PD * RHO * (4.378D+00 - 4.647D+00 * BETA**FIVE)
+!     *   / (0.138D+00 - 0.878D+00 * BETA**FIVE + BETA**SIX)**TWO
+!         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(5.291D+00 * BETA**SIX)
+!     *   / (0.138D+00 - 0.878D+00 * BETA**FIVE + BETA**SIX)
+!         VC1 = VC1 - PD * ROANUC * (27.893D+00 - 28.8D+00*BETA**THREE)
+!     *   / (0.3998D+00 - 0.8256D+00*BETA**THREE + BETA**SIX)**TWO
+!         VC3 = VC3 - PD * RHO * (27.893D+00 - 28.8D+00*BETA**THREE)
+!     *   / (0.3998D+00 - 0.8256D+00*BETA**THREE + BETA**SIX)**TWO
+!         EEPCATPOINT = EEPCATPOINT - FTOTWT*P*(11.6279D+00*BETA**SIX)
+!     *   / (0.3998D+00 - 0.8256D+00*BETA**THREE + BETA**SIX)
+C
+C         WRITE(6,*) ROA,ROANUC,BETA,VC1,VC3,EEPCATPOINT
+C
+      END IF
+      RETURN
+      END

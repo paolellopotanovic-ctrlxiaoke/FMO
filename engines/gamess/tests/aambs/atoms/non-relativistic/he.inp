@@ -1,0 +1,24 @@
+ $contrl
+  runtyp=energy
+  scftyp=rhf
+  ispher=1
+  mult=1
+  relwfn=iotc
+  local=svd
+ $end
+
+ $scf vvos=.t. $end
+
+ $basis gbasis=SPK-TZCD $end
+
+ $system mwords=15 memddi=10 $end
+
+ $data
+BASOPT test
+Oh
+
+He 2.0
+ $end
+
+! 
+

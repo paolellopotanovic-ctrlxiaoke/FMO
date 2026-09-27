@@ -1,0 +1,504 @@
+#!/bin/csh
+#
+set JOB=$1      # name of the input file xxx.inp, give only the xxx part
+set VERNO=$2    # revision number of the executable created by 'lked' step
+set NCPUS=$3    # number of compute processes to be run
+# under PJ setting NPROC for `mpirun -np $NPROC` optional (can be all defined via #PJM --mpi "proc=N"), 
+# 
+# Please set appropriate values below for following variables
+# - PLATFORM for which you build GAMESS binaries and runscripts, possible values
+#   are FX1000 or FX700
+set PLATFORM=FX700
+# Uncomment the next line if the default LANG for tcsh is other than English
+#if ($PLATFORM == FX700) setenv LANG C  # to produce system output in English
+set TARGET=mpi
+set USERSCR=$PWD
+#
+# provide defaults if last two arguments are not given to this script
+if (null$VERNO == null) set VERNO=00
+# Assuming several binaries are created, and gamess.02.x was built with both MPI and OpenMP
+if ($VERNO == 02) set TARGET=mpi-openmp
+#
+#
+#  ---- the top third of the script is input and other file assignments ----
+#
+echo "----- GAMESS execution script 'rungms' -----"
+set os=`uname`
+set master=`hostname`
+echo This job is running on host $master
+echo under operating system `uname` at `date`
+set CORESPNODE = `lscpu | awk -F ":" '/^CPU\(s\)/{print $2}'`
+if (`lscpu | grep "Off-line CPU(s)"` != "") then
+   @ CORESPNODE = $CORESPNODE - 12
+   set PLATFORM=FX1000
+endif   
+if ( $CORESPNODE =~ *[^0-9]* ) then
+   echo "The script rungms was adapted to run on FX700/FX1000 platforms. "
+   echo "You must edit the script to provide CORESPNODE (the number of cores available"
+   echo "for calculations per physical node)"
+   exit 
+endif
+echo "The host node $master has" `free -h | gawk  '/Mem:/{print $2}' `" of available physical memory"
+echo "and $CORESPNODE cores"
+
+if (! $?XOS_MMM_L_ARENA_FREE) then
+   echo "Memory access policy XOS_MMM_L_ARENA_FREE is undefined"
+else
+   echo "Memory access policy set as XOS_MMM_L_ARENA_FREE = $XOS_MMM_L_ARENA_FREE"
+endif
+#   setenv XOS_MMM_L_PAGING_POLICY "demand:demand:demand" # FX700 may profit
+if (! $?XOS_MMM_L_PAGING_POLICY) then 
+   echo "Memory access policy XOS_MMM_L_PAGING_POLICY is undefined"
+else
+   echo "Memory access policy set as XOS_MMM_L_PAGING_POLICY = $XOS_MMM_L_PAGING_POLICY"
+endif
+if (! $?XOS_MMM_L_HPAGE_TYPE) then
+   echo "Memory access policy XOS_MMM_L_HPAGE_TYPE is undefined"
+else
+   echo "Memory access policy set as XOS_MMM_L_HPAGE_TYPE = $XOS_MMM_L_HPAGE_TYPE"
+endif
+
+if ($PLATFORM == FX1000) then
+   set SCR=$TMPDIR/$PJM_JOBID
+   mkdir -p $SCR
+   set DEL_SCR=1 # Set this variable with any value in case $SCR must be deleted at the end of job
+   setenv DDI_RSH pjrsh
+   setenv DDI_RCP pjrsh
+
+else if ($PLATFORM == FX700) then
+   if (null$NCPUS == null) set NCPUS=1
+   set SCHED=none
+   if ($?PBS_ENVIRONMENT)  set SCHED=PBS
+   echo "SCHED is $SCHED"
+   if ($SCHED == PBS) then
+      if ($?PBS_JOBFS) then
+         set SCR=$PBS_JOBFS
+      else if ($?TMPDIR) then
+         set SCR=$TMPDIR/$PBS_JOBID
+         if  (! -d $SCR) then 
+            mkdir -p $SCR
+            set DEL_SCR=1 # Set this variable with any value in case $SCR must be deleted at the end of job
+         endif
+      else
+         echo "Calculation is terminated. Please assign env. variable TMPDIR where temporary files will be"
+         echo kept and resubmit"
+         exit 2
+      endif
+      echo "PBS has assigned the following compute nodes to this run:"
+      uniq $PBS_NODEFILE | paste -sd " " | fold -sw 80
+#     Choosing remote shell communicator
+      setenv DDI_RSH pbs_tmrsh
+      setenv DDI_RCP pbs_tmrsh
+   else
+      if ($?TMPDIR) then
+         set SCR=$TMPDIR
+      else
+         echo "Calculation is terminated. Please assign env. variable TMPDIR where temporary files will be"
+         echo kept and resubmit"
+         exit 2
+      endif 
+      setenv DDI_RSH ssh
+      setenv DDI_RCP scp
+   endif
+else
+   echo "Platform = $PLATFORM, but the runscript rungms allows FX700 or FX1000 as values for PLATFORM"
+   echo "For this reason the job is interupted. Fix the script and resubmit."
+   exit (1) 
+endif
+
+echo "DDI_RSH is $DDI_RSH"
+echo "DDI_RCP is $DDI_RCP"
+
+setenv HOSTFILE $SCR/$JOB.nodes.mpd
+if (-e $HOSTFILE) rm $HOSTFILE
+touch $HOSTFILE
+
+if ( -e $USERSCR/$JOB.nodes.mpd ) then
+   cp $USERSCR/$JOB.nodes.mpd $HOSTFILE
+else
+   if ($PLATFORM == FX1000) then
+      pjshowip | uniq > $HOSTFILE
+      set NNODES = $PJM_NODE     # The number of nodes allocated to job
+      set NPROCS = $PJM_MPI_PROC # This defines the number of MPI process to run (computing and data processes altogether) on a single node
+      echo "PJM has assigned the following compute nodes to this run:"
+      cat $HOSTFILE
+
+      setenv FLIB_CNTL_BARRIER_ERR FALSE
+      setenv FLIB_FASTOMP FALSE
+      echo "FLIB_CNTL_BARRIER_ERR is $FLIB_CNTL_BARRIER_ERR"
+      echo "FLIB_FASTOMP is $FLIB_FASTOMP"
+   else if ($PLATFORM == FX700) then
+      if ($SCHED == PBS) then
+         uniq $PBS_NODEFILE $HOSTFILE
+         set NNODES=`wc -l $HOSTFILE`
+         set NNODES=$NNODES[1]
+      else
+         if ($NCPUS <= $CORESPNODE) then
+            # This job run must be on this node itself!
+            echo `hostname` >> $HOSTFILE
+            set NNODES=1
+         else 
+            echo "SCHED is $SCHED and job requires more than one node. In this case you must provide"
+            echo "file $USERSCR/$JOB.nodes.mpd with list of nodes to use for the job. Prepare this"
+            echo "file and resubmit the job."
+            exit (3)
+         endif
+      endif
+   endif
+endif
+#           uncomment next lines if you need to debug host configuration.
+#--echo '-----debug----'
+#--echo HOSTFILE $HOSTFILE contains
+#--cat $HOSTFILE
+#--echo '--------------'
+
+#     the next file forces explicit "which process on what node" rules.
+#     The contents depend on the kickoff style.  This file is how
+#     we tell MPI to double-book the cores with two processes,
+#     thus accounting for both compute processes and data servers.
+#
+setenv PROCFILE $SCR/$JOB.processes.mpd
+touch $PROCFILE
+if (-e $USERSCR/$JOB.processes.mpd) cp $USERSCR/$JOB.processes.mpd $PROCFILE
+
+echo "Available scratch disk space (Kbyte units) at beginning of the job is"
+df -h $SCR
+echo "GAMESS temporary binary files will be written to $SCR"
+echo "GAMESS supplementary output files will be written to $USERSCR"
+
+#        this added as experiment, February 2007, as 8 MBytes
+#        increased to 32 MB in October 2013 for the VB2000 code.
+#        its intent is to detect large arrays allocated off the stack
+#        however mpi-openmp jobs may require larger stack, 128 MB found to be enough
+limit stacksize 128M
+echo "System limits:"
+limit
+
+#  Grab a copy of the input file.
+#  In the case of examNN jobs, file is in tests/standard subdirectory.
+#  In the case of exam-vbNN jobs, file is in vb2000's tests subdirectory.
+set FULL_PATH=`readlink -f $JOB`
+set JOB_PATH=`dirname $FULL_PATH`
+if ($JOB:r.inp == $JOB) set JOB=$JOB:r      # strip off possible .inp
+set JOB=`basename $JOB`
+echo "Copying input file $JOB_PATH/$JOB.inp to your run's scratch directory..."
+if (-e $JOB_PATH/$JOB.inp) then
+   set echo
+   cp  $JOB_PATH/$JOB.inp  $SCR/$JOB.F05
+   unset echo
+else
+   if (-e $GMSPATH/tests/standard/$JOB.inp) then
+      set echo
+      cp  $GMSPATH/tests/standard/$JOB.inp  $SCR/$JOB.F05
+      unset echo
+   else
+      if (-e tests/$JOB.inp) then
+         set echo
+         cp  tests/$JOB.inp  $SCR/$JOB.F05
+         unset echo
+      else
+         echo "Input file $JOB.inp does not exist."
+         echo "This job expected the input file to be in directory `pwd`"
+         echo "Please fix your file name problem, and resubmit."
+         exit 4
+      endif
+   endif
+endif
+
+# Copping the processes-node coordinates file for MPI mpirun -vcoordfile
+if ( -e $JOB.vcoord ) cp $JOB.vcoord $SCR
+
+#    define many environment variables setting up file names.
+#    anything can be overridden by a user's own choice, read 2nd.
+#
+source $GMSPATH/gms-files.csh
+if (-e $HOME/.gmsrc) then
+   echo "reading your own $HOME/.gmsrc"
+   source $HOME/.gmsrc
+endif
+#
+#    In case GAMESS has been interfaced to the Natural Bond Orbital
+#    analysis program (http://www.chem.wisc.edu/~nbo6), you must
+#    specify the full path name to the NBO binary.
+#    This value is ignored if NBO has not been linked to GAMESS.
+#
+setenv NBOEXE /apps/NBO/nbo6_nf1/bin/nbo6.i8.exe
+#
+#
+#    If a $GDDI input group is present, the calculation will be using
+#    subgroups within DDI (the input NGROUP=0 means this isn't GDDI).
+#
+#    The master within each group must have a copy of INPUT, which is
+#    dealt with below (prior to execution), once we know something about
+#    the host names where INPUT is required.  The INPUT does not have
+#    the global rank appended to its name, unlike all other files.
+#
+#    OUTPUT and PUNCH (and perhaps many other files) are opened on all
+#    processes (not just the master in each subgroup), but unique names
+#    will be generated by appending the global ranks.  Note that OUTPUT
+#    is not opened by the master in the first group, but is used by all
+#    other groups.  Typically, the OUTPUT from the first group's master
+#    is the only one worth saving, unless perhaps if runs crash out.
+#
+#    The other files that GDDI runs might use are already defined above.
+#
+set ngddi=`grep -i '^ \$GDDI' $SCR/$JOB.F05 | grep -iv 'NGROUP=0 ' | wc -l`
+if ($ngddi > 0) then
+   set GDDIjob=true
+   echo "This is a GDDI run, keeping various output files on local disks"
+   set echo
+   setenv  OUTPUT $SCR/$JOB.F06
+   setenv   PUNCH $SCR/$JOB.F07
+   unset echo
+else
+   set GDDIjob=false
+endif
+
+# Define logical nodes
+
+set NGROUP=`grep -i '\$GDDI' $SCR/$JOB.F05 | awk '{for (i=2; i<=NF; i++) print $i}'| awk 'BEGIN {IGNORECASE = 1;FS="="};{if($1 == "NGROUP") print $2 }'`
+set PARITY=0 # The variable is needed when logical nodes used for correct mapping and binding of MPI processes
+# Setting up the size of the logical node, if NGROUP in input is defined (assumed it is an integer number)
+if ( `echo "$NGROUP" | egrep '^[0-9]+$'` ) then
+    # Checking if division NCPUS/NGROUP has no remainder (in bash/tcsh division always integer, but there is remainder operator %)
+    @ RMD = $NCPUS % $NGROUP
+    if ( $RMD == 0 ) then
+       @ LOGICAL = $NCPUS / $NGROUP
+       @ PARITY = $NGROUP % 2
+       setenv DDI_LOGICAL_NODE_SIZE $LOGICAL
+       echo "Here the requested $PBS_NCPUS cpus have been divided into $NGROUP groups"
+       echo "DDI_LOGICAL_NODE_SIZE for this job was defined as $DDI_LOGICAL_NODE_SIZE"
+    else
+       echo "WARNING!!! DDI_LOGICAL_NODE_SIZE is not integer!!!"
+   endif
+   echo "NPCUS=$NCPUS, NGROUP=$NGROUP, remainder NCPUS%NGROUP is $RMD"
+endif
+
+#             replica-exchange molecular dynamics (REMD)
+#     option is active iff runtyp=md as well as mremd=1 or 2.
+#     It utilizes multiple replicas, one per subgroup.
+#     Although REMD is indeed a GDDI kind of run, it handles its own
+#     input file manipulations, but should do the GDDI file defs above.
+set runmd=`grep -i runtyp=md $SCR/$JOB.F05 | wc -l`
+set mremd=`grep -i mremd= $SCR/$JOB.F05 | grep -iv 'mremd=0 ' | wc -l`
+if (($mremd > 0) && ($runmd > 0) && ($ngddi > 0)) then
+   set GDDIjob=false
+   set REMDjob=true
+   echo "This is a REMD run, keeping various output files on local disks"
+   set echo
+   setenv TRAJECT     $SCR/$JOB.F04
+   setenv RESTART $USERSCR/$JOB.rst
+   setenv    REMD $USERSCR/$JOB.remd
+   unset echo
+   set GDDIinp=(`grep -i '^ \$GDDI' $JOB.F05`)
+   set numkwd=$#GDDIinp
+   @ g = 2
+   @ gmax = $numkwd - 1
+   while ($g <= $gmax)
+      set keypair=$GDDIinp[$g]
+      set keyword=`echo $keypair | awk '{split($1,a,"="); print a[1]}'`
+      if (($keyword == ngroup) || ($keyword == NGROUP)) then
+         set nREMDreplica=`echo $keypair | awk '{split($1,a,"="); print a[2]}'`
+         @ g = $gmax
+      endif
+      @ g++
+   end
+   unset g
+   unset gmax
+   unset keypair
+   unset keyword
+else
+   set REMDjob=false
+endif
+
+#    data left over from a previous run might be precious, stop if found.
+if (  (-e $CASINO) || (-e $CIMDMN)  || (-e $CIMFILE) || (-e $COSDATA) \
+   || (-e $COSPOT) || (-e $GAMMA)   || (-e $MAKEFP)  \
+   || (-e $MDDIP)  || (-e $OPTHES1) || (-e $OPTHES2) || (-e $PUNCH)   \
+   || (-e $QMWAVE) || (-e $RESTART) || (-e $TRAJECT) ) then
+   echo "Please save, rename, or erase these files from a previous run:"
+   echo "     $CASINO,"
+   echo "     $CIMDMN,"
+   echo "     $CIMFILE,"
+   echo "     $COSDATA,"
+   echo "     $COSPOT,"
+   echo "     $GAMMA,"
+   echo "     $MAKEFP,"
+   echo "     $MDDIP,"
+   echo "     $OPTHES1,"
+   echo "     $OPTHES2,"
+   echo "     $PUNCH,"
+   echo "     $QMWAVE,"
+   echo "     $RESTART, and/or"
+   echo "     $TRAJECT,"
+   echo "and then resubmit this computation."
+   exit 4
+endif
+
+#  ---- the middle third of the script is to execute GAMESS ----
+#
+set echo
+setenv OMPI_MCA_mpi_yield_when_idle 1
+unset echo
+
+   #     Set up Fragment MO runs (or other runs exploiting subgroups).
+   #     One way to be sure that the master node of each subgroup
+   #     has its necessary copy of the input file is to stuff a
+   #     copy of the input file onto every single node right here.
+
+   #     We consider that the nodes diskless with common $SCR available from all nodes
+   #     therefore all lines wuth $DDI_RCP commented out
+
+if ($REMDjob == true) then
+   source $GMSPATH/tools/remd.csh $TARGET $nREMDreplica
+   if ($status > 0) exit $status
+endif
+
+#  ---- the middle third of the script is to execute GAMESS ----
+
+chdir $SCR
+
+#
+#  Now, at last, we can actually kick-off the MPI processes...
+#
+set MPIEXTRAFLAGS =""
+if ($TARGET == mpi) then
+   setenv OMP_NUM_THREADS 1
+   if ($PLATFORM == FX1000) then
+      if ( $?MPI_BINDING_FLAGS ) then
+         set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS $MPI_BINDING_FLAGS" 
+       endif  
+   else if ($PLATFORM == FX700) then
+      set PPN=$CORESPNODE
+      @ PPN2 = $PPN + $PPN
+      @ NPROCS = $NCPUS + $NCPUS
+      if ( $?MPI_BINDING_FLAGS ) then
+         set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS $MPI_BINDING_FLAGS" 
+      else if ( ! -z $PROCFILE ) then
+         # case to use rankfile
+         setenv OMPI_MCA_rmaps_base_mapping_policy ''
+         set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -rf $PROCFILE"
+      else if ( $?DDI_LOGICAL_NODE_SIZE ) then       
+         if ( $PARITY != 0 ) then
+            set MPIEXTRAFLAGS = "--bind-to none -oversubscribe"
+         else if ( $DDI_LOGICAL_NODE_SIZE < $CORESPNODE ) then
+            set MPIEXTRAFLAGS = "--bind-to socket:overload-allowed -oversubscribe"
+         else
+            set MPIEXTRAFLAGS = "--bind-to core:overload-allowed --map-by slot:oversubscribe"
+         endif
+      else if ( $NCPUS < $CORESPNODE ) then
+         set MPIEXTRAFLAGS = "--bind-to none -oversubscribe"
+      else
+         set MPIEXTRAFLAGS = "--bind-to core:overload-allowed --map-by slot:oversubscribe"
+      endif
+      if ($NNODES != 1) set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -hostfile $HOSTFILE --prefix $FJSV_HOME"
+      if ($NNODES <= 2) set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -report-bindings"
+   endif
+endif
+#  optionally binding and mapping options can be provided via environment variable before running the script
+
+if ($TARGET == mpi-openmp) then
+
+#   setenv OMP_NUM_THREADS $4
+#   if (null$4 == null) setenv OMP_NUM_THREADS $CORESPNODE
+   if ($PLATFORM == FX1000) then
+      if (! $?OMP_NUM_THREADS) then       
+         setenv OMP_NUM_THREADS $CORESPNODE
+      else if ("$OMP_NUM_THREADS" == "")  then
+         setenv OMP_NUM_THREADS $CORESPNODE
+      endif
+      if ( $?MPI_BINDING_FLAGS ) then
+         set MPIEXTRAFLAGS = "$MPI_BINDING_FLAGS" 
+      endif
+   else if ($PLATFORM == FX700) then
+      if ($NCPUS <= $CORESPNODE) then
+         setenv OMP_NUM_THREADS $NCPUS
+      else
+         setenv OMP_NUM_THREADS $CORESPNODE
+      endif
+      set PPN=1
+      @ PPN2 = $PPN * 2
+      @ NPROCS = $NNODES * 2
+      if ( $?MPI_BINDING_FLAGS ) then
+         set MPIEXTRAFLAGS = "$MPI_BINDING_FLAGS" 
+      else
+         set MPIEXTRAFLAGS = "--bind-to core:overload-allowed --map-by node:PE=$OMP_NUM_THREADS -oversubscribe"
+      endif
+      if ($NNODES != 1) set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -hostfile $HOSTFILE --prefix $FJSV_HOME"
+      if ($NNODES <= 2) set MPIEXTRAFLAGS="$MPIEXTRAFLAGS -report-bindings"
+   endif
+#  provide defaults if last two arguments are not given to this script
+   if (! $?OMP_STACKSIZE) setenv OMP_STACKSIZE 128M
+   echo "OMP_NUM_THREADS is $OMP_NUM_THREADS"
+   echo "OMP_STACKSIZE is $OMP_STACKSIZE"
+   set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -x OMP_NUM_THREADS -x OMP_STACKSIZE"
+endif
+
+if ( $?XOS_MMM_L_ARENA_FREE ) then
+   set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -x XOS_MMM_L_ARENA_FREE"
+endif
+if ( $?XOS_MMM_L_HPAGE_TYPE ) then
+   set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -x XOS_MMM_L_HPAGE_TYPE"
+endif
+if ( $?XOS_MMM_L_PAGING_POLICY ) then
+   set MPIEXTRAFLAGS = "$MPIEXTRAFLAGS -x XOS_MMM_L_PAGING_POLICY"
+endif
+
+if (null$NPROCS != null) then
+   set MPIEXTRAFLAGS = "-n $NPROCS $MPIEXTRAFLAGS" 
+endif
+
+if ($PLATFORM == FX1000) then
+   if (`basename $USERSCR` == 'vb2000') then
+#     A hack to make vb/2000/runallvb script to run as intended on FX1000 where 
+#     mpirun missing standard (>) redirection of output     
+      set MPIEXTRAFLAGS = "--std $USERSCR/test_results/$JOB.log $MPIEXTRAFLAGS"
+#     some jobs in vb2000 verification 'runallvb' require to use file(-s) from 
+#     previous job test so total delete of $SCR after completing a job can't be 
+#     applied 
+      unset DEL_SCR
+   else
+      set MPIEXTRAFLAGS = "--std $USERSCR/$JOB.log $MPIEXTRAFLAGS"
+   endif   
+endif
+
+echo "MPI kickoff will run GAMESS on $NNODES nodes of $PLATFORM with $NPROCS compute and data processes in total"
+echo "The binary to be executed is $GMSPATH/gamess.$VERNO.x"
+
+set echo
+mpirun $MPIEXTRAFLAGS $GMSPATH/gamess.$VERNO.x
+unset echo
+#      ------ end of the MPI or MPI-OPENMP execution section -------
+#
+#  ---- the bottom third of the script is to clean up all disk files ----
+#  It is quite useful to display to users how big the disk files got to be.
+#
+echo ----- accounting info -----
+#
+#   in the case of GDDI runs, we save the first PUNCH file only.
+#   If something goes wrong, the .F06.00x, .F07.00x, ... from the
+#   other groups are potentially interesting to look at.
+if ($GDDIjob == true) cp $SCR/$JOB.F07 $USERSCR/$JOB.dat
+#
+#   Clean up the master's scratch directory.
+#
+echo "Temporary file storage was `du -sh $SCR`"
+echo Files used on the master node $master were:
+ls -lF $SCR/$JOB.*
+find $SCR -maxdepth 1 -type f \( -name "${JOB}.F*" -o -name "${JOB}.*.mpd" \) -exec rm {} \;
+#
+#   Clean/Rescue any files created by the VB2000 plug-in
+if (-e $SCR/$JOB.V84)        mv $SCR/$JOB.V84     $USERSCR
+find $SCR -maxdepth 1 -type f \( -name "${JOB}.V80" -o -name "${JOB}.TEMP*" \) -exec rm {} \;
+
+foreach EXT (orb vec mol molf mkl xyz)
+   if (-e $SCR/$JOB.$EXT) mv $SCR/$JOB.$EXT $USERSCR
+end
+find $SCR -maxdepth 1 -type f \( -name "${JOB}-*.cube" -o -name "${JOB}-*.grd" -o -name "${JOB}-*.csv" \) -exec mv {} $USERSCR \;
+if ( $?DEL_SCR ) rm -R $SCR
+#
+#  and this is the end
+#
+date
+time
+exit

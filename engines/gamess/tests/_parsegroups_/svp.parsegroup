@@ -1,0 +1,104 @@
+{
+  "parse_header" : "SVP",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)EGAS = INTERNAL ENERGY OF SOLUTE IN GAS PHASE.*$",
+     "parse_name"   : "EGAS - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)EINT = INTERNAL ENERGY OF SOLUTE IN SOLUTION.*$",
+     "parse_name"   : "EINT - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)DINT  = EINT-EGAS = SOLUTE  POLARIZATION ENERGY.*$",
+     "parse_name"   : "DINT - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)DGRXN = ERXNFLD/2 = SOLVENT POLARIZATION ENERGY.*$",
+     "parse_name"   : "DGRXN - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)SS\\(V\\)PE  DELTAG = DINT\\+DGRXN.*$",
+     "parse_name"   : "SS(V)PE DELTAG - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)SS\\(V\\)PE  GTOTAL = EINT\\+DGRXN.*$",
+     "parse_name"   : "SS(V)PE GTOTAL - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)DEFESR   DELTAG = DISP\\+EXCH\\+FNEG\\+FPOS ENERGIES.*$",
+     "parse_name"   : "DEFESR DELTAG - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)CMIRS    DELTAG = SS\\(V\\)PE  DELTAG \\+ DEFESR DELTAG.*$",
+     "parse_name"   : "CMIRS DELTAG - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)CMIRS    GTOTAL = SS\\(V\\)PE  GTOTAL \\+ DEFESR DELTAG.*$",
+     "parse_name"   : "CMIRS GTOTAL - SVP",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_instance" : -1,
+     "parse_required" : false
+   }
+ ]
+}

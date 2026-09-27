@@ -1,0 +1,16 @@
+! CCSDt         E=      -38.3860200707   CORR. E=  -0.1146953219
+! CC(t;3),A     E=      -38.3873428925   CORR. E=  -0.1160181437
+! CC(t;3)       E=      -38.3876068387   CORR. E=  -0.1162820900
+!
+ $contrl runtyp=energy scftyp=rohf mult=2 cctyp=cct3
+         ispher=1 $end
+ $system mwords=50 $end
+ $basis gbasis=accd $end
+ $ccinp ncore=1 nacto=1 nactu=2 $end
+ $data
+CH, aug-cc-pVDZ at R = Re
+Cnv 2
+
+ C   6.0      0.0000000     0.0000000     0.0000000
+ H   1.0      0.0000000     0.0000000     1.1197868
+ $end

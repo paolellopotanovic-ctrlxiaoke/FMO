@@ -1,0 +1,58 @@
+! GAMESS/VB2000 Test 29
+!
+! This is a test of using the GVB non-orthogonal orbitals as
+! the initial guess. It is the simplest possible calculation 
+! for H2, where the GVB is actually identical to the VB
+! calculation. The guess is actually the final result so it 
+! converges after only one macroiteration. Note, that perhaps
+! surprisingly, for larger cases getting the same result as 
+! the GAMESS GVB takes more than one macroiteration.
+!
+! GVB ENERGY IS -1.1468743320 AFTER   7 ITERATIONS
+!
+! ENERGY AND DIFF OF MACROITER    3 =     -1.1468743320
+!
+ $CONTRL SCFTYP=GVB RUNTYP=ENERGY COORD=ZMT
+    ISPHER=1 VBTYP=VB2000 $END
+ $SCF NCO=0 NSETO=0 NPAIR=1 $END
+ $SYSTEM TIMLIM=20 MEMORY=50000000 $END
+ $BASIS  GBASIS=CCD $END
+ $GUESS  GUESS=HUCKEL $END
+ $DATA
+H2 cc-pVDZ
+C1
+H
+H 1 0.74
+
+ $END      
+ $VB2000
+#! VB(2)/cc-pVDZ printall
+
+H2 cc-pVDZ
+
+0 1
+1 0.0 0.0  0.37
+1 0.0 0.0 -0.37
+
+ $ECONV
+ 8
+
+ $MACROITER
+ 99
+
+ $VECLMOS
+
+ $VECMOS
+
+ $VECINIT
+
+ $VECONLY
+
+ $DENSCUBE
+ DENS GMSD HPRT
+ H2 CCT
+ 81
+
+ $END      
+
+

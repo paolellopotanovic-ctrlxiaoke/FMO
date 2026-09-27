@@ -1,0 +1,45 @@
+!   (SnH3)(SeH)(I)Sb=S 1e- and 2e- LUT-IOTC energy by picture change corrected (PCC) DFT
+!   RHF/SPKrDZC (Sapporo relativistic core/valence basis set)
+!   The basis has 275 contracted and 765 uncontracted AOs, containing up to f function.
+!
+!   final energy:
+!   the 1e- and 2e-LUT-IOTC w/ PCC (relwfn=lutiotc2, pccdft=.t.) run is
+!      FINAL R-B3LYP ENERGY IS   -22610.1920906774 AFTER  25 ITERATIONS
+!   the 1e- and 2e-LUT-IOTC w/o PCC (relwfn=lutiotc2, pccdft=.f.) run is
+!      FINAL R-B3LYP ENERGY IS   -22613.5490686976 AFTER  25 ITERATIONS
+!   the 1e- and 2e-LUT-IOTC RHF (relwfn=lutiotc2, dfttyp=none) run is
+!      FINAL RHF ENERGY IS   -22598.5787464029 AFTER  17 ITERATIONS
+!   and 1e-LUT-IOTC RHF (relwfn=lut-iotc, dfttyp=none) run is
+!      FINAL RHF ENERGY IS   -22593.1031593580 AFTER  17 ITERATIONS
+!
+!   CPU time for all processes
+!      1e- and 2e-LUT-IOTC w/ PCC (relwfn=lutiotc2, pccdft=.t.) : 795 [second]
+!      1e- and 2e-LUT-IOTC w/o PCC (relwfn=lutiotc2, pccdft=.f.): 343 [second]
+!      1e- and 2e-LUT-IOTC RHF (relwfn=lutiotc2, dfttyp=none)   : 294 [second]
+!      1e-LUT-IOTC RHF (relwfn=lut-iotc, dfttyp=none)           :  61 [second]
+!   on 1core of Intel(R) Xeon(R) CPU Gold 6258R @ 2.70Hz (20 Dec 2021)
+!
+!
+ $contrl runtyp=energy scftyp=rhf dfttyp=b3lyp relwfn=lutiotc2
+         icharg=0 mult=1 ispher=1 $end
+ $relwfn pccdft=.t. $end
+ $system mwords=300 $end
+ $scf    dirscf=.f. $end
+ $guess  guess=huckel $end
+ $basis  gbasis=spkrdzc $end
+ $data
+test on artificial molecule...(SnH3)(SeH)(I)Sb=S
+C1
+Sb   51.0    .4070872775    .7782398266   -.3936725280
+Sn   50.0   1.1414728458   1.1356145862   2.3848588864
+H     1.0   1.2527257999   -.4214651586   3.0224606970
+H     1.0   2.6177043590   1.9484947995   2.3495726821
+H     1.0   -.1127047214   2.0405969627   3.0535321693
+Se   34.0   2.0684890776  -1.1125182760  -1.2134154093
+H     1.0   2.1422107340   -.5803659875  -2.5852472725
+I    53.0  -2.1302318016   -.6171154150   -.2143212107
+S    16.0    .3754817088   2.6319401078  -1.8885256240
+ $end
+
+!TRAVIS-CI SKIP
+!High variance in validated values across various mathlibs (Netlib,OpenBLAS,MKL)

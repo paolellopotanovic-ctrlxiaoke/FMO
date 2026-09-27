@@ -1,0 +1,3027 @@
+C 17 Jan 20 - HN  - NEW MODULE FOR UTDDFT ENERGY GRADIENT COMPUTATION
+C
+C*MODULE UTDGRD  *DECK UTDGRAD
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Calculate UTD-DFT gradient (Z-vector)
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE UTDGRAD
+      use mx_limits, only: mxatm,mxrt,mxgrid
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK,TRIPLET,SG1,SG1T,
+     *        TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFLEB/  NLEB(MXGRID),NLEB0(MXGRID)
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /PCMPAR/ IPCM,NFT26,NFT27,IRPPCM,IEF,IP_F,NFMOPCM,IHET
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+C
+      DATA CHECK/8HCHECK   /
+C
+C     ----- UTD-DFT RESPONSE EQUATION DRIVER -----
+C
+      IPCMSV  = IPCM
+      IF(NFMOPCM.NE.0) IPCM = 1
+C
+c     write(6,*) "www check=",irectd
+C
+      L1 = NUM
+      L2 = (L1*L1+L1)/2
+      L3 = L1 * L1
+C
+c     IF(LCFLAG) THEN
+c        IF(MASWRK) WRITE(IW,1000)
+c     ELSE
+c        IF(MASWRK) WRITE(IW,1100)
+c     ENDIF
+c     IF(MASWRK .AND. IPCM.EQ.1 .AND. NFRG.EQ.0) WRITE(IW,1101)
+c     IF(MASWRK .AND. IPCM.EQ.1 .AND. NFRG.GT.0) WRITE(IW,1102)
+C
+      IF(TRIPLET.AND..NOT.DFTBFL) THEN
+        WRITE(IW,*) 'TRIPLET IS NOT SUPPORTED FOR TDDFT-GRADIENT'
+        CALL ABRT
+      END IF
+C
+      IF (NTHST.GT.MXRT) THEN
+        WRITE(IW,*) 'TDDFT-GRADIENT CALCULATION IS ALLOWED ONLY',
+     *              'FOR IROOT.LE.',MXRT
+        CALL ABRT
+      ENDIF
+C
+C     -- SWITCH TO THE SMALL GRID SIZE FOR TDDFT
+C
+      NRADS=NRAD
+      NTHES=NTHE
+      NPHIS=NPHI
+      NLEBS=NLEB(1)
+      NRAD=NRADT
+      NTHE=NTHET
+      NPHI=NPHIT
+      NLEB(1)=NLEBT
+C
+C        POINT GROUP SYMMETRY CANNOT BE USED DURING THE RESPONSES.
+C        THE SELECTED STATE MAY NOT HAVE A SYMMETRIC DENSITY, SO
+C        WE ALSO HAVE TO DO THE GRADIENT INTEGRAL TERMS (LATER)
+C        W/O SYMMETRY.
+C
+      CALL SYMOFF
+      CALL URPADEN
+      CALL SYMON
+C
+C     AFTER THIS, DAF #16 HOLDS THE FULL TDDFT DENSITY MATRIX,
+C     BUT SEE THE NOTE IN -DENTD-.
+C     WHEREAS #308 WILL CONTAIN THE GROUND STATE DENSITY.
+C
+      CALL VALFM(LOADFM)
+      LDD  = LOADFM + 1
+      LD   = LDD    + L3*2
+      LD0  = LD     + L2*2
+      LAST = LD0    + L2*2
+      NEED = LAST - LOADFM -1
+      CALL GETFM(NEED)
+      IF(EXETYP.EQ.CHECK) THEN
+         CALL VCLR(X(LD) ,1,L2*2)
+         CALL VCLR(X(LD0),1,L2*2)
+      ELSE
+C
+         CALL DAREAD(IDAF,IODA,X(LD),L2,16,0)
+         CALL DAREAD(IDAF,IODA,X(LD+L2),L2,20,0)
+C
+         CALL DCOPY(L2*2,X(LD),1,X(LD0),1)
+         CALL DENTD(X(LD),X(LDD),L1)
+      END IF
+      CALL DAWRIT(IDAF,IODA,X(LD0),L2*2,308,0)
+      CALL DAWRIT(IDAF,IODA,X(LD)    ,  L2, 16,0)
+      CALL DAWRIT(IDAF,IODA,X(LD+L2) ,  L2, 20,0)
+C
+c     write(6,*) "www den check for Beta in UTD-DFT"
+c     CALL PRTRI(X(LD+L2),L1)
+C
+      CALL RETFM(NEED)
+C
+c     write(6,'("www Density =",F12.8)')  (X(LD+iii-1),iii=1,L2)
+C     --- GENERATE TD-DFT NATURAL ORBITALS (FROM RELAXED DENSITY) ---
+C        AS MANY EXCITED STATES WILL HAVE NON-SYMMETRIC DENSITY
+C        MATRICES (AFTER ALL, SINGLY EXCITED), WE CAN'T PERMIT
+C        THE SYMMETRY DIAGONALIZATION TO COPY DEGENERATE IRREPS.
+C
+c     IF(NPRINT.NE.-5) THEN
+c        NONABEL = .NOT.ABELPT()
+c        IF(NONABEL) CALL SYMOFF
+c        CALL TDDNOS
+c        IF(NONABEL) CALL SYMON
+c     END IF
+C
+      IF(MASWRK) WRITE(IW,9000)
+      CALL TIMIT(1)
+C
+      IF(NPRINT.NE.-5) CALL PROPTY('TDDF')
+C
+      IF(NFFAT.GT.0) CALL FFTDDFTDIP
+C
+C
+C     -- SWITCH BACK TO THE REGULAR GRID SIZE, E.G. FOR GRADIENT STEP
+C
+      NRAD=NRADS
+      NTHE=NTHES
+      NPHI=NPHIS
+      NLEB(1)=NLEBS
+      IPCM  = IPCMSV
+C
+      RETURN
+C
+c1000 FORMAT(/1X,71(1H-)/
+c    *  19X,'LC-TDDFT ENERGY GRADIENT CALCULATION'//
+c    *  14X,'BY MAHITO CHIBA, TAKAO TSUNEDA, KIMIHIKO HIRAO,'/
+c    *  21X,'J. CHEM. PHYS. 124 (2006) 144106.'/
+c    *       1X,71(1H-)/)
+c1100 FORMAT(/1X,71(1H-)/
+c    *  19X,'TD-DFT ENERGY GRADIENT CALCULATION'/
+c    *  19X,'CODED BY MAHITO CHIBA (AIST, JAPAN)'/
+c    *       1X,71(1H-)/)
+ 9000 FORMAT(1X,'..... DONE WITH TD-DFT EXCITED STATE RESPONSE',
+     *          ' AND DENSITY MATRIX .....')
+      END
+C
+C*MODULE UTDGRD  *DECK URPADEN
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Calculate Z-vectors
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE URPADEN
+      use mx_limits, only: mxatm,mxgrid
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      LOGICAL TRIPLET,PACK2E,GOPARR,DSKWRK,MASWRK,SG1,SG1T,TAMMD,
+     *        TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /INTFIL/ NINTMX,NHEX,NTUPL,PACK2E,INTTYP,IGRDTYP
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /PCKLAB/ LABSIZ
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+C
+      DATA CHECK/8HCHECK   /
+C
+      L0   = NINTMX
+      L1   = NUM
+      L2   = (NUM *(NUM+1))/2
+      L3   = NUM * NUM
+      LX   = NQMT
+      NOCA = NA
+      NOCB = NB
+      NVIA = LX   - NOCA
+      NVIB = LX   - NOCB
+      L7A  = NOCA * NVIA
+      L7B  = NOCB * NVIB
+      L7   = max(l7a,l7b)
+C
+C     --- MEMORY ALLOCATION
+C
+      CALL VALFM(LOADFM)
+C
+      LTA    = LOADFM   + 1
+      LTB    = LTA      + L3
+C     I10:TA(L3)OR PA(L3)
+      LV1A   = LTB      + L3
+      LV1B   = LV1A     + L7
+C     I20:V1(L7)
+      LV2A   = LV1B     + L7
+      LV2B   = LV2A     + L7
+C     I30:V2(L7)
+      LGXCA  = LV2B     + L7
+      LGXCB  = LGXCA    + L2
+C     I40:GXC(L2)
+      LFXCVA = LGXCB    + L2
+      LFXCVB = LFXCVA   + L2
+C     I50:FXCV(L2)  
+      LFXCTA = LFXCVB   + L2
+      LFXCTB = LFXCTA   + L2
+C     I60:FXCT(L2)
+      LRA    = LFXCTB   + L2
+      LRB    = LRA      + L7
+C     I70:R(L7) OR Z(L7)
+      LQAI   = LRB      + L7
+      LQBI   = LQAI     + L7
+C     I80:QAI(L7)
+      LTMPA  = LQBI     + L7
+      LTMPB  = LTMPA    + L3
+C     I90:TEMP
+      LVECA  = LTMPB    + L3
+      LVECB  = LVECA    + L3
+C     I100:MO(L3)
+      LEA    = LVECB    + L3
+      LEB    = LEA      + LX 
+C     I110:E(LX)
+      LAST   = LEB      + LX
+      NEEDRPA= LAST     - LTA
+      CALL GETFM(NEEDRPA)
+C
+C     ---- READ MO
+C
+      CALL DAREAD(IDAF,IODA,X(LVECA),L1*LX,15,0)
+      CALL DAREAD(IDAF,IODA,X(LVECB),L1*LX,19,0)
+C
+C     ---- CALCULATE TA(L1,L1)
+C
+      IF(EXETYP.EQ.CHECK) GO TO 50
+C
+      CALL DAREAD(IDAF,IODA,X(LV1A),L7*2,IRECTD,0)
+      CALL DAREAD(IDAF,IODA,X(LV2A),L7*2,IRECTD+1,0)
+C
+c     write(6,*) "www LV1A for Alpha:"
+c     write(6,'("www LV1A:",2F12.8)')
+c    *         (X(LV1A+iii-1),X(LV2A+iii-1),III=1,L7)
+c
+c     write(6,*) "www LV1B for Beta:"
+c     write(6,'("www LV1B:",2F12.8)')
+c    *         (X(LV1B+iii-1),X(LV2B+iii-1),III=1,L7)
+C
+      IF (TAMMD) THEN
+         ITF = 1
+      ELSE
+         ITF = 0
+      ENDIF
+C     Alpha TA
+      CALL TCONST(X(LTA),X(LV1A),X(LV2A),LX,NOCA,ITF)
+      CALL DGEMM('N','N',L1,LX,LX,ONE,X(LVECA),L1,X(LTA),LX,ZERO,
+     *           X(LTMPA),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(LTMPA),L1,X(LVECA),L1,ZERO,
+     *           X(LTA),L1)
+C
+      CALL TCONST(X(LTB),X(LV1B),X(LV2B),LX,NOCB,ITF)
+      CALL DGEMM('N','N',L1,LX,LX,ONE,X(LVECB),L1,X(LTB),LX,ZERO,
+     *           X(LTMPB),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(LTMPB),L1,X(LVECB),L1,ZERO,
+     *           X(LTB),L1)
+C 
+c     write(6,*) "www LTA for Alpha:"
+c     write(6,'("www LTA:",F12.8)')
+c    *         (X(LTA+iii-1),III=1,L3)
+c     write(6,*) "www LTB for Beta:"
+c     write(6,'("www LTB:",F12.8)')
+c    *         (X(LTB+iii-1),III=1,L3)
+c     ---- CALCULATE GXC(L2),FXCV(L2),FXCT(L2):GRID CALCULATION
+C
+   50 CONTINUE
+      IF(NDFTFG.EQ.1) THEN
+         CALL UFGMNG(X(LGXCA),X(LGXCB),X(LFXCVA),X(LFXCVB),
+     *               X(LFXCTA),X(LFXCTB),X(LTA),X(LTB),
+     *               L1,L2,L3,LX,IRECTD,NEEDMNG)
+      ELSE
+         NEEDMNG=0
+      ENDIF
+      NEEDMX = NEEDMNG + NEEDRPA
+C
+      ITF = 0
+C
+C     ---- R(L7)
+c     write(6,*) "wwwchk=",NDFTFG
+C
+      CALL URMNG(X(LRA),X(LRB),X(LQAI),X(LQBI),X(LGXCA),X(LGXCB),
+     *           X(LFXCVA),X(LFXCVB),X(LFXCTA),X(LFXCTB),
+     *           X(LTA),X(LTB),X(LV1A),X(LV1B),X(LV2A),X(LV2B),
+     *           X(LVECA),X(LVECB), NOCA,NOCB,NVIA,NVIB,
+     *           L0,L1,L2,L3,L7A,L7B,L7,LX,
+     *           LABSIZ,IRECTD,NEEDMNG,ITF)
+C
+      NEEDMX = MAX(NEEDMX,NEEDMNG + NEEDRPA)
+C
+C     ---- Z_MO(L7) AND PA(L1,L1) =TA+ZA
+C
+      CALL DAREAD(IDAF,IODA,X(LEA),LX,17,0)
+      CALL DAREAD(IDAF,IODA,X(LEB),LX,21,0)
+C
+      CALL UZPMNG(X(LRA),X(LRB),X(LTA),X(LTB),
+     *            X(LVECA),X(LVECB),X(LEA),X(LEB),
+     *            L0,L1,L2,L3,LX,L7A,L7B,L7,
+     *            NOCA,NOCB,NVIA,NVIB,LABSIZ,IRECTD,NEEDMNG,ITF)
+      NEEDMX = MAX(NEEDMX,NEEDMNG + NEEDRPA)
+C
+c     write(6,'("wwwchk ZvecA =",F12.8)') (X(LRA-1+iii),iii=1,L7)
+c     write(6,'("wwwchk ZvecB =",F12.8)') (X(LRB-1+iii),iii=1,L7)
+C
+C     ---- CALCULATE W_AO(L1,L1)
+C
+      CALL UWMNG(X(LQAI),X(LQBI),X(LGXCA),X(LGXCB),X(LTA),X(LTB),
+     *          X(LRA),X(LRB),X(LV1A),X(LV1B),X(LV2A),X(LV2B),
+     *          X(LVECA),X(LVECB),X(LEA),X(LEB),
+     *          NOCA,NOCB,L0,L1,L2,L3,LX,LABSIZ,NEEDMNG,ITF)
+C
+      NEEDMX = MAX(NEEDMX,NEEDMNG + NEEDRPA)
+      IF(MASWRK) WRITE(IW,9010) NEEDMX
+C
+      CALL RETFM(NEEDRPA)
+      RETURN
+ 9010 FORMAT(1X,'MAXIMUM MEMORY DURING TDDFT RESPONSES=',I10,' WORDS.')
+      END
+C*MODULE UTDGRD  *DECK UFGMNG
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Fock F_xc contribution
+C>
+C>    @author  Hiroya Nakata
+      SUBROUTINE UFGMNG(GXCA,GXCB,FXCVA,FXCVB,FXCTA,FXCTB,
+     *                  TA,TB,L1,L2,L3,LX,IRECTD,NEED)
+      use mx_limits, only: mxatm
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      DIMENSION GXCA(*),GXCB(*),FXCVA(*),FXCVB(*)
+      DIMENSION FXCTA(*),FXCTB(*),TA(*),TB(*)
+C
+c     LOGICAL GOPARR,DSKWRK,MASWRK
+C
+C
+      COMMON /FMCOM / X(1)
+      COMMON /INFGRD/RHOMIN,ILENG,MAXGRD
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+c     COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+C
+      DATA CHECK/8HCHECK   /
+C
+C     --- MEMORY ALLOCATION
+C
+      CALL VALFM(LOADFM)
+      LV1A    = LOADFM  + 1
+      LV1B    = LV1A    + L3
+C     I10:V1A(L3) OR TA(L3)
+      LASTI   = LV1B    + L3
+C     -- MEMORY FOR DFT GRID
+      LXYZGRD = LASTI   + 1
+C     J10:XYZGRD(MAXGRD*3)
+      LXYZWGT = LXYZGRD + MAXGRD*3
+C     J20:XYZWGT(MAXGRD)
+      LXYZDCH = LXYZWGT + MAXGRD
+C     J30:XYZDCH
+      LVA     = LXYZDCH + 4 * L1 * ILENG
+      LVB     = LVA     + L3
+C     J40:V(L3)ORD(L2)
+      J50     = LVB     + L3
+C     J50:---
+      LKCP    = J50
+C     J90:KCP(MAXGRD)
+      LCOEF   = LKCP    + MAXGRD
+C     J100:COEF(6*ILENG)
+      LDTRAI  = LCOEF   + 4 * 8 * ILENG
+C     J110:DTRAI_(5*ILENG)
+      LDRHOI  = LDTRAI  + 2 * 5 * ILENG
+C     J120:DRHOI_(4*MAXGRD)
+      LEX0    = LDRHOI  + 8 * MAXGRD
+C     J130:EX0(ILENG)
+      LEX     = LEX0    + ILENG
+C     J140:EX(38*ILENG)
+      LEC0    = LEX     + 38* ILENG
+C     J150:EC0(ILENG)
+      LEC     = LEC0    + ILENG
+C     J160:EC(119*ILENG)
+      J170    = LEC     + 119*ILENG
+      LAOMAX  = J170
+C     J180:AOMAX(L1) xxx NA+NB?
+      LIAO    = LAOMAX  + MAX(L1,4*NA)
+C     J190:IAO(L1) IN TDFXCP AND GMO(NA,4) IN TDDFTSET
+      IPRGRD  = LIAO    + L1
+C     J200:IPRGRD(2*L3)
+      LDTAUI  = IPRGRD  + 4 * L3
+C     J210:DTAUI_(MAXGRD)
+      LGMO    = LDTAUI  + MAXGRD * 2
+      LWRK1   = LGMO    + L1     * 4 * 2
+      LAST    = LWRK1   + L1     * 2
+c     IDUM    = LAST
+      NEED    = LAST    - LV1A
+      CALL GETFM(NEED)
+      IF(EXETYP.EQ.CHECK) GO TO 800
+C
+C     ----- CONSTRUCT DENSITY
+C     -- READ MO
+      CALL DAREAD(IDAF,IODA,X(LVA),L1*LX,15,0)
+      CALL DAREAD(IDAF,IODA,X(LVB),L1*LX,19,0)
+C
+      NPTGRD = MAXGRD
+C
+      CALL UTDDFTSET(X(LXYZGRD),X(LXYZWGT),X(LXYZDCH),X(LVA),X(LVB),
+     *               X(LDRHOI),X(LDTAUI),X(LAOMAX),X(LGMO),
+     *               ILENG,NPTGRD,L1)
+C
+C     ---- CALCULATE GXC(L2)
+C                               --READ V1A
+      CALL DAREAD(IDAF,IODA,X(LV1A),L3*2,IRECTD+2,0)
+      CALL VCLR(GXCA,1,L2)
+      CALL VCLR(GXCB,1,L2)
+C
+      CALL UTDFXCP2(GXCA,RHO,X(LXYZGRD),X(LXYZWGT),X(LXYZDCH),
+     *     X(LV1A),X(LV1B),X(LDRHOI),X(LDTAUI), 
+     *     X(LDTRAI),X(LCOEF),X(LEX),X(LEC),X(LEX0),X(LEC0),
+     *     X(LAOMAX),X(IPRGRD),X(LWRK1),X(LIAO),ILENG,NPTGRD,
+     *     L1,L2,3,.false.,0)
+C
+C
+c     IF(GOPARR) THEN
+c        CALL DDI_GSUMF(2332,GXCA, L2)
+c        CALL DDI_GSUMF(2332,GXCB, L2)
+c        CALL DDI_GSUMF(2333,RHO,1)
+c     ENDIF
+C
+c     write(6,*) "www GXCA:"
+c     call prtri(GXCA,l1)
+c     write(6,*) "www GXCB:"
+c     call prtri(GXCB,l1)
+C     ---- CALCULATE FXCV(L2)
+C
+      CALL VCLR(FXCVA,1,L2)
+      CALL VCLR(FXCVB,1,L2)
+C
+      CALL UTDFXCP2(FXCVA,RHO,X(LXYZGRD),X(LXYZWGT),X(LXYZDCH),
+     *     X(LV1A),X(LV1B),X(LDRHOI),X(LDTAUI), 
+     *     X(LDTRAI),X(LCOEF),X(LEX),X(LEC),X(LEX0),X(LEC0),
+     *     X(LAOMAX),X(IPRGRD),X(LWRK1),X(LIAO),ILENG,NPTGRD,
+     *     L1,L2,2,.false.,0)
+C
+c     IF(GOPARR) THEN
+c        CALL DDI_GSUMF(2334,FXCVA, L2)
+c        CALL DDI_GSUMF(2334,FXCVB, L2)
+c        CALL DDI_GSUMF(2335,RHO,1)
+c     ENDIF
+C
+c     write(6,*) "www FXCVA:"
+c     call prtri(FXCVA,l1)
+c     write(6,*) "www FXCVB:"
+c     call prtri(FXCVB,l1)
+C
+C     ---- CALCULATE FXCT(L2)
+C
+      CALL VCLR(FXCTA,1,L2)
+      CALL VCLR(FXCTB,1,L2)
+C
+C
+C
+      CALL UTDFXCP2(FXCTA,RHO,X(LXYZGRD),X(LXYZWGT),X(LXYZDCH),
+     *     TA,TB,X(LDRHOI),X(LDTAUI),
+     *     X(LDTRAI),X(LCOEF),X(LEX),X(LEC),X(LEX0),X(LEC0),
+     *     X(LAOMAX),X(IPRGRD),X(LWRK1),X(LIAO),ILENG,NPTGRD,
+     *     L1,L2,2,.false.,0)
+C
+C
+C
+C
+c     IF(GOPARR) THEN
+c       CALL DDI_GSUMF(2336,FXCTA, L2)
+c       CALL DDI_GSUMF(2336,FXCTB, L2)
+c       CALL DDI_GSUMF(2337,RHO,1)
+c     ENDIF
+C
+c     write(6,*) "www FXCTA:"
+c     call prtri(FXCTA,l1)
+c     write(6,*) "www FXCTB:"
+c     call prtri(FXCTB,l1)
+C
+C
+  800 CONTINUE
+      CALL RETFM(NEED)
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK URMNG
+C>
+C>    @brief   TD-DFT gradient
+C>
+C>    @details Rmn values for UTD
+C>
+C>    @author  Hiroya nakata
+C>
+      SUBROUTINE URMNG(RA,RB,QAI,QBI,GXCA,GXCB,
+     *           FXCVA,FXCVB,FXCTA,FXCTB,
+     *           TA,TB, V1A,V1B,V2A,V2B, VA,VB, NOCA,NOCB,NVIA,NVIB,
+     *           L0,L1,L2,L3,L7A,L7B,L7,LX,
+     *           LABSIZ,IRECTD,NEEDMNG,ITF)
+      
+      USE MX_LIMITS,ONLY:MXFRG,MXDFG,MXDPPT,mxgrid,mxatm
+      USE comm_EFPPAR
+      USE comm_FRGINF
+      USE comm_EFPTDG
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      DIMENSION RA(*),RB(*),QAI(*),QBI(*),
+     *          GXCA(*),GXCB(*),FXCVA(*),FXCVB(*),FXCTA(*),FXCTB(*),
+     *          TA(*),TB(*),V1A(*),V1B(*),V2A(*),V2B(*),VA(*),VB(*)
+C
+      LOGICAL SG1,IPCFP
+c     LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /DFTBS / LSDFTB
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+c     COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+c    *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+c    *                LFFCHARG,LFFPOL,LFFDIP,
+c    *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+c    *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+c    *                LFFBOND0,LFFFCBOND,
+c    *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+c    *                LFFDIHB0,LFFFCDIHB,
+c    *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+c    *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+c    *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+c    *                LFFVEL,LFFQMVEL,
+c    *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+c    *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+c    *                LFFCLPR,LFFZLPR,LFFNLPR,
+c    *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+c    *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+c    *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+c    *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLST,
+c    *                LFFMAPLST,LFFCMAPCO
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+c     COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+c    *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+c    *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTDD,ITDFG,ITDPRP,
+c    *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /PCMDIM/ MXSP,MXTS,MEMPCM1,MEMPCM2,NTS
+      COMMON /PCMPAR/ IPCM,NFT26,NFT27,IRPPCM,IEF,IP_F,NFMOPCM,IHET
+c     COMMON /PCMPNT/ LXYZRE,LSSFE,LLIST,LALPCM,LRINPCM,LINAPCM,LINFPCM,
+c    *                LINIPCM,LMEPCM,LAXYZCT,LXYZCT2,LNVERT,LQSN,LQSE,
+c    *                LQFS,LQIND,LISPHE,LVAD,LQOR,LVECMUL,LAIPRJ,LFIPRJ,
+c    *                LPEL,LPCMCDR,LDAI,LIDDAI,LQSND,LQSED,LEPSPCM
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+C
+      DATA CHECK/8HCHECK   /
+C
+C
+c     if(l7a.ne.0) write(6,*) "l7b=",l7b,needmng
+C
+      NOCA = NA
+      NOCB = NB
+      NVIA = LX   - NOCA
+      NVIB = LX   - NOCB
+C
+C
+      CALL VALFM(LOADFM)
+      CALL GOTFM(NGOTMX)
+      LV1A     = LOADFM + 1
+      LV1B     = LV1A   + L3
+C     I10:V1A(L1,L1) OR SCRATCH
+      LSCR     = LV1B   + L3 * 2
+C     I20:SCRATCH
+      I30      = LSCR   + L3
+C     I30:---
+      I40      = I30
+C     I40:XX(L0)
+      IIX      = I40      + L0 * 2
+C     I50:IX(L0*LABSIZ)
+      LFP1A    = IIX      + L0 * LABSIZ
+      LFP1B    = LFP1A    + L2
+C     I60:FP1(L2)
+      LFPTA    = LFP1B    + L2
+      LFPTB    = LFPTA    + L2
+C     I70:FPT(L2)
+      LFM2A    = LFPTB    + L2
+      LFM2B    = LFM2A    + L3
+C     I80:FM2(L1,L1)
+      I90      = LFM2B    + L3
+C     I90:--
+      I100     = I90
+C     I100:--  
+      I110     = I100
+C     I110:--  
+      LHP1IJA  = I110
+      LHP1IJB  = LHP1IJA  + NOCA*NOCA
+C     I120:HPV1IJ(NOCC,NOCC)
+      LHPV1ABA = LHP1IJB  + NOCB*NOCB
+      LHPV1ABB = LHPV1ABA + NVIA*NVIA
+C     I130:HPV1AB(NVIR,NVIR)
+      LHMV2IJA = LHPV1ABB + NVIB*NVIB
+      LHMV2IJB = LHMV2IJA + NOCA*NOCA
+C     I140:HMV2IJ(NOCC,NOCC)
+      LHMV2ABA = LHMV2IJB + NOCB*NOCB
+      LHMV2ABB = LHMV2ABA + NVIA*NVIA
+C     I150:HMV2AB(NVIR,NVIR)
+      LHPTIA   = LHMV2ABB + NVIB*NVIB
+      LHPTIB   = LHPTIA   + L7
+C     I155:HPTIA(L7)
+      I160     = LHPTIB   + L7
+C     I160:--
+      LIA      = I160
+      LIB      = LIA      + L7
+C     I170:G_IA(L7)
+      LAST     = LIB      + L7
+C
+C     -- PCM MEMORY
+C
+c     ISD=1
+      IPCFP=.FALSE.
+      CALL PCMMEM3(IPCFP,L2,LAST,NTSPAR,LSOL,LCHG,LDMATM,LQPOT,LQFLD,
+     *             LVPOT,LSE,LDE,LQ0,LQ1,LQ2,LQ3,LD0,LQA,LDIMAT,LQREP,
+     *             LTMP0,LTMP1,LTMP2,LIPVT,LPOTTMP,LRMUL,LCHG2,
+     *             LASCCRD,LASCCHG,LASCDIP,LASCQAD,LDISV,LDIS1,LDIS2,
+     *             LCQEF,LQEFF,LELD,LXDINT,LYDINT,LZDINT,LEFLD,MADD,
+     *             LABFLD,LVECMP,LVEC_2,LVEC_S,LAPROJ,LFPROJ)
+      IF(IPCM.EQ.1 .AND. IEFP.EQ.0) THEN
+         LWRK1 = LAST
+         LWRK3 = LWRK1 + L3
+         LSCR  = LWRK3 + L3
+         LQSET = LSCR  + L1
+         LQSNT = LQSET + NTS
+         LQSEDT= LQSNT + NTS
+         L200  = LQSEDT+ NTS
+         L300  = L200  + L2
+         LAST  = L300  + L2
+      END IF
+      IF (DFTBFL.AND.IPCM.EQ.1) THEN
+         LZAN  = LAST
+         LSDFTB= LZAN  + NAT
+         LAST  = LSDFTB+ L2
+      END IF
+C
+C     EFP SOLVATION MODEL
+C
+      IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0) THEN
+         LXEFI = LAST
+         LYEFI = LXEFI + L2
+         LZEFI = LYEFI + L2
+         LAST  = LZEFI + L2
+      END IF
+C
+      IF(ITDEFG.EQ.1 .AND. IPCM.EQ.1 .AND. IEF.EQ.10) THEN
+         LDINDSV  = LAST
+         LDINDDSV = LDINDSV  + 3*NPTTPT
+         LQSETD   = LDINDDSV + 3*NPTTPT
+         L200     = LQSETD   + NTS
+         L300     = L200     + L2
+         LAST     = L300     + L2
+      END IF
+C
+      IF(NFFAT.GT.0) THEN
+         L200     = LAST
+         L300     = L200     + L2
+         LAST     = L300     + L2
+      END IF
+C
+      IDUM=LAST
+C
+      NEED=LAST-LV1A
+      CALL GETFM(NEED)
+      IF(EXETYP.EQ.CHECK) GO TO 800
+      IF(DFTBFL.AND.IPCM.EQ.1) THEN
+        CALL DFTB_GET_ZAN(0,NAT,X(LZAN),ZAN)
+        CALL DAREAD(IDAF,IODA,X(LSDFTB),L2,12,0)
+      END IF
+C
+C     ---- FPT(L2),FP1(L2),FM2(L1,L1)
+C     FPT --TA
+      CALL VCLR(X(LFPTA),1,L2*2)
+C
+c     write(6,*) "www TA:"
+c     write(6,'("wwwTA:",F12.8)') (TA(iii),iii=1,L3)
+C
+      IF(DFTBFL) THEN
+c        CALL DFTB_TD_K(TA,X(I70),X(IDUM),X(IDUM),ITF,2,1,L1,L2,
+c    *                  NOCC,.FALSE.,.FALSE.)
+      ELSE
+c        CALL TD2E(TA,X(I70),X(IDUM),X(I40),X(I50),L1,ONE,0,1,ITF,1)
+         CALL UTD2E(TA,TB,X(LFPTA),X(LFPTB),X(IDUM),X(IDUM),
+     *             X(I40),X(IIX),L1,ONE,0,1,ITF,1)
+      END IF
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0) CALL TDEFP(TA,X(I70),
+c    *                           X(LXEFI),X(LYEFI),X(LZEFI),L2,L1,1)
+C        ROUTINE TDEFP(PA,F,XEFI,YEFI,ZEFI,L2,L1,NV)
+      IF(NDFTFG.EQ.1) THEN
+         CALL DAXPY(L2,2.0D+00,FXCTA,1,X(LFPTA),1)
+         CALL DAXPY(L2,2.0D+00,FXCTB,1,X(LFPTB),1)
+      END IF
+C     FP1 --V1A
+C
+c     write(6,*) "www FPTA:"
+c     call prtri(x(LFPTA),l1)
+C
+      CALL DAREAD(IDAF,IODA,X(LV1A),L3*2,IRECTD+2,0)
+      CALL VCLR(X(LFP1A),1,L2*2)
+      IF(DFTBFL) THEN
+c        CALL DFTB_TD_K(X(I10),X(I60),X(IDUM),GXC,ITF,2,1,L1,L2,
+c    *                  NOCC,TRIPLET,DFTB3)
+      ELSE
+         CALL UTD2E(X(LV1A),X(LV1B),X(LFP1A),X(LFP1B),X(IDUM),X(IDUM),
+     *             X(I40),X(IIX),L1,ONE,0,1,ITF,1)
+      END IF
+C                 EFP CONTRIBUTION
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0 ) CALL TDEFP(X(I10),X(I60),
+c    *                           X(LXEFI),X(LYEFI),X(LZEFI),L2,L1,1)
+C        ROUTINE TDEFP(PA,F,XEFI,YEFI,ZEFI,L2,L1,NV)
+      IF(NDFTFG.EQ.1) THEN 
+        CALL DAXPY(L2,2.0D+00,FXCVA,1,X(LFP1A),1)
+        CALL DAXPY(L2,2.0D+00,FXCVB,1,X(LFP1B),1)
+      END IF
+C
+c     write(6,*) "www FP1A:"
+c     write(6,'(" wwwFP1A :",F12.8)') (X(LFP1A+iii-1),iii=1,L2)
+C
+C     FM2 --V2A
+      CALL DAREAD(IDAF,IODA,X(LV1A),L3*2,IRECTD+3,0)
+      CALL VCLR(X(LFM2A),1,L3*2)
+C     (A-B) MATRIX FOR DFTB BECOMES ZERO
+      IF(.NOT.DFTBFL) THEN
+         CALL UTD2E(X(LV1A),X(LV1B),X(IDUM),X(IDUM),X(LFM2A),X(LFM2B),
+     *             X(I40),X(IIX),L1,ONE,1,0,ITF,1)
+      END IF
+C
+c     write(6,*) "www FM2A:"
+c     write(6,'("www FM2A :",F12.8)') (X(LFM2A+iii-1),iii=1,L3)
+C     POLARIZABLE FORCE FIELD CONTRIBUTION
+C
+C     IF (NFFAT.GT.0) THEN
+C         CALL DAREAD(IDAF,IODA,X(I10),L3,IRECTD+2,0)
+C         CALL TDPCMDEN(X(L200),X(I10),L1)
+C         CALL TDPCMDEN(X(L300),TA,L1)
+C         CALL QMMMPOLINT2(X(I60),X(L200),X(LFFDIPMP),L2,L1,
+C    *                     X(LFFNONLSTQ))
+C         CALL QMMMPOLINT2(X(I70),X(L300),X(LFFDIPMP),L2,L1,
+C    *                     X(LFFNONLSTQ))
+C     END IF
+C
+C     CPCM CONTRIBUTION
+C
+C      IF (IPCM.EQ.1 .AND. IEF.EQ.10 .AND. IEFP.EQ.0) THEN
+C          CALL DAREAD(IDAF,IODA,X(I10),L3,IRECTD+2,0)
+C          CALL TDPCMDEN(X(L200),X(I10),L1)
+C          CALL VCLR(X(LQ0),1,NTS)
+C          CALL PCMFLD(X(I60),DUMMY,X(L200),X(LSOL),
+C     *               X(LCHG),X(LWRK1),X(LDISV),
+C     *               X(LDIS1),X(LDIS2),X(LWRK3),X(LSCR),X(LDMATM),
+C     *               X(LCQEF),X(LQEFF),X(LELD),X(LQPOT),X(LQFLD),
+C     *               X(LVPOT),X(LSE),X(LDE),
+C     *               X(LQ0),X(LQ1),X(LQ2),X(LQ3),
+C     *               X(LD0),X(LQA),X(LDIMAT),X(LQREP),
+C     *               X(LTMP0),X(LTMP1),X(LTMP2),X(LIPVT),
+C     *               X(LPOTTMP),X(LRMUL),
+C     *               TCH,QET,QETN,QESC,ISD,NFT27,IPCFP,L1,L2,NTSPAR,
+C     *               X(LAXYZCT),X(LAXYZCT+MXTS),X(LAXYZCT+MXTS*2),
+C     *               X(LXYZCT2),X(LXYZCT2+MXTS),X(LXYZCT2+MXTS*2),
+C     *               X(LAXYZCT+MXTS*3),X(LQSNT),X(LQSET),
+C     *               X(LQSEDT),X(LQFS),
+C     *               X(LVECMUL),X(LCHG2),X(LQIND+MXTS),X(LPEL),
+C     *               X(LASCCRD),X(LASCCHG),X(LASCDIP),X(LASCQAD),
+C     *               X(LXYZRE),X(LXYZRE+MXSP),X(LXYZRE+MXSP*2),
+C     *               X(LXYZRE+MXSP*3),X(LISPHE),X(LLIST),X(LEPSPCM))
+C          CALL TDPCMDEN(X(L300),TA,L1)
+C          CALL VCLR(X(LQ0),1,NTS)
+C          CALL PCMFLD(X(I70),DUMMY,X(L300),X(LSOL),
+C     *               X(LCHG),X(LWRK1),X(LDISV),
+C     *               X(LDIS1),X(LDIS2),X(LWRK3),X(LSCR),X(LDMATM),
+C     *               X(LCQEF),X(LQEFF),X(LELD),X(LQPOT),X(LQFLD),
+C     *               X(LVPOT),X(LSE),X(LDE),
+C     *               X(LQ0),X(LQ1),X(LQ2),X(LQ3),
+C     *               X(LD0),X(LQA),X(LDIMAT),X(LQREP),
+C     *               X(LTMP0),X(LTMP1),X(LTMP2),X(LIPVT),
+C     *               X(LPOTTMP),X(LRMUL),
+C     *               TCH,QET,QETN,QESC,ISD,NFT27,IPCFP,L1,L2,NTSPAR,
+C     *               X(LAXYZCT),X(LAXYZCT+MXTS),X(LAXYZCT+MXTS*2),
+C     *               X(LXYZCT2),X(LXYZCT2+MXTS),X(LXYZCT2+MXTS*2),
+C     *               X(LAXYZCT+MXTS*3),X(LQSNT),X(LQSET),
+C     *               X(LQSEDT),X(LQFS),
+C     *               X(LVECMUL),X(LCHG2),X(LQIND+MXTS),X(LPEL),
+C     *               X(LASCCRD),X(LASCCHG),X(LASCDIP),X(LASCQAD),
+C     *               X(LXYZRE),X(LXYZRE+MXSP),X(LXYZRE+MXSP*2),
+C     *               X(LXYZRE+MXSP*3),X(LISPHE),X(LLIST),X(LEPSPCM))
+C      END IF
+CC
+C      IF(ITDEFG.EQ.1 .AND. IPCM.EQ.1 .AND. IEF.EQ.10) THEN
+C         CALL DCOPY(3*NPTTPT,DIND ,1,X(LDINDSV) ,1)
+C         CALL DCOPY(3*NPTTPT,DINDD,1,X(LDINDDSV),1)
+C         CALL DAREAD(IDAF,IODA,X(I10),L3,IRECTD+2,0)
+C         CALL TDPCMDEN(X(L200),X(I10),L1)
+C         CALL PCMPOLFLD(X(I60),X(L200),X(LAXYZCT),
+C     *               X(LAXYZCT+MXTS),X(LAXYZCT+2*MXTS),
+C     *               X(LAXYZCT+3*MXTS),L2,L1,X(LQSETD),1)
+C         CALL TDPCMDEN(X(L300),TA,L1)
+C         CALL PCMPOLFLD(X(I70),X(L300),X(LAXYZCT),
+C     *               X(LAXYZCT+MXTS),X(LAXYZCT+2*MXTS),
+C     *               X(LAXYZCT+3*MXTS),L2,L1,X(LQSETD),1)
+C         CALL DCOPY(3*NPTTPT,X(LDINDSV) ,1,DIND ,1)
+C         CALL DCOPY(3*NPTTPT,X(LDINDDSV),1,DINDD,1)
+C      END IF
+C
+C     ---- HPV1AB, HMV2AB, HPV1IJ, HMV2IJ, HPTIA
+C     --HPV1AB
+      CALL CANTOGEN(X(LFP1A),X(LV1A),L1)
+      CALL CANTOGEN(X(LFP1B),X(LV1B),L1)
+      CALL MNTOAB(X(LV1A),X(LHPV1ABA),X(LSCR),VA,L1,LX,NOCA,NVIA)
+      CALL MNTOAB(X(LV1B),X(LHPV1ABB),X(LSCR),VB,L1,LX,NOCB,NVIB)
+C        ROUTINE MNTOAB(PAO,PMO,SCR,V,L1,LX,NOCC,NVAL)
+C     --HMV2AB
+      CALL MNTOAB(X(LFM2A),X(LHMV2ABA),X(LSCR),VA,L1,LX,NOCA,NVIA)
+      CALL MNTOAB(X(LFM2B),X(LHMV2ABB),X(LSCR),VB,L1,LX,NOCB,NVIB)
+C     --HPV1IJ
+      CALL CANTOGEN(X(LFP1A),X(LV1A),L1)
+      CALL CANTOGEN(X(LFP1B),X(LV1B),L1)
+C     Alpha
+      CALL DGEMM('N','N',L1,NOCA,L1,ONE,X(LV1A),L1,VA,L1,ZERO
+     *          ,X(LSCR),L1)
+      CALL DGEMM('T','N',NOCA,NOCA,L1,ONE,VA,L1,X(LSCR),L1,ZERO
+     *          ,X(LHP1IJA),NOCA)
+C     Beta
+      CALL DGEMM('N','N',L1,NOCB,L1,ONE,X(LV1B),L1,VB,L1,ZERO
+     *          ,X(LSCR),L1)
+      CALL DGEMM('T','N',NOCB,NOCB,L1,ONE,VB,L1,X(LSCR),L1,ZERO
+     *          ,X(LHP1IJB),NOCB)
+C     --HMV2IJ alpha
+      CALL DGEMM('N','N',L1,NOCA,L1,ONE,X(LFM2A),L1,VA,L1,ZERO
+     *          ,X(LV1A),L1)
+      CALL DGEMM('T','N',NOCA,NOCA,L1,ONE,VA,L1,X(LV1A),L1,ZERO
+     *          ,X(LHMV2IJA),NOCA)
+C     --HMV2IJ beta
+      CALL DGEMM('N','N',L1,NOCB,L1,ONE,X(LFM2B),L1,VB,L1,ZERO
+     *          ,X(LV1B),L1)
+      CALL DGEMM('T','N',NOCB,NOCB,L1,ONE,VB,L1,X(LV1B),L1,ZERO
+     *          ,X(LHMV2IJB),NOCB)
+C     --HPTIA
+      CALL CANTOGEN(X(LFPTA),X(LV1A),L1)
+      CALL CANTOGEN(X(LFPTB),X(LV1B),L1)
+C
+      CALL MNTOIA(X(LV1A),X(LHPTIA),VA,X(LSCR),L1,LX,L7,NOCA,1)
+      CALL MNTOIA(X(LV1B),X(LHPTIB),VB,X(LSCR),L1,LX,L7,NOCB,1)
+C
+C     ---- GIA FOR R (DFT)
+C
+      IF(NDFTFG.EQ.1.OR.(DFTBFL.AND.DFTB3)) THEN
+       CALL CANTOGEN(GXCA,X(LV1A),L1)
+       CALL MNTOIA(X(LV1A),X(LIA),VA,X(LSCR),L1,LX,L7,NOCA,1)
+C
+       CALL CANTOGEN(GXCB,X(LV1B),L1)
+       CALL MNTOIA(X(LV1B),X(LIB),VB,X(LSCR),L1,LX,L7,NOCB,1)
+      ELSE
+       CALL VCLR(X(LIA),1,L7)
+       CALL VCLR(X(LIB),1,L7)
+      ENDIF
+C
+c      write(*,*) "wwwLIA"
+c      write(*,'("wwwchk LIA=",F12.8)') (X(LIA-1+iii),iii=1,L7)
+c      write(*,*) "wwwLIB"
+c      write(*,'("wwwchk LIB=",F12.8)') (X(LIB-1+iii),iii=1,L7)
+C     ---- R(L7)
+C
+      CALL URCALC(RA,RB,QAI,QBI,V1A,V1B,V2A,V2B,
+     * X(LIA),X(LIB),X(LHP1IJA),X(LHP1IJB),
+     * X(LHMV2IJA),X(LHMV2IJB),X(LHPV1ABA),X(LHPV1ABB),
+     * X(LHMV2ABA),X(LHMV2ABB),X(LHPTIA),X(LHPTIB),LX,L7,
+     * NOCA,NOCB,NVIA,NVIB)
+C
+c      write(*,'("wwwchk=",F12.8)') (RA(iii),iii=1,L7)
+C
+C
+  800 CONTINUE
+c     IF(DFTBFL.AND.IPCM.EQ.1) CALL DFTB_GET_ZAN(1,NAT,X(LZAN),ZAN)
+c     IF(DFTBFL.AND.DFTB3) CALL DAXPY(L7,-2.0D+00,X(I170),1,R,1)
+      CALL RETFM(NEED)
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK URCALC
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details R term contribution
+C>
+C>    @author  Hiroya Nakata
+      SUBROUTINE URCALC(RA,RB,QAI,QBI,V1A,V1B,V2A,V2B,GIA,GIB,
+     *           HPV1IJA,HPV1IJB,HMV2IJA,HMV2IJB,HPV1ABA,HPV1ABB,
+     *           HMV2ABA,HMV2ABB,HPTIA,HPTIB,LX,L7,
+     *           NOCA,NOCB,NVIA,NVIB)
+      use mx_limits, only: mxgrid
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      DIMENSION RA(*),RB(*),QAI(*),QBI(*),V1A(*),V1B(*),V2A(*),V2B(*),
+     *          GIA(*),GIB(*), 
+     *          HPV1IJA(NOCA,*), HPV1IJB(NOCB,*),
+     *          HMV2IJA(NOCA,*), HMV2IJB(NOCB,*),
+     *          HPV1ABA(NVIA,*), HPV1ABB(NVIB,*),
+     *          HMV2ABA(NVIA,*), HMV2ABB(NVIB,*),
+     *                 HPTIA(*),       HPTIB(*)
+C
+      LOGICAL SG1
+C
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+C
+      DATA ZERO/0.0D+00/
+C
+C     ++++ ALPHA PART ++++
+      DO I=1,NOCA
+        DO J=NOCA+1,LX
+          JJ=J-NOCA
+          IJ=(JJ-1)*NOCA+I
+C     --- FOR DUM1
+          DUM1=ZERO
+          DO K = NOCA+1,LX
+            KK   = K-NOCA
+            IB   = (KK-1)*NOCA+I
+            DUM  = V1A(IB)*HPV1ABA(JJ,KK)+V2A(IB)*HMV2ABA(JJ,KK)
+            DUM1 = DUM1+DUM
+          END DO
+C     --- FOR DUM2
+          DUM2=ZERO
+          DO K=1,NOCA
+            KA   = (JJ-1)*NOCA+K
+            DUM2 = DUM2+V1A(KA)*HPV1IJA(K,I)+V2A(KA)*HMV2IJA(K,I)
+          END DO
+          QAI(IJ)= DUM2
+C     --- FOR DUM3
+          DUM3   = HPTIA(IJ)
+C     --- TOTAL
+c         WRITE(6,*)'DUM1,DUM2,DUM3=',DUM1,DUM2,DUM3
+          RA(IJ) = DUM1 - DUM2 + DUM3
+        END DO
+      END DO
+C     --- ADD GXC TO R
+      IF(NDFTFG.EQ.1) CALL DAXPY(L7,2.0D+00,GIA,1,RA,1)
+      CALL DSCAL(L7,-1.0D+00,RA,1)
+C
+C     ++++ BETA PART ++++
+      DO I=1,NOCB
+        DO J=NOCB+1,LX
+          JJ=J-NOCB
+          IJ=(JJ-1)*NOCB+I
+C     --- FOR DUM1
+          DUM1=ZERO
+          DO K = NOCB+1,LX
+            KK   = K-NOCB
+            IB   = (KK-1)*NOCB+I
+            DUM  = V1B(IB)*HPV1ABB(JJ,KK)+V2B(IB)*HMV2ABB(JJ,KK)
+            DUM1 = DUM1+DUM
+          END DO
+C     --- FOR DUM2
+          DUM2=ZERO
+          DO K=1,NOCB
+            KA   = (JJ-1)*NOCB+K
+            DUM2 = DUM2+V1B(KA)*HPV1IJB(K,I)+V2B(KA)*HMV2IJB(K,I)
+          END DO
+          QBI(IJ)= DUM2
+C     --- FOR DUM3
+          DUM3   = HPTIB(IJ)
+C     --- TOTAL
+C       WRITE(6,*)'DUM1,DUM2,DUM3=',DUM1,DUM2,DUM3
+          RB(IJ) = DUM1 - DUM2 + DUM3
+        END DO
+      END DO
+C     --- ADD GXC TO R
+      IF(NDFTFG.EQ.1) CALL DAXPY(L7,2.0D+00,GIB,1,RB,1)
+      CALL DSCAL(L7,-1.0D+00,RB,1)
+C
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UZPMNG
+C>
+C>    @brief   TD-DFT gradient
+C>
+C>    @details Solve the Z-vector equation
+C>
+C>    @author  Hiroya nakata
+C>
+      SUBROUTINE UZPMNG(RA,RB,TA,TB,VA,VB,EA,EB,
+     *                  L0,L1,L2,L3,LX,L7A,L7B,L7,NOCA,NOCB,
+     *                  NVIA,NVIB,LABSIZ,IRECTD,NEED,ITF)
+C
+      USE MX_LIMITS,ONLY:MXFRG,MXDFG,MXDPPT,mxgrid,mxatm
+      USE comm_FRGINF
+      USE comm_EFPTDG
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK,SG1,IPCFP
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+      DIMENSION RA(*),RB(*),TA(*),TB(*),VA(*),VB(*),EA(*),EB(*)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /DFTBS / LSDFTB
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+c     COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+c    *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+c    *                LFFCHARG,LFFPOL,LFFDIP,
+c    *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+c    *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+c    *                LFFBOND0,LFFFCBOND,
+c    *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+c    *                LFFDIHB0,LFFFCDIHB,
+c    *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+c    *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+c    *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+c    *                LFFVEL,LFFQMVEL,
+c    *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+c    *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+c    *                LFFCLPR,LFFZLPR,LFFNLPR,
+c    *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+c    *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+c    *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+c    *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLST,
+c    *                LFFMAPLST,LFFCMAPCO
+      COMMON /FMCOM / X(1)
+      COMMON /INFGRD/RHOMIN,ILENG,MAXGRD
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /PCMDIM/ MXSP,MXTS,MEMPCM1,MEMPCM2,NTS
+      COMMON /PCMPAR/ IPCM,NFT26,NFT27,IRPPCM,IEF,IP_F,NFMOPCM,IHET
+c     COMMON /PCMPNT/ LXYZRE,LSSFE,LLIST,LALPCM,LRINPCM,LINAPCM,LINFPCM,
+c    *                LINIPCM,LMEPCM,LAXYZCT,LXYZCT2,LNVERT,LQSN,LQSE,
+c    *                LQFS,LQIND,LISPHE,LVAD,LQOR,LVECMUL,LAIPRJ,LFIPRJ,
+c    *                LPEL,LPCMCDR,LDAI,LIDDAI,LQSND,LQSED,LEPSPCM
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+C
+      DATA CHECK/8HCHECK   /
+      DATA THRE/1.0D-10/
+      DATA MXITER/50/
+C
+c     if(nvia.ne.0) write(6,*) "nvib=",nvib
+C
+      IF(MASWRK) THEN
+      WRITE(IW,*)'   -------------------------'
+      WRITE(IW,*)'      START Z-VECTOR LOOP'
+      WRITE(IW,*)'   -------------------------'
+      ENDIF
+C
+      CALL VALFM(LOADFM)
+      CALL GOTFM(NGOTMX)
+      I10    = LOADFM + 1
+C     I10:--
+      LXMA   = I10
+      LXMB   = LXMA   + L7
+C     I20:XM(L7)
+      LXMINA = LXMB   + L7
+      LXMINB = LXMINA + L7
+C     I30:XM_IN(L7)
+      LXTA   = LXMINB + L7
+      LXTB   = LXTA   + L7
+C     I40:X_T(L7)
+      KPAOA  = LXTB   + L7
+      KPAOB  = KPAOA  + L3
+C     K10:PK_AO(L1,L1) OR SCRATCH
+      KAPAOA = KPAOB  + L3
+      KAPAOB = KAPAOA + L2
+C     K20:AP_AO(L2)
+      KAPXCA = KAPAOB + L2
+      KAPXCB = KAPXCA + L2
+C     K30:APXC(L2)
+      KXX    = KAPXCB + L2
+C     K40:XX(L0)
+      KIX    = KXX    + L0
+C     K50:IX(L0*LABSIZ)
+      K60    = KIX    + L0*LABSIZ
+C     K60:---
+      LAPKA  = K60
+      LAPKB  = LAPKA  + L7
+C     I50:A_PK(L7)
+      I60    = LAPKB  + L7
+C     I60:---
+      LRA    = I60
+      LRB    = LRA    + L7
+C     I70:R(L7)
+      LPKA   = LRB    + L7
+      LPKB   = LPKA   + L7
+C     I80:PK(L7)
+      LZAOA  = LPKB   + L7
+      LZAOB  = LZAOA  + L1*L1
+C     I100:Z_AO(L1,L1) OR SCRACTH
+      LASTI  = LZAOB  + L1*L1
+C
+C     -- MEMORY FOR DFT GRID
+C
+      IF (NDFTFG.EQ.1) THEN
+         LXYZGRD = LASTI   + 1
+C        J10:XYZGRD(MAXGRD*3)
+         LXYZWGT = LXYZGRD + MAXGRD*3
+C        J20:XYZWGT(MAXGRD)
+         LXYZDCH = LXYZWGT + MAXGRD
+C        J30:XYZDCH
+         J40     = LXYZDCH + 4*L1*ILENG
+C        J40:---
+         J50     = J40
+C        J50:---
+         KCP     = J50
+C        J90:KCP(MAXGRD)
+         LCOEF   = KCP     + MAXGRD
+C        J100:COEF(6*ILENG)
+         LDTRAI  = LCOEF   + 4 * 8 * ILENG
+C        J110:DTRAI_(5*ILENG)
+         LDRHOI  = LDTRAI  + 2 * 5 * ILENG
+C        J120:DRHOI_(4*MAXGRD)
+         LEX0    = LDRHOI  + 8 * MAXGRD
+C        J130:EX0(ILENG)
+         LEX     = LEX0    + ILENG
+C        J140:EX(38*ILENG)
+         LEC0    = LEX     + 38*ILENG
+C        J150:EC0(ILENG)
+         LEC     = LEC0    + ILENG
+C        J160:EC(119*ILENG)
+         J170    = LEC     + 119*ILENG
+         LAOMAX  = J170
+C        J180:AOMAX(L1)
+         LIAO    = LAOMAX  + L1
+C        J190:IAO(L1)
+         LIPRGRD = LIAO    + L1
+C        J200:IPRGRD(2*L3)
+         LGMO    = LIPRGRD + 4*L3
+C        J210:DTAUI_(MAXGRD)
+         LWRK1   = LGMO    + L1     * 4 * 2
+         LDTAUI  = LWRK1   + L1     * 2
+         LAST    = LDTAUI  + MAXGRD * 2
+c        LAST    = J200    + 2*L3
+      ELSE
+         LAST=LASTI
+      ENDIF
+C
+C     -- PCM MEMORY
+C
+c     ISD=1
+      IPCFP=.FALSE.
+      CALL PCMMEM3(IPCFP,L2,LAST,NTSPAR,LSOL,LCHG,LDMATM,LQPOT,LQFLD,
+     *             LVPOT,LSE,LDE,LQ0,LQ1,LQ2,LQ3,LD0,LQA,LDIMAT,LQREP,
+     *             LTMP0,LTMP1,LTMP2,LIPVT,LPOTTMP,LRMUL,LCHG2,
+     *             LASCCRD,LASCCHG,LASCDIP,LASCQAD,LDISV,LDIS1,LDIS2,
+     *             LCQEF,LQEFF,LELD,LXDINT,LYDINT,LZDINT,LEFLD,MADD,
+     *             LABFLD,LVECMP,LVEC_2,LVEC_S,LAPROJ,LFPROJ)
+      IF(IPCM.EQ.1 .AND. IEFP.EQ.0) THEN
+         LWRK1 = LAST
+         LWRK3 = LWRK1 + L3
+         LSCR  = LWRK3 + L3
+         LQSET = LSCR  + L1
+         LQSNT = LQSET + NTS
+         LQSEDT= LQSNT + NTS
+         L100  = LQSEDT+ NTS
+         LAST  = L100  + L2
+      END IF
+      IF (DFTBFL.AND.IPCM.EQ.1) THEN
+         LZAN  = LAST
+         LSDFTB= LZAN  + NAT
+         LAST  = LSDFTB+ L2
+      END IF
+C
+C     EFP SOLVATION MODEL
+C
+      IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0) THEN
+         LXEFI = LAST
+         LYEFI = LXEFI + L2
+         LZEFI = LYEFI + L2
+         LAST  = LZEFI + L2
+      END IF
+C
+      IF(ITDEFG.EQ.1 .AND. IPCM.EQ.1 .AND. IEF.EQ.10) THEN
+         LDINDSV  = LAST
+         LDINDDSV = LDINDSV  + 3*NPTTPT
+         LQSETD   = LDINDDSV + 3*NPTTPT
+         L100     = LQSETD   + NTS
+         LAST     = L100     + L2
+      END IF
+C
+      IF(NFFAT.GT.0) THEN
+         L100     = LAST
+         LAST     = L100     + L2
+      END IF
+C
+      IDUM=LAST
+C
+      NEED=LAST-I10
+      CALL GETFM(NEED)
+      IF(EXETYP.EQ.CHECK) GO TO 800
+      IF(DFTBFL.AND.IPCM.EQ.1) THEN
+        CALL DFTB_GET_ZAN(0,NAT,X(LZAN),ZAN)
+        CALL DAREAD(IDAF,IODA,X(LSDFTB),L2,12,0)
+      END IF
+C
+      IF (NDFTFG.EQ.1) THEN
+C
+C     ----- CONSTRUCT DENSITY
+        NPTGRD = MAXGRD
+        CALL UTDDFTSET(X(LXYZGRD),X(LXYZWGT),X(LXYZDCH),VA,VB,
+     *               X(LDRHOI),X(LDTAUI),X(LAOMAX),X(LGMO),
+     *               ILENG,NPTGRD,L1)
+C
+      ENDIF
+C
+C     --- GET M(IA,JB) AS (EA-EI)
+C
+      CALL XECALC(X(LXMA),EA,NOCA,LX,L7)
+      CALL XECALC(X(LXMB),EB,NOCB,LX,L7)
+C
+C     --- GET M^(-1)
+C
+      CALL PCGMIN(X(LXMA),X(LXMINA),L7)
+      CALL PCGMIN(X(LXMB),X(LXMINB),L7)
+C
+C     --- GET INITIAL X_T(L7) (= ZERO)
+C
+      CALL VCLR(X(LXTA),1,L7)
+      CALL VCLR(X(LXTB),1,L7)
+c     TRANSFORM INTO AO -BASIS
+c     CALL IATOGENTD(X(LXTA),X(KPAOA),LX,L7,NOCA,1,1)
+c     CALL IATOGENTD(X(LXTB),X(KPAOB),LX,L7,NOCB,1,1)
+c
+c     For Alpha
+c     CALL DGEMM('N','N',L1,LX,LX,ONE,VA,L1,X(KPAOA),LX,ZERO
+c    *          ,X(LZAOA),L1)
+c     CALL DGEMM('N','T',L1,L1,LX,ONE,X(LZAOA),L1,VA,L1,ZERO
+c    *          ,X(KPAOA),L1)
+c
+c     For Beta
+c     CALL DGEMM('N','N',L1,LX,LX,ONE,VB,L1,X(KPAOB),LX,ZERO
+c    *          ,X(LZAOB),L1)
+c     CALL DGEMM('N','T',L1,L1,LX,ONE,X(LZAOB),L1,VB,L1,ZERO
+c    *          ,X(KPAOB),L1)
+c
+c     --- GET INITIAL A_PK(L7)
+c
+c ********************************************************************
+C
+C     ---- TWO ELECTRON PART
+C
+CXXX
+C     CALL VCLR(X(KAPAOA),1,L2*2)
+C     IF(DFTBFL) THEN !! here should be always zero?
+C        CALL DFTB_TD_K(X(K10),X(K20),X(IDUM),X(IDUM),ITF,0,1,L1,L2,
+C    *                  NOCC,.FALSE.,.FALSE.)
+C     ELSE
+C        CALL TD2E(X(K10),X(K20),X(IDUM),X(K40),X(K50),L1,ONE,0,1,ITF,1)
+C
+C        CALL UTD2E(X(KPAOA),X(KPAOB),X(KAPAOA),X(KAPAOB),
+C    *             X(IDUM),X(IDUM), X(KXX),X(KIX),L1,ONE,0,1,ITF,1)
+C     END IF
+C
+C     ---- EFP CONTRIBUTION
+C
+C SKIP BECAUSE X(K10)=0
+C--   IF(ITDEFG.EQ.1) CALL TDEFP(X(K10),X(K20),
+C--  *                           X(LXEFI),X(LYEFI),X(LZEFI),L2,L1,1)
+C
+C     -- XC
+C
+c     IF(NDFTFG.EQ.1) THEN
+C        CALL VCLR(X(K30),1,L2)
+C        CALL TDFXCP(X(K30),RHO,X(J10),X(J20),X(J30),X(K10),X(IDUM),
+C    *        X(J120),X(J210),X(J110),X(J100),X(J140),X(J160),X(J130),
+C    *        X(J150),X(J180),X(J200),X(J190),ILENG,NPTGRD,
+C    *        L1,L2,LX,2,2,.false.,1)
+C
+C             TDFXCP(F,RHO,XYZGRD,XYZWGT,XYZDCH,VA,VDUM,
+C    * DRHOI_,DTAUI_,DTRAI_,COEF,EX,EC,EX0,EC0,AOMAX,VALGA,IAO,
+C    * ILENG,NPTGRD,L1,L2,LX,NDER,IMETHOD)
+C
+C        IF(GOPARR) THEN
+C           CALL DDI_GSUMF(2338,X(K30), L2)
+C           CALL DDI_GSUMF(2339,RHO,1)
+C        ENDIF
+C        CALL DAXPY(L2,2.0D+00,X(K30),1,X(K20),1)
+c     ENDIF
+C
+C     -- PRODUCT A_P for Alpha
+c
+c     CALL CANTOGEN(X(KAPAOA),X(KPAOA),L1)
+c     CALL MNTOIA(X(KPAOA),X(LAPKA),VA,X(LZAOA),L1,LX,L7,NOCA,1)
+c     CALL ESUM(EA,X(LAPKA),X(LXTA),LX,L7,NOCA,1)
+C
+C     -- PRODUCT A_P for beta
+c
+c     CALL CANTOGEN(X(KAPAOB),X(KPAOB),L1)
+c     CALL MNTOIA(X(KPAOB),X(LAPKB),VB,X(LZAOB),L1,LX,L7,NOCB,1)
+c     CALL ESUM(EB,X(LAPKB),X(LXTB),LX,L7,NOCB,1)
+C
+C     
+C
+C     LAPKB is always zero??
+c     write(6,'("wwwchk LAPK=",F12.8)') (X(LAPKA-1+iii),iii=1,L7)
+      CALL VCLR(X(LAPKA),1,L7)
+      CALL VCLR(X(LAPKB),1,L7)
+C     --- GET R,BETA,PK INITIAL
+C     USE R(Z)
+      CALL VCLR(X(LRA),1,L7*2)
+      CALL UPCGRBPINI(RA,RB,X(LXMINA),X(LXMINB),X(LAPKA),X(LAPKB),
+     *                X(LRA),X(LRB),BETA,X(LPKA),X(LPKB),L7A,L7B,ER)
+      IF(MASWRK) WRITE(IW,1111) ER,THRE
+      IF (ER.LE.THRE) THEN
+       WRITE(IW,*)'ACCIDENTAL CONVERGENCE!'
+       ITER=0
+       GOTO 100
+       ELSE
+       CONTINUE
+      ENDIF
+C
+C     --- START PCG LOOP ---
+C
+      ITER=0
+   10 CONTINUE
+      ITER=ITER+1
+      IF(ITER.GT.MXITER) THEN
+       IF(MASWRK) THEN
+       WRITE(6,*)'    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   '
+       WRITE(6,*)'      Z-VECTOR FAILED TO CONVERGE'
+       WRITE(6,*)'    XXXXXXXXXXXX STOP XXXXXXXXXXXXX   '
+       WRITE(6,*)' ITER/MXITER=',ITER,'/',MXITER
+       ENDIF
+       CALL ABRT
+       STOP
+      ENDIF
+C
+C     -- TRANSFORM TRIAL VECTOR INTO AO BASIS
+C
+      CALL IATOGENTD(X(LPKA),X(KPAOA),LX,L7A,NOCA,1,1)
+      CALL DGEMM('N','N',L1,LX,LX,ONE,VA,L1,X(KPAOA),LX,ZERO
+     *          ,X(LZAOA),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(LZAOA),L1,VA,L1,ZERO
+     *          ,X(KPAOA),L1)
+C
+      CALL IATOGENTD(X(LPKB),X(KPAOB),LX,L7B,NOCB,1,1)
+      CALL DGEMM('N','N',L1,LX,LX,ONE,VB,L1,X(KPAOB),LX,ZERO
+     *          ,X(LZAOB),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(LZAOB),L1,VB,L1,ZERO
+     *          ,X(KPAOB),L1)
+C     -- GET A_PK
+C
+C ********************************************************************
+C
+C     ---- TWO ELECTRON PART
+C
+      CALL VCLR(X(KAPAOA),1,L2*2)
+      IF(DFTBFL) THEN
+c        CALL DFTB_TD_K(X(K10),X(K20),X(IDUM),X(IDUM),ITF,0,1,L1,L2,
+c    *                  NOCC,.FALSE.,.FALSE.)
+      ELSE
+         CALL UTD2E(X(KPAOA),X(KPAOB),X(KAPAOA),X(KAPAOB),
+     *             X(IDUM),X(IDUM), X(KXX),X(KIX),L1,ONE,0,1,ITF,1)
+      END IF
+C
+C     -- POLARIZABLE FORCE FIELD CONTRIBUTION
+C
+c     IF (NFFAT.GT.0) THEN
+c         CALL TDPCMDEN(X(L100),X(K10),L1)
+c         CALL QMMMPOLINT2(X(K20),X(L100),X(LFFDIPMP),L2,L1,
+c    *                     X(LFFNONLSTQ))
+c     END IF
+C
+C     -- CPCM CONTRIBUTION
+C
+c     IF (IPCM.EQ.1 .AND. IEF.EQ.10 .AND. IEFP.EQ.0) THEN
+c         CALL TDPCMDEN(X(L100),X(K10),L1)
+c         CALL VCLR(X(LQ0),1,NTS)
+c         CALL PCMFLD(X(K20),DUMMY,X(L100),X(LSOL),
+c    *               X(LCHG),X(LWRK1),X(LDISV),
+c    *               X(LDIS1),X(LDIS2),X(LWRK3),X(LSCR),X(LDMATM),
+c    *               X(LCQEF),X(LQEFF),X(LELD),X(LQPOT),X(LQFLD),
+c    *               X(LVPOT),X(LSE),X(LDE),
+c    *               X(LQ0),X(LQ1),X(LQ2),X(LQ3),
+c    *               X(LD0),X(LQA),X(LDIMAT),X(LQREP),
+c    *               X(LTMP0),X(LTMP1),X(LTMP2),X(LIPVT),
+c    *               X(LPOTTMP),X(LRMUL),
+c    *               TCH,QET,QETN,QESC,ISD,NFT27,IPCFP,L1,L2,NTSPAR,
+c    *               X(LAXYZCT),X(LAXYZCT+MXTS),X(LAXYZCT+MXTS*2),
+c    *               X(LXYZCT2),X(LXYZCT2+MXTS),X(LXYZCT2+MXTS*2),
+c    *               X(LAXYZCT+MXTS*3),X(LQSNT),X(LQSET),
+c    *               X(LQSEDT),X(LQFS),
+c    *               X(LVECMUL),X(LCHG2),X(LQIND+MXTS),X(LPEL),
+c    *               X(LASCCRD),X(LASCCHG),X(LASCDIP),X(LASCQAD),
+c    *               X(LXYZRE),X(LXYZRE+MXSP),X(LXYZRE+MXSP*2),
+c    *               X(LXYZRE+MXSP*3),X(LISPHE),X(LLIST),X(LEPSPCM))
+c     ENDIF
+C
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.1 .AND. IEF.EQ.10) THEN
+c        CALL DCOPY(3*NPTTPT,DIND ,1,X(LDINDSV) ,1)
+c        CALL DCOPY(3*NPTTPT,DINDD,1,X(LDINDDSV),1)
+c        CALL TDPCMDEN(X(L100),X(K10),L1)
+c        CALL PCMPOLFLD(X(K20),X(L100),X(LAXYZCT),
+c    *               X(LAXYZCT+MXTS),X(LAXYZCT+2*MXTS),
+c    *               X(LAXYZCT+3*MXTS),L2,L1,X(LQSETD),1)
+c        CALL DCOPY(3*NPTTPT,X(LDINDSV) ,1,DIND ,1)
+c        CALL DCOPY(3*NPTTPT,X(LDINDDSV),1,DINDD,1)
+c     END IF
+c
+c     -- EFP CONTRIBUTION
+c
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0) CALL TDEFP(X(K10),X(K20),
+c    *                           X(LXEFI),X(LYEFI),X(LZEFI),L2,L1,1)
+C        ROUTINE TDEFP(PA,F,XEFI,YEFI,ZEFI,L2,L1,NV)
+C
+C     -- XC
+C
+      IF(NDFTFG.EQ.1) THEN
+         CALL VCLR(X(KAPXCA),1,L2*2)
+C
+C
+         CALL UTDFXCP2(X(KAPXCA),RHO,X(LXYZGRD),X(LXYZWGT),X(LXYZDCH),
+     *        X(KPAOA),X(KPAOB),X(LDRHOI),X(LDTAUI), 
+     *        X(LDTRAI),X(LCOEF),X(LEX),X(LEC),X(LEX0),X(LEC0),
+     *        X(LAOMAX),X(LIPRGRD),X(LWRK1),X(LIAO),ILENG,NPTGRD,
+     *        L1,L2,2,.false.,0)
+ 
+ 
+         CALL DAXPY(L2,2.0D+00,X(KAPXCA),1,X(KAPAOA),1)
+         CALL DAXPY(L2,2.0D+00,X(KAPXCB),1,X(KAPAOB),1)
+      ENDIF
+C
+C     -- PRODUCT A_P
+C
+       CALL CANTOGEN(X(KAPAOA),X(KPAOA),L1)
+       CALL MNTOIA(X(KPAOA),X(LAPKA),VA,X(LZAOA),L1,LX,L7,NOCA,1)
+       CALL ESUM(EA,X(LAPKA),X(LPKA),LX,L7,NOCA,1)
+C
+       CALL CANTOGEN(X(KAPAOB),X(KPAOB),L1)
+       CALL MNTOIA(X(KPAOB),X(LAPKB),VB,X(LZAOB),L1,LX,L7,NOCB,1)
+       CALL ESUM(EB,X(LAPKB),X(LPKB),LX,L7,NOCB,1)
+C
+C ********************************************************************
+C
+C     -- GET ALPHA
+C
+        SUMA = DDOT(L7A,X(LPKA),1,X(LAPKA),1)
+        SUMB = DDOT(L7B,X(LPKB),1,X(LAPKB),1)
+        SUM  = SUMA    + SUMB
+        ALPHA= 1.0D+00 / SUM
+C
+C     -- UPDATE VECTOR X : X=ALPHA*PK
+C
+        CALL DAXPY(L7A,ALPHA,X(LPKA),1,X(LXTA),1)
+        CALL DAXPY(L7B,ALPHA,X(LPKB),1,X(LXTB),1)
+C
+C     -- GET ERROR VECTOR R(L7) & CHECK CONVERGENCE
+C
+        CALL DAXPY(L7A,-ALPHA,X(LAPKA),1,X(LRA),1)
+        CALL DAXPY(L7B,-ALPHA,X(LAPKB),1,X(LRB),1)
+C
+        ERA = DDOT(L7A,X(LRA),1,X(LRA),1)
+        ERB = DDOT(L7B,X(LRB),1,X(LRB),1)
+        ER  = ERA + ERB
+        IF(MASWRK) WRITE(IW,1112) ITER,ER
+        IF (ER.LE.THRE) GOTO 100
+C
+C     -- GET BETA
+C
+        CALL UPCGB(BETA,X(LRA),X(LRB),X(LXMINA),X(LXMINB),L7A,L7B)
+C
+C     -- UPDATE PK(L7)
+C
+        CALL PCGPUP(X(LPKA),BETA,X(LXMINA),X(LRA),L7A)
+        CALL PCGPUP(X(LPKB),BETA,X(LXMINB),X(LRB),L7B)
+      GOTO 10
+C
+  100 CONTINUE
+      IF(MASWRK) THEN
+      WRITE(IW,*)'   -------------------------'
+      WRITE(IW,*)'       Z-VECTOR CONVERGED          '
+      WRITE(IW,*)'   -------------------------'
+      ENDIF
+C
+C     --- CONVERGED
+C     NOW, X_T(L7) EQUAL TO ZIA(L7)
+      CALL DCOPY(L7A,X(LXTA),1,RA,1)
+      CALL DCOPY(L7B,X(LXTB),1,RB,1)
+C
+C     ----- CONVERT Z_IA TO Z_MN
+C     Alpha
+      CALL IATOGENTD(X(LXTA),X(LZAOA),LX,L7,NOCA,1,1)
+      CALL DGEMM('N','N',L1,LX,LX,ONE,VA,L1,X(LZAOA),LX,ZERO
+     *          ,X(KPAOA),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(KPAOA),L1,VA,L1,ZERO
+     *          ,X(LZAOA),L1)
+C     Beta
+      CALL IATOGENTD(X(LXTB),X(LZAOB),LX,L7,NOCB,1,1)
+      CALL DGEMM('N','N',L1,LX,LX,ONE,VB,L1,X(LZAOB),LX,ZERO
+     *          ,X(KPAOB),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(KPAOB),L1,VB,L1,ZERO
+     *          ,X(LZAOB),L1)
+C
+C     -- PA=TA+ZA
+      CALL DAXPY(L1*L1,1.0D+00,X(LZAOA),1,TA,1)
+      CALL DAXPY(L1*L1,1.0D+00,X(LZAOB),1,TB,1)
+      CALL DAWRIT(IDAF,IODA,TA,L3*2,IRECTD+4,0)
+C---  IF(MASWRK) WRITE(IW,*) 'PA WRIT DONE'
+C
+  800 CONTINUE
+c     IF(DFTBFL.AND.IPCM.EQ.1) CALL DFTB_GET_ZAN(1,NAT,X(LZAN),ZAN)
+      CALL RETFM(NEED)
+      RETURN
+ 1111 FORMAT(1X,'INITIAL ERROR =',1X,1P,E10.3,0P,
+     *          ', MUST CONVERGE TO',1P,E10.3)
+ 1112 FORMAT(1X,'ITER#',I2,' ERROR =',1X,1P,E10.3)
+      END
+C
+C*MODULE UTDGRD  *DECK UPCGB
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get Beta for Congugate Gradient
+C>
+C>    @author  Hiroya Nakata
+      SUBROUTINE UPCGB(BETA,RA,RB,XM_INA,XM_INB,NDIMA,NDIMB)
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      DIMENSION RA(*),RB(*)
+      DIMENSION XM_INA(*),XM_INB(*)
+      DUMI=0.0D+00
+      DO 10 I=1,NDIMA
+        DUM  = RA(I) * XM_INA(I) * RA(I)
+   10   DUMI = DUMI  + DUM
+      DO 20 I=1,NDIMB
+        DUM  = RB(I)*XM_INB(I)*RB(I)
+   20   DUMI = DUMI  + DUM
+      BETA = 1.0D+00 / DUMI
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UPCGRBPINI
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get Initial Set up for CG
+C>
+C>    @author  Hiroya Nakata
+      SUBROUTINE UPCGRBPINI(DA,DB,XM_INA,XM_INB,A_PKA,A_PKB,RA,RB,
+     *                      BETA,PKA,PKB,NDIMA,NDIMB,ER)
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      DIMENSION DA(*),DB(*)
+      DIMENSION XM_INA(*),XM_INB(*)
+      DIMENSION A_PKA(*),A_PKB(*)
+      DIMENSION RA(*),RB(*)
+      DIMENSION PKA(*),PKB(*)
+C
+C     -- R INI AND R NORM
+C
+      RNORM=0.0D+00
+      DO 10 I=1,NDIMA
+        RA(I)  =  DA(I)  -  A_PKA(I)
+   10   RNORM  =  RNORM  +  RA(I)**2
+C
+      DO 15 I=1,NDIMB
+        RB(I)  =  DB(I)  -  A_PKB(I)
+   15   RNORM  =  RNORM  +  RB(I)**2
+C
+      ER = RNORM
+C
+C
+C     -- BETA INI
+C
+      DUMI=0.0D+00
+      DO 20 I=1,NDIMA
+        DUM  = RA(I) * XM_INA(I) * RA(I)
+   20   DUMI = DUMI  + DUM
+C
+      DO 25 I=1,NDIMB
+        DUM  = RB(I) * XM_INB(I) * RB(I)
+   25   DUMI = DUMI  + DUM
+C
+      DUM  = 1.0D+00/DUMI
+      BETA = DUM
+C
+C     -- PK INI
+C
+      DO 30 I=1,NDIMA
+   30   PKA(I) = BETA*XM_INA(I)*RA(I)
+      DO 35 I=1,NDIMB
+   35   PKB(I) = BETA*XM_INB(I)*RB(I)
+C
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UWMNG
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get W term
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE UWMNG(QAI,QBI,GXCA,GXCB,PA,PB,ZA,ZB,V1A,V1B,
+     *                 V2A,V2B,VA,VB,EA,EB,NOCA,NOCB,L0,L1,L2,L3,LX,
+     *                 LABSIZ,NEED,ITF)
+      use mx_limits, only: mxrt,mxgrid
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+c     LOGICAL GOPARR,DSKWRK,MASWRK,
+      LOGICAL TRIPLET,SG1,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+      DIMENSION QAI(*),QBI(*),GXCA(*),GXCB(*),
+     *          PA(*),PB(*),ZA(*),ZB(*),V1A(*),V1B(*),
+     *          V2A(*),V2B(*),VA(*),VB(*),EA(*),EB(*)
+C
+c     PARAMETER (MXFRG=1050, MXDFG=5, MXDPPT=MXFRG*MXDFG*12)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      COMMON /ENRGYS/ ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2,
+     *                VEN,VEE,EPOT,EKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+c     COMMON /DFTBS / LSDFTB
+c     COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+c    *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+c     COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+c    *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+c    *                LFFCHARG,LFFPOL,LFFDIP,
+c    *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+c    *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+c    *                LFFBOND0,LFFFCBOND,
+c    *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+c    *                LFFDIHB0,LFFFCDIHB,
+c    *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+c    *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+c    *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+c    *                LFFVEL,LFFQMVEL,
+c    *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+c    *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+c    *                LFFCLPR,LFFZLPR,LFFNLPR,
+c    *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+c    *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+c    *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+c    *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLST,
+c    *                LFFMAPLST,LFFCMAPCO
+      COMMON /FMCOM / X(1)
+      COMMON /INFGRD/ RHOMIN,ILENG,MAXGRD
+c     COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+c    *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+c     COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+c     COMMON /PCMDIM/ MXSP,MXTS,MEMPCM1,MEMPCM2,NTS
+c     COMMON /PCMPAR/ IPCM,NFT26,NFT27,IRPPCM,IEF,IP_F,NFMOPCM,IHET
+c     COMMON /PCMPNT/ LXYZRE,LSSFE,LLIST,LALPCM,LRINPCM,LINAPCM,LINFPCM,
+c    *                LINIPCM,LMEPCM,LAXYZCT,LXYZCT2,LNVERT,LQSN,LQSE,
+c    *                LQFS,LQIND,LISPHE,LVAD,LQOR,LVECMUL,LAIPRJ,LFIPRJ,
+c    *                LPEL,LPCMCDR,LDAI,LIDDAI,LQSND,LQSED,LEPSPCM
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+C
+      DATA CHECK/8HCHECK   /
+C
+      CALL VALFM(LOADFM)
+      CALL GOTFM(NGOTMX)
+      IHPPA    =  LOADFM   + 1
+      IHPPB    =  IHPPA    + L2
+C     I10:HPP_AO(L2)
+      IPA      =  IHPPB    + L2
+      IPB      =  IPA      + L3
+C     I15:PA(L3) OR SCRATCH
+      IXX      =  IPB      + L3
+C     I20:XX(L0)
+      IIX      =  IXX      + L0
+C     I30:IX(L0*LABSIZ)
+      I40      =  IIX      + L0*LABSIZ
+C     I40:--
+      I50      =  I40
+C     I50:--
+      IHPPIJA  =  I50
+      IHPPIJB  =  IHPPIJA  + NOCA*NOCA
+C     I60:HPPIJ(NOCC*NOCC)
+      IFXCPA   =  IHPPIJB  + NOCB*NOCB
+      IFXCPB   =  IFXCPA   + L2
+C     I70:FXCP(L2)
+      IGIJA    =  IFXCPB   + L2
+      IGIJB    =  IGIJA    + NOCA*NOCA
+C     I80:GIJ(NOCC,NOCC)
+      IWA      =  IGIJB    + NOCB*NOCB
+      IWB      =  IWA      + LX*LX
+C     I90:W(LX,LX)
+      I100     =  IWB      + LX*LX
+C     I100:--
+      IWAOA    = I100
+      IWAOB    = IWAOA     + L3 
+C     I110:W_AO(L3) OR SCRATCH
+      LASTI    = IWAOB     + L3
+C
+C     ----- MEMORY FOR DFT GRID
+C
+      IF(NDFTFG.EQ.1) THEN
+         IXYZGRD = LASTI   + 1
+C        J10:XYZGRD(MAXGRD*3)
+         IXYZWGT = IXYZGRD + MAXGRD*3
+C        J20:XYZWGT(MAXGRD)
+         IXYZDCH = IXYZWGT + MAXGRD
+C        J30:XYZDCH
+         J40     = IXYZDCH + 4*L1*ILENG
+C        J40:---
+         J50     = J40
+C        J50:---
+         KCP     = J50
+C        J90:KCP(MAXGRD)
+         ICOEF   = KCP     + MAXGRD
+C        J100:COEF(6*ILENG)
+         IDTRAI  = ICOEF   + 4*8*ILENG
+C        J110:DTRAI_(5*ILENG)
+         IDRHOI  = IDTRAI  + 2*5*ILENG
+C        J120:DRHOI_(4*MAXGRD)
+         IEX0    = IDRHOI  + 8*MAXGRD
+C        J130:EX0(ILENG)
+         IEX     = IEX0    + ILENG
+C        J140:EX(38*ILENG)
+         IEC0    = IEX     + 38*ILENG
+C        J150:EC0(ILENG)
+         IEC     = IEC0    + ILENG
+C        J160:EC(119*ILENG)
+         J170    = IEC     + 119*ILENG
+         IAOMAX  = J170
+C        J180:AOMAX(L1)
+         IAO     = IAOMAX  + L1
+C        J190:IAO(L1)
+         IPRGRD  = IAO     + L1
+C        J200:IPRGRD(2*L3)
+         IDTAUI  = IPRGRD  + 4*L3
+C        J210:DTAUI_(MAXGRD)
+         LGMO    = IDTAUI  + MAXGRD * 2
+         LWRK1   = LGMO    + L1     * 4 * 2
+         LAST    = LWRK1   + L1     * 2
+         IDUM    = LAST
+      ELSE
+         LAST=LASTI
+      ENDIF
+C
+C     -- PCM MEMORY
+C
+c     ISD=1
+c     IPCFP=.FALSE.
+c     CALL PCMMEM3(IPCFP,L2,LAST,NTSPAR,LSOL,LCHG,LDMATM,LQPOT,LQFLD,
+c    *             LVPOT,LSE,LDE,LQ0,LQ1,LQ2,LQ3,LD0,LQA,LDIMAT,LQREP,
+c    *             LTMP0,LTMP1,LTMP2,LIPVT,LPOTTMP,LRMUL,LCHG2,
+c    *             LASCCRD,LASCCHG,LASCDIP,LASCQAD,LDISV,LDIS1,LDIS2,
+c    *             LCQEF,LQEFF,LELD,LXDINT,LYDINT,LZDINT,LEFLD,MADD,
+c    *             LABFLD,LVECMP,LVEC_2,LVEC_S,LAPROJ,LFPROJ)
+c     IF(IPCM.EQ.1 .AND. IEFP.EQ.0) THEN
+c        LWRK1 = LAST
+c        LWRK3 = LWRK1 + L3
+c        LSCR  = LWRK3 + L3
+c        LQSET = LSCR  + L1
+c        LQSNT = LQSET + NTS
+c        LQSEDT= LQSNT + NTS
+c        L40   = LQSEDT+ NTS
+c        LAST  = L40   + L2
+c     END IF
+c     IF (DFTBFL.AND.IPCM.EQ.1) THEN
+c        LZAN  = LAST
+c        LSDFTB= LZAN  + NAT
+c        LAST  = LSDFTB+ L2
+c     END IF
+C
+C     EFP SOLVATION MODEL
+c
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0) THEN
+c        LXEFI = LAST
+c        LYEFI = LXEFI + L2
+c        LZEFI = LYEFI + L2
+c        LAST  = LZEFI + L2
+c     END IF
+c
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.1 .AND. IEF.EQ.10) THEN
+c        LDINDSV  = LAST
+c        LDINDDSV = LDINDSV  + 3*NPTTPT
+c        LQSETD   = LDINDDSV + 3*NPTTPT
+c        LAST     = LQSETD   + NTS
+c        L40      = LQSETD   + NTS
+c        LAST     = L40      + L2
+c     END IF
+c
+c     IF(NFFAT.GT.0) THEN
+c        L40      = LAST
+c        LAST     = L40      + L2
+c     END IF
+C
+      IDUM = LAST
+      NEED = LAST - IHPPA
+C
+      CALL GETFM(NEED)
+      IF(EXETYP.EQ.CHECK) GO TO 800
+c     IF(DFTBFL.AND.IPCM.EQ.1) THEN
+c       CALL DFTB_GET_ZAN(0,NAT,X(LZAN),ZAN)
+c       CALL DAREAD(IDAF,IODA,X(LSDFTB),L2,12,0)
+c     END IF
+C
+C     ----- FPP(L2) @ X(I10)
+C
+C     ---- TWO ELECTRON PART
+C
+      CALL VCLR(X(IHPPA),1,L2*2)
+      IF(DFTBFL) THEN
+c        CALL DFTB_TD_K(P,X(I10),X(IDUM),X(IDUM),ITF,2,1,L1,L2,
+c    *                  NOCC,.FALSE.,.FALSE.)
+      ELSE
+c       CALL TD2E(P,X(I10),X(IDUM),X(I20),X(I30),L1,ONE,0,1,ITF,1)
+        CALL UTD2E(PA,PB,X(IHPPA),X(IHPPB),
+     *            X(IDUM),X(IDUM),X(IXX),X(IIX),
+     *            L1,ONE,0,1,ITF,1)
+      END IF
+C
+C     POLARIZABLE FORCE FIELD CONTRIBUTION
+C
+c     IF (NFFAT.GT.0) THEN
+c         CALL TDPCMDEN(X(L40),P,L1)
+c         CALL QMMMPOLINT2(X(I10),X(L40),X(LFFDIPMP),L2,L1,
+c    *                     X(LFFNONLSTQ))
+c     END IF
+C
+C     CPCM CONTRIBUTION
+C
+c     IF (IPCM.EQ.1 .AND. IEF.EQ.10 .AND. IEFP.EQ.0) THEN
+c         CALL TDPCMDEN(X(L40),P,L1)
+c         CALL VCLR(X(LQ0),1,NTS)
+c         CALL PCMFLD(X(I10),DUMMY,X(L40),X(LSOL),
+c    *               X(LCHG),X(LWRK1),X(LDISV),
+c    *               X(LDIS1),X(LDIS2),X(LWRK3),X(LSCR),X(LDMATM),
+c    *               X(LCQEF),X(LQEFF),X(LELD),X(LQPOT),X(LQFLD),
+c    *               X(LVPOT),X(LSE),X(LDE),
+c    *               X(LQ0),X(LQ1),X(LQ2),X(LQ3),
+c    *               X(LD0),X(LQA),X(LDIMAT),X(LQREP),
+c    *               X(LTMP0),X(LTMP1),X(LTMP2),X(LIPVT),
+c    *               X(LPOTTMP),X(LRMUL),
+c    *               TCH,QET,QETN,QESC,ISD,NFT27,IPCFP,L1,L2,NTSPAR,
+c    *               X(LAXYZCT),X(LAXYZCT+MXTS),X(LAXYZCT+MXTS*2),
+c    *               X(LXYZCT2),X(LXYZCT2+MXTS),X(LXYZCT2+MXTS*2),
+c    *               X(LAXYZCT+MXTS*3),X(LQSNT),X(LQSET),
+c    *               X(LQSEDT),X(LQFS),
+c    *               X(LVECMUL),X(LCHG2),X(LQIND+MXTS),X(LPEL),
+c    *               X(LASCCRD),X(LASCCHG),X(LASCDIP),X(LASCQAD),
+c    *               X(LXYZRE),X(LXYZRE+MXSP),X(LXYZRE+MXSP*2),
+c    *               X(LXYZRE+MXSP*3),X(LISPHE),X(LLIST),X(LEPSPCM))
+c     ENDIF
+c
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.1 .AND. IEF.EQ.10) THEN
+c        CALL DCOPY(3*NPTTPT,DIND ,1,X(LDINDSV) ,1)
+c        CALL DCOPY(3*NPTTPT,DINDD,1,X(LDINDDSV),1)
+c        CALL TDPCMDEN(X(L40),P,L1)
+c        CALL PCMPOLFLD(X(I10),X(L40),X(LAXYZCT),
+c    *               X(LAXYZCT+MXTS),X(LAXYZCT+2*MXTS),
+c    *               X(LAXYZCT+3*MXTS),L2,L1,X(LQSETD),1)
+c        CALL DCOPY(3*NPTTPT,X(LDINDSV) ,1,DIND ,1)
+c        CALL DCOPY(3*NPTTPT,X(LDINDDSV),1,DINDD,1)
+c     END IF
+c
+c     EFP CONTRIBUTION
+c
+c     IF(ITDEFG.EQ.1 .AND. IPCM.EQ.0) CALL TDEFP(P,X(I10),
+c    *                           X(LXEFI),X(LYEFI),X(LZEFI),L2,L1,1)
+c        ROUTINE TDEFP(PA,F,XEFI,YEFI,ZEFI,L2,L1,NV)
+c
+c     -- XC
+c
+      IF(NDFTFG.EQ.1) THEN
+        NPTGRD = MAXGRD
+        CALL UTDDFTSET(X(IXYZGRD),X(IXYZWGT),X(IXYZDCH),VA,VB,
+     *               X(IDRHOI),X(IDTAUI),X(IAOMAX),X(LGMO),
+     *               ILENG,NPTGRD,L1)
+C
+        CALL VCLR(X(IFXCPA),1,L2)
+        CALL VCLR(X(IFXCPB),1,L2)
+C
+C
+        CALL UTDFXCP2(X(IFXCPA),RHO,X(IXYZGRD),X(IXYZWGT),X(IXYZDCH),
+     *       PA,PB,X(IDRHOI),X(IDTAUI), 
+     *       X(IDTRAI),X(ICOEF),X(IEX),X(IEC),X(IEX0),X(IEC0),
+     *       X(IAOMAX),X(IPRGRD),X(LWRK1),X(IAO),ILENG,NPTGRD,
+     *       L1,L2,2,.false.,0)
+C
+         CALL DAXPY(L2,2.0D+00,X(IFXCPA),1,X(IHPPA),1)
+         CALL DAXPY(L2,2.0D+00,X(IFXCPB),1,X(IHPPB),1)
+      ENDIF
+C
+C     ---- HPPAO TO HPPIJ @ X(I60)
+C     for Alpha
+      CALL CANTOGEN(X(IHPPA),X(IPA),L1)
+      CALL DGEMM('N','N',L1,NOCA,L1,ONE,X(IPA),L1,VA,L1,ZERO
+     *          ,X(IWAOA),L1)
+      CALL DGEMM('T','N',NOCA,NOCA,L1,ONE,VA,L1,X(IWAOA),L1,ZERO
+     *          ,X(IHPPIJA),NOCA)
+C     for Beta
+      CALL CANTOGEN(X(IHPPB),X(IPB),L1)
+      CALL DGEMM('N','N',L1,NOCB,L1,ONE,X(IPB),L1,VB,L1,ZERO
+     *          ,X(IWAOB),L1)
+      CALL DGEMM('T','N',NOCB,NOCB,L1,ONE,VB,L1,X(IWAOB),L1,ZERO
+     *          ,X(IHPPIJB),NOCB)
+C
+C     ---- GAO TO GIJ
+C
+c     IF(DFTBFL.AND.DFTB3) NDFTFG=1 !! TO ADD THIRD-ORDER DERIVATIVE
+      IF(NDFTFG.EQ.1) THEN
+C     Alpha Third
+       CALL CANTOGEN(GXCA,X(IPA),L1)
+       CALL DGEMM('N','N',L1,NOCA,L1,ONE,X(IPA),L1,VA,L1,ZERO
+     *           ,X(IWAOA),L1)
+       CALL DGEMM('T','N',NOCA,NOCA,L1,ONE,VA,L1,X(IWAOA),L1,ZERO
+     *           ,X(IGIJA),NOCA)
+C     Beta Third
+       CALL CANTOGEN(GXCB,X(IPB),L1)
+       CALL DGEMM('N','N',L1,NOCB,L1,ONE,X(IPB),L1,VB,L1,ZERO
+     *           ,X(IWAOB),L1)
+       CALL DGEMM('T','N',NOCB,NOCB,L1,ONE,VB,L1,X(IWAOB),L1,ZERO
+     *           ,X(IGIJB),NOCB)
+      ELSE
+        CALL VCLR(X(IGIJA),1,NOCA*NOCA)
+        CALL VCLR(X(IGIJB),1,NOCB*NOCB)
+      ENDIF
+C
+c     write(6,*) "HPPIJ alpha"
+c     write(6,'("wwwchk H =",F12.8)')
+c    *         (X(IHPPIJA-1+iii),iii=1,NOCA*NOCA)
+C       ---- CALCULATE W_MO
+C
+c     CALL UWCALC(X(I90),ESTATE(NTHST)-ESCF,E,V1,V2,Z,LX,NOCC,NOCC,
+c    *           QAI,X(I80),X(I60))
+c     CALL UWCALC(X(IWA),X(IWB), ESTATE(NTHST)-ESCF,EA,EB,
+c    *            V1A,V1B,V2A,V2B,ZA,ZB,LX,NOCA,NOCB,
+c    *            QAI,QBI,X(IGIJA),X(IGIJB),
+c    *            X(IHPPIJA),X(IHPPIJB))
+      CALL UWCALC(X(IWA),X(IWB), ESTATE(NTHST),EA,EB,
+     *            V1A,V1B,V2A,V2B,ZA,ZB,LX,NOCA,NOCB,
+     *            QAI,QBI,X(IGIJA),X(IGIJB),
+     *            X(IHPPIJA),X(IHPPIJB))
+C
+C     ---- W_MO TO W_AO AND SAVE W_AO
+C     Alpha
+      CALL DGEMM('N','N',L1,LX,LX,ONE,VA,L1,X(IWA),LX,ZERO
+     *          ,X(IPA),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(IPA),L1,VA,L1,ZERO
+     *          ,X(IWAOA),L1)
+C     Beta
+      CALL DGEMM('N','N',L1,LX,LX,ONE,VB,L1,X(IWB),LX,ZERO
+     *          ,X(IPB),L1)
+      CALL DGEMM('N','T',L1,L1,LX,ONE,X(IPB),L1,VB,L1,ZERO
+     *          ,X(IWAOB),L1)
+C
+C
+c     write(6,*) "W UHF alpha"
+c     write(6,'("wwwchk W alpha=",F12.8)') (X(IWAOA-1+iii),iii=1,L3)
+c     write(6,*) "W UHF beta"
+c     write(6,'("wwwchk W  beta=",F12.8)') (X(IWAOB-1+iii),iii=1,L3)
+C
+C
+      CALL DAWRIT(IDAF,IODA,X(IWAOA),L3*2,IRECTD+5,0)
+C     IF(MASWRK) WRITE(IW,*)'WA WRIT DONE'
+C
+  800 CONTINUE
+c     IF(DFTBFL.AND.IPCM.EQ.1) CALL DFTB_GET_ZAN(1,NAT,X(LZAN),ZAN)
+c     IF(DFTBFL.AND.DFTB3) NDFTFG=0
+      CALL RETFM(NEED)
+C
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UWCALC
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get W term calculation
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE UWCALC(WA,WB,EE,EA,EB,V1A,V1B,V2A,V2B,
+     *                  ZA,ZB,LX,NOCA,NOCB,
+     *                  XHXA,XHXB,GIJA,GIJB,HPPIJA,HPPIJB)
+      use mx_limits, only: mxgrid
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      DIMENSION WA(LX,*),WB(LX,*), EA(*),EB(*),
+     *          V1A(*),V1B(*),V2A(*),V2B(*),ZA(*),ZB(*),
+     *          XHXA(*),XHXB(*),GIJA(NOCA,*),GIJB(NOCB,*),
+     *          HPPIJA(NOCA,*),HPPIJB(NOCB,*)
+C
+      LOGICAL SG1
+C
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+C
+      DATA ZERO/0.0D+00/
+C
+C     ---- W_IJ
+C
+      CALL VCLR(WA,1,LX*LX)
+      CALL VCLR(WB,1,LX*LX)
+C
+C
+      DO I=1,NOCA
+        DO J=1,I
+C     /--FOR DUM1
+          DUM1 = ZERO
+          DO K = NOCA+1,LX
+            KK   = K - NOCA
+            IIA  = (KK-1)*NOCA + I
+            JA   = (KK-1)*NOCA + J
+            DUM  = V1A(IIA)*V2A(JA)
+     *           + V2A(IIA)*V1A(JA)
+            DUM1 = DUM1 + DUM
+          END DO
+          DUM1 = EE * DUM1
+C         /--FOR DUM2 ----
+          DUM2 = ZERO
+          DO K = NOCA+1,LX
+            KK   = K - NOCA
+            IIA  = (KK-1)*NOCA + I
+            JA   = (KK-1)*NOCA + J
+            DUM  = V1A(IIA)*V1A(JA)
+     *           + V2A(IIA)*V2A(JA)
+            DUM2 = DUM2    + EA(K)*DUM
+          END DO
+C     /-- FOR DUM3 -----
+          DUM3    = HPPIJA(I,J)
+          WA(I,J) = DUM1 - DUM2 + DUM3
+C     --- ADD GIJ TO WIJ (DFT)
+          IF(NDFTFG.EQ.1) WA(I,J)=2.0D+00*GIJA(I,J) + WA(I,J)
+        END DO
+      END DO
+C
+      DO I=1,NOCB
+        DO J=1,I
+C     /--FOR DUM1
+          DUM1 = ZERO
+          DO K = NOCB+1,LX
+            KK   = K - NOCB
+            IIA  = (KK-1)*NOCB + I
+            JA   = (KK-1)*NOCB + J
+            DUM  = V1B(IIA)*V2B(JA)
+     *           + V2B(IIA)*V1B(JA)
+            DUM1 = DUM1 + DUM
+          END DO
+          DUM1 = EE * DUM1
+C         /--FOR DUM2 ----
+          DUM2 = ZERO
+          DO K = NOCB+1,LX
+            KK   = K - NOCB
+            IIA  = (KK-1)*NOCB + I
+            JA   = (KK-1)*NOCB + J
+            DUM  = V1B(IIA)*V1B(JA)
+     *           + V2B(IIA)*V2B(JA)
+            DUM2 = DUM2    + EB(K)*DUM
+          END DO
+C     /-- FOR DUM3 -----
+          DUM3    = HPPIJB(I,J)
+          WB(I,J) = DUM1 - DUM2 + DUM3
+C     --- ADD GIJ TO WIJ (DFT)
+          IF(NDFTFG.EQ.1) WB(I,J)=2.0D+00*GIJB(I,J)+WB(I,J)
+        END DO
+      END DO
+CC
+CC
+CC
+C     ---- W_AB
+C     Alpha
+      DO I=NOCA+1,LX
+        DO J=NOCA+1,I
+          II = I - NOCA
+          JJ = J - NOCA
+C     ---FOR DUM1
+          DUM1=ZERO
+          DO K=1,NOCA
+            IIA  = (II-1) *NOCA+K
+            IB   = (JJ-1) *NOCA+K
+            DUM  = V1A(IIA)*V2A(IB)
+     *           + V2A(IIA)*V1A(IB)
+            DUM1 = DUM1+DUM
+          END DO
+          DUM2=ZERO
+          DO K=1,NOCA
+            IIA = (II-1)* NOCA + K
+            IB  = (JJ-1)* NOCA + K
+            DUM = EA(K) * (V1A(IIA)*V1A(IB)+V2A(IIA)*V2A(IB))
+            DUM2= DUM2  + DUM
+          END DO
+          WA(I,J)=EE*DUM1+DUM2
+        END DO
+      END DO
+C     Beta
+      DO I=NOCB+1,LX
+        DO J=NOCB+1,I
+          II  = I- NOCB
+          JJ  = J- NOCB
+C     ---FOR DUM1
+          DUM1=ZERO
+          DO K=1,NOCB
+            IIA  = (II-1) *NOCB + K
+            IB   = (JJ-1) *NOCB + K
+            DUM  = V1B(IIA)*V2B(IB)
+     *           + V2B(IIA)*V1B(IB)
+            DUM1 = DUM1+DUM
+          END DO
+          DUM2=ZERO
+          DO K=1,NOCB
+            IIA  = (II-1)* NOCB + K
+            IB   = (JJ-1)* NOCB + K
+            DUM  = EB(K) * (V1B(IIA)*V1B(IB)+V2B(IIA)*V2B(IB))
+            DUM2 = DUM2  + DUM
+          END DO
+          WB(I,J) = EE*DUM1 + DUM2
+        END DO
+      END DO
+C
+C     ---- W_IA
+C
+      DO I = 1,NOCA
+        DO J = NOCA+1,LX
+          JJ      = J - NOCA
+          IJX     = (JJ-1)*NOCA+I
+          WA(J,I) = XHXA(IJX)+EA(I)*ZA(IJX)
+        END DO
+      END DO
+C
+      DO I = 1,NOCB
+        DO J = NOCB+1,LX
+          JJ      = J - NOCB
+          IJX     = (JJ-1)*NOCB+I
+          WB(J,I) = XHXB(IJX)+EB(I)*ZB(IJX)
+        END DO
+      END DO
+C     ---- SCALE HALF TO DIAGONAL ELEMENTS
+C
+      DO I=1,LX
+        WA(I,I)=0.5D+00*WA(I,I)
+        WB(I,I)=0.5D+00*WB(I,I)
+      END DO
+C
+      CALL DSCAL(LX*LX,-1.0D+00,WA,1)
+      CALL DSCAL(LX*LX,-1.0D+00,WB,1)
+C
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UTDGAMMA
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get Gamma
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE UTDGAMMA(M,N,K,L,DA,PA,DB,PB,V1A,V2A,V1B,V2B,
+     *                    SD,L1,CEXC)
+      USE camdft, ONLY: CAMFLAG
+      USE lrcdft, ONLY: LCFLAG, EMU, EMU2, LRFILE
+      use mx_limits, only: mxao
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL LRINT
+      COMMON /IJPAIR/ IA(MXAO)
+      COMMON /NLRCF / LRINT
+      PARAMETER (PT5=0.5D+00)
+      PARAMETER (FOUR=4.0D+00)
+      DIMENSION V1A(L1,*),V2A(L1,*)
+      DIMENSION V1B(L1,*),V2B(L1,*)
+      DIMENSION PA(L1,*),DA(*)
+      DIMENSION PB(L1,*),DB(*)
+C
+
+C
+C     -- SET INDICES
+      KL=IA(MAX0(K,L))+MIN0(K,L)
+C     MN=IA(MAX0(M,N))+MIN0(M,N)
+C     ML=IA(MAX0(M,L))+MIN0(M,L)
+C     MK=IA(MAX0(M,K))+MIN0(M,K)
+      KN=IA(MAX0(K,N))+MIN0(K,N)
+      LN=IA(MAX0(L,N))+MIN0(L,N)
+C     -- P=T+Z CONTRIBUTION
+      DUM1C =  PA(M,N) *PT5*DA(KL)
+     *      +  PA(M,N) *PT5*DB(KL)
+     *      +  PB(M,N) *PT5*DA(KL)
+     *      +  PB(M,N) *PT5*DB(KL)
+      DUM1C =  FOUR*DUM1C
+c     write(6,'("DUM1C =",4I4,2F12.8)') M,N,K,L,DUM1C
+
+      DUM1E =  PA(M,L)*DA(KN) + PA(K,M)*DA(LN)
+     *      +  PB(M,L)*DB(KN) + PB(K,M)*DB(LN)
+      DUM1E = -CEXC*DUM1E
+C     -- OTHER MO-INTEGRAL CONTRIBUTION
+      DUM2C =  V1A(M,N)*V1A(K,L)
+     *      +  V1A(M,N)*V1B(K,L)
+     *      +  V1B(M,N)*V1A(K,L)
+     *      +  V1B(M,N)*V1B(K,L)
+C
+c     write(6,'("DUM2C =",4I4,2F12.8)') M,N,K,L,V1A(M,N),V1B(M,N)
+C
+      DUM2  =  V1A(K,N)*V1A(M,L)
+     *      +  V1A(K,M)*V1A(L,N)
+     *      -  V2A(K,N)*V2A(M,L)
+     *      +  V2A(K,M)*V2A(L,N)
+     *      +  V1B(K,N)*V1B(M,L)
+     *      +  V1B(K,M)*V1B(L,N)
+     *      -  V2B(K,N)*V2B(M,L)
+     *      +  V2B(K,M)*V2B(L,N)
+      DUM2E = -CEXC*DUM2*PT5
+C     -- TOTAL
+      SD    =  DUM1C + DUM1E + DUM2C + DUM2E
+c     SD    =  DUM1C + DUM1E + DUM2C
+c     SD    =  DUM1C + DUM1E
+c     SD    =  DUM1C
+      IF(LCFLAG.AND.LRINT)        SD = DUM1E + DUM2E
+      IF(LCFLAG.AND.(.NOT.LRINT)) SD = DUM1C + DUM2C
+      IF(CAMFLAG.AND.LRINT)       SD = DUM1E + DUM2E
+      SD = FOUR*SD
+C     SD=TWO*D(MN)*D(KL)-D(MK)*D(LN)
+C
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UNUMFKG
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get Fock
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE UNUMFKG(RHO,TAU,RCUTOFF,F,DRHOI_,
+     *                   DTRAI_,DTAUI_,COEF,WGT,GAO,
+     *                   VALGA,VALGB,IST,IEND,L1,NPTGRD,L2)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      DIMENSION F(L2,*)
+      DIMENSION DRHOI_(NPTGRD,4,*)
+      DIMENSION DTRAI_(5,2,*)
+      DIMENSION COEF(6,2,*)
+      DIMENSION DTAUI_(NPTGRD,*)
+      DIMENSION WGT(NPTGRD)
+      DIMENSION GAO(4,L1,*)
+      DIMENSION VALGA(L1)
+      DIMENSION VALGB(L1)
+C
+      DATA ZERO      /0.0D+00/
+      DATA TWO       /2.0D+00/
+C
+C     -- GRID LOOP
+C
+      DO 200 IPT=IST,IEND
+C
+         IIPT = IPT-IST+1
+         RTOT = DRHOI_(IPT,1,1) + DRHOI_(IPT,1,2)
+         IF(RTOT.LT.RCUTOFF) GOTO 200
+         FTOTWT  = WGT(IPT)
+C
+         C1A     = COEF(1,1,IIPT)
+         C2A     = COEF(2,1,IIPT)
+         C3A     = COEF(3,1,IIPT)
+         C4A     = COEF(4,1,IIPT)
+         C5A     = COEF(5,1,IIPT)
+C
+         C1B     = COEF(1,2,IIPT)
+         C2B     = COEF(2,2,IIPT)
+         C3B     = COEF(3,2,IIPT)
+         C4B     = COEF(4,2,IIPT)
+         C5B     = COEF(5,2,IIPT)
+C
+C
+         DRHOIAX = DRHOI_(IPT,2,1)
+         DRHOIAY = DRHOI_(IPT,3,1)
+         DRHOIAZ = DRHOI_(IPT,4,1)
+         DRHOIBX = DRHOI_(IPT,2,2)
+         DRHOIBY = DRHOI_(IPT,3,2)
+         DRHOIBZ = DRHOI_(IPT,4,2)
+         DXA     = DTRAI_(2,1,IIPT)
+         DYA     = DTRAI_(3,1,IIPT)
+         DZA     = DTRAI_(4,1,IIPT)
+         DXB     = DTRAI_(2,2,IIPT)
+         DYB     = DTRAI_(3,2,IIPT)
+         DZB     = DTRAI_(4,2,IIPT)
+C
+C
+         IND=1
+         AOMAX=ZERO
+         AMAXVAL=ZERO
+         DO M=1,L1
+            PM  = GAO(1,M,IIPT)
+            PMX = GAO(2,M,IIPT)
+            PMY = GAO(3,M,IIPT)
+            PMZ = GAO(4,M,IIPT)
+C
+            VALGA(M)=( C1A/TWO*PM
+     *              +  C2A*DRHOIAX*PMX
+     *              +  C2A*DRHOIAY*PMY 
+     *              +  C2A*DRHOIAZ*PMZ
+     *              +  C3A*DRHOIBX*PMX
+     *              +  C3A*DRHOIBY*PMY 
+     *              +  C3A*DRHOIBZ*PMZ
+     *              +  C4A*DXA*PMX   
+     *              +  C4A*DYA*PMY 
+     *              +  C4A*DZA*PMZ
+     *              +  C5A*DXB*PMX   
+     *              +  C5A*DYB*PMY 
+     *              +  C5A*DZB*PMZ)*FTOTWT
+C
+            VALGB(M)=( C1B/TWO*PM
+     *              +  C2B*DRHOIBX*PMX
+     *              +  C2B*DRHOIBY*PMY 
+     *              +  C2B*DRHOIBZ*PMZ
+     *              +  C3B*DRHOIAX*PMX
+     *              +  C3B*DRHOIAY*PMY 
+     *              +  C3B*DRHOIAZ*PMZ
+     *              +  C4B*DXB*PMX   
+     *              +  C4B*DYB*PMY 
+     *              +  C4B*DZB*PMZ
+     *              +  C5B*DXA*PMX   
+     *              +  C5B*DYA*PMY 
+     *              +  C5B*DZA*PMZ)*FTOTWT
+C
+            VMA     = VALGA(M)
+            VMB     = VALGB(M)
+C
+            AOMAX   = MAX(AOMAX,ABS(PM))
+            AMAXVAL = MAX(AMAXVAL,ABS(VMA))
+C
+C
+            DO N=1,M
+               PN       = GAO(1,N,IIPT)
+c              PNX      = GAO(2,N,IIPT)
+c              PNY      = GAO(3,N,IIPT)
+c              PNZ      = GAO(4,N,IIPT)
+C              Alpha
+               F(IND,1) = F(IND,1) + PM*VALGA(N)+VMA*PN
+C              Beta
+               F(IND,2) = F(IND,2) + PM*VALGB(N)+VMB*PN
+C
+               IND=IND+1
+            END DO
+         END DO
+C
+C     -- DEBUG DENSITY
+C
+         RHO   = RHO + RTOT * WGT(IPT)
+         TAU   = TAU + (DTAUI_(IPT,1) + DTAUI_(IPT,1))*WGT(IPT)
+  200 CONTINUE
+      RETURN
+      END
+C
+C*MODULE UTDGRD  *DECK UGCOF
+C>
+C>    @brief   UTD-DFT gradient
+C>
+C>    @details Get GCOF
+C>
+C>    @author  Hiroya Nakata
+C>
+      SUBROUTINE UGCOF(COEF,EX,EC,DRHOI_,DTRAI_,RCUTOFF,NPTGRD,
+     *                 IST,IEND,ILENG)
+      USE CDERIX, ONLY: IRAGA, IRAGB, IRAGC, IRBGA, IRBGB, IRBGC,
+     *  IGAGA, IGAGB, IGAGC, IGBGB, IGBGC, IGCGC, IRARARA, IRARARB,
+     *  IRARAGA, IRARAGB, IRARAGC, IRARBRB, IRARBGA, IRARBGB, IRARBGC,
+     *  IRAGAGA, IRAGAGB, IRAGAGC, IRAGBGB, IRAGBGC, IRAGCGC, IRBRBRB,
+     *  IRBRBGA, IRBRBGB, IRBRBGC, IRBGAGA, IRBGAGB, IRBGAGC, IRBGBGB,
+     *  IRBGBGC, IRBGCGC, IGAGAGA, IGAGAGB, IGAGAGC, IGAGBGB, IGAGBGC,
+     *  IGAGCGC, IGBGBGB, IGBGBGC, IGBGCGC, IGCGCGC
+      USE XDERIX, ONLY: NXDIM, KRA, KRB, KGA, KGB, KTA, KTB, KRARA,
+     *  KRAGA, KRATA, KGAGA, KGATA, KTATA, KRBRB, KRBGB, KRBTB, KGBGB,
+     *  KGBTB, KTBTB, KRARARA, KRARAGA, KRARATA, KRAGAGA, KRAGATA,
+     *  KRATATA, KGAGAGA, KGAGATA, KGATATA, KTATATA, KRBRBRB, KRBRBGB,
+     *  KRBRBTB, KRBGBGB, KRBGBTB, KRBTBTB, KGBGBGB, KGBGBTB, KGBTBTB,
+     *  KTBTBTB
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      DIMENSION COEF(6,2,*)
+      DIMENSION DRHOI_(NPTGRD,4,2)
+      DIMENSION DTRAI_(5,2,*)
+      DIMENSION EX(ILENG,*)
+      DIMENSION EC(ILENG,*)
+      DIMENSION DUMNV(2),DXV(2),DYV(2),DZV(2),DUMGRV(4),DUMXX(4)
+C
+      DATA ZERO      /0.0D+00/
+      DATA TWO       /2.0D+00/
+      DATA FOUR      /4.0D+00/
+C
+      CALL VCLR(COEF,1,ILENG*6*2)
+C
+      DO IPT=IST,IEND
+         IIPT = IPT-IST+1
+         RHOA = DRHOI_(IPT,1,1)
+         RHOB = DRHOI_(IPT,1,2)
+         RHOT = RHOA + RHOB
+         IF(RHOT.GT.RCUTOFF) THEN
+            DRHOAX=DRHOI_(IPT,2,1)
+            DRHOAY=DRHOI_(IPT,3,1)
+            DRHOAZ=DRHOI_(IPT,4,1)
+            DRHOBX=DRHOI_(IPT,2,2)
+            DRHOBY=DRHOI_(IPT,3,2)
+            DRHOBZ=DRHOI_(IPT,4,2)
+C
+            DUMNV(1) = DTRAI_(1,1,IIPT)
+            DXV(1)   = DTRAI_(2,1,IIPT)
+            DYV(1)   = DTRAI_(3,1,IIPT)
+            DZV(1)   = DTRAI_(4,1,IIPT)
+            DUMNV(2) = DTRAI_(1,2,IIPT)
+            DXV(2)   = DTRAI_(2,2,IIPT)
+            DYV(2)   = DTRAI_(3,2,IIPT)
+            DZV(2)   = DTRAI_(4,2,IIPT)
+C
+C     -- DUMGRV
+C     1:A*A 2:B*B 3:A*B 4:B*A
+            DUMGRV(1)=DXV(1)*DRHOAX+DYV(1)*DRHOAY+DZV(1)*DRHOAZ
+            DUMGRV(2)=DXV(2)*DRHOBX+DYV(2)*DRHOBY+DZV(2)*DRHOBZ
+            DUMGRV(3)=DXV(1)*DRHOBX+DYV(1)*DRHOBY+DZV(1)*DRHOBZ
+            DUMGRV(4)=DXV(2)*DRHOAX+DYV(2)*DRHOAY+DZV(2)*DRHOAZ
+            DUMXX(1) =DXV(1)*DXV(1)+DYV(1)*DYV(1)+DZV(1)*DZV(1)
+            DUMXX(2) =DXV(2)*DXV(2)+DYV(2)*DYV(2)+DZV(2)*DZV(2)
+            DUMXX(3) =DXV(1)*DXV(2)+DYV(1)*DYV(2)+DZV(1)*DZV(2)
+            DUMXX(4) =DUMXX(3)
+C
+C     ---- FOR G(L2):3RD DERIVATIVES :F_CORE
+C     ********F_CORE****************
+C     ********G_ALPHA***************DUM"A",DUM"A"G
+C     --AA
+            C1=TWO*DUMXX(1)
+            C2=DUMNV(1)*DUMNV(1)
+            C3=TWO*DUMNV(1)*DUMGRV(1)
+            C4=TWO*DUMGRV(1)*DUMNV(1)
+            C5=DUMGRV(3)*DUMNV(1)
+            C6=DUMNV(1)*DUMGRV(3)
+            C7=FOUR*DUMGRV(1)*DUMGRV(1)
+            C8=TWO*DUMGRV(3)*DUMGRV(1)
+            C9=TWO*DUMGRV(1)*DUMGRV(3)
+            C10=DUMGRV(3)*DUMGRV(3)
+C     -- EXCHANGE
+            XDUMA=ZERO
+            XDUMAG=ZERO
+C     A-AA--1
+            XDUMA =XDUMA +C1*EX(IIPT,KRAGA)
+            XDUMAG=XDUMAG+C1*TWO*EX(IIPT,KGAGA)
+C     --2
+            XDUMA =XDUMA +C2*EX(IIPT,KRARARA)
+            XDUMAG=XDUMAG+C2*TWO*EX(IIPT,KRARAGA)
+C     --3
+            XDUMA=XDUMA+C3*EX(IIPT,KRARAGA)
+            XDUMAG=XDUMAG+C3*TWO*EX(IIPT,KRAGAGA)
+C     --4
+            XDUMA=XDUMA+C4*EX(IIPT,KRARAGA)
+            XDUMAG=XDUMAG+C4*TWO*EX(IIPT,KRAGAGA)
+C     --7
+            XDUMA=XDUMA+C7*EX(IIPT,KRAGAGA)
+            XDUMAG=XDUMAG+C7*TWO*EX(IIPT,KGAGAGA)
+C     -- CORRELATION
+            CDUMA=ZERO
+            CDUMAG1=ZERO
+            CDUMAG2=ZERO
+C     A-AA--1     GA
+            CDUMA=CDUMA+C1*EC(IIPT,IRAGA)
+            CDUMAG1=CDUMAG1+C1*TWO*EC(IIPT,IGAGA)
+            CDUMAG2=CDUMAG2+C1*EC(IIPT,IGAGC)
+C     --2        RARA
+            CDUMA=CDUMA+C2*EC(IIPT,IRARARA)
+            CDUMAG1=CDUMAG1+C2*TWO*EC(IIPT,IRARAGA)
+            CDUMAG2=CDUMAG2+C2*EC(IIPT,IRARAGC)
+C     --3        RAGA
+            CDUMA=CDUMA+C3*EC(IIPT,IRARAGA)
+            CDUMAG1=CDUMAG1+C3*TWO*EC(IIPT,IRAGAGA)
+            CDUMAG2=CDUMAG2+C3*EC(IIPT,IRAGAGC)
+C     --4        RAGA
+            CDUMA=CDUMA+C4*EC(IIPT,IRARAGA)
+            CDUMAG1=CDUMAG1+C4*TWO*EC(IIPT,IRAGAGA)
+            CDUMAG2=CDUMAG2+C4*EC(IIPT,IRAGAGC)
+C     --5        RAGC
+            CDUMA=CDUMA+C5*EC(IIPT,IRARAGC)
+            CDUMAG1=CDUMAG1+C5*TWO*EC(IIPT,IRAGAGC)
+            CDUMAG2=CDUMAG2+C5*EC(IIPT,IRAGCGC)
+C     --6        RAGC
+            CDUMA=CDUMA+C6*EC(IIPT,IRARAGC)
+            CDUMAG1=CDUMAG1+C6*TWO*EC(IIPT,IRAGAGC)
+            CDUMAG2=CDUMAG2+C6*EC(IIPT,IRAGCGC)
+C     --7        GAGA
+            CDUMA=CDUMA+C7*EC(IIPT,IRAGAGA)
+            CDUMAG1=CDUMAG1+C7*TWO*EC(IIPT,IGAGAGA)
+            CDUMAG2=CDUMAG2+C7*EC(IIPT,IGAGAGC)
+C     --8        GAGC
+            CDUMA=CDUMA+C8*EC(IIPT,IRAGAGC)
+            CDUMAG1=CDUMAG1+C8*TWO*EC(IIPT,IGAGAGC)
+            CDUMAG2=CDUMAG2+C8*EC(IIPT,IGAGCGC)
+C     --9        GAGC
+            CDUMA=CDUMA+C9*EC(IIPT,IRAGAGC)
+            CDUMAG1=CDUMAG1+C9*TWO*EC(IIPT,IGAGAGC)
+            CDUMAG2=CDUMAG2+C9*EC(IIPT,IGAGCGC)
+C     --10       GCGC
+            CDUMA=CDUMA+C10*EC(IIPT,IRAGCGC)
+            CDUMAG1=CDUMAG1+C10*TWO*EC(IIPT,IGAGCGC)
+            CDUMAG2=CDUMAG2+C10*EC(IIPT,IGCGCGC)
+C     --BB
+            C1=TWO*DUMXX(2)
+            C2=DUMNV(2)*DUMNV(2)
+            C3=TWO*DUMNV(2)*DUMGRV(2)
+            C4=TWO*DUMGRV(2)*DUMNV(2)
+            C5=DUMGRV(4)*DUMNV(2)
+            C6=DUMNV(2)*DUMGRV(4)
+            C7=FOUR*DUMGRV(2)*DUMGRV(2)
+            C8=TWO*DUMGRV(2)*DUMGRV(4)
+            C9=TWO*DUMGRV(4)*DUMGRV(2)
+            C10=DUMGRV(4)*DUMGRV(4)
+C     A-BB--1      GB
+            CDUMA=CDUMA+C1*EC(IIPT,IRAGB)
+            CDUMAG1=CDUMAG1+C1*TWO*EC(IIPT,IGAGB)
+            CDUMAG2=CDUMAG2+C1*EC(IIPT,IGBGC)
+C     --2        RBRB
+            CDUMA=CDUMA+C2*EC(IIPT,IRARBRB)
+            CDUMAG1=CDUMAG1+C2*TWO*EC(IIPT,IRBRBGA)
+            CDUMAG2=CDUMAG2+C2*EC(IIPT,IRBRBGC)
+C     --3        RBGB
+            CDUMA=CDUMA+C3*EC(IIPT,IRARBGB)
+            CDUMAG1=CDUMAG1+C3*TWO*EC(IIPT,IRBGAGB)
+            CDUMAG2=CDUMAG2+C3*EC(IIPT,IRBGBGC)
+C     --4        RBGB
+            CDUMA=CDUMA+C4*EC(IIPT,IRARBGB)
+            CDUMAG1=CDUMAG1+C4*TWO*EC(IIPT,IRBGAGB)
+            CDUMAG2=CDUMAG2+C4*EC(IIPT,IRBGBGC)
+C     --5        RBGC
+            CDUMA=CDUMA+C5*EC(IIPT,IRARBGC)
+            CDUMAG1=CDUMAG1+C5*TWO*EC(IIPT,IRBGAGC)
+            CDUMAG2=CDUMAG2+C5*EC(IIPT,IRBGCGC)
+C     --6        RBGC
+            CDUMA=CDUMA+C6*EC(IIPT,IRARBGC)
+            CDUMAG1=CDUMAG1+C6*TWO*EC(IIPT,IRBGAGC)
+            CDUMAG2=CDUMAG2+C6*EC(IIPT,IRBGCGC)
+C     --7        GBGB
+            CDUMA=CDUMA+C7*EC(IIPT,IRAGBGB)
+            CDUMAG1=CDUMAG1+C7*TWO*EC(IIPT,IGAGBGB)
+            CDUMAG2=CDUMAG2+C7*EC(IIPT,IGBGBGC)
+C     --8        GBGC
+            CDUMA=CDUMA+C8*EC(IIPT,IRAGBGC)
+            CDUMAG1=CDUMAG1+C8*TWO*EC(IIPT,IGAGBGC)
+            CDUMAG2=CDUMAG2+C8*EC(IIPT,IGBGCGC)
+C     --9        GBGC
+            CDUMA=CDUMA+C9*EC(IIPT,IRAGBGC)
+            CDUMAG1=CDUMAG1+C9*TWO*EC(IIPT,IGAGBGC)
+            CDUMAG2=CDUMAG2+C9*EC(IIPT,IGBGCGC)
+C     --10       GCGC
+            CDUMA=CDUMA+C10*EC(IIPT,IRAGCGC)
+            CDUMAG1=CDUMAG1+C10*TWO*EC(IIPT,IGAGCGC)
+            CDUMAG2=CDUMAG2+C10*EC(IIPT,IGCGCGC)
+C     --ABORBA
+            C11=DUMXX(3)
+            C12=DUMNV(1)*DUMNV(2)
+            C13=TWO*DUMNV(1)*DUMGRV(2)
+            C14=TWO*DUMGRV(1)*DUMNV(2)
+            C15=DUMNV(1)*DUMGRV(4)
+            C16=DUMGRV(3)*DUMNV(2)
+            C17=FOUR*DUMGRV(1)*DUMGRV(2)
+            C18=TWO*DUMGRV(1)*DUMGRV(4)
+            C19=TWO*DUMGRV(3)*DUMGRV(2)
+            C20=DUMGRV(3)*DUMGRV(4)
+C     A-AB--11   GC
+            CDUMA=CDUMA+C11*EC(IIPT,IRAGC)
+            CDUMAG1=CDUMAG1+C11*TWO*EC(IIPT,IGAGC)
+            CDUMAG2=CDUMAG2+C11*EC(IIPT,IGCGC)
+C     --12     RARB
+            CDUMA=CDUMA+C12*EC(IIPT,IRARARB)
+            CDUMAG1=CDUMAG1+C12*TWO*EC(IIPT,IRARBGA)
+            CDUMAG2=CDUMAG2+C12*EC(IIPT,IRARBGC)
+C     --13     RAGB
+            CDUMA=CDUMA+C13*EC(IIPT,IRARAGB)
+            CDUMAG1=CDUMAG1+C13*TWO*EC(IIPT,IRAGAGB)
+            CDUMAG2=CDUMAG2+C13*EC(IIPT,IRAGBGC)
+C     --14     RBGA
+            CDUMA=CDUMA+C14*EC(IIPT,IRARBGA)
+            CDUMAG1=CDUMAG1+C14*TWO*EC(IIPT,IRBGAGA)
+            CDUMAG2=CDUMAG2+C14*EC(IIPT,IRBGAGC)
+C     --15     RAGC
+            CDUMA=CDUMA+C15*EC(IIPT,IRARAGC)
+            CDUMAG1=CDUMAG1+C15*TWO*EC(IIPT,IRAGAGC)
+            CDUMAG2=CDUMAG2+C15*EC(IIPT,IRAGCGC)
+C     --16     RBGC
+            CDUMA=CDUMA+C16*EC(IIPT,IRARBGC)
+            CDUMAG1=CDUMAG1+C16*TWO*EC(IIPT,IRBGAGC)
+            CDUMAG2=CDUMAG2+C16*EC(IIPT,IRBGCGC)
+C     --17     GAGB
+            CDUMA=CDUMA+C17*EC(IIPT,IRAGAGB)
+            CDUMAG1=CDUMAG1+C17*TWO*EC(IIPT,IGAGAGB)
+            CDUMAG2=CDUMAG2+C17*EC(IIPT,IGAGBGC)
+C     --18     GAGC
+            CDUMA=CDUMA+C18*EC(IIPT,IRAGAGC)
+            CDUMAG1=CDUMAG1+C18*TWO*EC(IIPT,IGAGAGC)
+            CDUMAG2=CDUMAG2+C18*EC(IIPT,IGAGCGC)
+C     --19     GBGC
+            CDUMA=CDUMA+C19*EC(IIPT,IRAGBGC)
+            CDUMAG1=CDUMAG1+C19*TWO*EC(IIPT,IGAGBGC)
+            CDUMAG2=CDUMAG2+C19*EC(IIPT,IGBGCGC)
+C     --20     GCGC
+            CDUMA=CDUMA+C20*EC(IIPT,IRAGCGC)
+            CDUMAG1=CDUMAG1+C20*TWO*EC(IIPT,IGAGCGC)
+            CDUMAG2=CDUMAG2+C20*EC(IIPT,IGCGCGC)
+C     **BA_TERM=AB_TERM**
+C     --ABORBA
+            C11=DUMXX(3)
+            C12=DUMNV(1)*DUMNV(2)
+            C13=TWO*DUMNV(1)*DUMGRV(2)
+            C14=TWO*DUMGRV(1)*DUMNV(2)
+            C15=DUMNV(1)*DUMGRV(4)
+            C16=DUMGRV(3)*DUMNV(2)
+            C17=FOUR*DUMGRV(1)*DUMGRV(2)
+            C18=TWO*DUMGRV(1)*DUMGRV(4)
+            C19=TWO*DUMGRV(3)*DUMGRV(2)
+            C20=DUMGRV(3)*DUMGRV(4)
+C     A-AB--11   GC
+            CDUMA=CDUMA+C11*EC(IIPT,IRAGC)
+            CDUMAG1=CDUMAG1+C11*TWO*EC(IIPT,IGAGC)
+            CDUMAG2=CDUMAG2+C11*EC(IIPT,IGCGC)
+C     --12     RARB
+            CDUMA=CDUMA+C12*EC(IIPT,IRARARB)
+            CDUMAG1=CDUMAG1+C12*TWO*EC(IIPT,IRARBGA)
+            CDUMAG2=CDUMAG2+C12*EC(IIPT,IRARBGC)
+C     --13     RAGB
+            CDUMA=CDUMA+C13*EC(IIPT,IRARAGB)
+            CDUMAG1=CDUMAG1+C13*TWO*EC(IIPT,IRAGAGB)
+            CDUMAG2=CDUMAG2+C13*EC(IIPT,IRAGBGC)
+C     --14     RBGA
+            CDUMA=CDUMA+C14*EC(IIPT,IRARBGA)
+            CDUMAG1=CDUMAG1+C14*TWO*EC(IIPT,IRBGAGA)
+            CDUMAG2=CDUMAG2+C14*EC(IIPT,IRBGAGC)
+C     --15     RAGC
+            CDUMA=CDUMA+C15*EC(IIPT,IRARAGC)
+            CDUMAG1=CDUMAG1+C15*TWO*EC(IIPT,IRAGAGC)
+            CDUMAG2=CDUMAG2+C15*EC(IIPT,IRAGCGC)
+C     --16     RBGC
+            CDUMA=CDUMA+C16*EC(IIPT,IRARBGC)
+            CDUMAG1=CDUMAG1+C16*TWO*EC(IIPT,IRBGAGC)
+            CDUMAG2=CDUMAG2+C16*EC(IIPT,IRBGCGC)
+C     --17     GAGB
+            CDUMA=CDUMA+C17*EC(IIPT,IRAGAGB)
+            CDUMAG1=CDUMAG1+C17*TWO*EC(IIPT,IGAGAGB)
+            CDUMAG2=CDUMAG2+C17*EC(IIPT,IGAGBGC)
+C     --18     GAGC
+            CDUMA=CDUMA+C18*EC(IIPT,IRAGAGC)
+            CDUMAG1=CDUMAG1+C18*TWO*EC(IIPT,IGAGAGC)
+            CDUMAG2=CDUMAG2+C18*EC(IIPT,IGAGCGC)
+C     --19     GBGC
+            CDUMA=CDUMA+C19*EC(IIPT,IRAGBGC)
+            CDUMAG1=CDUMAG1+C19*TWO*EC(IIPT,IGAGBGC)
+            CDUMAG2=CDUMAG2+C19*EC(IIPT,IGBGCGC)
+C     --20     GCGC
+            CDUMA=CDUMA+C20*EC(IIPT,IRAGCGC)
+            CDUMAG1=CDUMAG1+C20*TWO*EC(IIPT,IGAGCGC)
+            CDUMAG2=CDUMAG2+C20*EC(IIPT,IGCGCGC)
+C     ********G_ALPHA END***********DUM"A",DUM"A"G
+C     ********G_BETA****************DUM"B",DUM"B"G
+C     *RB OR GB OR GC
+C     AA
+            C1=TWO*DUMXX(1)
+            C2=DUMNV(1)*DUMNV(1)
+            C3=TWO*DUMNV(1)*DUMGRV(1)
+            C4=TWO*DUMGRV(1)*DUMNV(1)
+            C5=DUMGRV(3)*DUMNV(1)
+            C6=DUMNV(1)*DUMGRV(3)
+            C7=FOUR*DUMGRV(1)*DUMGRV(1)
+            C8=TWO*DUMGRV(1)*DUMGRV(3)
+            C9=TWO*DUMGRV(3)*DUMGRV(1)
+            C10=DUMGRV(3)*DUMGRV(3)
+C     -- CORRELATION
+            CDUMB=ZERO
+            CDUMBG1=ZERO
+            CDUMBG2=ZERO
+C     B-AA--1     GA
+            CDUMB=CDUMB+C1*EC(IIPT,IRBGA)
+            CDUMBG1=CDUMBG1+C1*TWO*EC(IIPT,IGAGB)
+            CDUMBG2=CDUMBG2+C1*EC(IIPT,IGAGC)
+C     --2        RARA
+            CDUMB=CDUMB+C2*EC(IIPT,IRARARB)
+            CDUMBG1=CDUMBG1+C2*TWO*EC(IIPT,IRARAGB)
+            CDUMBG2=CDUMBG2+C2*EC(IIPT,IRARAGC)
+C     --3        RAGA
+            CDUMB=CDUMB+C3*EC(IIPT,IRARBGA)
+            CDUMBG1=CDUMBG1+C3*TWO*EC(IIPT,IRAGAGB)
+            CDUMBG2=CDUMBG2+C3*EC(IIPT,IRAGAGC)
+C     --4        RAGA
+            CDUMB=CDUMB+C4*EC(IIPT,IRARBGA)
+            CDUMBG1=CDUMBG1+C4*TWO*EC(IIPT,IRAGAGB)
+            CDUMBG2=CDUMBG2+C4*EC(IIPT,IRAGAGC)
+C     --5        RAGC
+            CDUMB=CDUMB+C5*EC(IIPT,IRARBGC)
+            CDUMBG1=CDUMBG1+C5*TWO*EC(IIPT,IRAGBGC)
+            CDUMBG2=CDUMBG2+C5*EC(IIPT,IRAGCGC)
+C     --6        RAGC
+            CDUMB=CDUMB+C6*EC(IIPT,IRARBGC)
+            CDUMBG1=CDUMBG1+C6*TWO*EC(IIPT,IRAGBGC)
+            CDUMBG2=CDUMBG2+C6*EC(IIPT,IRAGCGC)
+C     --7        GAGA
+            CDUMB=CDUMB+C7*EC(IIPT,IRBGAGA)
+            CDUMBG1=CDUMBG1+C7*TWO*EC(IIPT,IGAGAGB)
+            CDUMBG2=CDUMBG2+C7*EC(IIPT,IGAGAGC)
+C     --8        GAGC
+            CDUMB=CDUMB+C8*EC(IIPT,IRBGAGC)
+            CDUMBG1=CDUMBG1+C8*TWO*EC(IIPT,IGAGBGC)
+            CDUMBG2=CDUMBG2+C8*EC(IIPT,IGAGCGC)
+C     --9        GAGC
+            CDUMB=CDUMB+C9*EC(IIPT,IRBGAGC)
+            CDUMBG1=CDUMBG1+C9*TWO*EC(IIPT,IGAGBGC)
+            CDUMBG2=CDUMBG2+C9*EC(IIPT,IGAGCGC)
+C     --10       GCGC
+            CDUMB=CDUMB+C10*EC(IIPT,IRBGCGC)
+            CDUMBG1=CDUMBG1+C10*TWO*EC(IIPT,IGBGCGC)
+            CDUMBG2=CDUMBG2+C10*EC(IIPT,IGCGCGC)
+C     --BB
+            C1=TWO*DUMXX(2)
+            C2=DUMNV(2)*DUMNV(2)
+            C3=TWO*DUMNV(2)*DUMGRV(2)
+            C4=TWO*DUMGRV(2)*DUMNV(2)
+            C5=DUMGRV(4)*DUMNV(2)
+            C6=DUMNV(2)*DUMGRV(4)
+            C7=FOUR*DUMGRV(2)*DUMGRV(2)
+            C8=TWO*DUMGRV(4)*DUMGRV(2)
+            C9=TWO*DUMGRV(2)*DUMGRV(4)
+            C10=DUMGRV(4)*DUMGRV(4)
+C     -- EXCHANGE
+            XDUMB=ZERO
+            XDUMBG=ZERO
+C     B-BB--1      GB
+            XDUMB=XDUMB+C1*EX(IIPT,KRBGB)
+            XDUMBG=XDUMBG+C1*TWO*EX(IIPT,KGBGB)
+C     --2          RBRB
+            XDUMB=XDUMB+C2*EX(IIPT,KRBRBRB)
+            XDUMBG=XDUMBG+C2*TWO*EX(IIPT,KRBRBGB)
+C     --3          RBGB
+            XDUMB=XDUMB+C3*EX(IIPT,KRBRBGB)
+            XDUMBG=XDUMBG+C3*TWO*EX(IIPT,KRBGBGB)
+C     --4          RBGB
+            XDUMB=XDUMB+C4*EX(IIPT,KRBRBGB)
+            XDUMBG=XDUMBG+C4*TWO*EX(IIPT,KRBGBGB)
+C     --7          GBGB
+            XDUMB=XDUMB+C7*EX(IIPT,KRBGBGB)
+            XDUMBG=XDUMBG+C7*TWO*EX(IIPT,KGBGBGB)
+C     B-BB--1      GB
+            CDUMB=CDUMB+C1*EC(IIPT,IRBGB)
+            CDUMBG1=CDUMBG1+C1*TWO*EC(IIPT,IGBGB)
+            CDUMBG2=CDUMBG2+C1*EC(IIPT,IGBGC)
+C     --2        RBRB
+            CDUMB=CDUMB+C2*EC(IIPT,IRBRBRB)
+            CDUMBG1=CDUMBG1+C2*TWO*EC(IIPT,IRBRBGB)
+            CDUMBG2=CDUMBG2+C2*EC(IIPT,IRBRBGC)
+C     --3        RBGB
+            CDUMB=CDUMB+C3*EC(IIPT,IRBRBGB)
+            CDUMBG1=CDUMBG1+C3*TWO*EC(IIPT,IRBGBGB)
+            CDUMBG2=CDUMBG2+C3*EC(IIPT,IRBGBGC)
+C     --4        RBGB
+            CDUMB=CDUMB+C4*EC(IIPT,IRBRBGB)
+            CDUMBG1=CDUMBG1+C4*TWO*EC(IIPT,IRBGBGB)
+            CDUMBG2=CDUMBG2+C4*EC(IIPT,IRBGBGC)
+C     --5        RBGC
+            CDUMB=CDUMB+C5*EC(IIPT,IRBRBGC)
+            CDUMBG1=CDUMBG1+C5*TWO*EC(IIPT,IRBGBGC)
+            CDUMBG2=CDUMBG2+C5*EC(IIPT,IRBGCGC)
+C     --6        RBGC
+            CDUMB=CDUMB+C6*EC(IIPT,IRBRBGC)
+            CDUMBG1=CDUMBG1+C6*TWO*EC(IIPT,IRBGBGC)
+            CDUMBG2=CDUMBG2+C6*EC(IIPT,IRBGCGC)
+C     --7        GBGB
+            CDUMB=CDUMB+C7*EC(IIPT,IRBGBGB)
+            CDUMBG1=CDUMBG1+C7*TWO*EC(IIPT,IGBGBGB)
+            CDUMBG2=CDUMBG2+C7*EC(IIPT,IGBGBGC)
+C     --8        GBGC
+            CDUMB=CDUMB+C8*EC(IIPT,IRBGBGC)
+            CDUMBG1=CDUMBG1+C8*TWO*EC(IIPT,IGBGBGC)
+            CDUMBG2=CDUMBG2+C8*EC(IIPT,IGBGCGC)
+C     --9        GBGC
+            CDUMB=CDUMB+C9*EC(IIPT,IRBGBGC)
+            CDUMBG1=CDUMBG1+C9*TWO*EC(IIPT,IGBGBGC)
+            CDUMBG2=CDUMBG2+C9*EC(IIPT,IGBGCGC)
+C     --10       GCGC
+            CDUMB=CDUMB+C10*EC(IIPT,IRBGCGC)
+            CDUMBG1=CDUMBG1+C10*TWO*EC(IIPT,IGBGCGC)
+            CDUMBG2=CDUMBG2+C10*EC(IIPT,IGCGCGC)
+C     --ABORBA
+            C11=DUMXX(3)
+            C12=DUMNV(1)*DUMNV(2)
+            C13=TWO*DUMNV(1)*DUMGRV(2)
+            C14=TWO*DUMGRV(1)*DUMNV(2)
+            C15=DUMNV(1)*DUMGRV(4)
+            C16=DUMGRV(3)*DUMNV(2)
+            C17=FOUR*DUMGRV(1)*DUMGRV(2)
+            C18=TWO*DUMGRV(4)*DUMGRV(1)
+            C19=TWO*DUMGRV(3)*DUMGRV(2)
+            C20=DUMGRV(3)*DUMGRV(4)
+C     B-AB--11   GC
+            CDUMB=CDUMB+C11*EC(IIPT,IRBGC)
+            CDUMBG1=CDUMBG1+C11*TWO*EC(IIPT,IGBGC)
+            CDUMBG2=CDUMBG2+C11*EC(IIPT,IGCGC)
+C     --12     RARB
+            CDUMB=CDUMB+C12*EC(IIPT,IRARBRB)
+            CDUMBG1=CDUMBG1+C12*TWO*EC(IIPT,IRARBGB)
+            CDUMBG2=CDUMBG2+C12*EC(IIPT,IRARBGC)
+C     --13     RAGB
+            CDUMB=CDUMB+C13*EC(IIPT,IRARBGB)
+            CDUMBG1=CDUMBG1+C13*TWO*EC(IIPT,IRAGBGB)
+            CDUMBG2=CDUMBG2+C13*EC(IIPT,IRAGBGC)
+C     --14     RBGA
+            CDUMB=CDUMB+C14*EC(IIPT,IRBRBGA)
+            CDUMBG1=CDUMBG1+C14*TWO*EC(IIPT,IRBGAGB)
+            CDUMBG2=CDUMBG2+C14*EC(IIPT,IRBGAGC)
+C     --15     RAGC
+            CDUMB=CDUMB+C15*EC(IIPT,IRARBGC)
+            CDUMBG1=CDUMBG1+C15*TWO*EC(IIPT,IRAGBGC)
+            CDUMBG2=CDUMBG2+C15*EC(IIPT,IRAGCGC)
+C     --16     RBGC
+            CDUMB=CDUMB+C16*EC(IIPT,IRBRBGC)
+            CDUMBG1=CDUMBG1+C16*TWO*EC(IIPT,IRBGBGC)
+            CDUMBG2=CDUMBG2+C16*EC(IIPT,IRBGCGC)
+C     --17     GAGB
+            CDUMB=CDUMB+C17*EC(IIPT,IRBGAGB)
+            CDUMBG1=CDUMBG1+C17*TWO*EC(IIPT,IGAGBGB)
+            CDUMBG2=CDUMBG2+C17*EC(IIPT,IGAGBGC)
+C     --18     GAGC
+            CDUMB=CDUMB+C18*EC(IIPT,IRBGAGC)
+            CDUMBG1=CDUMBG1+C18*TWO*EC(IIPT,IGAGBGC)
+            CDUMBG2=CDUMBG2+C18*EC(IIPT,IGAGCGC)
+C     --19     GBGC
+            CDUMB=CDUMB+C19*EC(IIPT,IRBGBGC)
+            CDUMBG1=CDUMBG1+C19*TWO*EC(IIPT,IGBGBGC)
+            CDUMBG2=CDUMBG2+C19*EC(IIPT,IGBGCGC)
+C     --20     GCGC
+            CDUMB=CDUMB+C20*EC(IIPT,IRBGCGC)
+            CDUMBG1=CDUMBG1+C20*TWO*EC(IIPT,IGBGCGC)
+            CDUMBG2=CDUMBG2+C20*EC(IIPT,IGCGCGC)
+C     **BA_TERM=AB_TERM**
+C     B-BA--11   GC
+            CDUMB=CDUMB+C11*EC(IIPT,IRBGC)
+            CDUMBG1=CDUMBG1+C11*TWO*EC(IIPT,IGBGC)
+            CDUMBG2=CDUMBG2+C11*EC(IIPT,IGCGC)
+C     --12     RARB
+            CDUMB=CDUMB+C12*EC(IIPT,IRARBRB)
+            CDUMBG1=CDUMBG1+C12*TWO*EC(IIPT,IRARBGB)
+            CDUMBG2=CDUMBG2+C12*EC(IIPT,IRARBGC)
+C     --13     RAGB
+            CDUMB=CDUMB+C13*EC(IIPT,IRARBGB)
+            CDUMBG1=CDUMBG1+C13*TWO*EC(IIPT,IRAGBGB)
+            CDUMBG2=CDUMBG2+C13*EC(IIPT,IRAGBGC)
+C     --14     RBGA
+            CDUMB=CDUMB+C14*EC(IIPT,IRBRBGA)
+            CDUMBG1=CDUMBG1+C14*TWO*EC(IIPT,IRBGAGB)
+            CDUMBG2=CDUMBG2+C14*EC(IIPT,IRBGAGC)
+C     --15     RAGC
+            CDUMB=CDUMB+C15*EC(IIPT,IRARBGC)
+            CDUMBG1=CDUMBG1+C15*TWO*EC(IIPT,IRAGBGC)
+            CDUMBG2=CDUMBG2+C15*EC(IIPT,IRAGCGC)
+C     --16     RBGC
+            CDUMB=CDUMB+C16*EC(IIPT,IRBRBGC)
+            CDUMBG1=CDUMBG1+C16*TWO*EC(IIPT,IRBGBGC)
+            CDUMBG2=CDUMBG2+C16*EC(IIPT,IRBGCGC)
+C     --17     GAGB
+            CDUMB=CDUMB+C17*EC(IIPT,IRBGAGB)
+            CDUMBG1=CDUMBG1+C17*TWO*EC(IIPT,IGAGBGB)
+            CDUMBG2=CDUMBG2+C17*EC(IIPT,IGAGBGC)
+C     --18     GAGC
+            CDUMB=CDUMB+C18*EC(IIPT,IRBGAGC)
+            CDUMBG1=CDUMBG1+C18*TWO*EC(IIPT,IGAGBGC)
+            CDUMBG2=CDUMBG2+C18*EC(IIPT,IGAGCGC)
+C     --19     GBGC
+            CDUMB=CDUMB+C19*EC(IIPT,IRBGBGC)
+            CDUMBG1=CDUMBG1+C19*TWO*EC(IIPT,IGBGBGC)
+            CDUMBG2=CDUMBG2+C19*EC(IIPT,IGBGCGC)
+C     --20     GCGC
+            CDUMB=CDUMB+C20*EC(IIPT,IRBGCGC)
+            CDUMBG1=CDUMBG1+C20*TWO*EC(IIPT,IGBGCGC)
+            CDUMBG2=CDUMBG2+C20*EC(IIPT,IGCGCGC)
+C     ********G_BETA END************DUM"B",DUM"B"G
+C     *****F_CORE_END**********************
+C
+C     ********EDGE****************
+C
+C     --EXCHANGE
+C
+C     --GA*
+            XDUMAGEA=0
+            XDUMAGEA=XDUMAGEA+TWO*TWO*DUMNV(1)*EX(IIPT,KRAGA)
+            XDUMAGEA=XDUMAGEA+TWO*TWO*TWO*DUMGRV(1)*EX(IIPT,KGAGA)
+C     --GB
+            XDUMAGEB=0
+            XDUMAGEB=XDUMAGEB+TWO*TWO*DUMNV(2)*EX(IIPT,KRBGB)
+            XDUMAGEB=XDUMAGEB+TWO*TWO*TWO*DUMGRV(2)*EX(IIPT,KGBGB)
+C
+C     --CORRELATION
+C
+C     --GA
+            CDUMAGEAA=ZERO
+            CDUMAGEBA=ZERO
+C       AAA       (A | AA)
+            CDUMAGEAA=CDUMAGEAA+TWO*DUMNV(1)*TWO*EC(IIPT,IRAGA)
+            CDUMAGEAA=CDUMAGEAA+TWO*DUMGRV(1)*TWO*TWO*EC(IIPT,IGAGA)
+            CDUMAGEAA=CDUMAGEAA+TWO*DUMGRV(3)*TWO*EC(IIPT,IGAGC)
+C       AAB & ABA (B | AA)
+            CDUMAGEAA=CDUMAGEAA+TWO*DUMNV(2)*TWO*EC(IIPT,IRBGA)
+            CDUMAGEAA=CDUMAGEAA+TWO*DUMGRV(2)*TWO*TWO*EC(IIPT,IGAGB)
+            CDUMAGEAA=CDUMAGEAA+TWO*DUMGRV(4)*TWO*EC(IIPT,IGAGC)
+C
+c       AAB & ABA  (A | BA)
+            CDUMAGEBA=CDUMAGEBA+TWO*DUMNV(1)*EC(IIPT,IRAGC)
+            CDUMAGEBA=CDUMAGEBA+TWO*DUMGRV(1)*TWO*EC(IIPT,IGAGC)
+            CDUMAGEBA=CDUMAGEBA+TWO*DUMGRV(3)*EC(IIPT,IGCGC)
+CC      ABB        (B | BA)
+            CDUMAGEBA=CDUMAGEBA+TWO*DUMNV(2)*EC(IIPT,IRBGC)
+            CDUMAGEBA=CDUMAGEBA+TWO*DUMGRV(2)*TWO*EC(IIPT,IGBGC)
+            CDUMAGEBA=CDUMAGEBA+TWO*DUMGRV(4)*EC(IIPT,IGCGC)
+C
+C
+C
+C     --GB
+            CDUMBGEBB=ZERO
+            CDUMBGEBA=ZERO
+C
+C       BBB       (B | BB)
+            CDUMBGEBB=CDUMBGEBB+TWO*DUMNV(2)*TWO*EC(IIPT,IRBGB)
+            CDUMBGEBB=CDUMBGEBB+TWO*DUMGRV(2)*TWO*TWO*EC(IIPT,IGBGB)
+            CDUMBGEBB=CDUMBGEBB+TWO*DUMGRV(4)*TWO*EC(IIPT,IGBGC)
+C       BBA & BAB (A | BB)
+            CDUMBGEBB=CDUMBGEBB+TWO*DUMNV(1)*TWO*EC(IIPT,IRAGB)
+            CDUMBGEBB=CDUMBGEBB+TWO*DUMGRV(1)*TWO*TWO*EC(IIPT,IGAGB)
+            CDUMBGEBB=CDUMBGEBB+TWO*DUMGRV(3)*TWO*EC(IIPT,IGBGC)
+C
+c       BBA & BAB  (B | AB)
+            CDUMBGEBA=CDUMBGEBA+TWO*DUMNV(2)*EC(IIPT,IRBGC)
+            CDUMBGEBA=CDUMBGEBA+TWO*DUMGRV(2)*TWO*EC(IIPT,IGBGC)
+            CDUMBGEBA=CDUMBGEBA+TWO*DUMGRV(4)*EC(IIPT,IGCGC)
+CC      BAA        (A | AB)
+            CDUMBGEBA=CDUMBGEBA+TWO*DUMNV(1)*EC(IIPT,IRAGC)
+            CDUMBGEBA=CDUMBGEBA+TWO*DUMGRV(1)*TWO*EC(IIPT,IGAGC)
+            CDUMBGEBA=CDUMBGEBA+TWO*DUMGRV(3)*EC(IIPT,IGCGC)
+C     ********EDGE END************
+C
+C     --CONTRUCTION
+C     ALPHA
+            DUM1A=XDUMA+CDUMA                ! rho^alpha_\mu\nu
+            DUM2A=XDUMAG+CDUMAG1             ! Gamma^alpha_\mu\nu
+            DUM3A=CDUMAG2                    ! Gamma^beta\mu\nu
+            DUM4A=XDUMAGEA+CDUMAGEAA         ! Delta gamma(\mu\nu)^\alpha
+            DUM5A=CDUMAGEBA                  ! Delta gamma(\mu\nu)^\beta
+C     BETA
+            DUM1B=XDUMB+CDUMB                ! rho^alpha_\mu\nu
+            DUM2B=XDUMBG+CDUMBG1             ! Gamma^alpha_\mu\nu
+            DUM3B=CDUMBG2                    ! Gamma^beta\mu\nu
+            DUM4B=XDUMAGEB+CDUMBGEBB         ! Delta gamma(\mu\nu)^\alpha
+            DUM5B=CDUMBGEBA                  ! Delta gamma(\mu\nu)^\beta
+C
+c     if(iipt.eq.1) write(6,*) "wwwcheck XC=",XDUMA,CDUMA
+c     if(iipt.eq.1) write(6,*) "wwwcheck XC=",CDUMAGEBA
+C     ALPHA..
+            COEF(1,1,IIPT)=DUM1A
+            COEF(2,1,IIPT)=DUM2A
+            COEF(3,1,IIPT)=DUM3A
+            COEF(4,1,IIPT)=DUM4A
+            COEF(5,1,IIPT)=DUM5A
+C     BETA..
+            COEF(1,2,IIPT)=DUM1B
+            COEF(2,2,IIPT)=DUM2B
+            COEF(3,2,IIPT)=DUM3B
+            COEF(4,2,IIPT)=DUM4B
+            COEF(5,2,IIPT)=DUM5B
+         ENDIF
+      END DO
+      RETURN
+      END

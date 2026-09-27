@@ -1,0 +1,39 @@
+!   (HCl)3 1e- and 2e- IOTC energy
+!   RHF/SPKrDZC (Sapporo relativistic core/valence basis set)
+!   The basis has 102 contracted and 246 uncontracted AOs, containing up to d function.
+!
+!   final energy:
+!   the 1e- and 2e-IOTC (relwfn=iotc2e) run is
+!     FINAL RHF ENERGY IS    -1383.9278325920 AFTER  10 ITERATIONS
+!   the 1e- and 2e-LUT-IOTC (relwfn=lutiotc2) run is
+!     FINAL RHF ENERGY IS    -1383.9278067564 AFTER  10 ITERATIONS
+!   as 1e-IOTC (relwfn=iotc) run,
+!     FINAL RHF ENERGY IS    -1383.8054168261 AFTER  10 ITERATIONS
+!   and 1e-LUT-IOTC (relwfn=LUT-IOTC) run,
+!     FINAL RHF ENERGY IS    -1383.8054033928 AFTER  10 ITERATIONS
+!
+!   CPU time for all processes
+!      1e- and 2e-IOTC (relwfn=iotc2e)      : 149.968 [second]
+!      1e- and 2e-LUT-IOTC (relwfn=lutiotc2):   6.401 [second]
+!      1e-IOTC (relwfn=iotc)                :   0.896 [second]
+!      1e-LUT-IOTC (relwfn=LUT-IOTC)        :   0.740 [second]
+!   on 1core of Intel(R) Xeon(R) Gold 5122 CPU @ 3.60GHz (25 May 2022)
+!
+!
+ $contrl runtyp=energy scftyp=rhf relwfn=lutiotc2 icharg=0 
+         mult=1 maxit=200 ispher=1 $end
+ $system mwords=25 $end
+ $scf    dirscf=.f. $end
+ $guess  guess=huckel $end
+ $basis  gbasis=spkrdzc $end
+ $data
+test on (HCl)3
+C1
+H      1.0            0.07702673    5.05924763    0.00000000
+H      1.0           -0.41183870    2.04121672    0.00000000
+H      1.0           -0.10104935   -1.00031415    0.00000000
+Cl    17.0            0.71739220    3.87078978    0.00000000
+Cl    17.0           -1.12089065    0.89241503    0.00000000
+Cl    17.0            0.53931612   -2.18877200    0.00000000
+ $end
+

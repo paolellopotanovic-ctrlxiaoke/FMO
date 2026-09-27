@@ -1,0 +1,32 @@
+!  SF-CEPA example on the ground state of Ethyelene
+!  based on a SF-ORMAS-CISD example
+!
+!  FINAL ROHF ENERGY IS      -77.9205321560 AFTER   9 ITERATIONS
+!  E(REF)      =         -78.0662543884
+!  STATE   1  ENERGY=       -78.3981380142  S=  0.00  SZ=  0.00  SPACE SYM=A
+!
+ $CONTRL SCFTYP=rohf RUNTYP=energy mult=3
+  cityp=sform  $end
+ $BASIS GBASIS=n311 ngauss=6 ndfunc=1 $END
+ $cidet nstate=1 itermx=400
+   ncore=0 nact=50 nels=16 sz=1
+   mulsf=1
+ $end
+ $ormas
+  nspace=3 mstart(1)=1,8,10 mine(1)=12,0,0
+  maxe(1)=14,4,2 cepa=cepa0 qcorr=.f.
+ $end
+ $SCF DIRSCF=.TRUE. $END
+ $system mwords=400 $end
+ $DATA 
+Title
+C1
+ C           6.0  -0.0000000000  -0.0000000000   0.6732045548
+ C           6.0   0.0000000000  -0.0000000000  -0.6732045548
+ H           1.0  -0.0000000000  -0.9181328152  -1.2369753692
+ H           1.0   0.0000000000   0.9181328152   1.2369753692
+ H           1.0  -0.0000000000  -0.9181328152   1.2369753692
+ H           1.0   0.0000000000   0.9181328152  -1.2369753692
+ $END
+!TRAVIS-CI SMALL
+

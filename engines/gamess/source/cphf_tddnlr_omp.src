@@ -1,0 +1,590 @@
+#define __TIMING 0
+MODULE CPHFDYN_omptime
+    USE omp_lib
+    implicit none
+    private
+    public dynfunc_omptime
+    contains
+    double precision function dynfunc_omptime(ts_time)
+    double precision, intent(in) :: ts_time
+    dynfunc_omptime=omp_get_wtime() -ts_time
+    end
+
+END MODULE CPHFDYN_omptime
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE OMPMOD
+!>  @brief   In this module OpenMP versions of Fock matrix calculation routines are collected.
+!>           They are called explicitly from corresponding routines from int2a.src module,
+!>           namely TWOEI and EXCHNG, using conditional OpenMP compiling. They are never
+!>           called if compiler doesn't support OpenMP or -openmp/-fopenmp/-qopenmp flag
+!>           is not set at compile time for the all files.
+!>  @details A lot of the work on thread-safety is done by small script "addomp.sh" which
+!>           is located in ../tools directory. It sets <threadprivate> attribute
+!>           for sensitive common blocks throughout all files in GAMESS source directory.
+!>  @author  Vladimir Mironov
+!>  @date    2016-2017
+
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+MODULE TWOEI_CPHFDYN_omp 
+
+    USE omp_lib
+    USE prec, ONLY: fp
+
+    USE mx_limits, ONLY: &
+        mxsh, mxgtot, mxatm, mxang, mxang2, mxgsh, mxg2
+    use ompmod, only: ompmod_shellquart
+
+    IMPLICIT NONE
+
+    PRIVATE
+
+    PUBLIC &
+        TWOEI_CPHFDYN_APB_omp, TWOEI_CPHFDYN_AMB_omp
+
+    CHARACTER(LEN=*), PARAMETER :: &
+        dbgfmt1 = '(/2x,&
+                    &"Thread | Number of |",19X,"Timing",&
+                    &/1x," number | quartets  |  Integrals |   F update  ",&
+                    &"|   Schwartz  |    Total    |")', &
+        dbgfmt2 = '(i5,4x,"|",i10," |",4(f9.2," s | "))', &
+
+        dbgfmt_exch ='(1X,"SCHWARZ INEQUALITY OVERHEAD:",I10," INTEGRALS, &
+                  &T=",F12.2)'
+
+    INTEGER, PARAMETER :: &
+        angm(0:6) = (/4,4,6,10,15,21,28/)
+
+    REAL(KIND=fp), PARAMETER :: &
+        zero=0.0_fp, one=1.0_fp
+
+    INTERFACE
+        REAL(KIND=fp) FUNCTION schwdn(dsh,ish,jsh,ksh,lsh,ia)
+            USE prec
+            INTEGER, INTENT(IN) :: ish, jsh, ksh, lsh, ia(*)
+            REAL(KIND=fp), INTENT(IN) :: dsh(*)
+        END FUNCTION
+    END INTERFACE
+
+CONTAINS
+
+!*MODULE OMPMOD   *DECK OMPMOD_TWOEI_JK
+!
+! This is a clone of OMPMOD_TWOEI_JK
+  SUBROUTINE TWOEI_CPHFDYN_APB_omp(SCHWRZ,NINT,NSCHWZ,L1,L2,XINTS,&
+             NSH2,MAXG,IA,DA,FA,DSH,NXYZ,cutoff, oflag,HFSCAL,CSCALT)
+    use MOD_OFFLOAD, only: offload_makefp
+#if defined(__OFFLOAD)
+    use gpu_ompmod_tdhf_apb, only: gpu_TWOEI_CPHFDYN_APB_omp
+#endif
+
+    LOGICAL, INTENT(IN) :: schwrz,oflag
+    INTEGER, INTENT(OUT) :: nint, nschwz
+    INTEGER, INTENT(IN) :: l1, l2, nsh2, maxg,ia(l1), NXYZ
+    double precision, INTENT(IN) :: cutoff,xints(nsh2), dsh(nsh2)
+    double precision, INTENT(IN) :: da(l2*nxyz), HFSCAL,CSCALT
+    double precision, INTENT(INOUT) :: fa(l2*nxyz)
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+   ! COMMON /fmcom / xx(1)
+   !     REAL(KIND=fp), TARGET :: xx
+
+    COMMON /NSHEL / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),     &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),     &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh),  &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+    COMMON /ERIOUT/ INW,JNW,KNW,LNW,LSTRI,LSTRJ,LSTRK,LSTRL
+    integer :: INW,JNW,KNW,LNW,LSTRI,LSTRJ,LSTRK,LSTRL
+
+    COMMON /eridat/ len1,len2,len3,len4
+        INTEGER :: len1,len2,len3,len4
+!   Common blocks /MAXC  /, /SHLNOS/ and /GOUT/ contain
+!   both global (cmax(:),qq4,norgp) and thread-local
+!   data (the rest). Set them threadprivate and copyin
+!   global data later in $omp parallel section.
+
+!$omp threadprivate(/shlnos/,/maxc  /,/gout  /,/nlrcf /,/dftpar/,/ERIOUT/)
+
+    INTEGER :: &
+      next, num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll, ijij, klkl, jork, ixyz
+
+    LOGICAL :: &
+      schskp
+
+    REAL(KIND=fp) :: &
+      denmax, tim, tim0, tim1, tim2, tim3, tim4, test
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+      ddij_t, ghondo_t
+
+!   --- Initialization of variables ---
+    tim = zero
+    CALL tsecnd(tim)
+
+    nint   = 0
+    nschwz = 0
+    schskp = .FALSE.
+    denmax = zero
+
+!   no symmetry supported yet
+    qq4 = 1
+    norgp = 0
+#if defined(__OFFLOAD)
+    if(offload_makefp) then
+   call gpu_TWOEI_CPHFDYN_APB_omp(SCHWRZ,NINT,L1,L2,XINTS,&
+             NSH2,MAXG,IA,DA,FA,DSH,NXYZ,cutoff, oflag, &
+             len1,len2,len3,len4,cmax)
+   return
+    endif
+#endif
+
+#if __TIMING==1
+!   text for timing output
+    IF (oflag) WRITE(iw,dbgfmt1)
+#endif
+!
+!   --- Initiate OpenMP parallel ---
+!
+!   early thread invocation decrease OpenMP lib overhead
+!
+!$omp parallel                                  &
+!$omp   private(ithread, thr_nshq, ii,          &
+!$omp     jj,kk,ll,jork, ijij, klkl, test,      &
+!$omp     tim, tim0, tim1, tim2, tim3, tim4,    &
+!$omp     ddij_t, ghondo_t)                     &
+!$omp   firstprivate(denmax, schskp)            &
+!$omp   shared(ia,da,l1,l2,num_threads,         &
+!$omp     next, maxg,                        &
+!$omp     cutoff, xints, dsh,            &
+!$omp     schwrz,oflag,NXYZ)          &
+!$omp   reduction(+:fa,nint,nschwz)          &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+!   allocate temporary memory for integrals
+    ALLOCATE(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+
+!
+!   --- Variable initialization for OpenMP ---
+!
+
+    num_threads = omp_get_num_threads()
+
+!   reset all info stats
+    ithread  = omp_get_thread_num()
+    thr_nshq = 0
+#if __TIMING==1
+    tim1     = zero
+    tim2     = zero
+    tim3     = zero
+    tim4     = zero
+!   main timer initialization
+    tim0     = omp_get_wtime()
+#endif
+
+!   go over shells from largest value (nshell)
+!   to 0 for better load balance
+    ii = nshell + 1
+ic: DO
+!   --- MPI load balance ---
+        IF (ibtyp.eq.1) THEN
+!           dynamic load balance
+!$omp barrier
+!$omp master
+            CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+            ii = nshell - next
+            IF (ii.LE.0) EXIT ic
+        ELSE
+!           static load balance
+            ii = ii - 1
+            IF (ii.LE.0) EXIT ic
+            IF (MOD(ii,nproc).NE.me) CYCLE ic
+        END IF
+!
+!   --- Begin OpenMP integral calculation ---
+!
+!   Use conventional (instead of triple-sort)
+!   shell order for better load balance and for
+!   further vectorization
+!$omp do schedule(dynamic,1) collapse(2)
+        DO jj = 1,ii
+            DO kk = 1,ii
+
+            IF (ii.NE.kk) THEN
+                jork=kk
+            ELSE
+                jork=jj
+            END IF
+
+                DO ll = 1,jork
+!                   Schwartz screening:
+#if __TIMING==1
+                    tim1 = omp_get_wtime()
+#endif
+                    IF (schwrz) THEN
+                        ijij = (ii*ii-ii)/2 + jj
+                        klkl = (kk*kk-kk)/2 + ll
+                        test = xints(ijij)*xints(klkl)
+                        !IF (dirscf) THEN
+                            !denmax = schwdn(dsh,ii,jj,kk,ll,ia)
+                            !test = test*denmax
+                        !END IF
+                        schskp = test.LT.cutoff
+                    END IF
+
+#if __TIMING==1
+                    tim2 = tim2 + omp_get_wtime() - tim1
+#endif
+                    IF(.NOT.schskp) THEN
+
+                        CALL ompmod_shellquart(ii,jj,kk,ll,ghondo_t,ddij_t)
+
+#if __TIMING==1
+                        tim3 = tim3 + omp_get_wtime() - tim1
+#endif
+                        thr_nshq = thr_nshq + 1
+!
+!                  ---  Fock matrix update ---
+!
+      !CALL DIRFCK_DYN(IA,DA,FA,FB,ghondo_t,L2,NINT,NXYZ,L1,IAPB,IAMB)
+         CALL DIRFCK_CPHFDYN_APB(IA,DA,FA,NXYZ,INW,JNW,KNW,LNW,&
+                       GHONDO_t,LSTRI,LSTRJ,LSTRK,LSTRL,       &
+                       CUTOFF,NINT,HFSCAL,CSCALT,L1,L2)
+
+#if __TIMING==1
+                        tim4 = tim4 + omp_get_wtime() - tim1
+#endif
+                    ELSE
+                        nschwz = nschwz + 1
+                    END IF
+                END DO
+            END DO
+        END DO
+!$omp end do nowait
+    END DO ic
+!$omp barrier
+
+#if __TIMING==1
+    tim0 = omp_get_wtime() - tim0
+!   debug timing output
+    IF (oflag) THEN
+!$omp do ordered
+        DO ii = 0, num_threads-1
+!$omp ordered
+            WRITE(iw,dbgfmt2) ithread,thr_nshq,tim3-tim2,tim4-tim3,tim2,tim0
+!$omp end ordered
+        END DO
+!$omp end do
+    END IF
+#endif
+
+!   deallocate temporary memory for integrals
+    DEALLOCATE(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+    CALL ddi_dlbreset
+
+  END SUBROUTINE TWOEI_CPHFDYN_APB_omp
+
+!*MODULE OMPMOD   *DECK OMPMOD_TWOEI_JK
+!
+! This is a clone of OMPMOD_TWOEI_JK
+  SUBROUTINE TWOEI_CPHFDYN_AMB_omp(SCHWRZ,NINT,NSCHWZ,L1,L2,XINTS,&
+             NSH2,MAXG,IA,DA,FB,DSH,NXYZ,cutoff, oflag,HFSCAL,CSCALT)
+    use MOD_OFFLOAD, only: offload_makefp
+#if defined(__OFFLOAD)
+    use gpu_ompmod_tdhf_amb, only: gpu_TWOEI_CPHFDYN_AMB_omp
+#endif
+
+    LOGICAL, INTENT(IN) :: schwrz,oflag
+    INTEGER, INTENT(OUT) :: nint, nschwz
+    INTEGER, INTENT(IN) :: l1, l2, nsh2, maxg,ia(l1), NXYZ
+    double precision, INTENT(IN) :: cutoff,xints(nsh2), dsh(nsh2)
+    double precision, INTENT(IN) :: da(l2*nxyz), HFSCAL,CSCALT
+    double precision, INTENT(INOUT) :: fb(l2*nxyz)
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+   ! COMMON /fmcom / xx(1)
+   !     REAL(KIND=fp), TARGET :: xx
+
+    COMMON /NSHEL / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),     &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),     &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh),  &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+    COMMON /ERIOUT/ INW,JNW,KNW,LNW,LSTRI,LSTRJ,LSTRK,LSTRL
+    integer :: INW,JNW,KNW,LNW,LSTRI,LSTRJ,LSTRK,LSTRL
+
+    COMMON /eridat/ len1,len2,len3,len4
+        INTEGER :: len1,len2,len3,len4
+!   Common blocks /MAXC  /, /SHLNOS/ and /GOUT/ contain
+!   both global (cmax(:),qq4,norgp) and thread-local
+!   data (the rest). Set them threadprivate and copyin
+!   global data later in $omp parallel section.
+
+!$omp threadprivate(/shlnos/,/maxc  /,/gout  /,/nlrcf /,/dftpar/,/ERIOUT/)
+
+    INTEGER :: &
+      next, num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll, ijij, klkl, jork, ixyz
+
+    LOGICAL :: &
+      schskp
+
+    REAL(KIND=fp) :: &
+      denmax, tim, tim0, tim1, tim2, tim3, tim4, test
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+      ddij_t, ghondo_t
+
+!   --- Initialization of variables ---
+    tim = zero
+    CALL tsecnd(tim)
+
+    nint   = 0
+    nschwz = 0
+    schskp = .FALSE.
+    denmax = zero
+
+!   no symmetry supported yet
+    qq4 = 1
+    norgp = 0
+
+#if defined(__OFFLOAD)
+    if(offload_makefp) then
+   call gpu_TWOEI_CPHFDYN_AMB_omp(SCHWRZ,NINT,L1,L2,XINTS,&
+             NSH2,MAXG,IA,DA,FB,DSH,NXYZ,cutoff, oflag, &
+             len1,len2,len3,len4,cmax)
+   return
+    endif
+#endif
+
+#if __TIMING==1
+!   text for timing output
+    IF (oflag) WRITE(iw,dbgfmt1)
+#endif
+!
+!   --- Initiate OpenMP parallel ---
+!
+!   early thread invocation decrease OpenMP lib overhead
+!
+!$omp parallel                                  &
+!$omp   private(ithread, thr_nshq, ii,          &
+!$omp     jj,kk,ll,jork, ijij, klkl, test,      &
+!$omp     tim, tim0, tim1, tim2, tim3, tim4,    &
+!$omp     ddij_t, ghondo_t)                     &
+!$omp   firstprivate(denmax, schskp)            &
+!$omp   shared(ia,da,l1,l2,num_threads,         &
+!$omp     next, maxg,                        &
+!$omp     cutoff, xints, dsh,            &
+!$omp     schwrz,oflag,NXYZ)          &
+!$omp   reduction(+:fb,nint,nschwz)          &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+!   allocate temporary memory for integrals
+    ALLOCATE(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+
+!
+!   --- Variable initialization for OpenMP ---
+!
+
+    num_threads = omp_get_num_threads()
+
+!   reset all info stats
+    ithread  = omp_get_thread_num()
+    thr_nshq = 0
+#if __TIMING==1
+    tim1     = zero
+    tim2     = zero
+    tim3     = zero
+    tim4     = zero
+!   main timer initialization
+    tim0     = omp_get_wtime()
+#endif
+
+!   go over shells from largest value (nshell)
+!   to 0 for better load balance
+    ii = nshell + 1
+ic: DO
+!   --- MPI load balance ---
+        IF (ibtyp.eq.1) THEN
+!           dynamic load balance
+!$omp barrier
+!$omp master
+            CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+            ii = nshell - next
+            IF (ii.LE.0) EXIT ic
+        ELSE
+!           static load balance
+            ii = ii - 1
+            IF (ii.LE.0) EXIT ic
+            IF (MOD(ii,nproc).NE.me) CYCLE ic
+        END IF
+!
+!   --- Begin OpenMP integral calculation ---
+!
+!   Use conventional (instead of triple-sort)
+!   shell order for better load balance and for
+!   further vectorization
+!$omp do schedule(dynamic,1) collapse(2)
+        DO jj = 1,ii
+            DO kk = 1,ii
+
+            IF (ii.NE.kk) THEN
+                jork=kk
+            ELSE
+                jork=jj
+            END IF
+
+                DO ll = 1,jork
+!                   Schwartz screening:
+#if __TIMING==1
+                    tim1 = omp_get_wtime()
+#endif
+                    IF (schwrz) THEN
+                        ijij = (ii*ii-ii)/2 + jj
+                        klkl = (kk*kk-kk)/2 + ll
+                        test = xints(ijij)*xints(klkl)
+                        !IF (dirscf) THEN
+                            !denmax = schwdn(dsh,ii,jj,kk,ll,ia)
+                            !test = test*denmax
+                        !END IF
+                        schskp = test.LT.cutoff
+                    END IF
+
+#if __TIMING==1
+                    tim2 = tim2 + omp_get_wtime() - tim1
+#endif
+                    IF(.NOT.schskp) THEN
+
+                        CALL ompmod_shellquart(ii,jj,kk,ll,ghondo_t,ddij_t)
+
+#if __TIMING==1
+                        tim3 = tim3 + omp_get_wtime() - tim1
+#endif
+                        thr_nshq = thr_nshq + 1
+!
+!                  ---  Fock matrix update ---
+!
+      !CALL DIRFCK_DYN(IA,DA,FB,FB,ghondo_t,L2,NINT,NXYZ,L1,IAMB,IAMB)
+         CALL DIRFCK_CPHFDYN_AMB(IA,DA,FB,NXYZ,INW,JNW,KNW,LNW,&
+                       GHONDO_t,LSTRI,LSTRJ,LSTRK,LSTRL,       &
+                       CUTOFF,NINT,HFSCAL,CSCALT,L1,L2)
+
+#if __TIMING==1
+                        tim4 = tim4 + omp_get_wtime() - tim1
+#endif
+                    ELSE
+                        nschwz = nschwz + 1
+                    END IF
+                END DO
+            END DO
+        END DO
+!$omp end do nowait
+    END DO ic
+!$omp barrier
+
+#if __TIMING==1
+    tim0 = omp_get_wtime() - tim0
+!   debug timing output
+    IF (oflag) THEN
+!$omp do ordered
+        DO ii = 0, num_threads-1
+!$omp ordered
+            WRITE(iw,dbgfmt2) ithread,thr_nshq,tim3-tim2,tim4-tim3,tim2,tim0
+!$omp end ordered
+        END DO
+!$omp end do
+    END IF
+#endif
+
+!   deallocate temporary memory for integrals
+    DEALLOCATE(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+    CALL ddi_dlbreset
+
+  END SUBROUTINE TWOEI_CPHFDYN_AMB_omp
+
+END MODULE TWOEI_CPHFDYN_omp 

@@ -1,0 +1,26 @@
+ $contrl
+  runtyp=energy
+  scftyp=rhf
+  ispher=1
+  mult=1
+  local=svd
+ $end
+
+ $local ivvtyp=0 $end
+
+ $scf vvos=.t. soscf=.t. diis=.f. damp=.t. shift=.t. $end
+
+! Li - Xe
+ $basis gbasis=SPK-TZP $end
+
+ $system mwords=15 memddi=10 $end
+
+ $data
+BASOPT test
+Oh
+
+Xe 54.0
+ $end
+
+! 
+

@@ -1,0 +1,124 @@
+{
+  "name": "h2o_exc_mc2e2o_ssvpe.log",
+  "validation": [
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-75.8059333303",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -2",
+      "value": "-75.803752779",
+      "type": "float",
+      "precision": 9,
+      "tolerance": 5e-07
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -1",
+      "value": "-75.805933330",
+      "type": "float",
+      "precision": 9,
+      "tolerance": 5e-07
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "0.089634",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "SVP",
+      "name": "EGAS - SVP",
+      "value": "-75.80375278",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "EINT - SVP",
+      "value": "-75.79837026",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DINT - SVP",
+      "value": "0.00538252",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DGRXN - SVP",
+      "value": "-0.01217666",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "SS(V)PE DELTAG - SVP",
+      "value": "-0.00218055",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "SS(V)PE GTOTAL - SVP",
+      "value": "-75.80593333",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CAVITY SURFACE AREA - SS(V)PE",
+      "value": "159.80232",
+      "type": "float",
+      "precision": 5,
+      "tolerance": 0.005
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CAVITY VOLUME - SS(V)PE",
+      "value": "188.43381",
+      "type": "float",
+      "precision": 5,
+      "tolerance": 0.005
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "TOT SURFACE POLARIZATION CHARGE - SS(V)PE",
+      "value": "-0.11155356",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CHARGE PENETRATION - SS(V)PE",
+      "value": "-0.76303265",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

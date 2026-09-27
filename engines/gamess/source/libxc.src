@@ -1,0 +1,2524 @@
+!*MODULE libxc
+!> @brief  The head of libxc driver
+!> @author Igor S. Gerasimov
+!> @date   July, 2019 - Initial release -
+!> @date   July, 2021 Making internal subroutines private
+!> @todo   add LC-, CAM- free coefficient functionals
+!> @todo   add meta-GGA functionals with laplacian of electron density
+module libxc
+  use xc_f03_lib_m
+  use functionals, only: functional
+  use prec,        only: fp
+  implicit none
+  private
+#ifdef OQP
+  logical, parameter :: use_libxc = .TRUE.
+#else
+  logical :: use_libxc = .FALSE.
+#endif
+  character(len=*), parameter :: ABORTING = "Aborting from LibXC interface..."
+  type(functional) :: functional_
+  public :: use_libxc
+  public :: libxc_input, libxc_calc, libxc_TD_2D, libxc_TD_3D, libxc_destroy
+contains
+  !
+  !*MODULE libxc DECK libxc_input
+  !> @brief  setting up of using libxc functionals
+  !>         (Analog of INPGDFT)
+  !> @detail
+  !          For adding a new functional:
+  !           1) search code of interested functional that is a part of LibXC (like PBEX has code 101 and PBEC has code 130)
+  !           2) Determine coefficients of each needed coefficients (as for example PBE-0.1: 0.1HF + 0.9PBEX + 1.0PBEC)
+  !           3) Create a name of your functional (like PBEH). It can has any symbol excepting newline and space.
+  !           4) Do not forget to set flag needtau=.true. if your functional need it.
+  !
+  !           the example of code:
+  !             case("PBEH", "PBE-0.1") !two variant of names
+  !                 HFEX = 0.10_fp !0.1HF exchange
+  !                 call functional_%add_functional(XC_GGA_X_PBE,0.9_fp) !PBE_X*0.9
+  !                 call functional_%add_functional(XC_GGA_C_PBE,1.0_fp) !PBE_C*1.0
+  !> @author Igor S. Gerasimov
+  !> @date   July, 2019 - Initial release -
+  !> @date   July, 2021 Using messages module
+  !>                    Adding optional arguments
+  !> @params read_unit  (in,optional) logical unit of input file
+  !> @params functional (in,optional) functional's name
+  subroutine libxc_input(read_unit, functional)
+    use messages, only: show_message, WITH_ABORT
+#ifndef OQP
+    use comm_DFTPAR, only: DFTTYP
+#endif
+    use metagga,    only: needtau
+    use mod_nameio, only: input_group
+    use dhdft,      only: chf, cmp2, &
+                    c2same => c2s, &
+                    c2opp => c2t, &
+                    dhfunc
+    use camdft,     only: alpha => cam_alpha, &
+                    beta => cam_beta, &
+                    mu => cam_mu, &
+                    camflag
+
+    !
+    ! input's arguments
+    integer, intent(in), optional :: read_unit
+    character(len=*),    optional :: functional
+    !
+    ! Functional names
+    character(len=:), allocatable :: funcname
+    !
+    ! Reader
+    class(input_group), allocatable :: LibXC_group
+    integer                         :: error
+    ! LibXC strings
+    character(len=1024) :: LibXC_DOI, LibXC_reference, LibXC_version
+
+    real(kind=fp) :: HFEX,MP2,MP2SS,MP2OP,CAMMU,CAMALPHA,CAMBETA
+    HFEX = 0.0_fp
+
+    if(.not.use_libxc) then
+      call show_message("USING LIBXC INTERFACE WITHOUT DFTTYP=USELIBXC!")
+      call show_message("ABORT CALCULATION!", WITH_ABORT)
+    end if
+
+    if(present(read_unit).and.present(functional)) then
+      call show_message("read_unit and functional variables are passed into LibXC interface!", WITH_ABORT)
+    else if(present(read_unit)) then ! OK
+    else if(present(functional)) then ! OK
+    else ! no one is presented
+      call show_message("no one of read_unit and functional variables are passed into LibXC interface!", WITH_ABORT)
+    end if
+
+    call xc_f03_reference(LibXC_reference)
+    call xc_f03_reference_doi(LibXC_DOI)
+    call xc_f03_version_string(LibXC_version)
+
+    call show_message(" ") !empty line
+    call show_message(" The LibXC " // trim(LibXC_version) // " version is used!")
+    call show_message(" ") !empty line
+    call show_message(" THE FOLLOWING PAPERS SHOULD BE CITED WHEN USING LIBXC INTERFACE:")
+    call show_message(" " // trim(LibXC_reference))
+    call show_message(" DOI: " // trim(LibXC_DOI))
+    call show_message(" and")
+    call show_message(" Igor S. Gerasimov, Federico Zahariev, Sarom S. Leang, Anton Tesliuk, Mark S. Gordon, Michael G. Medvedev,")
+    call show_message(" Introducing LibXC into GAMESS (US),")
+    call show_message(" Mendeleev Commun., 2021, 31, 302–305")
+    call show_message(" DOI: 10.1016/j.mencom.2021.05.008")
+    call show_message(" ") !empty line
+    call show_message(" The information about selected functionals:")
+
+    if(.not.present(functional)) then
+      allocate(LibXC_group)
+      if(present(read_unit)) then
+        call LibXC_group%read_section(read_unit, "LIBXC", &
+          (/ "FUNCTIONAL", "HFEX      ", "MP2       ", "MP2SS     ",  "MP2OS     " /))
+        call LibXC_group%get_value("FUNCTIONAL",funcname,error)
+        if(error .ne. 0) then
+          call show_message("$LIBXC: The FUNCTIONAL keyword is not found! Assume FUNCTIONAL=MIXED!")
+          funcname = "MIXED"
+        end if
+      end if
+    else
+      funcname = functional
+    end if
+    select case(funcname)
+      ! If FUNCTIONAL is not presented or equals to MIXED:
+      case ("", "MIXED")
+        !read HFEX (ratio of exact exchange)
+        call LibXC_group%get_value("HFEX",HFEX,error,0.0_fp)
+        if(error .eq. 0) then
+          chf = HFEX
+          call show_message("(A,ES16.8E2)", "The ratio of exact exchange (HFEX) is: ", HFEX)
+        end if
+        ! read MP2 (ratio of non-local MP2 correlation)
+        call LibXC_group%get_value("MP2",MP2,error,0.0_fp)
+        if(error .eq. 0) then
+          dhfunc =.true.
+          cmp2   = MP2
+          c2same = MP2
+          c2opp  = MP2
+          call show_message("(A,ES16.8E2)", "The ratio of non-local correlation (MP2) is: ", MP2)
+        end if
+        ! read MP2SS (ratio on non-local same-spin MP2 correlation)
+        call LibXC_group%get_value("MP2SS",MP2SS,error,0.0_fp)
+        if(error .eq. 0) then
+          dhfunc =.true.
+          c2same = MP2SS
+          call show_message("(A,ES16.8E2)", "The ratio of same-spin non-local correlation (MP2SS) is: ", MP2SS)
+        end if
+        ! read MP2OS (ratio on non-local opposite-spin MP2 correlation)
+        call LibXC_group%get_value("MP2OS",MP2OP,error,0.0_fp)
+        if(error .eq. 0) then
+          dhfunc =.true.
+          c2opp  = MP2OP
+          call show_message("(A,ES16.8E2)", "The ratio of opposite-spin non-local correlation (MP2OS) is: ", MP2OP)
+        end if
+        ! the MP2OS == MP2SS means, that SCS-MP2 is not needed:
+        if((MP2OP .eq. MP2SS) .and. (MP2OP .ne. 0.00_fp)) then
+          MP2        = MP2OP
+          cmp2       = MP2
+          c2same     = MP2
+          c2opp      = MP2
+          call show_message("(A,ES16.8E2)", "The ratio of opposite-spin and same-spin non-local correlation is equals," // &
+              " and their value is ", MP2)
+        end if
+        ! Inputting of CAM leads to error. The libxc should be modified
+        call LibXC_group%get_value("CAMALPHA",CAMALPHA,error,0.0_fp)
+        if(error .eq. 0) then
+          camflag = .true.
+          alpha   = CAMALPHA
+          call show_message("CAM coefficients are not supported yet!")
+          call show_message(ABORTING, WITH_ABORT)
+        end if
+        ! Inputting of CAM leads to error. The libxc should be modified
+        call LibXC_group%get_value("CAMBETA",CAMBETA,error,0.0_fp)
+        if(error .eq. 0) then
+          camflag = .true.
+          beta    = CAMBETA
+          call show_message("CAM coefficients are not supported yet!")
+          call show_message(ABORTING, WITH_ABORT)
+        end if
+        ! Inputting of CAM leads to error. The libxc should be modified
+        call LibXC_group%get_value("CAMMU",CAMMU,error,0.0_fp)
+        if(error .eq. 0) then
+          camflag = .true.
+          mu      = CAMMU
+          call show_message("CAM coefficients are not supported yet!")
+          call show_message(ABORTING, WITH_ABORT)
+        end if
+        ! read other LibXC sections
+        if(present(read_unit)) then
+          call libxc_choose_functionals(read_unit)
+        else
+          call show_message("Calling of MIXED functional requires input group!", WITH_ABORT)
+        endif
+      case("SLATER")
+        call functional_%add_functional(                      XC_LDA_X,1.00_fp) !SLATER_X
+      case("TETER")
+        call functional_%add_functional(             XC_LDA_XC_TETER93,1.00_fp) !TETER93_XC
+      case("KSDT")
+        call functional_%add_functional(                XC_LDA_XC_KSDT,1.00_fp) !KSDT_XC
+      case("CORRKSDT")
+        call functional_%add_functional(            XC_LDA_XC_CORRKSDT,1.00_fp)
+      case("GDSMFB")
+        call functional_%add_functional(              XC_LDA_XC_GDSMFB,1.00_fp) !GDSMFB_XC
+      case("ZLP-20")
+        call functional_%add_functional(                 XC_LDA_XC_ZLP,1.00_fp) !ZLP_XC (LDA)
+      case("PBE", "PBEPBE")
+        call functional_%add_functional(                  XC_GGA_X_PBE,1.00_fp) !PBE_X
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp) !PBE_C
+      case("REVPBE")
+        call functional_%add_functional(                XC_GGA_X_PBE_R,1.00_fp) !PBE_R_X
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp) !PBE_C
+      case("RPBE")
+        call functional_%add_functional(                 XC_GGA_X_RPBE,1.00_fp) !RPBE_X
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp) !PBE_C
+      case("PW91")
+        call functional_%add_functional(                 XC_GGA_X_PW91,1.00_fp)
+        call functional_%add_functional(                 XC_GGA_C_PW91,1.00_fp)
+      case("AM05")
+        call functional_%add_functional(                 XC_GGA_X_AM05,1.00_fp)
+        call functional_%add_functional(                 XC_GGA_C_AM05,1.00_fp)
+      case("PBESOL")
+        call functional_%add_functional(              XC_GGA_X_PBE_SOL,1.00_fp) !PBEsol_X
+        call functional_%add_functional(              XC_GGA_C_PBE_SOL,1.00_fp) !PBEsol_C
+      case("WC")
+        call functional_%add_functional(                   XC_GGA_X_WC,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+      case("CHACHIYO")
+        call functional_%add_functional(             XC_GGA_X_CHACHIYO,1.00_fp)
+        call functional_%add_functional(             XC_GGA_C_CHACHIYO,1.00_fp)
+      case("BLYP")
+        call functional_%add_functional(                  XC_GGA_X_B88,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp)
+      case("OLYP")
+        call functional_%add_functional(                 XC_GGA_X_OPTX,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp)
+      case("XLYP")
+        call functional_%add_functional(                XC_GGA_XC_XLYP,1.00_fp)
+      case("KT1")
+        call functional_%add_functional(                 XC_GGA_XC_KT1,1.00_fp)
+      case("KT2")
+        call functional_%add_functional(                 XC_GGA_XC_KT2,1.00_fp)
+      case("KT3")
+        call functional_%add_functional(                 XC_GGA_XC_KT3,1.00_fp)
+      case("TH1")
+        call functional_%add_functional(                 XC_GGA_XC_TH1,1.00_fp)
+      case("TH2")
+        call functional_%add_functional(                 XC_GGA_XC_TH2,1.00_fp)
+      case("TH3")
+        call functional_%add_functional(                 XC_GGA_XC_TH3,1.00_fp)
+      case("TH4")
+        call functional_%add_functional(                 XC_GGA_XC_TH4,1.00_fp)
+      case("HCTH93")
+        call functional_%add_functional(             XC_GGA_XC_HCTH_93,1.00_fp)
+      case("HCTH120")
+        call functional_%add_functional(            XC_GGA_XC_HCTH_120,1.00_fp)
+      case("HCTH147")
+        call functional_%add_functional(            XC_GGA_XC_HCTH_147,1.00_fp)
+      case("HCTH407")
+        call functional_%add_functional(            XC_GGA_XC_HCTH_407,1.00_fp)
+      case("HCTH407+", "HCTH407P")
+        call functional_%add_functional(           XC_GGA_XC_HCTH_407P,1.00_fp)
+      case("HCTH-A")
+        call functional_%add_functional(               XC_GGA_X_HCTH_A,1.00_fp)
+        call functional_%add_functional(               XC_GGA_C_HCTH_A,1.00_fp)
+      case("HCTH-P14")
+        call functional_%add_functional(            XC_GGA_XC_HCTH_P14,1.00_fp)
+      case("HCTH-P76")
+        call functional_%add_functional(            XC_GGA_XC_HCTH_P76,1.00_fp)
+      case("PBE1W")
+        call functional_%add_functional(               XC_GGA_XC_PBE1W,1.00_fp)
+      case("MPWLYP1W")
+        call functional_%add_functional(            XC_GGA_XC_MPWLYP1W,1.00_fp)
+      case("PBELYP1W")
+        call functional_%add_functional(            XC_GGA_XC_PBELYP1W,1.00_fp)
+      case("GAM")
+        call functional_%add_functional(                  XC_GGA_X_GAM,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_GAM,1.00_fp)
+      case("MOHLYP")
+        call functional_%add_functional(              XC_GGA_XC_MOHLYP,1.00_fp)
+      case("MOHLYP-2", "MOHLYP2")
+        call functional_%add_functional(             XC_GGA_XC_MOHLYP2,1.00_fp)
+      case("SOGGA11")
+        call functional_%add_functional(              XC_GGA_X_SOGGA11,1.00_fp)
+        call functional_%add_functional(              XC_GGA_C_SOGGA11,1.00_fp)
+      case("N12")
+        call functional_%add_functional(                  XC_GGA_C_N12,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_X_N12,1.00_fp)
+      case("HLE16")
+        call functional_%add_functional(               XC_GGA_XC_HLE16,1.00_fp)
+      case("EDF1")
+        call functional_%add_functional(                XC_GGA_XC_EDF1,1.00_fp)
+      case("LB07")
+        camflag   = .true.
+        call functional_%add_functional(            XC_HYB_GGA_XC_LB07,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("NCAP")
+        call functional_%add_functional(                XC_GGA_XC_NCAP,1.00_fp)
+      case("HTBS")
+        call functional_%add_functional(                 XC_GGA_X_HTBS,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+      case("PKZB")
+        call functional_%add_functional(                XC_MGGA_X_PKZB,1.00_fp)
+        call functional_%add_functional(                XC_MGGA_C_PKZB,1.00_fp)
+        needtau = .true.
+      case("TPSS")
+        call functional_%add_functional(                XC_MGGA_X_TPSS,1.00_fp)
+        call functional_%add_functional(                XC_MGGA_C_TPSS,1.00_fp)
+        needtau = .true.
+      case("REVTPSS")
+        call functional_%add_functional(             XC_MGGA_X_REVTPSS,1.00_fp)
+        call functional_%add_functional(             XC_MGGA_C_REVTPSS,1.00_fp)
+        needtau = .true.
+      case("MODTPSS")
+        call functional_%add_functional(             XC_MGGA_X_MODTPSS,1.00_fp)
+        call functional_%add_functional(                XC_MGGA_C_TPSS,1.00_fp)
+        needtau = .true.
+      case("TPSSLOC", "TPSS-LOC")
+        call functional_%add_functional(                XC_MGGA_X_TPSS,1.00_fp)
+        call functional_%add_functional(             XC_MGGA_C_TPSSLOC,1.00_fp)
+        needtau = .true.
+      case("RTPSS")
+        call functional_%add_functional(               XC_MGGA_X_RTPSS,1.00_fp)
+        call functional_%add_functional(              XC_GGA_C_REGTPSS,1.00_fp)
+        needtau = .true.
+      case("REGTPSS")
+        call functional_%add_functional(             XC_MGGA_X_REGTPSS,1.00_fp)
+        call functional_%add_functional(              XC_GGA_C_REGTPSS,1.00_fp)
+        needtau = .true.
+      case("MVS")
+        call functional_%add_functional(                 XC_MGGA_X_MVS,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MVSB")
+        call functional_%add_functional(                XC_MGGA_X_MVSB,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MVSB*", "MVSBS")
+        call functional_%add_functional(               XC_MGGA_X_MVSBS,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MS0")
+        call functional_%add_functional(                 XC_MGGA_X_MS0,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MS1")
+        call functional_%add_functional(                 XC_MGGA_X_MS1,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MS2")
+        call functional_%add_functional(                 XC_MGGA_X_MS2,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MS2B")
+        call functional_%add_functional(                XC_MGGA_X_MS2B,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MS2B*", "MS2BS")
+        call functional_%add_functional(               XC_MGGA_X_MS2BS,1.00_fp)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("SCAN")
+        call functional_%add_functional(                XC_MGGA_X_SCAN,1.00_fp)
+        call functional_%add_functional(                XC_MGGA_C_SCAN,1.00_fp)
+        needtau = .true.
+      case("RSCAN", "REGSCAN")
+        call functional_%add_functional(               XC_MGGA_X_RSCAN,1.00_fp)
+        call functional_%add_functional(               XC_MGGA_C_RSCAN,1.00_fp)
+        needtau = .true.
+      case("RPPSCAN", "R++SCAN")
+        call functional_%add_functional(             XC_MGGA_X_RPPSCAN,1.00_fp)
+        call functional_%add_functional(             XC_MGGA_C_RPPSCAN,1.00_fp)
+        needtau = .true.
+      case("R2SCAN")
+        call functional_%add_functional(              XC_MGGA_X_R2SCAN,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_R2SCAN,1.00_fp)
+        needtau = .true.
+      case("R2SCAN01")
+        call functional_%add_functional(            XC_MGGA_X_R2SCAN01,1.00_fp)
+        call functional_%add_functional(            XC_MGGA_C_R2SCAN01,1.00_fp)
+        needtau = .true.
+      case("R4SCAN")
+        call functional_%add_functional(              XC_MGGA_X_R4SCAN,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_R2SCAN,1.00_fp)
+        needtau = .true.
+      case("REVSCAN")
+        call functional_%add_functional(             XC_MGGA_X_REVSCAN,1.00_fp)
+        call functional_%add_functional(             XC_MGGA_C_REVSCAN,1.00_fp)
+        needtau = .true.
+      case("TASK")
+        call functional_%add_functional(                XC_MGGA_X_TASK,1.00_fp)
+        call functional_%add_functional(                   XC_LDA_C_PW,1.00_fp)
+        needtau = .true.
+      case("TM")
+        call functional_%add_functional(                  XC_MGGA_X_TM,1.00_fp)
+        call functional_%add_functional(                  XC_MGGA_C_TM,1.00_fp)
+        needtau = .true.
+      case("REVTM")
+        call functional_%add_functional(               XC_MGGA_X_REVTM,1.00_fp)
+        call functional_%add_functional(               XC_MGGA_C_REVTM,1.00_fp)
+        needtau = .true.
+      case("REGTM")
+        call functional_%add_functional(               XC_MGGA_X_REGTM,1.00_fp)
+        call functional_%add_functional(                  XC_MGGA_C_TM,1.00_fp)
+        needtau = .true.
+      case("RREGTM")
+        call functional_%add_functional(               XC_MGGA_X_REGTM,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_RREGTM,1.00_fp)
+        needtau = .true.
+      case("MGGAC")
+        call functional_%add_functional(               XC_MGGA_X_MGGAC,1.00_fp)
+        call functional_%add_functional(                XC_GGA_C_MGGAC,1.00_fp)
+        needtau = .true.
+      case("RMGGAC")
+        call functional_%add_functional(               XC_MGGA_X_MGGAC,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_RMGGAC,1.00_fp)
+        needtau = .true.
+      case("TAUHCTH", "THCTH")
+        call functional_%add_functional(            XC_MGGA_X_TAU_HCTH,1.00_fp)
+        call functional_%add_functional(             XC_GGA_C_TAU_HCTH,1.00_fp)
+        needtau = .true.
+      case("VSXC")
+        call functional_%add_functional(                XC_MGGA_X_GVT4,1.00_fp)
+        call functional_%add_functional(                XC_MGGA_C_VSXC,1.00_fp)
+        needtau = .true.
+      case("TPSSLYP1W")
+        call functional_%add_functional(          XC_MGGA_XC_TPSSLYP1W,1.00_fp)
+        needtau = .true.
+      case("M06-L", "M06L")
+        call functional_%add_functional(               XC_MGGA_X_M06_L,1.00_fp)
+        call functional_%add_functional(               XC_MGGA_C_M06_L,1.00_fp)
+        needtau = .true.
+      case("REVM06-L", "REVM06L")
+        call functional_%add_functional(            XC_MGGA_X_REVM06_L,1.00_fp)
+        call functional_%add_functional(            XC_MGGA_C_REVM06_L,1.00_fp)
+        needtau = .true.
+      case("M11-L", "M11L")
+        camflag = .true.
+        call functional_%add_functional(               XC_MGGA_X_M11_L,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+        call functional_%add_functional(               XC_MGGA_C_M11_L,1.00_fp)
+        needtau = .true.
+      case("MN12-L", "MN12L")
+        call functional_%add_functional(              XC_MGGA_X_MN12_L,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_MN12_L,1.00_fp)
+        needtau = .true.
+      case("MN15-L", "MN15L")
+        call functional_%add_functional(              XC_MGGA_X_MN15_L,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_MN15_L,1.00_fp)
+        needtau = .true.
+      case("HLE17")
+        call functional_%add_functional(              XC_MGGA_XC_HLE17,1.00_fp)
+        needtau = .true.
+      case("HLTA")
+        call functional_%add_functional(                XC_MGGA_X_HLTA,1.00_fp)
+        call functional_%add_functional(              XC_MGGA_C_HLTAPW,1.00_fp)
+        needtau = .true.
+      case("LDA0")
+        call functional_%add_functional(            XC_HYB_LDA_XC_LDA0,1.00_fp, hfex=HFEX) !LDA0_hXC
+      case("CAM-LDA0") ! The energy of He in 3-21G basis set looks OK (-2.8529482409)
+        camflag   = .true.
+        call functional_%add_functional(        XC_HYB_LDA_XC_CAM_LDA0,1.00_fp, alpha=alpha, beta=beta, omega=mu) !CAM-LDA0_hXC
+      case("APF")
+        call functional_%add_functional(             XC_HYB_GGA_XC_APF,1.00_fp, hfex=HFEX)
+      case("B1WC")
+        call functional_%add_functional(            XC_HYB_GGA_XC_B1WC,1.00_fp, hfex=HFEX)
+      case("PBE0", "PBE-25", "PBE1PBE")
+        call functional_%add_functional(            XC_HYB_GGA_XC_PBEH,1.00_fp, hfex=HFEX)
+      case("PBE-33")
+        call functional_%add_functional(         XC_HYB_GGA_XC_PBE0_13,1.00_fp, hfex=HFEX)
+      case("PBE-38", "PBE-3/8")
+        call functional_%add_functional(           XC_HYB_GGA_XC_PBE38,1.00_fp, hfex=HFEX)
+      case("PBE-50")
+        call functional_%add_functional(           XC_HYB_GGA_XC_PBE50,1.00_fp, hfex=HFEX)
+      case("PBE-2X")
+        call functional_%add_functional(          XC_HYB_GGA_XC_PBE_2X,1.00_fp, hfex=HFEX)
+      case("PBE-3X")
+        HFEX = 0.84_fp
+        call functional_%add_functional(                  XC_GGA_X_PBE,0.16_fp) !PBE_X
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp) !PBE_C
+      case("BHH")
+        call functional_%add_functional(          XC_HYB_GGA_XC_BHANDH,1.00_fp, hfex=HFEX)
+      case("B1PW91")
+        call functional_%add_functional(          XC_HYB_GGA_XC_B1PW91,1.00_fp, hfex=HFEX)
+      case("B3PW91")
+        call functional_%add_functional(          XC_HYB_GGA_XC_B3PW91,1.00_fp, hfex=HFEX)
+      case("BLYP35")
+        call functional_%add_functional(          XC_HYB_GGA_XC_BLYP35,1.00_fp, hfex=HFEX)
+      case("B1LYP")
+        call functional_%add_functional(           XC_HYB_GGA_XC_B1LYP,1.00_fp, hfex=HFEX)
+      case("BHHLYP")
+        call functional_%add_functional(       XC_HYB_GGA_XC_BHANDHLYP,1.00_fp, hfex=HFEX)
+      case("B3LYP")
+        call show_message("B3LYP functional has different meanings,")
+        call show_message("so that it can not be run using LibXC interface.")
+        call show_message("For running B3LYP, choose one of them:")
+        call show_message(" - B3LYPV1R with  VWN RPA LDA correlation part (default for Gaussian)")
+        call show_message(" - B3LYPV3  with  VWN_3   LDA correlation part")
+        call show_message(" - B3LYPV5  with  VWN_5   LDA correlation part (default for GAMESS-US)")
+        call show_message(ABORTING, WITH_ABORT)
+      case("B3LYPV1R")
+        call functional_%add_functional(           XC_HYB_GGA_XC_B3LYP,1.00_fp, hfex=HFEX)
+      case("B3LYPV3")
+        call functional_%add_functional(          XC_HYB_GGA_XC_B3LYP3,1.00_fp, hfex=HFEX)
+      case("B3LYPV5", "B3LYP5")
+        call functional_%add_functional(          XC_HYB_GGA_XC_B3LYP5,1.00_fp, hfex=HFEX)
+      case("O3LYP")
+        call functional_%add_functional(           XC_HYB_GGA_XC_O3LYP,1.00_fp, hfex=HFEX)
+      case("X3LYP")
+        call functional_%add_functional(           XC_HYB_GGA_XC_X3LYP,1.00_fp, hfex=HFEX)
+      case("REVB3LYP")
+        call functional_%add_functional(        XC_HYB_GGA_XC_REVB3LYP,1.00_fp, hfex=HFEX)
+      case("B3LYP*", "B3LYPS")
+        call functional_%add_functional(          XC_HYB_GGA_XC_B3LYPs,1.00_fp, hfex=HFEX)
+      case("B50LYP", "B5050LYP")
+        call functional_%add_functional(        XC_HYB_GGA_XC_B5050LYP,1.00_fp, hfex=HFEX)
+      case("KMLYP")
+        call functional_%add_functional(           XC_HYB_GGA_XC_KMLYP,1.00_fp, hfex=HFEX)
+      case("CASE21")
+        call functional_%add_functional(          XC_HYB_GGA_XC_CASE21,1.00_fp, hfex=HFEX)
+      case("B97-1P")
+        call functional_%add_functional(          XC_HYB_GGA_XC_B97_1p,1.00_fp, hfex=HFEX)
+      case("B97")
+        call functional_%add_functional(             XC_HYB_GGA_XC_B97,1.00_fp, hfex=HFEX)
+      case("B97-1")
+        call functional_%add_functional(           XC_HYB_GGA_XC_B97_1,1.00_fp, hfex=HFEX)
+      case("B97-2")
+        call functional_%add_functional(           XC_HYB_GGA_XC_B97_2,1.00_fp, hfex=HFEX)
+      case("B97-3")
+        call functional_%add_functional(           XC_HYB_GGA_XC_B97_3,1.00_fp, hfex=HFEX)
+      case("B97-K")
+        call functional_%add_functional(           XC_HYB_GGA_XC_B97_K,1.00_fp, hfex=HFEX)
+      case("MPWLYP1M")
+        call functional_%add_functional(        XC_HYB_GGA_XC_MPWLYP1M,1.00_fp, hfex=HFEX)
+      case("MPW1K")
+        call functional_%add_functional(           XC_HYB_GGA_XC_MPW1K,1.00_fp, hfex=HFEX)
+      case("MPW1PBE")
+        call functional_%add_functional(         XC_HYB_GGA_XC_MPW1PBE,1.00_fp, hfex=HFEX)
+      case("MPW1PW", "MPW1PW91")
+        call functional_%add_functional(          XC_HYB_GGA_XC_MPW1PW,1.00_fp, hfex=HFEX)
+      case("MPW1LYP")
+        call functional_%add_functional(         XC_HYB_GGA_XC_MPW1LYP,1.00_fp, hfex=HFEX)
+      case("MPW3PW", "MPW3PW91")
+        call functional_%add_functional(          XC_HYB_GGA_XC_MPW3PW,1.00_fp, hfex=HFEX)
+      case("MPW3LYP")
+        call functional_%add_functional(         XC_HYB_GGA_XC_MPW3LYP,1.00_fp, hfex=HFEX)
+      case("SOGGA11-X", "SOGGA11X")
+        call functional_%add_functional(        XC_HYB_GGA_X_SOGGA11_X,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(            XC_GGA_C_SOGGA11_X,1.00_fp)
+      case("QTP17")
+        call functional_%add_functional(           XC_HYB_GGA_XC_QTP17,1.00_fp, hfex=HFEX)
+      case("EDF2")
+        call functional_%add_functional(            XC_HYB_GGA_XC_EDF2,1.00_fp, hfex=HFEX)
+      case("HPBEINT")
+        call functional_%add_functional(         XC_HYB_GGA_XC_HPBEINT,1.00_fp, hfex=HFEX)
+      case("CAP0")
+        call functional_%add_functional(            XC_HYB_GGA_XC_CAP0,1.00_fp, hfex=HFEX)
+      case("WC04")
+        call functional_%add_functional(            XC_HYB_GGA_XC_WC04,1.00_fp, hfex=HFEX)
+      case("WP04")
+        call functional_%add_functional(            XC_HYB_GGA_XC_WP04,1.00_fp, hfex=HFEX)
+      case("WB97")
+        camflag   = .true.
+        call functional_%add_functional(            XC_HYB_GGA_XC_WB97,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("WB97X")
+        camflag   = .true.
+        call functional_%add_functional(           XC_HYB_GGA_XC_WB97X,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("HSE03")
+        camflag   = .true.
+        call functional_%add_functional(           XC_HYB_GGA_XC_HSE03,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("HSE06")
+        camflag   = .true.
+        call functional_%add_functional(           XC_HYB_GGA_XC_HSE06,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("HSE12")
+        camflag   = .true.
+        call functional_%add_functional(           XC_HYB_GGA_XC_HSE12,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("HSE12-S")
+        camflag   = .true.
+        call functional_%add_functional(          XC_HYB_GGA_XC_HSE12S,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("HSESOL")
+        camflag   = .true.
+        call functional_%add_functional(         XC_HYB_GGA_XC_HSE_SOL,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("MCAM-B3LYP", "MCAMB3LYP")
+        camflag   = .true.
+        call functional_%add_functional(      XC_HYB_GGA_XC_MCAM_B3LYP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("CAM-B3LYP", "CAMB3LYP")
+        camflag   = .true.
+        call functional_%add_functional(       XC_HYB_GGA_XC_CAM_B3LYP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("CAMH-B3LYP", "CAMHB3LYP")
+        camflag   = .true.
+        call functional_%add_functional(      XC_HYB_GGA_XC_CAMH_B3LYP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("RCAM-B3LYP", "RCAMB3LYP")
+        camflag   = .true.
+        call functional_%add_functional(      XC_HYB_GGA_XC_RCAM_B3LYP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("TUNCAM-B3LYP", "TUNEDCAM-B3LYP")
+        camflag   = .true.
+        call functional_%add_functional( XC_HYB_GGA_XC_TUNED_CAM_B3LYP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("CAM-QTP00", "CAMQTP00", "CAM-QTP(00)", "CAM-QTP-00")
+        camflag   = .true.
+        call functional_%add_functional(      XC_HYB_GGA_XC_CAM_QTP_00,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("CAM-QTP01", "CAMQTP01", "CAM-QTP(01)", "CAM-QTP-01")
+        camflag   = .true.
+        call functional_%add_functional(      XC_HYB_GGA_XC_CAM_QTP_01,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("CAM-QTP02", "CAMQTP02", "CAM-QTP(02)", "CAM-QTP-02")
+        camflag   = .true.
+        call functional_%add_functional(      XC_HYB_GGA_XC_CAM_QTP_02,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("CAM-PBEH") ! The energy of He in 3-21G basis set looks OK (-2.8610170571)
+        camflag   = .true.
+        call functional_%add_functional(        XC_HYB_GGA_XC_CAM_PBEH,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("LRC-WPBEH")
+        camflag   = .true.
+        call functional_%add_functional(       XC_HYB_GGA_XC_LRC_WPBEH,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("LRC-WPBE")
+        camflag   = .true.
+        call functional_%add_functional(        XC_HYB_GGA_XC_LRC_WPBE,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("LC-WPBE", "LCWPBE")
+        camflag   = .true.
+        call functional_%add_functional(         XC_HYB_GGA_XC_LC_WPBE,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("WHPBE0")
+        camflag   = .true.
+        call functional_%add_functional(          XC_HYB_GGA_XC_WHPBE0,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("N12-SX", "N12SX")
+        camflag   = .true.
+        call functional_%add_functional(           XC_HYB_GGA_X_N12_SX,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+        call functional_%add_functional(               XC_GGA_C_N12_SX,1.00_fp)
+      case("LC-QTP")
+        camflag   = .true.
+        call functional_%add_functional(          XC_HYB_GGA_XC_LC_QTP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("LC-BLYP")
+        camflag = .true.
+        call functional_%add_functional(         XC_HYB_GGA_XC_LC_BLYP,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+      case("TPSSH")
+        call functional_%add_functional(          XC_HYB_MGGA_XC_TPSSH,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("TPSS0")
+        call functional_%add_functional(          XC_HYB_MGGA_XC_TPSS0,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("REVTPSSH")
+        call functional_%add_functional(       XC_HYB_MGGA_XC_REVTPSSH,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("MS2H")
+        call functional_%add_functional(            XC_HYB_MGGA_X_MS2H,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("MVSH")
+        call functional_%add_functional(            XC_HYB_MGGA_X_MVSH,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp)
+        needtau = .true.
+      case("SCAN0")
+        call functional_%add_functional(           XC_HYB_MGGA_X_SCAN0,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                XC_MGGA_C_SCAN,1.00_fp)
+        needtau = .true.
+      case("REVSCAN0")
+        call functional_%add_functional(        XC_HYB_MGGA_X_REVSCAN0,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(             XC_MGGA_C_REVSCAN,1.00_fp)
+        needtau = .true.
+      case("HYBTAUHCTH", "HYBTHCTH", "HYB-THCTH", "HYB-TAUHCTH", "THCTHHYB", "TAUHCTHHYB")
+        call functional_%add_functional(        XC_HYB_MGGA_X_TAU_HCTH,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(         XC_GGA_C_HYB_TAU_HCTH,1.00_fp)
+        needtau = .true.
+      case("BMK")
+        call functional_%add_functional(             XC_HYB_MGGA_X_BMK,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                  XC_GGA_C_BMK,1.00_fp)
+        needtau = .true.
+      case("DLDF")
+        call functional_%add_functional(            XC_HYB_MGGA_X_DLDF,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                XC_MGGA_C_DLDF,1.00_fp)
+        needtau = .true.
+      case("M05")
+        call functional_%add_functional(             XC_HYB_MGGA_X_M05,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                 XC_MGGA_C_M05,1.00_fp)
+        needtau = .true.
+      case("M05-2X", "M052X")
+        call functional_%add_functional(          XC_HYB_MGGA_X_M05_2X,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(              XC_MGGA_C_M05_2X,1.00_fp)
+        needtau = .true.
+      case("M06")
+        call functional_%add_functional(             XC_HYB_MGGA_X_M06,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                 XC_MGGA_C_M06,1.00_fp)
+        needtau = .true.
+      case("REVM06")
+        call functional_%add_functional(          XC_HYB_MGGA_X_REVM06,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(              XC_MGGA_C_REVM06,1.00_fp)
+        needtau = .true.
+      case("M06-2X", "M062X")
+        call functional_%add_functional(          XC_HYB_MGGA_X_M06_2X,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(              XC_MGGA_C_M06_2X,1.00_fp)
+        needtau = .true.
+      case("M06-HF", "M06HF")
+        call functional_%add_functional(          XC_HYB_MGGA_X_M06_HF,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(              XC_MGGA_C_M06_HF,1.00_fp)
+        needtau = .true.
+      case("M08-SO")
+        call functional_%add_functional(          XC_HYB_MGGA_X_M08_SO,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(              XC_MGGA_C_M08_SO,1.00_fp)
+        needtau = .true.
+      case("M08-HX")
+        call functional_%add_functional(          XC_HYB_MGGA_X_M08_HX,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(              XC_MGGA_C_M08_HX,1.00_fp)
+        needtau = .true.
+      case("MN15")
+        call functional_%add_functional(            XC_HYB_MGGA_X_MN15,1.00_fp, hfex=HFEX)
+        call functional_%add_functional(                XC_MGGA_C_MN15,1.00_fp)
+        needtau = .true.
+      case("PW86BC95", "PW86B95")
+        call functional_%add_functional(        XC_HYB_MGGA_XC_PW86B95,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("BB1K")
+        call functional_%add_functional(           XC_HYB_MGGA_XC_BB1K,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("MPW1BC95", "MPW1B95")
+        call functional_%add_functional(        XC_HYB_MGGA_XC_MPW1B95,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("MPW1B1K")
+        call functional_%add_functional(         XC_HYB_MGGA_XC_MPWB1K,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("PW6BC95", "PW6B95")
+        call functional_%add_functional(         XC_HYB_MGGA_XC_PW6B95,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("PWB6K")
+        call functional_%add_functional(          XC_HYB_MGGA_XC_PWB6K,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("MPW1KCIS")
+        call functional_%add_functional(       XC_HYB_MGGA_XC_MPW1KCIS,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("MPWKCIS1K")
+        call functional_%add_functional(      XC_HYB_MGGA_XC_MPWKCIS1K,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("B0KCIS")
+        call functional_%add_functional(         XC_HYB_MGGA_XC_B0KCIS,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("PBE1KCIS")
+        call functional_%add_functional(       XC_HYB_MGGA_XC_PBE1KCIS,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("TPSS1KCIS")
+        call functional_%add_functional(      XC_HYB_MGGA_XC_TPSS1KCIS,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("X1BC95", "X1B95")
+        call functional_%add_functional(          XC_HYB_MGGA_XC_X1B95,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("XB1K")
+        call functional_%add_functional(           XC_HYB_MGGA_XC_XB1K,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("B88BC95", "BBC95", "B88B95", "BB95")
+        call functional_%add_functional(         XC_HYB_MGGA_XC_B88B95,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("B86BC95", "B86B95")
+        call functional_%add_functional(         XC_HYB_MGGA_XC_B86B95,1.00_fp, hfex=HFEX)
+        needtau = .true.
+      case("M06-SX", "M06SX")
+        camflag = .true.
+        call functional_%add_functional(          XC_HYB_MGGA_X_M06_SX,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+        call functional_%add_functional(              XC_MGGA_C_M06_SX,1.00_fp)
+        needtau = .true.
+      case("M11")
+        camflag = .true.
+        call functional_%add_functional(             XC_HYB_MGGA_X_M11,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+        call functional_%add_functional(                 XC_MGGA_C_M11,1.00_fp)
+        needtau = .true.
+      case("REVM11")
+        camflag = .true.
+        call functional_%add_functional(          XC_HYB_MGGA_X_REVM11,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+        call functional_%add_functional(              XC_MGGA_C_REVM11,1.00_fp)
+        needtau = .true.
+      case("MN12-SX", "MN12SX")
+        camflag = .true.
+        call functional_%add_functional(         XC_HYB_MGGA_X_MN12_SX,1.00_fp, alpha=alpha, beta=beta, omega=mu)
+        call functional_%add_functional(             XC_MGGA_C_MN12_SX,1.00_fp)
+        needtau = .true.
+      case("PBE0-DH")
+        dhfunc     = .true.
+        HFEX       = 0.5_fp
+        MP2        = 0.128_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_PBE,1.00_fp-HFEX)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp-MP2)
+      case("TPSS0-DH")
+        needtau = .true.
+        dhfunc     = .true.
+        HFEX       = 0.5_fp
+        MP2        = 0.128_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_MGGA_X_TPSS,1.00_fp-HFEX)
+        call functional_%add_functional(                XC_MGGA_C_TPSS,1.00_fp-MP2)
+      case("SCAN0-DH")
+        needtau = .true.
+        dhfunc     = .true.
+        HFEX       = 0.5_fp
+        MP2        = 0.128_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_MGGA_X_SCAN,1.00_fp-HFEX)
+        call functional_%add_functional(                XC_MGGA_C_SCAN,1.00_fp-MP2)
+      case("PBE-QIDH")
+        dhfunc     = .true.
+        HFEX       = 0.693391_fp
+        MP2        = 0.128_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_PBE,1.00_fp-HFEX)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp-MP2)
+      case("TPSS-QIDH")
+        needtau = .true.
+        dhfunc     = .true.
+        HFEX       = 0.693391_fp
+        MP2        = 0.128_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_MGGA_X_TPSS,1.00_fp-HFEX)
+        call functional_%add_functional(                XC_MGGA_C_TPSS,1.00_fp-MP2)
+      case("SCAN-QIDH")
+        needtau = .true.
+        dhfunc     = .true.
+        HFEX       = 0.693391_fp
+        MP2        = 0.128_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_MGGA_X_SCAN,1.00_fp-HFEX)
+        call functional_%add_functional(                XC_MGGA_C_SCAN,1.00_fp-MP2)
+      case("PBE0-2")
+        dhfunc     = .true.
+        HFEX       = 0.793701_fp
+        MP2        = 0.5_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_PBE,1.00_fp-HFEX)
+        call functional_%add_functional(                  XC_GGA_C_PBE,1.00_fp-MP2)
+      case("TPSS0-2")
+        needtau = .true.
+        dhfunc     = .true.
+        HFEX       = 0.793701_fp
+        MP2        = 0.5_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_MGGA_X_TPSS,1.00_fp-HFEX)
+        call functional_%add_functional(                XC_MGGA_C_TPSS,1.00_fp-MP2)
+      case("SCAN0-2")
+        needtau = .true.
+        dhfunc     = .true.
+        HFEX       = 0.793701_fp
+        MP2        = 0.5_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_MGGA_X_SCAN,1.00_fp-HFEX)
+        call functional_%add_functional(                XC_MGGA_C_SCAN,1.00_fp-MP2)
+      case("B2-PLYP", "B2PLYP")
+        dhfunc     = .true.
+        HFEX       = 0.53_fp
+        MP2        = 0.27_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_B88,1.00_fp-HFEX) !Becke88
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp-MP2) !Lee-Yang-Parr
+      case("B2GP-PLYP", "B2GPPLYP")
+        dhfunc     = .true.
+        HFEX       = 0.65_fp
+        MP2        = 0.36_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_B88,1.00_fp-HFEX) !Becke88
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp-MP2) !Lee-Yang-Parr
+      case("B2T-PLYP", "B2TPLYP")
+        dhfunc     = .true.
+        HFEX       = 0.60_fp
+        MP2        = 0.31_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_B88,1.00_fp-HFEX) !Becke88
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp-MP2) !Lee-Yang-Parr
+      case("B2K-PLYP", "B2KPLYP")
+        dhfunc     = .true.
+        HFEX       = 0.42_fp
+        MP2        = 0.72_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                  XC_GGA_X_B88,1.00_fp-HFEX) !Becke88
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp-MP2) !Lee-Yang-Parr
+      case("MPW2-PLYP", "MPW2PLYP")
+        dhfunc     = .true.
+        HFEX       = 0.53_fp
+        MP2        = 0.27_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_GGA_X_MPW91,1.00_fp-HFEX) !mPW91
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp-MP2) !Lee-Yang-Parr
+      case("MPWK-PLYP", "MPWKPLYP")
+        dhfunc     = .true.
+        HFEX       = 0.42_fp
+        MP2        = 0.72_fp
+        chf        = HFEX
+        cmp2       = MP2
+        c2same     = MP2
+        c2opp      = MP2
+        call functional_%add_functional(                XC_GGA_X_MPW91,1.00_fp-HFEX) !mPW91
+        call functional_%add_functional(                  XC_GGA_C_LYP,1.00_fp-MP2) !Lee-Yang-Parr
+      case default
+        !It will be good, if someone write procedure for parsing of functional names, like PBE-1-PBE or PBE-0 or S+PBE-3-LYP+VWN-RPA
+        call show_message("Unrecognized functional name: " // funcname)
+        call show_message("Please, check the documentation about this functional or")
+        call show_message(" implement it to LibXC [https://gitlab.com/libxc/libxc],")
+        call show_message("   and, then, to GAMESS-LibXC interface")
+        call show_message(ABORTING, WITH_ABORT)
+    end select
+    ! No one of functionals was not selected
+    if(.not.functional_%can_calculate()) then
+      call show_message("No one functional was not selected!")
+      call show_message("Please, check the input!")
+      call show_message(ABORTING, WITH_ABORT)
+    end if
+    chf = HFEX
+    cmp2 = MP2
+#ifndef OQP
+    DFTTYP(3)  = HFEX
+    DFTTYP(14) = MP2
+#endif
+    ! Print information about non-local part of functionals
+    call show_message(" ")
+    if(.not.camflag) then
+      call show_message("(A,ES16.8E2)", "The global hybrid part:                ", HFEX)
+    else
+      call show_message("CAM-corrected functional is called")
+      call show_message("Yanai's notation of CAM parameters is used")
+      call show_message("(A,ES16.8E2)", "The global hybrid part:                ", alpha)
+      call show_message("(A,ES16.8E2)", "Additional long-range hybrid part:     ", beta)
+      call show_message("(A,ES16.8E2)", "Range-saparated factor:                ", mu)
+    end if
+    if(dhfunc) then
+      call show_message(" ")
+      call show_message("Double-hybrid functional is called")
+      call show_message("(A,ES16.8E2)", "Same-spin MP2 correlation factor:      ", c2same)
+      call show_message("(A,ES16.8E2)", "Opposite-spin MP2 correlation factor:  ", c2opp)
+    end if
+    call show_message(" ")
+    ! deallocate reader of section
+    if(.not.present(functional)) then
+      if(allocated(LibXC_group)) then
+        call LibXC_group%destroy
+        deallocate(LibXC_group)
+      end if
+    end if
+  end subroutine libxc_input
+  !
+  !*MODULE libxc DECK libxc_input
+  !> @brief  Destroy internal variables of functional
+  !> @author Igor S. Gerasimov
+  !> @date   Dec, 2020 - Initial release -
+  subroutine libxc_destroy()
+    call functional_%destroy
+  end subroutine libxc_destroy
+  !
+  !*MODULE libxc DECK libxc_calc
+  !> @brief  Performing DFT calculations using libxc at one point
+  !>         (Analog of CALCEXC)
+  !> @author Igor S. Gerasimov
+  !> @date   July, 2019
+  !> @params WEIGHT - (in)  weight of point (FTOTWT)
+  !> @params RHOA   - (in)  alpha-density at point
+  !> @params RHOB   - (in)  beta-density at point
+  !> @params GRD_A  - (in)  gradients of electron density for Alpha spin
+  !> @params GRD_B  - (in)  gradients of electron density for Beta spin
+  !> @params TAU_A  - (in)  local kinetic energies of electron density for Alpha spin
+  !> @params TAU_B  - (in)  local kinetic energies of electron density for Beta spin
+  !> @params XALPHA - (out) LDA exchange energy (full energy)
+  !> @params XGRD   - (out) GGA exchange energy (always is zero)
+  !> @params ECF    - (out) correlation energy  (always is zero)
+  !> @params VXCA   - (out) gradient of energy by alpha-density
+  !> @params VXCB   - (out) gradient of energy by beta-density
+  !> @params DUM_A  - (out) gradient of energy by normed gradient of electron density for Alpha spin
+  !> @params DUM_B  - (out) gradient of energy by normed gradient of electron density for Beta spin
+  !> @params DMGGA  - (out) gradient of energy by local kinetic energies for Alpha spin
+  !> @params DMGGB  - (out) gradient of energy by local kinetic energies for Beta spin
+  subroutine libxc_calc(WEIGHT,       &
+                RHOA, RHOB,           &
+                GRDAA, GRDAB, GRDBB,  &
+                GRADXA,GRADYA,GRADZA, &
+                GRADXB,GRADYB,GRADZB, &
+                TAUXA,TAUYA,TAUZA,    &
+                TAUXB,TAUYB,TAUZB,    &
+                XALPHA,XGRD,ECF,      &
+                VXCA,VXCB,            &
+                DUMAX,DUMAY,DUMAZ,    &
+                DUMBX,DUMBY,DUMBZ,    &
+                DMGGA, DMGGB)
+    use metagga, only: needtau
+    real(kind=fp), intent(in)  :: WEIGHT
+    real(kind=fp), intent(in)  :: RHOA, RHOB
+    real(kind=fp), intent(in)  :: GRDAA, GRDAB, GRDBB
+    real(kind=fp), intent(in)  :: GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB
+    real(kind=fp), intent(in)  :: TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB
+    real(kind=fp), intent(out) :: XALPHA,XGRD,ECF
+    real(kind=fp), intent(out) :: VXCA,VXCB
+    real(kind=fp), intent(out) :: DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ
+    real(kind=fp), intent(out) :: DMGGA, DMGGB
+    !internal variables
+    real(kind=fp), dimension(1) :: energy
+    real(kind=fp), dimension(2) :: rho, tau, dEdrho, dEdtau, lapl, dEdlapl
+    real(kind=fp), dimension(3) :: sigma, dEdsigma
+    ! Create arrays for LibXC
+    rho(1)   = rhoa
+    rho(2)   = rhob
+    sigma(1) = grdaa
+    sigma(2) = grdab
+    sigma(3) = grdbb
+    ! In the case, if needtau == .false., tauxa+tauya+tauza = 0
+    if(needtau) then
+      tau(1)   = abs(0.5_fp*(tauxa+tauya+tauza))
+      tau(2)   = abs(0.5_fp*(tauxb+tauyb+tauzb))
+    else
+      tau = 0.0_fp
+    end if
+    ! GAMESS-US can not calculate laplacian, set array to zero
+    lapl     = 0.0_fp
+    ! calculate DFT functional
+    call functional_%calc_evxc(1, rho, sigma, tau, lapl, energy, &
+      dEdrho, dEdsigma, dEdtau, dEdlapl)
+    ! Myltiply energy to weight for numerical integration
+    energy = energy * weight
+
+    ECF    = 0.0_fp
+    XGRD   = 0.0_fp
+    ! Total energy of LibXC functionals
+    XALPHA = energy(1)
+    ! Alpha density
+    VXCA   = dEdrho(1)
+    DUMAX  = 2.0_fp*(dEdsigma(1)*GRADXA)+(dEdsigma(2)*GRADXB)
+    DUMAY  = 2.0_fp*(dEdsigma(1)*GRADYA)+(dEdsigma(2)*GRADYB)
+    DUMAZ  = 2.0_fp*(dEdsigma(1)*GRADZA)+(dEdsigma(2)*GRADZB)
+    ! Beta density
+    VXCB   = dEdrho(2)
+    DUMBX  = 2.0_fp*(dEdsigma(3)*GRADXB)+(dEdsigma(2)*GRADXA)
+    DUMBY  = 2.0_fp*(dEdsigma(3)*GRADYB)+(dEdsigma(2)*GRADYA)
+    DUMBZ  = 2.0_fp*(dEdsigma(3)*GRADZB)+(dEdsigma(2)*GRADZA)
+    ! Derivatives of energy by local kinetic densities
+    dmgga  = dEdtau(1) / 2.0_fp
+    dmggb  = dEdtau(2) / 2.0_fp
+  end subroutine libxc_calc
+  !
+  !*MODULE libxc DECK libxc_calc_2D
+  !> @brief  Perform TD-DFT calculations using libxc (without 3rd derivatives)
+  !>         (Analog of any TDFUNC subroutine)
+  !> @detail All points produce one call of LibXC interface
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019
+  !> @params WaveType    - (in)  Type of wavefunction: restricted (1) or unrestricted (2). integer value
+  !> @params NGridPoints - (in)  count of grid points (also maxgrd)
+  !> @params NPoints     - (in)  count of points
+  !> @params DerivLength - (in)  Size of array of derivatives energy by rho/grad/tau
+  !> @params EXC         - (out) total energy
+  !> @params EnergyPoint - (out) energies at each point
+  !> @params DerivsPoint - (out) derivatives energy at each point
+  !> @params dRho        - (in)  rho and gradients rho at each point
+  !> @params dTau        - (in)  tau of rho at each point
+  !> @params weight      - (in)  weight of point at each point
+  !> @params MinRho      - (in)  except point where rho less that MinRho
+  !> @params StartPoint  - (in)  The first point, which needed to work (Needed for parallel runs, I think)
+  !> @params EndPoint    - (in)  The last point, which needed to work (Needed for parallel runs, I think)
+  subroutine libxc_TD_2D(WaveType, NGridPoints, NPoints, DerivLength, EXC, EnergyPoint, DerivsPoint, &
+                        dRho, dTau, weight, MinRho, StartPoint, EndPoint)
+    USE cderix, ONLY: IRA,IRB,IGA,IGB,IGC,ITA,ITB,IRARA,IRARB,         &
+                      IRAGA,IRAGB,IRAGC,IRATA,IRATB,IRBRB,IRBGA,IRBGB, &
+                      IRBGC,IRBTA,IRBTB,IGAGA,IGAGB,IGAGC,IGATA,IGATB, &
+                      IGBGB,IGBGC,IGBTA,IGBTB,IGCGC,IGCTA,IGCTB,ITATA, &
+                      ITATB,ITBTB
+    use metagga, only: needtau
+    integer,       intent(in)  :: WaveType
+    integer,       intent(in)  :: NGridPoints
+    integer,       intent(in)  :: NPoints
+    integer,       intent(in)  :: DerivLength
+    real(kind=fp), intent(out) :: EXC
+    real(kind=fp), dimension(NPoints),                intent(out) :: EnergyPoint
+    real(kind=fp), dimension(NPoints,DerivLength),    intent(out) :: DerivsPoint
+    real(kind=fp), dimension(NGridPoints,4,WaveType), intent(in)  :: dRho
+    real(kind=fp), dimension(NGridPoints,WaveType),   intent(in)  :: dTau
+    real(kind=fp), dimension(NGridPoints),            intent(in)  :: weight
+    real(kind=fp), intent(in)  :: MinRho
+    integer,       intent(in)  :: StartPoint
+    integer,       intent(in)  :: EndPoint
+    ! internal variables
+    real(kind=fp)                       :: dxa, dya, dza, dxb, dyb, dzb
+    real(kind=fp), dimension(:), allocatable :: energy
+    real(kind=fp), dimension(:), allocatable :: rho, tau, lapl, dEdrho, dEdtau, dEdlapl
+    real(kind=fp), dimension(:), allocatable :: sigma, dEdsigma, d2Edrho2, d2Edtau2, d2Edlapl2
+    real(kind=fp), dimension(:), allocatable :: d2Edrhotau, d2Edrholapl, d2Edlapltau
+    real(kind=fp), dimension(:), allocatable :: d2Edsigma2, d2Edrhosigma, d2Edsigmatau, d2Edsigmalapl
+    ! iterators
+    integer :: GridPoint, i, j, distance
+    ! Setting outputting variables to zero
+    EXC = 0
+    EnergyPoint = 0
+    DerivsPoint = 0
+
+    ! Writing arrays for LibXC
+    distance = EndPoint - StartPoint + 1
+    associate(D => distance)
+      allocate(energy(D))
+      allocate(rho(2*D), tau(2*D), lapl(2*D), dEdrho(2*D), dEdtau(2*D), dEdlapl(2*D))
+      allocate(sigma(3*D), dEdsigma(3*D), d2Edrho2(3*D), d2Edtau2(3*D), d2Edlapl2(3*D))
+      allocate(d2Edrhotau(4*D), d2Edrholapl(4*D), d2Edlapltau(4*D))
+      allocate(d2Edsigma2(6*D), d2Edrhosigma(6*D), d2Edsigmatau(6*D), d2Edsigmalapl(6*D))
+    end associate
+    do GridPoint = StartPoint, EndPoint
+      i = GridPoint - StartPoint + 1
+      j = GridPoint - StartPoint
+      ! getting of rho
+      rho(j * 2 + 1)   = dRho(GridPoint,1,1)
+      rho(j * 2 + 2)   = dRho(GridPoint,1,WaveType)
+      ! I hope that points with very low value of total density will be excluded in libxc
+      dxa              = dRho(GridPoint,2,1)
+      dya              = dRho(GridPoint,3,1)
+      dza              = dRho(GridPoint,4,1)
+      dxb              = dRho(GridPoint,2,WaveType)
+      dyb              = dRho(GridPoint,3,WaveType)
+      dzb              = dRho(GridPoint,4,WaveType)
+      ! Calculate normed gradients
+      sigma(j * 3 + 1) = dxa*dxa + dya*dya + dza*dza
+      sigma(j * 3 + 2) = dxa*dxb + dya*dyb + dza*dzb
+      sigma(j * 3 + 3) = dxb*dxb + dyb*dyb + dzb*dzb
+      ! Getting of tau
+      if(needtau) then
+        tau(j * 2 + 1)   = abs(dTau(GridPoint,1))
+        tau(j * 2 + 2)   = abs(dTau(GridPoint,WaveType))
+      end if
+    end do
+    if(.not.needtau) then
+      tau = 0.0_fp
+    end if
+    ! GAMESS-US can not calculate laplacian, set array to zero
+    lapl     = 0.0_fp
+    ! calculate DFT functional in all points
+    call functional_%calc_evfxc(distance, rho, sigma, tau, lapl, energy, dEdrho, dEdsigma, dEdtau, dEdlapl, &
+      d2Edrho2, d2Edsigma2, d2Edtau2, d2Edlapl2, &
+      d2Edrhosigma, d2Edrhotau, d2Edrholapl, d2Edsigmatau, d2Edsigmalapl, d2Edlapltau)
+
+    ! Getting values of energy and it derivatives from LibXC arrays
+    do GridPoint = StartPoint, EndPoint
+      i = GridPoint - StartPoint + 1
+      j = GridPoint - StartPoint
+      !Skipping regions with low rho, gradient and tau
+      if(rho(j * 2 + 1) + rho(j * 2 + 2) .lt. MinRho) cycle
+!
+!     STORE TOTAL ENERGY
+!
+      EXC = EXC + energy(i) * weight(i)
+!
+!     STORE FUNCTIONAL ENERGY
+!
+      EnergyPoint(i) = EnergyPoint(i) + energy(i)
+!
+!     STORE FIRST FUNCTIONAL DERIVATIVE
+!
+      DerivsPoint (i,IRA)   = DerivsPoint (i,IRA)   + dEdrho(j * 2 + 1)
+      DerivsPoint (i,IRB)   = DerivsPoint (i,IRB)   + dEdrho(j * 2 + 2)
+      DerivsPoint (i,IGA)   = DerivsPoint (i,IGA)   + dEdsigma(j * 3 + 1)
+      DerivsPoint (i,IGB)   = DerivsPoint (i,IGB)   + dEdsigma(j * 3 + 3)
+      DerivsPoint (i,IGC)   = DerivsPoint (i,IGC)   + dEdsigma(j * 3 + 2)
+      DerivsPoint (i,ITA)   = DerivsPoint (i,ITA)   + dEdtau(j * 2 + 1)
+      DerivsPoint (i,ITB)   = DerivsPoint (i,ITB)   + dEdtau(j * 2 + 2)
+!
+!     STORE SECOND FUNCTIONAL DERIVATIVE
+!
+      DerivsPoint (i,IRARA) = DerivsPoint (i,IRARA) + d2Edrho2(j * 3 + 1)
+      DerivsPoint (i,IRARB) = DerivsPoint (i,IRARB) + d2Edrho2(j * 3 + 2)
+      DerivsPoint (i,IRAGA) = DerivsPoint (i,IRAGA) + d2Edrhosigma(j * 6 + 1)
+      DerivsPoint (i,IRAGB) = DerivsPoint (i,IRAGB) + d2Edrhosigma(j * 6 + 3)
+      DerivsPoint (i,IRAGC) = DerivsPoint (i,IRAGC) + d2Edrhosigma(j * 6 + 2)
+      DerivsPoint (i,IRATA) = DerivsPoint (i,IRATA) + d2Edrhotau(j * 4 + 1)
+      DerivsPoint (i,IRATB) = DerivsPoint (i,IRATB) + d2Edrhotau(j * 4 + 2)
+      DerivsPoint (i,IRBRB) = DerivsPoint (i,IRBRB) + d2Edrho2(j * 3 + 3)
+      DerivsPoint (i,IRBGA) = DerivsPoint (i,IRBGA) + d2Edrhosigma(j * 6 + 4)
+      DerivsPoint (i,IRBGB) = DerivsPoint (i,IRBGB) + d2Edrhosigma(j * 6 + 6)
+      DerivsPoint (i,IRBGC) = DerivsPoint (i,IRBGC) + d2Edrhosigma(j * 6 + 5)
+      DerivsPoint (i,IRBTA) = DerivsPoint (i,IRBTA) + d2Edrhotau(j * 4 + 3)
+      DerivsPoint (i,IRBTB) = DerivsPoint (i,IRBTB) + d2Edrhotau(j * 4 + 4)
+      DerivsPoint (i,IGAGA) = DerivsPoint (i,IGAGA) + d2Edsigma2(j * 6 + 1)
+      DerivsPoint (i,IGAGB) = DerivsPoint (i,IGAGB) + d2Edsigma2(j * 6 + 3)
+      DerivsPoint (i,IGAGC) = DerivsPoint (i,IGAGC) + d2Edsigma2(j * 6 + 2)
+      DerivsPoint (i,IGATA) = DerivsPoint (i,IGATA) + d2Edsigmatau(j * 6 + 1)
+      DerivsPoint (i,IGATB) = DerivsPoint (i,IGATB) + d2Edsigmatau(j * 6 + 2)
+      DerivsPoint (i,IGBGB) = DerivsPoint (i,IGBGB) + d2Edsigma2(j * 6 + 6)
+      DerivsPoint (i,IGBGC) = DerivsPoint (i,IGBGC) + d2Edsigma2(j * 6 + 5)
+      DerivsPoint (i,IGBTA) = DerivsPoint (i,IGBTA) + d2Edsigmatau(j * 6 + 5)
+      DerivsPoint (i,IGBTB) = DerivsPoint (i,IGBTB) + d2Edsigmatau(j * 6 + 6)
+      DerivsPoint (i,IGCGC) = DerivsPoint (i,IGCGC) + d2Edsigma2(j * 6 + 4)
+      DerivsPoint (i,IGCTA) = DerivsPoint (i,IGCTA) + d2Edsigmatau(j * 6 + 3)
+      DerivsPoint (i,IGCTB) = DerivsPoint (i,IGCTB) + d2Edsigmatau(j * 6 + 4)
+      DerivsPoint (i,ITATA) = DerivsPoint (i,ITATA) + d2Edtau2(j * 3 + 1)
+      DerivsPoint (i,ITATB) = DerivsPoint (i,ITATB) + d2Edtau2(j * 3 + 2)
+      DerivsPoint (i,ITBTB) = DerivsPoint (i,ITBTB) + d2Edtau2(j * 3 + 3)
+    end do
+    deallocate(rho, sigma, tau, lapl, energy, dEdrho, dEdsigma, dEdtau, dEdlapl, &
+      d2Edrho2, d2Edsigma2, d2Edtau2, d2Edlapl2, &
+      d2Edrhosigma, d2Edrhotau, d2Edrholapl, d2Edsigmatau, d2Edsigmalapl, d2Edlapltau)
+  end subroutine libxc_TD_2D
+  !
+  !*MODULE libxc DECK libxc_TD_3D
+  !> @brief  Perform TD-DFT calculations using libxc
+  !>         (Analog of any TDFUNC subroutine)
+  !> @detail All points produce one call of LibXC interface
+  !>         For determining a shifting like (j * 3 + 3) see libxc/scripts/maple2c_new.pl @derivatives.
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019
+  !> @params WaveType    - (in)  Type of wavefunction: restricted (1) or unrestricted (2). integer value
+  !> @params NGridPoints - (in)  count of grid points (also maxgrd)
+  !> @params NPoints     - (in)  count of points
+  !> @params DerivLength - (in)  Size of array of derivatives energy by rho/grad/tau
+  !> @params EXC         - (out) total energy
+  !> @params EnergyPoint - (out) energies at each point
+  !> @params DerivsPoint - (out) derivatives energy at each point
+  !> @params dRho        - (in)  rho and gradients rho at each point
+  !> @params dTau        - (in)  tau of rho at each point
+  !> @params weight      - (in)  weight of point at each point
+  !> @params MinRho      - (in)  except point where rho less that MinRho
+  !> @params StartPoint  - (in)  The first point, which needed to work (Needed for parallel runs, I think)
+  !> @params EndPoint    - (in)  The last point, which needed to work (Needed for parallel runs, I think)
+  subroutine libxc_TD_3D(WaveType, NGridPoints, NPoints, DerivLength, EXC, EnergyPoint, DerivsPoint, &
+                         dRho, dTau, weight, MinRho, StartPoint, EndPoint)
+    USE cderix, ONLY: IRA,IRB,IGA,IGB,IGC,ITA,ITB,IRARA,IRARB,         &
+                      IRAGA,IRAGB,IRAGC,IRATA,IRATB,IRBRB,IRBGA,IRBGB, &
+                      IRBGC,IRBTA,IRBTB,IGAGA,IGAGB,IGAGC,IGATA,IGATB, &
+                      IGBGB,IGBGC,IGBTA,IGBTB,IGCGC,IGCTA,IGCTB,ITATA, &
+                      ITATB,ITBTB,IRARARA,IRARARB,IRARAGA,IRARAGB,     &
+                      IRARAGC,IRARATA,IRARATB,IRARBRB,IRARBGA,IRARBGB, &
+                      IRARBGC,IRARBTA,IRARBTB,IRAGAGA,IRAGAGB,IRAGAGC, &
+                      IRAGATA,IRAGATB,IRAGBGB,IRAGBGC,IRAGBTA,IRAGBTB, &
+                      IRAGCGC,IRAGCTA,IRAGCTB,IRATATA,IRATATB,IRATBTB, &
+                      IRBRBRB,IRBRBGA,IRBRBGB,IRBRBGC,IRBRBTA,IRBRBTB, &
+                      IRBGAGA,IRBGAGB,IRBGAGC,IRBGATA,IRBGATB,IRBGBGB, &
+                      IRBGBGC,IRBGBTA,IRBGBTB,IRBGCGC,IRBGCTA,IRBGCTB, &
+                      IRBTATA,IRBTATB,IRBTBTB,IGAGAGA,IGAGAGB,IGAGAGC, &
+                      IGAGATA,IGAGATB,IGAGBGB,IGAGBGC,IGAGBTA,IGAGBTB, &
+                      IGAGCGC,IGAGCTA,IGAGCTB,IGATATA,IGATATB,IGATBTB, &
+                      IGBGBGB,IGBGBGC,IGBGBTA,IGBGBTB,IGBGCGC,IGBGCTA, &
+                      IGBGCTB,IGBTATA,IGBTATB,IGBTBTB,IGCGCGC,IGCGCTA, &
+                      IGCGCTB,IGCTATA,IGCTATB,IGCTBTB,ITATATA,ITATATB, &
+                      ITATBTB,ITBTBTB
+    use metagga, only: needtau
+    integer,       intent(in)  :: WaveType
+    integer,       intent(in)  :: NGridPoints
+    integer,       intent(in)  :: NPoints
+    integer,       intent(in)  :: DerivLength
+    real(kind=fp), intent(out) :: EXC
+    real(kind=fp), dimension(NPoints),                intent(out) :: EnergyPoint
+    real(kind=fp), dimension(NPoints,DerivLength),    intent(out) :: DerivsPoint
+    real(kind=fp), dimension(NGridPoints,4,WaveType), intent(in)  :: dRho
+    real(kind=fp), dimension(NGridPoints,WaveType),   intent(in)  :: dTau
+    real(kind=fp), dimension(NGridPoints),            intent(in)  :: weight
+    real(kind=fp), intent(in)  :: MinRho
+    integer,       intent(in)  :: StartPoint
+    integer,       intent(in)  :: EndPoint
+    ! internal variables
+    real(kind=fp) :: dxa, dya, dza, dxb, dyb, dzb
+    real(kind=fp), dimension(:), allocatable :: energy
+    real(kind=fp), dimension(:), allocatable :: rho, tau, lapl, dEdrho, dEdtau, dEdlapl
+    real(kind=fp), dimension(:), allocatable :: sigma, dEdsigma, d2Edrho2, d2Edtau2, d2Edlapl2
+    real(kind=fp), dimension(:), allocatable :: d2Edrhotau, d2Edrholapl, d2Edlapltau
+    real(kind=fp), dimension(:), allocatable :: d2Edsigma2, d2Edrhosigma, d2Edsigmatau, d2Edsigmalapl
+    ! for third derivatives
+    real(kind=fp), dimension(:), allocatable :: d3Edrho3, d3Edtau3, d3Edlapl3
+    real(kind=fp), dimension(:), allocatable :: d3Edrho2tau, d3Edrhotau2, d3Edrho2lapl, d3Edrholapl2, d3Edlapl2tau, d3Edlapltau2
+    real(kind=fp), dimension(:), allocatable :: d3Edrholapltau
+    real(kind=fp), dimension(:), allocatable :: d3Edrho2sigma, d3Edsigmatau2, d3Edsigmalapl2
+    real(kind=fp), dimension(:), allocatable :: d3Edsigma3
+    real(kind=fp), dimension(:), allocatable :: d3Edrhosigma2, d3Edrhosigmatau, d3Edsigma2tau, d3Edrhosigmalapl, &
+                                                d3Edsigma2lapl, d3Edsigmalapltau
+    ! iterators
+    integer :: GridPoint, i, j, distance
+    ! Setting outputting variables to zero
+    EXC = 0
+    EnergyPoint = 0
+    DerivsPoint = 0
+    ! Writing arrays for LibXC
+    distance = EndPoint - StartPoint + 1
+    associate(D => distance)
+      allocate(energy(D))
+      allocate(rho(2*D), tau(2*D), lapl(2*D), dEdrho(2*D), dEdtau(2*D), dEdlapl(2*D))
+      allocate(sigma(3*D), dEdsigma(3*D), d2Edrho2(3*D), d2Edtau2(3*D), d2Edlapl2(3*D))
+      allocate(d2Edrhotau(4*D), d2Edrholapl(4*D), d2Edlapltau(4*D))
+      allocate(d2Edsigma2(6*D), d2Edrhosigma(6*D), d2Edsigmatau(6*D), d2Edsigmalapl(6*D))
+      allocate(d3Edrho3(4*D), d3Edtau3(4*D), d3Edlapl3(4*D))
+      allocate(d3Edrho2tau(6*D), d3Edrhotau2(6*D), d3Edrho2lapl(6*D), d3Edrholapl2(6*D), d3Edlapl2tau(6*D), d3Edlapltau2(6*D))
+      allocate(d3Edrholapltau(8*D))
+      allocate(d3Edrho2sigma(9*D), d3Edsigmatau2(9*D), d3Edsigmalapl2(9*D))
+      allocate(d3Edsigma3(10*D))
+      allocate(d3Edrhosigma2(12*D), d3Edrhosigmatau(12*D), d3Edsigma2tau(12*D), d3Edrhosigmalapl(12*D))
+      allocate(d3Edsigma2lapl(12*D), d3Edsigmalapltau(12*D))
+    end associate
+    do GridPoint = StartPoint, EndPoint
+      i = GridPoint - StartPoint + 1
+      j = GridPoint - StartPoint
+      ! getting of rho
+      rho(j * 2 + 1)   = dRho(GridPoint,1,1)
+      rho(j * 2 + 2)   = dRho(GridPoint,1,WaveType)
+      ! I hope that points with very low value of total density will be excluded in libxc
+      dxa              = dRho(GridPoint,2,1)
+      dya              = dRho(GridPoint,3,1)
+      dza              = dRho(GridPoint,4,1)
+      dxb              = dRho(GridPoint,2,WaveType)
+      dyb              = dRho(GridPoint,3,WaveType)
+      dzb              = dRho(GridPoint,4,WaveType)
+      ! Calculate normed gradients
+      sigma(j * 3 + 1) = dxa*dxa + dya*dya + dza*dza
+      sigma(j * 3 + 2) = dxa*dxb + dya*dyb + dza*dzb
+      sigma(j * 3 + 3) = dxb*dxb + dyb*dyb + dzb*dzb
+      ! Getting of tau
+      if(needtau) then
+        tau(j * 2 + 1)   = abs(dTau(GridPoint,1))
+        tau(j * 2 + 2)   = abs(dTau(GridPoint,WaveType))
+      end if
+    end do
+    if(.not.needtau) then
+      tau = 0.0_fp
+    end if
+    ! GAMESS-US can not calculate laplacian, set array to zero
+    lapl     = 0.0_fp
+    ! calculate DFT functional in all points
+    call functional_%calc_xc(distance, rho, sigma, tau, lapl, energy, dEdrho, dEdsigma, dEdlapl, dEdtau, &
+      d2Edrho2, d2Edrhosigma, d2Edrholapl, d2Edrhotau,                                           &
+      d2Edsigma2, d2Edsigmalapl, d2Edsigmatau, d2Edlapl2, d2Edlapltau, d2Edtau2,                 &
+      d3Edrho3, d3Edrho2sigma, d3Edrho2lapl, d3Edrho2tau, d3Edrhosigma2, d3Edrhosigmalapl,       &
+      d3Edrhosigmatau, d3Edrholapl2, d3Edrholapltau, d3Edrhotau2, d3Edsigma3, d3Edsigma2lapl,    &
+      d3Edsigma2tau, d3Edsigmalapl2, d3Edsigmalapltau, d3Edsigmatau2, d3Edlapl3, d3Edlapl2tau,   &
+      d3Edlapltau2, d3Edtau3)
+
+    ! Getting values of energy and it derivatives from LibXC arrays
+    do GridPoint = StartPoint, EndPoint
+      i = GridPoint - StartPoint + 1
+      j = GridPoint - StartPoint
+      !Skipping regions with low rho, gradient and tau
+      if(rho(j * 2 + 1) + rho(j * 2 + 2) .lt. MinRho) cycle
+!
+!     STORE TOTAL ENERGY
+!
+      EXC = EXC + energy(i) * weight(i)
+!
+!     STORE FUNCTIONAL ENERGY
+!
+      EnergyPoint(i) = EnergyPoint(i) + energy(i)
+!
+!     STORE FIRST FUNCTIONAL DERIVATIVE
+!
+      DerivsPoint (i,IRA)   = DerivsPoint (i,IRA)   + dEdrho(j * 2 + 1)
+      DerivsPoint (i,IRB)   = DerivsPoint (i,IRB)   + dEdrho(j * 2 + 2)
+      DerivsPoint (i,IGA)   = DerivsPoint (i,IGA)   + dEdsigma(j * 3 + 1)
+      DerivsPoint (i,IGB)   = DerivsPoint (i,IGB)   + dEdsigma(j * 3 + 3)
+      DerivsPoint (i,IGC)   = DerivsPoint (i,IGC)   + dEdsigma(j * 3 + 2)
+      DerivsPoint (i,ITA)   = DerivsPoint (i,ITA)   + dEdtau(j * 2 + 1)
+      DerivsPoint (i,ITB)   = DerivsPoint (i,ITB)   + dEdtau(j * 2 + 2)
+!
+!     STORE SECOND FUNCTIONAL DERIVATIVE
+!
+      DerivsPoint (i,IRARA) = DerivsPoint (i,IRARA) + d2Edrho2(j * 3 + 1)
+      DerivsPoint (i,IRARB) = DerivsPoint (i,IRARB) + d2Edrho2(j * 3 + 2)
+      DerivsPoint (i,IRAGA) = DerivsPoint (i,IRAGA) + d2Edrhosigma(j * 6 + 1)
+      DerivsPoint (i,IRAGB) = DerivsPoint (i,IRAGB) + d2Edrhosigma(j * 6 + 3)
+      DerivsPoint (i,IRAGC) = DerivsPoint (i,IRAGC) + d2Edrhosigma(j * 6 + 2)
+      DerivsPoint (i,IRATA) = DerivsPoint (i,IRATA) + d2Edrhotau(j * 4 + 1)
+      DerivsPoint (i,IRATB) = DerivsPoint (i,IRATB) + d2Edrhotau(j * 4 + 2)
+      DerivsPoint (i,IRBRB) = DerivsPoint (i,IRBRB) + d2Edrho2(j * 3 + 3)
+      DerivsPoint (i,IRBGA) = DerivsPoint (i,IRBGA) + d2Edrhosigma(j * 6 + 4)
+      DerivsPoint (i,IRBGB) = DerivsPoint (i,IRBGB) + d2Edrhosigma(j * 6 + 6)
+      DerivsPoint (i,IRBGC) = DerivsPoint (i,IRBGC) + d2Edrhosigma(j * 6 + 5)
+      DerivsPoint (i,IRBTA) = DerivsPoint (i,IRBTA) + d2Edrhotau(j * 4 + 3)
+      DerivsPoint (i,IRBTB) = DerivsPoint (i,IRBTB) + d2Edrhotau(j * 4 + 4)
+      DerivsPoint (i,IGAGA) = DerivsPoint (i,IGAGA) + d2Edsigma2(j * 6 + 1)
+      DerivsPoint (i,IGAGB) = DerivsPoint (i,IGAGB) + d2Edsigma2(j * 6 + 3)
+      DerivsPoint (i,IGAGC) = DerivsPoint (i,IGAGC) + d2Edsigma2(j * 6 + 2)
+      DerivsPoint (i,IGATA) = DerivsPoint (i,IGATA) + d2Edsigmatau(j * 6 + 1)
+      DerivsPoint (i,IGATB) = DerivsPoint (i,IGATB) + d2Edsigmatau(j * 6 + 2)
+      DerivsPoint (i,IGBGB) = DerivsPoint (i,IGBGB) + d2Edsigma2(j * 6 + 6)
+      DerivsPoint (i,IGBGC) = DerivsPoint (i,IGBGC) + d2Edsigma2(j * 6 + 5)
+      DerivsPoint (i,IGBTA) = DerivsPoint (i,IGBTA) + d2Edsigmatau(j * 6 + 5)
+      DerivsPoint (i,IGBTB) = DerivsPoint (i,IGBTB) + d2Edsigmatau(j * 6 + 6)
+      DerivsPoint (i,IGCGC) = DerivsPoint (i,IGCGC) + d2Edsigma2(j * 6 + 4)
+      DerivsPoint (i,IGCTA) = DerivsPoint (i,IGCTA) + d2Edsigmatau(j * 6 + 3)
+      DerivsPoint (i,IGCTB) = DerivsPoint (i,IGCTB) + d2Edsigmatau(j * 6 + 4)
+      DerivsPoint (i,ITATA) = DerivsPoint (i,ITATA) + d2Edtau2(j * 3 + 1)
+      DerivsPoint (i,ITATB) = DerivsPoint (i,ITATB) + d2Edtau2(j * 3 + 2)
+      DerivsPoint (i,ITBTB) = DerivsPoint (i,ITBTB) + d2Edtau2(j * 3 + 3)
+!
+!     STORE THIRD FUNCTIONAL DERIVATIVE
+!
+      DerivsPoint (i,IRARARA) = DerivsPoint (i,IRARARA) + d3Edrho3(j * 4 + 1)
+      DerivsPoint (i,IRARARB) = DerivsPoint (i,IRARARB) + d3Edrho3(j * 4 + 2)
+      DerivsPoint (i,IRARAGA) = DerivsPoint (i,IRARAGA) + d3Edrho2sigma(j * 9 + 1)
+      DerivsPoint (i,IRARAGB) = DerivsPoint (i,IRARAGB) + d3Edrho2sigma(j * 9 + 3)
+      DerivsPoint (i,IRARAGC) = DerivsPoint (i,IRARAGC) + d3Edrho2sigma(j * 9 + 2)
+      DerivsPoint (i,IRARATA) = DerivsPoint (i,IRARATA) + d3Edrho2tau(j * 6 + 1)
+      DerivsPoint (i,IRARATB) = DerivsPoint (i,IRARATB) + d3Edrho2tau(j * 6 + 2)
+      DerivsPoint (i,IRARBRB) = DerivsPoint (i,IRARBRB) + d3Edrho3(j * 4 + 3)
+      DerivsPoint (i,IRARBGA) = DerivsPoint (i,IRARBGA) + d3Edrho2sigma(j * 9 + 4)
+      DerivsPoint (i,IRARBGB) = DerivsPoint (i,IRARBGB) + d3Edrho2sigma(j * 9 + 6)
+      DerivsPoint (i,IRARBGC) = DerivsPoint (i,IRARBGC) + d3Edrho2sigma(j * 9 + 5)
+      DerivsPoint (i,IRARBTA) = DerivsPoint (i,IRARBTA) + d3Edrho2tau(j * 6 + 3)
+      DerivsPoint (i,IRARBTB) = DerivsPoint (i,IRARBTB) + d3Edrho2tau(j * 6 + 4)
+      DerivsPoint (i,IRAGAGA) = DerivsPoint (i,IRAGAGA) + d3Edrhosigma2(j * 12 + 1)
+      DerivsPoint (i,IRAGAGB) = DerivsPoint (i,IRAGAGB) + d3Edrhosigma2(j * 12 + 3)
+      DerivsPoint (i,IRAGAGC) = DerivsPoint (i,IRAGAGC) + d3Edrhosigma2(j * 12 + 2)
+      DerivsPoint (i,IRAGATA) = DerivsPoint (i,IRAGATA) + d3Edrhosigmatau(j * 12 + 1)
+      DerivsPoint (i,IRAGATB) = DerivsPoint (i,IRAGATB) + d3Edrhosigmatau(j * 12 + 2)
+      DerivsPoint (i,IRAGBGB) = DerivsPoint (i,IRAGBGB) + d3Edrhosigma2(j * 12 + 6)
+      DerivsPoint (i,IRAGBGC) = DerivsPoint (i,IRAGBGC) + d3Edrhosigma2(j * 12 + 5)
+      DerivsPoint (i,IRAGBTA) = DerivsPoint (i,IRAGBTA) + d3Edrhosigmatau(j * 12 + 5)
+      DerivsPoint (i,IRAGBTB) = DerivsPoint (i,IRAGBTB) + d3Edrhosigmatau(j * 12 + 6)
+      DerivsPoint (i,IRAGCGC) = DerivsPoint (i,IRAGCGC) + d3Edrhosigma2(j * 12 + 4)
+      DerivsPoint (i,IRAGCTA) = DerivsPoint (i,IRAGCTA) + d3Edrhosigmatau(j * 12 + 3)
+      DerivsPoint (i,IRAGCTB) = DerivsPoint (i,IRAGCTB) + d3Edrhosigmatau(j * 12 + 4)
+      DerivsPoint (i,IRATATA) = DerivsPoint (i,IRATATA) + d3Edrhotau2(j * 6 + 1)
+      DerivsPoint (i,IRATATB) = DerivsPoint (i,IRATATB) + d3Edrhotau2(j * 6 + 2)
+      DerivsPoint (i,IRATBTB) = DerivsPoint (i,IRATBTB) + d3Edrhotau2(j * 6 + 3)
+      DerivsPoint (i,IRBRBRB) = DerivsPoint (i,IRBRBRB) + d3Edrho3(j * 4 + 4)
+      DerivsPoint (i,IRBRBGA) = DerivsPoint (i,IRBRBGA) + d3Edrho2sigma(j * 9 + 7)
+      DerivsPoint (i,IRBRBGB) = DerivsPoint (i,IRBRBGB) + d3Edrho2sigma(j * 9 + 9)
+      DerivsPoint (i,IRBRBGC) = DerivsPoint (i,IRBRBGC) + d3Edrho2sigma(j * 9 + 8)
+      DerivsPoint (i,IRBRBTA) = DerivsPoint (i,IRBRBTA) + d3Edrho2tau(j * 6 + 5)
+      DerivsPoint (i,IRBRBTB) = DerivsPoint (i,IRBRBTB) + d3Edrho2tau(j * 6 + 6)
+      DerivsPoint (i,IRBGAGA) = DerivsPoint (i,IRBGAGA) + d3Edrhosigma2(j * 12 + 7)
+      DerivsPoint (i,IRBGAGB) = DerivsPoint (i,IRBGAGB) + d3Edrhosigma2(j * 12 + 9)
+      DerivsPoint (i,IRBGAGC) = DerivsPoint (i,IRBGAGC) + d3Edrhosigma2(j * 12 + 8)
+      DerivsPoint (i,IRBGATA) = DerivsPoint (i,IRBGATA) + d3Edrhosigmatau(j * 12 + 7)
+      DerivsPoint (i,IRBGATB) = DerivsPoint (i,IRBGATB) + d3Edrhosigmatau(j * 12 + 8)
+      DerivsPoint (i,IRBGBGB) = DerivsPoint (i,IRBGBGB) + d3Edrhosigma2(j * 12 + 12)
+      DerivsPoint (i,IRBGBGC) = DerivsPoint (i,IRBGBGC) + d3Edrhosigma2(j * 12 + 11)
+      DerivsPoint (i,IRBGBTA) = DerivsPoint (i,IRBGBTA) + d3Edrhosigmatau(j * 12 + 11)
+      DerivsPoint (i,IRBGBTB) = DerivsPoint (i,IRBGBTB) + d3Edrhosigmatau(j * 12 + 12)
+      DerivsPoint (i,IRBGCGC) = DerivsPoint (i,IRBGCGC) + d3Edrhosigma2(j * 12 + 10)
+      DerivsPoint (i,IRBGCTA) = DerivsPoint (i,IRBGCTA) + d3Edrhosigmatau(j * 12 + 9)
+      DerivsPoint (i,IRBGCTB) = DerivsPoint (i,IRBGCTB) + d3Edrhosigmatau(j * 12 + 10)
+      DerivsPoint (i,IRBTATA) = DerivsPoint (i,IRBTATA) + d3Edrhotau2(j * 6 + 4)
+      DerivsPoint (i,IRBTATB) = DerivsPoint (i,IRBTATB) + d3Edrhotau2(j * 6 + 5)
+      DerivsPoint (i,IRBTBTB) = DerivsPoint (i,IRBTBTB) + d3Edrhotau2(j * 6 + 6)
+      DerivsPoint (i,IGAGAGA) = DerivsPoint (i,IGAGAGA) + d3Edsigma3(j * 10 + 1)
+      DerivsPoint (i,IGAGAGB) = DerivsPoint (i,IGAGAGB) + d3Edsigma3(j * 10 + 3)
+      DerivsPoint (i,IGAGAGC) = DerivsPoint (i,IGAGAGC) + d3Edsigma3(j * 10 + 2)
+      DerivsPoint (i,IGAGATA) = DerivsPoint (i,IGAGATA) + d3Edsigma2tau(j * 12 + 1)
+      DerivsPoint (i,IGAGATB) = DerivsPoint (i,IGAGATB) + d3Edsigma2tau(j * 12 + 2)
+      DerivsPoint (i,IGAGBGB) = DerivsPoint (i,IGAGBGB) + d3Edsigma3(j * 10 + 6)
+      DerivsPoint (i,IGAGBGC) = DerivsPoint (i,IGAGBGC) + d3Edsigma3(j * 10 + 5)
+      DerivsPoint (i,IGAGBTA) = DerivsPoint (i,IGAGBTA) + d3Edsigma2tau(j * 12 + 5)
+      DerivsPoint (i,IGAGBTB) = DerivsPoint (i,IGAGBTB) + d3Edsigma2tau(j * 12 + 6)
+      DerivsPoint (i,IGAGCGC) = DerivsPoint (i,IGAGCGC) + d3Edsigma3(j * 10 + 4)
+      DerivsPoint (i,IGAGCTA) = DerivsPoint (i,IGAGCTA) + d3Edsigma2tau(j * 12 + 3)
+      DerivsPoint (i,IGAGCTB) = DerivsPoint (i,IGAGCTB) + d3Edsigma2tau(j * 12 + 4)
+      DerivsPoint (i,IGATATA) = DerivsPoint (i,IGATATA) + d3Edsigmatau2(j * 9 + 1)
+      DerivsPoint (i,IGATATB) = DerivsPoint (i,IGATATB) + d3Edsigmatau2(j * 9 + 2)
+      DerivsPoint (i,IGATBTB) = DerivsPoint (i,IGATBTB) + d3Edsigmatau2(j * 9 + 3)
+      DerivsPoint (i,IGBGBGB) = DerivsPoint (i,IGBGBGB) + d3Edsigma3(j * 10 + 10)
+      DerivsPoint (i,IGBGBGC) = DerivsPoint (i,IGBGBGC) + d3Edsigma3(j * 10 + 9)
+      DerivsPoint (i,IGBGBTA) = DerivsPoint (i,IGBGBTA) + d3Edsigma2tau(j * 12 + 11)
+      DerivsPoint (i,IGBGBTB) = DerivsPoint (i,IGBGBTB) + d3Edsigma2tau(j * 12 + 12)
+      DerivsPoint (i,IGBGCGC) = DerivsPoint (i,IGBGCGC) + d3Edsigma3(j * 10 + 8)
+      DerivsPoint (i,IGBGCTA) = DerivsPoint (i,IGBGCTA) + d3Edsigma2tau(j * 12 + 9)
+      DerivsPoint (i,IGBGCTB) = DerivsPoint (i,IGBGCTB) + d3Edsigma2tau(j * 12 + 10)
+      DerivsPoint (i,IGBTATA) = DerivsPoint (i,IGBTATA) + d3Edsigmatau2(j * 9 + 7)
+      DerivsPoint (i,IGBTATB) = DerivsPoint (i,IGBTATB) + d3Edsigmatau2(j * 9 + 8)
+      DerivsPoint (i,IGBTBTB) = DerivsPoint (i,IGBTBTB) + d3Edsigmatau2(j * 9 + 9)
+      DerivsPoint (i,IGCGCGC) = DerivsPoint (i,IGCGCGC) + d3Edsigma3(j * 10 + 7)
+      DerivsPoint (i,IGCGCTA) = DerivsPoint (i,IGCGCTA) + d3Edsigma2tau(j * 12 + 7)
+      DerivsPoint (i,IGCGCTB) = DerivsPoint (i,IGCGCTB) + d3Edsigma2tau(j * 12 + 8)
+      DerivsPoint (i,IGCTATA) = DerivsPoint (i,IGCTATA) + d3Edsigmatau2(j * 9 + 4)
+      DerivsPoint (i,IGCTATB) = DerivsPoint (i,IGCTATB) + d3Edsigmatau2(j * 9 + 5)
+      DerivsPoint (i,IGCTBTB) = DerivsPoint (i,IGCTBTB) + d3Edsigmatau2(j * 9 + 6)
+      DerivsPoint (i,ITATATA) = DerivsPoint (i,ITATATA) + d3Edtau3(j * 4 + 1)
+      DerivsPoint (i,ITATATB) = DerivsPoint (i,ITATATB) + d3Edtau3(j * 4 + 2)
+      DerivsPoint (i,ITATBTB) = DerivsPoint (i,ITATBTB) + d3Edtau3(j * 4 + 3)
+      DerivsPoint (i,ITBTBTB) = DerivsPoint (i,ITBTBTB) + d3Edtau3(j * 4 + 4)
+    end do
+    deallocate(rho, sigma, tau, lapl, energy, dEdrho, dEdsigma, dEdlapl, dEdtau, &
+      d2Edrho2, d2Edrhosigma, d2Edrholapl, d2Edrhotau,                                           &
+      d2Edsigma2, d2Edsigmalapl, d2Edsigmatau, d2Edlapl2, d2Edlapltau, d2Edtau2,                 &
+      d3Edrho3, d3Edrho2sigma, d3Edrho2lapl, d3Edrho2tau, d3Edrhosigma2, d3Edrhosigmalapl,       &
+      d3Edrhosigmatau, d3Edrholapl2, d3Edrholapltau, d3Edrhotau2, d3Edsigma3, d3Edsigma2lapl,    &
+      d3Edsigma2tau, d3Edsigmalapl2, d3Edsigmalapltau, d3Edsigmatau2, d3Edlapl3, d3Edlapl2tau,   &
+      d3Edlapltau2, d3Edtau3)
+  end subroutine libxc_TD_3D
+  !
+  !*MODULE libxc DECK add_free_functional
+  !> @brief  add functionals from libxc_choose_functionals for avoiding many repeated code
+  !> @author Igor S. Gerasimov
+  !> @date   March, 2020 - Initial release -
+  !> @date   July, 2021 Using messages module
+  !> @params section         - (in) class pair object which contains inputted keys of section
+  !> @params section_name    - (in) name of section
+  !> @params functional_name - (in) functional name
+  !> @params functional_code - (in) functional LibXC ID (C_INT)
+  !> @params needtau         - (in,optional) flag for tau-dependent meta-GGA functionals
+  subroutine add_free_functional(section, functional_name, functional_code, needtau)
+    use messages, only: show_message, WITH_ABORT
+    use ISO_C_Binding, only: C_INT
+    use mod_nameio, only: input_group
+    use metagga, only: NT => needtau
+    implicit none
+    character(len=*), parameter :: IN          = " in ", &
+                                   READ_ERROR  = " was not successful read!", &
+                                   CHECK_INPUT = "Please, check the input!"
+    class(input_group), allocatable, intent(inout) :: section
+    character(len=*),                intent(in)    :: functional_name
+    integer(C_INT),                  intent(in)    :: functional_code
+    logical,            optional,    intent(in)    :: needtau
+    ! internal variables
+    real(kind=fp) :: coefficient
+    integer :: error
+    call section%get_value(functional_name,coefficient,error,-1E+07_fp)
+    if(error .eq. 1) then
+      call show_message(functional_name//IN//section%name//READ_ERROR)
+      call show_message(CHECK_INPUT)
+      call show_message(ABORTING, WITH_ABORT)
+    else if(error .eq. 0) then
+      call functional_%add_functional(functional_code,coefficient)
+    end if
+    if(present(needtau)) then
+      if(needtau) NT = needtau
+    end if
+  end subroutine add_free_functional
+  !
+  !*MODULE libxc DECK libxc_input
+  !> @brief  codegenerated subroutine for choosing functionals from available in LibXC
+  !> @detail If you want to modify it, please, edit $GMS_PATH/tools/libxc/gen_all.py
+  !>
+  !> @author $GMS_PATH/tools/libxc/gen_all.py
+  !>
+  !> @date   July,     2019 Create subroutine
+  !> @date   April,    2020 Update to LibXC 5.0.0
+  !> @date   June,     2021 Update to LibXC-5.1.5
+  !> @date   July,     2021 Add read_unit argument
+  !> @date   November, 2021 Update to LibXC-5.1.7
+  !>
+  !> @param  read_unit (in) logical unit with input
+  subroutine libxc_choose_functionals(read_unit)
+    use mod_nameio, only: input_group
+    integer, intent(in) :: read_unit
+    !
+    ! internal variables
+    character(len= 5),  parameter   :: GGA_C_name                     = "GGA_C"
+    class(input_group), allocatable :: GGA_C_group
+    character(len= 5),  parameter   :: GGA_X_name                     = "GGA_X"
+    class(input_group), allocatable :: GGA_X_group
+    character(len= 6),  parameter   :: GGA_XC_name                    = "GGA_XC"
+    class(input_group), allocatable :: GGA_XC_group
+    character(len= 6),  parameter   :: HGGA_X_name                    = "HGGA_X"
+    class(input_group), allocatable :: HGGA_X_group
+    character(len= 7),  parameter   :: HGGA_XC_name                   = "HGGA_XC"
+    class(input_group), allocatable :: HGGA_XC_group
+    character(len= 7),  parameter   :: HLDA_XC_name                   = "HLDA_XC"
+    class(input_group), allocatable :: HLDA_XC_group
+    character(len= 7),  parameter   :: HMGGA_X_name                   = "HMGGA_X"
+    class(input_group), allocatable :: HMGGA_X_group
+    character(len= 8),  parameter   :: HMGGA_XC_name                  = "HMGGA_XC"
+    class(input_group), allocatable :: HMGGA_XC_group
+    character(len= 5),  parameter   :: LDA_C_name                     = "LDA_C"
+    class(input_group), allocatable :: LDA_C_group
+    character(len= 5),  parameter   :: LDA_X_name                     = "LDA_X"
+    class(input_group), allocatable :: LDA_X_group
+    character(len= 6),  parameter   :: LDA_XC_name                    = "LDA_XC"
+    class(input_group), allocatable :: LDA_XC_group
+    character(len= 6),  parameter   :: MGGA_C_name                    = "MGGA_C"
+    class(input_group), allocatable :: MGGA_C_group
+    character(len= 6),  parameter   :: MGGA_X_name                    = "MGGA_X"
+    class(input_group), allocatable :: MGGA_X_group
+    character(len= 7),  parameter   :: MGGA_XC_name                   = "MGGA_XC"
+    class(input_group), allocatable :: MGGA_XC_group
+    character(len= 5),  parameter   :: GGA_C_ACGGA_name               = "ACGGA"                        !  39: acGGA, asymptotically corrected GGA correlation
+    character(len= 6),  parameter   :: GGA_C_ACGGAP_name              = "ACGGAP"                       ! 176: acGGA+, asymptotically corrected GGA correlation+
+    character(len= 4),  parameter   :: GGA_C_AM05_name                = "AM05"                         ! 135: Armiento & Mattsson 05
+    character(len= 4),  parameter   :: GGA_C_APBE_name                = "APBE"                         ! 186: mu fixed from the semiclassical neutral atom
+    character(len= 3),  parameter   :: GGA_C_BMK_name                 = "BMK"                          ! 280: Boese-Martin for kinetics
+    character(len= 4),  parameter   :: GGA_C_CCDF_name                = "CCDF"                         ! 313: ccDF: coupled-cluster motivated density functional
+    character(len= 8),  parameter   :: GGA_C_CHACHIYO_name            = "CHACHIYO"                     ! 309: Chachiyo simple GGA correlation
+    character(len= 3),  parameter   :: GGA_C_CS1_name                 = "CS1"                          ! 565: A dynamical correlation functional
+    character(len= 4),  parameter   :: GGA_C_FT97_name                = "FT97"                         !  88: Filatov & Thiel correlation
+    character(len= 3),  parameter   :: GGA_C_GAM_name                 = "GAM"                          !  33: GAM functional from Minnesota
+    character(len= 4),  parameter   :: GGA_C_GAPC_name                = "GAPC"                         ! 555: GapC
+    character(len= 6),  parameter   :: GGA_C_GAPLOC_name              = "GAPLOC"                       ! 556: Gaploc
+    character(len= 6),  parameter   :: GGA_C_HCTH_A_name              = "HCTH_A"                       !  97: HCTH-A
+    character(len= 9),  parameter   :: GGA_C_HTAU_HCTH_name           = "HTAU_HCTH"                    ! 283: correlation part of hyb-tau-hcth
+    character(len= 2),  parameter   :: GGA_C_LM_name                  = "LM"                           ! 137: Langreth & Mehl
+    character(len= 3),  parameter   :: GGA_C_LYP_name                 = "LYP"                          ! 131: Lee, Yang & Parr
+    character(len= 4),  parameter   :: GGA_C_LYPR_name                = "LYPR"                         ! 624: Short-range LYP by Ai, Fang, and Su
+    character(len= 5),  parameter   :: GGA_C_MGGAC_name               = "MGGAC"                        ! 712: beta fitted to LC20 to be used with MGGAC
+    character(len= 3),  parameter   :: GGA_C_N12_name                 = "N12"                          !  80: Minnesota N12 functional
+    character(len= 6),  parameter   :: GGA_C_N12_SX_name              = "N12_SX"                       !  79: Minnesota N12-SX functional
+    character(len= 4),  parameter   :: GGA_C_OPTC_name                = "OPTC"                         ! 200: Optimized correlation functional of Cohen and Handy
+    character(len= 6),  parameter   :: GGA_C_OP_B88_name              = "OP_B88"                       !  87: one-parameter progressive functional (B88 version)
+    character(len= 6),  parameter   :: GGA_C_OP_G96_name              = "OP_G96"                       !  85: one-parameter progressive functional (G96 version)
+    character(len= 6),  parameter   :: GGA_C_OP_PBE_name              = "OP_PBE"                       !  86: one-parameter progressive functional (PBE version)
+    character(len= 7),  parameter   :: GGA_C_OP_PW91_name             = "OP_PW91"                      ! 262: one-parameter progressive functional (PW91 version)
+    character(len= 9),  parameter   :: GGA_C_OP_XALPHA_name           = "OP_XALPHA"                    !  84: one-parameter progressive functional (Xalpha version)
+    character(len= 3),  parameter   :: GGA_C_P86_name                 = "P86"                          ! 132: Perdew 86
+    character(len= 6),  parameter   :: GGA_C_P86VWN_name              = "P86VWN"                       ! 252: Perdew 86 based on VWN5 correlation
+    character(len= 9),  parameter   :: GGA_C_P86VWN_FT_name           = "P86VWN_FT"                    ! 253: Perdew 86 based on VWN5 correlation, with more accurate value for ftilde
+    character(len= 6),  parameter   :: GGA_C_P86_FT_name              = "P86_FT"                       ! 217: Perdew 86 with more accurate value for ftilde
+    character(len= 3),  parameter   :: GGA_C_PBE_name                 = "PBE"                          ! 130: Perdew, Burke & Ernzerhof
+    character(len= 5),  parameter   :: GGA_C_PBEFE_name               = "PBEFE"                        ! 258: PBE for formation energies
+    character(len= 6),  parameter   :: GGA_C_PBEINT_name              = "PBEINT"                       !  62: PBE for hybrid interfaces
+    character(len= 6),  parameter   :: GGA_C_PBELOC_name              = "PBELOC"                       ! 246: Semilocal dynamical correlation
+    character(len= 8),  parameter   :: GGA_C_PBE_JRGX_name            = "PBE_JRGX"                     ! 138: Reparametrized PBE by Pedroza, Silva & Capelle
+    character(len= 7),  parameter   :: GGA_C_PBE_MOL_name             = "PBE_MOL"                      ! 272: Reparametrized PBE by del Campo, Gazquez, Trickey & Vela
+    character(len= 7),  parameter   :: GGA_C_PBE_SOL_name             = "PBE_SOL"                      ! 133: Perdew, Burke & Ernzerhof SOL
+    character(len= 7),  parameter   :: GGA_C_PBE_VWN_name             = "PBE_VWN"                      ! 216: Perdew, Burke & Ernzerhof based on VWN correlation
+    character(len= 4),  parameter   :: GGA_C_PW91_name                = "PW91"                         ! 134: Perdew & Wang 91
+    character(len= 3),  parameter   :: GGA_C_Q2D_name                 = "Q2D"                          !  47: Chiodo et al
+    character(len= 7),  parameter   :: GGA_C_REGTPSS_name             = "REGTPSS"                      !  83: regularized TPSS correlation
+    character(len= 6),  parameter   :: GGA_C_REVTCA_name              = "REVTCA"                       !  99: Tognetti, Cortona, Adamo (revised)
+    character(len= 4),  parameter   :: GGA_C_RGE2_name                = "RGE2"                         ! 143: Regularized PBE
+    character(len= 7),  parameter   :: GGA_C_SCAN_E0_name             = "SCAN_E0"                      ! 553: GGA component of SCAN
+    character(len= 3),  parameter   :: GGA_C_SG4_name                 = "SG4"                          ! 534: Semiclassical GGA at fourth order
+    character(len= 7),  parameter   :: GGA_C_SOGGA11_name             = "SOGGA11"                      ! 152: Second-order generalized gradient approximation 2011
+    character(len= 9),  parameter   :: GGA_C_SOGGA11_X_name           = "SOGGA11_X"                    ! 159: To be used with HYB_GGA_X_SOGGA11_X
+    character(len= 4),  parameter   :: GGA_C_SPBE_name                = "SPBE"                         !  89: PBE correlation to be used with the SSB exchange
+    character(len= 8),  parameter   :: GGA_C_TAU_HCTH_name            = "TAU_HCTH"                     ! 281: correlation part of tau-hcth
+    character(len= 3),  parameter   :: GGA_C_TCA_name                 = "TCA"                          ! 100: Tognetti, Cortona, Adamo
+    character(len= 6),  parameter   :: GGA_C_TM_LYP_name              = "TM_LYP"                       ! 559: Takkar and McCarthy reparametrization
+    character(len= 6),  parameter   :: GGA_C_TM_PBE_name              = "TM_PBE"                       ! 560: Thakkar and McCarthy reparametrization
+    character(len= 3),  parameter   :: GGA_C_W94_name                 = "W94"                          ! 561: Wilson 94 (Eq. 25)
+    character(len= 2),  parameter   :: GGA_C_WI_name                  = "WI"                           ! 148: Wilson & Ivanov
+    character(len= 3),  parameter   :: GGA_C_WI0_name                 = "WI0"                          ! 153: Wilson & Ivanov initial version
+    character(len= 2),  parameter   :: GGA_C_WL_name                  = "WL"                           ! 147: Wilson & Levy
+    character(len= 4),  parameter   :: GGA_C_XPBE_name                = "XPBE"                         ! 136: Extended PBE by Xu & Goddard III
+    character(len= 7),  parameter   :: GGA_C_ZPBEINT_name             = "ZPBEINT"                      !  61: spin-dependent gradient correction to PBEint
+    character(len= 7),  parameter   :: GGA_C_ZPBESOL_name             = "ZPBESOL"                      !  63: spin-dependent gradient correction to PBEsol
+    character(len= 8),  parameter   :: GGA_C_ZVPBEINT_name            = "ZVPBEINT"                     ! 557: another spin-dependent correction to PBEint
+    character(len= 8),  parameter   :: GGA_C_ZVPBELOC_name            = "ZVPBELOC"                     ! 606: PBEloc variation with enhanced compatibility with exact exchange
+    character(len= 8),  parameter   :: GGA_C_ZVPBESOL_name            = "ZVPBESOL"                     ! 558: another spin-dependent correction to PBEsol
+    character(len= 5),  parameter   :: GGA_XC_B97_D_name              = "B97_D"                        ! 170: Becke 97-D
+    character(len= 8),  parameter   :: GGA_XC_B97_GGA1_name           = "B97_GGA1"                     !  96: Becke 97 GGA-1
+    character(len= 4),  parameter   :: GGA_XC_EDF1_name               = "EDF1"                         ! 165: EDF1
+    character(len= 8),  parameter   :: GGA_XC_HCTH_120_name           = "HCTH_120"                     ! 162: HCTH/120
+    character(len= 8),  parameter   :: GGA_XC_HCTH_147_name           = "HCTH_147"                     ! 163: HCTH/147
+    character(len= 8),  parameter   :: GGA_XC_HCTH_407_name           = "HCTH_407"                     ! 164: HCTH/407
+    character(len= 9),  parameter   :: GGA_XC_HCTH_407P_name          = "HCTH_407P"                    !  93: HCTH/407+
+    character(len= 7),  parameter   :: GGA_XC_HCTH_93_name            = "HCTH_93"                      ! 161: HCTH/93
+    character(len= 8),  parameter   :: GGA_XC_HCTH_P14_name           = "HCTH_P14"                     !  95: HCTH p=1/4
+    character(len= 8),  parameter   :: GGA_XC_HCTH_P76_name           = "HCTH_P76"                     !  94: HCTH p=7/6
+    character(len= 5),  parameter   :: GGA_XC_HLE16_name              = "HLE16"                        ! 545: high local exchange 2016
+    character(len= 3),  parameter   :: GGA_XC_KT1_name                = "KT1"                          ! 167: Keal and Tozer, version 1
+    character(len= 3),  parameter   :: GGA_XC_KT2_name                = "KT2"                          ! 146: Keal and Tozer, version 2
+    character(len= 3),  parameter   :: GGA_XC_KT3_name                = "KT3"                          ! 587: Keal and Tozer, version 3
+    character(len= 6),  parameter   :: GGA_XC_MOHLYP_name             = "MOHLYP"                       ! 194: Functional for organometallic chemistry
+    character(len= 7),  parameter   :: GGA_XC_MOHLYP2_name            = "MOHLYP2"                      ! 195: Functional for barrier heights
+    character(len= 8),  parameter   :: GGA_XC_MPWLYP1W_name           = "MPWLYP1W"                     ! 174: mPWLYP1w
+    character(len= 4),  parameter   :: GGA_XC_NCAP_name               = "NCAP"                         ! 181: NCAP exchange + P86 correlation
+    character(len= 7),  parameter   :: GGA_XC_OBLYP_D_name            = "OBLYP_D"                      !  67: oBLYP-D functional of Goerigk and Grimme
+    character(len= 6),  parameter   :: GGA_XC_OPBE_D_name             = "OPBE_D"                       !  65: oPBE-D functional of Goerigk and Grimme
+    character(len= 8),  parameter   :: GGA_XC_OPWLYP_D_name           = "OPWLYP_D"                     !  66: oPWLYP-D functional of Goerigk and Grimme
+    character(len= 5),  parameter   :: GGA_XC_PBE1W_name              = "PBE1W"                        ! 173: PBE1W
+    character(len= 8),  parameter   :: GGA_XC_PBELYP1W_name           = "PBELYP1W"                     ! 175: PBELYP1W
+    character(len= 3),  parameter   :: GGA_XC_TH1_name                = "TH1"                          ! 154: Tozer and Handy v. 1
+    character(len= 3),  parameter   :: GGA_XC_TH2_name                = "TH2"                          ! 155: Tozer and Handy v. 2
+    character(len= 3),  parameter   :: GGA_XC_TH3_name                = "TH3"                          ! 156: Tozer and Handy v. 3
+    character(len= 3),  parameter   :: GGA_XC_TH4_name                = "TH4"                          ! 157: Tozer and Handy v. 4
+    character(len= 5),  parameter   :: GGA_XC_TH_FC_name              = "TH_FC"                        ! 197: Tozer and Handy v. FC
+    character(len= 7),  parameter   :: GGA_XC_TH_FCFO_name            = "TH_FCFO"                      ! 198: Tozer and Handy v. FCFO
+    character(len= 6),  parameter   :: GGA_XC_TH_FCO_name             = "TH_FCO"                       ! 199: Tozer and Handy v. FCO
+    character(len= 5),  parameter   :: GGA_XC_TH_FL_name              = "TH_FL"                        ! 196: Tozer and Handy v. FL
+    character(len= 4),  parameter   :: GGA_XC_XLYP_name               = "XLYP"                         ! 166: XLYP
+    character(len= 4),  parameter   :: GGA_X_AIRY_name                = "AIRY"                         ! 192: Constantin et al based on the Airy gas
+    character(len= 4),  parameter   :: GGA_X_AK13_name                = "AK13"                         !  56: Armiento & Kuemmel 2013
+    character(len= 4),  parameter   :: GGA_X_AM05_name                = "AM05"                         ! 120: Armiento & Mattsson 05
+    character(len= 4),  parameter   :: GGA_X_APBE_name                = "APBE"                         ! 184: mu fixed from the semiclassical neutral atom
+    character(len= 3),  parameter   :: GGA_X_B86_name                 = "B86"                          ! 103: Becke 86
+    character(len= 7),  parameter   :: GGA_X_B86_MGC_name             = "B86_MGC"                      ! 105: Becke 86 with modified gradient correction
+    character(len= 5),  parameter   :: GGA_X_B86_R_name               = "B86_R"                        !  41: Revised Becke 86 with modified gradient correction
+    character(len= 3),  parameter   :: GGA_X_B88_name                 = "B88"                          ! 106: Becke 88
+    character(len= 4),  parameter   :: GGA_X_B88M_name                = "B88M"                         ! 570: Becke 88 reoptimized to be used with tau1
+    character(len= 9),  parameter   :: GGA_X_B88_6311G_name           = "B88_6311G"                    ! 179: Becke 88 reoptimized with the 6-311G** basis set
+    character(len= 8),  parameter   :: GGA_X_BAYESIAN_name            = "BAYESIAN"                     ! 125: Bayesian best fit for the enhancement factor
+    character(len= 4),  parameter   :: GGA_X_BCGP_name                = "BCGP"                         !  38: Burke, Cancio, Gould, and Pittalis
+    character(len= 6),  parameter   :: GGA_X_BPCCAC_name              = "BPCCAC"                       !  98: BPCCAC (GRAC for the energy)
+    character(len= 3),  parameter   :: GGA_X_CAP_name                 = "CAP"                          ! 270: Correct Asymptotic Potential
+    character(len= 8),  parameter   :: GGA_X_CHACHIYO_name            = "CHACHIYO"                     ! 298: Chachiyo exchange
+    character(len= 7),  parameter   :: GGA_X_DK87_R1_name             = "DK87_R1"                      ! 111: dePristo & Kress 87 version R1
+    character(len= 7),  parameter   :: GGA_X_DK87_R2_name             = "DK87_R2"                      ! 112: dePristo & Kress 87 version R2
+    character(len= 4),  parameter   :: GGA_X_EB88_name                = "EB88"                         ! 271: Non-empirical (excogitated) B88 functional of Becke and Elliott
+    character(len= 6),  parameter   :: GGA_X_ECMV92_name              = "ECMV92"                       ! 215: Engel, Chevary, Macdonald and Vosko
+    character(len= 4),  parameter   :: GGA_X_EV93_name                = "EV93"                         !  35: Engel and Vosko
+    character(len= 7),  parameter   :: GGA_X_FD_LB94_name             = "FD_LB94"                      ! 604: Functional derivative recovered from the stray LB94 potential
+    character(len=10),  parameter   :: GGA_X_FD_REVLB94_name          = "FD_REVLB94"                   ! 605: Revised FD_LB94
+    character(len= 6),  parameter   :: GGA_X_FT97_A_name              = "FT97_A"                       ! 114: Filatov & Thiel 97 (version A)
+    character(len= 6),  parameter   :: GGA_X_FT97_B_name              = "FT97_B"                       ! 115: Filatov & Thiel 97 (version B)
+    character(len= 3),  parameter   :: GGA_X_G96_name                 = "G96"                          ! 107: Gill 96
+    character(len= 3),  parameter   :: GGA_X_GAM_name                 = "GAM"                          !  32: Minnesota GAM exhange functional
+    character(len= 4),  parameter   :: GGA_X_GG99_name                = "GG99"                         ! 535: Gilbert and Gill 1999
+    character(len= 6),  parameter   :: GGA_X_HCTH_A_name              = "HCTH_A"                       !  34: HCTH-A
+    character(len= 6),  parameter   :: GGA_X_HERMAN_name              = "HERMAN"                       ! 104: Herman Xalphabeta GGA
+    character(len= 7),  parameter   :: GGA_X_HJS_B88_name             = "HJS_B88"                      ! 527: HJS screened exchange B88 version
+    character(len=10),  parameter   :: GGA_X_HJS_B88_V2_name          = "HJS_B88_V2"                   !  46: HJS screened exchange B88 corrected version
+    character(len= 8),  parameter   :: GGA_X_HJS_B97X_name            = "HJS_B97X"                     ! 528: HJS screened exchange B97x version
+    character(len= 7),  parameter   :: GGA_X_HJS_PBE_name             = "HJS_PBE"                      ! 525: HJS screened exchange PBE version
+    character(len=11),  parameter   :: GGA_X_HJS_PBE_SOL_name         = "HJS_PBE_SOL"                  ! 526: HJS screened exchange PBE_SOL version
+    character(len= 4),  parameter   :: GGA_X_HTBS_name                = "HTBS"                         ! 191: Haas, Tran, Blaha, and Schwarz
+    character(len= 4),  parameter   :: GGA_X_ITYH_name                = "ITYH"                         ! 529: Short-range recipe for B88 functional - erf
+    character(len= 9),  parameter   :: GGA_X_ITYH_OPTX_name           = "ITYH_OPTX"                    ! 622: Short-range recipe for OPTX functional
+    character(len= 8),  parameter   :: GGA_X_ITYH_PBE_name            = "ITYH_PBE"                     ! 623: Short-range recipe for PBE functional
+    character(len= 5),  parameter   :: GGA_X_KGG99_name               = "KGG99"                        ! 544: Gilbert and Gill 1999 (mixed)
+    character(len= 3),  parameter   :: GGA_X_KT1_name                 = "KT1"                          ! 145: Exchange part of Keal and Tozer version 1
+    character(len= 3),  parameter   :: GGA_X_LAG_name                 = "LAG"                          ! 193: Local Airy Gas
+    character(len=11),  parameter   :: GGA_X_LAMBDA_CH_N_name         = "LAMBDA_CH_N"                  !  44: lambda_CH(N) version of PBE
+    character(len=11),  parameter   :: GGA_X_LAMBDA_LO_N_name         = "LAMBDA_LO_N"                  !  45: lambda_LO(N) version of PBE
+    character(len=12),  parameter   :: GGA_X_LAMBDA_OC2_N_name        = "LAMBDA_OC2_N"                 !  40: lambda_OC2(N) version of PBE
+    character(len= 2),  parameter   :: GGA_X_LB_name                  = "LB"                           ! 160: van Leeuwen & Baerends
+    character(len= 3),  parameter   :: GGA_X_LBM_name                 = "LBM"                          ! 182: van Leeuwen & Baerends modified
+    character(len= 4),  parameter   :: GGA_X_LG93_name                = "LG93"                         ! 113: Lacks & Gordon 93
+    character(len= 5),  parameter   :: GGA_X_LSPBE_name               = "LSPBE"                        ! 168: lsPBE, a PW91-like modification of PBE exchange
+    character(len= 6),  parameter   :: GGA_X_LSRPBE_name              = "LSRPBE"                       ! 169: lsRPBE, a PW91-like modification of RPBE
+    character(len= 8),  parameter   :: GGA_X_LV_RPW86_name            = "LV_RPW86"                     !  58: Berland and Hyldgaard
+    character(len= 4),  parameter   :: GGA_X_MB88_name                = "MB88"                         ! 149: Modified Becke 88 for proton transfer
+    character(len= 4),  parameter   :: GGA_X_MPBE_name                = "MPBE"                         ! 122: Adamo & Barone modification to PBE
+    character(len= 5),  parameter   :: GGA_X_MPW91_name               = "MPW91"                        ! 119: mPW91 of Adamo & Barone
+    character(len= 3),  parameter   :: GGA_X_N12_name                 = "N12"                          !  82: Minnesota N12 exchange functional
+    character(len= 4),  parameter   :: GGA_X_NCAP_name                = "NCAP"                         ! 180: Nearly correct asymptotic potential
+    character(len= 3),  parameter   :: GGA_X_OL2_name                 = "OL2"                          ! 183: Exchange form based on Ou-Yang and Levy v.2
+    character(len= 4),  parameter   :: GGA_X_OPTX_name                = "OPTX"                         ! 110: Handy & Cohen OPTX 01
+    character(len= 3),  parameter   :: GGA_X_PBE_name                 = "PBE"                          ! 101: Perdew, Burke & Ernzerhof
+    character(len= 4),  parameter   :: GGA_X_PBEA_name                = "PBEA"                         ! 121: Madsen 07
+    character(len= 5),  parameter   :: GGA_X_PBEFE_name               = "PBEFE"                        ! 265: PBE for formation energies
+    character(len= 6),  parameter   :: GGA_X_PBEINT_name              = "PBEINT"                       !  60: PBE for hybrid interfaces
+    character(len= 6),  parameter   :: GGA_X_PBEPOW_name              = "PBEPOW"                       ! 539: PBE power
+    character(len= 8),  parameter   :: GGA_X_PBETRANS_name            = "PBETRANS"                     ! 291: Gradient-regulated connection-based correction for the PBE exchange
+    character(len= 8),  parameter   :: GGA_X_PBE_JSJR_name            = "PBE_JSJR"                     ! 126: Reparametrized PBE by Pedroza, Silva & Capelle
+    character(len= 7),  parameter   :: GGA_X_PBE_MOL_name             = "PBE_MOL"                      !  49: Reparametrized PBE by del Campo, Gazquez, Trickey & Vela
+    character(len= 5),  parameter   :: GGA_X_PBE_R_name               = "PBE_R"                        ! 102: Revised PBE from Zhang & Yang
+    character(len= 7),  parameter   :: GGA_X_PBE_SOL_name             = "PBE_SOL"                      ! 116: Perdew, Burke & Ernzerhof SOL
+    character(len= 7),  parameter   :: GGA_X_PBE_TCA_name             = "PBE_TCA"                      !  59: PBE revised by Tognetti et al
+    character(len= 4),  parameter   :: GGA_X_PW86_name                = "PW86"                         ! 108: Perdew & Wang 86
+    character(len= 4),  parameter   :: GGA_X_PW91_name                = "PW91"                         ! 109: Perdew & Wang 91
+    character(len= 8),  parameter   :: GGA_X_PW91_MOD_name            = "PW91_MOD"                     ! 316: PW91, alternate version with more digits
+    character(len= 3),  parameter   :: GGA_X_Q1D_name                 = "Q1D"                          ! 734: Functional for quasi-1D systems
+    character(len= 3),  parameter   :: GGA_X_Q2D_name                 = "Q2D"                          !  48: Chiodo et al
+    character(len= 8),  parameter   :: GGA_X_REVSSB_D_name            = "REVSSB_D"                     ! 312: Revised Swart, Sola and Bickelhaupt dispersion
+    character(len= 4),  parameter   :: GGA_X_RGE2_name                = "RGE2"                         ! 142: Regularized PBE
+    character(len= 4),  parameter   :: GGA_X_RPBE_name                = "RPBE"                         ! 117: Hammer, Hansen, and Norskov
+    character(len= 5),  parameter   :: GGA_X_RPW86_name               = "RPW86"                        ! 144: Refitted Perdew & Wang 86
+    character(len= 4),  parameter   :: GGA_X_S12G_name                = "S12G"                         ! 495: Swart 2012 GGA exchange
+    character(len= 4),  parameter   :: GGA_X_SFAT_name                = "SFAT"                         ! 530: Short-range recipe for B88 functional - Yukawa
+    character(len= 8),  parameter   :: GGA_X_SFAT_PBE_name            = "SFAT_PBE"                     ! 601: Short-range recipe for PBE functional - Yukawa
+    character(len= 3),  parameter   :: GGA_X_SG4_name                 = "SG4"                          ! 533: Semiclassical GGA at fourth order
+    character(len= 5),  parameter   :: GGA_X_SOGGA_name               = "SOGGA"                        ! 150: Second-order generalized gradient approximation
+    character(len= 7),  parameter   :: GGA_X_SOGGA11_name             = "SOGGA11"                      ! 151: Second-order generalized gradient approximation 2011
+    character(len= 3),  parameter   :: GGA_X_SSB_name                 = "SSB"                          !  91: Swart, Sola and Bickelhaupt
+    character(len= 5),  parameter   :: GGA_X_SSB_D_name               = "SSB_D"                        !  92: Swart, Sola and Bickelhaupt dispersion
+    character(len= 6),  parameter   :: GGA_X_SSB_SW_name              = "SSB_SW"                       !  90: Swart, Sola and Bickelhaupt correction to PBE
+    character(len= 8),  parameter   :: GGA_X_VMT84_GE_name            = "VMT84_GE"                     !  68: VMT{8,4} with constraint satisfaction with mu = mu_GE
+    character(len= 9),  parameter   :: GGA_X_VMT84_PBE_name           = "VMT84_PBE"                    !  69: VMT{8,4} with constraint satisfaction with mu = mu_PBE
+    character(len= 6),  parameter   :: GGA_X_VMT_GE_name              = "VMT_GE"                       !  70: Vela, Medel, and Trickey with mu = mu_GE
+    character(len= 7),  parameter   :: GGA_X_VMT_PBE_name             = "VMT_PBE"                      !  71: Vela, Medel, and Trickey with mu = mu_PBE
+    character(len= 2),  parameter   :: GGA_X_WC_name                  = "WC"                           ! 118: Wu & Cohen
+    character(len= 5),  parameter   :: GGA_X_WPBEH_name               = "WPBEH"                        ! 524: short-range part of the PBE (default w=0 gives PBEh)
+    character(len= 4),  parameter   :: GGA_X_XPBE_name                = "XPBE"                         ! 123: Extended PBE by Xu & Goddard III
+    character(len= 5),  parameter   :: HGGA_XC_APBE0_name             = "APBE0"                        ! 607: Hybrid based on APBE
+    character(len= 3),  parameter   :: HGGA_XC_APF_name               = "APF"                          ! 409: APF hybrid functional
+    character(len= 5),  parameter   :: HGGA_XC_B1LYP_name             = "B1LYP"                        ! 416: B1LYP
+    character(len= 6),  parameter   :: HGGA_XC_B1PW91_name            = "B1PW91"                       ! 417: B1PW91
+    character(len= 4),  parameter   :: HGGA_XC_B1WC_name              = "B1WC"                         ! 412: B1WC
+    character(len= 5),  parameter   :: HGGA_XC_B3LYP_name             = "B3LYP"                        ! 402: B3LYP
+    character(len= 6),  parameter   :: HGGA_XC_B3LYP3_name            = "B3LYP3"                       ! 394: B3LYP with VWN functional 3 instead of RPA
+    character(len= 6),  parameter   :: HGGA_XC_B3LYP5_name            = "B3LYP5"                       ! 475: B3LYP with VWN functional 5 instead of RPA
+    character(len= 6),  parameter   :: HGGA_XC_B3LYPS_name            = "B3LYPS"                       ! 459: B3LYP*
+    character(len=10),  parameter   :: HGGA_XC_B3LYP_MCM1_name        = "B3LYP_MCM1"                   ! 461: B3LYP-MCM1
+    character(len=10),  parameter   :: HGGA_XC_B3LYP_MCM2_name        = "B3LYP_MCM2"                   ! 462: B3LYP-MCM2
+    character(len= 5),  parameter   :: HGGA_XC_B3P86_name             = "B3P86"                        ! 403: B3P86
+    character(len= 6),  parameter   :: HGGA_XC_B3PW91_name            = "B3PW91"                       ! 401: The original (ACM, B3PW91) hybrid of Becke
+    character(len= 8),  parameter   :: HGGA_XC_B5050LYP_name          = "B5050LYP"                     ! 572: B5050LYP
+    character(len= 3),  parameter   :: HGGA_XC_B97_name               = "B97"                          ! 407: Becke 97
+    character(len= 5),  parameter   :: HGGA_XC_B97_1_name             = "B97_1"                        ! 408: Becke 97-1
+    character(len= 6),  parameter   :: HGGA_XC_B97_1P_name            = "B97_1P"                       ! 266: version of B97 by Cohen and Handy
+    character(len= 5),  parameter   :: HGGA_XC_B97_2_name             = "B97_2"                        ! 410: Becke 97-2
+    character(len= 5),  parameter   :: HGGA_XC_B97_3_name             = "B97_3"                        ! 414: Becke 97-3
+    character(len= 5),  parameter   :: HGGA_XC_B97_K_name             = "B97_K"                        ! 413: Boese-Martin for Kinetics
+    character(len= 6),  parameter   :: HGGA_XC_BHANDH_name            = "BHANDH"                       ! 435: BHandH i.e. BHLYP
+    character(len= 9),  parameter   :: HGGA_XC_BHANDHLYP_name         = "BHANDHLYP"                    ! 436: BHandHLYP
+    character(len= 6),  parameter   :: HGGA_XC_BLYP35_name            = "BLYP35"                       ! 499: BLYP35
+    character(len= 4),  parameter   :: HGGA_XC_CAP0_name              = "CAP0"                         ! 477: Correct Asymptotic Potential hybrid
+    character(len= 6),  parameter   :: HGGA_XC_CASE21_name            = "CASE21"                       ! 390: CASE21: Constrained And Smoothed semi-Empirical 2021 functional
+    character(len= 4),  parameter   :: HGGA_XC_EDF2_name              = "EDF2"                         ! 476: EDF2
+    character(len= 5),  parameter   :: HGGA_XC_HAPBE_name             = "HAPBE"                        ! 608: Hybrid based in APBE and zvPBEloc
+    character(len= 5),  parameter   :: HGGA_XC_HFLYP_name             = "HFLYP"                        ! 314: HF + LYP correlation
+    character(len= 7),  parameter   :: HGGA_XC_HPBEINT_name           = "HPBEINT"                      ! 472: hPBEint
+    character(len= 5),  parameter   :: HGGA_XC_KMLYP_name             = "KMLYP"                        ! 485: Kang-Musgrave hybrid
+    character(len=11),  parameter   :: HGGA_XC_MB3LYP_RC04_name       = "MB3LYP_RC04"                  ! 437: B3LYP with RC04 LDA
+    character(len= 5),  parameter   :: HGGA_XC_MPW1K_name             = "MPW1K"                        ! 405: mPW1K
+    character(len= 7),  parameter   :: HGGA_XC_MPW1LYP_name           = "MPW1LYP"                      ! 483: mPW1LYP
+    character(len= 7),  parameter   :: HGGA_XC_MPW1PBE_name           = "MPW1PBE"                      ! 484: mPW1PBE
+    character(len= 6),  parameter   :: HGGA_XC_MPW1PW_name            = "MPW1PW"                       ! 418: mPW1PW
+    character(len= 7),  parameter   :: HGGA_XC_MPW3LYP_name           = "MPW3LYP"                      ! 419: MPW3LYP
+    character(len= 6),  parameter   :: HGGA_XC_MPW3PW_name            = "MPW3PW"                       ! 415: MPW3PW of Adamo & Barone
+    character(len= 8),  parameter   :: HGGA_XC_MPWLYP1M_name          = "MPWLYP1M"                     ! 453: MPW with 1 par. for metals/LYP
+    character(len= 5),  parameter   :: HGGA_XC_O3LYP_name             = "O3LYP"                        ! 404: O3LYP
+    character(len= 7),  parameter   :: HGGA_XC_PBE0_13_name           = "PBE0_13"                      ! 456: PBE0-1/3
+    character(len= 5),  parameter   :: HGGA_XC_PBE38_name             = "PBE38"                        ! 393: PBE38: PBE0 with 3/8 = 37.5% exact exchange
+    character(len= 5),  parameter   :: HGGA_XC_PBE50_name             = "PBE50"                        ! 290: PBE50
+    character(len= 5),  parameter   :: HGGA_XC_PBEB0_name             = "PBEB0"                        ! 275: PBEbeta0
+    character(len= 4),  parameter   :: HGGA_XC_PBEH_name              = "PBEH"                         ! 406: PBEH (PBE0)
+    character(len= 6),  parameter   :: HGGA_XC_PBE_2X_name            = "PBE_2X"                       ! 392: PBE-2X: PBE0 with 56% exact exchange
+    character(len= 8),  parameter   :: HGGA_XC_PBE_MOL0_name          = "PBE_MOL0"                     ! 273: PBEmol0
+    character(len= 9),  parameter   :: HGGA_XC_PBE_MOLB0_name         = "PBE_MOLB0"                    ! 276: PBEmolbeta0
+    character(len= 8),  parameter   :: HGGA_XC_PBE_SOL0_name          = "PBE_SOL0"                     ! 274: PBEsol0
+    character(len= 5),  parameter   :: HGGA_XC_QTP17_name             = "QTP17"                        ! 460: Global hybrid for vertical ionization potentials
+    character(len= 8),  parameter   :: HGGA_XC_REVB3LYP_name          = "REVB3LYP"                     ! 454: Revised B3LYP
+    character(len= 7),  parameter   :: HGGA_XC_SB98_1A_name           = "SB98_1A"                      ! 420: SB98 (1a)
+    character(len= 7),  parameter   :: HGGA_XC_SB98_1B_name           = "SB98_1B"                      ! 421: SB98 (1b)
+    character(len= 7),  parameter   :: HGGA_XC_SB98_1C_name           = "SB98_1C"                      ! 422: SB98 (1c)
+    character(len= 7),  parameter   :: HGGA_XC_SB98_2A_name           = "SB98_2A"                      ! 423: SB98 (2a)
+    character(len= 7),  parameter   :: HGGA_XC_SB98_2B_name           = "SB98_2B"                      ! 424: SB98 (2b)
+    character(len= 7),  parameter   :: HGGA_XC_SB98_2C_name           = "SB98_2C"                      ! 425: SB98 (2c)
+    character(len= 4),  parameter   :: HGGA_XC_WC04_name              = "WC04"                         ! 611: hybrid fitted to carbon NMR shifts
+    character(len= 4),  parameter   :: HGGA_XC_WP04_name              = "WP04"                         ! 612: hybrid fitted to proton NMR shifts
+    character(len= 5),  parameter   :: HGGA_XC_X3LYP_name             = "X3LYP"                        ! 411: X3LYP
+    character(len= 4),  parameter   :: HGGA_X_S12H_name               = "S12H"                         ! 496: Swart 2012 hybrid exchange
+    character(len= 9),  parameter   :: HGGA_X_SOGGA11_X_name          = "SOGGA11_X"                    ! 426: Hybrid based on SOGGA11 form
+    character(len= 4),  parameter   :: HLDA_XC_LDA0_name              = "LDA0"                         ! 177: LDA hybrid exchange (LDA0)
+    character(len= 6),  parameter   :: HMGGA_XC_B0KCIS_name           = "B0KCIS"                       ! 563: Hybrid based on KCIS
+    character(len= 6),  parameter   :: HMGGA_XC_B86B95_name           = "B86B95"                       ! 441: Mixture of B86 with BC95
+    character(len= 6),  parameter   :: HMGGA_XC_B88B95_name           = "B88B95"                       ! 440: Mixture of B88 with BC95 (B1B95)
+    character(len= 4),  parameter   :: HMGGA_XC_BB1K_name             = "BB1K"                         ! 443: Mixture of B88 with BC95 from Zhao and Truhlar
+    character(len= 7),  parameter   :: HMGGA_XC_MPW1B95_name          = "MPW1B95"                      ! 445: Mixture of mPW91 with BC95 from Zhao and Truhlar
+    character(len= 8),  parameter   :: HMGGA_XC_MPW1KCIS_name         = "MPW1KCIS"                     ! 566: MPW1KCIS for barrier heights
+    character(len= 6),  parameter   :: HMGGA_XC_MPWB1K_name           = "MPWB1K"                       ! 446: Mixture of mPW91 with BC95 for kinetics
+    character(len= 9),  parameter   :: HMGGA_XC_MPWKCIS1K_name        = "MPWKCIS1K"                    ! 567: MPWKCIS1K for barrier heights
+    character(len= 8),  parameter   :: HMGGA_XC_PBE1KCIS_name         = "PBE1KCIS"                     ! 568: PBE1KCIS for binding energies
+    character(len= 6),  parameter   :: HMGGA_XC_PW6B95_name           = "PW6B95"                       ! 451: Mixture of PW91 with BC95 from Zhao and Truhlar
+    character(len= 7),  parameter   :: HMGGA_XC_PW86B95_name          = "PW86B95"                      ! 442: Mixture of PW86 with BC95
+    character(len= 5),  parameter   :: HMGGA_XC_PWB6K_name            = "PWB6K"                        ! 452: Mixture of PW91 with BC95 from Zhao and Truhlar for kinetics
+    character(len= 8),  parameter   :: HMGGA_XC_REVTPSSH_name         = "REVTPSSH"                     ! 458: revTPSSh
+    character(len= 5),  parameter   :: HMGGA_XC_TPSS0_name            = "TPSS0"                        ! 396: TPSS0 with 25% exact exchange
+    character(len= 9),  parameter   :: HMGGA_XC_TPSS1KCIS_name        = "TPSS1KCIS"                    ! 569: TPSS1KCIS for thermochemistry and kinetics
+    character(len= 5),  parameter   :: HMGGA_XC_TPSSH_name            = "TPSSH"                        ! 457: TPSSh
+    character(len= 5),  parameter   :: HMGGA_XC_X1B95_name            = "X1B95"                        ! 447: Mixture of X with BC95
+    character(len= 4),  parameter   :: HMGGA_XC_XB1K_name             = "XB1K"                         ! 448: Mixture of X with BC95 for kinetics
+    character(len= 3),  parameter   :: HMGGA_X_BMK_name               = "BMK"                          ! 279: Boese-Martin for kinetics
+    character(len= 4),  parameter   :: HMGGA_X_DLDF_name              = "DLDF"                         !  36: Dispersionless Density Functional
+    character(len= 3),  parameter   :: HMGGA_X_M05_name               = "M05"                          ! 438: Minnesota M05 hybrid exchange functional
+    character(len= 6),  parameter   :: HMGGA_X_M05_2X_name            = "M05_2X"                       ! 439: Minnesota M05-2X hybrid exchange functional
+    character(len= 3),  parameter   :: HMGGA_X_M06_name               = "M06"                          ! 449: Minnesota M06 hybrid exchange functional
+    character(len= 6),  parameter   :: HMGGA_X_M06_2X_name            = "M06_2X"                       ! 450: Minnesota M06-2X hybrid exchange functional
+    character(len= 6),  parameter   :: HMGGA_X_M06_HF_name            = "M06_HF"                       ! 444: Minnesota M06-HF hybrid exchange functional
+    character(len= 6),  parameter   :: HMGGA_X_M08_HX_name            = "M08_HX"                       ! 295: Minnesota M08-HX hybrid exchange functional
+    character(len= 6),  parameter   :: HMGGA_X_M08_SO_name            = "M08_SO"                       ! 296: Minnesota M08-SO hybrid exchange functional
+    character(len= 4),  parameter   :: HMGGA_X_MN15_name              = "MN15"                         ! 268: Minnesota MN15 hybrid exchange functional
+    character(len= 4),  parameter   :: HMGGA_X_MS2H_name              = "MS2H"                         ! 224: MS2 hybrid exchange of Sun, et al
+    character(len= 4),  parameter   :: HMGGA_X_MVSH_name              = "MVSH"                         ! 474: MVSh hybrid exchange functional
+    character(len= 6),  parameter   :: HMGGA_X_REVM06_name            = "REVM06"                       ! 305: Revised Minnesota M06 hybrid exchange functional
+    character(len= 8),  parameter   :: HMGGA_X_REVSCAN0_name          = "REVSCAN0"                     ! 583: revised SCAN hybrid exchange (SCAN0)
+    character(len= 5),  parameter   :: HMGGA_X_SCAN0_name             = "SCAN0"                        ! 264: SCAN hybrid exchange (SCAN0)
+    character(len= 8),  parameter   :: HMGGA_X_TAU_HCTH_name          = "TAU_HCTH"                     ! 282: Hybrid version of tau-HCTH
+    character(len= 4),  parameter   :: LDA_C_BR78_name                = "BR78"                         ! 552: Brual & Rothstein 78
+    character(len= 8),  parameter   :: LDA_C_CHACHIYO_name            = "CHACHIYO"                     ! 287: Chachiyo simple 2 parameter correlation
+    character(len=12),  parameter   :: LDA_C_CHACHIYO_MOD_name        = "CHACHIYO_MOD"                 ! 307: Chachiyo simple 2 parameter correlation with modified spin scaling
+    character(len= 4),  parameter   :: LDA_C_GK72_name                = "GK72"                         ! 578: Gordon and Kim 1972
+    character(len= 2),  parameter   :: LDA_C_GL_name                  = "GL"                           !   5: Gunnarson & Lundqvist
+    character(len= 6),  parameter   :: LDA_C_GOMBAS_name              = "GOMBAS"                       !  24: Gombas
+    character(len= 2),  parameter   :: LDA_C_HL_name                  = "HL"                           !   4: Hedin & Lundqvist
+    character(len= 8),  parameter   :: LDA_C_KARASIEV_name            = "KARASIEV"                     ! 579: Karasiev reparameterization of Chachiyo
+    character(len=12),  parameter   :: LDA_C_KARASIEV_MOD_name        = "KARASIEV_MOD"                 ! 308: Karasiev reparameterization of Chachiyo
+    character(len= 4),  parameter   :: LDA_C_LP96_name                = "LP96"                         ! 289: Liu-Parr correlation
+    character(len= 7),  parameter   :: LDA_C_MCWEENY_name             = "MCWEENY"                      ! 551: McWeeny 76
+    character(len= 3),  parameter   :: LDA_C_ML1_name                 = "ML1"                          !  22: Modified LSD (version 1) of Proynov and Salahub
+    character(len= 3),  parameter   :: LDA_C_ML2_name                 = "ML2"                          !  23: Modified LSD (version 2) of Proynov and Salahub
+    character(len= 5),  parameter   :: LDA_C_OB_PW_name               = "OB_PW"                        !  14: Ortiz & Ballone (PW parametrization)
+    character(len= 5),  parameter   :: LDA_C_OB_PZ_name               = "OB_PZ"                        !  11: Ortiz & Ballone (PZ parametrization)
+    character(len= 2),  parameter   :: LDA_C_OW_name                  = "OW"                           ! 574: Optimized Wigner
+    character(len= 6),  parameter   :: LDA_C_OW_LYP_name              = "OW_LYP"                       ! 573: Wigner with corresponding LYP parameters
+    character(len= 4),  parameter   :: LDA_C_PK09_name                = "PK09"                         ! 554: Proynov and Kong 2009
+    character(len= 6),  parameter   :: LDA_C_PMGB06_name              = "PMGB06"                       ! 590: Long-range LDA correlation functional
+    character(len= 2),  parameter   :: LDA_C_PW_name                  = "PW"                           !  12: Perdew & Wang
+    character(len= 6),  parameter   :: LDA_C_PW_MOD_name              = "PW_MOD"                       !  13: Perdew & Wang (modified)
+    character(len= 6),  parameter   :: LDA_C_PW_RPA_name              = "PW_RPA"                       !  25: Perdew & Wang (fit to the RPA energy)
+    character(len= 2),  parameter   :: LDA_C_PZ_name                  = "PZ"                           !   9: Perdew & Zunger
+    character(len= 6),  parameter   :: LDA_C_PZ_MOD_name              = "PZ_MOD"                       !  10: Perdew & Zunger (Modified)
+    character(len= 4),  parameter   :: LDA_C_RC04_name                = "RC04"                         !  27: Ragot-Cortona
+    character(len= 3),  parameter   :: LDA_C_RPA_name                 = "RPA"                          !   3: Random Phase Approximation (RPA)
+    character(len= 5),  parameter   :: LDA_C_RPW92_name               = "RPW92"                        ! 684: Ruggeri, Rios, and Alavi restricted fit
+    character(len= 5),  parameter   :: LDA_C_UPW92_name               = "UPW92"                        ! 683: Ruggeri, Rios, and Alavi unrestricted fit
+    character(len= 3),  parameter   :: LDA_C_VBH_name                 = "VBH"                          !  17: von Barth & Hedin
+    character(len= 3),  parameter   :: LDA_C_VWN_name                 = "VWN"                          !   7: Vosko, Wilk & Nusair (VWN5)
+    character(len= 5),  parameter   :: LDA_C_VWN_1_name               = "VWN_1"                        !  28: Vosko, Wilk & Nusair (VWN1)
+    character(len= 5),  parameter   :: LDA_C_VWN_2_name               = "VWN_2"                        !  29: Vosko, Wilk & Nusair (VWN2)
+    character(len= 5),  parameter   :: LDA_C_VWN_3_name               = "VWN_3"                        !  30: Vosko, Wilk & Nusair (VWN3)
+    character(len= 5),  parameter   :: LDA_C_VWN_4_name               = "VWN_4"                        !  31: Vosko, Wilk & Nusair (VWN4)
+    character(len= 7),  parameter   :: LDA_C_VWN_RPA_name             = "VWN_RPA"                      !   8: Vosko, Wilk & Nusair (VWN5_RPA)
+    character(len= 3),  parameter   :: LDA_C_W20_name                 = "W20"                          ! 317: Xie, Wu, and Zhao interpolation ansatz without fitting parameters
+    character(len= 6),  parameter   :: LDA_C_WIGNER_name              = "WIGNER"                       !   2: Wigner
+    character(len= 8),  parameter   :: LDA_XC_CORRKSDT_name           = "CORRKSDT"                     ! 318: Corrected KSDT by Karasiev, Dufty and Trickey
+    character(len= 6),  parameter   :: LDA_XC_GDSMFB_name             = "GDSMFB"                       ! 577: Groth, Dornheim, Sjostrom, Malone, Foulkes, Bonitz
+    character(len= 4),  parameter   :: LDA_XC_KSDT_name               = "KSDT"                         ! 259: Karasiev, Sjostrom, Dufty & Trickey
+    character(len= 4),  parameter   :: LDA_XC_LP_A_name               = "LP_A"                         ! 547: Lee-Parr reparametrization A
+    character(len= 4),  parameter   :: LDA_XC_LP_B_name               = "LP_B"                         ! 548: Lee-Parr reparametrization B
+    character(len= 7),  parameter   :: LDA_XC_TETER93_name            = "TETER93"                      !  20: Teter 93
+    character(len= 3),  parameter   :: LDA_XC_TIH_name                = "TIH"                          ! 599: Neural network LDA from Tozer et al
+    character(len= 3),  parameter   :: LDA_XC_ZLP_name                = "ZLP"                          !  43: Zhao, Levy & Parr, Eq. (20)
+    character(len= 3),  parameter   :: LDA_X_ERF_name                 = "ERF"                          ! 546: Attenuated exchange LDA (erf)
+    character(len= 3),  parameter   :: LDA_X_RAE_name                 = "RAE"                          ! 549: Rae self-energy corrected exchange
+    character(len= 3),  parameter   :: LDA_X_REL_name                 = "REL"                          ! 532: Slater exchange with relativistic corrections
+    character(len= 6),  parameter   :: LDA_X_SLATER_name              = "SLATER"                       !   1: Slater exchange
+    character(len= 4),  parameter   :: LDA_X_SLOC_name                = "SLOC"                         ! 692: simple local model for Slater potential
+    character(len= 6),  parameter   :: LDA_X_XALPHA_name              = "XALPHA"                       !   6: Slater's Xalpha
+    character(len= 3),  parameter   :: MGGA_C_B88_name                = "B88"                          ! 571: Meta-GGA correlation by Becke
+    character(len= 4),  parameter   :: MGGA_C_BC95_name               = "BC95"                         ! 240: Becke correlation 95
+    character(len= 4),  parameter   :: MGGA_C_DLDF_name               = "DLDF"                         !  37: Dispersionless Density Functional
+    character(len= 6),  parameter   :: MGGA_C_HLTAPW_name             = "HLTAPW"                       ! 699: Half-and-half meta-LDAized PW correlation by Lehtola and Marques
+    character(len= 4),  parameter   :: MGGA_C_KCIS_name               = "KCIS"                         ! 562: Krieger, Chen, Iafrate, and Savin
+    character(len= 5),  parameter   :: MGGA_C_KCISK_name              = "KCISK"                        ! 638: Krieger, Chen, and Kurth
+    character(len= 3),  parameter   :: MGGA_C_M05_name                = "M05"                          ! 237: Minnesota M05 correlation functional
+    character(len= 6),  parameter   :: MGGA_C_M05_2X_name             = "M05_2X"                       ! 238: Minnesota M05-2X correlation functional
+    character(len= 3),  parameter   :: MGGA_C_M06_name                = "M06"                          ! 235: Minnesota M06 correlation functional
+    character(len= 6),  parameter   :: MGGA_C_M06_2X_name             = "M06_2X"                       ! 236: Minnesota M06-2X correlation functional
+    character(len= 6),  parameter   :: MGGA_C_M06_HF_name             = "M06_HF"                       ! 234: Minnesota M06-HF correlation functional
+    character(len= 5),  parameter   :: MGGA_C_M06_L_name              = "M06_L"                        ! 233: Minnesota M06-L correlation functional
+    character(len= 6),  parameter   :: MGGA_C_M06_SX_name             = "M06_SX"                       ! 311: Minnesota M06-SX correlation functional
+    character(len= 6),  parameter   :: MGGA_C_M08_HX_name             = "M08_HX"                       !  78: Minnesota M08 correlation functional
+    character(len= 6),  parameter   :: MGGA_C_M08_SO_name             = "M08_SO"                       !  77: Minnesota M08-SO correlation functional
+    character(len= 3),  parameter   :: MGGA_C_M11_name                = "M11"                          !  76: Minnesota M11 correlation functional
+    character(len= 5),  parameter   :: MGGA_C_M11_L_name              = "M11_L"                        !  75: Minnesota M11-L correlation functional
+    character(len= 6),  parameter   :: MGGA_C_MN12_L_name             = "MN12_L"                       !  74: Minnesota MN12-L correlation functional
+    character(len= 7),  parameter   :: MGGA_C_MN12_SX_name            = "MN12_SX"                      !  73: Minnesota MN12-SX correlation functional
+    character(len= 4),  parameter   :: MGGA_C_MN15_name               = "MN15"                         ! 269: Minnesota MN15 correlation functional
+    character(len= 6),  parameter   :: MGGA_C_MN15_L_name             = "MN15_L"                       ! 261: Minnesota MN15-L correlation functional
+    character(len= 4),  parameter   :: MGGA_C_PKZB_name               = "PKZB"                         ! 239: Perdew, Kurth, Zupan, and Blaha
+    character(len= 6),  parameter   :: MGGA_C_R2SCAN_name             = "R2SCAN"                       ! 498: Re-regularized SCAN correlation by Furness et al
+    character(len= 8),  parameter   :: MGGA_C_R2SCAN01_name           = "R2SCAN01"                     ! 642: Re-regularized SCAN correlation with larger value for eta
+    character(len= 6),  parameter   :: MGGA_C_REVM06_name             = "REVM06"                       ! 306: Revised Minnesota M06 correlation functional
+    character(len= 8),  parameter   :: MGGA_C_REVM06_L_name           = "REVM06_L"                     ! 294: Minnesota revM06-L correlation functional
+    character(len= 6),  parameter   :: MGGA_C_REVM11_name             = "REVM11"                       ! 172: Revised Minnesota M11 correlation functional
+    character(len= 7),  parameter   :: MGGA_C_REVSCAN_name            = "REVSCAN"                      ! 582: revised SCAN
+    character(len= 5),  parameter   :: MGGA_C_REVTM_name              = "REVTM"                        ! 694: revised Tao and Mo 2016 exchange
+    character(len= 7),  parameter   :: MGGA_C_REVTPSS_name            = "REVTPSS"                      ! 241: revised TPSS correlation
+    character(len= 6),  parameter   :: MGGA_C_RMGGAC_name             = "RMGGAC"                       ! 643: Revised correlation energy for MGGAC exchange functional
+    character(len= 7),  parameter   :: MGGA_C_RPPSCAN_name            = "RPPSCAN"                      ! 649: r++SCAN: rSCAN with uniform density limit and coordinate scaling behavior
+    character(len= 6),  parameter   :: MGGA_C_RREGTM_name             = "RREGTM"                       ! 391: Revised regTM correlation by Jana et al
+    character(len= 5),  parameter   :: MGGA_C_RSCAN_name              = "RSCAN"                        ! 494: Regularized SCAN correlation by Bartok and Yates
+    character(len= 4),  parameter   :: MGGA_C_SCAN_name               = "SCAN"                         ! 267: SCAN correlation of Sun, Ruzsinszky, and Perdew
+    character(len= 2),  parameter   :: MGGA_C_TM_name                 = "TM"                           ! 251: Tao and Mo 2016 correlation
+    character(len= 4),  parameter   :: MGGA_C_TPSS_name               = "TPSS"                         ! 231: Tao, Perdew, Staroverov & Scuseria
+    character(len= 7),  parameter   :: MGGA_C_TPSSLOC_name            = "TPSSLOC"                      ! 247: Semilocal dynamical correlation
+    character(len= 4),  parameter   :: MGGA_C_VSXC_name               = "VSXC"                         ! 232: VSXC (correlation part)
+    character(len= 5),  parameter   :: MGGA_XC_HLE17_name             = "HLE17"                        ! 288: high local exchange 2017
+    character(len= 7),  parameter   :: MGGA_XC_OTPSS_D_name           = "OTPSS_D"                      !  64: oTPSS-D functional of Goerigk and Grimme
+    character(len= 9),  parameter   :: MGGA_XC_TPSSLYP1W_name         = "TPSSLYP1W"                    ! 242: TPSSLYP1W
+    character(len= 4),  parameter   :: MGGA_X_BLOC_name               = "BLOC"                         ! 244: functional with balanced localization
+    character(len= 4),  parameter   :: MGGA_X_GVT4_name               = "GVT4"                         ! 204: GVT4 (X part of VSXC)
+    character(len= 2),  parameter   :: MGGA_X_GX_name                 = "GX"                           ! 575: GX functional of Loos
+    character(len= 4),  parameter   :: MGGA_X_HLTA_name               = "HLTA"                         ! 698: Half-and-half meta-LDAized LDA exchange by Lehtola and Marques
+    character(len= 3),  parameter   :: MGGA_X_LTA_name                = "LTA"                          ! 201: Local tau approximation
+    character(len= 5),  parameter   :: MGGA_X_M06_L_name              = "M06_L"                        ! 203: Minnesota M06-L exchange functional
+    character(len= 5),  parameter   :: MGGA_X_M11_L_name              = "M11_L"                        ! 226: Minnesota M11-L exchange functional
+    character(len= 5),  parameter   :: MGGA_X_MBEEF_name              = "MBEEF"                        ! 249: mBEEF exchange
+    character(len= 3),  parameter   :: MGGA_X_MBR_name                = "MBR"                          ! 716: modified Becke-Roussel by Patra et al
+    character(len= 8),  parameter   :: MGGA_X_MBRXC_BG_name           = "MBRXC_BG"                     ! 696: Modified Becke-Roussel for band gaps - cuspless hole
+    character(len= 8),  parameter   :: MGGA_X_MBRXH_BG_name           = "MBRXH_BG"                     ! 697: Modified Becke-Roussel for band gaps - hydrogen hole
+    character(len= 4),  parameter   :: MGGA_X_MCML_name               = "MCML"                         ! 644: MCML exchange
+    character(len= 5),  parameter   :: MGGA_X_MGGAC_name              = "MGGAC"                        ! 711: MGGAC exchange of Patra et al
+    character(len= 6),  parameter   :: MGGA_X_MN12_L_name             = "MN12_L"                       ! 227: Minnesota MN12-L exchange functional
+    character(len= 6),  parameter   :: MGGA_X_MN15_L_name             = "MN15_L"                       ! 260: Minnesota MN15-L exchange functional
+    character(len= 7),  parameter   :: MGGA_X_MODTPSS_name            = "MODTPSS"                      ! 245: Modified Tao, Perdew, Staroverov & Scuseria
+    character(len= 3),  parameter   :: MGGA_X_MS0_name                = "MS0"                          ! 221: MS exchange of Sun, Xiao, and Ruzsinszky
+    character(len= 3),  parameter   :: MGGA_X_MS1_name                = "MS1"                          ! 222: MS1 exchange of Sun, et al
+    character(len= 3),  parameter   :: MGGA_X_MS2_name                = "MS2"                          ! 223: MS2 exchange of Sun, et al
+    character(len= 4),  parameter   :: MGGA_X_MS2B_name               = "MS2B"                         ! 300: MS2beta exchange of Furness and Sun
+    character(len= 5),  parameter   :: MGGA_X_MS2BS_name              = "MS2BS"                        ! 301: MS2beta* exchange of Furness and Sun
+    character(len= 7),  parameter   :: MGGA_X_MS2_REV_name            = "MS2_REV"                      ! 228: MS2 exchange of Sun, et al with revised value for c
+    character(len= 5),  parameter   :: MGGA_X_MTASK_name              = "MTASK"                        ! 724: modified TASK exchange
+    character(len= 3),  parameter   :: MGGA_X_MVS_name                = "MVS"                          ! 257: MVS exchange of Sun, Perdew, and Ruzsinszky
+    character(len= 4),  parameter   :: MGGA_X_MVSB_name               = "MVSB"                         ! 302: MVSbeta exchange by Furness and Sun
+    character(len= 5),  parameter   :: MGGA_X_MVSBS_name              = "MVSBS"                        ! 303: MVSbeta* exchange by Furness and Sun
+    character(len= 6),  parameter   :: MGGA_X_PBE_GX_name             = "PBE_GX"                       ! 576: PBE-GX functional of Loos
+    character(len= 4),  parameter   :: MGGA_X_PKZB_name               = "PKZB"                         ! 213: Perdew, Kurth, Zupan, and Blaha
+    character(len= 6),  parameter   :: MGGA_X_R2SCAN_name             = "R2SCAN"                       ! 497: Re-regularized SCAN exchange by Furness et al
+    character(len= 8),  parameter   :: MGGA_X_R2SCAN01_name           = "R2SCAN01"                     ! 645: Re-regularized SCAN exchange by Furness et al with larger value for eta
+    character(len= 6),  parameter   :: MGGA_X_R4SCAN_name             = "R4SCAN"                       ! 650: r^4SCAN, a functional that satisfies the same exact constraints that SCAN does
+    character(len= 5),  parameter   :: MGGA_X_REGTM_name              = "REGTM"                        ! 626: Regularized Tao and Mo exchange
+    character(len= 7),  parameter   :: MGGA_X_REGTPSS_name            = "REGTPSS"                      ! 603: Regularized TPSS
+    character(len= 8),  parameter   :: MGGA_X_REVM06_L_name           = "REVM06_L"                     ! 293: Minnesota revM06-L exchange functional
+    character(len= 7),  parameter   :: MGGA_X_REVSCAN_name            = "REVSCAN"                      ! 581: revised SCAN
+    character(len= 5),  parameter   :: MGGA_X_REVTM_name              = "REVTM"                        ! 693: revised Tao and Mo 2016 exchange
+    character(len= 7),  parameter   :: MGGA_X_REVTPSS_name            = "REVTPSS"                      ! 212: revised Tao, Perdew, Staroverov & Scuseria
+    character(len= 7),  parameter   :: MGGA_X_RPPSCAN_name            = "RPPSCAN"                      ! 648: r++SCAN: rSCAN with uniform density limit and coordinate scaling behavior
+    character(len= 5),  parameter   :: MGGA_X_RSCAN_name              = "RSCAN"                        ! 493: Regularized SCAN exchange by Bartok and Yates
+    character(len= 5),  parameter   :: MGGA_X_RTPSS_name              = "RTPSS"                        ! 299: TPSS for surface adsorption
+    character(len= 7),  parameter   :: MGGA_X_SA_TPSS_name            = "SA_TPSS"                      ! 542: TPSS with correct surface asymptotics
+    character(len= 4),  parameter   :: MGGA_X_SCAN_name               = "SCAN"                         ! 263: SCAN exchange of Sun, Ruzsinszky, and Perdew
+    character(len= 4),  parameter   :: MGGA_X_TASK_name               = "TASK"                         ! 707: TASK exchange of Aschebrock and Kuemmel
+    character(len= 8),  parameter   :: MGGA_X_TAU_HCTH_name           = "TAU_HCTH"                     ! 205: tau-HCTH from Boese and Handy
+    character(len= 2),  parameter   :: MGGA_X_TH_name                 = "TH"                           ! 225: Tsuneda and Hirao
+    character(len= 4),  parameter   :: MGGA_X_TLDA_name               = "TLDA"                         ! 685: LDA-type exchange with tau-dependent potential
+    character(len= 2),  parameter   :: MGGA_X_TM_name                 = "TM"                           ! 540: Tao and Mo 2016 exchange
+    character(len= 4),  parameter   :: MGGA_X_TPSS_name               = "TPSS"                         ! 202: Tao, Perdew, Staroverov & Scuseria
+    character(len= 4),  parameter   :: MGGA_X_VT84_name               = "VT84"                         ! 541: meta-GGA version of VT{8,4} GGA
+    allocate(GGA_C_group)
+    call GGA_C_group%read_section(read_unit, GGA_C_name)
+    allocate(GGA_X_group)
+    call GGA_X_group%read_section(read_unit, GGA_X_name)
+    allocate(GGA_XC_group)
+    call GGA_XC_group%read_section(read_unit, GGA_XC_name)
+    allocate(HGGA_X_group)
+    call HGGA_X_group%read_section(read_unit, HGGA_X_name)
+    allocate(HGGA_XC_group)
+    call HGGA_XC_group%read_section(read_unit, HGGA_XC_name)
+    allocate(HLDA_XC_group)
+    call HLDA_XC_group%read_section(read_unit, HLDA_XC_name)
+    allocate(HMGGA_X_group)
+    call HMGGA_X_group%read_section(read_unit, HMGGA_X_name)
+    allocate(HMGGA_XC_group)
+    call HMGGA_XC_group%read_section(read_unit, HMGGA_XC_name)
+    allocate(LDA_C_group)
+    call LDA_C_group%read_section(read_unit, LDA_C_name)
+    allocate(LDA_X_group)
+    call LDA_X_group%read_section(read_unit, LDA_X_name)
+    allocate(LDA_XC_group)
+    call LDA_XC_group%read_section(read_unit, LDA_XC_name)
+    allocate(MGGA_C_group)
+    call MGGA_C_group%read_section(read_unit, MGGA_C_name)
+    allocate(MGGA_X_group)
+    call MGGA_X_group%read_section(read_unit, MGGA_X_name)
+    allocate(MGGA_XC_group)
+    call MGGA_XC_group%read_section(read_unit, MGGA_XC_name)
+    call add_free_functional(GGA_C_group,GGA_C_ACGGA_name,XC_GGA_C_ACGGA)
+    call add_free_functional(GGA_C_group,GGA_C_ACGGAP_name,XC_GGA_C_ACGGAP)
+    call add_free_functional(GGA_C_group,GGA_C_AM05_name,XC_GGA_C_AM05)
+    call add_free_functional(GGA_C_group,GGA_C_APBE_name,XC_GGA_C_APBE)
+    call add_free_functional(GGA_C_group,GGA_C_BMK_name,XC_GGA_C_BMK)
+    call add_free_functional(GGA_C_group,GGA_C_CCDF_name,XC_GGA_C_CCDF)
+    call add_free_functional(GGA_C_group,GGA_C_CHACHIYO_name,XC_GGA_C_CHACHIYO)
+    call add_free_functional(GGA_C_group,GGA_C_CS1_name,XC_GGA_C_CS1)
+    call add_free_functional(GGA_C_group,GGA_C_FT97_name,XC_GGA_C_FT97)
+    call add_free_functional(GGA_C_group,GGA_C_GAM_name,XC_GGA_C_GAM)
+    call add_free_functional(GGA_C_group,GGA_C_GAPC_name,XC_GGA_C_GAPC)
+    call add_free_functional(GGA_C_group,GGA_C_GAPLOC_name,XC_GGA_C_GAPLOC)
+    call add_free_functional(GGA_C_group,GGA_C_HCTH_A_name,XC_GGA_C_HCTH_A)
+    call add_free_functional(GGA_C_group,GGA_C_HTAU_HCTH_name,XC_GGA_C_HYB_TAU_HCTH)
+    call add_free_functional(GGA_C_group,GGA_C_LM_name,XC_GGA_C_LM)
+    call add_free_functional(GGA_C_group,GGA_C_LYP_name,XC_GGA_C_LYP)
+    call add_free_functional(GGA_C_group,GGA_C_LYPR_name,XC_GGA_C_LYPR)
+    call add_free_functional(GGA_C_group,GGA_C_MGGAC_name,XC_GGA_C_MGGAC)
+    call add_free_functional(GGA_C_group,GGA_C_N12_name,XC_GGA_C_N12)
+    call add_free_functional(GGA_C_group,GGA_C_N12_SX_name,XC_GGA_C_N12_SX)
+    call add_free_functional(GGA_C_group,GGA_C_OPTC_name,XC_GGA_C_OPTC)
+    call add_free_functional(GGA_C_group,GGA_C_OP_B88_name,XC_GGA_C_OP_B88)
+    call add_free_functional(GGA_C_group,GGA_C_OP_G96_name,XC_GGA_C_OP_G96)
+    call add_free_functional(GGA_C_group,GGA_C_OP_PBE_name,XC_GGA_C_OP_PBE)
+    call add_free_functional(GGA_C_group,GGA_C_OP_PW91_name,XC_GGA_C_OP_PW91)
+    call add_free_functional(GGA_C_group,GGA_C_OP_XALPHA_name,XC_GGA_C_OP_XALPHA)
+    call add_free_functional(GGA_C_group,GGA_C_P86_name,XC_GGA_C_P86)
+    call add_free_functional(GGA_C_group,GGA_C_P86VWN_name,XC_GGA_C_P86VWN)
+    call add_free_functional(GGA_C_group,GGA_C_P86VWN_FT_name,XC_GGA_C_P86VWN_FT)
+    call add_free_functional(GGA_C_group,GGA_C_P86_FT_name,XC_GGA_C_P86_FT)
+    call add_free_functional(GGA_C_group,GGA_C_PBE_name,XC_GGA_C_PBE)
+    call add_free_functional(GGA_C_group,GGA_C_PBEFE_name,XC_GGA_C_PBEFE)
+    call add_free_functional(GGA_C_group,GGA_C_PBEINT_name,XC_GGA_C_PBEINT)
+    call add_free_functional(GGA_C_group,GGA_C_PBELOC_name,XC_GGA_C_PBELOC)
+    call add_free_functional(GGA_C_group,GGA_C_PBE_JRGX_name,XC_GGA_C_PBE_JRGX)
+    call add_free_functional(GGA_C_group,GGA_C_PBE_MOL_name,XC_GGA_C_PBE_MOL)
+    call add_free_functional(GGA_C_group,GGA_C_PBE_SOL_name,XC_GGA_C_PBE_SOL)
+    call add_free_functional(GGA_C_group,GGA_C_PBE_VWN_name,XC_GGA_C_PBE_VWN)
+    call add_free_functional(GGA_C_group,GGA_C_PW91_name,XC_GGA_C_PW91)
+    call add_free_functional(GGA_C_group,GGA_C_Q2D_name,XC_GGA_C_Q2D)
+    call add_free_functional(GGA_C_group,GGA_C_REGTPSS_name,XC_GGA_C_REGTPSS)
+    call add_free_functional(GGA_C_group,GGA_C_REVTCA_name,XC_GGA_C_REVTCA)
+    call add_free_functional(GGA_C_group,GGA_C_RGE2_name,XC_GGA_C_RGE2)
+    call add_free_functional(GGA_C_group,GGA_C_SCAN_E0_name,XC_GGA_C_SCAN_E0)
+    call add_free_functional(GGA_C_group,GGA_C_SG4_name,XC_GGA_C_SG4)
+    call add_free_functional(GGA_C_group,GGA_C_SOGGA11_name,XC_GGA_C_SOGGA11)
+    call add_free_functional(GGA_C_group,GGA_C_SOGGA11_X_name,XC_GGA_C_SOGGA11_X)
+    call add_free_functional(GGA_C_group,GGA_C_SPBE_name,XC_GGA_C_SPBE)
+    call add_free_functional(GGA_C_group,GGA_C_TAU_HCTH_name,XC_GGA_C_TAU_HCTH)
+    call add_free_functional(GGA_C_group,GGA_C_TCA_name,XC_GGA_C_TCA)
+    call add_free_functional(GGA_C_group,GGA_C_TM_LYP_name,XC_GGA_C_TM_LYP)
+    call add_free_functional(GGA_C_group,GGA_C_TM_PBE_name,XC_GGA_C_TM_PBE)
+    call add_free_functional(GGA_C_group,GGA_C_W94_name,XC_GGA_C_W94)
+    call add_free_functional(GGA_C_group,GGA_C_WI_name,XC_GGA_C_WI)
+    call add_free_functional(GGA_C_group,GGA_C_WI0_name,XC_GGA_C_WI0)
+    call add_free_functional(GGA_C_group,GGA_C_WL_name,XC_GGA_C_WL)
+    call add_free_functional(GGA_C_group,GGA_C_XPBE_name,XC_GGA_C_XPBE)
+    call add_free_functional(GGA_C_group,GGA_C_ZPBEINT_name,XC_GGA_C_ZPBEINT)
+    call add_free_functional(GGA_C_group,GGA_C_ZPBESOL_name,XC_GGA_C_ZPBESOL)
+    call add_free_functional(GGA_C_group,GGA_C_ZVPBEINT_name,XC_GGA_C_ZVPBEINT)
+    call add_free_functional(GGA_C_group,GGA_C_ZVPBELOC_name,XC_GGA_C_ZVPBELOC)
+    call add_free_functional(GGA_C_group,GGA_C_ZVPBESOL_name,XC_GGA_C_ZVPBESOL)
+    call add_free_functional(GGA_XC_group,GGA_XC_B97_D_name,XC_GGA_XC_B97_D)
+    call add_free_functional(GGA_XC_group,GGA_XC_B97_GGA1_name,XC_GGA_XC_B97_GGA1)
+    call add_free_functional(GGA_XC_group,GGA_XC_EDF1_name,XC_GGA_XC_EDF1)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_120_name,XC_GGA_XC_HCTH_120)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_147_name,XC_GGA_XC_HCTH_147)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_407_name,XC_GGA_XC_HCTH_407)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_407P_name,XC_GGA_XC_HCTH_407P)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_93_name,XC_GGA_XC_HCTH_93)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_P14_name,XC_GGA_XC_HCTH_P14)
+    call add_free_functional(GGA_XC_group,GGA_XC_HCTH_P76_name,XC_GGA_XC_HCTH_P76)
+    call add_free_functional(GGA_XC_group,GGA_XC_HLE16_name,XC_GGA_XC_HLE16)
+    call add_free_functional(GGA_XC_group,GGA_XC_KT1_name,XC_GGA_XC_KT1)
+    call add_free_functional(GGA_XC_group,GGA_XC_KT2_name,XC_GGA_XC_KT2)
+    call add_free_functional(GGA_XC_group,GGA_XC_KT3_name,XC_GGA_XC_KT3)
+    call add_free_functional(GGA_XC_group,GGA_XC_MOHLYP_name,XC_GGA_XC_MOHLYP)
+    call add_free_functional(GGA_XC_group,GGA_XC_MOHLYP2_name,XC_GGA_XC_MOHLYP2)
+    call add_free_functional(GGA_XC_group,GGA_XC_MPWLYP1W_name,XC_GGA_XC_MPWLYP1W)
+    call add_free_functional(GGA_XC_group,GGA_XC_NCAP_name,XC_GGA_XC_NCAP)
+    call add_free_functional(GGA_XC_group,GGA_XC_OBLYP_D_name,XC_GGA_XC_OBLYP_D)
+    call add_free_functional(GGA_XC_group,GGA_XC_OPBE_D_name,XC_GGA_XC_OPBE_D)
+    call add_free_functional(GGA_XC_group,GGA_XC_OPWLYP_D_name,XC_GGA_XC_OPWLYP_D)
+    call add_free_functional(GGA_XC_group,GGA_XC_PBE1W_name,XC_GGA_XC_PBE1W)
+    call add_free_functional(GGA_XC_group,GGA_XC_PBELYP1W_name,XC_GGA_XC_PBELYP1W)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH1_name,XC_GGA_XC_TH1)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH2_name,XC_GGA_XC_TH2)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH3_name,XC_GGA_XC_TH3)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH4_name,XC_GGA_XC_TH4)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH_FC_name,XC_GGA_XC_TH_FC)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH_FCFO_name,XC_GGA_XC_TH_FCFO)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH_FCO_name,XC_GGA_XC_TH_FCO)
+    call add_free_functional(GGA_XC_group,GGA_XC_TH_FL_name,XC_GGA_XC_TH_FL)
+    call add_free_functional(GGA_XC_group,GGA_XC_XLYP_name,XC_GGA_XC_XLYP)
+    call add_free_functional(GGA_X_group,GGA_X_AIRY_name,XC_GGA_X_AIRY)
+    call add_free_functional(GGA_X_group,GGA_X_AK13_name,XC_GGA_X_AK13)
+    call add_free_functional(GGA_X_group,GGA_X_AM05_name,XC_GGA_X_AM05)
+    call add_free_functional(GGA_X_group,GGA_X_APBE_name,XC_GGA_X_APBE)
+    call add_free_functional(GGA_X_group,GGA_X_B86_name,XC_GGA_X_B86)
+    call add_free_functional(GGA_X_group,GGA_X_B86_MGC_name,XC_GGA_X_B86_MGC)
+    call add_free_functional(GGA_X_group,GGA_X_B86_R_name,XC_GGA_X_B86_R)
+    call add_free_functional(GGA_X_group,GGA_X_B88_name,XC_GGA_X_B88)
+    call add_free_functional(GGA_X_group,GGA_X_B88M_name,XC_GGA_X_B88M)
+    call add_free_functional(GGA_X_group,GGA_X_B88_6311G_name,XC_GGA_X_B88_6311G)
+    call add_free_functional(GGA_X_group,GGA_X_BAYESIAN_name,XC_GGA_X_BAYESIAN)
+    call add_free_functional(GGA_X_group,GGA_X_BCGP_name,XC_GGA_X_BCGP)
+    call add_free_functional(GGA_X_group,GGA_X_BPCCAC_name,XC_GGA_X_BPCCAC)
+    call add_free_functional(GGA_X_group,GGA_X_CAP_name,XC_GGA_X_CAP)
+    call add_free_functional(GGA_X_group,GGA_X_CHACHIYO_name,XC_GGA_X_CHACHIYO)
+    call add_free_functional(GGA_X_group,GGA_X_DK87_R1_name,XC_GGA_X_DK87_R1)
+    call add_free_functional(GGA_X_group,GGA_X_DK87_R2_name,XC_GGA_X_DK87_R2)
+    call add_free_functional(GGA_X_group,GGA_X_EB88_name,XC_GGA_X_EB88)
+    call add_free_functional(GGA_X_group,GGA_X_ECMV92_name,XC_GGA_X_ECMV92)
+    call add_free_functional(GGA_X_group,GGA_X_EV93_name,XC_GGA_X_EV93)
+    call add_free_functional(GGA_X_group,GGA_X_FD_LB94_name,XC_GGA_X_FD_LB94)
+    call add_free_functional(GGA_X_group,GGA_X_FD_REVLB94_name,XC_GGA_X_FD_REVLB94)
+    call add_free_functional(GGA_X_group,GGA_X_FT97_A_name,XC_GGA_X_FT97_A)
+    call add_free_functional(GGA_X_group,GGA_X_FT97_B_name,XC_GGA_X_FT97_B)
+    call add_free_functional(GGA_X_group,GGA_X_G96_name,XC_GGA_X_G96)
+    call add_free_functional(GGA_X_group,GGA_X_GAM_name,XC_GGA_X_GAM)
+    call add_free_functional(GGA_X_group,GGA_X_GG99_name,XC_GGA_X_GG99)
+    call add_free_functional(GGA_X_group,GGA_X_HCTH_A_name,XC_GGA_X_HCTH_A)
+    call add_free_functional(GGA_X_group,GGA_X_HERMAN_name,XC_GGA_X_HERMAN)
+    call add_free_functional(GGA_X_group,GGA_X_HJS_B88_name,XC_GGA_X_HJS_B88)
+    call add_free_functional(GGA_X_group,GGA_X_HJS_B88_V2_name,XC_GGA_X_HJS_B88_V2)
+    call add_free_functional(GGA_X_group,GGA_X_HJS_B97X_name,XC_GGA_X_HJS_B97X)
+    call add_free_functional(GGA_X_group,GGA_X_HJS_PBE_name,XC_GGA_X_HJS_PBE)
+    call add_free_functional(GGA_X_group,GGA_X_HJS_PBE_SOL_name,XC_GGA_X_HJS_PBE_SOL)
+    call add_free_functional(GGA_X_group,GGA_X_HTBS_name,XC_GGA_X_HTBS)
+    call add_free_functional(GGA_X_group,GGA_X_ITYH_name,XC_GGA_X_ITYH)
+    call add_free_functional(GGA_X_group,GGA_X_ITYH_OPTX_name,XC_GGA_X_ITYH_OPTX)
+    call add_free_functional(GGA_X_group,GGA_X_ITYH_PBE_name,XC_GGA_X_ITYH_PBE)
+    call add_free_functional(GGA_X_group,GGA_X_KGG99_name,XC_GGA_X_KGG99)
+    call add_free_functional(GGA_X_group,GGA_X_KT1_name,XC_GGA_X_KT1)
+    call add_free_functional(GGA_X_group,GGA_X_LAG_name,XC_GGA_X_LAG)
+    call add_free_functional(GGA_X_group,GGA_X_LAMBDA_CH_N_name,XC_GGA_X_LAMBDA_CH_N)
+    call add_free_functional(GGA_X_group,GGA_X_LAMBDA_LO_N_name,XC_GGA_X_LAMBDA_LO_N)
+    call add_free_functional(GGA_X_group,GGA_X_LAMBDA_OC2_N_name,XC_GGA_X_LAMBDA_OC2_N)
+    call add_free_functional(GGA_X_group,GGA_X_LB_name,XC_GGA_X_LB)
+    call add_free_functional(GGA_X_group,GGA_X_LBM_name,XC_GGA_X_LBM)
+    call add_free_functional(GGA_X_group,GGA_X_LG93_name,XC_GGA_X_LG93)
+    call add_free_functional(GGA_X_group,GGA_X_LSPBE_name,XC_GGA_X_LSPBE)
+    call add_free_functional(GGA_X_group,GGA_X_LSRPBE_name,XC_GGA_X_LSRPBE)
+    call add_free_functional(GGA_X_group,GGA_X_LV_RPW86_name,XC_GGA_X_LV_RPW86)
+    call add_free_functional(GGA_X_group,GGA_X_MB88_name,XC_GGA_X_MB88)
+    call add_free_functional(GGA_X_group,GGA_X_MPBE_name,XC_GGA_X_MPBE)
+    call add_free_functional(GGA_X_group,GGA_X_MPW91_name,XC_GGA_X_MPW91)
+    call add_free_functional(GGA_X_group,GGA_X_N12_name,XC_GGA_X_N12)
+    call add_free_functional(GGA_X_group,GGA_X_NCAP_name,XC_GGA_X_NCAP)
+    call add_free_functional(GGA_X_group,GGA_X_OL2_name,XC_GGA_X_OL2)
+    call add_free_functional(GGA_X_group,GGA_X_OPTX_name,XC_GGA_X_OPTX)
+    call add_free_functional(GGA_X_group,GGA_X_PBE_name,XC_GGA_X_PBE)
+    call add_free_functional(GGA_X_group,GGA_X_PBEA_name,XC_GGA_X_PBEA)
+    call add_free_functional(GGA_X_group,GGA_X_PBEFE_name,XC_GGA_X_PBEFE)
+    call add_free_functional(GGA_X_group,GGA_X_PBEINT_name,XC_GGA_X_PBEINT)
+    call add_free_functional(GGA_X_group,GGA_X_PBEPOW_name,XC_GGA_X_PBEPOW)
+    call add_free_functional(GGA_X_group,GGA_X_PBETRANS_name,XC_GGA_X_PBETRANS)
+    call add_free_functional(GGA_X_group,GGA_X_PBE_JSJR_name,XC_GGA_X_PBE_JSJR)
+    call add_free_functional(GGA_X_group,GGA_X_PBE_MOL_name,XC_GGA_X_PBE_MOL)
+    call add_free_functional(GGA_X_group,GGA_X_PBE_R_name,XC_GGA_X_PBE_R)
+    call add_free_functional(GGA_X_group,GGA_X_PBE_SOL_name,XC_GGA_X_PBE_SOL)
+    call add_free_functional(GGA_X_group,GGA_X_PBE_TCA_name,XC_GGA_X_PBE_TCA)
+    call add_free_functional(GGA_X_group,GGA_X_PW86_name,XC_GGA_X_PW86)
+    call add_free_functional(GGA_X_group,GGA_X_PW91_name,XC_GGA_X_PW91)
+    call add_free_functional(GGA_X_group,GGA_X_PW91_MOD_name,XC_GGA_X_PW91_MOD)
+    call add_free_functional(GGA_X_group,GGA_X_Q1D_name,XC_GGA_X_Q1D)
+    call add_free_functional(GGA_X_group,GGA_X_Q2D_name,XC_GGA_X_Q2D)
+    call add_free_functional(GGA_X_group,GGA_X_REVSSB_D_name,XC_GGA_X_REVSSB_D)
+    call add_free_functional(GGA_X_group,GGA_X_RGE2_name,XC_GGA_X_RGE2)
+    call add_free_functional(GGA_X_group,GGA_X_RPBE_name,XC_GGA_X_RPBE)
+    call add_free_functional(GGA_X_group,GGA_X_RPW86_name,XC_GGA_X_RPW86)
+    call add_free_functional(GGA_X_group,GGA_X_S12G_name,XC_GGA_X_S12G)
+    call add_free_functional(GGA_X_group,GGA_X_SFAT_name,XC_GGA_X_SFAT)
+    call add_free_functional(GGA_X_group,GGA_X_SFAT_PBE_name,XC_GGA_X_SFAT_PBE)
+    call add_free_functional(GGA_X_group,GGA_X_SG4_name,XC_GGA_X_SG4)
+    call add_free_functional(GGA_X_group,GGA_X_SOGGA_name,XC_GGA_X_SOGGA)
+    call add_free_functional(GGA_X_group,GGA_X_SOGGA11_name,XC_GGA_X_SOGGA11)
+    call add_free_functional(GGA_X_group,GGA_X_SSB_name,XC_GGA_X_SSB)
+    call add_free_functional(GGA_X_group,GGA_X_SSB_D_name,XC_GGA_X_SSB_D)
+    call add_free_functional(GGA_X_group,GGA_X_SSB_SW_name,XC_GGA_X_SSB_SW)
+    call add_free_functional(GGA_X_group,GGA_X_VMT84_GE_name,XC_GGA_X_VMT84_GE)
+    call add_free_functional(GGA_X_group,GGA_X_VMT84_PBE_name,XC_GGA_X_VMT84_PBE)
+    call add_free_functional(GGA_X_group,GGA_X_VMT_GE_name,XC_GGA_X_VMT_GE)
+    call add_free_functional(GGA_X_group,GGA_X_VMT_PBE_name,XC_GGA_X_VMT_PBE)
+    call add_free_functional(GGA_X_group,GGA_X_WC_name,XC_GGA_X_WC)
+    call add_free_functional(GGA_X_group,GGA_X_WPBEH_name,XC_GGA_X_WPBEH)
+    call add_free_functional(GGA_X_group,GGA_X_XPBE_name,XC_GGA_X_XPBE)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_APBE0_name,XC_HYB_GGA_XC_APBE0)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_APF_name,XC_HYB_GGA_XC_APF)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B1LYP_name,XC_HYB_GGA_XC_B1LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B1PW91_name,XC_HYB_GGA_XC_B1PW91)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B1WC_name,XC_HYB_GGA_XC_B1WC)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3LYP_name,XC_HYB_GGA_XC_B3LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3LYP3_name,XC_HYB_GGA_XC_B3LYP3)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3LYP5_name,XC_HYB_GGA_XC_B3LYP5)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3LYPS_name,XC_HYB_GGA_XC_B3LYPS)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3LYP_MCM1_name,XC_HYB_GGA_XC_B3LYP_MCM1)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3LYP_MCM2_name,XC_HYB_GGA_XC_B3LYP_MCM2)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3P86_name,XC_HYB_GGA_XC_B3P86)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B3PW91_name,XC_HYB_GGA_XC_B3PW91)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B5050LYP_name,XC_HYB_GGA_XC_B5050LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B97_name,XC_HYB_GGA_XC_B97)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B97_1_name,XC_HYB_GGA_XC_B97_1)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B97_1P_name,XC_HYB_GGA_XC_B97_1P)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B97_2_name,XC_HYB_GGA_XC_B97_2)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B97_3_name,XC_HYB_GGA_XC_B97_3)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_B97_K_name,XC_HYB_GGA_XC_B97_K)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_BHANDH_name,XC_HYB_GGA_XC_BHANDH)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_BHANDHLYP_name,XC_HYB_GGA_XC_BHANDHLYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_BLYP35_name,XC_HYB_GGA_XC_BLYP35)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_CAP0_name,XC_HYB_GGA_XC_CAP0)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_CASE21_name,XC_HYB_GGA_XC_CASE21)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_EDF2_name,XC_HYB_GGA_XC_EDF2)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_HAPBE_name,XC_HYB_GGA_XC_HAPBE)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_HFLYP_name,XC_HYB_GGA_XC_HFLYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_HPBEINT_name,XC_HYB_GGA_XC_HPBEINT)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_KMLYP_name,XC_HYB_GGA_XC_KMLYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MB3LYP_RC04_name,XC_HYB_GGA_XC_MB3LYP_RC04)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPW1K_name,XC_HYB_GGA_XC_MPW1K)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPW1LYP_name,XC_HYB_GGA_XC_MPW1LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPW1PBE_name,XC_HYB_GGA_XC_MPW1PBE)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPW1PW_name,XC_HYB_GGA_XC_MPW1PW)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPW3LYP_name,XC_HYB_GGA_XC_MPW3LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPW3PW_name,XC_HYB_GGA_XC_MPW3PW)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_MPWLYP1M_name,XC_HYB_GGA_XC_MPWLYP1M)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_O3LYP_name,XC_HYB_GGA_XC_O3LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE0_13_name,XC_HYB_GGA_XC_PBE0_13)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE38_name,XC_HYB_GGA_XC_PBE38)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE50_name,XC_HYB_GGA_XC_PBE50)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBEB0_name,XC_HYB_GGA_XC_PBEB0)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBEH_name,XC_HYB_GGA_XC_PBEH)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE_2X_name,XC_HYB_GGA_XC_PBE_2X)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE_MOL0_name,XC_HYB_GGA_XC_PBE_MOL0)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE_MOLB0_name,XC_HYB_GGA_XC_PBE_MOLB0)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_PBE_SOL0_name,XC_HYB_GGA_XC_PBE_SOL0)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_QTP17_name,XC_HYB_GGA_XC_QTP17)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_REVB3LYP_name,XC_HYB_GGA_XC_REVB3LYP)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_SB98_1A_name,XC_HYB_GGA_XC_SB98_1A)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_SB98_1B_name,XC_HYB_GGA_XC_SB98_1B)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_SB98_1C_name,XC_HYB_GGA_XC_SB98_1C)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_SB98_2A_name,XC_HYB_GGA_XC_SB98_2A)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_SB98_2B_name,XC_HYB_GGA_XC_SB98_2B)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_SB98_2C_name,XC_HYB_GGA_XC_SB98_2C)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_WC04_name,XC_HYB_GGA_XC_WC04)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_WP04_name,XC_HYB_GGA_XC_WP04)
+    call add_free_functional(HGGA_XC_group,HGGA_XC_X3LYP_name,XC_HYB_GGA_XC_X3LYP)
+    call add_free_functional(HGGA_X_group,HGGA_X_S12H_name,XC_HYB_GGA_X_S12H)
+    call add_free_functional(HGGA_X_group,HGGA_X_SOGGA11_X_name,XC_HYB_GGA_X_SOGGA11_X)
+    call add_free_functional(HLDA_XC_group,HLDA_XC_LDA0_name,XC_HYB_LDA_XC_LDA0)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_B0KCIS_name,XC_HYB_MGGA_XC_B0KCIS,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_B86B95_name,XC_HYB_MGGA_XC_B86B95,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_B88B95_name,XC_HYB_MGGA_XC_B88B95,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_BB1K_name,XC_HYB_MGGA_XC_BB1K,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_MPW1B95_name,XC_HYB_MGGA_XC_MPW1B95,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_MPW1KCIS_name,XC_HYB_MGGA_XC_MPW1KCIS,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_MPWB1K_name,XC_HYB_MGGA_XC_MPWB1K,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_MPWKCIS1K_name,XC_HYB_MGGA_XC_MPWKCIS1K,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_PBE1KCIS_name,XC_HYB_MGGA_XC_PBE1KCIS,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_PW6B95_name,XC_HYB_MGGA_XC_PW6B95,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_PW86B95_name,XC_HYB_MGGA_XC_PW86B95,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_PWB6K_name,XC_HYB_MGGA_XC_PWB6K,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_REVTPSSH_name,XC_HYB_MGGA_XC_REVTPSSH,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_TPSS0_name,XC_HYB_MGGA_XC_TPSS0,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_TPSS1KCIS_name,XC_HYB_MGGA_XC_TPSS1KCIS,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_TPSSH_name,XC_HYB_MGGA_XC_TPSSH,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_X1B95_name,XC_HYB_MGGA_XC_X1B95,.true.)
+    call add_free_functional(HMGGA_XC_group,HMGGA_XC_XB1K_name,XC_HYB_MGGA_XC_XB1K,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_BMK_name,XC_HYB_MGGA_X_BMK,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_DLDF_name,XC_HYB_MGGA_X_DLDF,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M05_name,XC_HYB_MGGA_X_M05,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M05_2X_name,XC_HYB_MGGA_X_M05_2X,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M06_name,XC_HYB_MGGA_X_M06,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M06_2X_name,XC_HYB_MGGA_X_M06_2X,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M06_HF_name,XC_HYB_MGGA_X_M06_HF,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M08_HX_name,XC_HYB_MGGA_X_M08_HX,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_M08_SO_name,XC_HYB_MGGA_X_M08_SO,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_MN15_name,XC_HYB_MGGA_X_MN15,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_MS2H_name,XC_HYB_MGGA_X_MS2H,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_MVSH_name,XC_HYB_MGGA_X_MVSH,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_REVM06_name,XC_HYB_MGGA_X_REVM06,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_REVSCAN0_name,XC_HYB_MGGA_X_REVSCAN0,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_SCAN0_name,XC_HYB_MGGA_X_SCAN0,.true.)
+    call add_free_functional(HMGGA_X_group,HMGGA_X_TAU_HCTH_name,XC_HYB_MGGA_X_TAU_HCTH,.true.)
+    call add_free_functional(LDA_C_group,LDA_C_BR78_name,XC_LDA_C_BR78)
+    call add_free_functional(LDA_C_group,LDA_C_CHACHIYO_name,XC_LDA_C_CHACHIYO)
+    call add_free_functional(LDA_C_group,LDA_C_CHACHIYO_MOD_name,XC_LDA_C_CHACHIYO_MOD)
+    call add_free_functional(LDA_C_group,LDA_C_GK72_name,XC_LDA_C_GK72)
+    call add_free_functional(LDA_C_group,LDA_C_GL_name,XC_LDA_C_GL)
+    call add_free_functional(LDA_C_group,LDA_C_GOMBAS_name,XC_LDA_C_GOMBAS)
+    call add_free_functional(LDA_C_group,LDA_C_HL_name,XC_LDA_C_HL)
+    call add_free_functional(LDA_C_group,LDA_C_KARASIEV_name,XC_LDA_C_KARASIEV)
+    call add_free_functional(LDA_C_group,LDA_C_KARASIEV_MOD_name,XC_LDA_C_KARASIEV_MOD)
+    call add_free_functional(LDA_C_group,LDA_C_LP96_name,XC_LDA_C_LP96)
+    call add_free_functional(LDA_C_group,LDA_C_MCWEENY_name,XC_LDA_C_MCWEENY)
+    call add_free_functional(LDA_C_group,LDA_C_ML1_name,XC_LDA_C_ML1)
+    call add_free_functional(LDA_C_group,LDA_C_ML2_name,XC_LDA_C_ML2)
+    call add_free_functional(LDA_C_group,LDA_C_OB_PW_name,XC_LDA_C_OB_PW)
+    call add_free_functional(LDA_C_group,LDA_C_OB_PZ_name,XC_LDA_C_OB_PZ)
+    call add_free_functional(LDA_C_group,LDA_C_OW_name,XC_LDA_C_OW)
+    call add_free_functional(LDA_C_group,LDA_C_OW_LYP_name,XC_LDA_C_OW_LYP)
+    call add_free_functional(LDA_C_group,LDA_C_PK09_name,XC_LDA_C_PK09)
+    call add_free_functional(LDA_C_group,LDA_C_PMGB06_name,XC_LDA_C_PMGB06)
+    call add_free_functional(LDA_C_group,LDA_C_PW_name,XC_LDA_C_PW)
+    call add_free_functional(LDA_C_group,LDA_C_PW_MOD_name,XC_LDA_C_PW_MOD)
+    call add_free_functional(LDA_C_group,LDA_C_PW_RPA_name,XC_LDA_C_PW_RPA)
+    call add_free_functional(LDA_C_group,LDA_C_PZ_name,XC_LDA_C_PZ)
+    call add_free_functional(LDA_C_group,LDA_C_PZ_MOD_name,XC_LDA_C_PZ_MOD)
+    call add_free_functional(LDA_C_group,LDA_C_RC04_name,XC_LDA_C_RC04)
+    call add_free_functional(LDA_C_group,LDA_C_RPA_name,XC_LDA_C_RPA)
+    call add_free_functional(LDA_C_group,LDA_C_RPW92_name,XC_LDA_C_RPW92)
+    call add_free_functional(LDA_C_group,LDA_C_UPW92_name,XC_LDA_C_UPW92)
+    call add_free_functional(LDA_C_group,LDA_C_VBH_name,XC_LDA_C_VBH)
+    call add_free_functional(LDA_C_group,LDA_C_VWN_name,XC_LDA_C_VWN)
+    call add_free_functional(LDA_C_group,LDA_C_VWN_1_name,XC_LDA_C_VWN_1)
+    call add_free_functional(LDA_C_group,LDA_C_VWN_2_name,XC_LDA_C_VWN_2)
+    call add_free_functional(LDA_C_group,LDA_C_VWN_3_name,XC_LDA_C_VWN_3)
+    call add_free_functional(LDA_C_group,LDA_C_VWN_4_name,XC_LDA_C_VWN_4)
+    call add_free_functional(LDA_C_group,LDA_C_VWN_RPA_name,XC_LDA_C_VWN_RPA)
+    call add_free_functional(LDA_C_group,LDA_C_W20_name,XC_LDA_C_W20)
+    call add_free_functional(LDA_C_group,LDA_C_WIGNER_name,XC_LDA_C_WIGNER)
+    call add_free_functional(LDA_XC_group,LDA_XC_CORRKSDT_name,XC_LDA_XC_CORRKSDT)
+    call add_free_functional(LDA_XC_group,LDA_XC_GDSMFB_name,XC_LDA_XC_GDSMFB)
+    call add_free_functional(LDA_XC_group,LDA_XC_KSDT_name,XC_LDA_XC_KSDT)
+    call add_free_functional(LDA_XC_group,LDA_XC_LP_A_name,XC_LDA_XC_LP_A)
+    call add_free_functional(LDA_XC_group,LDA_XC_LP_B_name,XC_LDA_XC_LP_B)
+    call add_free_functional(LDA_XC_group,LDA_XC_TETER93_name,XC_LDA_XC_TETER93)
+    call add_free_functional(LDA_XC_group,LDA_XC_TIH_name,XC_LDA_XC_TIH)
+    call add_free_functional(LDA_XC_group,LDA_XC_ZLP_name,XC_LDA_XC_ZLP)
+    call add_free_functional(LDA_X_group,LDA_X_ERF_name,XC_LDA_X_ERF)
+    call add_free_functional(LDA_X_group,LDA_X_RAE_name,XC_LDA_X_RAE)
+    call add_free_functional(LDA_X_group,LDA_X_REL_name,XC_LDA_X_REL)
+    call add_free_functional(LDA_X_group,LDA_X_SLATER_name,XC_LDA_X)
+    call add_free_functional(LDA_X_group,LDA_X_SLOC_name,XC_LDA_X_SLOC)
+    call add_free_functional(LDA_X_group,LDA_X_XALPHA_name,XC_LDA_C_XALPHA)
+    call add_free_functional(MGGA_C_group,MGGA_C_B88_name,XC_MGGA_C_B88,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_BC95_name,XC_MGGA_C_BC95,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_DLDF_name,XC_MGGA_C_DLDF,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_HLTAPW_name,XC_MGGA_C_HLTAPW,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_KCIS_name,XC_MGGA_C_KCIS,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_KCISK_name,XC_MGGA_C_KCISK,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M05_name,XC_MGGA_C_M05,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M05_2X_name,XC_MGGA_C_M05_2X,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M06_name,XC_MGGA_C_M06,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M06_2X_name,XC_MGGA_C_M06_2X,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M06_HF_name,XC_MGGA_C_M06_HF,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M06_L_name,XC_MGGA_C_M06_L,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M06_SX_name,XC_MGGA_C_M06_SX,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M08_HX_name,XC_MGGA_C_M08_HX,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M08_SO_name,XC_MGGA_C_M08_SO,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M11_name,XC_MGGA_C_M11,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_M11_L_name,XC_MGGA_C_M11_L,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_MN12_L_name,XC_MGGA_C_MN12_L,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_MN12_SX_name,XC_MGGA_C_MN12_SX,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_MN15_name,XC_MGGA_C_MN15,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_MN15_L_name,XC_MGGA_C_MN15_L,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_PKZB_name,XC_MGGA_C_PKZB,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_R2SCAN_name,XC_MGGA_C_R2SCAN,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_R2SCAN01_name,XC_MGGA_C_R2SCAN01,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_REVM06_name,XC_MGGA_C_REVM06,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_REVM06_L_name,XC_MGGA_C_REVM06_L,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_REVM11_name,XC_MGGA_C_REVM11,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_REVSCAN_name,XC_MGGA_C_REVSCAN,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_REVTM_name,XC_MGGA_C_REVTM,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_REVTPSS_name,XC_MGGA_C_REVTPSS,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_RMGGAC_name,XC_MGGA_C_RMGGAC,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_RPPSCAN_name,XC_MGGA_C_RPPSCAN,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_RREGTM_name,XC_MGGA_C_RREGTM,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_RSCAN_name,XC_MGGA_C_RSCAN,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_SCAN_name,XC_MGGA_C_SCAN,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_TM_name,XC_MGGA_C_TM,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_TPSS_name,XC_MGGA_C_TPSS,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_TPSSLOC_name,XC_MGGA_C_TPSSLOC,.true.)
+    call add_free_functional(MGGA_C_group,MGGA_C_VSXC_name,XC_MGGA_C_VSXC,.true.)
+    call add_free_functional(MGGA_XC_group,MGGA_XC_HLE17_name,XC_MGGA_XC_HLE17,.true.)
+    call add_free_functional(MGGA_XC_group,MGGA_XC_OTPSS_D_name,XC_MGGA_XC_OTPSS_D,.true.)
+    call add_free_functional(MGGA_XC_group,MGGA_XC_TPSSLYP1W_name,XC_MGGA_XC_TPSSLYP1W,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_BLOC_name,XC_MGGA_X_BLOC,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_GVT4_name,XC_MGGA_X_GVT4,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_GX_name,XC_MGGA_X_GX,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_HLTA_name,XC_MGGA_X_HLTA,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_LTA_name,XC_MGGA_X_LTA,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_M06_L_name,XC_MGGA_X_M06_L,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_M11_L_name,XC_MGGA_X_M11_L,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MBEEF_name,XC_MGGA_X_MBEEF,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MBR_name,XC_MGGA_X_MBR,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MBRXC_BG_name,XC_MGGA_X_MBRXC_BG,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MBRXH_BG_name,XC_MGGA_X_MBRXH_BG,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MCML_name,XC_MGGA_X_MCML,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MGGAC_name,XC_MGGA_X_MGGAC,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MN12_L_name,XC_MGGA_X_MN12_L,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MN15_L_name,XC_MGGA_X_MN15_L,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MODTPSS_name,XC_MGGA_X_MODTPSS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MS0_name,XC_MGGA_X_MS0,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MS1_name,XC_MGGA_X_MS1,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MS2_name,XC_MGGA_X_MS2,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MS2B_name,XC_MGGA_X_MS2B,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MS2BS_name,XC_MGGA_X_MS2BS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MS2_REV_name,XC_MGGA_X_MS2_REV,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MTASK_name,XC_MGGA_X_MTASK,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MVS_name,XC_MGGA_X_MVS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MVSB_name,XC_MGGA_X_MVSB,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_MVSBS_name,XC_MGGA_X_MVSBS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_PBE_GX_name,XC_MGGA_X_PBE_GX,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_PKZB_name,XC_MGGA_X_PKZB,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_R2SCAN_name,XC_MGGA_X_R2SCAN,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_R2SCAN01_name,XC_MGGA_X_R2SCAN01,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_R4SCAN_name,XC_MGGA_X_R4SCAN,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_REGTM_name,XC_MGGA_X_REGTM,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_REGTPSS_name,XC_MGGA_X_REGTPSS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_REVM06_L_name,XC_MGGA_X_REVM06_L,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_REVSCAN_name,XC_MGGA_X_REVSCAN,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_REVTM_name,XC_MGGA_X_REVTM,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_REVTPSS_name,XC_MGGA_X_REVTPSS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_RPPSCAN_name,XC_MGGA_X_RPPSCAN,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_RSCAN_name,XC_MGGA_X_RSCAN,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_RTPSS_name,XC_MGGA_X_RTPSS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_SA_TPSS_name,XC_MGGA_X_SA_TPSS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_SCAN_name,XC_MGGA_X_SCAN,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_TASK_name,XC_MGGA_X_TASK,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_TAU_HCTH_name,XC_MGGA_X_TAU_HCTH,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_TH_name,XC_MGGA_X_TH,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_TLDA_name,XC_MGGA_X_TLDA,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_TM_name,XC_MGGA_X_TM,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_TPSS_name,XC_MGGA_X_TPSS,.true.)
+    call add_free_functional(MGGA_X_group,MGGA_X_VT84_name,XC_MGGA_X_VT84,.true.)
+    if(allocated(GGA_C_group)) then
+      call GGA_C_group%destroy
+      deallocate(GGA_C_group)
+    end if
+    if(allocated(GGA_X_group)) then
+      call GGA_X_group%destroy
+      deallocate(GGA_X_group)
+    end if
+    if(allocated(GGA_XC_group)) then
+      call GGA_XC_group%destroy
+      deallocate(GGA_XC_group)
+    end if
+    if(allocated(HGGA_X_group)) then
+      call HGGA_X_group%destroy
+      deallocate(HGGA_X_group)
+    end if
+    if(allocated(HGGA_XC_group)) then
+      call HGGA_XC_group%destroy
+      deallocate(HGGA_XC_group)
+    end if
+    if(allocated(HLDA_XC_group)) then
+      call HLDA_XC_group%destroy
+      deallocate(HLDA_XC_group)
+    end if
+    if(allocated(HMGGA_X_group)) then
+      call HMGGA_X_group%destroy
+      deallocate(HMGGA_X_group)
+    end if
+    if(allocated(HMGGA_XC_group)) then
+      call HMGGA_XC_group%destroy
+      deallocate(HMGGA_XC_group)
+    end if
+    if(allocated(LDA_C_group)) then
+      call LDA_C_group%destroy
+      deallocate(LDA_C_group)
+    end if
+    if(allocated(LDA_X_group)) then
+      call LDA_X_group%destroy
+      deallocate(LDA_X_group)
+    end if
+    if(allocated(LDA_XC_group)) then
+      call LDA_XC_group%destroy
+      deallocate(LDA_XC_group)
+    end if
+    if(allocated(MGGA_C_group)) then
+      call MGGA_C_group%destroy
+      deallocate(MGGA_C_group)
+    end if
+    if(allocated(MGGA_X_group)) then
+      call MGGA_X_group%destroy
+      deallocate(MGGA_X_group)
+    end if
+    if(allocated(MGGA_XC_group)) then
+      call MGGA_XC_group%destroy
+      deallocate(MGGA_XC_group)
+    end if
+  end subroutine libxc_choose_functionals
+end module libxc

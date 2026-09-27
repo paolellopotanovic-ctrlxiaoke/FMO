@@ -1,0 +1,53 @@
+benchmark:
+  name: boltz2_table12_fmo87
+  cohort: data/fmo87_cohort.csv
+  cohort_sha256: 19edfb8e2ccf3ab1029d848e4062d70cb35532d2b4fee63674f160b2a292997b
+  targets:
+    CDK2: 16
+    JNK1: 21
+    P38: 34
+    TYK2: 16
+  metric_aggregation: per_target_then_compound_count_weighted
+
+protein_preparation:
+  pdb2pqr: 3.6.1
+  forcefield: AMBER
+  titration: PROPKA 3.5.1
+  ph: 7.4
+  hydrogen_bond_optimization: true
+  water_policy: retain_crystal_waters
+
+geometry:
+  engine: OpenMM 8.4
+  protein_forcefield: AMBER14 protein.ff14SB
+  water_model: TIP3P
+  ligand_forcefield: OpenFF 2.2.0
+  ligand_charge_model: openff-gnn-am1bcc-1.0.0.pt
+  protein_coordinates: free
+  ligand_restraint_k_kj_mol_angstrom2: 100
+  minimization_tolerance_kj_mol_nm: 1.0
+
+fmo:
+  engine: GAMESS 2024.2.1
+  method: FMO2-DFTB3/PIEDA
+  parameters: 3OB-3-1
+  pocket_cutoff_angstrom: 5.0
+  fragmentation: shifted_facio_like_ca_c_prime
+  terminal_caps: full_neutral_ACE_NME
+  internal_boundaries: FMOBND_HOP_C
+  dampxh: true
+  modorb: 3
+  nacut: 0
+  modmol: 1
+  water_pcm_ifmo: -1
+  max_tie_reconciliation_kcal_mol: 0.005
+
+boltz2:
+  model: boltz2
+  version: 2.2.1
+  seed: 0
+  recycling_steps: 3
+  sampling_steps_affinity: 200
+  diffusion_samples_affinity: 5
+  msa_policy: one_shared_msa_per_target
+  affinity_conversion: RT_ln10_times_pred_minus_6_at_298.15K

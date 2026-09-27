@@ -1,0 +1,45 @@
+! GAMESS/VB2000 Test 41.
+! This illustrates the Generalized Product Function Energy Partitioning
+! code from the Nascimanto Group in Brazil, which was officially added
+! to VB2000 in version 3.0.
+!
+ $CONTRL VBTYP=VB2000 $END
+ $BASIS GBASIS=N31 NGAUSS=6 NDFUNC=1 $END
+ $DATA
+H2O GPFEP
+C1  
+O   8.0    0.0000    0.0000   0.0000
+H   1.0    0.0000   -0.7572   0.5865
+H   1.0    0.0000    0.7572   0.5865
+ $END
+! In this case the $GENCTL and $GRPDIM keywords are not necessary, because
+! it generates automatically the GVB-PP group spliting from the "GPF(3)"
+! specification below. But we keep them in the file to make clear the
+! partition of the groups: core electrons and lone pairs in one group 
+! treated at HF level and the 2 groups as the O-H bonds, treated at SCVB
+! (with 2 electrons is equivalent to GVB-PP) level. In this case the 
+! initial orbitals are generated correctly from a default localization
+! process in VB2000, but generally it is necessary to provide a proper 
+! set of initial orbitals (see the VB2000 manual for more details). It 
+! could be done as well as a GPF(5) calculation, treating the lone pairs 
+! also at GVB level.
+ $VB2000
+#! GPF(3)/6-31G*
+ 
+H2O GPFEP
+
+ $GENCTL
+ 6,2,2
+ 1,3,3
+
+ $GRPDIM
+ 3,2,2
+
+ $GPFEP
+
+ $GPFDP
+
+ $END
+
+!TRAVIS-CI SKIP
+!Large numeric variance when using Intel or NVIDIA HPC SDK compilers

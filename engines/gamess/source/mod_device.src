@@ -1,0 +1,18 @@
+! MODULE mod_device *DECK mod_device
+!>
+!> @brief   Contains the variables for the device input group
+!>
+!> @author  Sarom Leang
+!>
+!> @date    June 7, 2023
+!>
+!> @param freebytes sets artificial upper limit to the number of bytes available on the device
+
+      module mod_device
+      implicit none
+      public
+
+      integer :: freebytes = -1
+
+      save
+      end module mod_device

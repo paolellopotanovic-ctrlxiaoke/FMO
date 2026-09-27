@@ -1,0 +1,2 @@
+NCPUS=1
+VERSION=2023.R1.intel

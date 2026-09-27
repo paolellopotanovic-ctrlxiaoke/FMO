@@ -1,0 +1,21 @@
+! Serial DDI MP2 gradient run of sulfuric acid
+!
+ $CONTRL SCFTYP=RHF mplevl=2 RUNTYP=gradient icut=30 itol=30 $END
+ $system mwords=25 memddi=10 $end
+ $basis  gbasis=n31 ngauss=6 ndfunc=1 npfunc=1 $end
+ $mp2    code=ddi NACORE=0 cutoff=1.0E-30 $end
+ $scf    dirscf=.t. conv=1.0E-12 $end
+ $trans  cuttrf=1.0E-30 $end
+ 
+ $DATA
+sulfuric acid
+Cn 2
+
+S          16.0   0.0000000000   0.0000000000  -0.1685629831
+O           8.0   0.8581804909   0.9168966239   0.8563117705
+O           8.0   0.9670161942  -0.8412410460  -0.8350560171
+H           1.0   0.3023433940   1.6717530402   1.1127562441
+ $end
+
+! TRAVIS-CI MEDIUM
+

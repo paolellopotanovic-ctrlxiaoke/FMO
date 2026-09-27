@@ -1,0 +1,38 @@
+!  1SF-ORMAS energy on D2H ethylene molecule
+!  ROHF triplet reference used, so single spin-flip required to get singlet state
+!  It's a determinant code, so NSTATE needs to be larger enough
+!  6 states requested:
+!
+!  FINAL ROHF ENERGY IS      -77.9205321560 AFTER   9 ITERATIONS
+!  ALL CI Energies:
+!  STATE   1  ENERGY=       -78.1090693828  S=  0.00  SZ=  0.00  SPACE SYM=A   
+!  STATE   2  ENERGY=       -77.9418296055  S=  1.00  SZ=  0.00  SPACE SYM=A     
+!  STATE   3  ENERGY=       -77.7886346967  S=  0.00  SZ=  0.00  SPACE SYM=A
+!  STATE   4  ENERGY=       -77.7602886450  S=  1.00  SZ=  0.00  SPACE SYM=A   
+!  STATE   5  ENERGY=       -77.7528631096  S=  0.00  SZ=  0.00  SPACE SYM=A   
+!  STATE   6  ENERGY=       -77.7497809567  S=  1.00  SZ=  0.00  SPACE SYM=A   
+!
+ $CONTRL SCFTYP=rohf RUNTYP=energy mult=3
+  cityp=sform  $end
+ $BASIS GBASIS=n311 ngauss=6 ndfunc=1 $END
+ $cidet nstate=6 itermx=400
+   ncore=0 nact=50 nels=16 
+   mulsf=1  !<-- This has special meaning in SF-ORMAS. Denotes final MULT
+ $end
+ $ormas
+  nspace=3 mstart(1)=1,8,10 mine(1)=13,1,0
+  maxe(1)=14,3,1 
+ $end
+ $SCF DIRSCF=.TRUE. $END
+ $system mwords=400 $end
+ $DATA 
+Title
+C1
+ C           6.0  -0.0000000000  -0.0000000000   0.6732045548
+ C           6.0   0.0000000000  -0.0000000000  -0.6732045548
+ H           1.0  -0.0000000000  -0.9181328152  -1.2369753692
+ H           1.0   0.0000000000   0.9181328152   1.2369753692
+ H           1.0  -0.0000000000  -0.9181328152   1.2369753692
+ H           1.0   0.0000000000   0.9181328152  -1.2369753692
+ $END
+!TRAVIS-CI SMALL

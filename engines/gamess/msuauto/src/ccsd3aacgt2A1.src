@@ -1,0 +1,151 @@
+C*MODULE CCSD3A DECK t2A1
+C> @brief Updates cluster components
+C>
+C> @author Jun Shen
+C> - April, 2018
+C>
+C> @param N0 number of frozen core orbitals
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param M1 number of active occupied orbitals
+C> @param M2 number of active unoccupied orbitals
+C> @param K1 number of occupied alpha orbitals
+C> @param K2 number of occupied beta orbitals
+C> @param K3 number of unoccupied alpha orbitals
+C> @param K4 number of unoccupied beta orbitals
+C> @param K5 number of non-active occupied orbitals
+C> @param K6 number of non-active unoccupied orbitals
+C> @param K7 number of active occupied alpha orbitals
+C> @param K8 number of active occupied beta orbitals
+C> @param K9 number of active unoccupied alpha orbitals
+C> @param K0 number of active unoccupied beta orbitals
+C> @param FAHH Fock alpha HH array
+C> @param FAHP Fock alpha HP array
+C> @param FAPP Fock alpha PP array
+C> @param FBHH Fock beta HH array
+C> @param FBHP Fock beta HP array
+C> @param FBPP Fock beta PP array
+C> @param VAHHHH Twobody alpha-alpha HHHH array
+C> @param VAHHHP Twobody alpha-alpha HHHP array
+C> @param VAHHPP Twobody alpha-alpha HHPP array
+C> @param VAHPHP Twobody alpha-alpha HPHP array
+C> @param VAHPPP Twobody alpha-alpha HPPP array
+C> @param VBHHHH Twobody alpha-beta HHHH array
+C> @param VBHHHP Twobody alpha-beta HHHP array
+C> @param VBHHPH Twobody alpha-beta HHPH array
+C> @param VBHHPP Twobody alpha-beta HHPP array
+C> @param VBHPHP Twobody alpha-beta HPHP array
+C> @param VBHPPH Twobody alpha-beta HPPH array
+C> @param VBPHPH Twobody alpha-beta PHPH array
+C> @param VBHPPP Twobody alpha-beta HPPP array
+C> @param VBPHPP Twobody alpha-beta HPPP array
+C> @param VCHHHH Twobody beta-beta HHHH array
+C> @param VCHHHP Twobody beta-beta HHHP array
+C> @param VCHHPP Twobody beta-beta HHPP array
+C> @param VCHPHP Twobody beta-beta HPHP array
+C> @param VCHPPP Twobody beta-beta HPPP array
+C> @param VAAPPP Twobody alpha-alpha (AP)PPP array
+C> @param VBAPPP Twobody alpha-beta (AP)PPP array
+C> @param VBPAPP Twobody alpha-beta P(AP)PP array
+C> @param VCAPPP Twobody beta-beta (AP)PPP array
+C> @param T1A one-body alpha cluster components
+C> @param T1B one-body beta cluster components
+C> @param T2A two-body alpha-alpha cluster components
+C> @param T2B two-body alpha-beta cluster components
+C> @param T2C two-body beta-beta cluster components
+C> @param T3A three-body (active-alpha)-(alpha)-(alpha) cluster components
+C> @param T3B1 three-body (active-alpha)-alpha-beta, (active-alpha)-alpha-beta
+C> @param T3B2 three-body
+C> (non-active-alpha)-(non-active-alpha)-(active-beta), (non-active-alpha)-(non-active-alpha)-(active-beta)
+C> @param T3B3 three-body
+C> (alpha)-(alpha)-(non-active-beta), (non-active-alpha)-(non-active-alpha)-(active-beta)
+C> @param T3B4 three-body
+C> (non-active-alpha)-(non-active-alpha)-(active-beta), (active-alpha)-(alpha)-(beta)
+C> @param T3C1 three-body
+C> (alpha)-(active-beta)-(beta), (alpha)-(active-beta)-(beta)
+C> @param T3C2 three-body
+C> (active-alpha)-(non-active-beta)-(non-active-beta),(active-alpha)-(non-active-beta)-(non-active-beta)
+C> @param T3C3 three-body
+C> (alpha)-(active-beta)-(beta),(active-alpha)-(non-active-beta)-(non-active-beta)
+C> @param T3C4 three-body
+C> (active-alpha)-(non-active-beta)-(non-active-beta),(alpha)-(active-beta)-(beta)
+C> @param T3D three-body (active-beta)-(beta)-(beta) cluster components
+C>
+C> @note H stands for hole (occupied orbitals), P stands for particle
+C> (unnocupied orbitals), and AP stands for active-particle (active
+C> unoccupied orbitals). Also all T1, T2, and T3 arrays are read from
+C> right to left (i.e. T2(a4,a3,a2,a1) -> (a1)-(a2),(a3)-(a4), where
+C> first indices before the comma are occupied indices and the next are
+C> unnocupied.
+       subroutine t2A_update1(N0,N1,N3,V2A,shift,NFT848,
+     & K1,K3,FAHH,FAPP,t1A,t2A)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       integer a,b,c,e,f,g,h,i,j,k,m,n,o,p
+       real*8 CoeLeft,shift
+       real*8 FAHH(N0+1:N1,N0+1:N1)
+       real*8 FAPP(N1+1:N3,N1+1:N3)
+       real*8 t1A(N1+1:N3,N0+1:N1)
+       real*8 t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8 V2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8,allocatable::VAPPP(:,:,:)
+       real*8,allocatable::tt2A(:,:,:)
+       real*8,allocatable::U(:,:)
+       real*8,allocatable::C1(:,:,:)
+C
+       N2A=0
+       do i=N0+2,N1;do j=N0+1,i-1
+        N2A=N2A+1
+       enddo;enddo
+C
+       allocate(tt2A(N1+1:N3,N1+1:N3,N2A),
+     &          source=0.0d0)
+       I2A=0
+       do i=N0+2,N1;do j=N0+1,i-1
+        I2A=I2A+1
+        do e=N1+1,N3;do f=N1+1,N3
+         tt2A(f,e,I2A)=0.5d0*t2A(f,e,j,i)+t1A(e,i)*t1A(f,j)
+       enddo;enddo;enddo;enddo
+       allocate(VAPPP(N1+1:N3,N1+1:N3,N1+1:N3),
+     &          source=0.0d0)
+       do a=N1+1,N3-1
+        read(NFT848,rec=a-N1)VAPPP
+        allocate(C1(N1+1:N3,N1+1:N3,a+1:N3))
+        do b=a+1,N3;do e=N1+1,N3;do f=N1+1,N3
+         C1(f,e,b)=VAPPP(f,e,b)
+        enddo;enddo;enddo
+        allocate(U(a+1:N3,N2A))
+        I1=N2A
+        I2=N3-a
+        I3=K3*K3
+        call EGEMM(I1,I2,I3,tt2A,C1,U)
+!       call EGEMM(I1,I2,I3,tt2A,VAPPP(1,1,a+1),U)
+        deallocate(C1)
+        I2A=0
+        do i=N0+2,N1;do j=N0+1,i-1
+         I2A=I2A+1
+         do b=a+1,N3
+         V2A(b,a,j,i)=V2A(b,a,j,i)+U(b,I2A)
+        enddo;enddo;enddo
+        deallocate(U)
+       enddo
+       deallocate(VAPPP)
+       deallocate(tt2A)
+C
+       do i=N0+2,N1;do j=N0+1,i-1
+       do a=N1+1,N3-1;do b=a+1,N3
+         CoeLeft=FAPP(b,b)+FAPP(a,a)
+     &          -FAHH(j,j)-FAHH(i,i)
+     &          +shift
+         t2A(b,a,j,i)=t2A(b,a,j,i)-V2A(b,a,j,i)/CoeLeft
+         t2A(b,a,i,j)=-t2A(b,a,j,i)
+         t2A(a,b,j,i)=-t2A(b,a,j,i)
+         t2A(a,b,i,j)= t2A(b,a,j,i)
+       enddo
+       enddo
+       enddo
+       enddo
+C
+       end

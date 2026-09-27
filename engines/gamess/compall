@@ -1,0 +1,991 @@
+#!/bin/tcsh -f
+#
+# 27 Mar 2014 - script to compile the GAMESS quantum chemistry code.
+#
+#     Invoke this script by './compall >& compall.log &'.
+#     UNIX compilers are sometimes slow, so start this up, and go for tea.
+#
+#  This script no longer requires customization, as it starts off by
+#  reading information about the compilation from a configuration file.
+#
+#
+#  Please send your issues to the GAMESS public
+#  issue tracker on GitHub:
+#  https://github.com/gms-bbg/gamess-issues/issues
+#
+if (-e install.info) then
+   source install.info
+else if (-e ../install.info) then
+   source ../install.info
+else
+   echo "Please run 'config' first, to set up GAMESS compiling information" >> /dev/stderr
+   exit 4
+endif
+#
+#  the configuration file read just above provides the next two variables.
+#
+set TARGET=$GMS_TARGET
+#AAD this script is run from GMS_BUILD_DIR only which may be the same
+#    as GMS_PATH
+#chdir $GMS_PATH
+#
+#  ----- and now the script begins...
+#
+date
+#
+if (!(-e object)) mkdir object
+#
+#  If we are compiling a serial binary
+#
+if ($GMS_DDI_COMM == serial) ./comp serial
+# LibXC should be compiled as module
+if ($GMS_LIBXC == true) then
+   # gamess-libxc-enabled-start-section
+   ./comp prec
+   ./comp mx_limits
+   ./comp modules_common
+   ./comp modules_dft
+   ./comp messages
+   ./comp utils_strings
+   ./comp mod_nameio
+   ./comp functionals
+   ./comp libxc
+   # gamess-libxc-enabled-end-section
+else
+   # gamess-libxc-disabled-start-section
+   ./comp prec
+   ./comp mx_limits
+   ./comp modules_common
+   ./comp messages
+   ./comp libxc_empty
+   # gamess-libxc-disabled-end-section
+endif
+#
+#   modules and special code for the threaded Rys quadrature, if used
+#   for compilation of files not needed by non-threaded GAMESS
+#
+if ($GMS_OPENMP == true) then
+   #   files containing general modules
+   #   has to be compiled first for dependencies
+   # openmp-modules-start-section
+   ./comp prec
+   ./comp constants
+   ./comp mx_limits
+   ./comp constants
+   ./comp mod_vvos
+   ./comp gausshermite
+   ./comp modules_dft
+   ./comp efpmodule
+   ./comp grd2_consts
+   ./comp blkint
+   ./comp ompmod_tools
+   ./comp mod_gauss_hermite
+   ./comp mod_nosp_basis
+   ./comp mod_shell_tools
+   ./comp mod_1e_primitives
+   ./comp riccutils
+   ./comp riccints
+   ./comp riccdiag
+   ./comp riccrhf
+   ./comp rimp2grd
+   ./comp dftbpb
+   # openmp-modules-end-section
+
+   # openmp-modules-start-section
+   # strictly only necessary if the compiler does not
+   # provide norm2 intrinsic, but we always compile for omp_pcm
+   # and let lked handle whether to link it in or not
+   ./comp norm2
+   if ($GMS_OPENMP_OFFLOAD == true) then
+      ./comp gpu_mod_ERI
+      ./comp gpu_jtype1
+      ./comp gpu_jtype2
+      ./comp gpu_jtype3
+      ./comp gpu_jtype4
+      ./comp gpu_jtype5
+      ./comp gpu_jtype6
+      ./comp gpu_dirfck
+      ./comp gpu_ompmod_gpu
+      ./comp gpu_dirfck_cphf
+      ./comp gpu_ompmod_cphf
+      ./comp gpu_dirfck_tdhf
+      ./comp gpu_ompmod_tdhf_amb
+      ./comp gpu_ompmod_tdhf_apb
+   endif
+
+   #   other files
+   ./comp ompmod
+   ./comp ompgrd2
+   ./comp omp_int1
+   ./comp omp_grd1
+   ./comp omp_fmo
+   ./comp omp_fmogrd1
+   ./comp omp_fmogrd2
+   ./comp omp_pcm
+   ./comp efteiomp
+   ./comp cphf_tddnlr_omp
+   # openmp-modules-end-section
+endif
+if ($GMS_OPENMP_OFFLOAD == true) then
+   # openmp-offload-modules-start-section
+   ./comp cublasf
+   ./comp modules_rimp2gpu
+   ./comp shellprocessing
+   ./comp shellpairs
+   ./comp mod_device
+   # openmp-offload-modules-end-section
+endif
+
+if ($GMS_HPCCHEM == true) then
+   # hpcchem-modules-start-section
+./comp hpcchem_molecule_module
+./comp hpcchem_runner_module
+./comp hpcchem_module
+   # hpcchem-modules-end-section
+   # hpcchem-start-section
+./comp hpcchem_driver
+   # hpcchem-end-section
+endif
+#
+#
+#
+if ($GMS_MDI == true) then
+   # MDI should be compiled as module
+   # gamess-mdi-enabled-start-section
+   ./comp prec
+   ./comp constants
+   ./comp mx_limits
+   ./comp modmdi
+   # gamess-mdi-enabled-end-section
+else
+   # MDI stubs should be compiled as module
+   # gamess-mdi-disabled-start-section
+   ./comp modmdi_empty
+   # gamess-mdi-disabled-end-section
+endif
+#
+#  ---------- now, compile all of the individual source files -----------
+#
+# compile the subset of files, where modules are defined,
+# which are used in other files.
+#
+# gamess-modules-start-section
+#
+./comp prec
+./comp constants
+./comp mx_limits
+./comp cnglob
+./comp constants
+./comp mod_vvos
+./comp modf77_aambs
+./comp gausshermite
+./comp modules_dft
+./comp params
+./comp efpmodule
+./comp modmnfun
+./comp utils_strings
+./comp modules_common
+./comp mod_sformas
+./comp modmcpdft
+./comp mpcdatpm6
+./comp mpchbond
+./comp rmddat
+./comp secor
+./comp mod_nosp_basis
+./comp mod_grid_storage
+./comp mod_dft_partfunc
+./comp mod_dft_molgrid
+./comp mod_dft_fuzzycell
+./comp mod_dft_gridint
+./comp vm2_module
+./comp modcc
+./comp dftbpb
+./comp hrmrst
+./comp mod_vb2000
+./comp mod_lutiotc
+./comp gamess_version
+./comp unport
+./comp util
+./comp mod_offload
+./comp hpcchem_stubs
+#
+# gamess-modules-end-section
+#
+# gamess-base-start-section
+#
+./comp aldeci
+./comp algnci
+./comp basccn
+./comp basecp
+./comp basext
+./comp basg3l
+./comp basg3x
+./comp bashuz
+./comp bashz2
+./comp baskar
+./comp basminix
+./comp basn21
+./comp basn31
+./comp baspcn
+./comp bassto
+./comp casino
+./comp ccaux
+./comp ccddi
+./comp ccqaux
+./comp ccquad
+./comp ccsdt
+./comp ceeis
+./comp cepa
+./comp chgpen
+./comp cimf
+./comp ciminf
+./comp cimi
+./comp cimlib
+./comp cimsub
+./comp cisgrd
+./comp comp
+./comp cosmo
+./comp cosprt
+./comp cphf
+./comp cphf_tddnlr
+./comp cpmchf
+./comp cprohf
+./comp cpuhf
+./comp dccc
+./comp dcgrd
+./comp dcgues
+./comp dcint2
+./comp dclib
+./comp dcmp2
+./comp dcscf
+./comp dctran
+./comp ddilib
+./comp delocl
+./comp demrpt
+./comp dft
+./comp dftaux
+./comp dftbfo
+./comp dftbgr
+./comp dftbhs
+./comp dftblb
+./comp dftbsk
+./comp dftbtd
+./comp dftbx
+./comp dftdis
+./comp dftfun
+./comp dftgrd
+./comp dftint
+./comp dftxca
+./comp dftxcb
+./comp dftxcc
+./comp dftxcd
+./comp dftxce
+./comp dftxcf
+./comp dftxcg
+./comp diab
+./comp dmulti
+./comp drc
+./comp eaipcc
+./comp ecp
+./comp ecpder
+./comp ecplib
+./comp ecppot
+./comp efchtr
+./comp efdrvr
+./comp efelec
+./comp efgrd2
+./comp efgrda
+./comp efgrdb
+./comp efgrdc
+./comp efinp
+./comp efinta
+./comp efintb
+./comp efmo
+./comp efmograd
+./comp efmograd_es
+./comp efmograd_exrep
+./comp efmograd_pol
+./comp efmograd_disp
+./comp efpaul
+./comp efpcm
+./comp efpcov
+./comp efpfmo
+./comp eftei
+./comp eftei_genr70
+./comp eftei_genr03
+./comp eftei_eric
+./comp eigen
+./comp elglib
+./comp elgloc
+./comp elgscf
+./comp excorr
+./comp eomcc
+./comp ewald
+./comp fcidump
+./comp ffield
+./comp fmo
+./comp fmoafo
+./comp fmocp
+./comp fmoesd
+./comp fmogrd
+./comp fmoh1a
+./comp fmoh2a
+./comp fmoh2b
+./comp fmoh2c
+./comp fmohss
+./comp fmoint
+./comp fmoio
+./comp fmolib
+./comp fmomm
+./comp fmopbc
+./comp fmoprp
+./comp frfmt
+./comp fsodci
+./comp g3
+./comp gamess
+./comp globop
+./comp gmcpt
+./comp gradex
+./comp grd1
+./comp grd2a
+./comp grd2b
+./comp grd2c
+./comp guess
+./comp gugdga
+./comp gugdgb
+./comp gugdm
+./comp gugdm2
+./comp gugdrt
+./comp gugem
+./comp gugsrt
+./comp gvb
+./comp hess
+./comp hss1a
+./comp hss1b
+./comp hss1c
+./comp hss2a
+./comp hss2b
+./comp hss2c
+./comp inputa
+./comp inputb
+./comp inputc
+./comp int1
+./comp int2a
+./comp int2b
+./comp int2c
+./comp int2d
+./comp int2f
+./comp int2g
+./comp int2r
+./comp int2s
+./comp iolib
+./comp ivocas
+./comp lagran
+./comp local
+./comp locatd
+./comp loccd
+./comp locpol
+./comp locsvd
+./comp lrd
+./comp lut
+./comp mccas
+./comp mcjac
+./comp mcpdft
+./comp mcpgrd
+./comp mcpinp
+./comp mcpint
+./comp mcpl10
+./comp mcpl20
+./comp mcpl30
+./comp mcpl40
+./comp mcpl50
+./comp mcpl60
+./comp mcpl70
+./comp mcpl80
+./comp mcqdpt
+./comp mcqdwt
+./comp mcqud
+./comp mcscf
+./comp mctwo
+./comp mctwo-defensive
+./comp mdefp
+./comp mexing
+./comp mltfmo
+./comp mm23
+./comp mnsol
+./comp morokm
+./comp mp2
+./comp mp2ddi
+./comp mp2grd
+./comp mp2grd-defensive
+./comp mp2gr2
+./comp mp2ims
+./comp mpcdat
+./comp mpcgrd
+./comp mpcint
+./comp mpcmol
+./comp mpcmsc
+./comp mpcpcm
+./comp mpqcst
+./comp mrsf
+./comp mthlib
+./comp nameio
+./comp namd
+./comp nebpath
+./comp nmr
+./comp optcix
+./comp ordint
+./comp ormas1
+./comp ormpt2
+./comp parley
+./comp pcm
+./comp pcmcav
+./comp pcmcv2
+./comp pcmder
+./comp pcmdis
+./comp pcmhss
+./comp pcmief
+./comp pcmpol
+./comp pcmvch
+./comp prpamm
+./comp prpel
+./comp prplib
+./comp prppop
+./comp qeigen
+./comp qfmm
+./comp qmfm
+./comp qmmm
+./comp qrel
+./comp quanpoa
+./comp quanpoa_1
+./comp quanpob
+./comp quanpoc
+./comp quanpod
+./comp quanpoe
+./comp quanpof
+./comp raman
+./comp reks
+./comp reorg
+./comp rhfuhf
+./comp ricab
+./comp riint
+./comp rimp2
+./comp rimp2_1
+./comp rimp2omp
+./comp rimp2grd
+./comp rimp2gpu
+./comp rmd
+./comp rmdgen
+./comp rmdrun
+./comp rmdwrk
+./comp roeom
+./comp rohfcc
+./comp rxncrd
+./comp ryspol
+./comp scflib
+./comp scfmi
+./comp scrf
+./comp sfdft
+./comp sfgrad
+./comp sobrt
+./comp soffac
+./comp solib
+./comp sozeff
+./comp statpt
+./comp surf
+./comp svpchg
+./comp svpinp
+./comp svpleb
+./comp symhi
+./comp symorb
+./comp symslc
+./comp tddft
+./comp tduprp
+./comp tddefp
+./comp tddfun
+./comp tddfxc
+./comp tddgrd
+./comp tddint
+./comp tddnlr
+./comp tddxca
+./comp tddxcc
+./comp tddxcd_m05
+./comp tddxcd_m06
+./comp tddxcd_m08
+./comp tddxcd_pkzb
+./comp tddxcd_revtpss
+./comp tddxcd_tpss
+./comp tddxcd_vs98
+./comp tddxce
+./comp tdhf
+./comp tdx
+./comp tdxio
+./comp tdxitr
+./comp tdxni
+./comp tdxprp
+./comp trans
+./comp trfdm2
+./comp trnstn
+./comp trudge
+./comp umpddi
+./comp utddft
+./comp utdgrd
+./comp vibanl
+./comp vscf
+./comp vvos
+./comp aambs
+./comp zapddi
+./comp zmatrx
+#
+# gamess-base-end-section
+#
+if ($GMS_OPENMP_OFFLOAD == true) then
+   # openmp-offload-start-section
+   ./comp tgpu_ompmod_sp
+   ./comp tgpu_ompmod_cphf_sp
+   ./comp tgpu_ompmod_tdhf_amb_sp
+   ./comp tgpu_ompmod_tdhf_apb_sp
+   ./comp vxx
+   ./comp rimp2int
+   ./comp i00
+   ./comp i01
+   ./comp i02
+   ./comp i11
+   ./comp i12
+   ./comp i22
+   ./comp rt1
+   ./comp rt2
+   ./comp rt3
+   ./comp rimp2subs
+   ./comp work
+   # openmp-offload-end-section
+endif
+#
+# nbo-disabled-start-section
+./comp nbostb
+# nbo-disabled-end-section
+#
+# vm2-disabled-start-section
+./comp vm2_stub
+# vm2-disabled-end-section
+#
+if ($GMS_MSUAUTO == true) then
+   # msuauto-modules-enabled-start-section
+   ./comp ccsd3aacgreorder
+   ./comp ccsd3aacgsum
+   # msuauto-modules-enabled-end-section
+   # msuauto-enabled-start-section
+   ./comp ccsd3aacgt1A00
+   ./comp ccsd3aacgt1A01
+   ./comp ccsd3aacgt1A10
+   ./comp ccsd3aacgt1A11
+   ./comp ccsd3aacgt1A
+   ./comp ccsd3aacgt1B00
+   ./comp ccsd3aacgt1B01
+   ./comp ccsd3aacgt1B10
+   ./comp ccsd3aacgt1B11
+   ./comp ccsd3aacgt1B
+   ./comp ccsd3aacgt2A0000
+   ./comp ccsd3aacgt2A0010
+   ./comp ccsd3aacgt2A0011
+   ./comp ccsd3aacgt2A1000
+   ./comp ccsd3aacgt2A1010
+   ./comp ccsd3aacgt2A1011
+   ./comp ccsd3aacgt2A1100
+   ./comp ccsd3aacgt2A1110
+   ./comp ccsd3aacgt2A1111
+   ./comp ccsd3aacgt2A1
+   ./comp ccsd3aacgt2A
+   ./comp ccsd3aacgt2B0000
+   ./comp ccsd3aacgt2B0001
+   ./comp ccsd3aacgt2B0010
+   ./comp ccsd3aacgt2B0011
+   ./comp ccsd3aacgt2B0100
+   ./comp ccsd3aacgt2B0101
+   ./comp ccsd3aacgt2B0110
+   ./comp ccsd3aacgt2B0111
+   ./comp ccsd3aacgt2B1000
+   ./comp ccsd3aacgt2B1001
+   ./comp ccsd3aacgt2B1010
+   ./comp ccsd3aacgt2B1011
+   ./comp ccsd3aacgt2B1100
+   ./comp ccsd3aacgt2B1101
+   ./comp ccsd3aacgt2B1110
+   ./comp ccsd3aacgt2B1111
+   ./comp ccsd3aacgt2B1
+   ./comp ccsd3aacgt2B
+   ./comp ccsd3aacgt2C0000
+   ./comp ccsd3aacgt2C0010
+   ./comp ccsd3aacgt2C0011
+   ./comp ccsd3aacgt2C1000
+   ./comp ccsd3aacgt2C1010
+   ./comp ccsd3aacgt2C1011
+   ./comp ccsd3aacgt2C1100
+   ./comp ccsd3aacgt2C1110
+   ./comp ccsd3aacgt2C1111
+   ./comp ccsd3aacgt2C1
+   ./comp ccsd3aacgt2C
+   ./comp ccsd3aacgt3A100100
+   ./comp ccsd3aacgt3A100110
+   ./comp ccsd3aacgt3A100111
+   ./comp ccsd3aacgt3A110100
+   ./comp ccsd3aacgt3A110110
+   ./comp ccsd3aacgt3A110111
+   ./comp ccsd3aacgt3A111100
+   ./comp ccsd3aacgt3A111110
+   ./comp ccsd3aacgt3A111111
+   ./comp ccsd3aacgt3AB
+   ./comp ccsd3aacgt3B001001
+   ./comp ccsd3aacgt3B001100
+   ./comp ccsd3aacgt3B001101
+   ./comp ccsd3aacgt3B001110
+   ./comp ccsd3aacgt3B001111
+   ./comp ccsd3aacgt3B100001
+   ./comp ccsd3aacgt3B100100
+   ./comp ccsd3aacgt3B100101
+   ./comp ccsd3aacgt3B100110
+   ./comp ccsd3aacgt3B100111
+   ./comp ccsd3aacgt3B101001
+   ./comp ccsd3aacgt3B101100
+   ./comp ccsd3aacgt3B101101
+   ./comp ccsd3aacgt3B101110
+   ./comp ccsd3aacgt3B101111
+   ./comp ccsd3aacgt3B110001
+   ./comp ccsd3aacgt3B110100
+   ./comp ccsd3aacgt3B110101
+   ./comp ccsd3aacgt3B110110
+   ./comp ccsd3aacgt3B110111
+   ./comp ccsd3aacgt3B111001
+   ./comp ccsd3aacgt3B111100
+   ./comp ccsd3aacgt3B111101
+   ./comp ccsd3aacgt3B111110
+   ./comp ccsd3aacgt3B111111
+   ./comp ccsd3aacgt3BC
+   ./comp ccsd3aacgt3C010010
+   ./comp ccsd3aacgt3C010011
+   ./comp ccsd3aacgt3C010100
+   ./comp ccsd3aacgt3C010110
+   ./comp ccsd3aacgt3C010111
+   ./comp ccsd3aacgt3C011010
+   ./comp ccsd3aacgt3C011011
+   ./comp ccsd3aacgt3C011100
+   ./comp ccsd3aacgt3C011110
+   ./comp ccsd3aacgt3C011111
+   ./comp ccsd3aacgt3C100010
+   ./comp ccsd3aacgt3C100011
+   ./comp ccsd3aacgt3C100100
+   ./comp ccsd3aacgt3C100110
+   ./comp ccsd3aacgt3C100111
+   ./comp ccsd3aacgt3C110010
+   ./comp ccsd3aacgt3C110011
+   ./comp ccsd3aacgt3C110100
+   ./comp ccsd3aacgt3C110110
+   ./comp ccsd3aacgt3C110111
+   ./comp ccsd3aacgt3C111010
+   ./comp ccsd3aacgt3C111011
+   ./comp ccsd3aacgt3C111100
+   ./comp ccsd3aacgt3C111110
+   ./comp ccsd3aacgt3C111111
+   ./comp ccsd3aacgt3CD
+   ./comp ccsd3aacgt3D100100
+   ./comp ccsd3aacgt3D100110
+   ./comp ccsd3aacgt3D100111
+   ./comp ccsd3aacgt3D110100
+   ./comp ccsd3aacgt3D110110
+   ./comp ccsd3aacgt3D110111
+   ./comp ccsd3aacgt3D111100
+   ./comp ccsd3aacgt3D111110
+   ./comp ccsd3aacgt3D111111
+   ./comp ccsd3amain
+   ./comp ccsd3aacgt1A2
+   ./comp ccsd3aacgt1B2
+   ./comp ccsd3aacgt2A2
+   ./comp ccsd3aacgt2B2
+   ./comp ccsd3aacgt2C2
+   ./comp ccsd3aacgt3A2
+   ./comp ccsd3aacgt3B2
+   ./comp ccsd3aacgt3C2
+   ./comp ccsd3aacgt3D2
+   ./comp deaeom2ahr2B0A00
+   ./comp deaeom2ahr2B0A01
+   ./comp deaeom2ahr2B0A10
+   ./comp deaeom2ahr2B0A11
+   ./comp deaeom2ahr3B1A001
+   ./comp deaeom2ahr3B1A100
+   ./comp deaeom2ahr3B1A101
+   ./comp deaeom2ahr3B1A110
+   ./comp deaeom2ahr3B1A111
+   ./comp deaeom2ahr3C1B010
+   ./comp deaeom2ahr3C1B011
+   ./comp deaeom2ahr3C1B100
+   ./comp deaeom2ahr3C1B110
+   ./comp deaeom2ahr3C1B111
+   ./comp deaeom2hr2B0A
+   ./comp deaeom2hr3B1A
+   ./comp deaeom2hr3C1B
+   ./comp deaeom3ahr2B0A00
+   ./comp deaeom3ahr2B0A01
+   ./comp deaeom3ahr2B0A10
+   ./comp deaeom3ahr2B0A11
+   ./comp deaeom3ahr3B1A001
+   ./comp deaeom3ahr3B1A100
+   ./comp deaeom3ahr3B1A101
+   ./comp deaeom3ahr3B1A110
+   ./comp deaeom3ahr3B1A111
+   ./comp deaeom3ahr3C1B010
+   ./comp deaeom3ahr3C1B011
+   ./comp deaeom3ahr3C1B100
+   ./comp deaeom3ahr3C1B110
+   ./comp deaeom3ahr3C1B111
+   ./comp deaeom3ahr4B2A1001
+   ./comp deaeom3ahr4B2A1100
+   ./comp deaeom3ahr4B2A1101
+   ./comp deaeom3ahr4B2A1110
+   ./comp deaeom3ahr4B2A1111
+   ./comp deaeom3ahr4C2B0011
+   ./comp deaeom3ahr4C2B1010
+   ./comp deaeom3ahr4C2B1011
+   ./comp deaeom3ahr4C2B1100
+   ./comp deaeom3ahr4C2B1110
+   ./comp deaeom3ahr4C2B1111
+   ./comp deaeom3ahr4D2C0110
+   ./comp deaeom3ahr4D2C0111
+   ./comp deaeom3ahr4D2C1100
+   ./comp deaeom3ahr4D2C1110
+   ./comp deaeom3ahr4D2C1111
+   ./comp deaeom3bhr2B0A00
+   ./comp deaeom3bhr2B0A01
+   ./comp deaeom3bhr2B0A10
+   ./comp deaeom3bhr2B0A11
+   ./comp deaeom3bhr3B1A000
+   ./comp deaeom3bhr3B1A001
+   ./comp deaeom3bhr3B1A100
+   ./comp deaeom3bhr3B1A101
+   ./comp deaeom3bhr3B1A110
+   ./comp deaeom3bhr3B1A111
+   ./comp deaeom3bhr3C1B000
+   ./comp deaeom3bhr3C1B010
+   ./comp deaeom3bhr3C1B011
+   ./comp deaeom3bhr3C1B100
+   ./comp deaeom3bhr3C1B110
+   ./comp deaeom3bhr3C1B111
+   ./comp deaeom3bhr4B2A1001
+   ./comp deaeom3bhr4B2A1100
+   ./comp deaeom3bhr4B2A1101
+   ./comp deaeom3bhr4B2A1110
+   ./comp deaeom3bhr4B2A1111
+   ./comp deaeom3bhr4C2B0011
+   ./comp deaeom3bhr4C2B1010
+   ./comp deaeom3bhr4C2B1011
+   ./comp deaeom3bhr4C2B1100
+   ./comp deaeom3bhr4C2B1110
+   ./comp deaeom3bhr4C2B1111
+   ./comp deaeom3bhr4D2C0110
+   ./comp deaeom3bhr4D2C0111
+   ./comp deaeom3bhr4D2C1100
+   ./comp deaeom3bhr4D2C1110
+   ./comp deaeom3bhr4D2C1111
+   ./comp deaeom3hr2B0A
+   ./comp deaeom3hr3B1A
+   ./comp deaeom3hr3C1B
+   ./comp deaeom3hr4B2A
+   ./comp deaeom3hr4C2B
+   ./comp deaeom3hr4D2C
+   ./comp deaeomdipmain
+   ./comp deaeomdipr
+   ./comp deaeomdiptool
+   ./comp eomdip2hr0A2B
+   ./comp eomdip2hr1A3B
+   ./comp eomdip2hr1B3C
+   ./comp eomdip3ahr0A2B00
+   ./comp eomdip3ahr0A2B01
+   ./comp eomdip3ahr0A2B10
+   ./comp eomdip3ahr0A2B11
+   ./comp eomdip3ahr1A3B000
+   ./comp eomdip3ahr1A3B001
+   ./comp eomdip3ahr1A3B100
+   ./comp eomdip3ahr1A3B101
+   ./comp eomdip3ahr1A3B110
+   ./comp eomdip3ahr1A3B111
+   ./comp eomdip3ahr1B3C000
+   ./comp eomdip3ahr1B3C010
+   ./comp eomdip3ahr1B3C011
+   ./comp eomdip3ahr1B3C100
+   ./comp eomdip3ahr1B3C110
+   ./comp eomdip3ahr1B3C111
+   ./comp eomdip3ahr2A4B1001
+   ./comp eomdip3ahr2A4B1100
+   ./comp eomdip3ahr2A4B1101
+   ./comp eomdip3ahr2A4B1110
+   ./comp eomdip3ahr2A4B1111
+   ./comp eomdip3ahr2B4C0011
+   ./comp eomdip3ahr2B4C1010
+   ./comp eomdip3ahr2B4C1011
+   ./comp eomdip3ahr2B4C1100
+   ./comp eomdip3ahr2B4C1110
+   ./comp eomdip3ahr2B4C1111
+   ./comp eomdip3ahr2C4D0110
+   ./comp eomdip3ahr2C4D0111
+   ./comp eomdip3ahr2C4D1100
+   ./comp eomdip3ahr2C4D1110
+   ./comp eomdip3ahr2C4D1111
+   ./comp eomdip3hr0A2B
+   ./comp eomdip3hr1A3B
+   ./comp eomdip3hr1B3C
+   ./comp eomdip3hr2A4B
+   ./comp eomdip3hr2B4C
+   ./comp eomdip3hr2C4D
+   ./comp deaeomdiphbar
+   ./comp deaeomdipfock
+   # msuauto-enabled-end-section
+else
+   # msuauto-disabled-start-section
+   ./comp stubcc3
+   # msuauto-disabled-end-section
+endif
+#
+#                 four plug-in codes are available:
+#      TINKER  is available from the GAMESS web site    (see INTRO.DOC),
+#      VB2000  is distributed with GAMESS source code tar file.
+#      XMVB    is possibly available by electronic mail (see INTRO.DOC),
+#      NEO     is distributed with GAMESS source code tar file.
+#
+#           Select one or more by setting its flag to "true".
+#           You can select only one of the VB programs at a time.
+#
+#      optional Surface Integrated MO/MM method (SIMOMM),
+#      using a customized version of the Tinker MM code.
+#      To select this plug-in, set "TINKER" true in compall/comp/lked,
+#      and if you are adding the Tinker code in after a previous 'compall',
+#      recompile -- inputb -- to select the correct number of MM atoms,
+#      as well as the file names shown just below.
+#
+if ($TINKER == true) then
+   # tinker-start-section
+   ./comp Libtad
+   ./comp Libteac
+   ./comp Libtedl
+   ./comp Libtemo
+   ./comp Libterx
+   ./comp Libtfi
+   ./comp Libtjo
+   ./comp Libtpr
+   ./comp Libtsx
+   ./comp Tdrive
+   ./comp Tinkin
+   ./comp Toys
+   # tinker-end-section
+endif
+#
+#      optional Valence Bond method, using VB2000 code
+#      As of 2012, this plug-in's source is distributed with GAMESS,
+#      so it is safe to select VB2000.
+#      to select this plug-in, set "VB2000" true in compall/lked.
+#      VB2000 is incompatible with XMVB, at most, choose only one of these.
+#
+#      As of 2021 R2, VB2000 will be compiled by default.
+#      If you do not want VB2000, set VB2000 to false and re-compile.
+#
+if ($GMS_PHI != none)    set VB2000=false
+if ($GMS_OPENMP == true) set VB2000=false
+if ($VB2000 == true) then
+   # vb2000-enabled-start-section
+   ./comp vb2000
+   ./comp vb2gms
+   # vb2000-enabled-end-section
+else
+   # vb2000-disabled-start-section
+   ./comp vbdum
+   # vb2000-disabled-end-section
+endif
+#
+#      optional Valence Bond method, using XMVB code
+#      to select this plug-in, set "XMVB" true in compall/lked.
+#      XMVB is incompatible with VB2000, at most, choose only one of these.
+#
+if ($XMVB == true) then
+   # xmvb-enabled-start-section
+   ./comp xmvb
+   # xmvb-enabled-end-section
+else
+   # xmvb-disabled-start-section
+   ./comp vbdum
+   # xmvb-disabled-end-section
+endif
+#
+#      optional Nuclear-Electronic Orbital method, using NEO code
+#      to select this plug-in, set "NEO" true in compall/lked.
+#
+if ($NEO == true) then
+   # neo-enabled-start-section
+   ./comp neo
+   ./comp neobas
+   ./comp neocas
+   ./comp neoden
+   ./comp neofci
+   ./comp neog2a
+   ./comp neog2b
+   ./comp neog2c
+   ./comp neogrd
+   ./comp neohf
+   ./comp neohss
+   ./comp neoint
+   ./comp neomp2
+   ./comp neonci
+   ./comp neoopt
+   ./comp neopos
+   ./comp neoprp
+   ./comp neosym
+   ./comp neotrn
+   ./comp neovib
+   ./comp neodft
+   ./comp neogradient
+   ./comp neoepc
+   # neo-enabled-end-section
+else
+   # neo-disabled-start-section
+   ./comp neostb
+   # neo-disabled-end-section
+endif
+#
+#  optional RISM-SCF-cSED code
+#
+#
+
+if ($RISM == true) then
+# rism-modules-enabled-start-section
+   ./comp rsm_mod
+   ./comp rsm_fftdrv
+# rism-modules-enabled-end-section
+# rism-enabled-start-section
+   ./comp rsm_ios
+   ./comp rsm_main
+   ./comp rsm_lninp
+   ./comp rsm_uninp
+   ./comp rsm_rsmutl
+   ./comp rsm_sddutl
+   ./comp rsm_cprsm
+   ./comp rsm_sddint
+   ./comp rsm_gms_main
+   ./comp rsm_gms_cc
+   ./comp rsm_gms_cphf
+   ./comp rsm_gms_nmr
+   ./comp rsm_gms_ci
+   ./comp rsm_gms_getdat
+   ./comp rsm_gms_mcscf
+   ./comp rsm_gms_td
+   ./comp rsm_gms_conicl
+   ./comp rsm_gms_gmspar
+   ./comp rsm_gms_mp2
+# rism-enabled-end-section
+else
+# rism-modules-disabled-start-section
+# rism-modules-disabled-end-section
+# rism-disabled-start-section
+   ./comp rsmstop
+# rism-disabled-end-section
+endif
+unset echo
+echo ------------------- done with all compilations --------------------
+date
+time

@@ -1,0 +1,44 @@
+!    Harmonically Constrained RHF geometry optimization
+!
+!    With RHF/6-31G** the H-O-O-H dihedral in H2O2 is 180.0 degree.
+!    This test adds a harmonic constraint to this dihedral
+!    theta0 = 90.0 degree, force-constant 500 kcal*mol^-1*radian^-2
+! NSERCH:   0  E=     -148.8095486264  GRAD. MAX=  0.5701930  R.M.S.=  0.3292011
+! NSERCH:   1  E=     -149.5661208985  GRAD. MAX=  0.5522777  R.M.S.=  0.3266122
+! NSERCH:   2  E=     -150.1354842015  GRAD. MAX=  0.5158601  R.M.S.=  0.3279419
+! NSERCH:   3  E=     -150.5221359559  GRAD. MAX=  0.4078698  R.M.S.=  0.2971545
+! NSERCH:   4  E=     -150.7584191378  GRAD. MAX=  0.1045231  R.M.S.=  0.0585969
+! NSERCH:   5  E=     -150.7681778140  GRAD. MAX=  0.0658618  R.M.S.=  0.0364303
+! NSERCH:   6  E=     -150.7711020308  GRAD. MAX=  0.0365529  R.M.S.=  0.0280163
+! NSERCH:   7  E=     -150.7739977228  GRAD. MAX=  0.0315226  R.M.S.=  0.0192027
+! NSERCH:   8  E=     -150.7758108345  GRAD. MAX=  0.0068042  R.M.S.=  0.0045550
+! NSERCH:   9  E=     -150.7758970849  GRAD. MAX=  0.0007279  R.M.S.=  0.0003629
+! NSERCH:  10  E=     -150.7758915575  GRAD. MAX=  0.0015505  R.M.S.=  0.0009940
+! NSERCH:  11  E=     -150.7758971977  GRAD. MAX=  0.0005904  R.M.S.=  0.0002973
+! NSERCH:  12  E=     -150.7758973216  GRAD. MAX=  0.0004210  R.M.S.=  0.0002163
+! NSERCH:  13  E=     -150.7758974558  GRAD. MAX=  0.0000028  R.M.S.=  0.0000016
+!    The angle with this constraint ends up being 90.2 degree
+!
+!    The energy values above contain the constraining energy,
+!    so one could also check that the last geometry's quantum
+!    energy is -150.7759054033 a.u.
+!
+ $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE $END
+ $BASIS  GBASIS=n31 NGAUSS=6 NPFUNC=1 NDFUNC=1 $END
+ $STATPT OPTTOL=0.0001 NSTEP=20
+         IHMCON(1)=3,3,1,2,4
+         SHMCON(1)=90.0
+         FHMCON(1)=500.0
+ $END
+ $DATA
+hydrogen peroxide molecule
+C1
+O       8.0    -0.698526391     -0.072897628      0.000000000
+O       8.0     0.698526391      0.072897628      0.000000000
+H       1.0    -0.971683217      0.831702846      0.000000000
+H       1.0     0.971683215     -0.831702847      0.000000000
+ $END
+
+! TRAVIS-CI SMALL
+
+! TRAVIS-CI SKIP

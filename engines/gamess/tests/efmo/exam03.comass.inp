@@ -1,0 +1,69 @@
+! EFMO EXAM 01.
+!    water trimer...illustration of EFMO method on clusters.
+!    taken from EXAM 37 of the standard test set.
+!
+!    Modified to test adding WHERE=COMASS in the $elmom
+!    group. This makes the center of mass the point the multipole
+!    moments are computed around (which also affects the
+!    localization sums) does not affect the results.
+!
+!    To check, the first three values for POINT are:
+!
+!  POINT   1           X           Y           Z (BOHR)    CHARGE
+!                  1.699923    2.103735   -1.583280        0.00 (A.U.)
+!  POINT   1           X           Y           Z (BOHR)    CHARGE
+!                  1.699923    2.103735   -1.583280        0.00 (A.U.)
+!  POINT   1           X           Y           Z (BOHR)    CHARGE
+!                  1.699923    2.103735   -1.583280        0.00 (A.U.)
+!
+!     The first two localization sums should be:
+!
+!          THE INITIAL LOCALIZATION SUM IS    256.171619 DEBYE**2
+!            THE FINAL LOCALIZATION SUM IS    273.311571 DEBYE**2
+!          THE INITIAL LOCALIZATION SUM IS    255.965873 DEBYE**2
+!            THE FINAL LOCALIZATION SUM IS    273.105827 DEBYE**2
+!
+!    But note that the chemically important values is the difference
+!    between the initial and final localization sums, not
+!    the absolute values.
+!
+!    The energy is:
+!    Total energy of the molecule: Euncorr(2)=     -224.905876336
+!
+ $contrl scftyp=rhf runtyp=energy $end
+ $elmom where=comass $end
+ $system timlim=1 parall=.t. $end
+ $basis  gbasis=sto ngauss=3 $end
+ $fmo    nfrag=3 icharg(1)=0,0,0
+         frgnam(1)=frag01,frag02,frag03
+         indat(1)=1,1,1,
+                  2,2,2,
+                  3,3,3
+         resdim=0.5
+         iefmo=1
+         modefm(1)=8,28,1,1,1
+ $end
+ $fmoprp nprint=0 $end
+ $fmoxyz
+O  O        .000000     .000000     .000000
+H  H        .000000     .000000     .957200
+H  H        .926627     .000000    -.239987
+O  O       2.542027     .893763   -1.001593
+H  H       1.991815    1.623962   -1.284979
+H  H       2.958433     .581215   -1.804806
+O  O        .162059    2.462918   -1.477183
+H  H       -.189749    1.755643    -.936605
+H  H       -.375542    2.449889   -2.269046
+ $end
+ $data
+Basis set input, with no atomic coordinates
+C1
+h-1 1
+c-1 6
+n-1 7
+o-1 8
+ $end
+
+! TRAVIS-CI SMALL
+! TRAVIS-CI SKIP
+! NUMBER OF VALIDATION PARAMETERS VARIES FROM RUN TO RUN

@@ -1,0 +1,100 @@
+!    para-nitro-aniline excited states
+!
+!  Adapted from 'tddft-pna.inp' by Christian Friedl in 2019 to show
+!  the TRNSD flag for TDDFT property calulations. All properties that are
+!  calculated using the transition density are printed directly after the
+!  stance:
+!
+!  PROPERTIES FOR THE CAMB3LYP DFT FUNCTIONAL
+!   USING THE TRANSITION DENSITY BETWEEN
+!   THE GROUND STATE AND EXCITED STATE    2
+!
+!  The value of the transition dipole moment is the same
+!  when calculated using the TDDFT module:
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  2  A'        -491.6979285732    4.803     0.0299 -1.7938 -0.0000    0.3787
+!
+!  and when calculated using the PROPERTY module:
+!
+!      DX          DY          DZ         /D/  (DEBYE)
+!  0.075921   -4.559438   -0.000000    4.560070
+!
+!  A comparison of the values requires a conversion from A.U to Debye.
+!
+!  Finally we compare the values of the electrostatic potential
+!  of the transition density at several evaluation points to the
+!  respective values that we can get using Q-Chem 4.3 when using the
+!  same functional, basis set and convergence thresholds.
+!
+!  ESP from GAMESS:
+!
+!  POINT      X          Y          Z           ELECTRONIC      NUCLEAR         TOTAL
+!                      (BOHR)                                    (A.U.)
+!     1    0.90187   -8.54410   -3.02356         0.023127       0.000000       0.023127
+!     2    0.90187   -8.54410   -1.51178         0.026068       0.000000       0.026068
+!     3    0.90187   -7.03232   -4.53534         0.023876       0.000000       0.023876
+!     4    0.90187   -4.00876   -6.04712         0.013425       0.000000       0.013425
+!     5    0.90187    2.03836   -6.04712        -0.003955       0.000000      -0.003955
+!     6    0.90187    6.57371   -4.53534        -0.017823       0.000000      -0.017823
+!     7    0.90187    9.59727   -4.53534        -0.017680       0.000000      -0.017680
+!     8    0.90187   11.10905   -3.02356        -0.018583       0.000000      -0.018583
+!     9    0.90187   11.10905   -1.51178        -0.022051       0.000000      -0.022051
+!    10    0.90187   11.10905    0.00000        -0.023383       0.000000      -0.023383
+!
+!  ESP from Q-Chem 'plot.esp':
+!
+!  Grid positions and esp values for unrelaxed transition density (all in a.u.)
+!
+!        X            Y            Z         ES2
+!
+!   0.901870E+00 -0.854410E+01 -0.302356E+01  0.230955E-01
+!   0.901870E+00 -0.854410E+01 -0.151178E+01  0.260317E-01
+!   0.901870E+00 -0.703232E+01 -0.453534E+01  0.238357E-01
+!   0.901870E+00 -0.400876E+01 -0.604712E+01  0.134373E-01
+!   0.901870E+00  0.203836E+01 -0.604712E+01 -0.397404E-02
+!   0.901870E+00  0.657371E+01 -0.453534E+01 -0.178358E-01
+!   0.901870E+00  0.959727E+01 -0.453534E+01 -0.176932E-01
+!   0.901870E+00  0.111090E+02 -0.302356E+01 -0.185927E-01
+!   0.901870E+00  0.111090E+02 -0.151178E+01 -0.220579E-01
+!   0.901870E+00  0.111090E+02  0.000000E+00 -0.233886E-01
+!
+ $CONTRL SCFTYP=RHF DFTTYP=camB3LYP RUNTYP=ENERGY TDDFT=EXCITE $END
+ $system mwords=24 $end
+ $BASIS  GBASIS=n31 ngauss=6 ndfunc=1 $end
+ $SCF    DIRSCF=.true. $end
+ $TDDFT  NSTATE=3 IROOT=2 MULT=1
+         TDPRP=.true. TRNSD=.true. $END
+ $ELPOT  IEPOT=1 WHERE=POINTS OUTPUT=PAPER $END
+ $data
+para-nitro-aniline...RHF/6-31G(d) geometry
+Cs
+
+O    8.0   0.0227232753  -2.6256345838   1.0573528191
+N    7.0   0.0167066259  -2.0663559371   0.0000000000
+C    6.0   0.0019156297  -0.6210574079   0.0000000000
+H    1.0  -0.0001967762  -0.4837887726   2.1271188243
+C    6.0  -0.0045508810   0.0626177290   1.2056049456
+C    6.0  -0.0150265732   1.4385760975   1.2052189059
+H    1.0  -0.0260356374   1.9728107328   2.1381928874
+C    6.0  -0.0196724739   2.1485746294   0.0000000000
+N    7.0  -0.0736335253   3.5237691275   0.0000000000
+H    1.0   0.2281272435   3.9829469111   0.8304137512
+ $end
+ $points
+BOHR 10
+ 0.90187   -8.54410   -3.02356
+ 0.90187   -8.54410   -1.51178
+ 0.90187   -7.03232   -4.53534
+ 0.90187   -4.00876   -6.04712
+ 0.90187    2.03836   -6.04712
+ 0.90187    6.57371   -4.53534
+ 0.90187    9.59727   -4.53534
+ 0.90187   11.10905   -3.02356
+ 0.90187   11.10905   -1.51178
+ 0.90187   11.10905    0.00000
+ $end
+
+! TRAVIS-CI MEDIUM
+

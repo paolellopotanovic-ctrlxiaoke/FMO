@@ -1,0 +1,1 @@
+Default location of input files for double-click-run.gms

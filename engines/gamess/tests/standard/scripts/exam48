@@ -1,0 +1,18 @@
+#!/bin/csh
+set E0_REF=-190.6256907074
+set E1_REF=-191.2437930506
+set  G_REF=0.023405177
+
+set E0=`grep "FINAL RDFTB ENERGY IS" $1 | awk '{ print $5 }'`0
+set E1=`grep "ENERGY WITHOUT DISPERSION" $1 | awk '{ print $6 }'`0
+set  G=`grep "RMS GRADIENT =" $1 | awk '{ print $4 }'`0
+set ierr=0
+set E0err=`$chkabs $E0 $E0_REF $tolE`
+if($status != 0) set ierr=1 
+set E1err=`$chkabs $E1 $E1_REF $tolE`
+if($status != 0) set ierr=1 
+set Gerr=`$chkabs $G $G_REF $tolG`
+if($status != 0) set ierr=1 
+echo -n "E0err=$E0err E1err=$E1err Gerr=$Gerr. "
+exit $ierr 
+

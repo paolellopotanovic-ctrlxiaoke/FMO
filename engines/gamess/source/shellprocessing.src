@@ -1,0 +1,806 @@
+module shellProcessing
+
+   use gpuGlobalRimp2Eng,only: ONE,SQRT3
+   use gpuGlobalRimp2Eng,only: MXSH,MXGTOT
+
+   ! arrays of S,P,D shells in AO basis
+   INTEGER,ALLOCATABLE,DIMENSION(:) :: i_S_shl, &
+                                       i_P_shl, &
+                                       i_D_shl, &
+                                       i_F_shl, &
+                                       i_G_shl
+   INTEGER :: n_S_shl, &
+              n_P_shl, &
+              n_D_shl, &
+              n_F_shl, &
+              n_G_shl
+
+   ! arrays of S,P,D shells in auxiliary basis
+   INTEGER,ALLOCATABLE,DIMENSION(:) :: i_aux_S_shl, &
+                                       i_aux_P_shl, &
+                                       i_aux_D_shl, &
+                                       i_aux_F_shl, &
+                                       i_aux_G_shl
+   INTEGER :: n_aux_S_shl, &
+              n_aux_P_shl, &
+              n_aux_D_shl, &
+              n_aux_F_shl, &
+              n_aux_G_shl
+
+   ! buffered arrays of S,P,D shells in AO/aux basis
+   INTEGER,ALLOCATABLE,DIMENSION(:) :: iSshl,iPshl,iDshl,iFshl,iGshl
+   INTEGER :: nSshl,nPshl,nDshl,nFshl,nGshl
+
+   logical :: is_S,is_P,is_D,is_F,is_G
+
+   ! arrays of S,P,D contraction coefficients
+   DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:) :: CCS
+   DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:,:) :: CCP,CCD,CCF,CCG
+
+   ! flag to check if we are working on AO/AUX basis
+   LOGICAL :: is_AO=.TRUE.
+
+   private :: iSshl,iPshl,iDshl,iFshl,iGshl
+   private :: nSshl,nPshl,nDshl,nFshl,nGshl
+   private :: is_S,is_P,is_D,is_F,is_G
+
+   public :: i_S_shl,i_P_shl,i_D_shl,i_F_shl,i_G_shl
+   public :: n_S_shl,N_PSHL,n_D_shl,n_F_shl,n_G_shl
+   public :: i_aux_S_shl,i_aux_P_shl,i_aux_D_shl,i_aux_F_shl,i_aux_G_shl
+   public :: n_aux_S_shl,n_aux_P_shl,n_aux_D_shl,n_aux_F_shl,n_aux_G_shl
+
+   private :: SORT
+   public :: SORTSHELLS
+
+   private :: contCoeff_S_Shells,contCoeff_P_Shells,contCoeff_D_Shells
+   public :: contrCoeffs
+
+contains
+
+   SUBROUTINE deallocateShellProcessing()
+
+         if(ALLOCATED(i_S_shl)) DEALLOCATE(i_S_shl)
+         if(ALLOCATED(i_P_shl)) DEALLOCATE(i_P_shl)
+         if(ALLOCATED(i_D_shl)) DEALLOCATE(i_D_shl)
+         if(ALLOCATED(i_F_shl)) DEALLOCATE(i_F_shl)
+         if(ALLOCATED(i_G_shl)) DEALLOCATE(i_G_shl)
+
+         if(ALLOCATED(i_aux_S_shl)) DEALLOCATE(i_aux_S_shl)
+         if(ALLOCATED(i_aux_P_shl)) DEALLOCATE(i_aux_P_shl)
+         if(ALLOCATED(i_aux_D_shl)) DEALLOCATE(i_aux_D_shl)
+         if(ALLOCATED(i_aux_F_shl)) DEALLOCATE(i_aux_F_shl)
+         if(ALLOCATED(i_aux_G_shl)) DEALLOCATE(i_aux_G_shl)
+
+         IF (ALLOCATED(CCS)) DEALLOCATE(CCS)
+         IF (ALLOCATED(CCP)) DEALLOCATE(CCP)
+         IF (ALLOCATED(CCD)) DEALLOCATE(CCD)
+
+   END SUBROUTINE deallocateShellProcessing
+
+
+   SUBROUTINE SORTSHELLS(NSHELL,KTYPE,KNG,is_AO)
+
+    implicit none
+
+    integer,intent(in) :: &
+       KTYPE(NSHELL),KNG(NSHELL),NSHELL
+    logical,intent(in) :: &
+       is_AO
+
+    ! ~~~ Start ~~~
+
+    ! sort AO/AUX shells
+    CALL SORT(NSHELL,KTYPE,KNG)
+
+    ! copy the result to AO/AUX depending on is_AO
+    IF(is_AO) THEN
+       if(is_S) THEN
+          IF (ALLOCATED(i_S_shl)) DEALLOCATE(i_S_shl)
+          ALLOCATE(i_S_shl(nSshl))
+          i_S_shl = iSshl
+       END IF
+       if(is_P) THEN
+          IF (ALLOCATED(i_P_shl)) DEALLOCATE(i_P_shl)
+          ALLOCATE(i_P_shl(nPshl))
+          i_P_shl = iPshl
+       END IF
+       if(is_D) THEN
+          IF (ALLOCATED(i_D_shl)) DEALLOCATE(i_D_shl)
+          ALLOCATE(i_D_shl(nDshl))
+          i_D_shl = iDshl
+       END IF
+       if(is_F) THEN
+          IF (ALLOCATED(i_F_shl)) DEALLOCATE(i_F_shl)
+          ALLOCATE(i_F_shl(nFshl))
+          i_F_shl = iFshl
+       END IF
+       if(is_G) THEN
+          IF (ALLOCATED(i_G_shl)) DEALLOCATE(i_G_shl)
+          ALLOCATE(i_G_shl(nGshl))
+          i_G_shl = iGshl
+       END IF
+
+       !i_S_shl = iSshl
+       !i_P_shl = iPshl
+       !i_D_shl = iDshl
+       !i_F_shl = iFshl
+       !i_G_shl = iGshl
+
+       n_S_shl = nSshl
+       n_P_shl = nPshl
+       n_D_shl = nDshl
+       n_F_shl = nFshl
+       n_G_shl = nGshl
+    ELSE
+       if(is_S) THEN
+          IF (ALLOCATED(i_aux_S_shl)) DEALLOCATE(i_aux_S_shl)
+          ALLOCATE(i_aux_S_shl(nSshl))
+          i_aux_S_shl = iSshl
+       END IF
+       if(is_P) THEN
+          IF (ALLOCATED(i_aux_P_shl)) DEALLOCATE(i_aux_P_shl)
+          ALLOCATE(i_aux_P_shl(nPshl))
+          i_aux_P_shl = iPshl
+       END IF
+       if(is_D) THEN
+          IF (ALLOCATED(i_aux_D_shl)) DEALLOCATE(i_aux_D_shl)
+          ALLOCATE(i_aux_D_shl(nDshl))
+          i_aux_D_shl = iDshl
+       END IF
+       if(is_F) THEN
+          IF (ALLOCATED(i_aux_F_shl)) DEALLOCATE(i_aux_F_shl)
+          ALLOCATE(i_aux_F_shl(nFshl))
+          i_aux_F_shl = iFshl
+       END IF
+       if(is_G) THEN
+          IF (ALLOCATED(i_aux_G_shl)) DEALLOCATE(i_aux_G_shl)
+          ALLOCATE(i_aux_G_shl(nGshl))
+          i_aux_G_shl = iGshl
+       END IF
+
+       !i_aux_S_shl = iSshl
+       !i_aux_P_shl = iPshl
+       !i_aux_D_shl = iDshl
+       !i_aux_F_shl = iFshl
+       !i_aux_G_shl = iGshl
+
+       n_aux_S_shl = nSshl
+       n_aux_P_shl = nPshl
+       n_aux_D_shl = nDshl
+       n_aux_F_shl = nFshl
+       n_aux_G_shl = nGshl
+    ENDIF
+
+    ! reset
+    nSshl = 0
+    nPshl = 0
+    nDshl = 0
+    nFshl = 0
+    nGshl = 0
+    IF (ALLOCATED(iSshl)) DEALLOCATE(iSshl)
+    IF (ALLOCATED(iPshl)) DEALLOCATE(iPshl)
+    IF (ALLOCATED(iDshl)) DEALLOCATE(iDshl)
+    IF (ALLOCATED(iFshl)) DEALLOCATE(iFshl)
+    IF (ALLOCATED(iGshl)) DEALLOCATE(iGshl)
+
+   END SUBROUTINE SORTSHELLS
+
+
+   SUBROUTINE SORTSHELLS_1(NSHELL,KTYPE,KNG,is_AO)
+
+      implicit none
+
+      integer,intent(in) :: &
+         KTYPE(NSHELL),KNG(NSHELL),NSHELL
+      logical,intent(in) :: &
+         is_AO
+
+
+         ! ~~~ Start ~~~
+
+      ! sort AO/AUX shells
+      CALL SORT(NSHELL,KTYPE,KNG)
+
+      ! copy the result to AO/AUX depending on is_AO
+      IF(is_AO) THEN
+         if(is_S) ALLOCATE(i_S_shl(nSshl))
+         if(is_P) ALLOCATE(i_P_shl(nPshl))
+         if(is_D) ALLOCATE(i_D_shl(nDshl))
+         if(is_F) ALLOCATE(i_F_shl(nFshl))
+         if(is_G) ALLOCATE(i_G_shl(nGshl))
+
+         i_S_shl = iSshl
+         i_P_shl = iPshl
+         i_D_shl = iDshl
+         i_F_shl = iFshl
+         i_G_shl = iGshl
+
+         n_S_shl = nSshl
+         n_P_shl = nPshl
+         n_D_shl = nDshl
+         n_F_shl = nFshl
+         n_G_shl = nGshl
+         ! write(*,'(A30,5I10)') "num of S,P,D,F,G AO shells:", &
+         !                        n_S_shl,n_P_shl,n_D_shl,n_F_shl,n_G_shl
+      ELSE
+         if(is_S) ALLOCATE(i_aux_S_shl(nSshl))
+         if(is_P) ALLOCATE(i_aux_P_shl(nPshl))
+         if(is_D) ALLOCATE(i_aux_D_shl(nDshl))
+         if(is_F) ALLOCATE(i_aux_F_shl(nFshl))
+         if(is_G) ALLOCATE(i_aux_G_shl(nGshl))
+
+         i_aux_S_shl = iSshl
+         i_aux_P_shl = iPshl
+         i_aux_D_shl = iDshl
+         i_aux_F_shl = iFshl
+         i_aux_G_shl = iGshl
+
+         n_aux_S_shl = nSshl
+         n_aux_P_shl = nPshl
+         n_aux_D_shl = nDshl
+         n_aux_F_shl = nFshl
+         n_aux_G_shl = nGshl
+         ! write(*,'(A30,5I10)') "num of S,P,D,F,G AUX shells:", &
+         !                        n_aux_S_shl,n_aux_P_shl,n_aux_D_shl,n_aux_F_shl,n_aux_G_shl
+      ENDIF
+
+      ! reset
+      nSshl = 0
+      nPshl = 0
+      nDshl = 0
+      nFshl = 0
+      nGshl = 0
+      IF(ALLOCATED(iSshl)) DEALLOCATE(iSshl)
+      IF(ALLOCATED(iPshl)) DEALLOCATE(iPshl)
+      IF(ALLOCATED(iDshl)) DEALLOCATE(iDshl)
+      IF(ALLOCATED(iFshl)) DEALLOCATE(iFshl)
+      IF(ALLOCATED(iGshl)) DEALLOCATE(iGshl)
+
+   END SUBROUTINE SORTSHELLS_1
+
+
+   SUBROUTINE SORT(NSHELL,KTYPE,KNG)
+
+   implicit none
+
+   integer,parameter :: NCONTRACTION=10
+
+   ! AO/AUX shell information
+   integer,intent(in) :: &
+      KTYPE(NSHELL),KNG(NSHELL), NSHELL
+
+   ! number of S,P,D contractions
+   INTEGER :: nSc, &
+              nPc, &
+              nDc, &
+              nFc, &
+              nGc
+   ! arrays of contraction types for S,P,D
+   INTEGER :: iSc(NCONTRACTION), &
+              iPc(NCONTRACTION), &
+              iDc(NCONTRACTION), &
+              iFc(NCONTRACTION), &
+              iGc(NCONTRACTION)
+
+   ! local
+   INTEGER,ALLOCATABLE :: IbufferSHL(:)
+   integer :: ii, jj, IANG
+   integer :: ii_TMP,jj_TMP,kk_TMP,ll_TMP
+   integer :: ish,jsh
+
+   ! logical :: is_S,is_P,is_D,is_F,is_G
+
+
+
+   ! INTEGRALS UP TO D TYPE
+   !write(*,*) "max angular momentum", maxval(KTYPE)
+   IF(MAXVAL(KTYPE).GT.6) THEN
+      write(*,'(A30)') "integrals up to h function not coded yet"
+      CALL ABRT()
+   ENDIF
+
+   ! get number of s,p,d shells
+   CALL GET_NUM_SHELLS &
+      (nSshl,nPshl,nDshl,nFshl,nGshl, &
+         is_S,is_P,is_D,is_F,is_G, &
+         KTYPE,NSHELL)
+
+   ! allocate s,p,d arrays to store shells
+   if(is_S) ALLOCATE(iSshl(nSshl))
+   if(is_P) ALLOCATE(iPshl(nPshl))
+   if(is_D) ALLOCATE(iDshl(nDshl))
+   if(is_F) ALLOCATE(iFshl(nFshl))
+   if(is_G) ALLOCATE(iGshl(nGshl))
+
+   ! get indices of s,p,d shells
+   CALL GET_SHELL_INDICES &
+      (iSshl,iPshl,iDshl,iFshl,iGshl, &
+         KTYPE,NSHELL)
+
+   ! get contraction type for each kind of s,p,d shells
+   CALL GET_CONTR &
+      (iSc,iPc,iDc,iFc,iGc,NCONTRACTION, &
+         nSc,nPc,nDc,nFc,nGc, &
+         iSshl,iPshl,iDshl,iFshl,iGshl, &
+         nSshl,nPshl,nDshl,nFshl,nGshl, &
+         KNG,NSHELL)
+
+   ! SORT -S- SHELLS WRT CONTRACTION TYPES
+   CALL SORT_WRT_CONTR &
+      (iSshl,nSshl,iSc,nSc, &
+         NCONTRACTION, &
+         KNG,NSHELL)
+
+   ! SORT -P- SHELLS WRT CONTRACTION TYPES
+   CALL SORT_WRT_CONTR &
+      (iPshl,nPshl,iPc,nPc, &
+         NCONTRACTION, &
+         KNG,NSHELL)
+
+   ! SORT -D- SHELLS WRT CONTRACTION TYPES
+   CALL SORT_WRT_CONTR &
+      (iDshl,nDshl,iDc,nDc, &
+         NCONTRACTION, &
+         KNG,NSHELL)
+
+   ! SORT -F- SHELLS WRT CONTRACTION TYPES
+   CALL SORT_WRT_CONTR &
+      (iFshl,nFshl,iFc,nFc, &
+         NCONTRACTION, &
+         KNG,NSHELL)
+
+   ! SORT -G- SHELLS WRT CONTRACTION TYPES
+   CALL SORT_WRT_CONTR &
+      (iGshl,nGshl,iGc,nGc, &
+         NCONTRACTION, &
+         KNG,NSHELL)
+
+
+   ! DO II=1,nSshl
+   !    DO JJ=1,II
+   !       ISH=iSshl(II)
+   !       JSH=iSshl(JJ)
+   !       IF(ISH.lt.JSH) THEN
+   !          iSshl(II) = JSH
+   !          iSshl(JJ) = ISH    
+   !       ENDIF
+   !    ENDDO
+   ! ENDDO
+   ! ! write(*,*) "sorted S array"
+   ! ! do ii=1,nSshl
+   ! !   write(*,*) ii, iSshl(ii)
+   ! ! ENDDO
+
+   ! DO II=1,nPshl
+   !    DO JJ=1,II
+   !       ISH=iPshl(II)
+   !       JSH=iPshl(JJ)
+   !       IF(ISH.lt.JSH) THEN
+   !          iPshl(II) = JSH
+   !          iPshl(JJ) = ISH    
+   !       ENDIF
+   !    ENDDO
+   ! ENDDO
+   ! ! write(*,*) "sorted P array"
+   ! ! do ii=1,nPshl
+   ! !   write(*,*) ii,iPshl(ii)
+   ! ! ENDDO
+   ! ! =======================
+   ! ! ==========================================
+
+   END SUBROUTINE SORT
+
+
+   SUBROUTINE contrCoeffs(EX,CS,CP,CD,CF,CG,CH,CI, &
+                          KSTART,KATOM,KTYPE,KNG,  &
+                          KLOC,KMIN,KMAX,NSHELL,   &
+                          NORMF,NORMP,NOPK)
+
+      use gpuGlobalRimp2Eng,only: ONE
+      use gpuGlobalRimp2Eng,only: MXSH,MXGTOT
+
+      implicit none      
+
+      double precision,intent(in) :: &
+         EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),      &
+         CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT)
+      integer,intent(in) :: &
+         KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),   &
+         KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+
+      integer,intent(in) :: NORMF,NORMP,NOPK
+
+      logical :: NORM
+
+
+      NORM=NORMF.NE.1 .OR. NORMP.NE.1
+
+      call contCoeff_S_Shells(EX,CS,KNG,KSTART)
+      call contCoeff_P_Shells(EX,CS,CP,KNG,KSTART,KMAX,KMIN)
+      call contCoeff_D_Shells(EX,CD,KNG,KSTART,KMAX,KMIN,NORM)
+
+   END SUBROUTINE contrCoeffs
+
+
+
+   SUBROUTINE contCoeff_S_Shells(EX,CS,KNG,KSTART)
+
+      implicit none
+
+      double precision,intent(in) :: &
+         EX(MXGTOT),CS(MXGTOT)
+      integer,intent(in) :: &
+         KNG(MXSH),KSTART(MXSH)
+
+      double precision :: DUM1
+      integer :: III,ISH,NGI,I1,IG,MXCON
+
+
+         ! ~~~ Start ~~~
+
+      
+      ! max contraction length
+      MXCON = 1
+      DO III=1,n_S_shl
+         ISH=i_S_shl(III)
+         NGI   = KNG(ISH)
+         IF(NGI.GT.MXCON) MXCON = NGI
+      ENDDO
+
+      ! allocate array to store s contraction coefficients
+      IF(ALLOCATED(CCS)) DEALLOCATE(CCS)
+      ALLOCATE(CCS(MXCON,n_S_shl))
+
+      ! get contraction coefficients
+      CCS=0.0D00
+      DO III=1,n_S_shl
+         ISH=i_S_shl(III)
+         NGI   = KNG(ISH)
+         I1    = KSTART(ISH)
+         DO IG = 1, NGI
+            DUM1 = CS(I1+IG-1)
+            CCS(IG,III)=DUM1
+         ENDDO
+      ENDDO
+
+   END SUBROUTINE contCoeff_S_Shells
+
+
+
+
+   SUBROUTINE contCoeff_P_Shells(EX,CS,CP,KNG,KSTART,KMAX,KMIN)
+
+      implicit none
+
+      double precision,intent(in) :: &
+         EX(MXGTOT),CS(MXGTOT),CP(MXGTOT)
+      integer,intent(in) :: &
+         KNG(MXSH),KSTART(MXSH),KMAX(MXSH),KMIN(MXSH)
+
+      double precision :: DUM1
+      integer :: III,ISH,NGI,I1,IG,MXCON,ICNT,I,MINI,MAXI
+
+         
+         ! ~~~ Start ~~~
+
+      
+      ! max contraction length
+      MXCON = 1
+      DO III=1,n_P_shl
+         ISH=i_P_shl(III)
+         NGI=KNG(ISH)
+         IF(NGI.GT.MXCON) MXCON=NGI
+      ENDDO
+
+      ! allocate array to store s contraction coefficients
+      IF(ALLOCATED(CCP)) DEALLOCATE(CCP)
+      ALLOCATE(CCP(4,MXCON,n_P_shl))
+
+      ! get contraction coefficients
+      CCP=0.0D00
+      DO III=1,n_P_shl
+         ISH=i_P_shl(III)
+         NGI= KNG(ISH)
+         I1 = KSTART(ISH)
+         MINI = KMIN(ISH)
+         MAXI = KMAX(ISH)
+         DO IG = 1, NGI
+            ICNT=0
+            DO I = MINI, MAXI
+               IF(I .EQ. 1) THEN
+                  DUM1 = CS(I1+IG-1)
+               ELSEIF(I .LE.  4) THEN
+                  DUM1 = CP(I1+IG-1)
+               ENDIF
+               ICNT=ICNT+1
+               CCP(ICNT,IG,III) = DUM1
+            ENDDO
+         ENDDO
+      ENDDO
+
+   END SUBROUTINE contCoeff_P_Shells
+
+
+   SUBROUTINE contCoeff_D_Shells(EX,CD,KNG,KSTART,KMAX,KMIN,NORM)
+
+      implicit none
+
+      double precision,intent(in) :: &
+         EX(MXGTOT),CD(MXGTOT)
+      integer,intent(in) :: &
+         KNG(MXSH),KSTART(MXSH),KMAX(MXSH),KMIN(MXSH)
+      logical,intent(in) :: NORM
+
+      double precision :: DUM1
+      integer :: III,ISH,NGI,I1,IG,MXCON,ICNT,I,MINI,MAXI
+      
+            
+            ! ~~~ Start ~~~
+
+      
+      ! max contraction length
+      MXCON = 1
+      DO III=1,n_D_shl
+         ISH=i_D_shl(III)
+         NGI=KNG(ISH)
+         IF(NGI.GT.MXCON) MXCON=NGI
+      ENDDO
+
+      ! allocate array to store s contraction coefficients
+      IF(ALLOCATED(CCD)) DEALLOCATE(CCD)
+      ALLOCATE(CCD(6,MXCON,n_D_shl))
+
+      ! get contraction coefficients
+      CCD=0.0D00
+      DO III=1,n_D_shl
+         ISH=i_D_shl(III)
+         NGI= KNG(ISH)
+         I1 = KSTART(ISH)
+         MINI = KMIN(ISH)
+         MAXI = KMAX(ISH)
+         DO IG = 1, NGI
+            ICNT=0
+            DO I = MINI, MAXI
+               DUM1 = CD(I1+IG-1)
+               IF(I .GE. 8 .AND. NORM) DUM1 = DUM1*SQRT3
+               ICNT=ICNT+1
+               CCD(ICNT,IG,III) = DUM1
+            ENDDO
+         ENDDO
+      ENDDO
+
+   END SUBROUTINE contCoeff_D_Shells
+
+
+
+
+SUBROUTINE GET_NUM_SHELLS &
+   (nSshl,nPshl,nDshl,nFshl,nGshl, &
+      is_S,is_P,is_D,is_F,is_G, &
+      KTYPE,NSHELL)
+   
+   implicit none
+
+   integer,intent(in) :: KTYPE(NSHELL)
+   integer,intent(in) :: NSHELL
+   integer,intent(out) :: nSshl,nPshl,nDshl,nFshl,nGshl
+   logical,intent(out) :: is_S,is_P,is_D,is_F,is_G
+
+   integer :: ii,IANG
+
+   ! GET THE NUMBER OF S,P,D SHELLS
+   nSshl=0
+   nPshl=0
+   nDshl=0
+   DO II=1,NSHELL
+      IANG=KTYPE(II)
+      IF(IANG.EQ.1) THEN
+         nSshl = nSshl+1
+      ELSEIF(IANG.EQ.2) THEN
+         nPshl=nPshl+1
+      ELSEIF(IANG.EQ.3) THEN
+         nDshl=nDshl+1
+      ELSEIF(IANG.EQ.4) THEN
+         nFshl=nFshl+1
+      ELSEIF(IANG.EQ.5) THEN
+         nGshl=nGshl+1
+      ENDIF
+   ENDDO
+
+   ! if shells of s,p,d do not exist, set it to false
+   is_S=.false.
+   is_P=.false.
+   is_D=.false.
+   is_F=.false.
+   is_G=.false.
+   if(nSshl .ge. 1) is_S=.true.
+   if(nPshl .ge. 1) is_P=.true.
+   if(nDshl .ge. 1) is_D=.true.
+   if(nFshl .ge. 1) is_F=.true.
+   if(nGshl .ge. 1) is_G=.true.   
+
+
+END SUBROUTINE GET_NUM_SHELLS
+
+SUBROUTINE GET_SHELL_INDICES &
+   (iSshl,iPshl,iDshl,iFshl,iGshl, &
+      KTYPE,NSHELL)
+   
+   implicit none
+
+   integer,intent(out) :: iSshl(nSshl), &
+                          iPshl(nPshl), &
+                          iDshl(nDshl), &
+                          iFshl(nFshl), &
+                          iGshl(nGshl)
+   integer,intent(in) :: KTYPE(NSHELL)
+   integer,intent(in) :: NSHELL
+   integer :: iis,iip,iid,iif,iig,ii,IANG
+
+   ! COPY S,P,D SHELLS INTO iSshl,iPshl,iDshl
+   iis = 0
+   iip = 0
+   iid = 0
+   iif = 0
+   iig = 0
+   DO II=1,NSHELL
+      IANG=KTYPE(II)
+      IF(IANG.EQ.1) THEN
+         iis = iis+1
+         iSshl(iis) = II
+      ELSEIF(IANG.EQ.2) THEN
+         iip = iip+1
+         iPshl(iip) = II
+      ELSEIF(IANG.EQ.3) THEN
+         iid = iid+1
+         iDshl(iid) = II
+      ELSEIF(IANG.EQ.4) THEN
+         iif = iif+1
+         iFshl(iif) = II
+      ELSEIF(IANG.EQ.5) THEN
+         iig = iig+1
+         iGshl(iig) = II
+      ENDIF
+   ENDDO
+
+END SUBROUTINE GET_SHELL_INDICES
+
+
+
+SUBROUTINE GET_CONTR &
+   (iSc,iPc,iDc,iFc,iGc,NCONTRACTION, &
+      nSc,nPc,nDc,nFc,nGc, &
+      iSshl,iPshl,iDshl,iFshl,iGshl, &
+      nSshl,nPshl,nDshl,nFshl,nGshl, &
+      KNG,NSHELL)
+
+   implicit none
+
+   integer,intent(out) :: iSc(NCONTRACTION)
+   integer,intent(out) :: iPc(NCONTRACTION)
+   integer,intent(out) :: iDc(NCONTRACTION)
+   integer,intent(out) :: iFc(NCONTRACTION)
+   integer,intent(out) :: iGc(NCONTRACTION)
+   integer,intent(in) :: NCONTRACTION
+
+   integer,intent(out) :: nSc
+   integer,intent(out) :: nPc
+   integer,intent(out) :: nDc
+   integer,intent(out) :: nFc
+   integer,intent(out) :: nGc
+
+   integer,intent(in) :: iSshl(nSshl)
+   integer,intent(in) :: iPshl(nPshl)
+   integer,intent(in) :: iDshl(nDshl)
+   integer,intent(in) :: iFshl(nFshl)
+   integer,intent(in) :: iGshl(nGshl)
+
+   integer,intent(in) :: nSshl
+   integer,intent(in) :: nPshl
+   integer,intent(in) :: nDshl
+   integer,intent(in) :: nFshl
+   integer,intent(in) :: nGshl
+
+   integer,intent(in) :: KNG(NSHELL)
+   integer,intent(in) :: NSHELL
+
+   integer :: ii,ish
+
+   ! GET CONTRACTION TYPES OF S,P,D
+   nSc=0
+   nPc=0
+   nDc=0
+   nFc=0
+   nGc=0
+   DO II=MAXVAL(KNG(1:NSHELL)),MINVAL(KNG(1:NSHELL)),-1
+      ! S
+      DO ISH=1,nSshl
+         IF(KNG(iSshl(ISH)) .EQ. II) THEN
+            nSc=nSc+1
+            iSc(nSc) = II
+            EXIT
+         ENDIF
+      ENDDO
+      ! P
+      DO ISH=1,nPshl
+         IF(KNG(iPshl(ISH)) .EQ. II) THEN
+            nPc=nPc+1
+            iPc(nPc) = II
+            EXIT
+         ENDIF
+      ENDDO
+      ! D
+      DO ISH=1,nDshl
+         IF(KNG(iDshl(ISH)) .EQ. II) THEN
+            nDc=nDc+1
+            iDc(nDc) = II
+            EXIT
+         ENDIF
+      ENDDO
+      ! F
+      DO ISH=1,nFshl
+         IF(KNG(iFshl(ISH)) .EQ. II) THEN
+            nFc=nFc+1
+            iFc(nFc) = II
+            EXIT
+         ENDIF
+      ENDDO
+      ! G
+      DO ISH=1,nGshl
+         IF(KNG(iGshl(ISH)) .EQ. II) THEN
+            nGc=nGc+1
+            iGc(nGc) = II
+            EXIT
+         ENDIF
+      ENDDO
+
+   ENDDO
+
+END SUBROUTINE GET_CONTR
+
+
+
+
+SUBROUTINE SORT_WRT_CONTR &
+   (ishl,nshl,iCtr,nContr, &
+      NCONTRACTION, &
+      KNG,NSHELL)
+
+   implicit none
+
+   integer,intent(inout) :: ishl(nshl)
+   integer,intent(in) :: nshl
+   integer,intent(in) :: iCtr(NCONTRACTION)
+   integer,intent(in) :: nContr
+   integer,intent(in) :: NCONTRACTION
+
+   integer,intent(in) :: KNG(NSHELL)
+   integer,intent(in) :: NSHELL
+
+   integer,allocatable :: ICptr(:)
+   integer,allocatable :: IbufferSHL(:)
+
+   integer :: ish, ii, ii_TMP
+
+
+   ! SORT SHELLS WRT CONTRACTION TYPES
+   ALLOCATE(IbufferSHL(nshl))
+   ALLOCATE(ICptr(NCONTRACTION))
+   ii_TMP=1
+   DO II=1,nContr
+      ICptr(II)=ii_TMP
+      DO ISH=1,nshl
+         IF(KNG(ishl(ISH)).EQ.iCtr(II)) THEN
+            IbufferSHL(ii_TMP) = ishl(ISH)
+            ii_TMP=ii_TMP+1
+         ENDIF
+      ENDDO
+   ENDDO
+   ishl = IbufferSHL
+   DEALLOCATE(ICptr)
+   DEALLOCATE(IbufferSHL)
+
+END SUBROUTINE SORT_WRT_CONTR
+
+
+end module shellProcessing

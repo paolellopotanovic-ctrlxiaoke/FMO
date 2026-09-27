@@ -1,0 +1,20 @@
+! Geometry taken from J. Chem. Phys. 130, 054104 (2009). 
+! ACCSD(1,0,0.5,0.5,0)=DCSD from J. Chem. Phys. 155, 064101 (2021).
+!
+!    REFERENCE ENERGY:      -99.5321340904
+!        CCSDt ENERGY:      -99.7603614433   CORR. E=  -0.2282273529
+!
+ $contrl scftyp=rohf runtyp=energy cctyp=accsd coord=prinaxis
+         mult=2 icharg=1 ispher=1 units=angs $end
+ $system mwords=50 $end
+ $scf couple=.true. alpha(1)=0.5,0.5,0.5 beta(1)=0.5,0.5,0.5 $end
+ $basis gbasis=acct $end
+ $ccinp ncore=1 acp(1)=1,0,0.5,0.5,0 $end
+ $data 
+HF+/aug-cc-pVTZ
+cnv 2
+
+F  9        0.0000000000        0.0000000000        0.0504971356
+H  1        0.0000000000        0.0000000000       -0.9518075795
+ $end
+

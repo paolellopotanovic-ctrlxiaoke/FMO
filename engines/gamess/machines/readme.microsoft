@@ -1,0 +1,275 @@
+Installing GAMESS on Microsoft Windows systems with PGI or Intel Compilers
+   Apr 08, 2021 - Sarom Sok Leang - EP Analytics, Inc. (Update Intel 64-bit support)
+                - Shoubhik R Maiti - University of Sheffield (Update Intel 64-bit support)
+   Nov 30, 2020 - Sarom Sok Leang - EP Analytics, Inc. (Update PGI 64-bit support)
+   Jul 30, 2019 - Sarom Sok Leang - EP Analytics, Inc. (Update PGI 64-bit support)
+   Feb 14, 2018 - Sarom Sok Leang - Iowa State University (Remove Windows HPC support)
+   Sep 29, 2011 - Sarom Sok Leang - Iowa State University (Intel/64-bit support)
+   May 11, 2010 - Sarom Sok - Iowa State University (PGI/32 & 64-bit support)
+
+Software requirements
+=====================
+
+1) Windows operating system:
+   Windows 64-bit (Windows 10)
+
+2) The Intel OneAPI Base + HPC Toolkit for Windows - https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.htm
+
+Contents of the "gamess/machines/microsoft" folder:
+===================================================
+
+runall.parallel
+ - The Windows version of the runall shell script.
+ - This file is only executable under Cygwin
+ - This shell script will run all the exam files in parallel mode (4 compute processes).
+
+runall.serial
+ - The Windows version of the runall shell script.
+ - This file is only executable under Cygwin
+ - This shell script will run all the exam files in serial mode (1 compute process).
+
+rungms.windows
+ - The Windows version of the rungms shell script.
+ - This file is only executable under Cygwin
+
+Contents of the "gamess/machines/microsoft" folder:
+===================================================
+
+rungms.bat
+ - A batch file equivalent to the rungms shell script specifically written for non-HPC server Windows machines.
+ - This file is only executable under Windows's command prompt, cmd.exe
+
+runall.bat
+ - A batch file that will run all the exam files in gamess/tests
+ - This file is only executable under Windows's command prompt, cmd.exe
+
+Contents of the "gamess/machines/microsoft/windows" folder:
+
+gmsenv.bat
+ - Sets up GAMESS environmental variables
+
+Compiling and Linking GAMESS (OneAPI Compiler)
+============================
+The following instructions are provided by Tushar Mohan from Samara Technology Group LLC
+
+Only 64-bit support, currently.
+
+        Contents:
+        ========
+
+        A. Install Dependent Tools
+        B. Prepare Cygwin Environment for Build
+        C. Building GAMESS with Intel on Windows
+
+        -----------------------------------
+
+        A. Install Dependent Tools:
+           =======================
+        It's recommended you install programs in their default locations.
+
+        1. Install Visual Studio Community 2019 - Version 16.11.12 (https://visualstudio.microsoft.com/vs/community/)
+            + Desktop development with C++
+            + C++/CLI support for v142 build tools (Latest)
+
+        2. Install Intel oneAPI Base Toolkit (https://software.intel.com/content/www/us/en/develop/tools/oneapi/base-toolkit/download.html)
+
+        3. Install Intel oneAPI HPC addon (https://software.intel.com/content/www/us/en/develop/tools/oneapi/hpc-toolkit/download.html)
+
+        4. Install Cygwin (https://www.cygwin.com)
+           - In Devel make sure no compiler toolchains
+             and binutils are selected, except mingw-x86_64-binutils
+           - Install Devel >> mingw64-x86_64-binutils (needed for ar.exe)
+           - Install Devel >> make (needed for make.exe)
+           - Install Utils >> patch (for patching the sources)
+           - Install Utils >> ncurses (for tput needed by config script)
+           - Install Shells >> tcsh (for running gamess shell scripts)
+           - Install your favorite editor (e.g., Editors >> nano, vim, emacs)
+
+        B. Preparing Cygwin Environment for Build
+           ========================================================
+
+        1. Fixing stack limit sizes in bash.exe and tcsh.exe
+
+           The Intel build requires bash.exe and tcsh.exe to permit
+           large stack sizes. You can either replace the default
+           cygwin bash and tcsh with the modified bash/tcsh included
+           in this drop, or edit the cygwin bash and tcsh by
+           following the steps below.
+
+          a) create backups of original binaries
+             In cygwin shell:
+             $ cp /bin/bash.exe bash.exe.org
+             $ cp /bin/tcsh.exe tcsh.exe.org
+
+          b) Log in as Administrator and run:
+             Intel oneAPI 2023 >> Intel oneAPI command prompt for Intel 64 for Visual Studio 2019
+
+             ----------
+             editbin /stack:10000000 C:\cygwin\bin\bash.exe
+             editbin /stack:10000000 C:\cygwin\bin\tcsh.exe
+             ----------
+
+        2. Make sure 64-bit ar.exe is in the PATH
+           (Note: You must have installed the cygwin package
+                  Devel >> mingw64-x86_64-binutils)
+
+           a) Log into the Cygwin shell
+              Add the following line to the bottom your .bash_profile
+
+              export PATH="/usr/x86_64-w64-mingw32/bin:$PATH"
+
+           b) Re-login into the cygwin shell and see you are picking the right ar
+
+              $ which ar
+              /usr/x86_64-w64-mingw32/bin/ar
+
+        C. Building GAMESS with Intel on Windows:
+           =====================================
+        In all that follows it's assumed the GAMESS sources are lying in C:\cygwin64\home\$USER
+
+        1. Open an Intel oneAPI command prompt for Intel 64 from:
+              Intel oneAPI 2023 >> Intel oneAPI command prompt for Intel 64 for Visual Studio 2019
+
+        2. Run the cygwin shell *within* this command-prompt:
+           C:\cygwin64\Cygwin.bat
+
+        3. Navigate to the gamess sources (in this example C:\cygwin64\home\<username>)
+        4. Make sure the patches are applied.
+
+        5. Now build:
+        $ cd "C:\cygwin64\home\\$USER\gamess"
+        $ ./config
+          - Choose win64 (for platform/machine)
+          - Hit Enter to accpet GAMESS directory (/home/<username>/gamess)
+          - Choose oneapi-ifx (for compiler)
+          - Choose optimization settings, 'linux' is recommended.
+          - Choose mkl (for math library)/
+          - Hit Enter to accept default MKL root path.
+          - Hit Enter to accept default MKL version information.
+          - Choose 'impi' for the MPI library
+          - Hit Enter to accept default MPI root path.
+          - Choose any additional build options (you can hit ENTER to accept the default option of "no").
+
+          An install.info will be created.
+
+        Please ignore warnings issued in the following compilation and link phases.
+
+        $ make ddi
+        $ make modules
+        $ make -j$(nproc)
+
+        You should now have an executable like gamess.00.x
+
+Execution of GAMESS
+===================
+
+This assumes that you successfully compiled GAMESS on Windows using either the PGI or Intel compiler.
+
+You can deploy GAMESS either using a Unix tcsh script (under Cygwin) or a Windows batch script (under the Windows Command Prompt). Both approachs are detailed below.
+
+A. Deploying GAMESS using the Unix tcsh script (under Cygwin)
+
+    It is recommended to follow the instructions within the same environment used to compile GAMESS (e.g., PGI Cygwin or Intel oneAPI command prompt for Intel 64 for Visual Studio 2019 with Cygwin environment activated).
+
+    Copy over the rungms.windows script to the GAMESS directory (command assumes you are already in the top-level GAMESS directory):
+
+    cp machines/microsoft/rungms.windows .
+
+    The following example will run exam01 with 4 compute processes using
+    gamess.00.x with rungms.windows
+
+    ./rungms.windows exam01 00 4
+
+B. Deploying GAMESS using the Windows batch script (under Windows Command Prompt)
+
+    Copy over the contents of the machines/micrsoft/installer folder to the GAMESS directory.
+
+    Double-click on create-parameters script to generate the parameters file, rungms.gms, which will contain important path variables used by the  Windows batch script launch for GAMESS.
+
+    Copy or rename the gamess.00.x binary to gamess.00.exe
+
+    Double-click on the Windows-Command-Prompt shortcut.
+
+    Note ** if you compiled GAMESS on Windows using Intel then you will need to setup the environment so that your current Windows Command Prompt session can find mpiexec.exe. To do this simpily run the following command in the Command Prompt window you just opened:
+
+      "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+
+      You must include the double-quotes!
+
+    The following example will run exam01 with 4 compute processes using
+    gamess.00.exe with rungms.bat
+
+    rungms.bat exam01 00 4
+
+*********************
+***IMPORTANT NOTES***
+*********************
+
+  Describes at a high-level the changes made to the gamess sources/
+  build scripts as part of the Samara Intel port of gamess, and the
+  motivations and reasons for doing so.
+  ==================================================================
+
+* Added clauses for the intel compilers (ifort and icl)
+  to the build scripts (config, comp, compall, compddi and lked).
+  These clauses included linkage with the Intel's MKL and
+  Microsoft's MPI. These changes were to the win64 sections
+  of the build.
+
+* Renamed certain DDI operation names to avoid namespace
+  conflict resulting from the ifort compilers name mangling.
+  These operator names have been suffixed with "_OP" to
+  distinguish them from method names. These operation names
+  are distributed across the DDI sources. The change was
+  necessitated purely to allow the compile/link to happen
+  with the Intel compilers.
+
+* A typecast in ddi_comm_bcast.c to allow compilation to
+  happen while using the MPI library's collectives. This
+  change is expected to be needed for all compiles that
+  do not set USE_DDI_COLLECTIVE_ROUTINES
+
+* Added code to use appropriate timers on 64-bit Windows,
+  when building with the Intel compilers.
+
+* Mapping macros were added for missing f77 symbols in
+  ddi_fortran.h. These macros are necessary for the
+  Fortran-C linkage.
+
+Known Issues
+============
+
+May 11, 2010 - 2 GB physical file size limitations on both Windows 32-bit and Windows-64 bit.
+             - We are currently looking into this.
+             - Workarounds - push everything into memory.
+             - Use: $SCF   DIRSCF=.T. $END
+             - Use: $TRANS DIRTRF=.T. $END
+
+July 12, 2016 -
+
+Reduce EFP functionality:
+
+  sed -i "/MXFRG=1050/s//MXFRG=900/" *.src
+
+Feb. 14, 2018 -
+
+Remove EFP functionality:
+
+  sed -i "/MXFRG=1050/s//MXFRG=4/" *.src
+  sed -i "/MXDFG=5/s//MXDFG=1/" *.src
+  sed -i "/MXPT=2000/s//MXPT=8/" *.src
+  sed -i "/MXFGPT=12000/s//MXFGPT=4/" *.src
+
+  sed -i "/mxfrg=1050/s//mxfrg=4/" *.src
+  sed -i "/mxdfg=5/s//mxdfg=1/" *.src
+  sed -i "/mxpt=2000/s//mxpt=8/" *.src
+  sed -i "/mxfgpt=12000/s//mxfgpt=4/" *.src
+
+Reduce EFP static arrays by 50%:
+
+  sed -i "/MXFRG=1050/s//MXFRG=525/" *.src
+  sed -i "/mxfrg=1050/s//mxfrg=525/" *.src
+
+Nov. 30, 2020 -
+
+  Reduction of parameters are no longer needed

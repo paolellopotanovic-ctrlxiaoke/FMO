@@ -1,0 +1,925 @@
+!*MODULE class_Pair
+!> @brief  This module contains class for reading input file.
+!>         It provides the ability to saving different types of variables in
+!>             character strings
+!> @author Igor S. Gerasimov
+!> @date   Sep, 2019 --Initial release--
+!> @date   Mar, 2021 Add DOESNT_EXIST parameter
+!> @date   May, 2021 Add support of reading arrays with indexes
+!>                   Expand error parameters list
+!> @param  OK                  - OK status about succeeding of adding or getting of pair
+!> @param  DOUBLE_DECLARATION  - status about non-succeeding of adding of pair
+!> @param  KEY_NOT_FOUND       - status about non-succeeding of getting of pair
+!> @param  INDEX_OVERLAPPING   - in array, index are double defined
+!> @param  NON_INTEGER_INDEX   - in key definifion, index must be integer
+!> @param  ZERO_NEGATIVE_INDEX - in key definifion, index must be >= 0
+!> @param  BROKEN_BRAKES       - in key definifion, brakes must became and stop
+!> @param  TOO_MANY_ELEMENTS   - in array, some indexes will not be read
+module class_Pair
+  implicit none
+  private
+  integer, parameter :: OK                  =  0, &
+                        DOUBLE_DECLARATION  = -1, &
+                        KEY_NOT_FOUND       = -2, &
+                        INDEX_OVERLAPPING   = -3, &
+                        NON_INTEGER_INDEX   = -4, &
+                        ZERO_NEGATIVE_INDEX = -5, &
+                        BROKEN_BRAKES       = -6, &
+                        TOO_MANY_ELEMENTS   = -7
+
+  !*MODULE class_Pair CLASS Pair
+  !> @brief  It is a key-value map with ability to add or get pairs
+  !>         KEY   - name of keyword, like SCFTYP
+  !>         VALUE - the value of keyword, like UHF or RHF
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Dec, 2020 Use Linked List instead arrays
+  type, public :: Pair
+    character(len=:), allocatable :: key
+    character(len=:), allocatable :: value
+    type(Pair), private, pointer  :: next_pair => NULL()
+  contains
+    procedure :: add_pair
+    procedure :: get_value
+    procedure :: destroy
+  end type Pair
+contains
+  !*MODULE class_Pair DECK destroy
+  !> @brief  Deinitialize variables of class
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Renamed; old name was deinit
+  !> @date   Mar, 2021 Add intel compiler's hack
+  recursive subroutine destroy(this)
+    class(Pair), intent(inout) :: this
+    class(Pair), pointer :: next
+    if(allocated(this%key  )) deallocate(this%key)
+    if(allocated(this%value)) deallocate(this%value)
+    ! intel compiler's hack
+    ! originally:
+    ! if(associated(this%next_pair)) call this%next_pair%destroy
+    next => this%next_pair
+    if(associated(this%next_pair)) then
+      call next%destroy
+      deallocate(this%next_pair)
+    end if
+    next => NULL()
+  end subroutine destroy
+  !*MODULE class_Pair DECK add_pair
+  !> @brief  This subroutine add new pair to class
+  !> @detail At the reality, the first element of key- and value- arrays are filled by spaces.
+  !>         It should be fixed, but now it works.
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Dec, 2020 Use Linked List instead arrays
+  !> @date   May, 2021 Add parser of simple namelists array
+  !> @param  this  (in)  Pair Class
+  !> @param  key   (in)  the key of pair
+  !> @param  value (in)  the value or pair
+  !> @param  error (out) return 0 if OK and -1 if the key already exists.
+  subroutine add_pair(this, key, value, error)
+    use strings, only: index_ith
+    class(Pair),      target,      intent(inout) :: this
+    character(len=:), allocatable, intent(in)    :: key
+    character(len=:), allocatable, intent(in)    :: value
+    integer, intent(out) :: error
+    ! internal variables
+    type(Pair), pointer :: current
+    integer             :: ind, indls, indrs, ios
+    current => this
+    error = DOUBLE_DECLARATION
+    do
+      if(current%key.eq."") then
+        current%key   = key
+        current%value = value
+        error = OK
+        indls = index_ith("(", current%key, 1)
+        indrs = index_ith(")", current%key, -1)
+        if(indls.eq.0 .and. indrs.eq.0) return
+        if(indls.gt.indrs .or. indls.eq.0 .or. indrs.eq.0) then
+          error = BROKEN_BRAKES
+          return
+        end if
+        read(current%key(indls+1:indrs-1), *, iostat = ios) ind
+        if(ios .ne. OK) then
+          error = NON_INTEGER_INDEX
+        end if
+        if(ios.eq.OK .and. ind.le.0) then
+          error = ZERO_NEGATIVE_INDEX
+        end if
+        return
+      end if
+      if(trim(current%key) .eq. trim(key)) then
+        error = DOUBLE_DECLARATION
+        return
+      end if
+      if(.not.associated(current%next_pair)) then
+        allocate(current%next_pair)
+        current%next_pair%key = ""
+        current%next_pair%value = ""
+      end if
+      current => current%next_pair
+    end do
+  end subroutine add_pair
+
+  !*MODULE class_Pair DECK get_value
+  !> @brief  This function return value by key
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Dec, 2020 Use Linked List instead arrays
+  !> @date   May, 2021 Add parser of simple namelists array
+  !> @param  this   (in)  Pair Class
+  !> @param  key    (in)  the key of pair
+  !> @param  error  (out) return 0 if OK and -1 if the key does not exist
+  !> @param  length (in, optional) the length of array in value
+  function get_value(this, key, error, length) result(value)
+    use strings, only: count_substring, index_ith
+    class(Pair), target, intent(in)  :: this
+    character(len=*),    intent(in)  :: key
+    integer,             intent(out) :: error
+    integer,             intent(in), optional :: length
+    character(len=:),    allocatable :: value
+    ! internal variables
+    logical,    allocatable :: inserted(:)
+    type(Pair), pointer     :: current
+    integer                 :: ind, indls, indrs, countsubs
+    error = OK
+    current => this
+    value = ""
+    if(present(length)) then
+      value = repeat(",", length - 1)
+      allocate(inserted(length))
+      inserted = .false.
+    end if
+    do
+      if(.not.associated(current)) exit
+      if(.not.present(length) .and. trim(current%key) .eq. trim(key)) then
+        value = current%value
+        return
+      else if(present(length)) then
+        ind = 0
+        indls = index_ith("(", current%key, 1)
+        indrs = index_ith(")", current%key, -1)
+        if(trim(current%key) .eq. trim(key)) then
+          ind = 1
+        ! assume that brakes already checked in add_pair
+        else if(current%key(:indls-1) .eq. trim(key)) then
+          read(current%key(indls+1:indrs-1), *) ind
+        end if
+        if(ind.ne.0) then
+          countsubs = count_substring(",", current%value)
+          if(ind+countsubs .gt. length) then
+            error = TOO_MANY_ELEMENTS
+            value = "The key '"//key//"' has more elements than should be!"
+            deallocate(inserted)
+            return
+          end if
+          if(any(inserted(ind:ind+countsubs))) then
+            error = INDEX_OVERLAPPING
+            value = "The key '"//key//"' has overlapping indexes!"
+            deallocate(inserted)
+            return
+          end if
+          inserted(ind:ind+countsubs) = .true.
+          if(length .eq. countsubs + 1) then
+            value = current%value
+          else if(ind.eq.1) then
+            indrs = index_ith(",", value, ind+countsubs)
+            value = trim(current%value) // value(indrs:)
+          else if(ind.eq.length) then
+            indls = index_ith(",", value, ind - 1      )
+            value = value(:indls) // trim(current%value)
+          else
+            indls = index_ith(",", value, ind          ) - 1
+            indrs = index_ith(",", value, ind+countsubs)
+            value = value(:indls) // trim(current%value) // value(indrs:)
+          end if
+        end if
+      end if
+      current => current%next_pair
+    end do
+    if(present(length)) then
+      deallocate(inserted)
+      if (value.ne.repeat(",", length - 1)) then
+        return
+      end if
+    end if
+    ! this error is not critical; it is OK for input file
+    value = "The key '"//key//"' was not found!"
+    error = KEY_NOT_FOUND
+  end function get_value
+end module class_Pair
+
+!*MODULE mod_nameio
+!> @brief  Fortran 2003 module of mod_nameio
+!> @detail This module has similar functional like old mod_nameio.src,
+!>      but it let to use long keywords.
+!>     Perhaps, it cannot work with some sections, like $DATA
+!>     The using of new module for reading of file (some example can be found at libxc.src):
+!>       1) Import needed modules and types:
+!>        - use mod_nameio, only: input_group
+!>       2) It needs class which contains information about group
+!>        - class(input_group), allocatable :: section_group
+!>       3) It needs a name of section and keywords as character strings
+!>        - character(len=:), allocatable :: SECTION_NAME, KEYWORD1, KEYWORD2, LONG_KEYWORD
+!>       4) And also it need values, that will be read:
+!>        - double precision :: KEYWORD1_VALUE
+!>        - logical :: KEYWORD2_VALUE
+!>        - integer, dimension(PARAMETER_SIZE) :: LOND_KEYWORD_VALUE
+!>       5) Error should be cought:
+!>        - integer :: error
+!>       6) Set a section name and other string:
+!>        - SECTION_NAME = "EXAMPLE"
+!>        - KEYWORD1     = "DOUBLE"
+!>        - KEYWORD2     = "LOGICAL"
+!>        - LOND_KEYWORD = "INTEGER_ARRAY"
+!>       7) Read section to section_group:
+!>        - call section_group%read_section(IR, SECTION_NAME, (/ ... /)),
+!>          where (/ ... /) is an optional argument of allowed keys
+!>       8) Read a value from section_group by key KEYWORD1 to KEYWORD1_VALUE:
+!>        # `call section_info%get_value(KEYWORD1,KEYWORD1_VALUE,error)` returns
+!>        #    a) error equals to -1 - KEYWORD1 is not found in input
+!>        # and in KEYWORD1_VALUE the readed value is.
+!>        # Also, default value can be passed:
+!>        # `call section_info%get_value(KEYWORD2,KEYWORD2_VALUE,error,def=.true.)` returns
+!>      9) Do not forget to deallocate not needed variables:
+!>        # Check that array was allocated for deallocating (it always will be allocated, but anyway check it)
+!>        - if(allocated(LOND_KEYWORD_VALUE)) then
+!>        # Not always deallocating is needed.
+!>        -     deallocate(LOND_KEYWORD_VALUE)
+!>        - end if
+!>        # Check that section_group is allocated
+!>        - if(allocated(section_group)) then
+!>        # Deallocating of internal arrays
+!>        -     call section_group%destroy
+!>        # Deallocating of section_group
+!>        -     deallocate(section_group)
+!>        -  end if
+!> @author Igor S. Gerasimov
+!> @date   Sep, 2019 --Initial release--
+!> @date   Dec, 2020 Fix minor bug in group detector
+!> @date   May, 2021 Expand errors list
+!>                   Use size-known arrays instead allocatable when arrays are reading
+!>                   Add more error detection in module. External checks should not be
+!> @todo   Add a support to show a place with error
+!> @todo   Add a support of EXETYP=CHECK
+module mod_nameio
+  use class_Pair
+  use strings, only: count_substring
+  implicit none
+  private
+  ! Some codes of error whick can be during misprints in input file
+  integer, parameter :: NOT_ALLOWED_KEY      = -13, &
+                        MULTIPLE_DECLARATION = -12, &
+                        DOUBLE_SECTION       = -11, &
+                        NON_CLOSED_SECTION   = -10, &
+                        DOUBLED_KEYWORD      =  -9, &
+                        NO_VALUE             =  -8, &
+                        TOO_MANY_ELEMENTS    =  -7, &
+                        BROKEN_BRAKES        =  -6, &
+                        ZERO_NEGATIVE_INDEX  =  -5, &
+                        NON_INTEGER_INDEX    =  -4, &
+                        INDEX_OVERLAPPING    =  -3, &
+                        KEY_NOT_FOUND        =  -2, &
+                        DOUBLE_DECLARATION   =  -1, &
+                        OK                   =   0, &
+                        TYPE_ERROR           =   1
+
+  !*MODULE mod_nameio CLASS input_group
+  !> @brief  It is a key-value map with ability to add add get pairs
+  !>         KEY   - name of keyword, like SCFTYP
+  !>         VALUE - the value of keyword, like UHF or RHF
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Dec, 2020 Use Linked List instead arrays
+  type, public :: input_group
+    character(len=:), allocatable, public  :: name
+    class(Pair),      allocatable, private :: section_Pairs
+  contains
+    procedure :: read_section
+    procedure :: generate_pairs
+    procedure :: destroy
+    !> @brief  This generic routine masked some routines for getting values in needed type of variable from key-value pairs.
+    !> @detail The logical, integer, double precision, character variable, and its arrays are supported.
+    !>     The separator into arrays is comma
+    !>     The calling is next (for double precision):
+    !>       character(len=:), allocatable :: string
+    !>       double precision              :: variable
+    !>       integer                       :: error
+    !>       string = "0.54D+00"
+    !>       call section%get_value(string, variable, error)
+    !>     Using for array is also simple:
+    !>       character(len=:), allocatable               :: string
+    !>       double precision, dimension(:), allocatable :: variable
+    !>       integer                                     :: error
+    !>       string = "0.54D+00,0.23D+00,0.11D+00"
+    !>       call get_value(string, variable, error)
+    !> @author Igor S. Gerasimov
+    !> @date   Mar, 2021 --Initial release--
+    !> @date   May, 2021 Update list of routines
+    !> @param  key    - (in)           key from key-value pair, but also any string can be used.
+    !> @param  value  - (out)          The desired variable if it will be been successfully converted. The logical, integer, double precision, character variable, and its arrays are supported.
+    !> @param  error  - (out)          Return 0 if OK, KEY_NOT_FOUND if key does not exist
+    !> @param  def    - (in, optional) The default value of read variable
+    generic,   public  :: get_value => get_logical,       get_integer,       get_double,       get_string, &
+                                       get_logical_array, get_integer_array, get_double_array, get_string_array_alloc
+    procedure, private ::              get_logical,       get_integer,       get_double,       get_string, &
+                                       get_logical_array, get_integer_array, get_double_array, get_string_array_alloc
+    procedure :: show_error
+  end type input_group
+contains
+  !*MODULE mod_nameio DECK destroy
+  !> @brief  Destroy internal variables of input_group class
+  !> @author Igor S. Gerasimov
+  !> @date   Mar, 2021 --Initial release--
+  !> @param  this - (inout) class variable
+  recursive subroutine destroy(this)
+    class(input_group), intent(inout) :: this
+    if(allocated(this%section_Pairs)) then
+      call this%section_Pairs%destroy
+      deallocate(this%section_Pairs)
+    end if
+    if(allocated(this%name)) deallocate(this%name)
+  end subroutine destroy
+  !*MODULE mod_nameio DECK read_section
+  !> @brief  Read one section and return string pairs: key-value
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Dec, 2020 Fix minor bug in group detector
+  !> @date   Mar, 2021 Fix bug with error showing
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @date   May, 2021 Add more prints of errors
+  !> @date   Jul, 2021 Using messages module
+  !> @param  this         - (inout) class variable
+  !> @param  file_unit    - (in)    unit of file, which will be read
+  !> @param  section_name - (in)    name of section (like CONTRL), which will be read
+  !> @param  allowed_keys - (in, optional) keys, which are allowed in this group
+  subroutine read_section(this, file_unit, section_name, allowed_keys)
+    use messages, only: show_message, WITH_ABORT
+#ifndef OQP
+    use comm_PAR, only: master_worker => MASWRK, disk_worker => DSKWRK, master
+#endif
+    use strings, only: remove_spaces
+    class(input_group), intent(inout) :: this
+    integer,            intent(in)    :: file_unit
+    character(len=*),   intent(in)    :: section_name
+    character(len=*),   intent(in),   optional :: allowed_keys(:)
+    ! internal variables
+    integer :: error, error_t(1)
+    logical :: temp_diskworker
+    character(len=:), allocatable :: section
+    character(len=:), allocatable :: badkey
+    ! variables for data transfering
+    character(len=:), allocatable :: tmp_section
+    integer, dimension(:), allocatable :: int_section
+    integer :: message_length(1), itmp
+    character(len=1) :: charbuffer
+    section = ""
+    tmp_section = ""
+    error = OK
+
+#ifndef OQP
+    temp_diskworker = disk_worker
+    disk_worker = .false.
+    call SEQREW(file_unit)
+    disk_worker = temp_diskworker
+    !only MASWRK can work with input file
+    if(master_worker) &
+#endif
+      call get_section(file_unit, section_name, section, error)
+#ifndef OQP
+    error_t = error
+    CALL DDI_BCAST(264, 'I', error_t(1), 1, master)
+    error = error_t(1)
+#endif
+    select case(error)
+      case (MULTIPLE_DECLARATION)
+        call show_message("$"//section_name//": Just one section can be at one line.", WITH_ABORT)       ! | $CONTRL $END $DFT $END is not allowed
+      case (DOUBLE_SECTION)
+        call show_message("$"//section_name//": Missed $END between sections!", WITH_ABORT)              ! | $CONTRL $DFT $END is not allowed
+      case (NON_CLOSED_SECTION)
+        call show_message("$"//section_name//": The latest section is not closed by $END.", WITH_ABORT)  ! | $VEC <your data> EOF is not allowed
+    end select
+    call remove_spaces(section)
+#ifndef OQP
+    !now time to synchronize section string
+    message_length(1) = len(section)
+    CALL DDI_BCAST(262, 'I', message_length(1), 1, master)
+    allocate(int_section(message_length(1)))
+    int_section = 0
+    if(master_worker) then
+      do itmp = 1, message_length(1)
+        int_section(itmp) = iachar(section(itmp:itmp))
+      end do
+    end if
+    CALL DDI_BCAST(263, 'I', int_section, message_length(1), master)
+    if(.NOT.master_worker) then
+      do itmp = 1, message_length(1)
+        charbuffer = achar(int_section(itmp))
+        tmp_section = tmp_section // charbuffer
+      end do
+      section = tmp_section
+    end if
+    deallocate(int_section)
+    !end of section for synchronization
+#endif
+    this%name = section_name
+    call this%generate_pairs(section, error, badkey, allowed_keys)
+    select case(error)
+      case (DOUBLED_KEYWORD)
+        call show_message("$"//section_name//": Near " // badkey // " keyword KEY1=KEY2=VALUE construction is.", WITH_ABORT) ! | KEY1=KEY2=VALUE is not allowed (but we can think about it)
+      case (NO_VALUE)
+        call show_message("$"//section_name//": The " // badkey // " keyword does not have any value.", WITH_ABORT)         ! | KEY= $END is not allowed
+      case(DOUBLE_DECLARATION)
+        call show_message("$"//section_name//": Double declaration of keyword " // badkey // ".", WITH_ABORT)               ! | KEY=1 KEY=2 is not allowed
+      case(NON_INTEGER_INDEX)
+        call show_message("$"//section_name//": The " // badkey // " has incorrect array subscript.", WITH_ABORT)           ! | KEY(i), KEY((4) are not allowed
+      case(ZERO_NEGATIVE_INDEX)
+        call show_message("$"//section_name//": The " // badkey // " has zero of negative array subscript.", WITH_ABORT)    ! | KEY(0), KEY(-4) are not allowed
+      case(BROKEN_BRAKES)
+        call show_message("$"//section_name//": The " // badkey // " has incorrect brakes sequence.", WITH_ABORT)           ! | KEY)(, KEY(, KEY) are not allowed
+      case(NOT_ALLOWED_KEY)
+        call show_message("$"//section_name//": The " // badkey // " keyword is not allowed in this group.")                ! | the KEY is not allowed in group
+        if(present(allowed_keys)) then
+          call show_message("Allowed keys in $"//section_name//" group are the next: ", "(4A20)", allowed_keys, WITH_ABORT)
+        end if
+        call show_message(" ", WITH_ABORT)
+    end select
+  end subroutine read_section
+  !*MODULE mod_nameio DECK generate_pairs
+  !> @brief  Parse section string for creating KEY=PAIR pairs
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @param  this    - (inout) class variable
+  !> @param  section - (in)    section string
+  !> @param  error   - (out)   0 if OK, ...
+  !> @param  badkey  - (out)   the key, near of which, the error is
+  !> @param  allowed_keys - (in, optional) keys, which are allowed in this group
+  subroutine generate_pairs(this, section, error, badkey, allowed_keys)
+    use strings, only: index_ith
+    class(input_group),            intent(inout) :: this
+    character(len=:), allocatable, intent(in)    :: section
+    integer,                       intent(inout) :: error
+    character(len=:), allocatable, intent(out)   :: badkey
+    character(len=*),              intent(in),   optional :: allowed_keys(:)
+    ! internal variables
+    integer :: i, j, k, indb
+    character(len=:), allocatable :: tmp_line, tmp_section, tkey, tval, tkey_tr
+    logical :: found
+    tkey_tr = ""
+    i = 0
+    error = OK
+    if(allocated(this%section_Pairs)) then
+      call this%section_Pairs%destroy
+      deallocate(this%section_Pairs)
+    end if
+    allocate(this%section_Pairs)
+    if(len(section) .eq. 0) then
+      return
+    end if
+    tmp_section = section//" "
+    do
+      i = INDEX(tmp_section, " ")
+      if(i .eq. 0) exit
+      tmp_line = tmp_section(:i-1)
+      tmp_section = tmp_section(i+1:)
+      j = INDEX(tmp_line, "=")
+      tkey = tmp_line(:j-1)
+      tval = tmp_line(j+1:)
+      if(present(allowed_keys)) then
+        found = .false.
+        tkey_tr = trim(tkey)
+        indb = index_ith("(", tkey_tr, 1)
+        if(indb .gt. 0) tkey_tr = tkey_tr(:indb-1)
+        do k = 1, size(allowed_keys)
+          if(tkey_tr .eq. trim(allowed_keys(k))) then
+            found = .true.
+            exit
+          end if
+        end do
+        if(.not.found) then
+          error = NOT_ALLOWED_KEY
+          badkey = trim(tkey)
+          return
+        end if
+      end if
+      !tkey is zero or tval has "=" during KEY1=KEY2=...=VALUE
+      if(len(trim(tkey)) .eq. 0 .or. INDEX(tval,"=") .ne. 0) then
+        error = DOUBLED_KEYWORD
+        badkey = trim(tval)
+        return
+      end if
+      !the value of keyword is not presented
+      if(len(trim(tval)) .eq. 0) then
+        error = NO_VALUE
+        badkey = trim(tkey)
+        return
+      end if
+      call this%section_Pairs%add_pair(tkey, tval, error)
+      if(error .ne. 0) then
+        badkey = tkey
+        return
+      end if
+    end do
+  end subroutine generate_pairs
+  !*MODULE mod_nameio DECK get_section
+  !> @brief  Find and select all symbols between any $section_name and $end
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @param  file_unit    - (in)  unit of file, which will be read
+  !> @param  section_name - (in)  name of section (like CONTRL), which will be read
+  !> @param  section      - (out) string contains all inputted keywords and its values
+  subroutine get_section(file_unit, section_name, section, error)
+    use strings, only: to_upper
+    integer,                       intent(in)  :: file_unit
+    character(len=*),              intent(in)  :: section_name
+    character(len=:), allocatable, intent(out) :: section
+    integer, intent(out) :: error
+    ! internal variables
+    integer :: ios
+    integer :: endofsection
+    character(len=:), allocatable :: line, tmp_line, last_line
+    ! const characters
+    character(len=*), parameter :: dollar = "$", endblock = "END"
+    !
+    logical :: first_line, add
+    first_line = .true.
+    add = .false.
+
+    error = 0
+
+    !zero initializated strings
+    line    = ""
+    tmp_line  = ""
+    last_line = ""
+    section = ""
+    do
+      call get_line(file_unit, tmp_line, ios)
+      if (ios /= 0) exit                                 !< the end of file
+      call to_upper(tmp_line)
+      if (len(tmp_line) .le. 1) cycle                    !< the short line cannot have useful information
+      if (tmp_line(1:1) /= " ") cycle                    !< fast skipping any lines with commentaries
+      if (count_substring(dollar,tmp_line) .gt. 2) then
+        error = MULTIPLE_DECLARATION                     !< several declarations of sections can not be at one line
+        return
+      end if
+      last_line = line
+      line = tmp_line
+      if((INDEX(line, dollar//section_name//" ") .eq. 2) .and. (INDEX(last_line,dollar//endblock) .ne. 0 .or. first_line)) then
+        first_line = .false.
+        add = .true.
+        endofsection = INDEX(line, dollar//endblock)
+        if(endofsection .eq. 0) then
+          section = section // line(INDEX(line, dollar//section_name//" ") + len(section_name) + 1:) // " "
+        else
+          section = section // line(INDEX(line, dollar//section_name//" ") + len(section_name) + 1:endofsection - 1) // " "
+          add = .false.
+        end if
+      else if(INDEX(line//" ", dollar//section_name//" ") .eq. 2) then
+        error = DOUBLE_SECTION                           !< The $END should be before $new_section
+        return
+      else if(add) then
+        endofsection = INDEX(line, dollar//endblock)
+        if(endofsection .eq. 0) then
+          section = section // line(1:) // " "
+        else
+          section = section // line(1:endofsection - 1) // " "
+          add = .false.
+        end if
+      end if
+    end do
+    if(add) then
+      error = NON_CLOSED_SECTION                         !< The last $END is not checking by this routine. It can be dangerous.
+      return
+    end if
+  end subroutine get_section
+  !*MODULE mod_nameio DECK get_line
+  !> @brief  get long line from file
+  !> @date   Sep, 2019 --Initial release--
+  !> @param  file_unit - (in)  unit of file
+  !> @param  line      - (out) read line (result)
+  !> @param  ios       - (out) i/o state; check it that is equals to zero for reading next line
+  subroutine get_line(file_unit, line, ios)
+    integer, intent(in)                        :: file_unit
+    character(len=:), allocatable, intent(out) :: line
+    integer, intent(out)                       :: ios
+    ! internal variables
+    character(len=80) :: buffer
+    integer                                    :: size_read
+
+    line = ""
+    do
+      read(file_unit, "(A)", iostat=ios, advance="no", size=size_read) buffer
+      if (is_iostat_eor(ios)) then
+        line = line // buffer(:size_read)
+        ios = 0
+        exit
+      else if (ios == 0) then
+        line = line // buffer
+      else
+        exit
+      end if
+    end do
+  end subroutine get_line
+  !*MODULE mod_nameio DECK get_logical
+  !> @brief  This subroutine is masked by get_value. It is needed for logical converting
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (out) converted logical value
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_logical(this, key, value, error, def)
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    logical, intent(out) :: value
+    integer, intent(out) :: error
+    logical, intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    error = OK
+    value = .false.
+    if(present(def)) value = def
+    section_value = this%section_Pairs%get_value(key, error)
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    select case(trim(section_value))
+      case (".T.", ".TRUE.")
+        value = .true.
+      case (".F.", ".FALSE.")
+        value = .false.
+      case default
+        error = TYPE_ERROR
+        section_value = "The key '"//trim(key)//"' value can not be converted to logical"
+        call this%show_error(section_value)
+    end select
+  end subroutine get_logical
+  !*MODULE mod_nameio DECK get_integer
+  !> @brief  This subroutine is masked by get_value. It is needed for integer converting
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (out) converted integer value
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_integer(this, key, value, error, def)
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    integer, intent(out) :: value
+    integer, intent(out) :: error
+    integer, intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    integer :: ios
+    error = OK
+    value = 0
+    if(present(def)) value = def
+    section_value = this%section_Pairs%get_value(key, error)
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    read(section_value, *, iostat = ios) value
+    if(ios .ne. OK) then
+      error = TYPE_ERROR
+      section_value = "The key '"//trim(key)//"' value can not be converted to integer"
+      call this%show_error(section_value)
+    end if
+  end subroutine get_integer
+  !*MODULE mod_nameio DECK get_double
+  !> @brief  This subroutine is masked by get_value. It is needed for real(fp) (double precision) converting
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (out) converted real(fp) (double precision) value
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_double(this, key, value, error, def)
+    use prec, only: fp
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    real(kind=fp), intent(out) :: value
+    integer, intent(out) :: error
+    real(kind=fp), intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    integer :: ios
+    error = OK
+    value = 0.0_fp
+    if(present(def)) value = def
+    section_value = this%section_Pairs%get_value(key, error)
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    read(section_value, *, iostat = ios) value
+    if(ios .ne. OK) then
+      error = TYPE_ERROR
+      section_value = "The key '"//trim(key)//"' value can not be converted to float"
+      call this%show_error(section_value)
+    end if
+  end subroutine get_double
+  !*MODULE mod_nameio DECK get_string
+  !> @brief  This subroutine is masked by get_value. It is needed for string converting
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (out) converted string value
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_string(this, key, value, error, def)
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    character(len=:), allocatable, intent(out) :: value
+    integer, intent(out) :: error
+    character(len=:), allocatable, intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    error = OK
+    value = ""
+    if(present(def)) value = def
+    section_value = this%section_Pairs%get_value(key, error)
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    value = trim(section_value)
+  end subroutine get_string
+  !*MODULE mod_nameio DECK get_logical_array
+  !> @brief  This subroutine is masked by get_value. It is needed for logical array converting
+  !> @author Igor S. Gerasimov
+  !> @date   May, 2021 --Initial release--
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (out) converted logical array values, must have explicit size
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_logical_array(this, key, value, error, def)
+    character(len=1), parameter :: comma = ","
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    logical, dimension(:), intent(inout) :: value
+    integer, intent(out) :: error
+    logical, intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value, tmp_str
+    integer :: i, ind
+    error = OK
+    section_value = this%section_Pairs%get_value(key, error, size(value))
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    value = .false.
+    if(present(def)) value = def
+    tmp_str = trim(section_value)
+    do i = 1, size(value)
+      ind = INDEX(tmp_str,comma)
+      if(ind .eq. 0) then
+        ind = len(tmp_str) + 1
+      end if
+      select case(tmp_str(:ind - 1))
+        case ("")
+          value(i) = .false.
+          if(present(def)) value(i) = def
+        case (".T.", ".TRUE.")
+          value(i) = .true.
+        case (".F.", ".FALSE.")
+          value(i) = .false.
+        case default
+          error = TYPE_ERROR
+          section_value = "The key '"//trim(key)//"' value can not be converted to logical array"
+          call this%show_error(section_value)
+          return
+      end select
+      tmp_str = tmp_str(ind+1:)
+    end do
+  end subroutine get_logical_array
+  !*MODULE mod_nameio DECK get_integer_array
+  !> @brief  This subroutine is masked by get_value. It is needed for integer array converting
+  !> @author Igor S. Gerasimov
+  !> @date   May, 2021 --Initial release--
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (inout) converted integer array value, must have explicit size
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_integer_array(this, key, value, error, def)
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    integer, dimension(:), intent(inout) :: value
+    integer, intent(out) :: error
+    integer, intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    integer :: ios
+    error = OK
+    section_value = this%section_Pairs%get_value(key, error, size(value))
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    value = 0
+    if(present(def)) value = def
+    read(section_value, *, iostat = ios) value
+    if(ios .ne. OK) then
+      error = TYPE_ERROR
+      section_value = "The key '"//trim(key)//"' value can not be converted to integer array"
+      call this%show_error(section_value)
+    end if
+  end subroutine get_integer_array
+  !*MODULE mod_nameio DECK get_double_array
+  !> @brief  This subroutine is masked by get_value. It is needed for real(fp) (double precision) array converting
+  !> @author Igor S. Gerasimov
+  !> @date   May, 2021 --Initial release--
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (inout) converted real(fp) (double precision) array values, must have explicit size
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_double_array(this, key, value, error, def)
+    use prec, only: fp
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    real(fp), dimension(:), intent(inout) :: value
+    integer, intent(out) :: error
+    real(fp), intent(in), optional :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    integer :: ios
+    error = OK
+    section_value = this%section_Pairs%get_value(key, error, size(value))
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    value = 0.0_fp
+    if(present(def)) value = def
+    read(section_value, *, iostat = ios) value
+    if(ios .ne. OK) then
+      error = TYPE_ERROR
+      section_value = "The key '"//trim(key)//"' value can not be converted to float array"
+      call this%show_error(section_value)
+    end if
+  end subroutine get_double_array
+  !*MODULE mod_nameio DECK get_string_array_alloc
+  !> @brief  This subroutine is masked by get_value. It is needed for string array converting
+  !> @author Igor S. Gerasimov
+  !> @date   Sep, 2019 --Initial release--
+  !> @date   Mar, 2021 Moving routine to input_group class
+  !> @param  key    - (in)  key in group
+  !> @param  value  - (out) converted string array values
+  !> @param  error  - (out) 0 if OK, KEY_NOT_FOUND if key was not found
+  !> @param  def    - (in, optional) setting default value
+  subroutine get_string_array_alloc(this, key, value, error, def)
+    character(len=1), parameter :: comma = ","
+    class(input_group), intent(inout) :: this
+    character(len=*), intent(in) :: key
+    character(len=:), dimension(:), allocatable, intent(out) :: value
+    integer, intent(out) :: error
+    character(len=:), allocatable, optional, intent(in) :: def
+    ! internal variables
+    character(len=:), allocatable :: section_value
+    character(len=:), allocatable :: tmp_str
+    integer :: lenarr, maxlen, i, ind
+    error = OK
+    section_value = this%section_Pairs%get_value(key, error)
+    ! this error is not critical; it is OK for input file
+    if(error .eq. KEY_NOT_FOUND) return
+    if(error .ne. OK) call this%show_error(section_value)
+    maxlen = 0
+    lenarr = count_substring(comma,section_value)
+    value = ""
+    if(present(def)) value = def
+    if(present(def)) maxlen = max(maxlen,len(def))
+    !read(section_value, *, iostat = ios) value
+    tmp_str = section_value
+    do i = 1, lenarr
+      ind = INDEX(tmp_str,comma)
+      if(ind .eq. 0) then
+        ind = len(tmp_str) + 1
+      end if
+      tmp_str = tmp_str(ind+1:)
+      maxlen = max(maxlen, ind-1)
+    end do
+    allocate(value(lenarr),source=repeat(" ",maxlen))
+    tmp_str = section_value
+    do i = 1, lenarr
+      ind = INDEX(tmp_str,comma)
+      if(ind .eq. 0) then
+        ind = len(tmp_str) + 1
+      end if
+      value(i) = tmp_str(:ind - 1)
+      tmp_str = tmp_str(ind+1:)
+    end do
+  end subroutine get_string_array_alloc
+  !*MODULE mod_nameio DECK show_error
+  !> @brief  Show critical error after get_value
+  !> @author Igor S. Gerasimov
+  !> @date   May, 2021 --Initial release--
+  !> @date   Jul, 2021 Using messages module
+  !> @param  message - (in) error message
+  subroutine show_error(this, message)
+    use messages, only: show_message, WITH_ABORT
+    class(input_group),            intent(inout) :: this
+    character(len=:), allocatable, intent(in)    :: message
+    call show_message("$"//this%name//": "//message, WITH_ABORT)
+  end subroutine show_error
+end module mod_nameio

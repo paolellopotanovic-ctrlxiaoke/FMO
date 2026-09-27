@@ -1,0 +1,594 @@
+MODULE omp_fmogrd2
+
+    USE prec, ONLY: fp
+
+    USE mx_limits, ONLY: &
+        MXGTOT, MXSH, MXATM, &
+        MXAO, MXFRG, MXFGPT
+
+    USE grd2_consts, ONLY: &
+        RLN10, TEN, ONE, &
+        TENM9, TENM11, TENM20, &
+        PT5, TENM12, LENSHL, &
+        fmt_jkder_screen_info, &
+        fmt_jkder_end
+
+    USE ompgrd2, ONLY: &
+        ompgrd2_jkdmem, &
+        ompgrd2_fixmem, &
+        ompgrd2_prep_pople, &
+        ompgrd2_prep_rys
+
+    IMPLICIT NONE
+
+    REAL(KIND=fp), PARAMETER :: &
+        CHECK = transfer('CHECK   ', 1.0_fp), &
+        GRD2  = transfer('GRD2    ', 1.0_fp), &
+        DEBUG = transfer('DEBUG   ', 1.0_fp), &
+        UHF   = transfer('UHF     ', 1.0_fp), &
+        ROHF  = transfer('ROHF    ', 1.0_fp)
+
+    CHARACTER(LEN=*), PARAMETER :: &
+        fmt_gradient_banner = '(/10X,22("-")/10X,&
+                              &"GRADIENT OF THE ENERGY",/&
+                              &10X,22("-"))'
+
+    PRIVATE
+    PUBLIC omp_esd2der
+
+CONTAINS
+!*MODULE OMP_FMO  *DECK omp_esd2der
+!>
+!>    @brief driver for the two electron gradient in separated dimers
+!>    @note Based on `ESD2DER` subroutine in fmoint.src
+!>
+!>    @date _Jun, 2018_ Initial release
+!>    @author Vladimir Mironov
+!>
+!>    @param[in] di    density for one fragment
+!>    @param[in] dj    density for second fragment
+!>    @param[in] l1i   flag determining what type of calculation to do.
+!>     It's passed to `DABCLU`, and takes into account symmetry
+!>      - -1: FMO response
+!>      - -4: H2 part of the EFMO dispersion gradient, with 3*12 responses
+!>      - -5: H1 part of the EFMO dispersion gradient, with 3*12 responses
+!>      - -6: part of the EFMO polarization gradient, with 3 responses
+ SUBROUTINE omp_esd2der(di,dj,l1i)
+
+      USE omp_lib
+      USE constants, ONLY: one
+
+      REAL(KIND=fp), INTENT(IN) :: di(*),dj(*)
+      INTEGER, INTENT(IN) :: l1i
+
+      COMMON /DERSKP/ iiat,jjat,kkat,llat,skipi,skipj,skipk,skipl
+        INTEGER :: &
+            iiat, jjat, kkat, llat
+        LOGICAL :: &
+            skipi,skipj,skipk,skipl
+!$omp threadprivate(/DERSKP/)
+
+      COMMON /DSHLNO/ lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                      mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                      nij,ijd,kld,ij,kl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ijd,kld,ij,kl
+!$omp threadprivate(/DSHLNO/)
+
+      COMMON /DSHLT / rtol,dtol,vtol1,vtol2,vtols,out,dbg
+        REAL(KIND=fp) :: &
+            rtol,dtol,vtol1,vtol2,vtols
+        LOGICAL :: &
+            out,dbg
+
+      COMMON /FMCOM / x(1)
+        REAL(KIND=fp) :: x
+
+      COMMON /GRAD  / de(3,mxatm)
+        REAL(KIND=fp) :: de
+!$omp threadprivate(/GRAD  /)
+
+      COMMON /IJPAIR/ ia(mxao)
+        INTEGER :: ia
+
+      COMMON /INFOA / nat,ich,mul,num,nqmt,ne,na,nb, &
+                    zan(mxatm),c(3,mxatm),ian(mxatm)
+        INTEGER :: nat,ich,mul,num,nqmt,ne,na,nb,ian
+        REAL(KIND=fp) :: zan,c
+
+      COMMON /INTFIL/ nintmx,nhex,ntupl,pack2e,inttyp,igrdtyp
+        INTEGER :: nintmx,nhex,ntupl,inttyp,igrdtyp
+        LOGICAL :: pack2e
+
+      COMMON /INTOPT/ ischwz,iecp,necp,iefld
+        INTEGER :: ischwz,iecp,necp,iefld
+
+      COMMON /IOFILE/ ir,iw,ip,ijk,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,ijk,ipk,idaf,nav,ioda
+
+      COMMON /NSHEL / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot), &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot), &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh), &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+
+      COMMON /OUTPUT/ nprint,itol,icut,normf,normp,nopk
+        INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+      COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: goparr,dskwrk,maswrk
+
+      COMMON /PAULMO/ centnm(mxfgpt),centcd(3,mxfgpt),norb(mxfrg), &
+                      npbf(mxfrg),ntmo
+        REAL(KIND=fp) :: centnm, centcd
+        INTEGER :: norb, npbf, ntmo
+
+      COMMON /RESTAR/ timlim,irest,nrec,intloc,ist,jst,kst,lst
+        REAL(KIND=fp) :: timlim
+        INTEGER :: irest,nrec,intloc,ist,jst,kst,lst
+
+      COMMON /RUNOPT/ runtyp,exetyp,nevals,nglevl,nhlevl
+        REAL(KIND=fp) :: runtyp,exetyp
+        INTEGER :: nevals,nglevl,nhlevl
+
+        INTEGER :: maxtyp
+
+      COMMON /TMVALS/ ti,tx,tim
+        REAL(KIND=fp) :: ti,tx,tim
+!$omp threadprivate (/TMVALS/)
+
+      COMMON /WFNOPT/ scftyp,vbtyp,dftype,tddftyp,cityp,cctyp, &
+                      mplevl,mpctyp
+      REAL(KIND=fp) :: scftyp,vbtyp,dftype,tddftyp,cityp,cctyp
+      INTEGER :: mplevl,mpctyp
+
+      COMMON /fmoopt/ espsca(9),respap(2),resppc(2),resdim,restri(4), &
+                    rcorsd,respct,convfg,cnvdmp,coroff,rflmo(4), &
+                    orshft,orshft2,cnvafo,ascreen(4),ixesp,mxitfg, &
+                    nguess,nbsse,modorb,modpar,irststp,irstlay,nprfmo, &
+                    nfmopal,modprp,maxl1c,ipieda,modgrd,modesp,ivmul, &
+                    modlmo,nopden,mofock,modfd,modfmm,ncentm,ndualb, &
+                    ngab,modpan
+        REAL(KIND=fp) :: espsca,respap,resppc,resdim,restri, &
+            rcorsd,respct,convfg,cnvdmp,coroff,rflmo, &
+            orshft,orshft2,cnvafo,ascreen
+        INTEGER :: ixesp,mxitfg,nguess,nbsse,modorb,modpar,&
+            irststp,irstlay,nprfmo,nfmopal,modprp,maxl1c,ipieda,&
+            modgrd,modesp,ivmul,modlmo,nopden,mofock,modfd,&
+            modfmm,ncentm,ndualb,ngab,modpan
+
+      COMMON /fmopnt/ lichfg,lmulfg,lidmrec,lfrgnam,llayfrg,lindat, &
+                      lnCBS,lfmozan,lfmoc,lfmomas,lizbas,liaglob,libdgh, &
+                      liabdfg,ljabdfg,lnCAO,lidxCAO,liaprjo,ljaprjo, &
+                      lCoreAO,lOccCor,lshiftb,liodfmo,lfmoda,lfmodb, &
+                      lfmoespa,lfmoespb,llocfmo,lscffrg,lfmoscf,lrij, &
+                      lpopmul,lpopmat,lialoc,lindbd,liatfrg,lindfrg, &
+                      lindgfrg,lnatfrg,lnat0frg,lianfrg,lzanfrg,lcfrg, &
+                      llibish,llibnsh,llibng,lindatg,lfmobuf(3),lfmode, &
+                      lnumfrg,lloctat,liaoglob,lloadm,lfmoge,ldgrid, &
+                      liodcfmo,ljob2grp,lfmopg,lemocdr,luntxyz,luntrot, &
+                      lstonep,lmapsu,lfrgmul,lclmo,lialmo,lindlmo, &
+                      latclmo,llmobdf,lfgflmo,lnfglmo,llfglmo,lpfglmo, &
+                      LPOPDMAT,lidmpnt,liddpnt,livmpnt,liactfg,lcrfrg, &
+                      lzlmfrgv,lYlmfrgv,lndtfrg,lf_mm,lg_mm,lmaxl30, &
+                      libuffg,lindatp,lsmon,lsdim,ledimfed,lexcit3d, &
+                      lifgfret
+        INTEGER :: lichfg,lmulfg,lidmrec,lfrgnam,llayfrg,lindat, &
+                   lncbs,lfmozan,lfmoc,lfmomas,lizbas,liaglob,libdgh, &
+                   liabdfg,ljabdfg,lncao,lidxcao,liaprjo,ljaprjo, &
+                   lcoreao,locccor,lshiftb,liodfmo,lfmoda,lfmodb, &
+                   lfmoespa,lfmoespb,llocfmo,lscffrg,lfmoscf,lrij, &
+                   lpopmul,lpopmat,lialoc,lindbd,liatfrg,lindfrg, &
+                   lindgfrg,lnatfrg,lnat0frg,lianfrg,lzanfrg,lcfrg, &
+                   llibish,llibnsh,llibng,lindatg,lfmobuf,lfmode, &
+                   lnumfrg,lloctat,liaoglob,lloadm,lfmoge,ldgrid, &
+                   liodcfmo,ljob2grp,lfmopg,lemocdr,luntxyz,luntrot, &
+                   lstonep,lmapsu,lfrgmul,lclmo,lialmo,lindlmo, &
+                   latclmo,llmobdf,lfgflmo,lnfglmo,llfglmo,lpfglmo, &
+                   lpopdmat,lidmpnt,liddpnt,livmpnt,liactfg,lcrfrg, &
+                   lzlmfrgv,lylmfrgv,lndtfrg,lf_mm,lg_mm,lmaxl30, &
+                   libuffg,lindatp,lsmon,lsdim,ledimfed,lexcit3d, &
+                   lifgfret
+
+      COMMON /fmorun/ espscf,e0scf(2),emp2s,idafmo,icurfg,jcurfg,kcurfg, &
+                    icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+                    moncor,needr,modrst,norbproj,nunesp,iskipesp, &
+                    iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo, &
+                    iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo(2)
+        REAL(KIND=fp) :: espscf,e0scf,emp2s
+        INTEGER :: idafmo,icurfg,jcurfg,kcurfg, &
+            icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+            moncor,needr,modrst,norbproj,nunesp,iskipesp, &
+            iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo, &
+            iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo
+
+      COMMON /DERMEM/ iwfn,ixch,inijg,igint,ifint,isint,iijklg,idab,ichrg, &
+                      ixy,ixz,iyz,ix,iy,iz,isj,isk,isl,igijkl,ignkl,ignm, &
+                      idij,idkl,ib00,ib01,ib10,ic00,id00,if00, &
+                      iaai,iaaj,ibbk,ibbl,ifi,ifj,ifk,ifl, &
+                      isii,isjj,iskk,isll,isij,isik,isil,isjk,isjl,iskl, &
+                      idijsi,idijsj,idklsk,idklsl,iabv,icv,irw
+        INTEGER :: iwfn,ixch,inijg,igint,ifint,isint,iijklg,idab,ichrg, &
+            ixy,ixz,iyz,ix,iy,iz,isj,isk,isl,igijkl,ignkl,ignm, &
+            idij,idkl,ib00,ib01,ib10,ic00,id00,if00, &
+            iaai,iaaj,ibbk,ibbl,ifi,ifj,ifk,ifl, &
+            isii,isjj,iskk,isll,isij,isik,isil,isjk,isjl,iskl, &
+            idijsi,idijsj,idklsk,idklsl,iabv,icv,irw
+!$omp threadprivate(/DERMEM/)
+
+    COMMON /DERPAR/ ider,jder,kder,lder,nder
+    INTEGER :: &
+        ider,jder,kder,lder,nder
+!$omp threadprivate(/DERPAR/)
+
+      COMMON /INDD80/ imax,jmax,kkkmax,lmax
+        INTEGER :: imax, jmax, kkkmax, lmax
+!$omp threadprivate(/INDD80/)
+
+    LOGICAL :: uhftyp, pople, hondo, some, slb, dlb
+
+    INTEGER :: nxyz_disp
+    LOGICAL :: ish2_disp
+
+    INTEGER :: &
+        next, i1, i2, iiskip1, iiskip2, idid, &
+        l2, nsh2, i, maxshl, length, loadfm, iaddr, ilocal, minxyz, &
+        maxxyz, minvec, need, nc, ldf, ii, jj, kk, ll, ijij, klkl, &
+        iijj, nij0, maxll, nkl, nkl0, iat, jat, kat, lat, &
+        inew, jnew, knew, lnew, jtype, iout, ithread, maxkk, idum, nbf
+    REAL(KIND=fp) :: &
+        cutoff, cutoff2, zbig, dabcut, dabmax, q4, gmax, fc, df, dda
+
+    REAL(KIND=fp), ALLOCATABLE :: &
+        de_priv(:,:), de_shar(:,:)
+
+!     This is the main 2e- gradient driver
+      dbg = exetyp==debug
+      out = exetyp==grd2 .OR. nprint==-4
+      some = maswrk .AND. nprint/=-5
+      IF (some) WRITE (iw,FMT=fmt_gradient_banner)
+
+!     Calculate the largest shell type
+      CALL baschk(maxtyp)
+      maxshl = LENSHL(maxtyp+1)
+      If (maxshl<4) maxshl = 4 ! Do at least an L-shell
+
+!     Set starting parameters
+      hondo = .true.
+      pople = igrdtyp/=2
+
+!     If we are using the Pople package and do not have any shells
+!     larger than an L-shell then skip the setup for the Rys package
+      IF (pople .AND. maxtyp<2) hondo = .false.
+
+!     CUTOFF is the Schwarz screening cut off
+!     DABCUT is the two particle density cut off
+      cutoff = TENM9
+      IF (.NOT.pople) cutoff = cutoff/TEN
+      cutoff2 = cutoff/2.0d+00
+
+      i1 = kstart(1)
+      i2 = kstart(nshell)+kng(nshell)-1
+      zbig = maxval(ex(i1:i2))
+      dabcut = TENM11
+      IF (zbig>1.0d+06) dabcut = dabcut/ten
+      IF (zbig>1.0d+07) dabcut = dabcut/ten
+
+!     VTOLS are cut offs used by the Pople package
+!     Current values are from HONDO 8, see G92 for other possibilities
+      vtol1 = TENM12
+      vtol2 = TENM12
+      vtols = TENM20
+      dtol = TEN**(-itol)
+      rtol = RLN10*itol
+
+!     UHFTYP is not used below because for FMO there is no exchange terms
+!     in the ESP (FMO/X would have a bug here) and DABCLU simply multiplies
+!     two densities of I and J, so that if the total density is used that is
+!     fine (?). To implement FMO/X gradient, modify DABCLU to include
+!     exchange terms based on separate alpha and beta densities of I and J??
+!     Note that DABLCU has DA = total density (A+B), DB = spin (A-B).
+      uhftyp = scftyp==UHF .OR. scftyp==ROHF
+      if (iand(modesp,32)/=0) CALL abrt
+
+!     Set pointers for partitioning of memory
+      l2 = (num*num+num)/2
+      nsh2 = (nshell*nshell+nshell)/2
+
+      DO i = 1, num
+         ia(i) = (i*i-i)/2
+      END DO
+
+!     Read in 1e-gradient
+
+!     CALL daread(idaf,ioda,de,3*nat,3,0)
+!     IF (goparr) CALL dscal(3*nat,ONE/nproc,de,1)
+!     CALL vclr(de,1,3*nat)
+
+!     DE is set in ESDNRDER
+
+!     Figure out the memory we need for storing density matrix
+!     and other wavefunction information. `JKDMEM` allocates
+!     memory for derivative computation and 2nd order density
+!     after `LENGTH` words.
+      length = l2
+      IF (ntmo>0) length = length + length
+
+!     Calculate the amount of memory needed and set the pointers
+!     for both packages
+      CALL valfm(loadfm)
+      CALL ompgrd2_jkdmem(1,loadfm,iaddr,ilocal, &
+                    length,minxyz,maxxyz,minvec,pople,.false.)
+
+!     Carry out set up tasks
+      need = iaddr-loadfm
+      CALL getfm(need)
+
+!     Allocate memory for the OpenMP code
+!     Thread-local 2-electron contribution to the gradient
+      ALLOCATE(de_priv(3,nat))
+      de_priv(:,:) = 0.0_fp
+
+!     Backup of previously computed contributions to the gradient
+      ALLOCATE(de_shar(3,nat))
+
+      IF (exetyp==CHECK) THEN
+        CALL omp_esd2der__cleanup
+        RETURN
+      END IF
+
+!     Read wavefunction information
+
+!     Read in the exchange integrals from disk. If they were not
+!     previously computed, then just set the array to one, which
+!     effectively deactivates the Schwarz screening
+
+      IF (ischwz==1) THEN
+         IF (lfmobuf(3)==0) then
+           CALL daread(idaf,ioda,x(ixch),nsh2,54,0)
+         ELSE
+           CALL dcopy(nsh2,x(lfmobuf(3)),1,x(ixch),1)
+         END IF
+      ELSE
+         x(ixch:ixch+nsh2-1) = ONE
+      END IF
+
+      de_shar(:,1:nat) = de(:,1:nat) ! Backup the common block /GRAD/
+
+!     Set up the 1-electron charge distribution
+      IF (hondo) CALL oedhnd(x(inijg),x(ichrg))
+
+!     Set parameters for DABCLU_DISP
+      SELECT CASE (l1i)
+      CASE (-4)
+          nxyz_disp = 36
+          ish2_disp = .true.
+      CASE (-5)
+          nxyz_disp = 36
+          ish2_disp = .false.
+      CASE (-6)
+          nxyz_disp = 3
+          ish2_disp = .false.
+      END SELECT
+
+!     Square DTOL for use in JKDSPD
+      dtol = dtol*dtol
+
+      nc = 1
+      ldf = 1
+
+!     Initialize the integral block counters to zero
+      iiskip1 = 0
+      iiskip2 = 0
+      idid = 0
+
+!     Initialize parallel
+      slb = goparr  .and.  ibtyp.eq.0
+      dlb = goparr  .and.  ibtyp.eq.1
+      next = -1
+
+!$omp parallel &
+!$omp   copyin( &
+!$omp       /DERMEM/, nder &
+!$omp   ) &
+!$omp   private( &
+!$omp       ii, jj, kk, ll, ijij, klkl, &
+!$omp       iijj, nij0, maxkk, maxll, q4, gmax, &
+!$omp       pople, nkl, nkl0, &
+!$omp       iat, jat, kat, lat, &
+!$omp       inew, jnew, knew, lnew, jtype, &
+!$omp       dabmax, iout, &
+!$omp       ithread &
+!$omp   ) &
+!$omp   shared( &
+!$omp       next &
+!$omp   ) &
+!$omp reduction(+:de_priv, idid, iiskip1, iiskip2)
+
+      de(:,1:nat) = 0.0_fp
+      ithread = omp_get_thread_num()
+      CALL ompgrd2_fixmem(ithread,ilocal)
+
+!     I shell
+      ii = nshell + 1
+ic:   DO
+!         MPI load balance
+          IF (dlb) THEN
+!             Dynamic load balance
+!$omp barrier
+!$omp master
+              CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+              ii = nshell - next
+              IF (ii<=ncursh) EXIT ic
+          ELSE
+!             Static load balance
+              ii = ii - 1
+              IF (ii<=ncursh) EXIT ic
+              IF (slb .AND. MOD(ii-ncursh,nproc)/=me) CYCLE ic
+          END IF
+
+          maxkk = ncursh
+          IF (l1i>=-6 .AND. l1i<=-1) maxkk = ii
+
+!$omp barrier
+!$omp do collapse(2) schedule(dynamic,1)
+!       J shell
+        DO jj = ncursh+1, ii
+        DO kk = 1, maxkk
+
+!           Get IJ charge distribution
+!           Really we just set the pointers to the charge distribution
+            IF (hondo) THEN
+              iijj = ia(max0(ii,jj))+min0(ii,jj)
+              CALL oedrd(x(inijg),nij,nij0,iijj)
+              IF (nij==0) CYCLE
+            END IF
+
+!           L shell
+            maxll = kk
+            IF ((l1i>=-6 .AND. l1i<=-1) .AND. kk==ii) maxll = jj
+            DO ll = 1, maxll
+
+                q4 = 1
+
+!               Decide on derivative integral method
+!               Any purely SP set of shells can be done with the faster
+!               Pople/Schlegel rotation algorithm. Integrals involving
+!               D and higher functions must use Rys polynomial code.
+                pople = (igrdtyp.ne.2)  .and.&
+                        (ktype(ii).le.2).and.&
+                        (ktype(jj).le.2).and.&
+                        (ktype(kk).le.2).and.&
+                        (ktype(ll).le.2)
+
+!               Implement integral screening here using exchange integrals
+!               see H.Horn, H.Weiss, M.Haeser, M.Ehrig,
+!               R.Ahlrichs J.Comput.Chem. 12, 1058-1064(1991)
+!               regarding the estimation formula (31) that is used here.
+
+                ijij = ia(max0(ii,jj))+min0(ii,jj)
+                klkl = ia(max0(kk,ll))+min0(kk,ll)
+                gmax = (x(ixch+ijij-1)*x(ixch+klkl-1))
+
+!               Coarse screening, on just the integral value
+                IF (gmax<cutoff) THEN
+                   iiskip1 = iiskip1+1
+                   CYCLE
+                END IF
+
+                IF (pople) THEN
+                    CALL ompgrd2_prep_pople(ii,jj,kk,ll,&
+                            inew,jnew,knew,lnew,iat,jat,kat,lat, &
+                            jtype,q4,iout)
+                ELSE
+                    CALL ompgrd2_prep_rys(ii,jj,kk,ll, &
+                            inijg,iijklg,ia(MAX0(kk,ll)),&
+                            inew,jnew,knew,lnew,nkl,nkl0,iout)
+                END IF
+
+                IF (iout/=0) CYCLE
+
+!               Obtain 2 body density for this shell block
+!               DA and DB are flipped around, since the first 2 indices are
+!               for J and the other 2 for I. This agrees with FMO2ei.
+
+!               IF (ntmo>0) THEN
+!                  CALL dabpau(inew,jnew,knew,lnew,uhftyp,x(lden), &
+!                              x(lvec),x(idab),dabmax,q4,pople)
+!               ELSE
+                  IF (l1i<=-4 .AND. l1i>=-6) THEN
+                     CALL dabclu_disp(inew,jnew,knew,lnew,dj, &
+                          di,x(idab),dabmax,q4,pople,nxyz_disp,ish2_disp)
+                  ELSE
+                     CALL dabclu(inew,jnew,knew,lnew,uhftyp,dj, &
+                          di,x(idab),dabmax,q4,pople,l1i)
+                  END IF
+!               END IF
+
+!               Fine screening, on integral value times density factor
+                IF (dabmax*gmax < cutoff2) THEN
+                   iiskip2 = iiskip2+1
+                   CYCLE
+                END IF
+
+!               Evaluate derivative integral, and add to the gradient
+                idid = idid+1
+                IF (pople) THEN
+                   CALL jkdg80(one,dabmax,inew,jnew,knew,lnew, &
+                               jtype,iat,jat,kat,lat)
+                ELSE
+                   CALL jkdspd(nij0,nkl,nkl0,x(ichrg), &
+                   x(igint),x(ifint),x(isint),x(iijklg),x(igijkl), &
+                   x(ignkl),x(ignm),x(ixy),x(ixz),x(iyz),x(ix),x(iy),x(iz), &
+                   x(isj),x(isk),x(isl),x(ib00),x(ib01),x(ib10),x(ic00), &
+                   x(id00),x(if00),x(idij),x(idkl),x(idijsi),x(idijsj), &
+                   x(idklsk),x(idklsl),x(iabv),x(icv),x(irw),x(iaai),x(iaaj), &
+                   x(ibbk),x(ibbl),x(ifi),x(ifj),x(ifk),x(ifl),x(isii),x(isjj), &
+                   x(iskk),x(isll),x(isij),x(isik),x(isil),x(isjk),x(isjl), &
+                   x(iskl),x(idab),maxxyz,fc,nc,df,ldf,nbf,dda,q4,minvec, &
+                   dabcut,dabmax,one)
+                END IF
+
+            END DO
+       END DO
+       END DO
+!$omp end do
+  END DO ic
+
+!   backup 2-electron gradient from threadprivate array 'DE'
+    de_priv(1:3,1:nat) = de(1:3,1:nat)
+
+!$omp end parallel
+
+!   Reset DLB counter
+    IF (dlb) CALL ddi_dlbreset
+
+!   Finish up the final gradient
+
+!   *DGF*
+!   Global sum contributions from each node
+!   Do not global sum: it will be done elsewhere (FMOX).
+    IF (goparr) THEN
+       idum = 0
+       CALL ddi_nsumi(1601,iiskip1,iiskip2,idid,idum,3)
+    END IF
+
+!   Add two-electron contribution to the rest of the gradient
+!   Put the final value into the common block /GRAD/
+    de(1:3,1:nat) = de_priv(1:3,1:nat) + de_shar(1:3,1:nat)
+
+!   *DGF*
+!   Do not symmetrise: no symmetry. If one is to symmetrise, other
+!   contributions fron TVDER, SDER and ESDNRDER are to be pre-added.
+
+    CALL omp_esd2der__cleanup
+
+CONTAINS
+
+!> @brief Utility procedure for memory deallocation and printing results
+     SUBROUTINE omp_esd2der__cleanup
+
+         DEALLOCATE(de_priv, de_shar)
+
+         CALL retfm(need)
+         IF (nprint/=-5) then
+           IF (maswrk) THEN
+            IF (some) THEN
+               WRITE(iw,FMT=fmt_jkder_screen_info) iiskip1,iiskip2,idid
+            END IF
+            WRITE(iw,FMT=fmt_jkder_end)
+           END IF
+           CALL texit(1,4)
+         END IF
+
+    END SUBROUTINE
+
+ END SUBROUTINE
+
+END MODULE

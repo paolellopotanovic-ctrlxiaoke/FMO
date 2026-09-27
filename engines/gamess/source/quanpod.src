@@ -1,0 +1,6860 @@
+C*MODULE QUANPOD  *DECK QMMMPOLINT
+!>
+!> @brief    1-e integral due to MM induced dipoles and surface charges
+!>
+!> @author   Hui Li, Dejun Si
+!>           - Feb 2011
+!>
+!> @details  This must be done in every SCF step
+!>
+      SUBROUTINE QMMMPOLINT(H1,FA,FB,DENTOT,HADD,OLDADD,DIP,
+     *                      XTS,YTS,ZTS,QRXN1,QRXN2,
+     *                      CMAT1,L2,L1,MCITER,NTS,NONLSTQ)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (PT5=0.5D+00)
+C
+      DIMENSION H1(L2),FA(L2),FB(L2),DENTOT(L2),HADD(L2),OLDADD(L2),
+     *          DIP(3,*),
+     *          XTS(NTS),YTS(NTS),ZTS(NTS),QRXN1(NTS),QRXN2(NTS),
+     *          CMAT1(NTS,NTS),NONLSTQ(*)
+C
+      LOGICAL GOPARR,MASWRK,DSKWRK,DIRSCF,FDIFF,DIRDIF
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+      COMMON /CONV  / ACURCY,ENUCR,AJUNK(3),DIFF,ITER,ICALCP,ICBET
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFMPT3/ NACTMM,LACTMM(2020),LFFDIPOLD,JUMBUP,
+     *                NACTQM,LACTQM(2020),LFFOLDC,LFFQMVELSV,MMHESS,
+     *                LFFQMCHG,LFFQMCHGB,ISWAP,R2SWAP,DFTBMM
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /OPTSCF/ DIRSCF,FDIFF
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RHF,GVB/8HRHF     ,8HGVB     /
+      DATA RMC/8HMCSCF   /
+C
+C     HUI LI, DEJUN SI, FEB 2011, LINCOLN
+C     HUI LI, NOV 2016, LINCOLN, ADD DFTB
+C
+C     -- USE A DIFFERENT ROUTE FOR FIXSOL --
+      IF(IFIXSOL.EQ.1) THEN
+         CALL FIXSOLINT(H1,FA,FB,DENTOT,HADD,OLDADD,
+     *                  L2,L1,MCITER,NONLSTQ,X(LFFCORD),
+     *                  X(LFFCHARG),X(LFFZANF),X(LFFAFIX),X(LFFQFIX),
+     *                  X(LFFVFIX1),X(LFFVFIX2),
+     *                  X(LFFXTSFIX),X(LFFYTSFIX),X(LFFZTSFIX),
+     *                  X(LFFRFIX),X(LFFIDATOM),X(LFFDAI),
+     *                  X(LFFIDDAI),X(LFFPOL),X(LFFPOLSV),DIP,
+     *                  X(LFFFIELD1),X(LFFFIELD2),X(LFFFIELD3),
+     *                  X(LFFNONLS1),X(LFFL1213J))
+         RETURN
+      END IF
+C
+C
+C     CAUTION, GVB ITERATIONS START AT 1, BUT RHF,UHF,ROHF AT 0!
+C
+      IF(SCFTYP.EQ.RMC) THEN
+         ITER=MCITER
+      END IF
+      DIRDIF = DIRSCF  .AND.  FDIFF  .AND.  SCFTYP.NE.GVB
+C
+C     -- ELECTRONIC FIELDS AT MM POL
+C
+      CALL VALFM(LOADFM)
+      LXEFI    = LOADFM   + 1
+      LYEFI    = LXEFI    + L2
+      LZEFI    = LYEFI    + L2
+      LABFLD   = LZEFI    + L2
+      LABPOT   = LABFLD   + 3*NFFAT
+      LSCR     = LABPOT   + NTS
+      LAST     = LSCR     + L2
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+      IF(IDOPOL.EQ.0) THEN
+         CALL VCLR(X(LABFLD),1,3*NFFAT)
+         GOTO 101
+      END IF
+C
+      IF(DFTBFL) GOTO 110
+      CALL VCLR(X(LABFLD),1,3*NFFAT)
+      IPCOUNT = ME - 1
+      DO 100 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 100
+         CALL QMMMPOLFLDINT(IFFAT,X(LFFCORD),
+     *             X(LXEFI),X(LYEFI),X(LZEFI),L2)
+         X(LABFLD+3*(IFFAT-1)  )=TRACEP(DENTOT,X(LXEFI),L1)
+         X(LABFLD+3*(IFFAT-1)+1)=TRACEP(DENTOT,X(LYEFI),L1)
+         X(LABFLD+3*(IFFAT-1)+2)=TRACEP(DENTOT,X(LZEFI),L1)
+ 100  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LABFLD),3*NFFAT)
+C
+ 110  CONTINUE
+C
+      IF(DFTBFL) THEN
+C     -- LABFLD: FIELD AT POL DUE TO QM ELECTRON --
+C
+C     - DFTB MULLIKEN POPULATION, NOT CHARGE -
+      CALL DAREAD(IDAF,IODA,X(LFFQMCHG),NAT,556,0)
+      DO IAT=1,NAT
+         X(LFFQMCHG+IAT-1)=-X(LFFQMCHG+IAT-1)
+      ENDDO
+C
+      CALL VCLR(X(LABFLD),1,3*NFFAT)
+      IPCOUNT = ME - 1
+      DO 150 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 150
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 150
+         DO 160 JAT=1,NAT
+            QJ    = X(LFFQMCHG+JAT-1)
+C
+            DX    = X(LFFCORD+(IFFAT-1)*3+1-1) - C(1,JAT)
+            DY    = X(LFFCORD+(IFFAT-1)*3+2-1) - C(2,JAT)
+            DZ    = X(LFFCORD+(IFFAT-1)*3+3-1) - C(3,JAT)
+            PBCX  = XBOX*ANINT(DX*ONEXBOX)
+            PBCY  = YBOX*ANINT(DY*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(DZ*ONEZBOX)
+            DX    = DX - PBCX
+            DY    = DY - PBCY
+            DZ    = DZ - PBCZ
+            R2    = DX*DX+DY*DY+DZ*DZ
+            IF(R2.GT.SWRB2) GOTO 160
+            IF(R2.LT.1.0D-10) GOTO 160
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,DX,DY,DZ)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,DX,DY,DZ)
+C
+            DUMI  = QJ*ONER3*SWF
+            X(LABFLD+3*(IFFAT-1)  )=X(LABFLD+3*(IFFAT-1)  )+DUMI*DX
+            X(LABFLD+3*(IFFAT-1)+1)=X(LABFLD+3*(IFFAT-1)+1)+DUMI*DY
+            X(LABFLD+3*(IFFAT-1)+2)=X(LABFLD+3*(IFFAT-1)+2)+DUMI*DZ
+ 160     CONTINUE
+ 150  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LABFLD),3*NFFAT)
+      END IF
+ 101  CONTINUE
+C
+C     -- TOTAL FIELD AT MM POL
+C        NOTE: QM NUC AND MM CHARGE DONE IN QMMMPOLFLDNUCMM
+C              HERE 'FIELD' BECOMES THE TOTAL, MUST GO BACK
+C              TO NUC+CHG
+C
+      CALL VADD(X(LABFLD),1,X(LFFFIELD1),1,X(LFFFIELD1),1,3*NFFAT)
+C
+C     -- TOTAL POTENTIAL AT SURFACE --
+C        NOTE: XLABPOT = - POT_ELE,
+C              HERE POT1 = POT_NUC + POT_MMCHG + POT_ELE,
+C              MUST GO BACK TO POT_NUC + POT_MMCHG
+C
+      CALL VCLR (X(LABPOT),1,NTS)
+      CALL EPOTEN(-ONE,XTS,YTS,ZTS,X(LABPOT),DENTOT,NTS,L2)
+      IF(GOPARR) CALL DDI_GSUMF(2668,X(LABPOT),NTS)
+      CALL VADD(X(LABPOT),1,X(LFFPOT1),1,X(LFFPOT1),1,NTS)
+C
+C     -- SURFACE CHARGE INDUCED BY NUC, ELE AND CHG
+C
+      SCALE = (RXNEPS-ONE)/RXNEPS
+      IPCOUNT = ME - 1
+      DO 320 ITS = 1, NTS
+         QRXN1(ITS) = ZERO
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 320
+         END IF
+         DO JTS = 1, NTS
+            QRXN1(ITS) = QRXN1(ITS)-CMAT1(ITS,JTS)*X(LFFPOT1+JTS-1)
+         ENDDO
+         QRXN1(ITS) = QRXN1(ITS)*SCALE
+ 320  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(2406,QRXN1,NTS)
+C
+C     -- SOLVE INDUCED DIPOLES
+C        (HERE FIELD2 MUST BE CLEARED)
+      CALL VCLR(X(LFFFIELD2),1,3*NFFAT)
+      CALL SOLVEDIP(X(LFFCORD),X(LFFPOL),X(LFFPOLSV),DIP,ENPOL,
+     *              X(LFFFIELD1),X(LFFFIELD2),X(LFFFIELD3),
+     *              X(LFFNONLS1),X(LFFL1213J),
+     *              X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *              X(LFFCMAT1),X(LFFPOT2),QRXN1,
+     *              QRXN2,NTS)
+C
+C     -- COMPUTE POLARIZATION ENERGY CORRECTION --
+C        NOTE BY HUI LI:
+C        ENPOL   = -(1/2)*FIELD*DIPOLE
+C                = -(1/2)*(F_NUC + F_MM + F_ELE)*DIPOLE
+C        ENRXN   =  (1/2)*POTENTIAL*(ASC1 + ASC2)
+C                =  (1/2)*(V_NUC + V_MM + V_ELE)*(ASC1 + ASC2)
+C        HOWEVER, A FULL TERM OF [-(1.0)*F_ELE*DIPOLE]
+C        AND A FULL TERM OF      [(1.0)*V_ELE*ASC]     ARE INCLUDED IN
+C        THE SCF ENERGY VIA 1-E INTEGRALS, SO WE NEED TO REMOVE IT:
+C             XENPOL =  (F_ELE)*DIPOLE
+C             XENRXN = -(V_ELE)*ASC     !  LABPOT = - V_ELE
+C
+      XENPOL = ZERO
+      DO IFFAT=1,NFFAT
+         FLDX   = X(LABFLD+3*(IFFAT-1)  )
+         FLDY   = X(LABFLD+3*(IFFAT-1)+1)
+         FLDZ   = X(LABFLD+3*(IFFAT-1)+2)
+         XENPOL = XENPOL + (FLDX*DIP(1,IFFAT)
+     *                     +FLDY*DIP(2,IFFAT)
+     *                     +FLDZ*DIP(3,IFFAT))
+      ENDDO
+C
+      ENRXN    = ZERO
+      ENRXNPOL = ZERO
+      XENRXN   = ZERO
+      IF(ISPHSOL.GE.60 .AND. RSPHSOL.LT.1.0D+30) THEN
+         DO ITS=1,NTS
+            ENRXN    = ENRXN + X(LFFPOT1+ITS-1)*QRXN1(ITS)
+            ENRXNPOL = ENRXNPOL + X(LFFPOT1+ITS-1)*QRXN2(ITS)
+            XENRXN = XENRXN
+     *              + X(LABPOT+ITS-1)*(QRXN1(ITS)+QRXN2(ITS))
+         ENDDO
+         ENRXNPOL = PT5*ENRXNPOL
+         ENRXN    = PT5*ENRXN
+      END IF
+C
+      CALL VSUB(X(LABFLD),1,X(LFFFIELD1),1,X(LFFFIELD1),1,3*NFFAT)
+      CALL VSUB(X(LABPOT),1,X(LFFPOT1),1,X(LFFPOT1),1,NTS)
+C
+      IF(DFTBFL) GOTO 299
+C
+C     -- CALCULATE INTEGRALS --
+C
+      IF(GOPARR) THEN
+         IF(.NOT.DIRDIF) CALL DSCAL(L2,ONE/NPROC,H1,1)
+      END IF
+      IF(DIRDIF) CALL VCLR(HADD,1,L2)
+C
+      IF(IDOPOL.EQ.0) GOTO 201
+      IPCOUNT = ME - 1
+      DO 200 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF (GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 200
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 200
+         CALL QMMMPOLFLDINT(IFFAT,X(LFFCORD),
+     *             X(LXEFI),X(LYEFI),X(LZEFI),L2)
+         IF(DIRDIF) THEN
+            DO K=1,L2
+               HADD(K)=HADD(K)
+     *                -X(LXEFI+K-1)*DIP(1,IFFAT)
+     *                -X(LYEFI+K-1)*DIP(2,IFFAT)
+     *                -X(LZEFI+K-1)*DIP(3,IFFAT)
+            ENDDO
+         ELSE
+            DO K=1,L2
+               H1(K)=H1(K)
+     *                -X(LXEFI+K-1)*DIP(1,IFFAT)
+     *                -X(LYEFI+K-1)*DIP(2,IFFAT)
+     *                -X(LZEFI+K-1)*DIP(3,IFFAT)
+            ENDDO
+         END IF
+ 200  CONTINUE
+ 201  CONTINUE
+C
+      IPCOUNT = ME - 1
+      DO 300 ITS=1,NTS
+         IF (GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 300
+         END IF
+         CALL INTMEP(X(LSCR),XTS(ITS),YTS(ITS),ZTS(ITS))
+         IF(DIRDIF) THEN
+            DO K=1,L2
+               HADD(K)= HADD(K)-X(LSCR+K-1)*(QRXN1(ITS)+QRXN2(ITS))
+            ENDDO
+         ELSE
+            DO K=1,L2
+               H1(K)  = H1(K)-X(LSCR+K-1)*(QRXN1(ITS)+QRXN2(ITS))
+            ENDDO
+        END IF
+ 300  CONTINUE
+C
+      IF(GOPARR) THEN
+         IF(DIRDIF) THEN
+            CALL DDI_GSUMF(686,HADD,L2)
+         ELSE
+            CALL DDI_GSUMF(687, H1,L2)
+         END IF
+      END IF
+C
+C     ----- ADD DIFFERENCE IN PERTURBATION WHEN DIRSCF AND FDIFF -----
+C
+      IF(SCFTYP.EQ.RHF) THEN
+         IF(DIRSCF  .AND.  FDIFF) THEN
+            IF(ITER.EQ.1) CALL VCLR(OLDADD,1,L2)
+            CALL VADD(  H1,1, HADD,1,  H1,1,L2)
+            CALL VSUB(OLDADD,1, HADD,1,OLDADD,1,L2)
+            CALL VADD(  FA,1,OLDADD,1,  FA,1,L2)
+            CALL DCOPY(L2,HADD,1,OLDADD,1)
+         END IF
+      ELSE
+         IF(DIRDIF) THEN
+            IF(ITER .EQ. 1) CALL VCLR(OLDADD,1,L2)
+            CALL VADD(  H1,1, HADD,1,  H1,1,L2)
+            CALL VSUB(OLDADD,1, HADD,1,OLDADD,1,L2)
+            CALL VADD(  FA,1,OLDADD,1,  FA,1,L2)
+            CALL VADD(  FB,1,OLDADD,1,  FB,1,L2)
+            CALL DCOPY(L2,HADD,1,OLDADD,1)
+         END IF
+      END IF
+C
+C     --- FOR MCSCF/GVB H1 MUST BE WRITTEN TO DAF ---
+C
+      CALL DAWRIT(IDAF,IODA,H1,L2,80,0)
+      IF (SCFTYP.EQ.GVB .OR. SCFTYP.EQ.RMC) THEN
+         CALL DAWRIT(IDAF,IODA,H1,L2,11,0)
+      END IF
+C
+ 299  CONTINUE
+C
+      IF(DFTBFL) THEN
+      CALL VCLR(X(LSCR),1,NAT)
+C
+C     --  NEGATIVE POTENTIAL AT QM ATOMS DUE TO ASC --
+C
+      IPCOUNT = ME - 1
+      DO 500 ITS=1, NTS
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 500
+         END IF
+         DO JAT=1,NAT
+            R2 =  (XTS(ITS)-C(1,JAT))**2
+     *           +(YTS(ITS)-C(2,JAT))**2
+     *           +(ZTS(ITS)-C(3,JAT))**2
+            R  = SQRT(R2)
+            X(LSCR+JAT-1) = X(LSCR+JAT-1)-(QRXN1(ITS)+QRXN2(ITS))/R
+         ENDDO
+ 500  CONTINUE
+C
+C     --  NEGATIVE POTENTIAL AT QM ATOMS DUE TO MM INDUCED DIPOLE --
+      IPCOUNT = ME - 1
+      DO 600 IIQ = 1, NTODOQ
+         JFFAT = NONLSTQ(IIQ)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 600
+         END IF
+         IF(X(LFFPOL+JFFAT-1).EQ.ZERO) GOTO 600
+         DIPJX = DIP(1,JFFAT)
+         DIPJY = DIP(2,JFFAT)
+         DIPJZ = DIP(3,JFFAT)
+         DO 610 IAT=1,NAT
+C
+            DX    = C(1,IAT) - X(LFFCORD+(JFFAT-1)*3+1-1)
+            DY    = C(2,IAT) - X(LFFCORD+(JFFAT-1)*3+2-1)
+            DZ    = C(3,IAT) - X(LFFCORD+(JFFAT-1)*3+3-1)
+            PBCX  = XBOX*ANINT(DX*ONEXBOX)
+            PBCY  = YBOX*ANINT(DY*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(DZ*ONEZBOX)
+            DX    = DX - PBCX
+            DY    = DY - PBCY
+            DZ    = DZ - PBCZ
+            R2    = DX*DX+DY*DY+DZ*DZ
+            IF(R2.GT.SWRB2) GOTO 610
+            IF(R2.LT.1.0D-10) GOTO 610
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,DX,DY,DZ)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,DX,DY,DZ)
+C
+            X(LSCR+IAT-1) = X(LSCR+IAT-1) -
+     *                      SWF*(DIPJX*DX+DIPJY*DY+DIPJZ*DZ)*ONER3
+ 610     CONTINUE
+ 600  CONTINUE
+C
+      IF(GOPARR) CALL DDI_GSUMF(2416,X(LSCR),NAT)
+      CALL DAWRIT(IDAF,IODA,X(LSCR),NAT,570,0)
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+C
+      END
+C*MODULE QUANPOD  *DECK QMMMPOLINT2
+!>
+!> @brief    1-e integral due to MM induced dipoles and surface charges
+!>
+!> @author   Hui Li
+!>           - Jan 2011
+!>
+!> @details  The dipoles and surface charges are induced by
+!>           MP2 or TDDFT style densities
+!>
+      SUBROUTINE QMMMPOLINT2(H1,DENTOT,DIPTMP,L2,L1,NONLSTQ)
+      use mx_limits, only: mxatm,mxgtot,mxsh
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (MXSPE=10)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      DIMENSION H1(L2),DENTOT(L2),DIPTMP(3,*),NONLSTQ(*)
+C
+      LOGICAL GOPARR,MASWRK,DSKWRK
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /DFTBPR/ ETEMP,DFTBDP(MXSPE*14),DAMPXHE,HUBDER(MXSPE),
+     *                ZREF(MXATM),SPNCST(6,MXSPE),SPE(MXATM),NSPE,
+     *                MAXANG(MXATM),ISPE(MXATM),IND(MXATM+1),IDFTBD,
+     *                PARAMDIR
+      COMMON /DFTBS / LS
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFMPT3/ NACTMM,LACTMM(2020),LFFDIPOLD,JUMBUP,
+     *                NACTQM,LACTQM(2020),LFFOLDC,LFFQMVELSV,MMHESS,
+     *                LFFQMCHG,LFFQMCHGB,ISWAP,R2SWAP,DFTBMM
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+C     HUI LI, JAN 2011, LINCOLN
+C     DEJUN SI, MAR 2011, LINCOLN
+C     HUI LI, NOV 30, 2016, LINCOLN
+C
+C     -- USE A DIFFERENT ROUTE FOR FIXSOL --
+      IF(IFIXSOL.EQ.1) THEN
+         CALL FIXSOLINT2(H1,DENTOT,
+     *                   L2,L1,NONLSTQ,X(LFFCORD),
+     *                   X(LFFAFIX),X(LFFVFIX2),X(LFFXTSFIX),
+     *                   X(LFFYTSFIX),X(LFFZTSFIX),X(LFFPOL),
+     *                   X(LFFPOLSV),DIPTMP,X(LFFFIELD2),X(LFFFIELD3),
+     *                   X(LFFNONLS1),X(LFFL1213J))
+         RETURN
+      END IF
+C
+C     -- ELECTRONIC FIELDS AT MM POL
+C
+      NTS = ISPHSOL
+      CALL VALFM(LOADFM)
+      LXEFI    = LOADFM   + 1
+      LYEFI    = LXEFI    + L2
+      LZEFI    = LYEFI    + L2
+      LABFLD   = LZEFI    + L2
+      LABPOT   = LABFLD   + 3*NFFAT
+      LQTMP1   = LABPOT   + NTS
+      LQTMP2   = LQTMP1   + NTS
+      LSCR     = LQTMP2   + NTS
+      LAST     = LSCR     + L2
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+      IF(DFTBFL) GOTO 110
+      CALL VCLR(X(LABFLD),1,3*NFFAT)
+      IPCOUNT = ME - 1
+      DO 100 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 100
+         CALL QMMMPOLFLDINT(IFFAT,X(LFFCORD),
+     *             X(LXEFI),X(LYEFI),X(LZEFI),L2)
+         X(LABFLD+3*(IFFAT-1)  )=TRACEP(DENTOT,X(LXEFI),L1)
+         X(LABFLD+3*(IFFAT-1)+1)=TRACEP(DENTOT,X(LYEFI),L1)
+         X(LABFLD+3*(IFFAT-1)+2)=TRACEP(DENTOT,X(LZEFI),L1)
+ 100  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LABFLD),3*NFFAT)
+C
+ 110  CONTINUE
+C
+      IF(DFTBFL) THEN
+C     -- LABFLD: FIELD AT POL DUE TO QM ELECTRON --
+C
+      CALL VALFM(LOADFM)
+      LMUL1    = LOADFM   + 1
+      LMUL1S   = LMUL1    + L1
+      LAST     = LMUL1S   + NSHELL
+      NEEDX    = LAST     - LOADFM
+      CALL GETFM(NEEDX)
+C
+      CALL VCLR(X(LFFQMCHG),1,NAT)
+      CALL DFTB_MULLIKEN(L1,L2,DENTOT,X(LS),X(LMUL1))
+      CALL DFTB_MULSA(X(LMUL1),X(LMUL1S),X(LFFQMCHG),L1,NSHELL,NAT)
+      DO IAT=1,NAT
+         X(LFFQMCHG+IAT-1)=-X(LFFQMCHG+IAT-1)
+      ENDDO
+C
+      CALL VCLR(X(LABFLD),1,3*NFFAT)
+      IPCOUNT = ME - 1
+      DO 150 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 150
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 150
+         DO 160 JAT=1,NAT
+            QJ    = X(LFFQMCHG+JAT-1)
+C
+            DX    = X(LFFCORD+(IFFAT-1)*3+1-1) - C(1,JAT)
+            DY    = X(LFFCORD+(IFFAT-1)*3+2-1) - C(2,JAT)
+            DZ    = X(LFFCORD+(IFFAT-1)*3+3-1) - C(3,JAT)
+            PBCX  = XBOX*ANINT(DX*ONEXBOX)
+            PBCY  = YBOX*ANINT(DY*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(DZ*ONEZBOX)
+            DX    = DX - PBCX
+            DY    = DY - PBCY
+            DZ    = DZ - PBCZ
+            R2    = DX*DX+DY*DY+DZ*DZ
+            IF(R2.GT.SWRB2) GOTO 160
+            IF(R2.LT.1.0D-10) GOTO 160
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,DX,DY,DZ)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,DX,DY,DZ)
+C
+            DUMI  = QJ*ONER3*SWF
+            X(LABFLD+3*(IFFAT-1)  )=X(LABFLD+3*(IFFAT-1)  )+DUMI*DX
+            X(LABFLD+3*(IFFAT-1)+1)=X(LABFLD+3*(IFFAT-1)+1)+DUMI*DY
+            X(LABFLD+3*(IFFAT-1)+2)=X(LABFLD+3*(IFFAT-1)+2)+DUMI*DZ
+ 160     CONTINUE
+ 150  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LABFLD),3*NFFAT)
+      CALL RETFM(NEEDX)
+      END IF
+C
+      CALL VCLR (X(LABPOT),1,NTS)
+      CALL EPOTEN(-ONE,X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *            X(LABPOT),DENTOT,NTS,L2)
+      IF(GOPARR) CALL DDI_GSUMF(2668,X(LABPOT),NTS)
+C
+C     -- SURFACE CHARGE INDUCED BY ABPOT --
+C
+      SCALE = (RXNEPS-ONE)/RXNEPS
+      IPCOUNT = ME - 1
+      DO 320 ITS = 1, NTS
+         X(LQTMP1+ITS-1) = ZERO
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 320
+         END IF
+         DO JTS = 1, NTS
+            X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)
+     *        -X(LFFCMAT1+(JTS-1)*NTS+ITS-1)*X(LABPOT+JTS-1)
+         ENDDO
+         X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)*SCALE
+ 320  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(2406,X(LQTMP1),NTS)
+C
+      CALL VCLR(X(LFFFIELD2),1,3*NFFAT)
+      CALL SOLVEDIP(X(LFFCORD),X(LFFPOL),X(LFFPOLSV),DIPTMP,DUM,
+     *              X(LABFLD),X(LFFFIELD2),X(LFFFIELD3),
+     *              X(LFFNONLS1),X(LFFL1213J),
+     *              X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *              X(LFFCMAT1),X(LFFPOT2),X(LQTMP1),
+     *              X(LQTMP2),NTS)
+C
+      CALL VADD(X(LQTMP1),1,X(LQTMP2),1,X(LQTMP2),1,NTS)
+C
+      IF(DFTBFL) GOTO 299
+C     -- CALCULATE INTEGRALS --
+C
+      IF(GOPARR) CALL DSCAL(L2,ONE/NPROC,H1,1)
+      IPCOUNT = ME - 1
+      FACTOR=1.0D+00
+      IF(TDDFTYP.NE.RNONE) FACTOR=2.0D+00
+      DO 200 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF (GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 200
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 200
+         CALL QMMMPOLFLDINT(IFFAT,X(LFFCORD),
+     *             X(LXEFI),X(LYEFI),X(LZEFI),L2)
+         DO K=1,L2
+            H1(K)=H1(K)
+     *           -X(LXEFI+K-1)*DIPTMP(1,IFFAT)*FACTOR
+     *           -X(LYEFI+K-1)*DIPTMP(2,IFFAT)*FACTOR
+     *           -X(LZEFI+K-1)*DIPTMP(3,IFFAT)*FACTOR
+         ENDDO
+ 200  CONTINUE
+      IPCOUNT = ME - 1
+      DO 300 ITS=1,NTS
+         IF (GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 300
+         END IF
+         CALL INTMEP(X(LSCR),X(LFFXTS+ITS-1),X(LFFYTS+ITS-1),
+     *               X(LFFZTS+ITS-1))
+C
+         DO K=1,L2
+            H1(K)  = H1(K)
+     *              -X(LSCR+K-1)*X(LQTMP2+ITS-1)*FACTOR
+         ENDDO
+ 300  CONTINUE
+C
+      IF(GOPARR) CALL DDI_GSUMF(687,H1,L2)
+C
+ 299  CONTINUE
+C
+      IF(DFTBFL) THEN
+      CALL VCLR(X(LSCR),1,NAT)
+      FACTOR=1.0D+00
+      IF(TDDFTYP.NE.RNONE) FACTOR=2.0D+00
+C
+C     --  NEGATIVE POTENTIAL AT QM ATOMS DUE TO ASC --
+C
+      IPCOUNT = ME - 1
+      DO 500 ITS=1, NTS
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 500
+         END IF
+         DO JAT=1,NAT
+            R2 =  (X(LFFXTS+ITS-1)-C(1,JAT))**2
+     *           +(X(LFFYTS+ITS-1)-C(2,JAT))**2
+     *           +(X(LFFZTS+ITS-1)-C(3,JAT))**2
+            R  = SQRT(R2)
+            X(LSCR+JAT-1) = X(LSCR+JAT-1)-FACTOR*X(LQTMP2+ITS-1)/R
+         ENDDO
+ 500  CONTINUE
+C
+C     --  NEGATIVE POTENTIAL AT QM ATOMS DUE TO MM INDUCED DIPOLE --
+      IPCOUNT = ME - 1
+      DO 600 IIQ = 1, NTODOQ
+         JFFAT = NONLSTQ(IIQ)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 600
+         END IF
+         IF(X(LFFPOL+JFFAT-1).EQ.ZERO) GOTO 600
+         DIPJX = DIPTMP(1,JFFAT)
+         DIPJY = DIPTMP(2,JFFAT)
+         DIPJZ = DIPTMP(3,JFFAT)
+         DO 610 IAT=1,NAT
+C
+            DX    = C(1,IAT) - X(LFFCORD+(JFFAT-1)*3+1-1)
+            DY    = C(2,IAT) - X(LFFCORD+(JFFAT-1)*3+2-1)
+            DZ    = C(3,IAT) - X(LFFCORD+(JFFAT-1)*3+3-1)
+            PBCX  = XBOX*ANINT(DX*ONEXBOX)
+            PBCY  = YBOX*ANINT(DY*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(DZ*ONEZBOX)
+            DX    = DX - PBCX
+            DY    = DY - PBCY
+            DZ    = DZ - PBCZ
+            R2    = DX*DX+DY*DY+DZ*DZ
+            IF(R2.GT.SWRB2) GOTO 610
+            IF(R2.LT.1.0D-10) GOTO 610
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,DX,DY,DZ)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,DX,DY,DZ)
+C
+            X(LSCR+IAT-1) = X(LSCR+IAT-1) - FACTOR*
+     *                      SWF*(DIPJX*DX+DIPJY*DY+DIPJZ*DZ)*ONER3
+ 610     CONTINUE
+ 600  CONTINUE
+C
+      IF(GOPARR) CALL DDI_GSUMF(2416,X(LSCR),NAT)
+      CALL DFTB_SHIFT_FOCK(X(LSCR),H1,X(LS),NAT,L2,
+     *                     NSPE,ISPE,IND,MAXANG)
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+C
+      END
+C*MODULE QUANPOD  *DECK QMMMPOLFMMNUCMM
+!>
+!> @brief    force on MM induced dipoles
+!>
+!> @author   Hui Li
+!>           - Jan 2011
+!>
+!> @details  force between dipoles and MM charges
+!>           force between dipoles and QM nuc charges
+!>           force between dipoles and MM dipoles
+!>
+      SUBROUTINE QMMMPOLFMMNUCMM(CORD,FFGRD,CHARG,POL,POLSV,DIP,
+     *                           NONLS1,NONLSTQ,
+     *                           DIPMP,DIPTA,DIPXY,L1213J)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (THREE=3.0D+00)
+      PARAMETER (ONESIX=1.0D+00/6.0D+00)
+      PARAMETER (PT5=0.5D+00)
+      PARAMETER (FOUR=4.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),CHARG(*),POL(*),POLSV(*),DIP(3,*),
+     *          NONLS1(2,*),NONLSTQ(*),
+     *          DIPMP(3,*),DIPTA(3,*),DIPXY(3,*),L1213J(2,*)
+C
+      COMMON /FFDAMP/ IPODAMP,IPO1213,SCRFAC,RSCRFAC,SCRF2,SCRF3,SCRF4
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFNODE/ L1BOND,L2BOND,L1ANGL,L2ANGL,L1DIHR,L2DIHR,
+     *                L1DIHB,L2DIHB,L1CMAP,L2CMAP,L1WAGG,L2WAGG,
+     *                L11213,L21213,L1N14J,L2N14J,
+     *                L11213A,L21213A,L1N14A,L2N14A,
+     *                L11213B,L21213B,L1N14B,L2N14B,
+     *                L1BONDPMA,L2BONDPMA,L1ANGLPMA,L2ANGLPMA,
+     *                L1DIHRPMA,L2DIHRPMA,L1DIHBPMA,L2DIHBPMA,
+     *                L1WAGGPMA,L2WAGGPMA,L1CMAPPMA,L2CMAPPMA,
+     *                L11213PMA,L21213PMA,L1N14PMA,L2N14PMA,
+     *                L1BONDPMB,L2BONDPMB,L1ANGLPMB,L2ANGLPMB,
+     *                L1DIHRPMB,L2DIHRPMB,L1DIHBPMB,L2DIHBPMB,
+     *                L1WAGGPMB,L2WAGGPMB,L1CMAPPMB,L2CMAPPMB,
+     *                L11213PMB,L21213PMB,L1N14PMB,L2N14PMB,
+     *                L1FFAT,L2FFAT
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+C     -- FORCE BETWEEN INDUCED DIPOLES AND MM CHARGES
+C              BETWEEN INDUCED DIPOLES AND QM NUC
+C              BETWEEN INDUCED DIPOLES AND INDUCED DIPOLES
+C
+      IF(IDOPOL.EQ.0) RETURN
+C
+      DO LL=1,2
+      IF(LL.EQ.1) THEN
+         NN1  = 1
+         NN2  = NTODO
+         SIGN = 1.0D+00
+      END IF
+      IF(LL.EQ.2) THEN
+         NN1  = L11213
+         NN2  = L21213
+         SIGN = -1.0D+00
+      END IF
+      DO 100 III=NN1, NN2
+         IF(LL.EQ.1) THEN
+            IFFAT = NONLS1(1,III)
+            JFFAT = NONLS1(2,III)
+         END IF
+         IF(LL.EQ.2) THEN
+            IFFAT = L1213J(1,III)
+            JFFAT = L1213J(2,III)
+         END IF
+         IF(IFFAT.EQ.0.OR.JFFAT.EQ.0) GOTO 100
+         IF(CHARG(IFFAT).EQ.ZERO.AND.POL(IFFAT).EQ.ZERO) GOTO 100
+         IF(CHARG(JFFAT).EQ.ZERO.AND.POL(JFFAT).EQ.ZERO) GOTO 100
+         IF(  POL(IFFAT).EQ.ZERO.AND.POL(JFFAT).EQ.ZERO) GOTO 100
+         QI    = CHARG(IFFAT)
+         QJ    = CHARG(JFFAT)
+C
+         X     = CORD(1,IFFAT) - CORD(1,JFFAT)
+         Y     = CORD(2,IFFAT) - CORD(2,JFFAT)
+         Z     = CORD(3,IFFAT) - CORD(3,JFFAT)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.GT.SWRB2) GOTO 100
+         IF(R2.LT.0.01D+00) GOTO 100
+         R     = SQRT(R2)
+C
+         FE    = ONE
+         FT    = ONE
+         FEGRD = ZERO
+         FTGRD = ZERO
+         IF(IPODAMP.GT.0) THEN
+            POLIJ = POLSV(IFFAT)*POLSV(JFFAT) + 1.0D-60
+            POL6  = POLIJ**ONESIX
+            RPOL6 = ONE/POL6
+            RSFAC = RSCRFAC*RPOL6
+            VFAC  = R*RSFAC
+            VFAC2 = VFAC*VFAC
+            VFAC3 = VFAC2*VFAC
+            VFAC4 = VFAC3*VFAC
+            UFAC  = R*RPOL6
+            UFAC2 = UFAC*UFAC
+            UFAC3 = UFAC2*UFAC
+            IF(IPODAMP.EQ.1.AND.VFAC.LT.ONE) THEN
+C              -- LINEAR THOLE MODEL
+               FE    = FOUR*VFAC3-THREE*VFAC4
+               FT    = VFAC4
+               FEGRD = 12.0D+00*(VFAC2-VFAC3)*RSFAC
+               FTGRD = FOUR*VFAC3*RSFAC
+            ELSE IF(IPODAMP.EQ.2) THEN
+C              -- EXPONENTIAL THOLE MODEL
+               VALEXP= EXP(-SCRFAC*UFAC)
+               FE    = ONE-(PT5*SCRF2*UFAC2+SCRFAC*UFAC+ONE)*VALEXP
+               FT    = ONE-(ONESIX*SCRF3*UFAC3+PT5*SCRF2*UFAC2+
+     *                      SCRFAC*UFAC+ONE)*VALEXP
+               FEGRD = PT5*SCRF3*UFAC2*RPOL6*VALEXP
+               FTGRD = ONESIX*SCRF4*UFAC3*RPOL6*VALEXP
+            ELSE IF(IPODAMP.EQ.3) THEN
+C              -- THOLE-TINKER EXPONENTIAL MODEL
+               VALEXP= EXP(-SCRFAC*UFAC3)
+               FE    = ONE-VALEXP
+               FT    = ONE-(ONE+SCRFAC*UFAC3)*VALEXP
+               FEGRD = THREE*SCRFAC*UFAC2*RPOL6*VALEXP
+               FTGRD = FEGRD*SCRFAC*UFAC3
+            END IF
+         END IF
+C
+         ONER  = ONE/R
+         IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,X,Y,Z)
+         IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,X,Y,Z)
+C
+         XX    = X*X
+         YY    = Y*Y
+         ZZ    = Z*Z
+         XY    = X*Y
+         XZ    = X*Z
+         YZ    = Y*Z
+         ONER2 = ONER*ONER
+         ONER3 = ONER2*ONER
+         ONER4 = ONER2*ONER2
+         ONER5 = ONER2*ONER3
+         ONER6 = ONER3*ONER3
+         ONER7 = ONER2*ONER5
+C
+C        - FORCES BETWEEN MM CHARGE AND DIPOLE
+C
+         DIPIX = DIP(1,IFFAT)
+         DIPIY = DIP(2,IFFAT)
+         DIPIZ = DIP(3,IFFAT)
+         DIPJX = DIP(1,JFFAT)
+         DIPJY = DIP(2,JFFAT)
+         DIPJZ = DIP(3,JFFAT)
+         IF(MPLEVL.EQ.2)THEN
+            DIPIX = DIP(1,IFFAT) + DIPMP(1,IFFAT)
+            DIPIY = DIP(2,IFFAT) + DIPMP(2,IFFAT)
+            DIPIZ = DIP(3,IFFAT) + DIPMP(3,IFFAT)
+            DIPJX = DIP(1,JFFAT) + DIPMP(1,JFFAT)
+            DIPJY = DIP(2,JFFAT) + DIPMP(2,JFFAT)
+            DIPJZ = DIP(3,JFFAT) + DIPMP(3,JFFAT)
+         END IF
+         IF(TDDFTYP.NE.RNONE) THEN
+            DIPIX = DIP(1,IFFAT) + DIPTA(1,IFFAT)
+            DIPIY = DIP(2,IFFAT) + DIPTA(2,IFFAT)
+            DIPIZ = DIP(3,IFFAT) + DIPTA(3,IFFAT)
+            DIPJX = DIP(1,JFFAT) + DIPTA(1,JFFAT)
+            DIPJY = DIP(2,JFFAT) + DIPTA(2,JFFAT)
+            DIPJZ = DIP(3,JFFAT) + DIPTA(3,JFFAT)
+         END IF
+         QIDOT = THREE*ONER5*(DIPJX*X+DIPJY*Y+DIPJZ*Z)*QI
+         QJDOT = THREE*ONER5*(DIPIX*X+DIPIY*Y+DIPIZ*Z)*QJ
+         QIONER3= QI*ONER3
+         QJONER3= QJ*ONER3
+C              NEGATIVE FORCE ON QI BY DIPJ
+         DXI   = DIPJX*QIONER3 - QIDOT*X
+         DYI   = DIPJY*QIONER3 - QIDOT*Y
+         DZI   = DIPJZ*QIONER3 - QIDOT*Z
+C              NEGATIVE FORCE ON QJ BY DIPI
+C                       FORCE ON DIPI BY QJ
+         DXJ   = DIPIX*QJONER3 - QJDOT*X
+         DYJ   = DIPIY*QJONER3 - QJDOT*Y
+         DZJ   = DIPIZ*QJONER3 - QJDOT*Z
+C              NEGATIVE FORCE ON IFFAT
+         DX    = DXI - DXJ
+         DY    = DYI - DYJ
+         DZ    = DZI - DZJ
+C        - ENERGY-SWFDX TERMS
+         FLDIX = QJONER3*X      ! FIELD AT DIPI DUE TO QJ
+         FLDIY = QJONER3*Y
+         FLDIZ = QJONER3*Z
+         FLDJX = QIONER3*(-X)   ! FIELD AT DIPJ DUE TO QI
+         FLDJY = QIONER3*(-Y)
+         FLDJZ = QIONER3*(-Z)
+         EDIQJ = -(FLDIX*DIPIX+FLDIY*DIPIY+FLDIZ*DIPIZ) ! E = -F*D
+         EDJQI = -(FLDJX*DIPJX+FLDJY*DIPJY+FLDJZ*DIPJZ)
+C
+         IF(IDOPOL.EQ.1) THEN
+            EDIDJ = ZERO
+            GOTO 150
+         END IF
+C
+C        - FORCES BETWEEN DIPOLE AND DIPOLE -
+C
+         IF(IPO1213.EQ.1.AND.LL.EQ.2) THEN
+            EDIDJ=ZERO
+            GOTO 150
+         END IF
+C
+         DIPIX = DIP(1,IFFAT)
+         DIPIY = DIP(2,IFFAT)
+         DIPIZ = DIP(3,IFFAT)
+         DMPIX = DIPMP(1,IFFAT)
+         DMPIY = DIPMP(2,IFFAT)
+         DMPIZ = DIPMP(3,IFFAT)
+         DTAIX = DIPTA(1,IFFAT)
+         DTAIY = DIPTA(2,IFFAT)
+         DTAIZ = DIPTA(3,IFFAT)
+         DXYIX = DIPXY(1,IFFAT)
+         DXYIY = DIPXY(2,IFFAT)
+         DXYIZ = DIPXY(3,IFFAT)
+         DIPJX = DIP(1,JFFAT)
+         DIPJY = DIP(2,JFFAT)
+         DIPJZ = DIP(3,JFFAT)
+         DMPJX = DIPMP(1,JFFAT)
+         DMPJY = DIPMP(2,JFFAT)
+         DMPJZ = DIPMP(3,JFFAT)
+         DTAJX = DIPTA(1,JFFAT)
+         DTAJY = DIPTA(2,JFFAT)
+         DTAJZ = DIPTA(3,JFFAT)
+         DXYJX = DIPXY(1,JFFAT)
+         DXYJY = DIPXY(2,JFFAT)
+         DXYJZ = DIPXY(3,JFFAT)
+C
+         DOTM  = DIPJX*DIPIX + DIPJY*DIPIY + DIPJZ*DIPIZ
+         DOTXY = DIPJY*DIPIX + DIPIY*DIPJX
+         DOTXZ = DIPJZ*DIPIX + DIPIZ*DIPJX
+         DOTYZ = DIPJY*DIPIZ + DIPIY*DIPJZ
+         DOTX  = TWO*DIPJX*DIPIX*X + DOTXY*Y + DOTXZ*Z
+         DOTY  = TWO*DIPJY*DIPIY*Y + DOTXY*X + DOTYZ*Z
+         DOTZ  = TWO*DIPJZ*DIPIZ*Z + DOTXZ*X + DOTYZ*Y
+         TEMP  = DIPIX*DIPJX*XX
+     *          +DIPIY*DIPJY*YY
+     *          +DIPIZ*DIPJZ*ZZ
+     *          +(DIPIX*DIPJY+DIPIY*DIPJX)*XY
+     *          +(DIPIX*DIPJZ+DIPIZ*DIPJX)*XZ
+     *          +(DIPIY*DIPJZ+DIPIZ*DIPJY)*YZ
+         IF(MPLEVL.EQ.2)THEN
+            DOTM  = DOTM + DMPJX*DIPIX + DMPJY*DIPIY + DMPJZ*DIPIZ
+     *                   + DIPJX*DMPIX + DIPJY*DMPIY + DIPJZ*DMPIZ
+            DOTXY = DMPJY*DIPIX + DMPIY*DIPJX
+     *            + DIPJY*DMPIX + DIPIY*DMPJX
+            DOTXZ = DMPJZ*DIPIX + DMPIZ*DIPJX
+     *            + DIPJZ*DMPIX + DIPIZ*DMPJX
+            DOTYZ = DMPJY*DIPIZ + DMPIY*DIPJZ
+     *            + DIPJY*DMPIZ + DIPIY*DMPJZ
+            DOTX  = DOTX + TWO*DMPJX*DIPIX*X + DOTXY*Y + DOTXZ*Z
+     *                   + TWO*DIPJX*DMPIX*X
+            DOTY  = DOTY + TWO*DMPJY*DIPIY*Y + DOTXY*X + DOTYZ*Z
+     *                   + TWO*DIPJY*DMPIY*Y
+            DOTZ  = DOTZ + TWO*DMPJZ*DIPIZ*Z + DOTXZ*X + DOTYZ*Y
+     *                   + TWO*DIPJZ*DMPIZ*Z
+            TEMP  = TEMP + (DMPIX*DIPJX+DIPIX*DMPJX)*XX
+     *                   + (DMPIY*DIPJY+DIPIY*DMPJY)*YY
+     *                   + (DMPIZ*DIPJZ+DIPIZ*DMPJZ)*ZZ
+     *                   + (DMPIX*DIPJY+DMPIY*DIPJX)*XY
+     *                   + (DIPIX*DMPJY+DIPIY*DMPJX)*XY
+     *                   + (DMPIX*DIPJZ+DMPIZ*DIPJX)*XZ
+     *                   + (DIPIX*DMPJZ+DIPIZ*DMPJX)*XZ
+     *                   + (DMPIY*DIPJZ+DMPIZ*DIPJY)*YZ
+     *                   + (DIPIY*DMPJZ+DIPIZ*DMPJY)*YZ
+         END IF
+         IF(TDDFTYP.NE.RNONE) THEN
+            DOTM  = DOTM + DTAJX*DIPIX + DTAJY*DIPIY + DTAJZ*DIPIZ
+     *                   + DIPJX*DTAIX + DIPJY*DTAIY + DIPJZ*DTAIZ
+            DOTXY = DTAJY*DIPIX + DTAIY*DIPJX
+     *            + DIPJY*DTAIX + DIPIY*DTAJX
+            DOTXZ = DTAJZ*DIPIX + DTAIZ*DIPJX
+     *            + DIPJZ*DTAIX + DIPIZ*DTAJX
+            DOTYZ = DTAJY*DIPIZ + DTAIY*DIPJZ
+     *            + DIPJY*DTAIZ + DIPIY*DTAJZ
+            DOTX  = DOTX + TWO*DTAJX*DIPIX*X + DOTXY*Y + DOTXZ*Z
+     *                   + TWO*DIPJX*DTAIX*X
+            DOTY  = DOTY + TWO*DTAJY*DIPIY*Y + DOTXY*X + DOTYZ*Z
+     *                   + TWO*DIPJY*DTAIY*Y
+            DOTZ  = DOTZ + TWO*DTAJZ*DIPIZ*Z + DOTXZ*X + DOTYZ*Y
+     *                   + TWO*DIPJZ*DTAIZ*Z
+            TEMP  = TEMP + (DTAIX*DIPJX+DIPIX*DTAJX)*XX
+     *                   + (DTAIY*DIPJY+DIPIY*DTAJY)*YY
+     *                   + (DTAIZ*DIPJZ+DIPIZ*DTAJZ)*ZZ
+     *                   + (DTAIX*DIPJY+DTAIY*DIPJX)*XY
+     *                   + (DIPIX*DTAJY+DIPIY*DTAJX)*XY
+     *                   + (DTAIX*DIPJZ+DTAIZ*DIPJX)*XZ
+     *                   + (DIPIX*DTAJZ+DIPIZ*DTAJX)*XZ
+     *                   + (DTAIY*DIPJZ+DTAIZ*DIPJY)*YZ
+     *                   + (DIPIY*DTAJZ+DIPIZ*DTAJY)*YZ
+            DOTM  = DOTM + DXYJX*DXYIX + DXYJY*DXYIY + DXYJZ*DXYIZ
+     *                   + DXYJX*DXYIX + DXYJY*DXYIY + DXYJZ*DXYIZ
+            DOTXY = DXYJY*DXYIX + DXYIY*DXYJX
+     *            + DXYJY*DXYIX + DXYIY*DXYJX
+            DOTXZ = DXYJZ*DXYIX + DXYIZ*DXYJX
+     *            + DXYJZ*DXYIX + DXYIZ*DXYJX
+            DOTYZ = DXYJY*DXYIZ + DXYIY*DXYJZ
+     *            + DXYJY*DXYIZ + DXYIY*DXYJZ
+            DOTX  = DOTX + TWO*DXYJX*DXYIX*X + DOTXY*Y + DOTXZ*Z
+     *                   + TWO*DXYJX*DXYIX*X
+            DOTY  = DOTY + TWO*DXYJY*DXYIY*Y + DOTXY*X + DOTYZ*Z
+     *                   + TWO*DXYJY*DXYIY*Y
+            DOTZ  = DOTZ + TWO*DXYJZ*DXYIZ*Z + DOTXZ*X + DOTYZ*Y
+     *                   + TWO*DXYJZ*DXYIZ*Z
+            TEMP  = TEMP + (DXYIX*DXYJX+DXYIX*DXYJX)*XX
+     *                   + (DXYIY*DXYJY+DXYIY*DXYJY)*YY
+     *                   + (DXYIZ*DXYJZ+DXYIZ*DXYJZ)*ZZ
+     *                   + (DXYIX*DXYJY+DXYIY*DXYJX)*XY
+     *                   + (DXYIX*DXYJY+DXYIY*DXYJX)*XY
+     *                   + (DXYIX*DXYJZ+DXYIZ*DXYJX)*XZ
+     *                   + (DXYIX*DXYJZ+DXYIZ*DXYJX)*XZ
+     *                   + (DXYIY*DXYJZ+DXYIZ*DXYJY)*YZ
+     *                   + (DXYIY*DXYJZ+DXYIZ*DXYJY)*YZ
+         END IF
+         FEDOTM= FE*DOTM
+         FTDOTX= FT*DOTX
+         FTDOTY= FT*DOTY
+         FTDOTZ= FT*DOTZ
+         DUM   = THREE*ONER5
+         DUM4  = FEGRD*DOTM*ONER4
+         DUM6  = THREE*FTGRD*TEMP*ONER6
+         DUM7  = 15.0D+00*TEMP*ONER7*FT
+C        - NEGATIVE FORCE ON IFFAT
+         DX  = DX - DUM*(FEDOTM*X+FTDOTX)+(DUM4-DUM6+DUM7)*X
+         DY  = DY - DUM*(FEDOTM*Y+FTDOTY)+(DUM4-DUM6+DUM7)*Y
+         DZ  = DZ - DUM*(FEDOTM*Z+FTDOTZ)+(DUM4-DUM6+DUM7)*Z
+C        - ENERGY-SWFDX TERMS
+         DOTJ  = THREE*ONER5*FT*(DIPJX*X+DIPJY*Y+DIPJZ*Z)
+         FLDIX = -DIPJX*ONER3*FE + DOTJ*X  ! FIELD AT DIPI DUE TO DIPJ
+         FLDIY = -DIPJY*ONER3*FE + DOTJ*Y
+         FLDIZ = -DIPJZ*ONER3*FE + DOTJ*Z
+         EDIDJ = -(DIPIX*FLDIX + DIPIY*FLDIY + DIPIZ*FLDIZ) ! E = -F*D
+         IF(MPLEVL.EQ.2)THEN
+            EDIDJ = EDIDJ
+     *              -(DMPIX*FLDIX + DMPIY*FLDIY + DMPIZ*FLDIZ) ! E = -F*D
+            DOTJ  = THREE*ONER5*FT*(DMPJX*X+DMPJY*Y+DMPJZ*Z)
+            FLDIX = -DMPJX*ONER3*FE + DOTJ*X  ! FIELD AT DIPI DUE TO DMPJ
+            FLDIY = -DMPJY*ONER3*FE + DOTJ*Y
+            FLDIZ = -DMPJZ*ONER3*FE + DOTJ*Z
+            EDIDJ = EDIDJ
+     *              -(DIPIX*FLDIX + DIPIY*FLDIY + DIPIZ*FLDIZ) ! E = -F*D
+         END IF
+         IF(TDDFTYP.NE.RNONE)THEN
+            EDIDJ = EDIDJ
+     *              -(DTAIX*FLDIX + DTAIY*FLDIY + DTAIZ*FLDIZ) ! E = -F*D
+            DOTJ  = THREE*ONER5*FT*(DTAJX*X+DTAJY*Y+DTAJZ*Z)
+            FLDIX = -DTAJX*ONER3*FE + DOTJ*X  ! FIELD AT DIPI DUE TO DTAJ
+            FLDIY = -DTAJY*ONER3*FE + DOTJ*Y
+            FLDIZ = -DTAJZ*ONER3*FE + DOTJ*Z
+            EDIDJ = EDIDJ
+     *              -(DIPIX*FLDIX + DIPIY*FLDIY + DIPIZ*FLDIZ) ! E = -F*D
+C
+            DOTJ  = THREE*ONER5*FT*(DXYJX*X+DXYJY*Y+DXYJZ*Z)
+            FLDIX = -DXYJX*ONER3*FE + DOTJ*X  ! FIELD AT DXYI DUE TO DXYJ
+            FLDIY = -DXYJY*ONER3*FE + DOTJ*Y
+            FLDIZ = -DXYJZ*ONER3*FE + DOTJ*Z
+            EDIDJ = EDIDJ - TWO*
+     *               (DXYIX*FLDIX + DXYIY*FLDIY + DXYIZ*FLDIZ) ! E = -F*D
+         END IF
+C
+ 150     CONTINUE
+C
+         EPAIR = (EDIQJ + EDJQI + EDIDJ)*SIGN
+C
+         DEX   = DX*SWF*SIGN
+         DEY   = DY*SWF*SIGN
+         DEZ   = DZ*SWF*SIGN
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DEX
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DEY
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DEZ
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT)+EPAIR*SWFDX
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT)+EPAIR*SWFDY
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT)+EPAIR*SWFDZ
+         FFGRD(1,JFFAT)=FFGRD(1,JFFAT) - DEX
+         FFGRD(2,JFFAT)=FFGRD(2,JFFAT) - DEY
+         FFGRD(3,JFFAT)=FFGRD(3,JFFAT) - DEZ
+         FFGRD(1,JFFAT)=FFGRD(1,JFFAT)-EPAIR*SWFDX
+         FFGRD(2,JFFAT)=FFGRD(2,JFFAT)-EPAIR*SWFDY
+         FFGRD(3,JFFAT)=FFGRD(3,JFFAT)-EPAIR*SWFDZ
+         VIR(1)    =VIR(1)     + DEX*X + EPAIR*SWFDX*X
+         VIR(2)    =VIR(2)     + DEY*Y + EPAIR*SWFDY*Y
+         VIR(3)    =VIR(3)     + DEZ*Z + EPAIR*SWFDZ*Z
+         IYES = 0
+         DO KFIX=1,NFIXMM
+            IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+         ENDDO
+         IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+            VIR(1) =VIR(1)     - DEX*X - EPAIR*SWFDX*X
+            VIR(2) =VIR(2)     - DEY*Y - EPAIR*SWFDY*Y
+            VIR(3) =VIR(3)     - DEZ*Z - EPAIR*SWFDZ*Z
+         END IF
+ 100  CONTINUE
+      ENDDO
+C
+C     - FORCES BETWEEN QM NUCLEI AND INDUCED DIPOLE
+C
+      IF(NAT.LE.0) GOTO 330
+C
+      IPCOUNT = ME - 1
+      DO 300 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF(POL(IFFAT).EQ.ZERO) GOTO 300
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 300
+         END IF
+         DIPIX = DIP(1,IFFAT)
+         DIPIY = DIP(2,IFFAT)
+         DIPIZ = DIP(3,IFFAT)
+         IF(MPLEVL.EQ.2)THEN
+            DIPIX = DIP(1,IFFAT) + DIPMP(1,IFFAT)
+            DIPIY = DIP(2,IFFAT) + DIPMP(2,IFFAT)
+            DIPIZ = DIP(3,IFFAT) + DIPMP(3,IFFAT)
+         END IF
+         IF(TDDFTYP.NE.RNONE) THEN
+            DIPIX = DIP(1,IFFAT) + DIPTA(1,IFFAT)
+            DIPIY = DIP(2,IFFAT) + DIPTA(2,IFFAT)
+            DIPIZ = DIP(3,IFFAT) + DIPTA(3,IFFAT)
+         END IF
+         DO 310 JAT=1,NAT
+            QJ    = ZAN(JAT)
+C
+            X     = CORD(1,IFFAT) - C(1,JAT)
+            Y     = CORD(2,IFFAT) - C(2,JAT)
+            Z     = CORD(3,IFFAT) - C(3,JAT)
+            PBCX  = XBOX*ANINT(X*ONEXBOX)
+            PBCY  = YBOX*ANINT(Y*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(Z*ONEZBOX)
+            X     = X - PBCX
+            Y     = Y - PBCY
+            Z     = Z - PBCZ
+            R2    = X*X+Y*Y+Z*Z
+            IF(R2.GT.SWRB2) GOTO 310
+            IF(R2.LT.1.0D-10) GOTO 310
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            ONER5 = ONER2*ONER3
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,X,Y,Z)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,X,Y,Z)
+C
+            QJDOT = THREE*ONER5*(DIPIX*X+DIPIY*Y+DIPIZ*Z)*QJ
+            QJONER3= QJ*ONER3
+C                 NEGATIVE FORCE ON QJ BY DIPI
+C                          FORCE ON DIPI BY QJ
+            DXJ   = DIPIX*QJONER3 - QJDOT*X
+            DYJ   = DIPIY*QJONER3 - QJDOT*Y
+            DZJ   = DIPIZ*QJONER3 - QJDOT*Z
+C                 NEGATIVE FORCE ON IFFAT
+            DX    = - DXJ
+            DY    = - DYJ
+            DZ    = - DZJ
+C
+C           - ENERGY-SWFDX TERMS
+C
+            FLDIX = QJONER3*X      ! FIELD AT DIPI DUE TO QJ
+            FLDIY = QJONER3*Y
+            FLDIZ = QJONER3*Z
+            EPAIR = -(FLDIX*DIPIX+FLDIY*DIPIY+FLDIZ*DIPIZ) ! E = -F*D
+C
+            DEX   = DX*SWF + EPAIR*SWFDX
+            DEY   = DY*SWF + EPAIR*SWFDY
+            DEZ   = DZ*SWF + EPAIR*SWFDZ
+            FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DEX
+            FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DEY
+            FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DEZ
+            DE(1,JAT)     =DE(1,JAT)      - DEX
+            DE(2,JAT)     =DE(2,JAT)      - DEY
+            DE(3,JAT)     =DE(3,JAT)      - DEZ
+            VIR(1)        =VIR(1) + DEX*X
+            VIR(2)        =VIR(2) + DEY*Y
+            VIR(3)        =VIR(3) + DEZ*Z
+            IYES = 0
+            DO KFIX=1,NFIXMM
+               IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+            ENDDO
+            IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+               VIR(1)     =VIR(1) - DEX*X
+               VIR(2)     =VIR(2) - DEY*Y
+               VIR(3)     =VIR(3) - DEZ*Z
+            END IF
+ 310     CONTINUE
+ 300  CONTINUE
+C
+ 330  CONTINUE
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK QMMMPOLFMMSWF
+!>
+!> @brief    ele-pol energy required when shifting is used
+!>
+!> @author   Hui Li
+!>           - Dec 22, 2016
+!>
+!> @details  forces between MM induced dipoles and QM electrons
+!>           when shifting function is used.
+!>
+      SUBROUTINE QMMMPOLFMMSWF(DM,DMHF,DMXY,FFGRD,CORD,NONLSTQ)
+      use mx_limits, only: mxatm,mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL NORM,GOPARR,MASWRK,DSKWRK,NXT
+C
+C
+      DIMENSION DM(*),DMHF(*),DMXY(*),FFGRD(3,*),CORD(3,*),
+     *          NONLSTQ(*)
+C
+      DIMENSION XIN(128),YIN(128),ZIN(128)
+      DIMENSION DIJ(100),FIJ(100)
+      DIMENSION IX(20),IY(20),IZ(20),JX(20),JY(20),JZ(20)
+      DIMENSION IJX(100),IJY(100),IJZ(100)
+C
+      COMMON /CSSTV / CX,CY,CZ
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FMCOM / X(1)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /ROOT  / XX,U(13),W(13),NROOTS
+      COMMON /STV   / XINT,YINT,ZINT,T,X0,Y0,Z0,XI,YI,ZI,XJ,YJ,ZJ,NI,NJ
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA JX / 0, 1, 0, 0, 2, 0, 0, 1, 1, 0,
+     1          3, 0, 0, 2, 2, 1, 0, 1, 0, 1/
+      DATA IX / 1, 5, 1, 1, 9, 1, 1, 5, 5, 1,
+     1         13, 1, 1, 9, 9, 5, 1, 5, 1, 5/
+      DATA JY / 0, 0, 1, 0, 0, 2, 0, 1, 0, 1,
+     1          0, 3, 0, 1, 0, 2, 2, 0, 1, 1/
+      DATA IY / 1, 1, 5, 1, 1, 9, 1, 5, 1, 5,
+     1          1,13, 1, 5, 1, 9, 9, 1, 5, 5/
+      DATA JZ / 0, 0, 0, 1, 0, 0, 2, 0, 1, 1,
+     1          0, 0, 3, 0, 1, 0, 1, 2, 2, 1/
+      DATA IZ / 1, 1, 1, 5, 1, 1, 9, 1, 5, 5,
+     1          1, 1,13, 1, 5, 1, 5, 9, 9, 5/
+C
+      DATA ZERO,PT5,ONE/0.0D+00,0.5D+00,1.0D+00/
+      DATA PI212 /1.1283791670955D+00/
+      DATA SQRT3 /1.73205080756888D+00/
+      DATA SQRT5 /2.23606797749979D+00/
+      DATA RLN10 /2.30258D+00/
+      DATA RNONE/8HNONE    /
+C
+C     HUI LI, DEC 22, 2016, LINCOLN
+C
+C     INTERACTION ENERGY BETWEEN QM ELE AND MM INDUCED DIPOLES -
+C     THIS ENERGY IS NOT NECESSARY WHEN COMPUTING THE TOTAL
+C     ENERGY OF THE SYSTEM, BUT IS REQUIRED WHEN SHIFTING IS USED FOR
+C     MM INDUCED DIPOLES (TO CALCULATE THE FORCES BETWEEN QM ELECTRONS
+C     AND INDUCED DIPOLES)
+C
+      IF(IDOPOL.EQ.0) RETURN
+C
+      NNQ = NTODOQ
+C
+      CALL VALFM(LOADFM)
+      LSWF    = LOADFM + 1
+      LSWF2   = LSWF   + 3*225*NNQ
+      LSWF3   = LSWF2  + 3*225*NNQ
+      LAST    = LSWF3  + 3*225*NNQ
+      NEED    = LAST   - LOADFM
+      CALL GETFM(NEED)
+      CALL VCLR(X(LSWF),1,3*225*NNQ)
+      CALL VCLR(X(LSWF2),1,3*225*NNQ)
+      CALL VCLR(X(LSWF3),1,3*225*NNQ)
+C
+      NXT = IBTYP.EQ.1
+      IPCOUNT = ME - 1
+      NEXT = -1
+      LCNT = -1
+      TOL=RLN10*ITOL
+      NORM=NORMF.NE.1.OR.NORMP.NE.1
+C
+C     -- FIELD INTEGRALS AT MM POL DUE TO QM BASIS FUNC
+C
+C     ----- ISHELL
+C
+      DO 9000 II=1,NSHELL
+      IF(NXT .AND. GOPARR) THEN
+         LCNT = LCNT + 1
+         IF(LCNT.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+         IF(NEXT.NE.LCNT) GOTO 9000
+      END IF
+      I=KATOM(II)
+      XI=C(1,I)
+      YI=C(2,I)
+      ZI=C(3,I)
+      I1=KSTART(II)
+      I2=I1+KNG(II)-1
+      LIT=KTYPE(II)
+      MINI=KMIN(II)
+      MAXI=KMAX(II)
+      LOCI=KLOC(II)-MINI
+C
+C     ----- JSHELL
+C
+      DO 8000 JJ=1,NSHELL
+      IF((.NOT.NXT) .AND. GOPARR) THEN
+         IPCOUNT = IPCOUNT + 1
+         IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 8000
+      END IF
+C
+      J=KATOM(JJ)
+      XJ=C(1,J)
+      YJ=C(2,J)
+      ZJ=C(3,J)
+      J1=KSTART(JJ)
+      J2=J1+KNG(JJ)-1
+      LJT=KTYPE(JJ)
+      MINJ=KMIN(JJ)
+      MAXJ=KMAX(JJ)
+      LOCJ=KLOC(JJ)-MINJ
+      NROOTS=(LIT+LJT+1-2)/2 + 1
+      RR=(XI-XJ)**2+(YI-YJ)**2+(ZI-ZJ)**2
+C
+C     ----- PREPARE INDICES FOR PAIRS OF (I,J) FUNCTIONS
+C
+      IJ=0
+      MAX=MAXJ
+      DO 50 I=MINI,MAXI
+      NX=IX(I)
+      NY=IY(I)
+      NZ=IZ(I)
+      DO 50 J=MINJ,MAX
+      IJ=IJ+1
+      IJX(IJ)=NX+JX(J)
+      IJY(IJ)=NY+JY(J)
+      IJZ(IJ)=NZ+JZ(J)
+   50 CONTINUE
+      CALL VCLR(X(LSWF),1,3*225*NNQ)
+      CALL VCLR(X(LSWF2),1,3*225*NNQ)
+      CALL VCLR(X(LSWF3),1,3*225*NNQ)
+C
+C     ----- I PRIMITIVE
+C
+      DO 7000 IG=I1,I2
+      AI=EX(IG)
+      ARRI=AI*RR
+      AXI=AI*XI
+      AYI=AI*YI
+      AZI=AI*ZI
+      CSI=CS(IG)
+      CPI=CP(IG)
+      CDI=CD(IG)
+      CFI=CF(IG)
+C
+C     ----- J PRIMITIVE
+C
+      DO 6000 JG=J1,J2
+      AJ=EX(JG)
+      AA=AI+AJ
+      AA1=ONE/AA
+      DUM=AJ*ARRI*AA1
+      IF(DUM.GT.TOL) GOTO 6000
+      FAC=EXP(-DUM)
+      CSJ=CS(JG)
+      CPJ=CP(JG)
+      CDJ=CD(JG)
+      CFJ=CF(JG)
+      AX=(AXI+AJ*XJ)*AA1
+      AY=(AYI+AJ*YJ)*AA1
+      AZ=(AZI+AJ*ZJ)*AA1
+C
+C     ----- DENSITY FACTOR
+C
+      MAX=MAXJ
+      NN=0
+      DUM1=ZERO
+      DUM2=DUM1
+      DO 310 I=MINI,MAXI
+      GOTO ( 70, 80,180,180, 90,180,180,100,180,180,
+     *       110,180,180,120,180,180,180,180,180,130),I
+   70 DUM1=CSI*FAC
+      GOTO 180
+   80 DUM1=CPI*FAC
+      GOTO 180
+   90 DUM1=CDI*FAC
+      GOTO 180
+  100 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 180
+  110 DUM1=CFI*FAC
+      GOTO 180
+  120 IF(NORM) DUM1=DUM1*SQRT5
+      GOTO 180
+  130 IF(NORM) DUM1=DUM1*SQRT3
+  180 CONTINUE
+      DO 310 J=MINJ,MAX
+      GOTO (190,200,300,300,210,300,300,220,300,300,
+     *       230,300,300,240,300,300,300,300,300,250),J
+  190 DUM2=DUM1*CSJ
+      GOTO 300
+  200 DUM2=DUM1*CPJ
+      GOTO 300
+  210 DUM2=DUM1*CDJ
+      GOTO 300
+  220 IF(NORM) DUM2=DUM2*SQRT3
+      GOTO 300
+  230 DUM2=DUM1*CFJ
+      GOTO 300
+  240 IF(NORM) DUM2=DUM2*SQRT5
+      GOTO 300
+  250 IF(NORM) DUM2=DUM2*SQRT3
+  300 NN=NN+1
+  310 DIJ(NN)=DUM2
+C
+      AAX=AA*AX
+      AAY=AA*AY
+      AAZ=AA*AZ
+      DUM=PI212*AA1
+      DUM=DUM+DUM
+      DO 800 I=1,IJ
+  800 FIJ(I)=DIJ(I)*DUM
+C
+      DO 495 IIQ = 1, NNQ
+      IFFAT = NONLSTQ(IIQ)
+C
+      IAT   = KATOM(II)
+      JAT   = KATOM(JJ)
+      XIJ   = PT5*(C(1,IAT) + C(1,JAT))
+      YIJ   = PT5*(C(2,IAT) + C(2,JAT))
+      ZIJ   = PT5*(C(3,IAT) + C(3,JAT))
+      CX    = CORD(1,IFFAT) - XIJ
+      CY    = CORD(2,IFFAT) - YIJ
+      CZ    = CORD(3,IFFAT) - ZIJ
+      PBCX  = XBOX*ANINT(CX*ONEXBOX)
+      PBCY  = YBOX*ANINT(CY*ONEYBOX)
+      PBCZ  = ZBOX*ANINT(CZ*ONEZBOX)
+      CX    = CX - PBCX
+      CY    = CY - PBCY
+      CZ    = CZ - PBCZ
+      R2    = CX*CX+CY*CY+CZ*CZ
+      IF(R2.GT.SWRB2) GOTO 495
+      IF(R2.LT.1.0D-10) THEN    !  R COULD BE ZERO
+      SWF   = ONE
+      SWFDX = ZERO
+      SWFDY = ZERO
+      SWFDZ = ZERO
+      ELSE
+      R     = SQRT(R2)
+      ONER  = ONE/R
+      IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,CX,CY,CZ)
+      IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,CX,CY,CZ)
+      END IF
+      CX    = CORD(1,IFFAT) - PBCX
+      CY    = CORD(2,IFFAT) - PBCY
+      CZ    = CORD(3,IFFAT) - PBCZ
+      XMU   = X(LFFDIP+3*(IFFAT-1)  )
+      YMU   = X(LFFDIP+3*(IFFAT-1)+1)
+      ZMU   = X(LFFDIP+3*(IFFAT-1)+2)
+      XMUMP = X(LFFDIPMP+3*(IFFAT-1)  )
+      YMUMP = X(LFFDIPMP+3*(IFFAT-1)+1)
+      ZMUMP = X(LFFDIPMP+3*(IFFAT-1)+2)
+      XMUTA = X(LFFDIPTA+3*(IFFAT-1)  )
+      YMUTA = X(LFFDIPTA+3*(IFFAT-1)+1)
+      ZMUTA = X(LFFDIPTA+3*(IFFAT-1)+2)
+      XMUXY = X(LFFDIPXY+3*(IFFAT-1)  )
+      YMUXY = X(LFFDIPXY+3*(IFFAT-1)+1)
+      ZMUXY = X(LFFDIPXY+3*(IFFAT-1)+2)
+C
+      XX=AA*((AX-CX)**2+(AY-CY)**2+(AZ-CZ)**2)
+      IF(NROOTS.LE.3) CALL RT123
+      IF(NROOTS.EQ.4) CALL ROOT4
+      MM=0
+      DO 830 K=1,NROOTS
+      UU=AA*U(K)
+      WW=W(K)
+      WW=WW*UU
+      TT=ONE/(AA+UU)
+      T=SQRT(TT)
+      X0=(AAX+UU*CX)*TT
+      Y0=(AAY+UU*CY)*TT
+      Z0=(AAZ+UU*CZ)*TT
+      IN=-4+MM
+      DO 820 I=1,LIT
+      IN=IN+4
+      NI=I
+      DO 820 J=1,LJT
+      JN=IN+J
+      NJ=J
+      CALL STVINT
+      XIN(JN)=XINT
+      YIN(JN)=YINT
+      ZIN(JN)=ZINT*WW
+      CALL POLXYZ
+      XIN(JN+64)=XINT
+      YIN(JN+64)=YINT
+      ZIN(JN+64)=ZINT*WW
+  820 CONTINUE
+  830 MM=MM+16
+      DO 850 I=1,IJ
+      NX=IJX(I)
+      NY=IJY(I)
+      NZ=IJZ(I)
+      DUMX=ZERO
+      DUMY=ZERO
+      DUMZ=ZERO
+      MM=0
+      DO 840 K=1,NROOTS
+      DUMX=DUMX+XIN(NX+MM+64)*YIN(NY+MM   )*ZIN(NZ+MM   )
+      DUMY=DUMY+XIN(NX+MM   )*YIN(NY+MM+64)*ZIN(NZ+MM   )
+      DUMZ=DUMZ+XIN(NX+MM   )*YIN(NY+MM   )*ZIN(NZ+MM+64)
+  840 MM=MM+16
+      DUM=FIJ(I)
+      DUMIJ = DUM*(DUMX*XMU + DUMY*YMU + DUMZ*ZMU)
+      X(LSWF+(IIQ-1)*3*225+(I-1)*3  )=
+     *X(LSWF+(IIQ-1)*3*225+(I-1)*3  )-DUMIJ*SWFDX
+      X(LSWF+(IIQ-1)*3*225+(I-1)*3+1)=
+     *X(LSWF+(IIQ-1)*3*225+(I-1)*3+1)-DUMIJ*SWFDY
+      X(LSWF+(IIQ-1)*3*225+(I-1)*3+2)=
+     *X(LSWF+(IIQ-1)*3*225+(I-1)*3+2)-DUMIJ*SWFDZ
+      IF(MPLEVL.EQ.2) THEN
+      DUMIJ = DUM*(DUMX*XMUMP + DUMY*YMUMP + DUMZ*ZMUMP)
+      X(LSWF2+(IIQ-1)*3*225+(I-1)*3  )=
+     *X(LSWF2+(IIQ-1)*3*225+(I-1)*3  )-DUMIJ*SWFDX
+      X(LSWF2+(IIQ-1)*3*225+(I-1)*3+1)=
+     *X(LSWF2+(IIQ-1)*3*225+(I-1)*3+1)-DUMIJ*SWFDY
+      X(LSWF2+(IIQ-1)*3*225+(I-1)*3+2)=
+     *X(LSWF2+(IIQ-1)*3*225+(I-1)*3+2)-DUMIJ*SWFDZ
+      END IF
+      IF(TDDFTYP.NE.RNONE) THEN
+      DUMIJ = DUM*(DUMX*XMUTA + DUMY*YMUTA + DUMZ*ZMUTA)
+      X(LSWF2+(IIQ-1)*3*225+(I-1)*3  )=
+     *X(LSWF2+(IIQ-1)*3*225+(I-1)*3  )-DUMIJ*SWFDX
+      X(LSWF2+(IIQ-1)*3*225+(I-1)*3+1)=
+     *X(LSWF2+(IIQ-1)*3*225+(I-1)*3+1)-DUMIJ*SWFDY
+      X(LSWF2+(IIQ-1)*3*225+(I-1)*3+2)=
+     *X(LSWF2+(IIQ-1)*3*225+(I-1)*3+2)-DUMIJ*SWFDZ
+      DUMIJ = DUM*(DUMX*XMUXY + DUMY*YMUXY + DUMZ*ZMUXY)
+      X(LSWF3+(IIQ-1)*3*225+(I-1)*3  )=
+     *X(LSWF3+(IIQ-1)*3*225+(I-1)*3  )-DUMIJ*SWFDX
+      X(LSWF3+(IIQ-1)*3*225+(I-1)*3+1)=
+     *X(LSWF3+(IIQ-1)*3*225+(I-1)*3+1)-DUMIJ*SWFDY
+      X(LSWF3+(IIQ-1)*3*225+(I-1)*3+2)=
+     *X(LSWF3+(IIQ-1)*3*225+(I-1)*3+2)-DUMIJ*SWFDZ
+      END IF
+  850 CONTINUE
+  495 CONTINUE
+C
+ 6000 CONTINUE
+ 7000 CONTINUE
+C
+C
+            MAX = MAXJ
+            KK = 0
+            DO 620 I = MINI,MAXI
+               LI = LOCI+I
+               DO 600 J = MINJ,MAX
+                  KK = KK + 1
+                  LJ = LOCJ+J
+                  IF(LI-LJ) 920,940,940
+  920             ID = LJ
+                  JD = LI
+                  GOTO 960
+  940             ID = LI
+                  JD = LJ
+  960             NN = (ID*(ID-1))/2+JD
+                  DUM   = DM(NN)
+                  DUMHF = ZERO
+                  DUMXY = ZERO
+                  IF(MPLEVL.EQ.2) DUMHF = DMHF(NN)
+                  IF(TDDFTYP.NE.RNONE) THEN
+                     DUMHF = DMHF(NN)
+                     DUMXY = DMXY(NN)
+                  END IF
+                  DO IIQ = 1, NNQ
+                     IFFAT = NONLSTQ(IIQ)
+                     IAT   = KATOM(II)
+                     JAT   = KATOM(JJ)
+                     XIJ   = PT5*(C(1,IAT) + C(1,JAT))
+                     YIJ   = PT5*(C(2,IAT) + C(2,JAT))
+                     ZIJ   = PT5*(C(3,IAT) + C(3,JAT))
+                     CX    = CORD(1,IFFAT) - XIJ
+                     CY    = CORD(2,IFFAT) - YIJ
+                     CZ    = CORD(3,IFFAT) - ZIJ
+                     PBCX  = XBOX*ANINT(CX*ONEXBOX)
+                     PBCY  = YBOX*ANINT(CY*ONEYBOX)
+                     PBCZ  = ZBOX*ANINT(CZ*ONEZBOX)
+                     CX    = CX - PBCX
+                     CY    = CY - PBCY
+                     CZ    = CZ - PBCZ
+                     DEX   = DUM*X(LSWF +(IIQ-1)*3*225+(KK-1)*3  )+
+     *                     DUMHF*X(LSWF2+(IIQ-1)*3*225+(KK-1)*3  )+
+     *                     DUMXY*X(LSWF3+(IIQ-1)*3*225+(KK-1)*3  )
+                     DEY   = DUM*X(LSWF +(IIQ-1)*3*225+(KK-1)*3+1)+
+     *                     DUMHF*X(LSWF2+(IIQ-1)*3*225+(KK-1)*3+1)+
+     *                     DUMXY*X(LSWF3+(IIQ-1)*3*225+(KK-1)*3+1)
+                     DEZ   = DUM*X(LSWF +(IIQ-1)*3*225+(KK-1)*3+2)+
+     *                     DUMHF*X(LSWF2+(IIQ-1)*3*225+(KK-1)*3+2)+
+     *                     DUMXY*X(LSWF3+(IIQ-1)*3*225+(KK-1)*3+2)
+                     FFGRD(1,IFFAT)=FFGRD(1,IFFAT)+DEX
+                     FFGRD(2,IFFAT)=FFGRD(2,IFFAT)+DEY
+                     FFGRD(3,IFFAT)=FFGRD(3,IFFAT)+DEZ
+C                    - ONLY ATOM-ATOM SHIFTING NEEDS THIS -
+                     DE(1,IAT) = DE(1,IAT) - PT5*DEX
+                     DE(2,IAT) = DE(2,IAT) - PT5*DEY
+                     DE(3,IAT) = DE(3,IAT) - PT5*DEZ
+                     DE(1,JAT) = DE(1,JAT) - PT5*DEX
+                     DE(2,JAT) = DE(2,JAT) - PT5*DEY
+                     DE(3,JAT) = DE(3,JAT) - PT5*DEZ
+                     VIR(1)=VIR(1)+DEX*CX
+                     VIR(2)=VIR(2)+DEY*CY
+                     VIR(3)=VIR(3)+DEZ*CZ
+                     IYES = 0
+                     DO KFIX=1,NFIXMM
+                        IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+                     ENDDO
+                     IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+                        VIR(1)=VIR(1)-DEX*CX
+                        VIR(2)=VIR(2)-DEY*CY
+                        VIR(3)=VIR(3)-DEZ*CZ
+                     END IF
+                  ENDDO
+  600          CONTINUE
+  620       CONTINUE
+C
+ 8000 CONTINUE
+ 9000 CONTINUE
+C
+      CALL RETFM(NEED)
+C
+      IF(GOPARR .AND. NXT) CALL DDI_DLBRESET
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK QMMMPOLFMM
+!>
+!> @brief    force on MM induced dipoles due to QM electrons
+!>
+!> @author   Hui Li
+!>           - Jan 2011
+!>
+!> @details  force on MM induced dipoles due to QM electrons
+!>
+      SUBROUTINE QMMMPOLFMM(DM,DHF,DXY,CHGINT,CHGINT2,CHGINT3,
+     *                      CORD,FFGRD,NONLSTQ)
+      use mx_limits, only: mxsh,mxgtot,mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL NORM,GOPARR,DSKWRK,MASWRK,NXT
+C
+C
+      DIMENSION DM(*),DHF(*),DXY(*),CHGINT(*),
+     *          CHGINT2(*),CHGINT3(*),FFGRD(3,*),CORD(3,*),
+     *          NONLSTQ(*)
+C
+      DIMENSION DIJ(100),XIN(432),YIN(432),ZIN(432)
+      DIMENSION FIJ(100)
+      DIMENSION IX(20),IY(20),IZ(20),JX(20),JY(20),JZ(20)
+      DIMENSION IJX(100),IJY(100),IJZ(100),W2(5),W4(5)
+C
+      COMMON /CSSTV / CX,CY,CZ
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /ROOT  / XX,U(13),W(13),NROOTS
+      COMMON /STV   / XINT,YINT,ZINT,T,X0,Y0,Z0,XI,YI,ZI,XJ,YJ,ZJ,NI,NJ
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA JX / 0, 1, 0, 0, 2, 0, 0, 1, 1, 0,
+     1          3, 0, 0, 2, 2, 1, 0, 1, 0, 1/
+      DATA JY / 0, 0, 1, 0, 0, 2, 0, 1, 0, 1,
+     1          0, 3, 0, 1, 0, 2, 2, 0, 1, 1/
+      DATA JZ / 0, 0, 0, 1, 0, 0, 2, 0, 1, 1,
+     1          0, 0, 3, 0, 1, 0, 1, 2, 2, 1/
+      DATA IX / 1, 5, 1, 1, 9, 1, 1, 5, 5, 1,
+     1         13, 1, 1, 9, 9, 5, 1, 5, 1, 5/
+      DATA IY / 1, 1, 5, 1, 1, 9, 1, 5, 1, 5,
+     1          1,13, 1, 5, 1, 9, 9, 1, 5, 5/
+      DATA IZ / 1, 1, 1, 5, 1, 1, 9, 1, 5, 5,
+     1          1, 1,13, 1, 5, 1, 5, 9, 9, 5/
+C
+      DATA PI212 /1.1283791670955D+00/
+      DATA SQRT3 /1.73205080756888D+00/
+      DATA SQRT5 /2.23606797749979D+00/
+      DATA ZERO,ONE,TWO,FOUR/0.0D+00,1.0D+00,2.0D+00,4.0D+00/
+      DATA RLN10 /2.30258D+00/
+      DATA RNONE/8HNONE    /
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+C     FORCES ON INDUCED DIPOLES BY QM ELECTRONS
+C
+      IF(IDOPOL.EQ.0) RETURN
+C
+      CALL QMMMPOLFMMSWF(DM,DHF,DXY,FFGRD,CORD,NONLSTQ)
+C
+      NXT = IBTYP.EQ.1
+      IPCOUNT = ME - 1
+      NEXT = -1
+      LCNT = -1
+      TOL = RLN10*ITOL
+      NORM = NORMF .NE. 1 .OR. NORMP .NE. 1
+C
+      DO 100 IIQ = 1, NTODOQ
+      IFFAT = NONLSTQ(IIQ)
+      IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 100
+C
+C     ----- ISHELL
+C
+      DO 600 II = 1,NSHELL
+      IF(NXT .AND. GOPARR) THEN
+         LCNT = LCNT + 1
+         IF(LCNT.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+         IF(NEXT.NE.LCNT) GOTO 600
+      END IF
+      IAT= KATOM(II)
+      XI = C(1,IAT)
+      YI = C(2,IAT)
+      ZI = C(3,IAT)
+      I1 = KSTART(II)
+      I2 = I1+KNG(II)-1
+      LIT = KTYPE(II)
+      MINI = KMIN(II)
+      MAXI = KMAX(II)
+      LOCI = KLOC(II)-MINI
+C
+C     ----- JSHELL
+C
+      DO 580 JJ = 1,NSHELL
+      IF((.NOT.NXT) .AND. GOPARR) THEN
+         IPCOUNT = IPCOUNT + 1
+         IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 580
+      END IF
+      JAT= KATOM(JJ)
+      XJ = C(1,JAT)
+      YJ = C(2,JAT)
+      ZJ = C(3,JAT)
+      J1 = KSTART(JJ)
+      J2 = J1+KNG(JJ)-1
+      LJT = KTYPE(JJ)
+      MINJ = KMIN(JJ)
+      MAXJ = KMAX(JJ)
+      LOCJ = KLOC(JJ)-MINJ
+      NROOTS = (LIT+LJT+2-2)/2 + 1
+      RR = (XI-XJ)**2+(YI-YJ)**2+(ZI-ZJ)**2
+C
+C     ----- PREPARE INDICES FOR PAIRS OF (I,J) FUNCTIONS
+C
+      IJ = 0
+      MAX = MAXJ
+      DO 30 I = MINI,MAXI
+      NX = IX(I)
+      NY = IY(I)
+      NZ = IZ(I)
+      DO 30 J = MINJ,MAX
+      IJ = IJ+1
+      IJX(IJ) = NX+JX(J)
+      IJY(IJ) = NY+JY(J)
+      IJZ(IJ) = NZ+JZ(J)
+  30  CONTINUE
+      CALL VCLR(CHGINT ,1,3*IJ)
+      CALL VCLR(CHGINT2,1,3*IJ)
+      CALL VCLR(CHGINT3,1,3*IJ)
+C
+C     ----- I PRIMITIVE
+C
+      DO 520 IG = I1,I2
+      AI = EX(IG)
+      ARRI = AI*RR
+      AXI = AI*XI
+      AYI = AI*YI
+      AZI = AI*ZI
+      CSI = CS(IG)
+      CPI = CP(IG)
+      CDI = CD(IG)
+      CFI = CF(IG)
+C
+C     ----- J PRIMITIVE
+C
+      DO 500 JG = J1,J2
+      AJ = EX(JG)
+      AA = AI+AJ
+      AA1 = ONE/AA
+      DUM = AJ*ARRI*AA1
+      IF (DUM .GT. TOL) GOTO 500
+      FAC =  EXP(-DUM)
+      CSJ = CS(JG)
+      CPJ = CP(JG)
+      CDJ = CD(JG)
+      CFJ = CF(JG)
+      AX = (AXI+AJ*XJ)*AA1
+      AY = (AYI+AJ*YJ)*AA1
+      AZ = (AZI+AJ*ZJ)*AA1
+C
+C     ----- DENSITY FACTOR
+C
+      MAX = MAXJ
+      NN = 0
+      DUM1=ZERO
+      DUM2=DUM1
+      DO 170 I=MINI,MAXI
+      GOTO (70,80,110,110,90,110,110,95,110,110,
+     *       102,110,110,104,110,110,110,110,110,108),I
+  70  DUM1=CSI*FAC
+      GOTO 110
+  80  DUM1=CPI*FAC
+      GOTO 110
+  90  DUM1=CDI*FAC
+      GOTO 110
+  95  IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 110
+ 102  DUM1=CFI*FAC
+      GOTO 110
+ 104  DUM1 = DUM1 *SQRT5
+      GOTO 110
+ 108  DUM1 = DUM1 * SQRT3
+ 110  CONTINUE
+      DO 170 J=MINJ,MAX
+      GOTO (125,130,160,160,140,160,160,150,160,160,
+     *       152,160,160,154,160,160,160,160,160,156),J
+  125 DUM2=DUM1*CSJ
+      GOTO 160
+  130 DUM2=DUM1*CPJ
+      GOTO 160
+  140 DUM2=DUM1*CDJ
+      GOTO 160
+  150 IF(NORM) DUM2=DUM2*SQRT3
+      GOTO 160
+  152 DUM2 = DUM1 * CFJ
+      GOTO 160
+  154 DUM2 = DUM2 *SQRT5
+      GOTO 160
+  156 DUM2 = DUM2 * SQRT3
+  160 NN=NN+1
+  170 DIJ(NN)=DUM2
+C
+C     ..... HELLMANN-FEYNMAN TERM .....
+C
+C     DUM = PI212*AA1/THREE
+      DUM = PI212*AA1
+      DO 380 I = 1,IJ
+      FIJ(I) = DIJ(I)*DUM
+  380 CONTINUE
+      AAX = AA*AX
+      AAY = AA*AY
+      AAZ = AA*AZ
+C
+      ICC=1
+C
+      IAT   = KATOM(II)
+      JAT   = KATOM(JJ)
+      XIJ   = 0.5D+00*(C(1,IAT) + C(1,JAT))
+      YIJ   = 0.5D+00*(C(2,IAT) + C(2,JAT))
+      ZIJ   = 0.5D+00*(C(3,IAT) + C(3,JAT))
+      CX    = CORD(1,IFFAT) - XIJ
+      CY    = CORD(2,IFFAT) - YIJ
+      CZ    = CORD(3,IFFAT) - ZIJ
+      PBCX  = XBOX*ANINT(CX*ONEXBOX)
+      PBCY  = YBOX*ANINT(CY*ONEYBOX)
+      PBCZ  = ZBOX*ANINT(CZ*ONEZBOX)
+      CX    = CX - PBCX
+      CY    = CY - PBCY
+      CZ    = CZ - PBCZ
+      R2    = CX*CX+CY*CY+CZ*CZ
+      IF(R2.GT.SWRB2) GOTO 500
+      IF(R2.LT.1.0D-10) THEN    !  R COULD BE ZERO
+      SWF   = ONE
+      SWFDX = ZERO
+      SWFDY = ZERO
+      SWFDZ = ZERO
+      ELSE
+      R     = SQRT(R2)
+      ONER  = ONE/R
+      IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,CX,CY,CZ)
+      IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,CX,CY,CZ)
+      END IF
+      CX    = CORD(1,IFFAT) - PBCX
+      CY    = CORD(2,IFFAT) - PBCY
+      CZ    = CORD(3,IFFAT) - PBCZ
+C
+      XX   = AA*((AX-CX)**2+(AY-CY)**2+(AZ-CZ)**2)
+      IF(NROOTS.LE.3) CALL RT123
+      IF(NROOTS.EQ.4) CALL ROOT4
+      IF(NROOTS.EQ.5) CALL ROOT5
+      IF(NROOTS.EQ.6) CALL ROOT6
+      IF(NROOTS.GE.7) THEN
+         IF(MASWRK) WRITE(IW,9008)
+         CALL ABRT
+      END IF
+      MM = 0
+      DO 401 K = 1,NROOTS
+      U2 = AA*U(K)
+      U4 = U2*U2
+      WW = W(K)
+      W2(K) = TWO *WW*U2
+      W4(K) = FOUR*WW*U4
+      TT = ONE/(AA+U2)
+      T  =  SQRT(TT)
+      X0 = (AAX+U2*CX)*TT
+      Y0 = (AAY+U2*CY)*TT
+      Z0 = (AAZ+U2*CZ)*TT
+      IN = -4+MM
+      DO 400 I = 1,LIT
+      IN = IN+4
+      NI = I
+      DO 400 J = 1,LJT
+      JN = IN+J
+      NJ = J
+      CALL STVINT
+      XIN(JN   ) = XINT
+      YIN(JN   ) = YINT
+      ZIN(JN   ) = ZINT
+      CALL POLXYZ
+      XIN(JN+144) = XINT
+      YIN(JN+144) = YINT
+      ZIN(JN+144) = ZINT
+      CALL EFQXYZ
+      XIN(JN+288) = XINT
+      YIN(JN+288) = YINT
+      ZIN(JN+288) = ZINT
+  400 CONTINUE
+  401 MM = MM+16
+      DO 403 I = 1,IJ
+      NX    = IJX(I)
+      NY    = IJY(I)
+      NZ    = IJZ(I)
+      DUMXX = ZERO
+      DUMYY = ZERO
+      DUMZZ = ZERO
+      DUMXY = ZERO
+      DUMXZ = ZERO
+      DUMYZ = ZERO
+      MM    = 0
+      DO 402 K = 1,NROOTS
+      DUMXX= DUMXX+XIN(NX+MM    )*YIN(NY+MM    )*ZIN(NZ+MM    )*W2(K)
+     *            -XIN(NX+MM+288)*YIN(NY+MM    )*ZIN(NZ+MM    )*W4(K)
+      DUMYY= DUMYY+XIN(NX+MM    )*YIN(NY+MM    )*ZIN(NZ+MM    )*W2(K)
+     *            -XIN(NX+MM    )*YIN(NY+MM+288)*ZIN(NZ+MM    )*W4(K)
+      DUMZZ= DUMZZ+XIN(NX+MM    )*YIN(NY+MM    )*ZIN(NZ+MM    )*W2(K)
+     *            -XIN(NX+MM    )*YIN(NY+MM    )*ZIN(NZ+MM+288)*W4(K)
+      DUMXY= DUMXY-XIN(NX+MM+144)*YIN(NY+MM+144)*ZIN(NZ+MM    )*W4(K)
+      DUMXZ= DUMXZ-XIN(NX+MM+144)*YIN(NY+MM    )*ZIN(NZ+MM+144)*W4(K)
+      DUMYZ= DUMYZ-XIN(NX+MM    )*YIN(NY+MM+144)*ZIN(NZ+MM+144)*W4(K)
+  402 MM  = MM+16
+      DUM = FIJ(I)*SWF
+      CHGINT(ICC  ) = CHGINT(ICC  ) +
+     * DUM * ( DUMXX*X(LFFDIP+3*(IFFAT-1)  )
+     *       + DUMXY*X(LFFDIP+3*(IFFAT-1)+1)
+     *       + DUMXZ*X(LFFDIP+3*(IFFAT-1)+2))
+      CHGINT(ICC+1) = CHGINT(ICC+1) +
+     * DUM * ( DUMXY*X(LFFDIP+3*(IFFAT-1)  )
+     *       + DUMYY*X(LFFDIP+3*(IFFAT-1)+1)
+     *       + DUMYZ*X(LFFDIP+3*(IFFAT-1)+2))
+      CHGINT(ICC+2) = CHGINT(ICC+2) +
+     * DUM * ( DUMXZ*X(LFFDIP+3*(IFFAT-1)  )
+     *       + DUMYZ*X(LFFDIP+3*(IFFAT-1)+1)
+     *       + DUMZZ*X(LFFDIP+3*(IFFAT-1)+2))
+      IF(MPLEVL.EQ.2) THEN
+         CHGINT2(ICC  ) = CHGINT2(ICC  ) +
+     *    DUM * ( DUMXX*X(LFFDIPMP+3*(IFFAT-1)  )
+     *          + DUMXY*X(LFFDIPMP+3*(IFFAT-1)+1)
+     *          + DUMXZ*X(LFFDIPMP+3*(IFFAT-1)+2))
+         CHGINT2(ICC+1) = CHGINT2(ICC+1) +
+     *    DUM * ( DUMXY*X(LFFDIPMP+3*(IFFAT-1)  )
+     *          + DUMYY*X(LFFDIPMP+3*(IFFAT-1)+1)
+     *          + DUMYZ*X(LFFDIPMP+3*(IFFAT-1)+2))
+         CHGINT2(ICC+2) = CHGINT2(ICC+2) +
+     *    DUM * ( DUMXZ*X(LFFDIPMP+3*(IFFAT-1)  )
+     *          + DUMYZ*X(LFFDIPMP+3*(IFFAT-1)+1)
+     *          + DUMZZ*X(LFFDIPMP+3*(IFFAT-1)+2))
+      END IF
+      IF(TDDFTYP.NE.RNONE) THEN
+         CHGINT2(ICC  ) = CHGINT2(ICC  ) +
+     *    DUM * ( DUMXX*X(LFFDIPTA+3*(IFFAT-1)  )
+     *          + DUMXY*X(LFFDIPTA+3*(IFFAT-1)+1)
+     *          + DUMXZ*X(LFFDIPTA+3*(IFFAT-1)+2))
+         CHGINT2(ICC+1) = CHGINT2(ICC+1) +
+     *    DUM * ( DUMXY*X(LFFDIPTA+3*(IFFAT-1)  )
+     *          + DUMYY*X(LFFDIPTA+3*(IFFAT-1)+1)
+     *          + DUMYZ*X(LFFDIPTA+3*(IFFAT-1)+2))
+         CHGINT2(ICC+2) = CHGINT2(ICC+2) +
+     *    DUM * ( DUMXZ*X(LFFDIPTA+3*(IFFAT-1)  )
+     *          + DUMYZ*X(LFFDIPTA+3*(IFFAT-1)+1)
+     *          + DUMZZ*X(LFFDIPTA+3*(IFFAT-1)+2))
+C
+         CHGINT3(ICC  ) = CHGINT3(ICC  ) +
+     *    DUM * ( DUMXX*X(LFFDIPXY+3*(IFFAT-1)  )
+     *          + DUMXY*X(LFFDIPXY+3*(IFFAT-1)+1)
+     *          + DUMXZ*X(LFFDIPXY+3*(IFFAT-1)+2))
+         CHGINT3(ICC+1) = CHGINT3(ICC+1) +
+     *    DUM * ( DUMXY*X(LFFDIPXY+3*(IFFAT-1)  )
+     *          + DUMYY*X(LFFDIPXY+3*(IFFAT-1)+1)
+     *          + DUMYZ*X(LFFDIPXY+3*(IFFAT-1)+2))
+         CHGINT3(ICC+2) = CHGINT3(ICC+2) +
+     *    DUM * ( DUMXZ*X(LFFDIPXY+3*(IFFAT-1)  )
+     *          + DUMYZ*X(LFFDIPXY+3*(IFFAT-1)+1)
+     *          + DUMZZ*X(LFFDIPXY+3*(IFFAT-1)+2))
+      END IF
+      ICC=ICC+3
+ 403  CONTINUE
+ 500  CONTINUE
+ 520  CONTINUE
+C
+C     ----- END OF *PRIMITIVE* LOOPS -----
+C
+      MAX=MAXJ
+      NN=0
+      ICC=1
+C
+      DO 550 I=MINI,MAXI
+      LI=LOCI+I
+      DO 550 J=MINJ,MAX
+      LJ=LOCJ+J
+      IF (LI-LJ) 920,940,940
+  920 ID = LJ
+      JD = LI
+      GOTO 960
+  940 ID = LI
+      JD = LJ
+  960 NN = (ID*(ID-1))/2+JD
+      DUM = DM(NN)
+      FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DUM*CHGINT(ICC  )
+      FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DUM*CHGINT(ICC+1)
+      FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DUM*CHGINT(ICC+2)
+C
+C     -- HUI LI: BEFORE DEC 10, 2016, VIRIAL IS CALCULATED WITH CX,
+C        WHICH IS MM CORD INSTEAD OF QM-MM DISTANCE, BECAUSE
+C        WE DO NOT KNOW WHICH ELECTRON (AND WHERE IT IS) GIVES
+C        THE FROCE TO THE MM POL POINT (AND IT SHOULD NOT
+C        BE DONE WITH QMCX BECAUSE THE FORCE COMES FROM ELECTRONS
+C        INSTEAD OF QMCX SWITCHING FUNCTION)
+C     VIR(1)        =VIR(1)         + DUM*CHGINT(ICC  )*CX
+C     VIR(2)        =VIR(2)         + DUM*CHGINT(ICC+1)*CY
+C     VIR(3)        =VIR(3)         + DUM*CHGINT(ICC+2)*CZ
+C
+C     -- HUI LI: AFTER DEC 10, 2016, VIRIAL IS CALCULATED WITH CXGRP,
+C        WHICH IS QM-MM DISTANCE, AND THE
+C        QM ELECTRON IS APPROXIMATELY AT XIJ, WHERE IT GIVES THE FORCE TO
+C        THE MM POL POINT (AND IT SHOULD NOT BE DONE WITH
+C        QMCX BECAUSE THE FORCE COMES FROM ELECTRONS
+C        INSTEAD OF QMCX SWITCHING FUNCTION).
+      IAT   = KATOM(II)
+      JAT   = KATOM(JJ)
+      XIJ   = 0.5D+00*(C(1,IAT) + C(1,JAT))
+      YIJ   = 0.5D+00*(C(2,IAT) + C(2,JAT))
+      ZIJ   = 0.5D+00*(C(3,IAT) + C(3,JAT))
+      CXGRP = CORD(1,IFFAT) - XIJ
+      CYGRP = CORD(2,IFFAT) - YIJ
+      CZGRP = CORD(3,IFFAT) - ZIJ
+      PBCX  = XBOX*ANINT(CXGRP*ONEXBOX)
+      PBCY  = YBOX*ANINT(CYGRP*ONEYBOX)
+      PBCZ  = ZBOX*ANINT(CZGRP*ONEZBOX)
+      CXGRP = CXGRP - PBCX
+      CYGRP = CYGRP - PBCY
+      CZGRP = CZGRP - PBCZ
+      VIR(1)        =VIR(1)         + DUM*CHGINT(ICC  )*CXGRP
+      VIR(2)        =VIR(2)         + DUM*CHGINT(ICC+1)*CYGRP
+      VIR(3)        =VIR(3)         + DUM*CHGINT(ICC+2)*CZGRP
+      IYES = 0
+      DO KFIX=1,NFIXMM
+         IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+      ENDDO
+      IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+         VIR(1)     =VIR(1)         - DUM*CHGINT(ICC  )*CXGRP
+         VIR(2)     =VIR(2)         - DUM*CHGINT(ICC+1)*CYGRP
+         VIR(3)     =VIR(3)         - DUM*CHGINT(ICC+2)*CZGRP
+      END IF
+      IF(MPLEVL.EQ.2 .OR. TDDFTYP.NE.RNONE) THEN
+         DUM = DHF(NN)
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DUM*CHGINT2(ICC  )
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DUM*CHGINT2(ICC+1)
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DUM*CHGINT2(ICC+2)
+         VIR(1)        =VIR(1)         + DUM*CHGINT2(ICC  )*CXGRP
+         VIR(2)        =VIR(2)         + DUM*CHGINT2(ICC+1)*CYGRP
+         VIR(3)        =VIR(3)         + DUM*CHGINT2(ICC+2)*CZGRP
+         IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+            VIR(1)     =VIR(1)         - DUM*CHGINT2(ICC  )*CXGRP
+            VIR(2)     =VIR(2)         - DUM*CHGINT2(ICC+1)*CYGRP
+            VIR(3)     =VIR(3)         - DUM*CHGINT2(ICC+2)*CZGRP
+         END IF
+      END IF
+      IF(TDDFTYP.NE.RNONE) THEN
+         DUM = DXY(NN)
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DUM*CHGINT3(ICC  )
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DUM*CHGINT3(ICC+1)
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DUM*CHGINT3(ICC+2)
+         VIR(1)        =VIR(1)         + DUM*CHGINT3(ICC  )*CXGRP
+         VIR(2)        =VIR(2)         + DUM*CHGINT3(ICC+1)*CYGRP
+         VIR(3)        =VIR(3)         + DUM*CHGINT3(ICC+2)*CZGRP
+         IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+            VIR(1)     =VIR(1)         - DUM*CHGINT3(ICC  )*CXGRP
+            VIR(2)     =VIR(2)         - DUM*CHGINT3(ICC+1)*CYGRP
+            VIR(3)     =VIR(3)         - DUM*CHGINT3(ICC+2)*CZGRP
+         END IF
+      END IF
+      ICC=ICC+3
+  550 CONTINUE
+  580 CONTINUE
+  600 CONTINUE
+  100 CONTINUE
+C
+      IF(GOPARR .AND. NXT) CALL DDI_DLBRESET
+      RETURN
+ 9008 FORMAT(/' NUMBER OF POLYNOMIAL ROOTS NEEDED (NROOTS) IS GREATER',
+     *        ' THAN 6 IN QMMMPOLFMM.  CALL A PROGRAMMER/
+     *          QUANTUM CHEMIST.')
+      END
+C*MODULE QUANPOD  *DECK QMMMPOLFQM
+!>
+!> @brief    force on QM electrons due to MM induced dipoles
+!>
+!> @author   Hui Li
+!>           - Jan 2011
+!>
+!> @details  force on QM electrons due to MM induced dipoles
+!>
+      SUBROUTINE QMMMPOLFQM(DM,DHFA,DXY,DIP,DIPMP,DIPTA,DIPXY,
+     *                      CORD,NONLSTQ)
+      use mx_limits, only: mxsh,mxgtot,mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL ISKIP
+      LOGICAL DBG,NORM,GOPARR,DSKWRK,MASWRK,NXT
+C
+      DIMENSION DM(*),DHFA(*),DXY(*),DIP(3,*),DIPMP(3,*),
+     *          DIPTA(3,*),DIPXY(3,*),CORD(3,*),NONLSTQ(*)
+      DIMENSION ISKIP(35),INDX(70)
+      DIMENSION IX(35),IY(35),IZ(35),JX(20),JY(20),JZ(20)
+      DIMENSION IJG(210),IJX(210),IJY(210),IJZ(210)
+      DIMENSION XIN(200),YIN(200),ZIN(200),G(210),DIJ(210)
+      DIMENSION XINMP(200),YINMP(200),ZINMP(200),GMP(210)
+      DIMENSION XINTA(200),YINTA(200),ZINTA(200),GTA(210)
+      DIMENSION XINXY(200),YINXY(200),ZINXY(200),GXY(210)
+      DIMENSION FIJ(210)
+C
+C
+      COMMON /DSTV  / XINT,YINT,ZINT,T,X0,Y0,Z0,XI,YI,ZI,
+     *                XJ,YJ,ZJ,NI,NJ,CX,CY,CZ
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /ROOT  / XX,U(13),W(13),NROOTS
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (RLN10=2.30258D+00)
+      PARAMETER (PI212=1.1283791670955D+00)
+      PARAMETER (SQRT3=1.73205080756888D+00)
+      PARAMETER (SQRT5=2.23606797749979D+00)
+C
+      DATA CHECK/8HCHECK   /, DEBUG/8HDEBUG   /, DBUGME/8HTVDER   /
+C
+      DATA INDX / 1, 2, 3, 4, 5, 6, 7, 8, 9,10,
+     1           11,12,13,14,15,16,17,18,19,20,
+     2           -0,-0,-0,-0,-0,-0,-0,-0,-0,-0,
+     3           -0,-0,-0,-0,-0,
+     4           -0, 1, 2, 3, 1, 2, 3, 4, 5, 6,
+     5            4, 5, 6, 7, 8, 9,10,11,12,13,
+     6            7, 8, 9,10,11,12,13,14,15,16,
+     7           17,18,19,20,21/
+      DATA JX / 0, 1, 0, 0, 2, 0, 0, 1, 1, 0,
+     1          3, 0, 0, 2, 2, 1, 0, 1, 0, 1/
+      DATA IX / 1, 5, 1, 1, 9, 1, 1, 5, 5, 1,
+     1         13, 1, 1, 9, 9, 5, 1, 5, 1, 5,
+     2         17, 1, 1,13,13, 5, 1, 5, 1, 9,
+     3          9, 1, 9, 5, 5/
+      DATA JY / 0, 0, 1, 0, 0, 2, 0, 1, 0, 1,
+     1          0, 3, 0, 1, 0, 2, 2, 0, 1, 1/
+      DATA IY / 1, 1, 5, 1, 1, 9, 1, 5, 1, 5,
+     1          1,13, 1, 5, 1, 9, 9, 1, 5, 5,
+     2          1,17, 1, 5, 1,13,13, 1, 5, 9,
+     3          1, 9, 5, 9, 5/
+      DATA JZ / 0, 0, 0, 1, 0, 0, 2, 0, 1, 1,
+     1          0, 0, 3, 0, 1, 0, 1, 2, 2, 1/
+      DATA IZ / 1, 1, 1, 5, 1, 1, 9, 1, 5, 5,
+     1          1, 1,13, 1, 5, 1, 5, 9, 9, 5,
+     2          1, 1,17, 1, 5, 1, 5,13,13, 1,
+     3          9, 9, 5, 5, 9/
+C
+C
+C     HUI LI, JAN 2011, LINCOLN
+C     HUI LI, DEC 22, 2011
+C     HUI LI, DEC 21, 2016
+C
+C     FORCES ON ELECTRONS BY INDUCED DIPOLES
+C
+      IF(IDOPOL.EQ.0) RETURN
+C
+C     INITIALIZATION FOR PARALLEL
+C
+      NXT = IBTYP.EQ.1
+      IPCOUNT = ME - 1
+      NEXT = -1
+      LCNT = -1
+      DBG = .FALSE.
+      IF (EXETYP.EQ.DEBUG  .OR. EXETYP.EQ.DBUGME  .OR.
+     *    NPRINT.EQ.-3) THEN
+         DBG = .TRUE.
+      END IF
+      IF (DBG .AND. MASWRK) WRITE (IW,9008)
+      TOL = RLN10*ITOL
+      NORM = NORMF .NE. 1 .OR. NORMP .NE. 1
+C
+      IF (EXETYP .EQ. CHECK) GOTO 1120
+C
+C     ----- ISHELL
+C
+      DO 1060 II = 1,NSHELL
+      IF(NXT .AND. GOPARR) THEN
+         LCNT = LCNT + 1
+         IF(LCNT.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+         IF(NEXT.NE.LCNT) GOTO 1060
+      END IF
+      IAT = KATOM(II)
+      XI = C(1,IAT)
+      YI = C(2,IAT)
+      ZI = C(3,IAT)
+      I1 = KSTART(II)
+      I2 = I1+KNG(II)-1
+      LIT = KTYPE(II)+1
+      MINI = KMIN(II)
+      MAXI = KMAX(II)
+      LOCI = KLOC(II)-MINI
+      DO 100 I=1,35
+ 100  ISKIP(I)=.TRUE.
+      DO 260 I=MINI,MAXI
+      GOTO (110,140,260,260,180,260,260,260,260,260,
+     *       220,260,260,260,260,260,260,260,260,260),I
+ 110  DO 120 K=2,4
+ 120  ISKIP(K)=.FALSE.
+      GOTO 260
+ 140  DO 160 K=5,10
+ 160  ISKIP(K)=.FALSE.
+      ISKIP(1)=.FALSE.
+      GOTO 260
+ 180  DO 200 K=2,4
+ 200  ISKIP(K)=.FALSE.
+      DO 210 K=11,20
+ 210  ISKIP(K)=.FALSE.
+      GOTO 260
+ 220  DO 240 K=5,10
+ 240  ISKIP(K)=.FALSE.
+      DO 250 K=21,35
+ 250  ISKIP(K)=.FALSE.
+ 260  CONTINUE
+C
+C     ----- JSHELL
+C
+      DO 1040 JJ = 1,NSHELL
+        IF((.NOT.NXT) .AND. GOPARR) THEN
+           IPCOUNT = IPCOUNT + 1
+           IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 1040
+        END IF
+C
+      JAT = KATOM(JJ)
+      XJ = C(1,JAT)
+      YJ = C(2,JAT)
+      ZJ = C(3,JAT)
+      J1 = KSTART(JJ)
+      J2 = J1+KNG(JJ)-1
+      LJT = KTYPE(JJ)
+      MINJ = KMIN(JJ)
+      MAXJ = KMAX(JJ)
+      LOCJ = KLOC(JJ)-MINJ
+      NROOTS = (LIT+LJT+1-2)/2 + 1
+      RR = (XI-XJ)**2+(YI-YJ)**2+(ZI-ZJ)**2
+C
+C     ----- PREPARE INDICES FOR PAIRS OF (I,J) FUNCTIONS
+C
+      N0 = 0
+      IF (LIT .GE. 4) N0 = 35
+      IJ = 0
+      DO 340 I = 1,35
+      IF (ISKIP(I)) GOTO 340
+      IN = INDX(I+N0)
+      NX = IX(I)
+      NY = IY(I)
+      NZ = IZ(I)
+      DO 320 J = MINJ,MAXJ
+      IJ = IJ+1
+      IJX(IJ) = NX+JX(J)
+      IJY(IJ) = NY+JY(J)
+      IJZ(IJ) = NZ+JZ(J)
+      IJG(IJ) = IN+21*(J-MINJ)
+  320 CONTINUE
+  340 CONTINUE
+      DO 360 I = 1,IJ
+      N = IJG(I)
+      G(N) = ZERO
+      GMP(N) = ZERO
+      GTA(N) = ZERO
+      GXY(N) = ZERO
+  360 CONTINUE
+C
+C     ----- I PRIMITIVE
+C
+      DO 840 IG = I1,I2
+      AI = EX(IG)
+      ARRI = AI*RR
+      AXI = AI*XI
+      AYI = AI*YI
+      AZI = AI*ZI
+      DUM = AI+AI
+      CSI = CP(IG)
+      CPI = CS(IG)*DUM
+      IF (LIT .EQ. 4) CPI = CD(IG)
+      CDI = CP(IG)*DUM
+      IF (LIT .EQ. 5) CDI = CF(IG)
+      CFI = CD(IG)*DUM
+      CGI = CF(IG)*DUM
+C
+C     ----- J PRIMITIVE
+C
+      DO 820 JG = J1,J2
+      AJ = EX(JG)
+      AA = AI+AJ
+      AA1 = ONE/AA
+      DUM = AJ*ARRI*AA1
+      IF (DUM .GT. TOL) GOTO 820
+      FAC = EXP(-DUM)
+      CSJ = CS(JG)
+      CPJ = CP(JG)
+      CDJ = CD(JG)
+      CFJ = CF(JG)
+      AX = (AXI+AJ*XJ)*AA1
+      AY = (AYI+AJ*YJ)*AA1
+      AZ = (AZI+AJ*ZJ)*AA1
+C
+C     ----- DENSITY FACTOR
+C
+      NN = 0
+      DUM1 = ZERO
+      DUM2 = DUM1
+      DO 600 I=1,35
+      IF(ISKIP(I)) GOTO 600
+      GOTO (370,380,420,420,390,420,420,420,420,420,
+     1       400,420,420,420,420,420,420,420,420,420,
+     2       410,420,420,420,420,420,420,420,420,420,
+     3       420,420,420,420,420),I
+ 370  DUM1=CSI*FAC
+      GOTO 420
+ 380  DUM1=CPI*FAC
+      GOTO 420
+ 390  DUM1=CDI*FAC
+      GOTO 420
+ 400  DUM1=CFI*FAC
+      GOTO 420
+ 410  DUM1 = CGI*FAC
+ 420  CONTINUE
+      DO 580 J=MINJ,MAXJ
+      GOTO (430,440,560,560,460,560,560,480,560,560,
+     1       500,560,560,520,560,560,560,560,560,540),J
+  430 DUM2=DUM1*CSJ
+      GOTO 560
+  440 DUM2=DUM1*CPJ
+      GOTO 560
+  460 DUM2=DUM1*CDJ
+      GOTO 560
+  480 IF(NORM) DUM2=DUM2*SQRT3
+      GOTO 560
+  500 DUM2 = DUM1 * CFJ
+      GOTO 560
+  520 DUM2 = DUM2 *SQRT5
+      GOTO 560
+  540 DUM2 = DUM2 * SQRT3
+  560 NN=NN+1
+  580 DIJ(NN)=DUM2
+  600 CONTINUE
+C
+C     ..... BASIC DIPOLE TERM
+C
+      DUM = 2*PI212*AA1
+      DO 700 I = 1,IJ
+  700 FIJ(I) = DIJ(I)*DUM
+      AAX = AA*AX
+      AAY = AA*AY
+      AAZ = AA*AZ
+C
+      DO 818 IIQ = 1, NTODOQ
+      IFFAT = NONLSTQ(IIQ)
+C
+      IAT   = KATOM(II)
+      JAT   = KATOM(JJ)
+      XIJ   = 0.5D+00*(C(1,IAT) + C(1,JAT))
+      YIJ   = 0.5D+00*(C(2,IAT) + C(2,JAT))
+      ZIJ   = 0.5D+00*(C(3,IAT) + C(3,JAT))
+      X     = CORD(1,IFFAT) - XIJ
+      Y     = CORD(2,IFFAT) - YIJ
+      Z     = CORD(3,IFFAT) - ZIJ
+      PBCX  = XBOX*ANINT(X*ONEXBOX)
+      PBCY  = YBOX*ANINT(Y*ONEYBOX)
+      PBCZ  = ZBOX*ANINT(Z*ONEZBOX)
+      X     = X - PBCX
+      Y     = Y - PBCY
+      Z     = Z - PBCZ
+      R2    = X*X+Y*Y+Z*Z
+      IF(R2.GT.SWRB2) GOTO 818
+      IF(R2.LT.1.0D-10) THEN    !  R COULD BE ZERO
+      SWF   = ONE
+      SWFDX = ZERO
+      SWFDY = ZERO
+      SWFDZ = ZERO
+      ELSE
+      R     = SQRT(R2)
+      ONER  = ONE/R
+      IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,X,Y,Z)
+      IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,X,Y,Z)
+      END IF
+      CX    = CORD(1,IFFAT) - PBCX
+      CY    = CORD(2,IFFAT) - PBCY
+      CZ    = CORD(3,IFFAT) - PBCZ
+      XMU   = DIP(1,IFFAT)
+      YMU   = DIP(2,IFFAT)
+      ZMU   = DIP(3,IFFAT)
+      XMUMP = DIPMP(1,IFFAT)
+      YMUMP = DIPMP(2,IFFAT)
+      ZMUMP = DIPMP(3,IFFAT)
+      XMUTA = DIPTA(1,IFFAT)
+      YMUTA = DIPTA(2,IFFAT)
+      ZMUTA = DIPTA(3,IFFAT)
+      XMUXY = DIPXY(1,IFFAT)
+      YMUXY = DIPXY(2,IFFAT)
+      ZMUXY = DIPXY(3,IFFAT)
+      XX = AA*((AX-CX)**2+(AY-CY)**2+(AZ-CZ)**2)
+      IF(NROOTS.LE.3)CALL RT123
+      IF(NROOTS.EQ.4)CALL ROOT4
+      IF(NROOTS.EQ.5)CALL ROOT5
+      MM = 0
+      DO 740 K = 1,NROOTS
+      UU = AA*U(K)
+      WW = W(K)
+      WW = WW*UU
+      TT = ONE/(AA+UU)
+      T = SQRT(TT)
+      X0 = (AAX+UU*CX)*TT
+      Y0 = (AAY+UU*CY)*TT
+      Z0 = (AAZ+UU*CZ)*TT
+      IN = -4+MM
+      DO 720 I = 1,LIT
+      IN = IN+4
+      NI = I
+      DO 720 J = 1,LJT
+      JN = IN+J
+      NJ = J
+      CALL VINT
+      XIN(JN) = XINT
+      YIN(JN) = YINT
+      ZIN(JN) = ZINT*WW
+      CALL PDXYZ
+      XIN(JN+100) = XINT
+      YIN(JN+100) = YINT
+      ZIN(JN+100) = ZINT*WW
+  720 CONTINUE
+  740 MM = MM+20
+      DO 780 I = 1,IJ
+      N = IJG(I)
+      NX = IJX(I)
+      NY = IJY(I)
+      NZ = IJZ(I)
+      DUMX = ZERO
+      DUMY = ZERO
+      DUMZ = ZERO
+      MM = 0
+      DO 760 K = 1,NROOTS
+      DUMX = DUMX+XIN(NX+MM+100)*YIN(NY+MM    )*ZIN(NZ+MM    )
+      DUMY = DUMY+XIN(NX+MM    )*YIN(NY+MM+100)*ZIN(NZ+MM    )
+      DUMZ = DUMZ+XIN(NX+MM    )*YIN(NY+MM    )*ZIN(NZ+MM+100)
+  760 MM = MM+20
+      DUM = FIJ(I)*SWF
+      G(N)   = G(N)   - DUM*(DUMX*XMU  +DUMY*YMU  +DUMZ*ZMU  )
+      GMP(N) = GMP(N) - DUM*(DUMX*XMUMP+DUMY*YMUMP+DUMZ*ZMUMP)
+      GTA(N) = GTA(N) - DUM*(DUMX*XMUTA+DUMY*YMUTA+DUMZ*ZMUTA)
+      GXY(N) = GXY(N) - DUM*(DUMX*XMUXY+DUMY*YMUXY+DUMZ*ZMUXY)
+  780 CONTINUE
+  818 CONTINUE
+  820 CONTINUE
+  840 CONTINUE
+C
+C     ----- FORM INTEGRALS OVER DERIVATIVES -----
+C
+      NN = 0
+      N = 1
+      DO 900 J = MINJ,MAXJ
+      IF (MINI .GT. 1) GOTO 860
+      NN = NN+1
+      XIN(NN) = G(N+ 1)
+      YIN(NN) = G(N+ 2)
+      ZIN(NN) = G(N+ 3)
+      XINMP(NN) = GMP(N+ 1)
+      YINMP(NN) = GMP(N+ 2)
+      ZINMP(NN) = GMP(N+ 3)
+      XINTA(NN) = GTA(N+ 1)
+      YINTA(NN) = GTA(N+ 2)
+      ZINTA(NN) = GTA(N+ 3)
+      XINXY(NN) = GXY(N+ 1)
+      YINXY(NN) = GXY(N+ 2)
+      ZINXY(NN) = GXY(N+ 3)
+      IF (MAXI .EQ. 1) GOTO 900
+  860 IF (MINI .GT. 2) GOTO 880
+      NN = NN+1
+      XIN(NN) = (G(N+ 4)-G(N ))
+      YIN(NN) = G(N+ 7)
+      ZIN(NN) = G(N+ 8)
+      XINMP(NN) = (GMP(N+ 4)-GMP(N ))
+      YINMP(NN) = GMP(N+ 7)
+      ZINMP(NN) = GMP(N+ 8)
+      XINTA(NN) = (GTA(N+ 4)-GTA(N ))
+      YINTA(NN) = GTA(N+ 7)
+      ZINTA(NN) = GTA(N+ 8)
+      XINXY(NN) = (GXY(N+ 4)-GXY(N ))
+      YINXY(NN) = GXY(N+ 7)
+      ZINXY(NN) = GXY(N+ 8)
+      NN = NN+1
+      XIN(NN) = G(N+ 7)
+      YIN(NN) = (G(N+ 5)-G(N ))
+      ZIN(NN) = G(N+ 9)
+      XINMP(NN) = GMP(N+ 7)
+      YINMP(NN) = (GMP(N+ 5)-GMP(N ))
+      ZINMP(NN) = GMP(N+ 9)
+      XINTA(NN) = GTA(N+ 7)
+      YINTA(NN) = (GTA(N+ 5)-GTA(N ))
+      ZINTA(NN) = GTA(N+ 9)
+      XINXY(NN) = GXY(N+ 7)
+      YINXY(NN) = (GXY(N+ 5)-GXY(N ))
+      ZINXY(NN) = GXY(N+ 9)
+      NN = NN+1
+      XIN(NN) = G(N+ 8)
+      YIN(NN) = G(N+ 9)
+      ZIN(NN) = (G(N+ 6)-G(N ))
+      XINMP(NN) = GMP(N+ 8)
+      YINMP(NN) = GMP(N+ 9)
+      ZINMP(NN) = (GMP(N+ 6)-GMP(N ))
+      XINTA(NN) = GTA(N+ 8)
+      YINTA(NN) = GTA(N+ 9)
+      ZINTA(NN) = (GTA(N+ 6)-GTA(N ))
+      XINXY(NN) = GXY(N+ 8)
+      YINXY(NN) = GXY(N+ 9)
+      ZINXY(NN) = (GXY(N+ 6)-GXY(N ))
+      IF (MAXI .EQ. 4) GOTO 900
+  880 CONTINUE
+      IF (MINI .GT. 5) GOTO 890
+      NN = NN+1
+      XIN(NN) = (G(N+ 3)-G(N )-G(N ))
+      YIN(NN) = G(N+ 6)
+      ZIN(NN) = G(N+ 7)
+      XINMP(NN) = (GMP(N+ 3)-GMP(N )-GMP(N ))
+      YINMP(NN) = GMP(N+ 6)
+      ZINMP(NN) = GMP(N+ 7)
+      XINTA(NN) = (GTA(N+ 3)-GTA(N )-GTA(N ))
+      YINTA(NN) = GTA(N+ 6)
+      ZINTA(NN) = GTA(N+ 7)
+      XINXY(NN) = (GXY(N+ 3)-GXY(N )-GXY(N ))
+      YINXY(NN) = GXY(N+ 6)
+      ZINXY(NN) = GXY(N+ 7)
+      NN = NN+1
+      XIN(NN) = G(N+ 8)
+      YIN(NN) = (G(N+ 4)-G(N+ 1)-G(N+ 1))
+      ZIN(NN) = G(N+ 9)
+      XINMP(NN) = GMP(N+ 8)
+      YINMP(NN) = (GMP(N+ 4)-GMP(N+ 1)-GMP(N+ 1))
+      ZINMP(NN) = GMP(N+ 9)
+      XINTA(NN) = GTA(N+ 8)
+      YINTA(NN) = (GTA(N+ 4)-GTA(N+ 1)-GTA(N+ 1))
+      ZINTA(NN) = GTA(N+ 9)
+      XINXY(NN) = GXY(N+ 8)
+      YINXY(NN) = (GXY(N+ 4)-GXY(N+ 1)-GXY(N+ 1))
+      ZINXY(NN) = GXY(N+ 9)
+      NN = NN+1
+      XIN(NN) = G(N+10)
+      YIN(NN) = G(N+11)
+      ZIN(NN) = (G(N+ 5)-G(N+ 2)-G(N+ 2))
+      XINMP(NN) = GMP(N+10)
+      YINMP(NN) = GMP(N+11)
+      ZINMP(NN) = (GMP(N+ 5)-GMP(N+ 2)-GMP(N+ 2))
+      XINTA(NN) = GTA(N+10)
+      YINTA(NN) = GTA(N+11)
+      ZINTA(NN) = (GTA(N+ 5)-GTA(N+ 2)-GTA(N+ 2))
+      XINXY(NN) = GXY(N+10)
+      YINXY(NN) = GXY(N+11)
+      ZINXY(NN) = (GXY(N+ 5)-GXY(N+ 2)-GXY(N+ 2))
+      NN = NN+1
+      DUM = ONE
+      IF (NORM) DUM = SQRT3
+      XIN(NN) = DUM*(G(N+ 6)-G(N+ 1))
+      YIN(NN) = DUM*(G(N+ 8)-G(N ))
+      ZIN(NN) = DUM* G(N+12)
+      XINMP(NN) = DUM*(GMP(N+ 6)-GMP(N+ 1))
+      YINMP(NN) = DUM*(GMP(N+ 8)-GMP(N ))
+      ZINMP(NN) = DUM* GMP(N+12)
+      XINTA(NN) = DUM*(GTA(N+ 6)-GTA(N+ 1))
+      YINTA(NN) = DUM*(GTA(N+ 8)-GTA(N ))
+      ZINTA(NN) = DUM* GTA(N+12)
+      XINXY(NN) = DUM*(GXY(N+ 6)-GXY(N+ 1))
+      YINXY(NN) = DUM*(GXY(N+ 8)-GXY(N ))
+      ZINXY(NN) = DUM* GXY(N+12)
+      NN = NN+1
+      XIN(NN) = DUM*(G(N+ 7)-G(N+ 2))
+      YIN(NN) = DUM* G(N+12)
+      ZIN(NN) = DUM*(G(N+10)-G(N ))
+      XINMP(NN) = DUM*(GMP(N+ 7)-GMP(N+ 2))
+      YINMP(NN) = DUM* GMP(N+12)
+      ZINMP(NN) = DUM*(GMP(N+10)-GMP(N ))
+      XINTA(NN) = DUM*(GTA(N+ 7)-GTA(N+ 2))
+      YINTA(NN) = DUM* GTA(N+12)
+      ZINTA(NN) = DUM*(GTA(N+10)-GTA(N ))
+      XINXY(NN) = DUM*(GXY(N+ 7)-GXY(N+ 2))
+      YINXY(NN) = DUM* GXY(N+12)
+      ZINXY(NN) = DUM*(GXY(N+10)-GXY(N ))
+      NN = NN+1
+      XIN(NN) = DUM* G(N+12)
+      YIN(NN) = DUM*(G(N+ 9)-G(N+ 2))
+      ZIN(NN) = DUM*(G(N+11)-G(N+ 1))
+      XINMP(NN) = DUM* GMP(N+12)
+      YINMP(NN) = DUM*(GMP(N+ 9)-GMP(N+ 2))
+      ZINMP(NN) = DUM*(GMP(N+11)-GMP(N+ 1))
+      XINTA(NN) = DUM* GTA(N+12)
+      YINTA(NN) = DUM*(GTA(N+ 9)-GTA(N+ 2))
+      ZINTA(NN) = DUM*(GTA(N+11)-GTA(N+ 1))
+      XINXY(NN) = DUM* GXY(N+12)
+      YINXY(NN) = DUM*(GXY(N+ 9)-GXY(N+ 2))
+      ZINXY(NN) = DUM*(GXY(N+11)-GXY(N+ 1))
+      IF(MAXI.EQ.10) GOTO 900
+ 890  CONTINUE
+      NN=NN+1
+      XIN(NN)=(G(N+ 6)-G(N   )-G(N   )-G(N   ))
+      YIN(NN)= G(N+ 9)
+      ZIN(NN)= G(N+10)
+      XINMP(NN)=(GMP(N+ 6)-GMP(N   )-GMP(N   )-GMP(N   ))
+      YINMP(NN)= GMP(N+ 9)
+      ZINMP(NN)= GMP(N+10)
+      XINTA(NN)=(GTA(N+ 6)-GTA(N   )-GTA(N   )-GTA(N   ))
+      YINTA(NN)= GTA(N+ 9)
+      ZINTA(NN)= GTA(N+10)
+      XINXY(NN)=(GXY(N+ 6)-GXY(N   )-GXY(N   )-GXY(N   ))
+      YINXY(NN)= GXY(N+ 9)
+      ZINXY(NN)= GXY(N+10)
+      NN=NN+1
+      XIN(NN)= G(N+11)
+      YIN(NN)=(G(N+ 7)-G(N+ 1)-G(N+ 1)-G(N+ 1))
+      ZIN(NN)= G(N+12)
+      XINMP(NN)= GMP(N+11)
+      YINMP(NN)=(GMP(N+ 7)-GMP(N+ 1)-GMP(N+ 1)-GMP(N+ 1))
+      ZINMP(NN)= GMP(N+12)
+      XINTA(NN)= GTA(N+11)
+      YINTA(NN)=(GTA(N+ 7)-GTA(N+ 1)-GTA(N+ 1)-GTA(N+ 1))
+      ZINTA(NN)= GTA(N+12)
+      XINXY(NN)= GXY(N+11)
+      YINXY(NN)=(GXY(N+ 7)-GXY(N+ 1)-GXY(N+ 1)-GXY(N+ 1))
+      ZINXY(NN)= GXY(N+12)
+      NN=NN+1
+      XIN(NN)= G(N+13)
+      YIN(NN)= G(N+14)
+      ZIN(NN)=(G(N+ 8)-G(N+ 2)-G(N+ 2)-G(N+ 2))
+      XINMP(NN)= GMP(N+13)
+      YINMP(NN)= GMP(N+14)
+      ZINMP(NN)=(GMP(N+ 8)-GMP(N+ 2)-GMP(N+ 2)-GMP(N+ 2))
+      XINTA(NN)= GTA(N+13)
+      YINTA(NN)= GTA(N+14)
+      ZINTA(NN)=(GTA(N+ 8)-GTA(N+ 2)-GTA(N+ 2)-GTA(N+ 2))
+      XINXY(NN)= GXY(N+13)
+      YINXY(NN)= GXY(N+14)
+      ZINXY(NN)=(GXY(N+ 8)-GXY(N+ 2)-GXY(N+ 2)-GXY(N+ 2))
+      NN=NN+1
+      DUM=ONE
+      IF(NORM) DUM=SQRT5
+      XIN(NN)=DUM* (G(N+ 9)-G(N+ 3)-G(N+ 3))
+      YIN(NN)=DUM* (G(N+15)-G(N  ))
+      ZIN(NN)=DUM* G(N+18)
+      XINMP(NN)=DUM* (GMP(N+ 9)-GMP(N+ 3)-GMP(N+ 3))
+      YINMP(NN)=DUM* (GMP(N+15)-GMP(N  ))
+      ZINMP(NN)=DUM* GMP(N+18)
+      XINTA(NN)=DUM* (GTA(N+ 9)-GTA(N+ 3)-GTA(N+ 3))
+      YINTA(NN)=DUM* (GTA(N+15)-GTA(N  ))
+      ZINTA(NN)=DUM* GTA(N+18)
+      XINXY(NN)=DUM* (GXY(N+ 9)-GXY(N+ 3)-GXY(N+ 3))
+      YINXY(NN)=DUM* (GXY(N+15)-GXY(N  ))
+      ZINXY(NN)=DUM* GXY(N+18)
+      NN=NN+1
+      XIN(NN)=DUM* (G(N+10)-G(N+ 4)-G(N+ 4))
+      YIN(NN)=DUM* G(N+18)
+      ZIN(NN)=DUM* (G(N+16)-G(N  ))
+      XINMP(NN)=DUM* (GMP(N+10)-GMP(N+ 4)-GMP(N+ 4))
+      YINMP(NN)=DUM* GMP(N+18)
+      ZINMP(NN)=DUM* (GMP(N+16)-GMP(N  ))
+      XINTA(NN)=DUM* (GTA(N+10)-GTA(N+ 4)-GTA(N+ 4))
+      YINTA(NN)=DUM* GTA(N+18)
+      ZINTA(NN)=DUM* (GTA(N+16)-GTA(N  ))
+      XINXY(NN)=DUM* (GXY(N+10)-GXY(N+ 4)-GXY(N+ 4))
+      YINXY(NN)=DUM* GXY(N+18)
+      ZINXY(NN)=DUM* (GXY(N+16)-GXY(N  ))
+      NN=NN+1
+      XIN(NN)=DUM* (G(N+15)-G(N+ 1))
+      YIN(NN)=DUM* (G(N+11)-G(N+ 3)-G(N+ 3))
+      ZIN(NN)=DUM*  G(N+19)
+      XINMP(NN)=DUM* (GMP(N+15)-GMP(N+ 1))
+      YINMP(NN)=DUM* (GMP(N+11)-GMP(N+ 3)-GMP(N+ 3))
+      ZINMP(NN)=DUM*  GMP(N+19)
+      XINTA(NN)=DUM* (GTA(N+15)-GTA(N+ 1))
+      YINTA(NN)=DUM* (GTA(N+11)-GTA(N+ 3)-GTA(N+ 3))
+      ZINTA(NN)=DUM*  GTA(N+19)
+      XINXY(NN)=DUM* (GXY(N+15)-GXY(N+ 1))
+      YINXY(NN)=DUM* (GXY(N+11)-GXY(N+ 3)-GXY(N+ 3))
+      ZINXY(NN)=DUM*  GXY(N+19)
+      NN=NN+1
+      XIN(NN)=DUM* G(N+19)
+      YIN(NN)=DUM* (G(N+12)-G(N+ 5)-G(N+ 5))
+      ZIN(NN)=DUM* (G(N+17)-G(N+ 1))
+      XINMP(NN)=DUM* GMP(N+19)
+      YINMP(NN)=DUM* (GMP(N+12)-GMP(N+ 5)-GMP(N+ 5))
+      ZINMP(NN)=DUM* (GMP(N+17)-GMP(N+ 1))
+      XINTA(NN)=DUM* GTA(N+19)
+      YINTA(NN)=DUM* (GTA(N+12)-GTA(N+ 5)-GTA(N+ 5))
+      ZINTA(NN)=DUM* (GTA(N+17)-GTA(N+ 1))
+      XINXY(NN)=DUM* GXY(N+19)
+      YINXY(NN)=DUM* (GXY(N+12)-GXY(N+ 5)-GXY(N+ 5))
+      ZINXY(NN)=DUM* (GXY(N+17)-GXY(N+ 1))
+      NN=NN+1
+      XIN(NN)=DUM* (G(N+16)-G(N+ 2))
+      YIN(NN)=DUM*  G(N+20)
+      ZIN(NN)=DUM* (G(N+13)-G(N+ 4)-G(N+ 4))
+      XINMP(NN)=DUM* (GMP(N+16)-GMP(N+ 2))
+      YINMP(NN)=DUM*  GMP(N+20)
+      ZINMP(NN)=DUM* (GMP(N+13)-GMP(N+ 4)-GMP(N+ 4))
+      XINTA(NN)=DUM* (GTA(N+16)-GTA(N+ 2))
+      YINTA(NN)=DUM*  GTA(N+20)
+      ZINTA(NN)=DUM* (GTA(N+13)-GTA(N+ 4)-GTA(N+ 4))
+      XINXY(NN)=DUM* (GXY(N+16)-GXY(N+ 2))
+      YINXY(NN)=DUM*  GXY(N+20)
+      ZINXY(NN)=DUM* (GXY(N+13)-GXY(N+ 4)-GXY(N+ 4))
+      NN=NN+1
+      XIN(NN)=DUM*  G(N+20)
+      YIN(NN)=DUM* (G(N+17)-G(N+ 2))
+      ZIN(NN)=DUM* (G(N+14)-G(N+ 5)-G(N+ 5))
+      XINMP(NN)=DUM*  GMP(N+20)
+      YINMP(NN)=DUM* (GMP(N+17)-GMP(N+ 2))
+      ZINMP(NN)=DUM* (GMP(N+14)-GMP(N+ 5)-GMP(N+ 5))
+      XINTA(NN)=DUM*  GTA(N+20)
+      YINTA(NN)=DUM* (GTA(N+17)-GTA(N+ 2))
+      ZINTA(NN)=DUM* (GTA(N+14)-GTA(N+ 5)-GTA(N+ 5))
+      XINXY(NN)=DUM*  GXY(N+20)
+      YINXY(NN)=DUM* (GXY(N+17)-GXY(N+ 2))
+      ZINXY(NN)=DUM* (GXY(N+14)-GXY(N+ 5)-GXY(N+ 5))
+      NN=NN+1
+      IF(NORM) DUM=DUM*SQRT3
+      XIN(NN)=DUM* (G(N+18)-G(N+ 5))
+      YIN(NN)=DUM* (G(N+19)-G(N+ 4))
+      ZIN(NN)=DUM* (G(N+20)-G(N+ 3))
+      XINMP(NN)=DUM* (GMP(N+18)-GMP(N+ 5))
+      YINMP(NN)=DUM* (GMP(N+19)-GMP(N+ 4))
+      ZINMP(NN)=DUM* (GMP(N+20)-GMP(N+ 3))
+      XINTA(NN)=DUM* (GTA(N+18)-GTA(N+ 5))
+      YINTA(NN)=DUM* (GTA(N+19)-GTA(N+ 4))
+      ZINTA(NN)=DUM* (GTA(N+20)-GTA(N+ 3))
+      XINXY(NN)=DUM* (GXY(N+18)-GXY(N+ 5))
+      YINXY(NN)=DUM* (GXY(N+19)-GXY(N+ 4))
+      ZINXY(NN)=DUM* (GXY(N+20)-GXY(N+ 3))
+  900 N = N+21
+C
+C     ----- CALCULATE CONTRIBUTION TO GRADIENT -----
+C
+      N = 0
+      DO 980 J = MINJ,MAXJ
+      JN = LOCJ+J
+      DO 980 I = MINI,MAXI
+      N = N+1
+      IN = LOCI+I
+      IF (IN-JN) 920,940,940
+  920 ID = JN
+      JD = IN
+      GOTO 960
+  940 ID = IN
+      JD = JN
+  960 NN = (ID*(ID-1))/2+JD
+      DUM = DM(NN)+DM(NN)
+      DX  = DUM*XIN(N)
+      DY  = DUM*YIN(N)
+      DZ  = DUM*ZIN(N)
+      IF(MPLEVL.EQ.2) THEN
+         DUM = DHFA(NN)+DHFA(NN)
+         DX  = DX + DUM*XINMP(N)
+         DY  = DY + DUM*YINMP(N)
+         DZ  = DZ + DUM*ZINMP(N)
+      END IF
+      IF(TDDFTYP.NE.RNONE) THEN
+         DUM = DHFA(NN)+DHFA(NN)
+         DX  = DX + DUM*XINTA(N)
+         DY  = DY + DUM*YINTA(N)
+         DZ  = DZ + DUM*ZINTA(N)
+         DUM = DXY(NN)+DXY(NN)
+         DX  = DX + DUM*XINXY(N)
+         DY  = DY + DUM*YINXY(N)
+         DZ  = DZ + DUM*ZINXY(N)
+      END IF
+      DE(1,IAT) = DE(1,IAT)+DX
+      DE(2,IAT) = DE(2,IAT)+DY
+      DE(3,IAT) = DE(3,IAT)+DZ
+C     - NO VIR(1), VIR(2), VIR(3) ON QM ATOMS. ALL ARE DONE ON MM ATOMS -
+  980 CONTINUE
+ 1040 CONTINUE
+ 1060 CONTINUE
+ 1120 CONTINUE
+C
+      IF(GOPARR .AND. NXT) CALL DDI_DLBRESET
+      RETURN
+ 9008 FORMAT(/' NUMBER OF POLYNOMIAL ROOTS NEEDED (NROOTS) IS GREATER',
+     *        ' THAN 6 IN QMMMPOLFQM.  CALL A PROGRAMMER/
+     *          QUANTUM CHEMIST.')
+      END
+C*MODULE QUANPOD  *DECK QMMMRXNFQM
+!>
+!> @brief    force on QM electrons due to induced surface charges
+!>
+!> @author   Dejun Si
+!>           - Feb 2011
+!>
+!> @details  force on QM electrons due to induced surface charges
+!>
+      SUBROUTINE QMMMRXNFQM(DM,DHFA,DXY,QRXN,QRXN2,QRXNMP,
+     *                      QRXNTA,QRXNXY,NTS)
+      use mx_limits, only: mxsh,mxgtot,mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL ISKIP
+      LOGICAL NORM,GOPARR,DSKWRK,MASWRK,NXT
+C
+      DIMENSION DM(*),DHFA(*),DXY(*),QRXN(*),QRXN2(*),QRXNMP(*),
+     *          QRXNTA(*),QRXNXY(*)
+C
+      DIMENSION ISKIP(35),INDX(70)
+      DIMENSION IX(35),IY(35),IZ(35),JX(20),JY(20),JZ(20)
+      DIMENSION IJG(210),IJX(210),IJY(210),IJZ(210)
+      DIMENSION XIN(200),YIN(200),ZIN(200),G(210),DIJ(210)
+      DIMENSION XINMP(200),YINMP(200),ZINMP(200),GMP(210)
+      DIMENSION XINTA(200),YINTA(200),ZINTA(200),GTA(210)
+      DIMENSION XINXY(200),YINXY(200),ZINXY(200),GXY(210)
+      DIMENSION FIJ(210)
+C
+C
+      COMMON /DSTV  / XINT,YINT,ZINT,T,X0,Y0,Z0,XI,YI,ZI,
+     *                XJ,YJ,ZJ,NI,NJ,CX,CY,CZ
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /ROOT  / XX,U(13),W(13),NROOTS
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (RLN10=2.30258D+00)
+      PARAMETER (PI212=1.1283791670955D+00)
+      PARAMETER (SQRT3=1.73205080756888D+00)
+      PARAMETER (SQRT5=2.23606797749979D+00)
+C
+      DATA CHECK/8HCHECK   /
+      DATA INDX / 1, 2, 3, 4, 5, 6, 7, 8, 9,10,
+     1           11,12,13,14,15,16,17,18,19,20,
+     2           -0,-0,-0,-0,-0,-0,-0,-0,-0,-0,
+     3           -0,-0,-0,-0,-0,
+     4           -0, 1, 2, 3, 1, 2, 3, 4, 5, 6,
+     5            4, 5, 6, 7, 8, 9,10,11,12,13,
+     6            7, 8, 9,10,11,12,13,14,15,16,
+     7           17,18,19,20,21/
+      DATA JX / 0, 1, 0, 0, 2, 0, 0, 1, 1, 0,
+     1          3, 0, 0, 2, 2, 1, 0, 1, 0, 1/
+      DATA IX / 1, 5, 1, 1, 9, 1, 1, 5, 5, 1,
+     1         13, 1, 1, 9, 9, 5, 1, 5, 1, 5,
+     2         17, 1, 1,13,13, 5, 1, 5, 1, 9,
+     3          9, 1, 9, 5, 5/
+      DATA JY / 0, 0, 1, 0, 0, 2, 0, 1, 0, 1,
+     1          0, 3, 0, 1, 0, 2, 2, 0, 1, 1/
+      DATA IY / 1, 1, 5, 1, 1, 9, 1, 5, 1, 5,
+     1          1,13, 1, 5, 1, 9, 9, 1, 5, 5,
+     2          1,17, 1, 5, 1,13,13, 1, 5, 9,
+     3          1, 9, 5, 9, 5/
+      DATA JZ / 0, 0, 0, 1, 0, 0, 2, 0, 1, 1,
+     1          0, 0, 3, 0, 1, 0, 1, 2, 2, 1/
+      DATA IZ / 1, 1, 1, 5, 1, 1, 9, 1, 5, 5,
+     1          1, 1,13, 1, 5, 1, 5, 9, 9, 5,
+     2          1, 1,17, 1, 5, 1, 5,13,13, 1,
+     3          9, 9, 5, 5, 9/
+C
+C     DEJUN SI, FEB 2011, LINCOLN
+C     HUI LI, DEC 22, 2011
+C
+C     --- FORCE ON QM ELECTRONS BY SURFACE CHARGE ---
+C
+      IF(ISPHSOL.GE.60 .AND. RSPHSOL.LT.1.0D+30)
+     *   CALL VADD(QRXN2,1,QRXN,1,QRXN,1,ISPHSOL)
+C
+C
+      NXT = IBTYP.EQ.1
+      IPCOUNT = ME - 1
+      NEXT = -1
+      LCNT = -1
+      TOL = RLN10*ITOL
+      NORM = NORMF .NE. 1 .OR. NORMP .NE. 1
+C
+      IF (EXETYP .EQ. CHECK) GOTO 1120
+C
+C     -- ISHELL
+C
+      DO 1060 II = 1,NSHELL
+C
+      IF(NXT .AND. GOPARR) THEN
+         LCNT = LCNT + 1
+         IF(LCNT.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+         IF(NEXT.NE.LCNT) GOTO 1060
+      END IF
+      IAT = KATOM(II)
+      XI = C(1,IAT)
+      YI = C(2,IAT)
+      ZI = C(3,IAT)
+      I1 = KSTART(II)
+      I2 = I1+KNG(II)-1
+      LIT = KTYPE(II)+1
+      MINI = KMIN(II)
+      MAXI = KMAX(II)
+      LOCI = KLOC(II)-MINI
+      DO 100 I=1,35
+ 100  ISKIP(I)=.TRUE.
+      DO 260 I=MINI,MAXI
+      GOTO (110,140,260,260,180,260,260,260,260,260,
+     *       220,260,260,260,260,260,260,260,260,260),I
+ 110  DO 120 K=2,4
+ 120  ISKIP(K)=.FALSE.
+      GOTO 260
+ 140  DO 160 K=5,10
+ 160  ISKIP(K)=.FALSE.
+      ISKIP(1)=.FALSE.
+      GOTO 260
+ 180  DO 200 K=2,4
+ 200  ISKIP(K)=.FALSE.
+      DO 210 K=11,20
+ 210  ISKIP(K)=.FALSE.
+      GOTO 260
+ 220  DO 240 K=5,10
+ 240  ISKIP(K)=.FALSE.
+      DO 250 K=21,35
+ 250  ISKIP(K)=.FALSE.
+ 260  CONTINUE
+C
+C     -- JSHELL
+C
+      DO 1040 JJ = 1,NSHELL
+        IF((.NOT.NXT) .AND. GOPARR) THEN
+           IPCOUNT = IPCOUNT + 1
+           IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 1040
+        END IF
+C
+      JAT = KATOM(JJ)
+      XJ = C(1,JAT)
+      YJ = C(2,JAT)
+      ZJ = C(3,JAT)
+      J1 = KSTART(JJ)
+      J2 = J1+KNG(JJ)-1
+      LJT = KTYPE(JJ)
+      MINJ = KMIN(JJ)
+      MAXJ = KMAX(JJ)
+      LOCJ = KLOC(JJ)-MINJ
+      NROOTS = (LIT+LJT+1-2)/2 + 1
+      RR = (XI-XJ)**2+(YI-YJ)**2+(ZI-ZJ)**2
+C
+C     -- PREPARE INDICES FOR PAIRS OF (I,J) FUNCTIONS
+C
+      N0 = 0
+      IF (LIT .GE. 4) N0 = 35
+      IJ = 0
+      DO 340 I = 1,35
+      IF (ISKIP(I)) GOTO 340
+      IN = INDX(I+N0)
+      NX = IX(I)
+      NY = IY(I)
+      NZ = IZ(I)
+      DO 320 J = MINJ,MAXJ
+      IJ = IJ+1
+      IJX(IJ) = NX+JX(J)
+      IJY(IJ) = NY+JY(J)
+      IJZ(IJ) = NZ+JZ(J)
+      IJG(IJ) = IN+21*(J-MINJ)
+  320 CONTINUE
+  340 CONTINUE
+      DO 360 I = 1,IJ
+      N = IJG(I)
+      G(N) = ZERO
+      GMP(N) = ZERO
+      GTA(N) = ZERO
+      GXY(N) = ZERO
+  360 CONTINUE
+C
+C     -- I PRIMITIVE
+C
+      DO 840 IG = I1,I2
+      AI = EX(IG)
+      ARRI = AI*RR
+      AXI = AI*XI
+      AYI = AI*YI
+      AZI = AI*ZI
+      DUM = AI+AI
+      CSI = CP(IG)
+      CPI = CS(IG)*DUM
+      IF (LIT .EQ. 4) CPI = CD(IG)
+      CDI = CP(IG)*DUM
+      IF (LIT .EQ. 5) CDI = CF(IG)
+      CFI = CD(IG)*DUM
+      CGI = CF(IG)*DUM
+C
+C     -- J PRIMITIVE
+C
+      DO 820 JG = J1,J2
+      AJ = EX(JG)
+      AA = AI+AJ
+      AA1 = ONE/AA
+      DUM = AJ*ARRI*AA1
+      IF (DUM .GT. TOL) GOTO 820
+      FAC = EXP(-DUM)
+      CSJ = CS(JG)
+      CPJ = CP(JG)
+      CDJ = CD(JG)
+      CFJ = CF(JG)
+      AX = (AXI+AJ*XJ)*AA1
+      AY = (AYI+AJ*YJ)*AA1
+      AZ = (AZI+AJ*ZJ)*AA1
+C
+C     -- DENSITY FACTOR
+C
+      NN = 0
+      DUM1 = ZERO
+      DUM2 = DUM1
+      DO 600 I=1,35
+      IF(ISKIP(I)) GOTO 600
+      GOTO (370,380,420,420,390,420,420,420,420,420,
+     *       400,420,420,420,420,420,420,420,420,420,
+     *       410,420,420,420,420,420,420,420,420,420,
+     *       420,420,420,420,420),I
+ 370  DUM1=CSI*FAC
+      GOTO 420
+ 380  DUM1=CPI*FAC
+      GOTO 420
+ 390  DUM1=CDI*FAC
+      GOTO 420
+ 400  DUM1=CFI*FAC
+      GOTO 420
+ 410  DUM1 = CGI*FAC
+ 420  CONTINUE
+      DO 580 J=MINJ,MAXJ
+      GOTO (430,440,560,560,460,560,560,480,560,560,
+     *       500,560,560,520,560,560,560,560,560,540),J
+  430 DUM2=DUM1*CSJ
+      GOTO 560
+  440 DUM2=DUM1*CPJ
+      GOTO 560
+  460 DUM2=DUM1*CDJ
+      GOTO 560
+  480 IF(NORM) DUM2=DUM2*SQRT3
+      GOTO 560
+  500 DUM2 = DUM1 * CFJ
+      GOTO 560
+  520 DUM2 = DUM2 *SQRT5
+      GOTO 560
+  540 DUM2 = DUM2 * SQRT3
+  560 NN=NN+1
+  580 DIJ(NN)=DUM2
+  600 CONTINUE
+C
+C     ....BASIC CHARGE TERM
+C
+      DUM = PI212*AA1
+      DO 700 I=1,IJ
+ 700  FIJ(I)=DIJ(I)*DUM
+      AAX=AA*AX
+      AAY=AA*AY
+      AAZ=AA*AZ
+C
+      DO 710 ITS = 1,NTS
+      IF(IFIXSOL.EQ.0) THEN
+         CX    = X(LFFXTS+ITS-1) - ZERO
+         CY    = X(LFFYTS+ITS-1) - ZERO
+         CZ    = X(LFFZTS+ITS-1) - ZERO
+      END IF
+      IF(IFIXSOL.EQ.1) THEN
+         CX    = X(LFFXTSFIX+ITS-1)
+         CY    = X(LFFYTSFIX+ITS-1)
+         CZ    = X(LFFZTSFIX+ITS-1)
+      END IF
+      XX=AA*((AX-CX)**2+(AY-CY)**2+(AZ-CZ)**2)
+      IF(NROOTS.LE.3)CALL RT123
+      IF(NROOTS.EQ.4)CALL ROOT4
+      IF(NROOTS.EQ.5)CALL ROOT5
+      MM=0
+      DO 806 K=1,NROOTS
+      UU=AA*U(K)
+      WW=W(K)
+      TT=ONE/(AA+UU)
+      T =SQRT(TT)
+      X0=(AAX+UU*CX)*TT
+      Y0=(AAY+UU*CY)*TT
+      Z0=(AAZ+UU*CZ)*TT
+      IN=-4+MM
+      DO 804 I=1,LIT
+      IN=IN+4
+      NI=I
+      DO 804 J=1,LJT
+      JN=IN+J
+      NJ=J
+      CALL VINT
+      XIN(JN)=XINT
+      YIN(JN)=YINT
+      ZIN(JN)=ZINT*WW
+ 804  CONTINUE
+ 806  MM=MM+20
+      DO 810 I=1,IJ
+      N=IJG(I)
+      NX=IJX(I)
+      NY=IJY(I)
+      NZ=IJZ(I)
+      DUM=ZERO
+      MM=0
+      DO 808 K=1,NROOTS
+      DUM=DUM+XIN(NX+MM)*YIN(NY+MM)*ZIN(NZ+MM)
+ 808  MM=MM+20
+      DUMFIJ = DUM*FIJ(I)
+      G(N)   = G(N)   - DUMFIJ*QRXN(ITS)
+      GMP(N) = GMP(N) - DUMFIJ*QRXNMP(ITS)
+      GTA(N) = GTA(N) - DUMFIJ*QRXNTA(ITS)
+      GXY(N) = GXY(N) - DUMFIJ*QRXNXY(ITS)
+ 810  CONTINUE
+ 710  CONTINUE
+C
+C     -- END OF PRIMITIVE LOOPS -----
+C
+  820 CONTINUE
+  840 CONTINUE
+C
+C     -- FORM INTEGRALS OVER DERIVATIVES -----
+C
+      NN = 0
+      N = 1
+      DO 900 J = MINJ,MAXJ
+      IF (MINI .GT. 1) GOTO 860
+      NN = NN+1
+      XIN(NN) = G(N+ 1)
+      YIN(NN) = G(N+ 2)
+      ZIN(NN) = G(N+ 3)
+      XINMP(NN) = GMP(N+ 1)
+      YINMP(NN) = GMP(N+ 2)
+      ZINMP(NN) = GMP(N+ 3)
+      XINTA(NN) = GTA(N+ 1)
+      YINTA(NN) = GTA(N+ 2)
+      ZINTA(NN) = GTA(N+ 3)
+      XINXY(NN) = GXY(N+ 1)
+      YINXY(NN) = GXY(N+ 2)
+      ZINXY(NN) = GXY(N+ 3)
+      IF (MAXI .EQ. 1) GOTO 900
+  860 IF (MINI .GT. 2) GOTO 880
+      NN = NN+1
+      XIN(NN) = (G(N+ 4)-G(N ))
+      YIN(NN) = G(N+ 7)
+      ZIN(NN) = G(N+ 8)
+      XINMP(NN) = (GMP(N+ 4)-GMP(N ))
+      YINMP(NN) = GMP(N+ 7)
+      ZINMP(NN) = GMP(N+ 8)
+      XINTA(NN) = (GTA(N+ 4)-GTA(N ))
+      YINTA(NN) = GTA(N+ 7)
+      ZINTA(NN) = GTA(N+ 8)
+      XINXY(NN) = (GXY(N+ 4)-GXY(N ))
+      YINXY(NN) = GXY(N+ 7)
+      ZINXY(NN) = GXY(N+ 8)
+      NN = NN+1
+      XIN(NN) = G(N+ 7)
+      YIN(NN) = (G(N+ 5)-G(N ))
+      ZIN(NN) = G(N+ 9)
+      XINMP(NN) = GMP(N+ 7)
+      YINMP(NN) = (GMP(N+ 5)-GMP(N ))
+      ZINMP(NN) = GMP(N+ 9)
+      XINTA(NN) = GTA(N+ 7)
+      YINTA(NN) = (GTA(N+ 5)-GTA(N ))
+      ZINTA(NN) = GTA(N+ 9)
+      XINXY(NN) = GXY(N+ 7)
+      YINXY(NN) = (GXY(N+ 5)-GXY(N ))
+      ZINXY(NN) = GXY(N+ 9)
+      NN = NN+1
+      XIN(NN) = G(N+ 8)
+      YIN(NN) = G(N+ 9)
+      ZIN(NN) = (G(N+ 6)-G(N ))
+      XINMP(NN) = GMP(N+ 8)
+      YINMP(NN) = GMP(N+ 9)
+      ZINMP(NN) = (GMP(N+ 6)-GMP(N ))
+      XINTA(NN) = GTA(N+ 8)
+      YINTA(NN) = GTA(N+ 9)
+      ZINTA(NN) = (GTA(N+ 6)-GTA(N ))
+      XINXY(NN) = GXY(N+ 8)
+      YINXY(NN) = GXY(N+ 9)
+      ZINXY(NN) = (GXY(N+ 6)-GXY(N ))
+      IF (MAXI .EQ. 4) GOTO 900
+  880 CONTINUE
+      IF (MINI .GT. 5) GOTO 890
+      NN = NN+1
+      XIN(NN) = (G(N+ 3)-G(N )-G(N ))
+      YIN(NN) = G(N+ 6)
+      ZIN(NN) = G(N+ 7)
+      XINMP(NN) = (GMP(N+ 3)-GMP(N )-GMP(N ))
+      YINMP(NN) = GMP(N+ 6)
+      ZINMP(NN) = GMP(N+ 7)
+      XINTA(NN) = (GTA(N+ 3)-GTA(N )-GTA(N ))
+      YINTA(NN) = GTA(N+ 6)
+      ZINTA(NN) = GTA(N+ 7)
+      XINXY(NN) = (GXY(N+ 3)-GXY(N )-GXY(N ))
+      YINXY(NN) = GXY(N+ 6)
+      ZINXY(NN) = GXY(N+ 7)
+      NN = NN+1
+      XIN(NN) = G(N+ 8)
+      YIN(NN) = (G(N+ 4)-G(N+ 1)-G(N+ 1))
+      ZIN(NN) = G(N+ 9)
+      XINMP(NN) = GMP(N+ 8)
+      YINMP(NN) = (GMP(N+ 4)-GMP(N+ 1)-GMP(N+ 1))
+      ZINMP(NN) = GMP(N+ 9)
+      XINTA(NN) = GTA(N+ 8)
+      YINTA(NN) = (GTA(N+ 4)-GTA(N+ 1)-GTA(N+ 1))
+      ZINTA(NN) = GTA(N+ 9)
+      XINXY(NN) = GXY(N+ 8)
+      YINXY(NN) = (GXY(N+ 4)-GXY(N+ 1)-GXY(N+ 1))
+      ZINXY(NN) = GXY(N+ 9)
+      NN = NN+1
+      XIN(NN) = G(N+10)
+      YIN(NN) = G(N+11)
+      ZIN(NN) = (G(N+ 5)-G(N+ 2)-G(N+ 2))
+      XINMP(NN) = GMP(N+10)
+      YINMP(NN) = GMP(N+11)
+      ZINMP(NN) = (GMP(N+ 5)-GMP(N+ 2)-GMP(N+ 2))
+      XINTA(NN) = GTA(N+10)
+      YINTA(NN) = GTA(N+11)
+      ZINTA(NN) = (GTA(N+ 5)-GTA(N+ 2)-GTA(N+ 2))
+      XINXY(NN) = GXY(N+10)
+      YINXY(NN) = GXY(N+11)
+      ZINXY(NN) = (GXY(N+ 5)-GXY(N+ 2)-GXY(N+ 2))
+      NN = NN+1
+      DUM = ONE
+      IF (NORM) DUM = SQRT3
+      XIN(NN) = DUM*(G(N+ 6)-G(N+ 1))
+      YIN(NN) = DUM*(G(N+ 8)-G(N ))
+      ZIN(NN) = DUM* G(N+12)
+      XINMP(NN) = DUM*(GMP(N+ 6)-GMP(N+ 1))
+      YINMP(NN) = DUM*(GMP(N+ 8)-GMP(N ))
+      ZINMP(NN) = DUM* GMP(N+12)
+      XINTA(NN) = DUM*(GTA(N+ 6)-GTA(N+ 1))
+      YINTA(NN) = DUM*(GTA(N+ 8)-GTA(N ))
+      ZINTA(NN) = DUM* GTA(N+12)
+      XINXY(NN) = DUM*(GXY(N+ 6)-GXY(N+ 1))
+      YINXY(NN) = DUM*(GXY(N+ 8)-GXY(N ))
+      ZINXY(NN) = DUM* GXY(N+12)
+      NN = NN+1
+      XIN(NN) = DUM*(G(N+ 7)-G(N+ 2))
+      YIN(NN) = DUM* G(N+12)
+      ZIN(NN) = DUM*(G(N+10)-G(N ))
+      XINMP(NN) = DUM*(GMP(N+ 7)-GMP(N+ 2))
+      YINMP(NN) = DUM* GMP(N+12)
+      ZINMP(NN) = DUM*(GMP(N+10)-GMP(N ))
+      XINTA(NN) = DUM*(GTA(N+ 7)-GTA(N+ 2))
+      YINTA(NN) = DUM* GTA(N+12)
+      ZINTA(NN) = DUM*(GTA(N+10)-GTA(N ))
+      XINXY(NN) = DUM*(GXY(N+ 7)-GXY(N+ 2))
+      YINXY(NN) = DUM* GXY(N+12)
+      ZINXY(NN) = DUM*(GXY(N+10)-GXY(N ))
+      NN = NN+1
+      XIN(NN) = DUM* G(N+12)
+      YIN(NN) = DUM*(G(N+ 9)-G(N+ 2))
+      ZIN(NN) = DUM*(G(N+11)-G(N+ 1))
+      XINMP(NN) = DUM* GMP(N+12)
+      YINMP(NN) = DUM*(GMP(N+ 9)-GMP(N+ 2))
+      ZINMP(NN) = DUM*(GMP(N+11)-GMP(N+ 1))
+      XINTA(NN) = DUM* GTA(N+12)
+      YINTA(NN) = DUM*(GTA(N+ 9)-GTA(N+ 2))
+      ZINTA(NN) = DUM*(GTA(N+11)-GTA(N+ 1))
+      XINXY(NN) = DUM* GXY(N+12)
+      YINXY(NN) = DUM*(GXY(N+ 9)-GXY(N+ 2))
+      ZINXY(NN) = DUM*(GXY(N+11)-GXY(N+ 1))
+      IF(MAXI.EQ.10) GOTO 900
+ 890  CONTINUE
+      NN=NN+1
+      XIN(NN)=(G(N+ 6)-G(N   )-G(N   )-G(N   ))
+      YIN(NN)= G(N+ 9)
+      ZIN(NN)= G(N+10)
+      XINMP(NN)=(GMP(N+ 6)-GMP(N   )-GMP(N   )-GMP(N   ))
+      YINMP(NN)= GMP(N+ 9)
+      ZINMP(NN)= GMP(N+10)
+      XINTA(NN)=(GTA(N+ 6)-GTA(N   )-GTA(N   )-GTA(N   ))
+      YINTA(NN)= GTA(N+ 9)
+      ZINTA(NN)= GTA(N+10)
+      XINXY(NN)=(GXY(N+ 6)-GXY(N   )-GXY(N   )-GXY(N   ))
+      YINXY(NN)= GXY(N+ 9)
+      ZINXY(NN)= GXY(N+10)
+      NN=NN+1
+      XIN(NN)= G(N+11)
+      YIN(NN)=(G(N+ 7)-G(N+ 1)-G(N+ 1)-G(N+ 1))
+      ZIN(NN)= G(N+12)
+      XINMP(NN)= GMP(N+11)
+      YINMP(NN)=(GMP(N+ 7)-GMP(N+ 1)-GMP(N+ 1)-GMP(N+ 1))
+      ZINMP(NN)= GMP(N+12)
+      XINTA(NN)= GTA(N+11)
+      YINTA(NN)=(GTA(N+ 7)-GTA(N+ 1)-GTA(N+ 1)-GTA(N+ 1))
+      ZINTA(NN)= GTA(N+12)
+      XINXY(NN)= GXY(N+11)
+      YINXY(NN)=(GXY(N+ 7)-GXY(N+ 1)-GXY(N+ 1)-GXY(N+ 1))
+      ZINXY(NN)= GXY(N+12)
+      NN=NN+1
+      XIN(NN)= G(N+13)
+      YIN(NN)= G(N+14)
+      ZIN(NN)=(G(N+ 8)-G(N+ 2)-G(N+ 2)-G(N+ 2))
+      XINMP(NN)= GMP(N+13)
+      YINMP(NN)= GMP(N+14)
+      ZINMP(NN)=(GMP(N+ 8)-GMP(N+ 2)-GMP(N+ 2)-GMP(N+ 2))
+      XINTA(NN)= GTA(N+13)
+      YINTA(NN)= GTA(N+14)
+      ZINTA(NN)=(GTA(N+ 8)-GTA(N+ 2)-GTA(N+ 2)-GTA(N+ 2))
+      XINXY(NN)= GXY(N+13)
+      YINXY(NN)= GXY(N+14)
+      ZINXY(NN)=(GXY(N+ 8)-GXY(N+ 2)-GXY(N+ 2)-GXY(N+ 2))
+      NN=NN+1
+      DUM=ONE
+      IF(NORM) DUM=SQRT5
+      XIN(NN)=DUM* (G(N+ 9)-G(N+ 3)-G(N+ 3))
+      YIN(NN)=DUM* (G(N+15)-G(N  ))
+      ZIN(NN)=DUM* G(N+18)
+      XINMP(NN)=DUM* (GMP(N+ 9)-GMP(N+ 3)-GMP(N+ 3))
+      YINMP(NN)=DUM* (GMP(N+15)-GMP(N  ))
+      ZINMP(NN)=DUM* GMP(N+18)
+      XINTA(NN)=DUM* (GTA(N+ 9)-GTA(N+ 3)-GTA(N+ 3))
+      YINTA(NN)=DUM* (GTA(N+15)-GTA(N  ))
+      ZINTA(NN)=DUM* GTA(N+18)
+      XINXY(NN)=DUM* (GXY(N+ 9)-GXY(N+ 3)-GXY(N+ 3))
+      YINXY(NN)=DUM* (GXY(N+15)-GXY(N  ))
+      ZINXY(NN)=DUM* GXY(N+18)
+      NN=NN+1
+      XIN(NN)=DUM* (G(N+10)-G(N+ 4)-G(N+ 4))
+      YIN(NN)=DUM* G(N+18)
+      ZIN(NN)=DUM* (G(N+16)-G(N  ))
+      XINMP(NN)=DUM* (GMP(N+10)-GMP(N+ 4)-GMP(N+ 4))
+      YINMP(NN)=DUM* GMP(N+18)
+      ZINMP(NN)=DUM* (GMP(N+16)-GMP(N  ))
+      XINTA(NN)=DUM* (GTA(N+10)-GTA(N+ 4)-GTA(N+ 4))
+      YINTA(NN)=DUM* GTA(N+18)
+      ZINTA(NN)=DUM* (GTA(N+16)-GTA(N  ))
+      XINXY(NN)=DUM* (GXY(N+10)-GXY(N+ 4)-GXY(N+ 4))
+      YINXY(NN)=DUM* GXY(N+18)
+      ZINXY(NN)=DUM* (GXY(N+16)-GXY(N  ))
+      NN=NN+1
+      XIN(NN)=DUM* (G(N+15)-G(N+ 1))
+      YIN(NN)=DUM* (G(N+11)-G(N+ 3)-G(N+ 3))
+      ZIN(NN)=DUM*  G(N+19)
+      XINMP(NN)=DUM* (GMP(N+15)-GMP(N+ 1))
+      YINMP(NN)=DUM* (GMP(N+11)-GMP(N+ 3)-GMP(N+ 3))
+      ZINMP(NN)=DUM*  GMP(N+19)
+      XINTA(NN)=DUM* (GTA(N+15)-GTA(N+ 1))
+      YINTA(NN)=DUM* (GTA(N+11)-GTA(N+ 3)-GTA(N+ 3))
+      ZINTA(NN)=DUM*  GTA(N+19)
+      XINXY(NN)=DUM* (GXY(N+15)-GXY(N+ 1))
+      YINXY(NN)=DUM* (GXY(N+11)-GXY(N+ 3)-GXY(N+ 3))
+      ZINXY(NN)=DUM*  GXY(N+19)
+      NN=NN+1
+      XIN(NN)=DUM* G(N+19)
+      YIN(NN)=DUM* (G(N+12)-G(N+ 5)-G(N+ 5))
+      ZIN(NN)=DUM* (G(N+17)-G(N+ 1))
+      XINMP(NN)=DUM* GMP(N+19)
+      YINMP(NN)=DUM* (GMP(N+12)-GMP(N+ 5)-GMP(N+ 5))
+      ZINMP(NN)=DUM* (GMP(N+17)-GMP(N+ 1))
+      XINTA(NN)=DUM* GTA(N+19)
+      YINTA(NN)=DUM* (GTA(N+12)-GTA(N+ 5)-GTA(N+ 5))
+      ZINTA(NN)=DUM* (GTA(N+17)-GTA(N+ 1))
+      XINXY(NN)=DUM* GXY(N+19)
+      YINXY(NN)=DUM* (GXY(N+12)-GXY(N+ 5)-GXY(N+ 5))
+      ZINXY(NN)=DUM* (GXY(N+17)-GXY(N+ 1))
+      NN=NN+1
+      XIN(NN)=DUM* (G(N+16)-G(N+ 2))
+      YIN(NN)=DUM*  G(N+20)
+      ZIN(NN)=DUM* (G(N+13)-G(N+ 4)-G(N+ 4))
+      XINMP(NN)=DUM* (GMP(N+16)-GMP(N+ 2))
+      YINMP(NN)=DUM*  GMP(N+20)
+      ZINMP(NN)=DUM* (GMP(N+13)-GMP(N+ 4)-GMP(N+ 4))
+      XINTA(NN)=DUM* (GTA(N+16)-GTA(N+ 2))
+      YINTA(NN)=DUM*  GTA(N+20)
+      ZINTA(NN)=DUM* (GTA(N+13)-GTA(N+ 4)-GTA(N+ 4))
+      XINXY(NN)=DUM* (GXY(N+16)-GXY(N+ 2))
+      YINXY(NN)=DUM*  GXY(N+20)
+      ZINXY(NN)=DUM* (GXY(N+13)-GXY(N+ 4)-GXY(N+ 4))
+      NN=NN+1
+      XIN(NN)=DUM*  G(N+20)
+      YIN(NN)=DUM* (G(N+17)-G(N+ 2))
+      ZIN(NN)=DUM* (G(N+14)-G(N+ 5)-G(N+ 5))
+      XINMP(NN)=DUM*  GMP(N+20)
+      YINMP(NN)=DUM* (GMP(N+17)-GMP(N+ 2))
+      ZINMP(NN)=DUM* (GMP(N+14)-GMP(N+ 5)-GMP(N+ 5))
+      XINTA(NN)=DUM*  GTA(N+20)
+      YINTA(NN)=DUM* (GTA(N+17)-GTA(N+ 2))
+      ZINTA(NN)=DUM* (GTA(N+14)-GTA(N+ 5)-GTA(N+ 5))
+      XINXY(NN)=DUM*  GXY(N+20)
+      YINXY(NN)=DUM* (GXY(N+17)-GXY(N+ 2))
+      ZINXY(NN)=DUM* (GXY(N+14)-GXY(N+ 5)-GXY(N+ 5))
+      NN=NN+1
+      IF(NORM) DUM=DUM*SQRT3
+      XIN(NN)=DUM* (G(N+18)-G(N+ 5))
+      YIN(NN)=DUM* (G(N+19)-G(N+ 4))
+      ZIN(NN)=DUM* (G(N+20)-G(N+ 3))
+      XINMP(NN)=DUM* (GMP(N+18)-GMP(N+ 5))
+      YINMP(NN)=DUM* (GMP(N+19)-GMP(N+ 4))
+      ZINMP(NN)=DUM* (GMP(N+20)-GMP(N+ 3))
+      XINTA(NN)=DUM* (GTA(N+18)-GTA(N+ 5))
+      YINTA(NN)=DUM* (GTA(N+19)-GTA(N+ 4))
+      ZINTA(NN)=DUM* (GTA(N+20)-GTA(N+ 3))
+      XINXY(NN)=DUM* (GXY(N+18)-GXY(N+ 5))
+      YINXY(NN)=DUM* (GXY(N+19)-GXY(N+ 4))
+      ZINXY(NN)=DUM* (GXY(N+20)-GXY(N+ 3))
+  900 N = N+21
+C
+C     -- CALCULATE CONTRIBUTION TO GRADIENT -----
+C
+      N = 0
+      DO 980 J = MINJ,MAXJ
+      JN = LOCJ+J
+      DO 980 I = MINI,MAXI
+      N = N+1
+      IN = LOCI+I
+      IF (IN-JN) 920,940,940
+  920 ID = JN
+      JD = IN
+      GOTO 960
+  940 ID = IN
+      JD = JN
+  960 NN = (ID*(ID-1))/2+JD
+      DUM = DM(NN)+DM(NN)
+      DX  = DUM*XIN(N)
+      DY  = DUM*YIN(N)
+      DZ  = DUM*ZIN(N)
+      IF(MPLEVL.EQ.2) THEN
+         DUM = DHFA(NN)+DHFA(NN)
+         DX  = DX + DUM*XINMP(N)
+         DY  = DY + DUM*YINMP(N)
+         DZ  = DZ + DUM*ZINMP(N)
+      END IF
+      IF(TDDFTYP.NE.RNONE) THEN
+         DUM = DHFA(NN)+DHFA(NN)
+         DX  = DX + DUM*XINTA(N)
+         DY  = DY + DUM*YINTA(N)
+         DZ  = DZ + DUM*ZINTA(N)
+         DUM = DXY(NN)+DXY(NN)
+         DX  = DX + DUM*XINXY(N)
+         DY  = DY + DUM*YINXY(N)
+         DZ  = DZ + DUM*ZINXY(N)
+      END IF
+      DE(1,IAT) = DE(1,IAT)+DX
+      DE(2,IAT) = DE(2,IAT)+DY
+      DE(3,IAT) = DE(3,IAT)+DZ
+      VIR(1) =VIR(1) + DX*C(1,IAT)
+      VIR(2) =VIR(2) + DY*C(2,IAT)
+      VIR(3) =VIR(3) + DZ*C(3,IAT)
+      IYES = 0
+      DO KFIX=1,NFIXQM
+         IF(IAT.EQ.IFIXQM(KFIX)) IYES = 1
+      ENDDO
+      IF(IYES.EQ.1) THEN
+         VIR(1) =VIR(1) - DX*C(1,IAT)
+         VIR(2) =VIR(2) - DY*C(2,IAT)
+         VIR(3) =VIR(3) - DZ*C(3,IAT)
+      END IF
+  980 CONTINUE
+ 1040 CONTINUE
+ 1060 CONTINUE
+C
+C     ----- END OF SHELL LOOPS -----
+C
+ 1120 CONTINUE
+      IF(GOPARR .AND. NXT) CALL DDI_DLBRESET
+C
+      IF(ISPHSOL.GE.60 .AND. RSPHSOL.LT.1.0D+30)
+     *   CALL VSUB(QRXN2,1,QRXN,1,QRXN,1,ISPHSOL)
+C
+      RETURN
+C
+      END
+C*MODULE QUANPOD  *DECK QMMMRXNFMM
+!>
+!> @brief    force on induced surface charges due to QM electrons
+!>
+!> @author   Hui Li
+!>           - Dec 2012
+!>
+!> @details  force on induced surface charges due to QM electrons
+!>
+      SUBROUTINE QMMMRXNFMM(DM,DHF,DXY,CHGINT,
+     *                      QFIX,QFIXMP,QFIXTA,QFIXXY,
+     *                      FFGRD,IDATOM,
+     *                      XTSFIX,YTSFIX,ZTSFIX)
+      use mx_limits, only: mxsh,mxgtot,mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL NORM,GOPARR,DSKWRK,MASWRK,NXT
+C
+C
+      DIMENSION DM(*),DHF(*),DXY(*),CHGINT(*),
+     *          QFIX(*),QFIXMP(*),QFIXTA(*),QFIXXY(*),
+     *          FFGRD(3,*),IDATOM(*),XTSFIX(*),YTSFIX(*),ZTSFIX(*)
+C
+      DIMENSION DIJ(100),XIN(432),YIN(432),ZIN(432)
+      DIMENSION FIJ(100)
+      DIMENSION IX(20),IY(20),IZ(20),JX(20),JY(20),JZ(20)
+      DIMENSION IJX(100),IJY(100),IJZ(100)
+C
+      COMMON /CSSTV / CX,CY,CZ
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /ROOT  / XX,U(13),W(13),NROOTS
+      COMMON /STV   / XINT,YINT,ZINT,T,X0,Y0,Z0,XI,YI,ZI,XJ,YJ,ZJ,NI,NJ
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+      DATA JX / 0, 1, 0, 0, 2, 0, 0, 1, 1, 0,
+     1          3, 0, 0, 2, 2, 1, 0, 1, 0, 1/
+      DATA JY / 0, 0, 1, 0, 0, 2, 0, 1, 0, 1,
+     1          0, 3, 0, 1, 0, 2, 2, 0, 1, 1/
+      DATA JZ / 0, 0, 0, 1, 0, 0, 2, 0, 1, 1,
+     1          0, 0, 3, 0, 1, 0, 1, 2, 2, 1/
+      DATA IX / 1, 5, 1, 1, 9, 1, 1, 5, 5, 1,
+     1         13, 1, 1, 9, 9, 5, 1, 5, 1, 5/
+      DATA IY / 1, 1, 5, 1, 1, 9, 1, 5, 1, 5,
+     1          1,13, 1, 5, 1, 9, 9, 1, 5, 5/
+      DATA IZ / 1, 1, 1, 5, 1, 1, 9, 1, 5, 5,
+     1          1, 1,13, 1, 5, 1, 5, 9, 9, 5/
+C
+      DATA PI212 /1.1283791670955D+00/
+      DATA SQRT3 /1.73205080756888D+00/
+      DATA SQRT5 /2.23606797749979D+00/
+      DATA ZERO,ONE/0.0D+00,1.0D+00/
+      DATA RLN10 /2.30258D+00/
+C
+C     HUI LI, DEC 12, 2011, LINCOLN
+C
+C     FORCES ON NFFTS BY QM ELECTRONS
+C
+      IF(IFIXSOL.EQ.0) RETURN
+C
+      NXT = IBTYP.EQ.1
+      IPCOUNT = ME - 1
+      NEXT = -1
+      LCNT = -1
+      TOL = RLN10*ITOL
+      NORM = NORMF .NE. 1 .OR. NORMP .NE. 1
+C
+      DO 100 IFFTS = 1, NFFTS
+      IFFAT = IDATOM(IFFTS)
+      CX    = XTSFIX(IFFTS)
+      CY    = YTSFIX(IFFTS)
+      CZ    = ZTSFIX(IFFTS)
+      IF(QFIX(IFFTS).EQ.ZERO) GOTO 100
+C
+C     -- ISHELL
+C
+      DO 600 II = 1,NSHELL
+C
+      IF(NXT .AND. GOPARR) THEN
+         LCNT = LCNT + 1
+         IF(LCNT.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+         IF(NEXT.NE.LCNT) GOTO 600
+      END IF
+      IAT= KATOM(II)
+C
+      XI = C(1,IAT)
+      YI = C(2,IAT)
+      ZI = C(3,IAT)
+      I1 = KSTART(II)
+      I2 = I1+KNG(II)-1
+      LIT = KTYPE(II)
+      MINI = KMIN(II)
+      MAXI = KMAX(II)
+      LOCI = KLOC(II)-MINI
+C
+C     -- JSHELL
+C
+      DO 580 JJ = 1,NSHELL
+      IF((.NOT.NXT) .AND. GOPARR) THEN
+         IPCOUNT = IPCOUNT + 1
+         IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 580
+      END IF
+      JAT= KATOM(JJ)
+C
+      XJ = C(1,JAT)
+      YJ = C(2,JAT)
+      ZJ = C(3,JAT)
+      J1 = KSTART(JJ)
+      J2 = J1+KNG(JJ)-1
+      LJT = KTYPE(JJ)
+      MINJ = KMIN(JJ)
+      MAXJ = KMAX(JJ)
+      LOCJ = KLOC(JJ)-MINJ
+      NROOTS = (LIT+LJT+1-2)/2 + 1
+      RR = (XI-XJ)**2+(YI-YJ)**2+(ZI-ZJ)**2
+C
+C     -- PREPARE INDICES FOR PAIRS OF (I,J) FUNCTIONS
+C
+      IJ = 0
+      MAX = MAXJ
+      DO 50 I = MINI,MAXI
+      NX = IX(I)
+      NY = IY(I)
+      NZ = IZ(I)
+      DO 50 J = MINJ,MAX
+      IJ = IJ+1
+      IJX(IJ) = NX+JX(J)
+      IJY(IJ) = NY+JY(J)
+      IJZ(IJ) = NZ+JZ(J)
+  50  CONTINUE
+      CALL VCLR(CHGINT,1,3*IJ)
+C
+C     -- I PRIMITIVE
+C
+      DO 520 IG = I1,I2
+      AI = EX(IG)
+      ARRI = AI*RR
+      AXI = AI*XI
+      AYI = AI*YI
+      AZI = AI*ZI
+      CSI = CS(IG)
+      CPI = CP(IG)
+      CDI = CD(IG)
+      CFI = CF(IG)
+C
+C     -- J PRIMITIVE
+C
+      DO 500 JG = J1,J2
+      AJ = EX(JG)
+      AA = AI+AJ
+      AA1 = ONE/AA
+      DUM = AJ*ARRI*AA1
+      IF (DUM .GT. TOL) GOTO 500
+      FAC =  EXP(-DUM)
+      CSJ = CS(JG)
+      CPJ = CP(JG)
+      CDJ = CD(JG)
+      CFJ = CF(JG)
+      AX = (AXI+AJ*XJ)*AA1
+      AY = (AYI+AJ*YJ)*AA1
+      AZ = (AZI+AJ*ZJ)*AA1
+C
+C     -- DENSITY FACTOR
+C
+      MAX = MAXJ
+      NN = 0
+      DUM1=ZERO
+      DUM2=DUM1
+      DO 170 I=MINI,MAXI
+      GOTO (70,80,110,110,90,110,110,95,110,110,
+     1       102,110,110,104,110,110,110,110,110,108),I
+  70  DUM1=CSI*FAC
+      GOTO 110
+  80  DUM1=CPI*FAC
+      GOTO 110
+  90  DUM1=CDI*FAC
+      GOTO 110
+  95  IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 110
+ 102  DUM1=CFI*FAC
+      GOTO 110
+ 104  DUM1 = DUM1 *SQRT5
+      GOTO 110
+ 108  DUM1 = DUM1 * SQRT3
+ 110  CONTINUE
+      DO 170 J=MINJ,MAX
+      GOTO (125,130,160,160,140,160,160,150,160,160,
+     1       152,160,160,154,160,160,160,160,160,156),J
+  125 DUM2=DUM1*CSJ
+      GOTO 160
+  130 DUM2=DUM1*CPJ
+      GOTO 160
+  140 DUM2=DUM1*CDJ
+      GOTO 160
+  150 IF(NORM) DUM2=DUM2*SQRT3
+      GOTO 160
+  152 DUM2 = DUM1 * CFJ
+      GOTO 160
+  154 DUM2 = DUM2 *SQRT5
+      GOTO 160
+  156 DUM2 = DUM2 * SQRT3
+  160 NN=NN+1
+  170 DIJ(NN)=DUM2
+C
+C     ..... HELLMANN-FEYNMAN TERM .....
+C
+      DUM = PI212*AA1
+      DUM=DUM+DUM
+      DO 380 I = 1,IJ
+      FIJ(I) = DIJ(I)*DUM
+  380 CONTINUE
+      AAX = AA*AX
+      AAY = AA*AY
+      AAZ = AA*AZ
+C
+      ICC=1
+C
+      XX   = AA*((AX-CX)**2+(AY-CY)**2+(AZ-CZ)**2)
+      IF(NROOTS.LE.3) CALL RT123
+      IF(NROOTS.EQ.4) CALL ROOT4
+      IF(NROOTS.EQ.5) CALL ROOT5
+      IF(NROOTS.EQ.6) CALL ROOT6
+      IF(NROOTS.GE.7) THEN
+         WRITE(IW,9008)
+         CALL ABRT
+      END IF
+      MM = 0
+      DO 401 K = 1,NROOTS
+      UU = AA*U(K)
+      WW = W(K)
+      WW = WW*UU
+      TT = ONE/(AA+UU)
+      T  = SQRT(TT)
+      X0 = (AAX+UU*CX)*TT
+      Y0 = (AAY+UU*CY)*TT
+      Z0 = (AAZ+UU*CZ)*TT
+      IN = -4+MM
+      DO 400 I = 1,LIT
+      IN = IN+4
+      NI = I
+      DO 400 J = 1,LJT
+      JN = IN+J
+      NJ = J
+      CALL STVINT
+      XIN(JN   ) = XINT
+      YIN(JN   ) = YINT
+      ZIN(JN   ) = ZINT*WW
+      CALL POLXYZ
+      XIN(JN+125) = XINT
+      YIN(JN+125) = YINT
+      ZIN(JN+125) = ZINT*WW
+  400 CONTINUE
+  401 MM = MM+16
+      DO 403 I = 1,IJ
+      NX    = IJX(I)
+      NY    = IJY(I)
+      NZ    = IJZ(I)
+      DUMX  = ZERO
+      DUMY  = ZERO
+      DUMZ  = ZERO
+      MM    = 0
+      DO 402 K = 1,NROOTS
+      DUMX= DUMX+XIN(NX+MM+125)*YIN(NY+MM    )*ZIN(NZ+MM    )
+      DUMY= DUMY+XIN(NX+MM    )*YIN(NY+MM+125)*ZIN(NZ+MM    )
+      DUMZ= DUMZ+XIN(NX+MM    )*YIN(NY+MM    )*ZIN(NZ+MM+125)
+  402 MM  = MM+16
+      DUM = FIJ(I)
+      CHGINT(ICC  )=CHGINT(ICC  )-DUM*DUMX
+      CHGINT(ICC+1)=CHGINT(ICC+1)-DUM*DUMY
+      CHGINT(ICC+2)=CHGINT(ICC+2)-DUM*DUMZ
+      ICC=ICC+3
+ 403  CONTINUE
+ 500  CONTINUE
+ 520  CONTINUE
+C
+C     ----- END OF *PRIMITIVE* LOOPS -----
+C
+      MAX=MAXJ
+      ICC=1
+      DO 550 I=MINI,MAXI
+      LI=LOCI+I
+      DO 550 J=MINJ,MAX
+      LJ=LOCJ+J
+      IF (LI-LJ) 920,940,940
+  920 ID = LJ
+      JD = LI
+      GOTO 960
+  940 ID = LI
+      JD = LJ
+  960 NN = (ID*(ID-1))/2+JD
+C
+      DUM = DM(NN)*QFIX(IFFTS)
+      IF(MPLEVL.EQ.2)      DUM = DUM + DHF(NN)*QFIXMP(IFFTS)
+      IF(TDDFTYP.NE.RNONE) DUM = DUM + DHF(NN)*QFIXTA(IFFTS)
+     *                               + DXY(NN)*QFIXXY(IFFTS)
+      IF(IFFAT.LE.NFFAT) THEN
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DUM*CHGINT(ICC  )
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DUM*CHGINT(ICC+1)
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DUM*CHGINT(ICC+2)
+      END IF
+      IF(IFFAT.GT.NFFAT) THEN
+         IAT = IFFAT - NFFAT
+         DE(1,IAT)=DE(1,IAT) + DUM*CHGINT(ICC  )
+         DE(2,IAT)=DE(2,IAT) + DUM*CHGINT(ICC+1)
+         DE(3,IAT)=DE(3,IAT) + DUM*CHGINT(ICC+2)
+      END IF
+      ICC=ICC+3
+  550 CONTINUE
+  580 CONTINUE
+  600 CONTINUE
+  100 CONTINUE
+C
+      IF(GOPARR .AND. NXT) CALL DDI_DLBRESET
+      RETURN
+ 9008 FORMAT(/' NUMBER OF POLYNOMIAL ROOTS NEEDED (NROOTS) IS GREATER',
+     *        ' THAN 6 IN EFDINT.  CALL A PROGRAMMER/QUANTUM CHEMIST.')
+      END
+C*MODULE QUANPOD  *DECK QMMMRXNFMMNUCMM
+!>
+!> @brief    force due to induced surface charges
+!>
+!> @author   Dejun Si
+!>           - Feb 2012
+!>
+!> @details  force on induced charges, MM charge and induced dipoles,
+!>           and QM nuc charges
+!>
+      SUBROUTINE QMMMRXNFMMNUCMM(CORD,FFGRD,CHARG,
+     *                           DIP,QRXN,QRXN2,NTS,
+     *                           IDATOM,IDDAI,DAI,AFIX,
+     *                           QRXNMP,QRXNTA,QRXNXY,
+     *                           DIPMP,DIPTA,DIPXY)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (TOBOHR=1.0D+00/TOANGS)
+      PARAMETER (PI=3.14159265358979323846264338D+00)
+      PARAMETER (PT5=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (THREE=3.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),CHARG(*),DIP(3,*),QRXN(NTS),
+     *          QRXN2(NTS),IDATOM(NTS),IDDAI(41,*),DAI(3,40,*),AFIX(*),
+     *          QRXNMP(*),QRXNTA(*),QRXNXY(*),
+     *          DIPMP(3,*),DIPTA(3,*),DIPXY(3,*)
+C
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+C
+C     DEJUN SI, FEB 2011, LINCOLN
+C     HUI LI, DEC 12, 2011
+C
+      SQRTPI=SQRT(PI)
+C
+      IF(ISPHSOL.GE.60 .AND. RSPHSOL.LT.1.0D+30)
+     *CALL VADD(QRXN2,1,QRXN,1,QRXN,1,NTS)
+C
+C     - FORCE BETWEEN SURFACE CHARGES
+C
+      IF(IFIXSOL.EQ.1) THEN
+         IF(NTSATM.EQ. 60) DISM0 = 0.4000D+00*TOBOHR
+         IF(NTSATM.EQ.240) DISM0 = 0.2000D+00*TOBOHR
+         IF(NTSATM.EQ.960) DISM0 = 0.1000D+00*TOBOHR
+         SCALE   = (FIXEPS - ONE)/FIXEPS
+         ONESCALE= ONE/(SCALE+1.0D-99)
+         FACTORX = PT5*1.07D+00*SQRTPI*ONESCALE
+         IPCOUNT  = ME - 1
+         DO 400 I = 1, NTS
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 400
+            END IF
+            IFFAT  = IDATOM(I)
+            QI     = QRXN(I)
+            QIMP   = QRXNMP(I)
+            QITA   = QRXNTA(I)
+            QIXY   = QRXNXY(I)
+            DO 420 J = I+1, NTS
+               JFFAT  = IDATOM(J)
+               QJ     = QRXN(J)
+               QJMP   = QRXNMP(J)
+               QJTA   = QRXNTA(J)
+               QJXY   = QRXNXY(J)
+               QIQJ   = QI*QJ
+               IF(MPLEVL.EQ.2)      QIQJ=QIQJ+QI*QJMP+QIMP*QJ
+               IF(TDDFTYP.NE.RNONE) QIQJ=QIQJ+QI*QJTA+QITA*QJ
+     *                                       +TWO*QIXY*QJXY
+               X      = XX(LFFXTSFIX+I-1) - XX(LFFXTSFIX+J-1)
+               Y      = XX(LFFYTSFIX+I-1) - XX(LFFYTSFIX+J-1)
+               Z      = XX(LFFZTSFIX+I-1) - XX(LFFZTSFIX+J-1)
+               R2     = X*X+Y*Y+Z*Z
+               R      = SQRT(R2)
+               IF(R.GT.DISM0) THEN
+                  R3     = R2*R
+                  ONER3  = ONE/R3
+                  DUM    = -QIQJ*ONER3*ONESCALE
+               ELSE
+                  DUM    = -QIQJ*ONESCALE/DISM0**3
+               END IF
+               DX     = DUM*X
+               DY     = DUM*Y
+               DZ     = DUM*Z
+               IF(IFFAT.LE.NFFAT) THEN
+                  FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DX
+                  FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DY
+                  FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DZ
+               END IF
+               IF(IFFAT.GT.NFFAT) THEN
+                  IAT = IFFAT - NFFAT
+                  DE(1,IAT)=DE(1,IAT) + DX
+                  DE(2,IAT)=DE(2,IAT) + DY
+                  DE(3,IAT)=DE(3,IAT) + DZ
+               END IF
+               IF(JFFAT.LE.NFFAT) THEN
+                  FFGRD(1,JFFAT)=FFGRD(1,JFFAT) - DX
+                  FFGRD(2,JFFAT)=FFGRD(2,JFFAT) - DY
+                  FFGRD(3,JFFAT)=FFGRD(3,JFFAT) - DZ
+               END IF
+               IF(JFFAT.GT.NFFAT) THEN
+                  JAT = JFFAT - NFFAT
+                  DE(1,JAT)=DE(1,JAT) - DX
+                  DE(2,JAT)=DE(2,JAT) - DY
+                  DE(3,JAT)=DE(3,JAT) - DZ
+               END IF
+ 420        CONTINUE
+            IF(AFIX(I).GT.1.0D-08) THEN
+               DUMQ = QI**2
+               IF(MPLEVL.EQ.2)      DUMQ=DUMQ+TWO*QI*QIMP
+               IF(TDDFTYP.NE.RNONE) DUMQ=DUMQ+TWO*(QI*QITA+QIXY*QIXY)
+               DUM =-FACTORX*DUMQ/SQRT(AFIX(I)**3)
+               DO 430 III = 1, IDDAI(41,I)
+                  MFFAT = IDDAI(III,I)
+                  IF(MFFAT.LE.NFFAT) THEN
+                     FFGRD(1,MFFAT)=FFGRD(1,MFFAT) + DUM*DAI(1,III,I)
+                     FFGRD(2,MFFAT)=FFGRD(2,MFFAT) + DUM*DAI(2,III,I)
+                     FFGRD(3,MFFAT)=FFGRD(3,MFFAT) + DUM*DAI(3,III,I)
+                  END IF
+                  IF(MFFAT.GT.NFFAT) THEN
+                     MAT = MFFAT - NFFAT
+                     DE(1,MAT)=DE(1,MAT) + DUM*DAI(1,III,I)
+                     DE(2,MAT)=DE(2,MAT) + DUM*DAI(2,III,I)
+                     DE(3,MAT)=DE(3,MAT) + DUM*DAI(3,III,I)
+                  END IF
+ 430           CONTINUE
+            END IF
+ 400     CONTINUE
+      END IF
+C
+C     - FORCE BETWEEN MM CHARGE/DIPOLE AND ASC
+C
+      IPCOUNT = ME - 1
+      DO 600 JTS = 1, NTS
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 600
+         END IF
+         IF(IFIXSOL.EQ.0) THEN
+            XJ    = XX(LFFXTS+JTS-1)
+            YJ    = XX(LFFYTS+JTS-1)
+            ZJ    = XX(LFFZTS+JTS-1)
+         END IF
+         IF(IFIXSOL.EQ.1) THEN
+            XJ    = XX(LFFXTSFIX+JTS-1)
+            YJ    = XX(LFFYTSFIX+JTS-1)
+            ZJ    = XX(LFFZTSFIX+JTS-1)
+            JFFAT = IDATOM(JTS)
+         END IF
+         QJ    = QRXN(JTS)
+         QJMP  = QRXNMP(JTS)
+         QJTA  = QRXNTA(JTS)
+         QJXY  = QRXNXY(JTS)
+         DO 610 IFFAT=1,NFFAT
+            QIFFAT= CHARG(IFFAT)
+            DIX   = DIP(1,IFFAT)
+            DIY   = DIP(2,IFFAT)
+            DIZ   = DIP(3,IFFAT)
+            DIXMP = DIPMP(1,IFFAT)
+            DIYMP = DIPMP(2,IFFAT)
+            DIZMP = DIPMP(3,IFFAT)
+            DIXTA = DIPTA(1,IFFAT)
+            DIYTA = DIPTA(2,IFFAT)
+            DIZTA = DIPTA(3,IFFAT)
+            DIXXY = DIPXY(1,IFFAT)
+            DIYXY = DIPXY(2,IFFAT)
+            DIZXY = DIPXY(3,IFFAT)
+            XI    = CORD(1,IFFAT)
+            YI    = CORD(2,IFFAT)
+            ZI    = CORD(3,IFFAT)
+            X     = XI-XJ
+            Y     = YI-YJ
+            Z     = ZI-ZJ
+            R2    = X*X + Y*Y + Z*Z
+            ONER2 = ONE/R2
+            ONER  = SQRT(ONER2)
+            ONER3 = ONER2*ONER
+            ONER5 = ONER3*ONER2
+            DUM   = -QIFFAT*QJ*ONER3
+            DXA   = DUM*X
+            DYA   = DUM*Y
+            DZA   = DUM*Z
+            QJONER3= QJ*ONER3
+            QJDOT = THREE*ONER5*(DIX*X+DIY*Y+DIZ*Z)*QJ
+            DXB   = -DIX*QJONER3 + QJDOT*X
+            DYB   = -DIY*QJONER3 + QJDOT*Y
+            DZB   = -DIZ*QJONER3 + QJDOT*Z
+            IF(MPLEVL.EQ.2)THEN
+               DUM   = -QIFFAT*QJMP*ONER3
+               DXA   = DXA + DUM*X
+               DYA   = DYA + DUM*Y
+               DZA   = DZA + DUM*Z
+               QJONER3= QJMP*ONER3
+               QJDOT = THREE*ONER5*(DIX*X+DIY*Y+DIZ*Z)*QJMP
+               DXB   = DXB -DIX*QJONER3 + QJDOT*X
+               DYB   = DYB -DIY*QJONER3 + QJDOT*Y
+               DZB   = DZB -DIZ*QJONER3 + QJDOT*Z
+               QJONER3= QJ*ONER3
+               QJDOT = THREE*ONER5*(DIXMP*X+DIYMP*Y+DIZMP*Z)*QJ
+               DXB   = DXB -DIXMP*QJONER3 + QJDOT*X
+               DYB   = DYB -DIYMP*QJONER3 + QJDOT*Y
+               DZB   = DZB -DIZMP*QJONER3 + QJDOT*Z
+            END IF
+            IF(TDDFTYP.NE.RNONE) THEN
+               DUM   = -QIFFAT*QJTA*ONER3
+               DXA   = DXA + DUM*X
+               DYA   = DYA + DUM*Y
+               DZA   = DZA + DUM*Z
+               QJONER3= QJTA*ONER3
+               QJDOT = THREE*ONER5*(DIX*X+DIY*Y+DIZ*Z)*QJTA
+               DXB   = DXB -DIX*QJONER3 + QJDOT*X
+               DYB   = DYB -DIY*QJONER3 + QJDOT*Y
+               DZB   = DZB -DIZ*QJONER3 + QJDOT*Z
+               QJONER3= QJ*ONER3
+               QJDOT = THREE*ONER5*(DIXTA*X+DIYTA*Y+DIZTA*Z)*QJ
+               DXB   = DXB -DIXTA*QJONER3 + QJDOT*X
+               DYB   = DYB -DIYTA*QJONER3 + QJDOT*Y
+               DZB   = DZB -DIZTA*QJONER3 + QJDOT*Z
+               QJONER3= QJXY*ONER3
+               QJDOT = THREE*ONER5*(DIXXY*X+DIYXY*Y+DIZXY*Z)*QJXY
+               DXB   = DXB -TWO*(DIXXY*QJONER3 - QJDOT*X)
+               DYB   = DYB -TWO*(DIYXY*QJONER3 - QJDOT*Y)
+               DZB   = DZB -TWO*(DIZXY*QJONER3 - QJDOT*Z)
+            END IF
+            FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DXA + DXB
+            FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DYA + DYB
+            FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DZA + DZB
+            VIR(1) =VIR(1) + (DXA + DXB)*CORD(1,IFFAT)
+            VIR(2) =VIR(2) + (DYA + DYB)*CORD(2,IFFAT)
+            VIR(3) =VIR(3) + (DZA + DZB)*CORD(3,IFFAT)
+            IYES = 0
+            DO KFIX=1,NFIXMM
+               IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+            ENDDO
+            IF(IYES.EQ.1) THEN
+               VIR(1) =VIR(1) - (DXA + DXB)*CORD(1,IFFAT)
+               VIR(2) =VIR(2) - (DYA + DYB)*CORD(2,IFFAT)
+               VIR(3) =VIR(3) - (DZA + DZB)*CORD(3,IFFAT)
+            END IF
+            IF(IFIXSOL.EQ.1) THEN
+               IF(JFFAT.LE.NFFAT) THEN
+                  FFGRD(1,JFFAT)=FFGRD(1,JFFAT) - DXA - DXB
+                  FFGRD(2,JFFAT)=FFGRD(2,JFFAT) - DYA - DYB
+                  FFGRD(3,JFFAT)=FFGRD(3,JFFAT) - DZA - DZB
+               END IF
+               IF(JFFAT.GT.NFFAT) THEN
+                  JAT = JFFAT - NFFAT
+                  DE(1,JAT)=DE(1,JAT) - DXA - DXB
+                  DE(2,JAT)=DE(2,JAT) - DYA - DYB
+                  DE(3,JAT)=DE(3,JAT) - DZA - DZB
+               END IF
+            END IF
+ 610     CONTINUE
+ 600  CONTINUE
+C
+C     - FORCE BETWEEN QM NUC AND ASC
+C
+      IPCOUNT = ME - 1
+      DO 700 JTS = 1, NTS
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 700
+         END IF
+         IF(IFIXSOL.EQ.0) THEN
+            XJ    = XX(LFFXTS+JTS-1)
+            YJ    = XX(LFFYTS+JTS-1)
+            ZJ    = XX(LFFZTS+JTS-1)
+         END IF
+         IF(IFIXSOL.EQ.1) THEN
+            XJ    = XX(LFFXTSFIX+JTS-1)
+            YJ    = XX(LFFYTSFIX+JTS-1)
+            ZJ    = XX(LFFZTSFIX+JTS-1)
+            JFFAT = IDATOM(JTS)
+         END IF
+         QJ    = QRXN(JTS)
+         IF(MPLEVL.EQ.2)      QJ = QJ + QRXNMP(JTS)
+         IF(TDDFTYP.NE.RNONE) QJ = QJ + QRXNTA(JTS)
+         DO 710 IAT=1,NAT
+            QIAT  = ZAN(IAT)
+            XI    = C(1,IAT)
+            YI    = C(2,IAT)
+            ZI    = C(3,IAT)
+            X     = XI - XJ
+            Y     = YI - YJ
+            Z     = ZI - ZJ
+            R2    = (XI-XJ)**2 + (YI-YJ)**2 + (ZI-ZJ)**2
+            ONER2 = ONE/R2
+            ONER  = SQRT(ONER2)
+            ONER3 = ONER2*ONER
+            DUM   = -QIAT*QJ*ONER3
+            DX    = DUM*X
+            DY    = DUM*Y
+            DZ    = DUM*Z
+            DE(1,IAT) = DE(1,IAT) + DX
+            DE(2,IAT) = DE(2,IAT) + DY
+            DE(3,IAT) = DE(3,IAT) + DZ
+            VIR(1)    =VIR(1) + DX*C(1,IAT)
+            VIR(2)    =VIR(2) + DY*C(2,IAT)
+            VIR(3)    =VIR(3) + DZ*C(3,IAT)
+            IYES = 0
+            DO KFIX=1,NFIXQM
+               IF(IAT.EQ.IFIXQM(KFIX)) IYES = 1
+            ENDDO
+            IF(IYES.EQ.1) THEN
+               VIR(1)    =VIR(1) - DX*C(1,IAT)
+               VIR(2)    =VIR(2) - DY*C(2,IAT)
+               VIR(3)    =VIR(3) - DZ*C(3,IAT)
+            END IF
+            IF(IFIXSOL.EQ.1) THEN
+               IF(JFFAT.LE.NFFAT) THEN
+                  FFGRD(1,JFFAT)=FFGRD(1,JFFAT) - DX
+                  FFGRD(2,JFFAT)=FFGRD(2,JFFAT) - DY
+                  FFGRD(3,JFFAT)=FFGRD(3,JFFAT) - DZ
+               END IF
+               IF(JFFAT.GT.NFFAT) THEN
+                  JAT = JFFAT - NFFAT
+                  DE(1,JAT)=DE(1,JAT) - DX
+                  DE(2,JAT)=DE(2,JAT) - DY
+                  DE(3,JAT)=DE(3,JAT) - DZ
+               END IF
+            END IF
+ 710     CONTINUE
+ 700  CONTINUE
+C
+      IF(ISPHSOL.GE.60 .AND. RSPHSOL.LT.1.0D+30)
+     *CALL VSUB(QRXN2,1,QRXN,1,QRXN,1,NTS)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK QMMMRXNPOTNUCMM
+      SUBROUTINE QMMMRXNPOTNUCMM(CORD,CHARG,XTS,YTS,ZTS,POT1,NTS)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+C
+      DIMENSION CORD(3,*),CHARG(*),XTS(NTS),YTS(NTS),ZTS(NTS),POT1(NTS)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     DEJUN SI, FEB 2011, LINCOLN
+C
+C
+C     --  POT1: POTENTIAL AT SURFACE DUE TO NUC AND CHG --
+C
+      CALL VCLR(POT1,1,NTS)
+      IF(ISPHSOL.LT.60) RETURN
+      IF(RSPHSOL.GE.1.0D+30) RETURN
+C
+      IPCOUNT = ME - 1
+      DO 300 ITS=1, NTS
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 300
+         END IF
+         DO JAT=1,NAT
+            R2 =  (XTS(ITS)-C(1,JAT))**2
+     *           +(YTS(ITS)-C(2,JAT))**2
+     *           +(ZTS(ITS)-C(3,JAT))**2
+            R  = SQRT(R2)
+            POT1(ITS) = POT1(ITS)+ZAN(JAT)/R
+         ENDDO
+         DO JFFAT=1,NFFAT
+            R2 =  (XTS(ITS) - CORD(1,JFFAT))**2
+     *           +(YTS(ITS) - CORD(2,JFFAT))**2
+     *           +(ZTS(ITS) - CORD(3,JFFAT))**2
+            R  = SQRT(R2)
+            POT1(ITS) = POT1(ITS)+CHARG(JFFAT)/R
+         ENDDO
+ 300  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(2405,POT1,NTS)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLZVEC
+      SUBROUTINE FFPOLZVEC(U,UNXT,CMO)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+      LOGICAL OUTPUT,MP2ENG,UMP2GD,ZAPTGD
+      DOUBLE PRECISION U(*),UNXT(*),CMO(NBF,*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /MP2XTR/ NBF,NACORE,NBSQ,NBTR,NSTR,MXSHL,NACT,NOCC
+     *,               NVIR,NOV,NOSQ,NVSQ,NOTR,NVTR,NCP1,NOP1
+     *,               NATR,ICHANL,OUTPUT,MP2ENG,IOST,NMOS,UMP2GD
+      COMMON /ZAPTGR/ NOCD,NOCD1,NOCS,NOCSTR,IXYEXC,ICHIX,ITIA,IZVEC
+     *,               ZAPTGD
+      COMMON /FMCOM / XX(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      NUM  = NBF
+      L1   = NUM
+      L2   = (NUM*(NUM+1))/2
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LXT      = LPAO     + NBSQ
+      LPMN     = LXT      + NBSQ
+      LPMO     = LPMN     + NBTR
+      LDIPTMP  = LPMO     + NBSQ
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      IF(ZAPTGD) THEN
+C        - YJ BLOCK = NOCD*NOCS
+         CALL MRARTR(U,NOCD,NOCD,NOCS,CMO(1,NOCD+1),NBF,NBF,XX(LXT),NBF)
+         CALL DGEMM('N','N',NBF,NBF,NOCD,ONE,CMO,NBF,XX(LXT),
+     *              NBF,ZERO,XX(LPAO),NBF)
+C        - BJ BLOCK = NVIR*NOCD
+         CALL MRARTR(U(NOCS*NOCD+1),NVIR,NVIR,NOCD,CMO,NBF,NBF,
+     *               XX(LXT),NBF)
+         CALL DGEMM('N','N',NBF,NBF,NVIR,TWO,CMO(1,NOCD+NOCS+1),
+     *              NBF,XX(LXT),
+     *              NBF,ONE,XX(LPAO),NBF)
+C        - BY BLOCK = NVIR*NOCS
+         CALL MRARTR(U(NOCS*NOCD+NVIR*NOCD+1),NVIR,NVIR,NOCS,
+     *               CMO(1,NOCD+1),NBF,NBF,XX(LXT),NBF)
+         CALL DGEMM('N','N',NBF,NBF,NVIR,ONE,CMO(1,NOCD+NOCS+1),
+     *              NBF,XX(LXT),
+     *              NBF,ONE,XX(LPAO),NBF)
+      ELSE
+         CALL MRARTR(U,NVIR,NVIR,NOCC,CMO,NBF,NBF,XX(LXT),NBF)
+         CALL DGEMM('N','N',NBF,NBF,NVIR,ONE,CMO(1,NOP1),NBF,XX(LXT),
+     *              NBF,ZERO,XX(LPAO),NBF)
+      END IF
+C
+C     -- MAKE SQUARE MATRIX INTO TRIANGLE ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(NBTR,FOUR,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+      IF(ZAPTGD) THEN
+         IV2=0
+         IF(NOCS.GT.0)THEN
+C        - XI BLOCK = NOCD*NOCS
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO(1,NOCD+1),NBF,
+     *               NOCS,XX(LXT),NBF)
+         CALL DGEMM('T','N',NOCD,NOCS,NBF,ONE,CMO,NBF,
+     *           XX(LXT),NBF,ZERO,XX(LPMO),NOCD)
+         KKK = 0
+         DO II = 1,NOCS
+            DO JJ = 1,NOCD
+               IV2 = IV2+1
+               KKK = KKK+1
+               UNXT(IV2)=UNXT(IV2)+0.25D+00*XX(LPMO+KKK-1)
+            ENDDO
+         ENDDO
+         END IF
+C        - AI BLOCK = NVIR*NOCD
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCD,XX(LXT),NBF)
+         CALL DGEMM('T','N',NVIR,NOCD,NBF,ONE,CMO(1,NOCD+NOCS+1),NBF,
+     *           XX(LXT),NBF,ZERO,XX(LPMO),NVIR)
+         KKK = 0
+         DO II = 1,NOCD
+            DO JJ = 1,NVIR
+               IV2 = IV2+1
+               KKK = KKK+1
+               UNXT(IV2)=UNXT(IV2)+0.50D+00*XX(LPMO+KKK-1)
+            ENDDO
+         ENDDO
+C        - AX BLOCK = NVIR*NOCS
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO(1,NOCD+1),
+     *               NBF,NOCS,XX(LXT),NBF)
+         CALL DGEMM('T','N',NVIR,NOCS,NBF,ONE,CMO(1,NOCD+NOCS+1),NBF,
+     *           XX(LXT),NBF,ZERO,XX(LPMO),NVIR)
+         KKK = 0
+         DO II = 1,NOCS
+            DO JJ = 1,NVIR
+               IV2 = IV2+1
+               KKK = KKK+1
+               UNXT(IV2)=UNXT(IV2)+0.25D+00*XX(LPMO+KKK-1)
+            ENDDO
+         ENDDO
+      ELSE
+C        ---- TRANSFORM BMN3 TO MO BASIS ----
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCC,XX(LXT),NBF)
+         CALL DGEMM('T','N',NVIR,NOCC,NBF,ONE,CMO(1,NOP1),NBF,
+     *              XX(LXT),NBF,ZERO,XX(LPMO),NVIR)
+C
+         IV2 = 0
+         DO II = 1,NOCC
+            DO JJ = 1,NVIR
+               IV2 = IV2 + 1
+               UNXT(IV2)=UNXT(IV2) + XX(LPMO+IV2-1)
+            ENDDO
+         ENDDO
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOL1PDM
+      SUBROUTINE FFPOL1PDM(PMAT,WMAT,CMO)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      LOGICAL OUTPUT,MP2ENG,UMP2GD,ZAPTGD
+      DOUBLE PRECISION CMO(NBF,*),PMAT(NBF,*),WMAT(NBF,*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+      COMMON /MP2XTR/ NBF,NACORE,NBSQ,NBTR,NSTR,MXSHL,NACT,NOCC
+     *,               NVIR,NOV,NOSQ,NVSQ,NOTR,NVTR,NCP1,NOP1
+     *,               NATR,ICHANL,OUTPUT,MP2ENG,IOST,NMOS,UMP2GD
+      COMMON /ZAPTGR/ NOCD,NOCD1,NOCS,NOCSTR,IXYEXC,ICHIX,ITIA,IZ
+     *,               ZAPTGD
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LXT      = LPAO     + NBSQ
+      LPMN     = LXT      + NBSQ
+      LPMO     = LPMN     + NBTR
+      LDIPTMP  = LPMO     + NBSQ
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+C     -- CONVERT MO DENSITY MATRIX TO AO --
+      CALL CACT(NBF,NMOS,
+     *          PMAT,NBF,
+     *          CMO,NBF,
+     *          XX(LPAO),NBF,XX(LXT))
+C     -- SYMMETRIZE P(AO) ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(NBTR,TWO,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+      IF(ZAPTGD) THEN
+C        - XI BLOCK = NOCS*NOCD
+         IF(NOCS.GT.0)THEN
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCD,XX(LXT),NBF)
+         CALL DGEMM('T','N',NOCS,NOCD,NBF,ONE,CMO(1,NOCD+1),
+     *              NBF,XX(LXT),NBF,ZERO,XX(LPMO),NOCS)
+         DO II = 1,NOCS
+            DO JJ = 1,NOCD
+               WMAT(JJ,II+NOCD)=WMAT(JJ,II+NOCD)
+     *            + 0.50D+00*XX(LPMO+(JJ-1)*NOCS+II-1)
+C                   HERE SHOULD BE 0.5    EQ (64)
+            ENDDO
+         ENDDO
+         END IF
+C        - AI BLOCK = NVIR*NOCD
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCD,XX(LXT),NBF)
+         CALL DGEMM('T','N',NVIR,NOCD,NBF,ONE,CMO(1,NOCD+NOCS+1),
+     *              NBF,XX(LXT),NBF,ZERO,XX(LPMO),NVIR)
+         DO II = 1,NVIR
+            DO JJ = 1,NOCD
+               WMAT(JJ,II+NOCD+NOCS)=WMAT(JJ,II+NOCD+NOCS)
+     *            + XX(LPMO+(JJ-1)*NVIR+II-1)
+C                   HERE SHOULD BE 1.0   EQ (65)
+            ENDDO
+         ENDDO
+C        - AX BLOCK = NVIR*NOCS
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO(1,NOCD+1),NBF,
+     *               NOCS,XX(LXT),NBF)
+         CALL DGEMM('T','N',NVIR,NOCS,NBF,ONE,CMO(1,NOCD+NOCS+1),
+     *              NBF,XX(LXT),NBF,ZERO,XX(LPMO),NVIR)
+         DO II = 1,NVIR
+            DO JJ = 1,NOCS
+               WMAT(NOCD+JJ,II+NOCD+NOCS)=WMAT(NOCD+JJ,II+NOCD+NOCS)
+     *            + 0.50D+00*XX(LPMO+(JJ-1)*NVIR+II-1)
+C                   HERE SHOULD BE 0.5    EQ (66)
+            ENDDO
+         ENDDO
+      ELSE
+C        -- TRANSFORM TO MO --
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCC,XX(LXT),NBF)
+         CALL DGEMM('T','N',NVIR,NOCC,NBF,ONE,CMO(1,NOP1),NBF,XX(LXT)
+     *              ,NBF,ZERO,XX(LPMO),NVIR)
+         DO II = 1,NVIR
+            DO JJ = 1,NOCC
+               WMAT(II+NOCC,JJ)=WMAT(II+NOCC,JJ)
+     *                         +XX(LPMO+(JJ-1)*NVIR+II-1)
+            ENDDO
+         ENDDO
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLWOV
+      SUBROUTINE FFPOLWOV(PMAT,WMAT,CMO)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      LOGICAL OUTPUT,MP2ENG,UMP2GD,ZAPTGD
+      DOUBLE PRECISION PMAT(NBF,*),WMAT(NBF,*),CMO(NBF,*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /MP2XTR/ NBF,NACORE,NBSQ,NBTR,NSTR,MXSHL,NACT,NOCC
+     *,               NVIR,NOV,NOSQ,NVSQ,NOTR,NVTR,NCP1,NOP1
+     *,               NATR,ICHANL,OUTPUT,MP2ENG,IOST,NMOS,UMP2GD
+      COMMON /FMCOM / XX(1)
+      COMMON /ZAPTGR/ NOCD,NOCD1,NOCS,NOCSTR,IXYEXC,ICHIX,ITIA,IZ
+     *,               ZAPTGD
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LXT      = LPAO     + NBSQ
+      LPMN     = LXT      + NBSQ
+      LPMO     = LPMN     + NBTR
+      LDIPTMP  = LPMO     + NOCC*NOCC
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL MRARTR(PMAT,NBF,NBF,NBF,CMO,NBF,NBF,XX(LXT),NBF)
+      CALL DGEMM('N','N',NBF,NBF,NBF,ONE,CMO,NBF,XX(LXT),
+     *           NBF,ZERO,XX(LPAO),NBF)
+C
+C     -- MAKE SQUARE MATRIX INTO TRIANGLE ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(NBTR,TWO,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+      IF(ZAPTGD) THEN
+C        - IJ BLOCK = NOCD*NOCD
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCD,XX(LXT),NBF)
+         CALL DGEMM('T','N',NOCD,NOCD,NBF,ONE,CMO,NBF,
+     *              XX(LXT),NBF,ZERO,XX(LPMO),NOCD)
+         DO I = 1, NOCD
+            DO J = 1, NOCD
+               WMAT(J,I) = WMAT(J,I)-XX(LPMO+(J-1)*NOCD+I-1)
+C                    HERE SHOULD BE 1.00     EQ(57)
+            ENDDO
+         ENDDO
+C        - XI BLOCK = NOCS*NOCD
+         IF(NOCS.GT.0)THEN
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCD,XX(LXT),NBF)
+         CALL DGEMM('T','N',NOCS,NOCD,NBF,ONE,CMO(1,NOCD+1),NBF,
+     *              XX(LXT),NBF,ZERO,XX(LPMO),NOCS)
+         DO I = 1, NOCS
+            DO J = 1, NOCD
+               WMAT(J,NOCD+I) = WMAT(J,NOCD+I)
+     *                  -0.50D+00*XX(LPMO+(J-1)*NOCS+I-1)
+               WMAT(NOCD+I,J) = WMAT(J,NOCD+I)
+C                    HERE SHOULD BE 0.50    BUT EQ(60) SAYS 1.0. ??
+            ENDDO
+         ENDDO
+C        - XX BLOCK = NOCS*NOCS
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO(1,NOCD+1),
+     *               NBF,NOCS,XX(LXT),NBF)
+         CALL DGEMM('T','N',NOCS,NOCS,NBF,ONE,CMO(1,NOCD+1),NBF,
+     *              XX(LXT),NBF,ZERO,XX(LPMO),NOCS)
+         DO I = 1, NOCS
+            DO J = 1, NOCS
+               WMAT(NOCD+J,NOCD+I) = WMAT(NOCD+J,NOCD+I)
+     *                  -0.50D+00*XX(LPMO+(J-1)*NOCS+I-1)
+C                    HERE SHOULD BE 0.50     EQ(58)
+            ENDDO
+         ENDDO
+         END IF
+      ELSE
+C        ---- TRANSFORM BMN3 TO MO BASIS ----
+         CALL VCLR(XX(LXT),1,NBSQ)
+         CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCC,XX(LXT),NBF)
+         CALL DGEMM('T','N',NOCC,NOCC,NBF,ONE,CMO,NBF,XX(LXT),NBF,
+     *              ZERO,XX(LPMO),NOCC)
+C
+         DO J = 1, NOCC
+            DO I = 1, NOCC
+               WMAT(I,J) = WMAT(I,J) - XX(LPMO+(J-1)*NOCC+I-1)
+            ENDDO
+         ENDDO
+      END IF
+C
+      CALL RETFM(NEED)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOL1IMS
+      SUBROUTINE FFPOL1IMS(PMN,LAI,CMO,NOCC,NVIR,NBF)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+C
+      DOUBLE PRECISION CMO(NBF,*),PMN(*),LAI(NOCC,NVIR)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      L3   = NBF*NBF
+      NOP1 = NOCC+1
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPMN     = LBMN     + L2
+      LPAO     = LPMN     + L2
+      LPMO     = LPAO     + L3
+      LXT      = LPMO     + NVIR*NOCC
+      LDIPTMP  = LXT      + L3
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+C     -- SYMMETRIZE PMN ---
+      CALL SQTR(PMN,XX(LPMN),NBF)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+C     -- TRANSFORM PAO TO MO BASIS --
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCC,XX(LXT),NBF)
+      CALL DGEMM('T','N',NVIR,NOCC,NBF,ONE,CMO(1,NOP1),NBF,XX(LXT)
+     *           ,NBF,ZERO,XX(LPMO),NVIR)
+C
+      DO II = 1,NVIR
+         DO JJ = 1,NOCC
+            LAI(JJ,II)=LAI(JJ,II)+FOUR*XX(LPMO+(JJ-1)*NVIR+II-1)
+         ENDDO
+      ENDDO
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLZIMS
+      SUBROUTINE FFPOLZIMS(GMVEC0,GMVEC1,NOCC,NVIR,NBF,CMO,ENG,FACTOR)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+C
+      DOUBLE PRECISION CMO(NBF,NBF),ENG(*),
+     *                 GMVEC0(NOCC,NVIR),GMVEC1(NOCC,NVIR)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      L3   = NBF*NBF
+      NOP1 = NOCC+1
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPMN     = LBMN     + L2
+      LPAO     = LPMN     + L2
+      LPMO     = LPAO     + L3
+      LXT      = LPMO     + NVIR*NOCC
+      LDIPTMP  = LXT      + L3
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+C     -- TRANSPOSE GMVEC0 TO LPMO --
+      DO IA=1,NVIR
+         DO II=1,NOCC
+            XX(LPMO+(II-1)*NVIR+IA-1)=GMVEC0(II,IA)
+         ENDDO
+      ENDDO
+C
+      CALL MRARTR(XX(LPMO),NVIR,NVIR,NOCC,CMO,NBF,NBF,XX(LXT),NBF)
+      CALL DGEMM('N','N',NBF,NBF,NVIR,ONE,CMO(1,NOP1),NBF,XX(LXT),
+     *           NBF,ZERO,XX(LPAO),NBF)
+C
+C     -- SYMMETRIZE PAO ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(L2,FOUR,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+C     -- TRANSFORM PAO TO MO BASIS --
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCC,XX(LXT),NBF)
+      CALL DGEMM('T','N',NVIR,NOCC,NBF,ONE,CMO(1,NOP1),NBF,XX(LXT)
+     *           ,NBF,ZERO,XX(LPMO),NVIR)
+C
+      IV2 = 0
+      DO II = 1,NOCC
+         DO JJ = 1,NVIR
+            IV2 = IV2 + 1
+            ENGA= ENG(JJ+NOCC)
+            GMVEC1(II,JJ)=GMVEC1(II,JJ)
+     *                    +FACTOR*XX(LPMO+IV2-1)/(ENGA-ENG(II))
+         ENDDO
+      ENDDO
+C
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLWIMS
+      SUBROUTINE FFPOLWIMS(PMN,WIJ,NOCC,NBF,CMO)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      DOUBLE PRECISION CMO(NBF*NBF),WIJ(NOCC,*),PMN(NBF,NBF)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      L3   = NBF*NBF
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPMN     = LBMN     + L2
+      LPAO     = LPMN     + L2
+      LPMO     = LPAO     + L3
+      LXT      = LPMO     + NOCC*NOCC
+      LDIPTMP  = LXT      + L3
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+C     -- MAKE SQUARE MATRIX INTO TRIANGLE ---
+      CALL SQTR(PMN,XX(LPMN),NBF)
+      CALL DSCAL(L2,TWO,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+C     ---- TRANSFORM PAO TO MO BASIS ----
+      CALL VCLR(XX(LXT),1,L3)
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMO,NBF,NOCC,XX(LXT),NBF)
+      CALL DGEMM('T','N',NOCC,NOCC,NBF,ONE,CMO,NBF,XX(LXT),NBF,
+     *           ZERO,XX(LPMO),NOCC)
+C
+      DO J = 1, NOCC
+         DO I = 1, NOCC
+            WIJ(I,J) = WIJ(I,J) - XX(LPMO+(J-1)*NOCC+I-1)
+         ENDDO
+      ENDDO
+C
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLBMN
+      SUBROUTINE FFPOLBMN(PMN,Y,NBF)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ONE=1.0D+00)
+C
+      DIMENSION PMN(*),Y(*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      L3   = NBF*NBF
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LDIPTMP  = LPAO     + L3
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+      CALL VCLR(X(LBMN),1,L2)
+      CALL QMMMPOLINT2(X(LBMN),PMN,X(LDIPTMP),L2,L1,
+     *                 X(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(X(LBMN),X(LPAO),L1,1)
+C
+C     -- ADD X(LPAO) TO Y --
+      CALL DAXPY(L3,ONE,X(LPAO),1,Y,1)
+      CALL RETFM(NEED)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLBMNAB
+      SUBROUTINE FFPOLBMNAB(PMNA,YA,PMNB,YB,NBF)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ONE=1.0D+00)
+C
+      DIMENSION PMNA(*),YA(*),PMNB(*),YB(*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      L3   = NBF*NBF
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LDIPTMP  = LPAO     + L3
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+      CALL VCLR(X(LBMN),1,L2)
+      CALL VADD(PMNA,1,PMNB,1,PMNB,1,L2)
+      CALL QMMMPOLINT2(X(LBMN),PMNB,X(LDIPTMP),L2,L1,
+     *                 X(LFFNONLSTQ))
+      CALL VSUB(PMNA,1,PMNB,1,PMNB,1,L2)
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(X(LBMN),X(LPAO),L1,1)
+C
+C     -- ADD X(LPAO) TO YA AND YB --
+      CALL DAXPY(L3,ONE,X(LPAO),1,YA,1)
+      CALL DAXPY(L3,ONE,X(LPAO),1,YB,1)
+      CALL RETFM(NEED)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLZVECAB
+      SUBROUTINE FFPOLZVECAB(UA,UB,UNXTA,UNXTB,CMOA,CMOB)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+      LOGICAL OUTPUT,MP2ENG,UMP2GD
+      DOUBLE PRECISION UA(*),UNXTA(*),CMOA(NBF,*),
+     *                 UB(*),UNXTB(*),CMOB(NBF,*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /MP2PAR/ OSPT,CODEMP,SCSPT,TOL,METHOD,NWORD,MEMPRI,MPPROP,
+     *                NACORE_MP2PAR,NBCORE_MP2PAR,NOA,NOB,NO,NBF_MP2PAR,
+     *                NOMIT,MOCPHF,MAXITC
+      COMMON /MP2XTR/ NBF,NACORE,NBSQ,NBTR,NSTR,MXSHL,NACT,NOCC
+     *,               NVIR,NOV,NOSQ,NVSQ,NOTR,NVTR,NCP1,NOP1
+     *,               NATR,ICHANL,OUTPUT,MP2ENG,IOST,NMOS,UMP2GD
+      COMMON /UMP2XB/ NBCORE,NACTB,NOCCB,NVIRB,NOVB,NOSB,NVSB,NOTB,
+     *                NVTB,NCP1B,NOP1B,NATB,IOSTB,NOCCBLD
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FMCOM / XX(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      NUM  = NBF
+      L1   = NUM
+      L2   = (NUM*(NUM+1))/2
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LXT      = LPAO     + NBSQ
+      LPMN     = LXT      + NBSQ
+      LPMO     = LPMN     + NBTR
+      LDIPTMP  = LPMO     + NVIR*NOCC
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      CALL MRARTR(UB,NVIRB,NVIRB,NOB,CMOB,NBF,NBF,XX(LXT),NBF)
+      CALL DGEMM('N','N',NBF,NBF,NVIRB,ONE,CMOB(1,NOP1B),NBF,XX(LXT),
+     *           NBF,ZERO,XX(LPAO),NBF)
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL MRARTR(UA,NVIR,NVIR,NOCC,CMOA,NBF,NBF,XX(LXT),NBF)
+      CALL DGEMM('N','N',NBF,NBF,NVIR,ONE,CMOA(1,NOP1),NBF,XX(LXT),
+     *           NBF,ONE,XX(LPAO),NBF)
+C
+C     -- MAKE SQUARE MATRIX INTO TRIANGLE ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(NBTR,FOUR,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+C     ---- TRANSFORM BMN3 TO MO BASIS ----
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMOA,NBF,NOCC,XX(LXT),NBF)
+      CALL DGEMM('T','N',NVIR,NOCC,NBF,ONE,CMOA(1,NOP1),NBF,
+     *           XX(LXT),NBF,ZERO,XX(LPMO),NVIR)
+      IV2 = 0
+      DO II = 1,NOCC
+         DO JJ = 1,NVIR
+            IV2 = IV2 + 1
+            UNXTA(IV2)=UNXTA(IV2) + 0.5D+00*XX(LPMO+IV2-1)
+         ENDDO
+      ENDDO
+C
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMOB,NBF,NOB,XX(LXT),NBF)
+      CALL DGEMM('T','N',NVIRB,NOB,NBF,ONE,CMOB(1,NOP1B),NBF,
+     *           XX(LXT),NBF,ZERO,XX(LPMO),NVIRB)
+      IV2 = 0
+      DO II = 1,NOB
+         DO JJ = 1,NVIRB
+            IV2 = IV2 + 1
+            UNXTB(IV2)=UNXTB(IV2) + 0.5D+00*XX(LPMO+IV2-1)
+         ENDDO
+      ENDDO
+C
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOL1PDMAB
+      SUBROUTINE FFPOL1PDMAB(PMATA,PMATB,WMATA,WMATB,CMOA,CMOB)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      LOGICAL OUTPUT,MP2ENG,UMP2GD
+      DOUBLE PRECISION CMOA(NBF,*),PMATA(NBF,*),WMATA(NBF,*)
+     *,                CMOB(NBF,*),PMATB(NBF,*),WMATB(NBF,*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+      COMMON /MP2PAR/ OSPT,CODEMP,SCSPT,TOL,METHOD,NWORD,MEMPRI,MPPROP,
+     *                NACORE_MP2PAR,NBCORE_MP2PAR,NOA,NOB,NO,NBF_MP2PAR,
+     *                NOMIT,MOCPHF,MAXITC
+      COMMON /MP2XTR/ NBF,NACORE,NBSQ,NBTR,NSTR,MXSHL,NACT,NOCC
+     *,               NVIR,NOV,NOSQ,NVSQ,NOTR,NVTR,NCP1,NOP1
+     *,               NATR,ICHANL,OUTPUT,MP2ENG,IOST,NMOS,UMP2GD
+      COMMON /UMP2XB/ NBCORE,NACTB,NOCCB,NVIRB,NOVB,NOSB,NVSB,NOTB,
+     *                NVTB,NCP1B,NOP1B,NATB,IOSTB,NOCCBLD
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LPAO2    = LPAO     + NBSQ
+      LXT      = LPAO2    + NBSQ
+      LPMN     = LXT      + NBSQ
+      LPMO     = LPMN     + NBTR
+      LDIPTMP  = LPMO     + NVIR*NOCC
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM - 1
+      CALL GETFM(NEED)
+C
+C     -- CONVERT MO DENSITY MATRIX TO AO --
+      CALL CACT(NBF,NMOS,
+     *          PMATB,NBF,
+     *          CMOB,NBF,
+     *          XX(LPAO2),NBF,XX(LXT))
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL CACT(NBF,NMOS,
+     *          PMATA,NBF,
+     *          CMOA,NBF,
+     *          XX(LPAO),NBF,XX(LXT))
+      CALL VADD(XX(LPAO2),1,XX(LPAO),1,XX(LPAO),1,NBSQ)
+C     -- SYMMETRIZE P(AO) ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(NBTR,TWO,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+C     -- TRANSFORM TO MO --
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMOA,NBF,NOCC,XX(LXT),NBF)
+      CALL DGEMM('T','N',NVIR,NOCC,NBF,ONE,CMOA(1,NOP1),NBF,XX(LXT)
+     *           ,NBF,ZERO,XX(LPMO),NVIR)
+      DO II = 1,NVIR
+         DO JJ = 1,NOCC
+            WMATA(II+NOCC,JJ)=WMATA(II+NOCC,JJ)
+     *         +0.5D+00*XX(LPMO+(JJ-1)*NVIR+II-1)
+         ENDDO
+      ENDDO
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMOB,NBF,NOB,XX(LXT),NBF)
+      CALL DGEMM('T','N',NVIRB,NOB,NBF,ONE,CMOB(1,NOP1B),NBF,XX(LXT)
+     *           ,NBF,ZERO,XX(LPMO),NVIRB)
+      DO II = 1,NVIRB
+         DO JJ = 1,NOB
+            WMATB(II+NOB,JJ)=WMATB(II+NOB,JJ)
+     *         +0.5D+00*XX(LPMO+(JJ-1)*NVIRB+II-1)
+         ENDDO
+      ENDDO
+C
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFPOLWOVAB
+      SUBROUTINE FFPOLWOVAB(PMATA,PMATB,WMATA,WMATB,CMOA,CMOB)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      LOGICAL OUTPUT,MP2ENG,UMP2GD
+      DOUBLE PRECISION PMATA(NBF,*),PMATB(NBF,*),
+     *                 WMATA(NBF,*),WMATB(NBF,*),
+     *                 CMOA(NBF,*),CMOB(NBF,*)
+C
+      COMMON /MP2PAR/ OSPT,CODEMP,SCSPT,TOL,METHOD,NWORD,MEMPRI,MPPROP,
+     *                NACORE_MP2PAR,NBCORE_MP2PAR,NOA,NOB,NO,NBF_MP2PAR,
+     *                NOMIT,MOCPHF,MAXITC
+      COMMON /MP2XTR/ NBF,NACORE,NBSQ,NBTR,NSTR,MXSHL,NACT,NOCC
+     *,               NVIR,NOV,NOSQ,NVSQ,NOTR,NVTR,NCP1,NOP1
+     *,               NATR,ICHANL,OUTPUT,MP2ENG,IOST,NMOS,UMP2GD
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+C
+C     HUI LI, JAN 2011, LINCOLN
+C
+      IF(IDOPOL.EQ.0.AND.IFIXSOL.EQ.0.AND.ISPHSOL.EQ.0) RETURN
+C
+      L1   = NBF
+      L2   = (NBF*(NBF+1))/2
+      CALL VALFM(LOADFM)
+      LBMN     = LOADFM   + 1
+      LPAO     = LBMN     + L2
+      LXT      = LPAO     + NBSQ
+      LPMN     = LXT      + NBSQ
+      LPMO     = LPMN     + NBTR
+      LDIPTMP  = LPMO     + NOCC*NOCC
+      LAST     = LDIPTMP  + 3*NFFAT
+      NEED     = LAST     - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL MRARTR(PMATB,NBF,NBF,NBF,CMOB,NBF,NBF,XX(LXT),NBF)
+      CALL DGEMM('N','N',NBF,NBF,NBF,ONE,CMOB,NBF,XX(LXT),
+     *           NBF,ZERO,XX(LPAO),NBF)
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL MRARTR(PMATA,NBF,NBF,NBF,CMOA,NBF,NBF,XX(LXT),NBF)
+      CALL DGEMM('N','N',NBF,NBF,NBF,ONE,CMOA,NBF,XX(LXT),
+     *           NBF,ONE,XX(LPAO),NBF)
+C
+C     -- MAKE SQUARE MATRIX INTO TRIANGLE ---
+      CALL SQTR(XX(LPAO),XX(LPMN),NBF)
+      CALL DSCAL(NBTR,TWO,XX(LPMN),1)
+C
+      CALL VCLR(XX(LBMN),1,L2)
+      CALL QMMMPOLINT2(XX(LBMN),XX(LPMN),XX(LDIPTMP),L2,L1,
+     *                 XX(LFFNONLSTQ))
+C
+C     -- MAKE TRIANGLE INTO SQUARE MATRIX---
+      CALL CPYTSQ(XX(LBMN),XX(LPAO),NBF,1)
+C
+C     ---- TRANSFORM BMN3 TO MO BASIS ----
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMOA,NBF,NOCC,XX(LXT),NBF)
+      CALL DGEMM('T','N',NOCC,NOCC,NBF,ONE,CMOA,NBF,XX(LXT),NBF,
+     *           ZERO,XX(LPMO),NOCC)
+      DO J = 1, NOCC
+         DO I = 1, NOCC
+            WMATA(I,J) = WMATA(I,J)-0.5D+00*XX(LPMO+(J-1)*NOCC+I-1)
+         ENDDO
+      ENDDO
+C
+      CALL VCLR(XX(LXT),1,NBSQ)
+      CALL MRARBR(XX(LPAO),NBF,NBF,NBF,CMOB,NBF,NOB,XX(LXT),NBF)
+      CALL DGEMM('T','N',NOB,NOB,NBF,ONE,CMOB,NBF,XX(LXT),NBF,
+     *           ZERO,XX(LPMO),NOB)
+      DO J = 1, NOB
+         DO I = 1, NOB
+            WMATB(I,J) = WMATB(I,J)-0.5D+00*XX(LPMO+(J-1)*NOB+I-1)
+         ENDDO
+      ENDDO
+C
+      CALL RETFM(NEED)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK FFMP2DIP
+!>
+!> @brief    induced dipole due to MP2 P(2) density
+!>
+!> @author   Hui Li
+!>           - Jan 2011
+!>
+!> @details  This is called by MP2 Z-vector code
+!>
+      SUBROUTINE FFMP2DIP
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      LOGICAL GOPARR,MASWRK,DSKWRK
+C
+      COMMON /ENRGMP/ EMP2,EMP3,EMP4,EMP2A
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA ROHF,UHF,RHF/8HROHF    ,8HUHF     ,8HRHF     /
+C
+C     HUI LI, JAN 2011, LINCOLN
+C     DEJUN SI, MAR 2011, LINCOLN
+C
+C     -- SOLVE MM INDUCED DIPOLES/CHARGES DUE TO P(2)
+C
+      L1 = NUM
+      L2 = (NUM*NUM+NUM)/2
+C
+C     -- USE A DIFFERENT ROUTINE FOR FIXSOL --
+      IF(IFIXSOL.EQ.1) THEN
+         CALL VALFM(LOADFM)
+         LDIPTMP    = LOADFM   + 1
+         LAST       = LDIPTMP  + 3*NFFAT
+         NEED       = LAST     - LOADFM
+         CALL GETFM(NEED)
+         CALL FFMP2DIP2(L2,L1,X(LFFNONLSTQ),X(LFFCORD),
+     *                  X(LFFAFIX),X(LFFVFIX2),X(LFFXTSFIX),
+     *                  X(LFFYTSFIX),X(LFFZTSFIX),X(LFFPOL),
+     *                  X(LFFPOLSV),X(LDIPTMP),X(LFFFIELD2),
+     *                  X(LFFFIELD3),X(LFFNONLS1),X(LFFL1213J))
+         CALL RETFM(NEED)
+         RETURN
+      END IF
+C
+      NTS = ISPHSOL
+      CALL VALFM(LOADFM)
+      LABFLD   = LOADFM   + 1
+      LMP      = LABFLD   + 3*NFFAT
+      LXEFI    = LMP      + L2
+      LYEFI    = LXEFI    + L2
+      LZEFI    = LYEFI    + L2
+      LABPOT   = LZEFI    + L2
+      LQTMP1   = LABPOT   + NTS
+      LQTMP2   = LQTMP1   + NTS
+      LAST     = LQTMP2   + NTS
+      NEED     = LAST     - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      IF(SCFTYP.EQ.UHF) THEN
+C        - BORROW LXEFI AND LYEFI FOR 0.001 SECONDS
+         CALL DAREAD(IDAF,IODA,X(LXEFI),L2,417,0)
+         CALL DAREAD(IDAF,IODA,X(LYEFI),L2,427,0)
+         CALL VADD(X(LXEFI),1,X(LYEFI),1,X(LMP),1,L2)
+      ELSE IF(SCFTYP.EQ.RHF .OR. SCFTYP.EQ.ROHF) THEN
+         KREC7 = 307
+         CALL DAREAD(IDAF,IODA,X(LMP),L2,KREC7,0)
+      END IF
+C
+C     -- ELECTRONIC FIELDS AT MM POL DUE TO P(2)
+C
+      CALL VCLR(X(LABFLD),1,3*NFFAT)
+      IPCOUNT = ME - 1
+      DO 100 IIQ = 1, NTODOQ
+         CALL GETIFFAT(X(LFFNONLSTQ),IIQ,IFFAT)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 100
+         CALL QMMMPOLFLDINT(IFFAT,X(LFFCORD),
+     *                      X(LXEFI),X(LYEFI),X(LZEFI),L2)
+         X(LABFLD+3*(IFFAT-1)  )=TRACEP(X(LMP),X(LXEFI),L1)
+         X(LABFLD+3*(IFFAT-1)+1)=TRACEP(X(LMP),X(LYEFI),L1)
+         X(LABFLD+3*(IFFAT-1)+2)=TRACEP(X(LMP),X(LZEFI),L1)
+ 100  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LABFLD),3*NFFAT)
+C
+      CALL VCLR (X(LABPOT),1,NTS)
+      CALL VCLR (X(LQTMP1),1,NTS)
+      CALL VCLR (X(LQTMP2),1,NTS)
+      CALL VCLR (X(LFFQRXNMP),1,NTS)
+      IF(ISPHSOL.GE.60) THEN
+         CALL EPOTEN(-ONE,X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *               X(LABPOT),X(LMP),NTS,L2)
+         IF(GOPARR) CALL DDI_GSUMF(2668,X(LABPOT),NTS)
+         SCALE = (RXNEPS-ONE)/RXNEPS
+         IPCOUNT = ME - 1
+         DO 200 ITS = 1, NTS
+            X(LQTMP1+ITS-1) = ZERO
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 200
+            END IF
+            DO JTS = 1, NTS
+               X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)
+     *           -X(LFFCMAT1+(JTS-1)*NTS+ITS-1)*X(LABPOT+JTS-1)
+            ENDDO
+            X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)*SCALE
+ 200     CONTINUE
+         IF(GOPARR) CALL DDI_GSUMF(2406,X(LQTMP1),NTS)
+      END IF
+      CALL VCLR(X(LFFFIELD2),1,3*NFFAT)
+      CALL SOLVEDIP(X(LFFCORD),X(LFFPOL),X(LFFPOLSV),X(LFFDIPMP),DUM,
+     *              X(LABFLD),X(LFFFIELD2),X(LFFFIELD3),
+     *              X(LFFNONLS1),X(LFFL1213J),
+     *              X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *              X(LFFCMAT1),X(LFFPOT2),X(LQTMP1),
+     *              X(LQTMP2),NTS)
+      IF(ISPHSOL.GE.60) THEN
+         CALL VADD(X(LQTMP1),1,X(LQTMP2),1,X(LFFQRXNMP),1,NTS)
+      END IF
+C
+      E2RXN = 0.0D+00
+      DO ITS = 1, NTS
+         E2RXN = E2RXN + X(LABPOT+ITS-1)*
+     *                   (X(LFFQRXN1+ITS-1) +
+     *                    X(LFFQRXN2+ITS-1) +
+     *           0.50D+00*X(LFFQRXNMP+ITS-1))
+      ENDDO
+      E2POL = 0.0D+00
+      DO IFFAT = 1, NFFAT
+         DIPX  =          X(LFFDIP  +3*(IFFAT-1)  )
+     *         + 0.50D+00*X(LFFDIPMP+3*(IFFAT-1)  )
+         DIPY  =          X(LFFDIP  +3*(IFFAT-1)+1)
+     *         + 0.50D+00*X(LFFDIPMP+3*(IFFAT-1)+1)
+         DIPZ  =          X(LFFDIP  +3*(IFFAT-1)+2)
+     *         + 0.50D+00*X(LFFDIPMP+3*(IFFAT-1)+2)
+         E2POL = E2POL - X(LABFLD+3*(IFFAT-1)  )*DIPX
+     *                 - X(LABFLD+3*(IFFAT-1)+1)*DIPY
+     *                 - X(LABFLD+3*(IFFAT-1)+2)*DIPZ
+      ENDDO
+      IF(MASWRK.AND.ISPHSOL.LT.60) THEN
+         WRITE(IW,900)' '
+         WRITE(IW,900)' ---------------------------------'
+         WRITE(IW,900)' THE P(2) CORRECTED MP2-POL ENERGY'
+         WRITE(IW,900)'  (CURRENTLY NO ANALYTIC GRADIENT)'
+         WRITE(IW,900)' EMP2        =', EMP2
+         WRITE(IW,900)' EPOL(2)     =', E2POL
+         WRITE(IW,900)' EMP2+EPOL(2)=', EMP2+E2POL
+         WRITE(IW,900)' ---------------------------------'
+         WRITE(IW,900)' '
+      END IF
+      IF(MASWRK.AND.ISPHSOL.GE.60) THEN
+       WRITE(IW,900)' ------------------------------------------'
+       WRITE(IW,900)' THE P(2) CORRECTED MP2-POLARIZATION ENERGY'
+       WRITE(IW,900)'   INCLUDING INDUCED DIPOLES AND CHARGES'
+       WRITE(IW,900)'      (CURRENTLY NO ANALYTIC GRADIENT)'
+       WRITE(IW,900)' EMP2                =', EMP2
+       WRITE(IW,900)' EPOL(2)             =', E2POL
+       WRITE(IW,900)' ERXN(2)             =', E2RXN
+       WRITE(IW,900)' EMP2+EPOL(2)+ERXN(2)=', EMP2+E2POL+E2RXN
+       WRITE(IW,900)' ------------------------------------------'
+      END IF
+C
+      CALL RETFM(NEED)
+ 900  FORMAT(A,F20.10)
+      RETURN
+C
+      END
+C*MODULE QUANPOD  *DECK FFTDDFTDIP
+!>
+!> @brief    induced dipole/charges due to TDDFT density TA and XY
+!>
+!> @author   Hui Li
+!>           - Jan 2011
+!>
+!> @details  This is called by TDDFT Z-vector code
+!>
+      SUBROUTINE FFTDDFTDIP
+      use mx_limits, only: mxatm,mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      LOGICAL GOPARR,MASWRK,DSKWRK
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+C
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),MIN(MXSH),MAX(MXSH),NSHELL
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, JAN 2011, LINCOLN
+C     DEJUN SI, MAR 2011, LINCOLN
+C     HUI LI, DEC 1, 2016, LINCOLN, ADD DFTB/TDDFTB
+C
+C     -- SOLVE INDUCED DIPOLES/CHARGES DUE TO TDDFT DENSITY TA AND XY
+C
+C     -- USE A DIFFERENT ROUTINE FOR FIXSOL --
+      IF(IFIXSOL.EQ.1) THEN
+         L1 = NUM
+         L2 = (NUM*NUM+NUM)/2
+         L3 = NUM*NUM
+         CALL VALFM(LOADFM)
+         LDIPTMP    = LOADFM   + 1
+         LAST       = LDIPTMP  + 3*NFFAT
+         NEED       = LAST     - LOADFM
+         CALL GETFM(NEED)
+         CALL FFTDDFTDIP2(L3,L2,L1,X(LFFNONLSTQ),X(LFFCORD),
+     *                    X(LFFAFIX),X(LFFVFIX2),X(LFFXTSFIX),
+     *                    X(LFFYTSFIX),X(LFFZTSFIX),X(LFFPOL),
+     *                    X(LFFPOLSV),X(LDIPTMP),X(LFFFIELD2),
+     *                    X(LFFFIELD3),X(LFFNONLS1),X(LFFL1213J))
+         CALL RETFM(NEED)
+         RETURN
+      END IF
+C
+      NTS = ISPHSOL
+      L1 = NUM
+      L2 = (NUM*NUM+NUM)/2
+      L3 = NUM*NUM
+      CALL VALFM(LOADFM)
+      LXEFI    = LOADFM   + 1
+      LYEFI    = LXEFI    + L2
+      LZEFI    = LYEFI    + L2
+      LDTEMP   = LZEFI    + L2
+      LTA      = LDTEMP   + L3
+      LXY      = LTA      + L2
+      LFLDTA   = LXY      + L2
+      LFLDXY   = LFLDTA   + 3*NFFAT
+      LPOTTA   = LFLDXY   + 3*NFFAT
+      LPOTXY   = LPOTTA   + NTS
+      LQTMP1   = LPOTXY   + NTS
+      LQTMP2   = LQTMP1   + NTS
+      LAST     = LQTMP2   + NTS
+      NEED     = LAST     - LOADFM
+      CALL GETFM(NEED)
+C
+C     TA = EXCITATION DIFFERENCE DENSITY
+      CALL DAREAD(IDAF,IODA,X(LDTEMP),L3,IRECTD+4,0)
+      CALL TDPCMDEN(X(LTA),X(LDTEMP),L1)
+C
+C     XY = X + Y = TRANSITION STATE DENSITY
+      CALL DAREAD(IDAF,IODA,X(LDTEMP),L3,IRECTD+2,0)
+      CALL TDPCMDEN(X(LXY),X(LDTEMP),L1)
+C
+      IF(DFTBFL) GOTO 110
+      CALL VCLR(X(LFLDTA),1,6*NFFAT)
+      IPCOUNT = ME - 1
+      DO 100 IIQ = 1, NTODOQ
+         CALL GETIFFAT(X(LFFNONLSTQ),IIQ,IFFAT)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 100
+         CALL QMMMPOLFLDINT(IFFAT,X(LFFCORD),
+     *                      X(LXEFI),X(LYEFI),X(LZEFI),L2)
+         X(LFLDTA+3*(IFFAT-1)  )=TRACEP(X(LTA),X(LXEFI),L1)
+         X(LFLDTA+3*(IFFAT-1)+1)=TRACEP(X(LTA),X(LYEFI),L1)
+         X(LFLDTA+3*(IFFAT-1)+2)=TRACEP(X(LTA),X(LZEFI),L1)
+         X(LFLDXY+3*(IFFAT-1)  )=TRACEP(X(LXY),X(LXEFI),L1)
+         X(LFLDXY+3*(IFFAT-1)+1)=TRACEP(X(LXY),X(LYEFI),L1)
+         X(LFLDXY+3*(IFFAT-1)+2)=TRACEP(X(LXY),X(LZEFI),L1)
+ 100  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LFLDTA),6*NFFAT)
+C
+ 110  CONTINUE
+C
+      IF(DFTBFL) THEN
+C     -- LFLDTA, LFLDXY: FIELD AT POL DUE TO QM ELECTRON --
+C
+      CALL VALFM(LOADFM)
+      LMUL1    = LOADFM   + 1
+      LMUL1S   = LMUL1    + L1
+      LS       = LMUL1S   + NSHELL
+      LQTA     = LS       + L2
+      LQXY     = LQTA     + NAT
+      LAST     = LQXY     + NAT
+      NEEDX    = LAST     - LOADFM
+      CALL GETFM(NEEDX)
+C
+      CALL VCLR(X(LQTA),1,2*NAT)
+      CALL DAREAD(IDAF,IODA,X(LS),L2,12,0)
+      CALL DFTB_MULLIKEN(L1,L2,X(LTA),X(LS),X(LMUL1))
+      CALL DFTB_MULSA(X(LMUL1),X(LMUL1S),X(LQTA),L1,NSHELL,NAT)
+      CALL DFTB_MULLIKEN(L1,L2,X(LXY),X(LS),X(LMUL1))
+      CALL DFTB_MULSA(X(LMUL1),X(LMUL1S),X(LQXY),L1,NSHELL,NAT)
+      DO IAT=1,NAT
+         X(LQTA+IAT-1)=-X(LQTA+IAT-1)
+         X(LQXY+IAT-1)=-X(LQXY+IAT-1)
+      ENDDO
+C
+      CALL VCLR(X(LFLDTA),1,6*NFFAT)
+      IPCOUNT = ME - 1
+      DO 150 IIQ = 1, NTODOQ
+         CALL GETIFFAT(X(LFFNONLSTQ),IIQ,IFFAT)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 150
+         END IF
+         IF(X(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 150
+         DO 160 JAT=1,NAT
+            QJTA  = X(LQTA+JAT-1)
+            QJXY  = X(LQXY+JAT-1)
+C
+            DX    = X(LFFCORD+(IFFAT-1)*3+1-1) - C(1,JAT)
+            DY    = X(LFFCORD+(IFFAT-1)*3+2-1) - C(2,JAT)
+            DZ    = X(LFFCORD+(IFFAT-1)*3+3-1) - C(3,JAT)
+            PBCX  = XBOX*ANINT(DX*ONEXBOX)
+            PBCY  = YBOX*ANINT(DY*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(DZ*ONEZBOX)
+            DX    = DX - PBCX
+            DY    = DY - PBCY
+            DZ    = DZ - PBCZ
+            R2    = DX*DX+DY*DY+DZ*DZ
+            IF(R2.GT.SWRB2) GOTO 160
+            IF(R2.LT.1.0D-10) GOTO 160
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,DX,DY,DZ)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,DX,DY,DZ)
+C
+            DUMITA= QJTA*ONER3*SWF
+            X(LFLDTA+3*(IFFAT-1)  )=X(LFLDTA+3*(IFFAT-1)  )+DUMITA*DX
+            X(LFLDTA+3*(IFFAT-1)+1)=X(LFLDTA+3*(IFFAT-1)+1)+DUMITA*DY
+            X(LFLDTA+3*(IFFAT-1)+2)=X(LFLDTA+3*(IFFAT-1)+2)+DUMITA*DZ
+            DUMIXY= QJXY*ONER3*SWF
+            X(LFLDXY+3*(IFFAT-1)  )=X(LFLDXY+3*(IFFAT-1)  )+DUMIXY*DX
+            X(LFLDXY+3*(IFFAT-1)+1)=X(LFLDXY+3*(IFFAT-1)+1)+DUMIXY*DY
+            X(LFLDXY+3*(IFFAT-1)+2)=X(LFLDXY+3*(IFFAT-1)+2)+DUMIXY*DZ
+ 160     CONTINUE
+ 150  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(668,X(LFLDTA),6*NFFAT)
+      CALL RETFM(NEEDX)
+      END IF
+C
+C     -- TA --
+      CALL VCLR (X(LPOTTA),1,NTS)
+      CALL VCLR (X(LQTMP1),1,NTS)
+      CALL VCLR (X(LQTMP2),1,NTS)
+      CALL VCLR (X(LFFQRXNTA),1,NTS)
+      CALL VCLR (X(LFFDIPTA),1,3*NFFAT)
+      IF(ISPHSOL.GE.60) THEN
+         CALL EPOTEN(-ONE,X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *               X(LPOTTA),X(LTA),NTS,L2)
+         IF(GOPARR) CALL DDI_GSUMF(2668,X(LPOTTA),NTS)
+         SCALE = (RXNEPS-ONE)/RXNEPS
+         IPCOUNT = ME - 1
+         DO 200 ITS = 1, NTS
+            X(LQTMP1+ITS-1) = ZERO
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 200
+            END IF
+            DO JTS = 1, NTS
+               X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)
+     *           -X(LFFCMAT1+(JTS-1)*NTS+ITS-1)*X(LPOTTA+JTS-1)
+            ENDDO
+            X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)*SCALE
+ 200     CONTINUE
+         IF(GOPARR) CALL DDI_GSUMF(2406,X(LQTMP1),NTS)
+      END IF
+      CALL VCLR(X(LFFFIELD2),1,3*NFFAT)
+      CALL SOLVEDIP(X(LFFCORD),X(LFFPOL),X(LFFPOLSV),X(LFFDIPTA),DUM,
+     *              X(LFLDTA),X(LFFFIELD2),X(LFFFIELD3),
+     *              X(LFFNONLS1),X(LFFL1213J),
+     *              X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *              X(LFFCMAT1),X(LFFPOT2),X(LQTMP1),
+     *              X(LQTMP2),NTS)
+      IF(ISPHSOL.GE.60) THEN
+         CALL VADD(X(LQTMP1),1,X(LQTMP2),1,X(LFFQRXNTA),1,NTS)
+      END IF
+C
+C     -- XY --
+      CALL VCLR (X(LPOTXY),1,NTS)
+      CALL VCLR (X(LQTMP1),1,NTS)
+      CALL VCLR (X(LQTMP2),1,NTS)
+      CALL VCLR (X(LFFQRXNXY),1,NTS)
+      CALL VCLR (X(LFFDIPXY),1,3*NFFAT)
+      IF(ISPHSOL.GE.60) THEN
+         CALL EPOTEN(-ONE,X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *               X(LPOTXY),X(LXY),NTS,L2)
+         IF(GOPARR) CALL DDI_GSUMF(2668,X(LPOTXY),NTS)
+         SCALE = (RXNEPS-ONE)/RXNEPS
+         IPCOUNT = ME - 1
+         DO 300 ITS = 1, NTS
+            X(LQTMP1+ITS-1) = ZERO
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 300
+            END IF
+            DO JTS = 1, NTS
+               X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)
+     *           -X(LFFCMAT1+(JTS-1)*NTS+ITS-1)*X(LPOTXY+JTS-1)
+            ENDDO
+            X(LQTMP1+ITS-1) =  X(LQTMP1+ITS-1)*SCALE
+ 300     CONTINUE
+         IF(GOPARR) CALL DDI_GSUMF(2406,X(LQTMP1),NTS)
+      END IF
+      CALL VCLR(X(LFFFIELD2),1,3*NFFAT)
+      CALL SOLVEDIP(X(LFFCORD),X(LFFPOL),X(LFFPOLSV),X(LFFDIPXY),DUM,
+     *              X(LFLDXY),X(LFFFIELD2),X(LFFFIELD3),
+     *              X(LFFNONLS1),X(LFFL1213J),
+     *              X(LFFXTS),X(LFFYTS),X(LFFZTS),
+     *              X(LFFCMAT1),X(LFFPOT2),X(LQTMP1),
+     *              X(LQTMP2),NTS)
+      IF(ISPHSOL.GE.60) THEN
+         CALL VADD(X(LQTMP1),1,X(LQTMP2),1,X(LFFQRXNXY),1,NTS)
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+C
+      END
+C*MODULE QUANPOD  *DECK FFEGOUT
+      SUBROUTINE FFEGOUT(ATMNAM,FFGRD)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      CHARACTER*10 ATMNAM
+      DIMENSION ATMNAM(*),FFGRD(3,*)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, JAN 2011
+C
+C     ----- PRINT ENERGY GRADIENT VECTOR FOR MM ATOMS -----
+C
+      IF (MASWRK.AND.NFFAT.GT.0) THEN
+         DO IFFAT=1,NFFAT
+            WRITE(IW,9000)ATMNAM(IFFAT),
+     *                 FFGRD(1,IFFAT),FFGRD(2,IFFAT),FFGRD(3,IFFAT)
+         ENDDO
+      END IF
+      RETURN
+C
+ 9000 FORMAT(1X,A10,5X,3F18.9)
+      END
+C*MODULE QUANPOD  *DECK FFRAND
+      SUBROUTINE FFRAND(RNUM)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      CHARACTER*24 TIMSTR
+C
+      COMMON /FFRNUM/ JJRAND(3),NRANDOM,NRANDOM0
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     WICHMANN AND HILL
+C     "AN EFFICIENT AND PORTABLE PSEUDO-RANDOM NUMBER GENERATOR"
+C     APPLIED STATISTICS, 31, 188-190 (1982)
+C
+C     CYCLE LENGTH = ((30269-1)*(30307-1)*(30323-1))/4 = 6953607871644
+C
+C     -- GIVE SEEDS IF NRANDOM=0 OR 1 --
+      IF(NRANDOM.EQ.0)THEN
+         JJRAND(1)=103
+         JJRAND(2)=817
+         JJRAND(3)=910
+         NRANDOM = 1000
+      ELSE IF (NRANDOM.EQ.1) THEN
+         IF(MASWRK)THEN
+            CALL TMDATE(TIMSTR)
+            JJRAND(1)=ICHAR(TIMSTR( 1: 1))*ICHAR(TIMSTR(24:24))
+     *               +ICHAR(TIMSTR( 3: 3))*ICHAR(TIMSTR( 4: 4))
+     *               +ICHAR(TIMSTR( 5: 5))*ICHAR(TIMSTR(16:16))
+     *               +ICHAR(TIMSTR(17:17))*ICHAR(TIMSTR( 8: 8))
+            JJRAND(2)=ICHAR(TIMSTR(19:19))*ICHAR(TIMSTR(23:23))
+     *               +ICHAR(TIMSTR(11:11))*ICHAR(TIMSTR(22:22))
+     *               +ICHAR(TIMSTR(13:13))*ICHAR(TIMSTR(14:14))
+     *               +ICHAR(TIMSTR(15:15))*ICHAR(TIMSTR( 6: 6))
+            JJRAND(3)=ICHAR(TIMSTR( 7: 7))*ICHAR(TIMSTR(18:18))
+     *               +ICHAR(TIMSTR( 9: 9))*ICHAR(TIMSTR(20:20))
+     *               +ICHAR(TIMSTR(21:21))*ICHAR(TIMSTR(12:12))
+     *               +ICHAR(TIMSTR(10:10))*ICHAR(TIMSTR( 2: 2))
+            JJRAND(1)=MOD(JJRAND(1),30000)
+            JJRAND(2)=MOD(JJRAND(2),30000)
+            JJRAND(3)=MOD(JJRAND(3),30000)
+            IF(JJRAND(1).EQ.0) JJRAND(1) = 103
+            IF(JJRAND(2).EQ.0) JJRAND(2) = 817
+            IF(JJRAND(3).EQ.0) JJRAND(3) = 910
+         END IF
+         IF(GOPARR) CALL DDI_BCAST(460,'I',JJRAND,3,MASTER)
+         NRANDOM = 1000
+      END IF
+C
+      JJRAND(1) = 171*MOD(JJRAND(1),177) -  2*(JJRAND(1)/177)
+      JJRAND(2) = 172*MOD(JJRAND(2),176) - 35*(JJRAND(2)/176)
+      JJRAND(3) = 170*MOD(JJRAND(3),178) - 63*(JJRAND(3)/178)
+      IF(JJRAND(1).LT.0) JJRAND(1) = JJRAND(1) + 30269
+      IF(JJRAND(2).LT.0) JJRAND(2) = JJRAND(2) + 30307
+      IF(JJRAND(3).LT.0) JJRAND(3) = JJRAND(3) + 30323
+      V = JJRAND(1)/30269.0D+00
+     *  + JJRAND(2)/30307.0D+00
+     *  + JJRAND(3)/30323.0D+00
+      RNUM=V-INT(V)
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK INIRDF
+!>
+!> @brief    Initialize the radial distribution function
+!>
+!> @author   Dejun Si
+!>           - Apr 2011
+!>
+!> @details  Initialize the radial distribution function
+!>
+      SUBROUTINE INIRDF(ATMNAM,FRAG1,FRAG2,NFRAG1,NFRAG2,GOFR)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      CHARACTER*10 FRAG1(10),FRAG2(10),ATMNAM(NFFAT)
+      DIMENSION NFRAG1(10),NFRAG2(10),GOFR(1000,10)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRDF / DELRDF,NUMGRD,NUMSUM,NRDF,LFFGOFR,
+     *                LFFNFRAG1,LFFNFRAG2,LFFFRAG1,LFFFRAG2,
+     *                NRDEN,NBINRDEN,LFFPRO,LFFNRDPRATM,
+     *                LFFRDPRATM,LFFDIESTEP,LFFDI1STEP
+      COMMON /FFSPH / SPHRAD,SPHSIG,SPHEPS,IADDWAT
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     DEJUN SI, APR 2011, LINCOLN
+C
+      IF(NRDF.EQ.0) RETURN
+C
+      NUMSUM = 0
+      IF(SPHRAD.GE.1.0D+30) THEN
+         BOX     = MIN(XBOX,YBOX,ZBOX)
+         NUMGRD  = INT(BOX*0.5D+00/DELRDF) + 1
+      ELSE
+         NUMGRD  = INT(SPHRAD*0.5D+00/DELRDF) + 1
+      END IF
+      IF(NUMGRD .GT. 1000) NUMGRD = 1000
+C
+      CALL VCLR(GOFR,1,1000*10)
+      CALL VICLR(NFRAG1,1,10)
+      CALL VICLR(NFRAG2,1,10)
+      DO IRDF = 1, NRDF
+         K1   = 0
+         K2   = 0
+         DO I = 1, NFFAT
+            IF (ATMNAM(I) .EQ. FRAG1(IRDF)) K1 = K1 + 1
+            IF (ATMNAM(I) .EQ. FRAG2(IRDF)) K2 = K2 + 1
+         ENDDO
+         IF(K1.EQ.0 .OR. K2.EQ.0) THEN
+            IF(MASWRK) WRITE(IW,*)'ERROR: PLEASE CHECK RDF ='
+            IF(MASWRK)WRITE(IW,*)' '
+            CALL ABRT
+         END IF
+         IF(SPHRAD.GE.1.0D+30) THEN
+            NFRAG1(IRDF)=K1
+            NFRAG2(IRDF)=K2
+         ELSE
+            NFRAG1(IRDF)=0
+            NFRAG2(IRDF)=K2
+         END IF
+      ENDDO
+C
+      RETURN
+      END
+C*MODULE QUANPOD  *DECK RDF
+!>
+!> @brief    calculate radial distribution function
+!>
+!> @author   Dejun Si
+!>           - Apr 2011
+!>
+!> @details  calculate radial distribution function
+!>
+      SUBROUTINE RDF(CORD,ISTEP,ATMNAM,FRAG1,FRAG2,NFRAG1,NFRAG2,GOFR)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (PI=3.14159265358979323846264338D+00)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+      CHARACTER*10 FRAG1(10),FRAG2(10),ATMNAM(NFFAT)
+      DIMENSION CORD(3,NFFAT),GOFR(1000,10),NFRAG1(10),NFRAG2(10)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRDF / DELRDF,NUMGRD,NUMSUM,NRDF,LFFGOFR,
+     *                LFFNFRAG1,LFFNFRAG2,LFFFRAG1,LFFFRAG2,
+     *                NRDEN,NBINRDEN,LFFPRO,LFFNRDPRATM,
+     *                LFFRDPRATM,LFFDIESTEP,LFFDI1STEP
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     DEJUN SI, APR 2011, LINCOLN
+C     HUI LI, AUG 27, 2012
+C
+      IPCOUNT = ME - 1
+      DO 200 IRDF = 1, NRDF
+         DO 210 I = 1, NFFAT
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 210
+            END IF
+            IF(ATMNAM(I).NE.FRAG1(IRDF).AND.
+     *         ATMNAM(I).NE.FRAG2(IRDF)    ) GOTO 210
+            DO 220 J = I+1, NFFAT
+               IF(((ATMNAM(I).EQ.FRAG1(IRDF)).AND.
+     *             (ATMNAM(J).EQ.FRAG2(IRDF)))    .OR.
+     *            ((ATMNAM(I).EQ.FRAG2(IRDF)).AND.
+     *             (ATMNAM(J).EQ.FRAG1(IRDF)))) THEN
+                  GRX    = CORD(1,I) - CORD(1,J)
+                  GRY    = CORD(2,I) - CORD(2,J)
+                  GRZ    = CORD(3,I) - CORD(3,J)
+                  PBCX   = XBOX * ANINT(GRX*ONEXBOX)
+                  PBCY   = YBOX * ANINT(GRY*ONEYBOX)
+                  PBCZ   = ZBOX * ANINT(GRZ*ONEZBOX)
+                  GRX    = GRX - PBCX
+                  GRY    = GRY - PBCY
+                  GRZ    = GRZ - PBCZ
+                  GRL    = SQRT(GRX*GRX+GRY*GRY+GRZ*GRZ)
+                  IBIN   = INT(GRL/DELRDF) + 1
+                  IF(IBIN.LE.NUMGRD)GOFR(IBIN,IRDF)=GOFR(IBIN,IRDF)+ONE
+               END IF
+ 220        CONTINUE
+ 210     CONTINUE
+ 200  CONTINUE
+C
+      NUMSUM  = NUMSUM + 1
+C
+      IF(MOD(ISTEP,JOUT).EQ.0.OR.ISTEP.EQ.NSTEP) THEN
+         IF(GOPARR) CALL DDI_GSUMF(2406,GOFR,1000*10)
+         IF(MASWRK) THEN
+         PREFAC  = TOANGS*TOANGS*TOANGS/NUMSUM
+         PREFAC2 = PREFAC*XBOX*YBOX*ZBOX/(4.0D+00*PI/3.0D+00)
+         DO IRDF = 1, NRDF
+            IF(FRAG1(IRDF).EQ.FRAG2(IRDF)) THEN
+               FAC1 = NFRAG1(IRDF)*(NFRAG2(IRDF)-1)/2.0D+00
+            ELSE
+               FAC1 = NFRAG1(IRDF)*NFRAG2(IRDF)
+            END IF
+            FAC2 = PREFAC2/FAC1
+            WRITE(IW,4000) FRAG1(IRDF),FRAG2(IRDF)
+            R = 0.0D+00
+            RUPPER = R + DELRDF*TOANGS
+            DO J = 1, NUMGRD
+               DIFF = RUPPER**3 - R**3
+               WRITE(IW,4030) R+DELRDF*0.5D+00*TOANGS,
+     *                        GOFR(J,IRDF)*FAC2/DIFF
+               R = RUPPER
+               RUPPER = RUPPER + DELRDF*TOANGS
+            ENDDO
+            WRITE(IW,*)' '
+         ENDDO
+         END IF
+         IF(GOPARR) CALL DSCAL(1000*10,ONE/NPROC,GOFR,1)
+      END IF
+      CALL FLSHBF(IW)
+C
+      RETURN
+ 4000 FORMAT(/1X,'RDF FOR ATOM "',A10,'" AND ATOM "',A10,'"')
+ 4030 FORMAT(1X,F10.3,5X,F12.8)
+      END
+C*MODULE QUANPOD  *DECK RDEN
+!>
+!> @brief    calculate radial density profile
+!>
+!> @author   Dejun Si
+!>           - Dec 2011
+!>
+!> @details  calculate radial density profile
+!>
+      SUBROUTINE RDEN(CORD,ISTEP,ATMNAM,RDENATM,NRDPRATM,PRO)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+      CHARACTER*10 RDENATM(10),ATMNAM(*)
+C
+      DIMENSION CORD(3,*),PRO(1000,10),NRDPRATM(10)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRDF / DELRDF,NUMGRD,NUMSUM,NRDF,LFFGOFR,
+     *                LFFNFRAG1,LFFNFRAG2,LFFFRAG1,LFFFRAG2,
+     *                NRDEN,NBINRDEN,LFFPRO,LFFNRDPRATM,
+     *                LFFRDPRATM,LFFDIESTEP,LFFDI1STEP
+      COMMON /FFSPH / SPHRAD,SPHSIG,SPHEPS,IADDWAT
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     DEJUN SI, DEC 1, 2011, LINCOLN
+C     HUI LI, FEB 14, 2012
+C
+      IF(ISTEP.EQ.0) THEN
+         CALL VCLR(PRO,1,1000*10)
+         CALL VICLR(NRDPRATM,1,10)
+C
+         DO IRDEN = 1, NRDEN
+            K1   = 0
+            DO I = 1, NFFAT
+               IF (ATMNAM(I) .EQ. RDENATM(IRDEN)) K1 = K1 + 1
+            ENDDO
+            IF(K1.EQ.0) THEN
+               IF(MASWRK) WRITE(IW,*)'ERROR: PLEASE CHECK RDEN ='
+               IF(MASWRK)WRITE(IW,*)' '
+               CALL ABRT
+            END IF
+            NRDPRATM(IRDEN)=K1
+         ENDDO
+      END IF
+C
+      IPCOUNT = ME - 1
+      DO 200 IRDEN = 1, NRDEN
+         DO 220 I = 1, NFFAT
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 220
+            END IF
+            IF(ATMNAM(I).EQ.RDENATM(IRDEN)) THEN
+               XI     = CORD(1,I) - CENTX
+               YI     = CORD(2,I) - CENTY
+               ZI     = CORD(3,I) - CENTZ
+               GRL    = SQRT(XI*XI+YI*YI+ZI*ZI)
+               IBIN   = INT(GRL/DELRDF) + 1
+               IF(IBIN.LE.NBINRDEN)
+     *            PRO(IBIN,IRDEN)=PRO(IBIN,IRDEN)+ONE
+            END IF
+ 220     CONTINUE
+ 200  CONTINUE
+C
+      IF(MOD(ISTEP,JOUT).EQ.0.OR.ISTEP.EQ.NSTEP) THEN
+         IF(GOPARR) CALL DDI_GSUMF(2406,PRO,1000*10)
+         IF(MASWRK) THEN
+         NFRAME  = ISTEP +1
+         PREFAC  = TOANGS*TOANGS*TOANGS/NFRAME
+         PREFAC2 = PREFAC*SPHRAD**3
+         DO IRDEN = 1, NRDEN
+            FAC1 = NRDPRATM(IRDEN)
+            FAC2 = PREFAC2/FAC1
+            WRITE(IW,4000) RDENATM(IRDEN)
+            R = 0.0D+00
+            RUPPER = R + DELRDF*TOANGS
+            DO IBIN = 1, NBINRDEN
+               DIFF = RUPPER**3 - R**3
+               WRITE(IW,4030) R+DELRDF*TOANGS,
+     *                        PRO(IBIN,IRDEN)*FAC2/DIFF
+               R = RUPPER
+               RUPPER = RUPPER + DELRDF*TOANGS
+            ENDDO
+            WRITE(IW,*)' '
+         ENDDO
+         END IF
+         IF(GOPARR) CALL DSCAL(1000*10,ONE/NPROC,PRO,1)
+      END IF
+      CALL FLSHBF(IW)
+C
+      RETURN
+ 4000 FORMAT(/1X,'RDEN FOR ATOM "',A10,'"')
+ 4030 FORMAT(1X,F10.3,5X,F12.8)
+      END
+C*MODULE QUANPOD  *DECK RDFSPH
+!>
+!> @brief    calculate radial distribution function for spheric boundary
+!>
+!> @author   Dejun Si
+!>           - Dec 2011
+!>
+!> @details  calculate radial distribution function for spheric boundary
+!>
+      SUBROUTINE RDFSPH(CORD,ISTEP,ATMNAM,FRAG1,FRAG2,
+     *                  NFRAG1,NFRAG2,GOFR)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+      CHARACTER*10 FRAG1(10),FRAG2(10),ATMNAM(NFFAT)
+      DIMENSION CORD(3,NFFAT),GOFR(1000,10),NFRAG1(10),NFRAG2(10)
+      DIMENSION GOFRI(1000,10)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRDF / DELRDF,NUMGRD,NUMSUM,NRDF,LFFGOFR,
+     *                LFFNFRAG1,LFFNFRAG2,LFFFRAG1,LFFFRAG2,
+     *                NRDEN,NBINRDEN,LFFPRO,LFFNRDPRATM,
+     *                LFFRDPRATM,LFFDIESTEP,LFFDI1STEP
+      COMMON /FFSPH / SPHRAD,SPHSIG,SPHEPS,IADDWAT
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     DEJUN SI, DEC 1, 2011, LINCOLN
+C     HUI LI, AUG 27, 2012
+C
+      RSMP2   =SPHRAD*SPHRAD/4
+      CALL VICLR(NFRAG1,1,10)
+      CALL VCLR (GOFRI,1,10000)
+      IPCOUNT = ME - 1
+      DO 200 IRDF = 1, NRDF
+         DO 210 I = 1, NFFAT
+            IF(GOPARR) THEN
+               IPCOUNT = IPCOUNT + 1
+               IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 210
+            END IF
+            IF(ATMNAM(I).EQ.FRAG1(IRDF)) THEN
+               XI = CORD(1,I) - CENTX
+               YI = CORD(2,I) - CENTY
+               ZI = CORD(3,I) - CENTZ
+               R2 = XI*XI+YI*YI+ZI*ZI
+               IF(R2.GT.RSMP2) GOTO 210
+               NFRAG1(IRDF) = NFRAG1(IRDF) +1
+            ELSE
+               GOTO 210
+            END IF
+            DO 220 J = I+1, NFFAT
+               IF(ATMNAM(J).EQ.FRAG2(IRDF)) THEN
+                  GRX    = CORD(1,I) - CORD(1,J)
+                  GRY    = CORD(2,I) - CORD(2,J)
+                  GRZ    = CORD(3,I) - CORD(3,J)
+                  GRL    = SQRT(GRX*GRX+GRY*GRY+GRZ*GRZ)
+                  IBIN   = INT(GRL/DELRDF) + 1
+                  IF(IBIN.LE.NUMGRD) GOFRI(IBIN,IRDF) =
+     *                                    GOFRI(IBIN,IRDF)+ONE
+               END IF
+ 220        CONTINUE
+ 210     CONTINUE
+ 200  CONTINUE
+C
+      IF(GOPARR) CALL DDI_GSUMF(2406,GOFRI,1000*10)
+      NUMSUM = NUMSUM +1
+      DO IRDF = 1, NRDF
+         DO J = 1, NUMGRD
+            GOFRI(J,IRDF) = GOFRI(J,IRDF)/NFRAG1(IRDF)
+            GOFR(J,IRDF)=(GOFR(J,IRDF)*(NUMSUM-1)+GOFRI(J,IRDF))/NUMSUM
+         ENDDO
+      ENDDO
+C
+      IF(MASWRK.AND.(MOD(ISTEP,JOUT).EQ.0.OR.ISTEP.EQ.NSTEP)) THEN
+         PREFAC  = (SPHRAD*TOANGS)**3
+         DO IRDF = 1, NRDF
+            IF(FRAG1(IRDF).EQ.FRAG2(IRDF)) THEN
+               FAC1 = (NFRAG2(IRDF)-1)/2.0D+00
+            ELSE
+               FAC1 = NFRAG2(IRDF)
+            END IF
+            FAC2 = PREFAC/FAC1
+            WRITE(IW,4000) FRAG1(IRDF),FRAG2(IRDF)
+            R = 0.0D+00
+            RUPPER = R + DELRDF*TOANGS
+            DO J = 1, NUMGRD
+               DIFF = RUPPER**3 - R**3
+               WRITE(IW,4030) R+DELRDF*0.5D+00*TOANGS,
+     *                        GOFR(J,IRDF)*FAC2/DIFF
+               R = RUPPER
+               RUPPER = RUPPER + DELRDF*TOANGS
+            ENDDO
+            WRITE(IW,*)' '
+         ENDDO
+      END IF
+      CALL FLSHBF(IW)
+C
+      RETURN
+ 4000 FORMAT(/1X,'RDF FOR ATOM "',A10,'" AND ATOM "',A10,'"')
+ 4030 FORMAT(1X,F10.3,5X,F12.8)
+      END

@@ -1,0 +1,82 @@
+{
+  "parse_header" : "SMD",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "INTERNAL ENERGY IN GAS - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 2,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "INTERNAL ENERGY IN SOLVENT - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 3,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "DELTA INTERNAL ENERGY - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 4,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "TOTAL ENERGY IN SOLVENT - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 5,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "ELECTROSTATIC INTERACTION - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 6,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "CDS INTERACTION - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 7,
+     "parse_instance" : -1,
+     "parse_required" : false
+   },
+   {
+     "regex_string" : "^(\\s*)-------   RESULTS OF SMD CALCULATION   -------.*$",
+     "parse_name"   : "TOTAL FREE ENERGY IN SOLVENT - SMD",
+     "parse_case_sensitive" : true,
+     "parse_type" : "float",
+     "parse_precision": -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 8,
+     "parse_instance" : -1,
+     "parse_required" : false
+   }
+ ]
+}

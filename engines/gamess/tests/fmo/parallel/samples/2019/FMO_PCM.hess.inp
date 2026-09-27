@@ -1,0 +1,57 @@
+! Analytic FMO-RHF/PCM Hessian described in:
+! H. Nakata, D. G. Fedorov, Phys. Chem. Chem. Phys. 21 (2019) 13641-13652.
+!
+! During geometry optimizations, modgrd=42 should be used;
+! for Hessian runs, SCZV is not needed, so modgrd=10 is used
+! (however, 2+8 bits in modgrd should be set for Hessians).
+! It is not possible to get both gradient and Hessian in the same FMO run.
+!
+!     Free unco+D energy in solvent=     -684.256123729
+! THE HARMONIC ZERO POINT ENERGY IS (SCALED BY   1.000)
+!       0.289469 HARTREE/MOLECULE    63531.129684 CM**-1/MOLECULE
+!
+ $CONTRL NPRINT=-5 ISPHER=-1 RUNTYP=fmohess $END
+ $SYSTEM MWORDS=100 $END
+ $GDDI NGROUP=1 $END
+ $SCF  DIRSCF=.T. NPUNCH=0 DIIS=.T. SOSCF=.F.  $END
+ $BASIS GBASIS=N31 NGAUSS=6 NDFUNC=1 $END
+ $pcm solvnt=water ief=-10 icomp=0 icav=1 idisp=1 ifmo=-1 $end
+ $fmoprp modorb=3 nprint=9 $end
+ $DFT IDCVER=3 DC=.t.  $END
+ $FMO modgrd=10 RESDIM=2.0 resppc=0.0
+      NBODY=2 NLAYER=1 NFRAG=9 nacut=3 $END
+ $DATA
+
+c1
+H-1 1
+O-1 8
+ $END
+ $FMOXYZ
+      1  O     -0.7170250047   2.1509768084   1.4670369539
+      2  H     -0.9166880863   2.7614078796   0.7695982966
+      3  H     -1.4886234217   1.5856586891   1.5680614471
+      4  O      0.1389451118  -0.1714558146   3.3511301374
+      5  H     -0.2372554041   0.6566141251   3.6471176656
+      6  H      0.1250111367  -0.1332005299   2.4024614674
+      7  O     -0.1366896915   2.5511184511   4.2489920838
+      8  H      0.8121087076   2.4677499999   4.3251151020
+      9  H     -0.3144811976   2.7908541642   3.3434853677
+     10  O     -2.1871666940  -1.7093577872   3.7088210036
+     11  H     -1.2661632434  -1.4784615255   3.7992645575
+     12  H     -2.3299864153  -2.5046736449   4.2051683701
+     13  O      2.8553360056   2.4952098554  -1.1596041110
+     14  H      2.3515578676   3.0985103334  -1.6922331913
+     15  H      3.7592085402   2.6287977766  -1.4178896961
+     16  O     -2.8281964427   0.4275108393   1.9981368429
+     17  H     -2.7000544089  -0.3730975864   2.5055482077
+     18  H     -3.4941439398   0.9227437953   2.4580865563
+     19  O      2.1816883234   4.5410259666   3.3380617639
+     20  H      1.2789239063   4.8236869527   3.4108439978
+     21  H      2.1730068206   3.8392608763   2.6911197880
+     22  O      2.1205928378   2.2402557913   1.5663212858
+     23  H      2.4202095734   2.3848744006   0.6675700610
+     24  H      1.1966009804   2.0117014923   1.4954705630
+     25  O      2.4749373116   1.3344729188   4.1771640588
+     26  H      1.9431523668   0.5502608038   4.0844378668
+     27  H      2.7021444599   1.5677449687   3.2803035542
+ $END

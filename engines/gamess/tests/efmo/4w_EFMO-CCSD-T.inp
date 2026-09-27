@@ -1,0 +1,34 @@
+!  MBPT(2) ENERGY -152.4024665837  
+!  CCSD    ENERGY -152.4197585433
+!  CCSD[T] ENERGY -152.4238552543
+!  CCSD(T) ENERGY -152.4236574712
+!
+ $CONTRL SCFTYP=RHF RUNTYP=ENERGY CCTYP=CCSD(T) MAXIT=30 MULT=1 $END
+ $SYSTEM TIMLIM=525600 MEMORY=500000000 MEMDDI=500 $END
+ $BASIS GBASIS=N31 NGAUSS=6 NDFUNC=1 $END
+ $SCF DIRSCF=.TRUE. $END
+!!!! Warning: FMO input is incomplete - you must complete by hand.
+ $FMO NFRAG=4 INDAT(1)= 1, 1, 1, 2, 2, 2, 3, 3, 3, 4 ,4 ,4
+ IEFMO=1 RESPAP=0 RESPPC=-1 RESDIM=1 RCORSD=1 MODESP=0
+ $END
+ $elmom where=originp $end
+ $DATA
+
+C1
+O   8
+H   1
+ $END
+ $FMOXYZ
+O     8.0     1.37161    -1.05712     0.07141
+H     1.0     2.23308    -0.71511     0.24397
+H     1.0     0.75977    -0.58243     0.62834
+O     8.0    -0.67970     0.49527     1.31898
+H     1.0    -1.20607     0.70843     0.55259
+H     1.0    -1.27229     0.26176     2.01398
+O     8.0    -0.09538    -1.00340    -2.38261
+H     1.0     0.50993    -1.09635    -1.65129
+H     1.0    -0.24400    -1.86399    -2.73779
+O     8.0    -1.97873     0.80061    -1.20950
+H     1.0    -2.09066     1.58643    -1.71833
+H     1.0    -1.45309     0.19698    -1.72836
+ $END

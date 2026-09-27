@@ -1,0 +1,62 @@
+!	S1/S0 Conical Intersection optimization of Azomethema
+!	Initial geometry very close, so only 1 step to converge.
+!
+!	NSERCH=0 ..... ENERGY GAP=     0.0000572018
+!	NSERCH:   0  E=     -188.0133097627  GRAD. MAX=  0.0000606  R.M.S.=  0.0000209
+!
+!	NSERCH=1 ..... ENERGY GAP=     0.0000329239	
+!	NSERCH:   1  E=     -188.0133061559  GRAD. MAX=  0.0000919  R.M.S.=  0.0000283	
+!
+!          ***** EQUILIBRIUM GEOMETRY LOCATED *****
+!     COORDINATES OF ALL ATOMS ARE (ANGS)
+!       ATOM   CHARGE       X              Y              Z
+!     ------------------------------------------------------------
+!     N           7.0   0.6348523014   0.5121573445  -0.5967285970
+!     N           7.0   0.0913242281   0.4622579262   0.5686803139
+!     C           6.0   0.9962847683  -0.7940709167  -1.1373302357
+!     C           6.0  -1.2147090319   0.4014732457   1.1303963292
+!     H           1.0   0.4476082132  -1.6038193721  -0.6701039070
+!     H           1.0   0.8242882683  -0.7707110077  -2.2076737157
+!     H           1.0   2.0591471300  -0.9354895837  -0.9755488383
+!     H           1.0  -1.1126573723   0.4245194629   2.2067117744
+!     H           1.0  -1.8265690335   1.2503325151   0.8296225532
+!     H           1.0  -1.7386014717  -0.5184606143   0.8666923229
+!
+ $contrl scftyp=rohf runtyp=conical
+  cityp=sform 
+  mult=3 maxit=100 $end
+ $scf dirscf=.t. diis=.t. $end
+ $statpt nstep=1000 $end
+ $system mwords=300 parall=.f. $end
+ $cidet nstate=5 itermx=500
+  ncore=0 nact=72 nels=32
+  mxxpan=70 nhgss=2200
+   mulsf=1
+  pures=.t.
+ $end
+ $basis GBASIS=n31 ngauss=6 ndfunc=1 $END
+ $conicl
+   ixroot(1)=1,2 symoff=.t. opttyp=bpupd
+ $end
+ $ormas
+  nspace=3 mstart(1)=1,16,18 mine(1)=29,1,0
+  maxe(1)=30,3,1
+ $end
+ $data
+Water molecule
+C1
+ N           7.0   0.6347687866   0.5122187568  -0.5968085013
+ N           7.0   0.0914015482   0.4621304491   0.5687689302
+ C           6.0   0.9963196935  -0.7940717670  -1.1373053925
+ C           6.0  -1.2147408767   0.4015528796   1.1303710682
+ H           1.0   0.4476093940  -1.6038202739  -0.6701062442
+ H           1.0   0.8242842123  -0.7707074181  -2.2076684510
+ H           1.0   2.0591500765  -0.9354987431  -0.9755498282
+ H           1.0  -1.1126542938   0.4245176363   2.2067101067
+ H           1.0  -1.8265852061   1.2503272087   0.8296232737
+ H           1.0  -1.7385853345  -0.5184597284   0.8666830384
+ $END
+!TRAVIS-CI SMALL
+!TRAVIS-CI SKIP
+!does not converge for Skylake and EYPC with GNU, Sandybridge with GNU and PGI
+!only successfully runs with Intel toolchain

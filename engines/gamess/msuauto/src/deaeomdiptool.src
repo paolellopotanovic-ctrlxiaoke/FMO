@@ -1,0 +1,636 @@
+C*MODULE DEAEOMDIP DECK R_ORTH
+C> @brief orthonormal R
+C>
+C> @author Jun Shen
+C>
+C> @param IR .R file unit number
+C> @param LLL number size of the DIP/DEA vector
+C> @param ITER number of iteration
+C>
+       SUBROUTINE R_ORTH(IR,LLL,ITER)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 PP
+       real*8,ALLOCATABLE:: R0(:),R(:)
+C
+       ALLOCATE(R0(LLL),R(LLL))
+!      READ(IR,REC=ITER+1)R
+       CALL DEAEOM_READ(IR,ITER+1,LLL,R)
+       PP=0.0D0
+       DO I=1,LLL
+        PP=PP+R(I)*R(I)
+       ENDDO
+       R=R/DSQRT(PP)
+C
+       R0=0.0D0
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        PP=0.0D0
+        DO J=1,LLL
+         PP=PP+R0(J)*R(J)
+        ENDDO
+        R=R-PP*R0
+       ENDDO
+C
+       PP=0.0D0
+       DO I=1,LLL
+        PP=PP+R(I)*R(I)
+       ENDDO
+       R=R/DSQRT(PP)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       END
+C
+C*MODULE DEAEOMDIP DECK DEAEOMDIP_SOLVER
+C> @brief solver of DEA/DIP
+C>
+C> @author Jun Shen
+C>
+C> @param IO output file unit number
+C> @param IHR .HR file unit number
+C> @param IR .R file unit number
+C> @param LLL number size of the DEA/DIP vector
+C> @param ITER number of iteration
+C> @param ITEOM diagonal space of HBar
+C> @param MATRIX TO BE DIAGONALIZED
+C> @param ECOR DEA/DIP excitation energy
+C> @param WI EIGENVALUE OF H*R
+C>
+       SUBROUTINE DEAEOMDIP_SOLVER(IO,IHR,IR,LLL,ITER,ITEOM,MTS,ECOR,WI)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 PP,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),MTS0(:,:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 MTS(ITEOM,ITEOM),WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(HR(LLL),R(LLL))
+!      READ(IHR,REC=ITER)HR
+       CALL DEAEOM_READ(IHR,ITER,LLL,HR)
+!      DO I=1,ITER-1
+       DO I=1,ITER
+!       READ(IR,REC=I)R
+        CALL DEAEOM_READ(IR,I,LLL,R)
+        PP=0.0D0
+        DO J=1,LLL
+         PP=PP+HR(J)*R(J)
+        ENDDO
+        MTS(I,ITER)=PP
+       ENDDO
+!      READ(IR,REC=ITER)R
+       DO I=1,ITER-1
+!       READ(IHR,REC=I)HR
+        CALL DEAEOM_READ(IHR,I,LLL,HR)
+        PP=0.0D0
+        DO J=1,LLL
+         PP=PP+HR(J)*R(J)
+        ENDDO
+        MTS(ITER,I)=PP
+       ENDDO
+!      READ(IHR,REC=ITER)HR
+!      READ(IR,REC=ITER)R
+!      PP=0.0D0
+!      DO J=1,LLL
+!       PP=PP+HR(J)*R(J)
+!      ENDDO
+!      MTS(ITER,ITER)=PP
+       DEALLOCATE(HR,R)
+       DO I=ITER+1,ITEOM
+        MTS(I,I)=1.0D4+I
+       ENDDO
+C
+       ALLOCATE(MTS0(ITEOM,ITEOM),WR(ITEOM),WORK(4*ITEOM))
+       ALLOCATE(VR(ITEOM,ITEOM),VL(ITEOM,ITEOM))
+       LWORK=4*ITEOM
+       JOBVL='N'
+       JOBVR='V'
+       MTS0=MTS
+       CALL DGEEV(JOBVL,JOBVR,ITEOM,MTS0,ITEOM,WR,WI,VL,ITEOM,
+     &            VR,ITEOM,WORK,LWORK,INFO)
+       IF(INFO.NE.0) THEN
+        WRITE(IO,*)'PROBLEMS WITH SOLVING SMALL EIGENVALUE PROBLEM!!!'
+        WRITE(IO,*)'INFO = ',INFO
+        CALL ABRT
+       END IF
+!      LL=0
+!      CALL QR(MTS,ITEOM,VR,WR,VL,LL)
+       XMAX=0.0D0
+       I0=0
+       DO I=1,ITEOM
+        IF(DABS(VR(1,I)).LE.XMAX.OR.DABS(WI(I)).GE.1.0D-7
+     &  .OR.DABS(WR(I)).GE.1.0D4)CYCLE
+        XMAX=DABS(VR(1,I));I0=I
+       ENDDO
+       ECOR=WR(I0)
+       DO I=1,ITEOM
+        WI(I)=VR(I,I0)
+       ENDDO
+C
+       END
+C
+C*MODULE DEAEOMDIP DECK DEAEOMDIP_SORT
+C> @brief sort from A to B
+C>
+C> @author Jun Shen
+C>
+      SUBROUTINE DEAEOMDIP_SORT(N,A,B)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+      real*8 A(N),B(N,N),PP
+      DO I=1,N-1
+       DO J=I+1,N
+        IF(A(I).LE.A(J))CYCLE
+        PP=A(I);A(I)=A(J);A(J)=PP
+        DO K=1,N
+         PP=B(K,I);B(K,I)=B(K,J);B(K,J)=PP
+        ENDDO
+       ENDDO
+      ENDDO
+      END
+C
+       SUBROUTINE DEAEOM_PRINT_INI(IO,N0,N1,N2,N3,R,LLL,PP)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 PP
+       real*8 R(LLL)
+       INTEGER A,B,C,D
+C
+       I0=0
+       DO A=N1+1,N3;DO B=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,E19.12)')A,'A  ',B,'B  :',R(I0)
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'A  --> ',A,'A  ',B,'A  ',C,'B  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,N3;DO C=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'B  --> ',A,'A  ',B,'B  ',C,'B  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+      IF(I0.NE.LLL)THEN
+       WRITE(IO,*)'I0 !=LLL IN PRINT_INI'
+        CALL ABRT
+      ENDIF
+C
+       END
+C
+       SUBROUTINE DEAEOM_PRINT_R(IR,IO,ITER,N0,N1,N2,N3,LLLR,LLL,PP)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 PP
+       real*8,ALLOCATABLE:: R(:)
+       INTEGER A,B,C,D
+C
+       ALLOCATE(R(LLLR))
+       R=0.0D0
+!      READ(IR,REC=ITER)(R(i),i=1,LLL)
+       CALL DEAEOM_READ(IR,ITER,LLLR,R)
+       I0=0
+       DO A=N1+1,N3;DO B=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,E19.12)')A,'A  ',B,'B  :',R(I0)
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'A  --> ',A,'A  ',B,'A  ',C,'B  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,N3;DO C=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'B  --> ',A,'A  ',B,'B  ',C,'B  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+      IF(I0.NE.LLL)THEN
+        WRITE(IO,*)'I0 !=LLL IN PRINT_R'
+        CALL ABRT
+      ENDIF
+C
+       END
+C
+       SUBROUTINE EOMDIP_PRINT_INI(IO,N0,N1,N2,N3,R,LLL,PP)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 PP
+       real*8 R(LLL)
+       INTEGER A,B,C,D
+C
+       I0=0
+       DO I=N0+1,N1;DO J=N0+1,N2
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,E19.12)')I,'A  ',J,'B  :',R(I0)
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2;DO A=N1+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'A  ',J,'A  ',K,'B  --> ',A,'A  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO J=N0+1,N2;DO K=N0+1,N2;DO A=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'A  ',J,'B  ',K,'B  --> ',A,'B  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+      IF(I0.NE.LLL)THEN
+       WRITE(IO,*)'I0 !=LLL IN PRINT_INI'
+        CALL ABRT
+      ENDIF
+C
+       END
+C
+       SUBROUTINE EOMDIP_PRINT_R(IR,IO,ITER,N0,N1,N2,N3,LLLR,LLL,PP)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 PP
+       real*8,ALLOCATABLE:: R(:)
+       INTEGER A,B,C,D
+C
+!      PP=1.0D-1
+       ALLOCATE(R(LLLR))
+       R=0.0D0
+!      READ(IR,REC=ITER)R
+       CALL DEAEOM_READ(IR,ITER,LLLR,R)
+       I0=0
+       DO I=N0+1,N1;DO J=N0+1,N2
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,E19.12)')I,'A  ',J,'B  :',R(I0)
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2;DO A=N1+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'A  ',J,'A  ',K,'B  --> ',A,'A  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO J=N0+1,N2;DO K=N0+1,N2;DO A=N2+1,N3
+        I0=I0+1
+        IF(DABS(R(I0)).LT.PP)CYCLE
+        WRITE(IO,'(I4,A,I4,A,I4,A,I4,A,E19.12)')
+     &  I,'A  ',J,'B  ',K,'B  --> ',A,'B  :',R(I0)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       END
+C
+       SUBROUTINE DEAEOM3A_READ_INI(N0,N1,N2,N3,M2,L2,L4,
+     & RR2,RR3B1A,RR3C1B,RR4,
+     & R2,R3B1A,R3B1A1,R3C1B,R3C1B1,R4)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C
+       real*8 RR2(L2)
+       real*8 RR4(L4)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+C
+       real*8 R2(L2)
+       real*8 R4(L4)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 R3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 R3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+C
+       R2=RR2;R4=RR4
+C
+       DO I=N0+1,N1;DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2
+        IF(A.EQ.B)CYCLE
+        R3B1A1(C,B,A,I)=RR3B1A(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3
+        IF(B.EQ.C)CYCLE
+        R3C1B1(C,B,A,I)=RR3C1B(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM3A_WRITE_R(N0,N1,N2,N3,M2,L2,L4,
+     & RR2,RR3B1A,RR3C1B,RR4,
+     & R2,R3B1A,R3B1A1,R3C1B,R3C1B1,R4)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C
+       real*8 RR2(L2)
+       real*8 RR4(L4)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+C
+       real*8 R2(L2)
+       real*8 R4(L4)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 R3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 R3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+C
+       RR2=R2;RR4=R4
+C
+       DO I=N0+1,N1;DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        RR3B1A(C,B,A,I)=R3B1A(C,B,A,I)
+        IF(B.GT.M2)RR3B1A(C,A,B,I)=-R3B1A(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2
+        IF(A.EQ.B)CYCLE
+        RR3B1A(C,B,A,I)=R3B1A1(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        RR3C1B(C,B,A,I)=R3C1B(C,B,A,I)
+        IF(C.GT.N2)RR3C1B(B,C,A,I)=-R3C1B(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3
+        IF(B.EQ.C)CYCLE
+        RR3C1B(C,B,A,I)=R3C1B1(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM2A_READ_INI(N0,N1,N2,N3,M2,
+     & RR2B0A,RR3B1A,RR3C1B,
+     & R2B0A,R3B1A,R3B1A1,R3C1B,R3C1B1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+C
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 R3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 R3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+C
+       R2B0A=RR2B0A
+C
+       DO I=N0+1,N1;DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2
+        IF(A.EQ.B)CYCLE
+        R3B1A1(C,B,A,I)=RR3B1A(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3
+        IF(B.EQ.C)CYCLE
+        R3C1B1(C,B,A,I)=RR3C1B(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM2A_WRITE_R(N0,N1,N2,N3,M2,
+     & RR2B0A,RR3B1A,RR3C1B,
+     & R2B0A,R3B1A,R3B1A1,R3C1B,R3C1B1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+C
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 R3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 R3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+C
+       RR2B0A=R2B0A
+C
+       DO I=N0+1,N1;DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        RR3B1A(C,B,A,I)=R3B1A(C,B,A,I)
+        IF(B.GT.M2)RR3B1A(C,A,B,I)=-R3B1A(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2
+        IF(A.EQ.B)CYCLE
+        RR3B1A(C,B,A,I)=R3B1A1(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        RR3C1B(C,B,A,I)=R3C1B(C,B,A,I)
+        IF(C.GT.N2)RR3C1B(B,C,A,I)=-R3C1B(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3
+        IF(B.EQ.C)CYCLE
+        RR3C1B(C,B,A,I)=R3C1B1(C,B,A,I)
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+C*MODULE DEAEOMDIP DECK DEAEOM_OPEN
+C> @brief OPEN FILE
+C>
+C> @author Jun Shen
+C>
+       SUBROUTINE DEAEOM_OPEN(IO,IR,LLLR,FNAME,NAME)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+       CHARACTER*800 FNAME*800,NAME*3
+C
+       LLL=LLLR
+       LLL_2G=2147483647/8
+       IF(LLL.GT.LLL_2G)THEN
+        LLL=LLL_2G
+        N=LLLR/LLL_2G
+        IF(N*LLL_2G.LT.LLLR)N=N+1
+        WRITE(IO,100)IR,TRIM(FNAME)//NAME,LLLR*8,N
+       ENDIF
+  100 FORMAT(/1X,'WARNING: ATTEMPTING TO OPEN FILE',I4,' NAMED ',A/
+     *    1X,'WITH A RECORD SIZE OVER 2 GBYTES, NAMELY,',I20,' WORDS,'/
+     *    1X,'IN THIS FILE,',I3,
+     *    1X,'SEQUENTIAL RECORDS WILL BE USED AS ONE ENTIRE RECORD.')
+       OPEN(IR,FILE=TRIM(FNAME)//NAME,RECL=LLL*8,ACCESS='DIRECT',
+     & FORM='UNFORMATTED')
+C
+       END
+C
+C*MODULE DEAEOMDIP DECK DEAEOM_READ
+C> @brief READ FILE
+C>
+C> @author Jun Shen
+C>
+       SUBROUTINE DEAEOM_READ(IR,IROOT,LLLR,R)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+       real*8 R(LLLR)
+C
+       LLL_2G=2147483647/8
+       N=LLLR/LLL_2G
+       IF(N*LLL_2G.LT.LLLR)N=N+1
+       DO I=1,N
+        IREC=(IROOT-1)*N+I
+        I1=(I-1)*LLL_2G+1
+        I2=I*LLL_2G
+        IF(I.EQ.N)I2=LLLR
+        READ(IR,REC=IREC)R(I1:I2)
+       ENDDO
+C
+       END
+C
+C*MODULE DEAEOMDIP DECK DEAEOM_WRITE
+C> @brief WRITE FILE
+C>
+C> @author Jun Shen
+C>
+       SUBROUTINE DEAEOM_WRITE(IR,IROOT,LLLR,R)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+       real*8 R(LLLR)
+C
+       LLL_2G=2147483647/8
+       N=LLLR/LLL_2G
+       IF(N*LLL_2G.LT.LLLR)N=N+1
+       DO I=1,N
+        IREC=(IROOT-1)*N+I
+        I1=(I-1)*LLL_2G+1
+        I2=I*LLL_2G
+        IF(I.EQ.N)I2=LLLR
+        WRITE(IR,REC=IREC)R(I1:I2)
+       ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM_SPIN(N0,N1,N2,N3,ISPIN,R2B0A,R3B1A,R3C1B,TOL)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 RMAX,TOL
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+       INTEGER A,B,C,D,AMAX,BMAX,CMAX,ISPIN
+C
+       ISPIN=0
+       AMAX=0;BMAX=0;RMAX=0.0D0
+       DO A=N1+1,N3;DO B=N2+1,N3
+        IF(DABS(R2B0A(B,A)).LT.DABS(RMAX))CYCLE
+        RMAX=R2B0A(B,A);AMAX=A;BMAX=B
+       ENDDO;ENDDO
+C
+       IF(DABS(RMAX).GT.TOL)THEN
+        IF(AMAX.EQ.BMAX)THEN
+         ISPIN=1;RETURN
+        ENDIF
+        IF(DABS(RMAX-R2B0A(AMAX,BMAX)).LT.TOL)THEN
+         ISPIN=1;RETURN
+        ENDIF
+        IF(DABS(RMAX+R2B0A(AMAX,BMAX)).LT.TOL)THEN
+         ISPIN=3;RETURN
+        ENDIF
+       ENDIF
+C
+       IMAX=0;AMAX=0;BMAX=0;CMAX=0;RMAX=0.0D0
+ 
+       DO I=N0+1,N1;DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(DABS(R3B1A(C,B,A,I)).LT.DABS(RMAX))CYCLE
+        RMAX=R3B1A(C,B,A,I);IMAX=I;AMAX=A;BMAX=B;CMAX=C
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       IF(DABS(RMAX).LT.TOL)RETURN
+C
+       IF(AMAX.NE.CMAX.AND.BMAX.NE.CMAX)THEN
+        IF(DABS(RMAX+R3C1B(BMAX,AMAX,CMAX,IMAX)).LT.TOL)THEN
+         ISPIN=5;RETURN
+        ENDIF
+        IF(DABS(RMAX-R3C1B(BMAX,AMAX,CMAX,IMAX)).LT.TOL)THEN
+         ISPIN=3;RETURN
+        ENDIF
+       ELSEIF(AMAX.EQ.CMAX.OR.BMAX.EQ.CMAX)THEN
+        IF(DABS(RMAX+R3C1B(BMAX,AMAX,CMAX,IMAX)).LT.TOL)THEN
+         ISPIN=1;RETURN
+        ENDIF
+        IF(DABS(RMAX-R3C1B(BMAX,AMAX,CMAX,IMAX)).LT.TOL)THEN
+         ISPIN=3;RETURN
+        ENDIF
+       ENDIF
+C
+       END
+C
+       SUBROUTINE EOMDIP_SPIN(N0,N1,N2,N3,ISPIN,R0A2B,R1A3B,R1B3C,TOL)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       real*8 RMAX,TOL
+       real*8 R0A2B(N0+1:N2,N0+1:N1)
+       real*8 R1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 R1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       INTEGER A,AMAX,ISPIN
+C
+       ISPIN=0
+       IMAX=0;JMAX=0;RMAX=0.0D0
+       DO I=N0+1,N1;DO J=N0+1,N2
+        IF(DABS(R0A2B(J,I)).LT.DABS(RMAX))CYCLE
+        RMAX=R0A2B(J,I);IMAX=I;JMAX=J
+       ENDDO;ENDDO
+C
+       IF(DABS(RMAX).GT.TOL)THEN
+        IF(IMAX.EQ.JMAX)THEN
+         ISPIN=1;RETURN
+        ENDIF
+        IF(DABS(RMAX-R0A2B(IMAX,JMAX)).LT.TOL)THEN
+         ISPIN=1;RETURN
+        ENDIF
+        IF(DABS(RMAX+R0A2B(IMAX,JMAX)).LT.TOL)THEN
+         ISPIN=3;RETURN
+        ENDIF
+       ENDIF
+C
+       IMAX=0;JMAX=0;KMAX=0;AMAX=0;RMAX=0.0D0
+ 
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2;DO A=N1+1,N3
+        IF(DABS(R1A3B(A,K,J,I)).LT.DABS(RMAX))CYCLE
+        RMAX=R1A3B(A,K,J,I);IMAX=I;JMAX=J;KMAX=K;AMAX=A
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       IF(DABS(RMAX).LT.TOL)RETURN
+C
+       IF(IMAX.NE.KMAX.AND.JMAX.NE.KMAX)THEN
+        IF(DABS(RMAX+R1B3C(AMAX,JMAX,IMAX,KMAX)).LT.TOL)THEN
+         ISPIN=5;RETURN
+        ENDIF
+        IF(DABS(RMAX-R1B3C(AMAX,JMAX,IMAX,KMAX)).LT.TOL)THEN
+         ISPIN=3;RETURN
+        ENDIF
+       ELSEIF(IMAX.EQ.KMAX.OR.JMAX.EQ.KMAX)THEN
+        IF(DABS(RMAX+R1B3C(AMAX,JMAX,IMAX,KMAX)).LT.TOL)THEN
+         ISPIN=1;RETURN
+        ENDIF
+        IF(DABS(RMAX-R1B3C(AMAX,JMAX,IMAX,KMAX)).LT.TOL)THEN
+         ISPIN=3;RETURN
+        ENDIF
+       ENDIF
+C
+       END

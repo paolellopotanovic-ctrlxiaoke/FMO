@@ -1,0 +1,35 @@
+!  Note the QUAO populations and charges are the same for
+!  local=svd and local=ruednbrg
+!
+!      TOTAL ATOMIC QUAO POPULATIONS
+!    ATOM      QUAO POP.       CHARGE
+!    1 AU      78.951305      0.048695
+!    2 H        1.048695     -0.048695
+!
+ $contrl
+  scftyp=rhf
+  relwfn=iotc
+  maxit=100
+  mult=1
+  ispher=1
+!  local=ruednbrg
+  local=svd
+ $end
+ $local orient=.t. extloc=splitq2 $end
+ $scf
+  vvos=.t.
+  soscf=.t. diis=.f. shift=.t. damp=.t.
+ $end
+ $basis gbasis=SPKrTZC $end
+ $guess guess=huckel $end
+ $system mwords=50 memddi=50 $end
+ $data
+AuH relativistic QUAO charges
+Cnv 4
+
+Au  79.0  0.0  0.0  0.0
+H    1.0  0.0  0.0  1.5
+ $end
+
+! TRAVIS-CI SKIP
+

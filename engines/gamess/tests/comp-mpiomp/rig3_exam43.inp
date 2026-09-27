@@ -1,0 +1,62 @@
+!this is an example for RI-G3(PDG)
+!below are results from pure G3 and PDG
+
+!PURE G3
+!                SUMMARY OF G3(MP2) CALCULATIONS
+! --------------------------------------------------------
+! MP2/6-31G(D)   = -40.332552 CCSD(T)/6-31G(D)= -40.355850
+! MP2/G3MP2LARGE = -40.404248 BASIS CONTRIBUT =   -.071696
+! ZPE(HF/6-31G(D)=    .042659 ZPE SCALE FACTOR=    .892900
+! HLC            =   -.036680 FREE ENERGY     =    .030480
+! THERMAL ENERGY =    .050629 THERMAL ENTHALPY=    .051573
+! --------------------------------------------------------
+! E(G3(MP2)) @ 0K= -40.421567 E(G3(MP2)) @298K= -40.418715
+! H(G3(MP2))     = -40.417771 G(G3(MP2))      = -40.438863
+! --------------------------------------------------------
+!       HEAT OF FORMATION   (0K):     -16.01 KCAL/MOL
+!       HEAT OF FORMATION (298K):     -17.83 KCAL/MOL
+! --------------------------------------------------------
+!
+!
+!RI-G3 (PDG)
+!
+!
+!    ----------------------------------------------------------------
+!                   SUMMARY OF G3(MP2) CALCULATIONS
+!    ----------------------------------------------------------------
+!    MP2/6-31G(D)    =   -40.331250   CCSD(T)/6-31G(D) =   -40.354677
+!    MP2/G3MP2LARGE  =   -40.404208   BASIS CONTRIBUT  =    -0.072958
+!    ZPE(HF/6-31G(D))=     0.042634   ZPE SCALE FACTOR =     0.892900
+!    HLC             =    -0.036680   FREE ENERGY      =     0.030452
+!    THERMAL ENERGY  =     0.050600   THERMAL ENTHALPY =     0.051545
+!    ----------------------------------------------------------------
+!    E(G3(MP2)) @ 0K =   -40.421681   E(G3(MP2)) @298K =   -40.418829
+!    H(G3(MP2))      =   -40.417885   G(G3(MP2))       =   -40.438978
+!    ----------------------------------------------------------------
+!
+!    ----------------------------------------------------------------
+!          HEAT OF FORMATION   (0K):     -16.08 KCAL/MOL
+!          HEAT OF FORMATION (298K):     -17.90 KCAL/MOL
+!    ----------------------------------------------------------------
+!
+ $contrl scftyp=rhf runtyp=g3mp2 ispher=1 $end
+!the keyword `g3mp3` enable G3MP2 method
+ $system  mwords=5 memddi=5 $end
+ $mp2 code=omprimp2 $end
+!the keyword `code=omprimp2` tells G3 to use RI-MP2 instead of full MP2
+ $auxbas cabnam(1)=ccd,cct $end
+!the keyword `cabnam(1)=ccd,cct` tells RIMP2 to use `ccd` and `cct` auxiliary basis sets for gradient and energy computation, respectively.
+ $CCINP MAXCC=100 ICONV=7 CCERI=RI $END
+!the keyword `CCERI=RI` tells G3 to use RI-CCSD(T) instead of full CCSD(T)
+ $RICC CABNAM=ACCT EXTCAB=.FALSE. USEDM3=.FALSE.
+                                  USEDM4=.TRUE. $END
+!the keyword, `CABNAM=ACCT` tells RICCSD(T) to use ACCT for its auxiliary basis set
+ $STATPT OPTTOL=0.0001 NSTEP=20 HESS=CALC $END
+
+ $data
+Methane...G3(MP2,CCSD(T))
+Td
+
+C  6.0  0.0000000     0.0000000     0.0000000
+H  1.0  0.6375302     0.6375302     0.6375302
+ $end

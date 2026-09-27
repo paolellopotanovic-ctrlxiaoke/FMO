@@ -1,0 +1,13 @@
+hpcx_home=/opt/hpcx
+prefix=${hpcx_home}/ompi
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: pmix
+Description: Process Management Interface for Exascale (PMIx)
+Version: 3.2.5a1
+URL: https://pmix.org/
+Requires:  zlib
+Libs: -L${libdir} -lpmix 
+Cflags: -I${includedir}

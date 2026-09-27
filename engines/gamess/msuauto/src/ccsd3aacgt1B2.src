@@ -1,0 +1,168 @@
+C*MODULE CCSD3A DECK t1B
+C> @brief Updates cluster components for CCSDT
+C>
+C> @author Jun Shen
+C> - August, 2020
+C>
+C> @param N0 number of frozen core orbitals
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param K1 number of occupied alpha orbitals
+C> @param K2 number of occupied beta orbitals
+C> @param K3 number of unoccupied alpha orbitals
+C> @param K4 number of unoccupied beta orbitals
+C> @param FAHH Fock alpha HH array
+C> @param FAHP Fock alpha HP array
+C> @param FAPP Fock alpha PP array
+C> @param FBHH Fock beta HH array
+C> @param FBHP Fock beta HP array
+C> @param FBPP Fock beta PP array
+C> @param VAHHHH Twobody alpha-alpha HHHH array
+C> @param VAHHHP Twobody alpha-alpha HHHP array
+C> @param VAHHPP Twobody alpha-alpha HHPP array
+C> @param VAHPHP Twobody alpha-alpha HPHP array
+C> @param VAHPPP Twobody alpha-alpha HPPP array
+C> @param VBHHHH Twobody alpha-beta HHHH array
+C> @param VBHHHP Twobody alpha-beta HHHP array
+C> @param VBHHPH Twobody alpha-beta HHPH array
+C> @param VBHHPP Twobody alpha-beta HHPP array
+C> @param VBHPHP Twobody alpha-beta HPHP array
+C> @param VBHPPH Twobody alpha-beta HPPH array
+C> @param VBPHPH Twobody alpha-beta PHPH array
+C> @param VBHPPP Twobody alpha-beta HPPP array
+C> @param VBPHPP Twobody alpha-beta HPPP array
+C> @param VCHHHH Twobody beta-beta HHHH array
+C> @param VCHHHP Twobody beta-beta HHHP array
+C> @param VCHHPP Twobody beta-beta HHPP array
+C> @param VCHPHP Twobody beta-beta HPHP array
+C> @param VCHPPP Twobody beta-beta HPPP array
+C> @param T1A one-body alpha cluster components
+C> @param T1B one-body beta cluster components
+C> @param T2A two-body alpha-alpha cluster components
+C> @param T2B two-body alpha-beta cluster components
+C> @param T2C two-body beta-beta cluster components
+C> @param T3A three-body alpha-alpha-alpha cluster components
+C> @param T3B three-body alpha-alpha-beta cluster components
+C> @param T3C three-body alpha-beta-beta cluster components
+C> @param T3D three-body beta-beta-beta cluster components
+C>
+C> @note H stands for hole (occupied orbitals), P stands for particle
+C> (unnocupied orbitals), and AP stands for active-particle (active
+C> unoccupied orbitals). Also all T1, T2, and T3 arrays are read from
+C> right to left (i.e. T2(a4,a3,a2,a1) -> (a1)-(a2),(a3)-(a4), where
+C> first indices before the comma are occupied indices and the next are
+C> unnocupied.
+       subroutine t1B_CCSDT(N0,N1,N2,N3,V1B,shift,
+     & K1,K2,K3,K4,
+     & FAHH,FAHP,FAPP,FBHH,FBHP,FBPP,
+     & VAHHHH,VAHHHP,VAHHPP,VAHPHP,VAHPPP,
+     & VBHHHH,VBHHHP,VBHHPH,VBHHPP,VBHPHP,VBHPPH,
+     & VBPHPH,VBHPPP,VBPHPP,
+     & VCHHHH,VCHHHP,VCHHPP,VCHPHP,VCHPPP,
+     & t1A,t1B,t2A,t2B,t2C,t3A,t3B,t3C,t3D)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+       use prec, only: dp
+C
+       integer a,b,c,e,f,g,h,i,j,k,m,n,o,p
+       real*8 shift
+       real*8 FAHH(N0+1:N1,N0+1:N1)
+       real*8 FAHP(N1+1:N3,N0+1:N1)
+       real*8 FAPP(N1+1:N3,N1+1:N3)
+       real*8 FBHH(N0+1:N2,N0+1:N2)
+       real*8 FBHP(N2+1:N3,N0+1:N2)
+       real*8 FBPP(N2+1:N3,N2+1:N3)
+       real*8 VAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8 VAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8 VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8 VAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1)
+       real*8 VAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 VBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1)
+       real*8 VBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1)
+       real*8 VBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8 VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8 VBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1)
+       real*8 VBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1)
+       real*8 VBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3)
+       real*8 VBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1)
+       real*8 VBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3)
+       real*8 VCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2)
+       real*8 VCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+       real*8 VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+       real*8 VCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2)
+       real*8 VCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2)
+       real*8 t1A(N1+1:N3,N0+1:N1)
+       real*8 t1B(N2+1:N3,N0+1:N2)
+       real*8 t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8 t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8 t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+       real*8 t3A(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8 t3B(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 t3C(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8 t3D(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+C
+       real*8 V1B(N2+1:N3,N0+1:N2)
+C
+       real*8,allocatable::B1(:,:)
+       real*8,allocatable::B2(:,:)
+       real*8,allocatable::C1(:,:,:)
+       real*8,allocatable::C2(:,:,:)
+       real*8,allocatable::D1(:,:,:,:)
+       real*8,allocatable::D2(:,:,:,:)
+       real*8,allocatable::F1(:,:,:,:,:,:)
+       real*8,allocatable::F2(:,:,:,:,:,:)
+C
+       real*8,allocatable::Z1(:,:)
+       real*8,allocatable::Z2(:,:)
+       real*8,allocatable::Z3(:,:)
+C
+       allocate(D1(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3))
+       call reorder3412(N1,N3,N1,N3,N0,N1,N0,N1,
+     & N0,N1,N0,N1,N1,N3,N1,N3,VAHHPP,D1)
+       allocate(F2(N0+1:N1,N0+1:N1,N1+1:N3,N1+1:N3,N2+1:N3,N0+1:N2))
+       call reorder562314(N2,N3,N1,N3,N1,N3,N0,N2,N0,N1,N0,N1,
+     & N0,N1,N0,N1,N1,N3,N1,N3,N2,N3,N0,N2,t3B,F2)
+       allocate(Z1(N2+1:N3,N0+1:N2))
+       I2=K2*K4
+       I3=K3*K3*K1*K1
+       call EGEMM2(I2,I3,D1,F2,Z1)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V1B=V1B+0.25_dp*Z1
+       deallocate(Z1)
+C
+       allocate(D1(N0+1:N2,N0+1:N1,N2+1:N3,N1+1:N3))
+       call reorder3412(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,N0,N1,N2,N3,N1,N3,VBHHPP,D1)
+       allocate(F2(N0+1:N2,N0+1:N1,N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N2))
+       call reorder461325(N2,N3,N2,N3,N1,N3,N0,N2,N0,N2,N0,N1,
+     & N0,N2,N0,N1,N2,N3,N1,N3,N2,N3,N0,N2,t3C,F2)
+       allocate(Z2(N2+1:N3,N0+1:N2))
+       I2=K2*K4
+       I3=K3*K4*K1*K2
+       call EGEMM2(I2,I3,D1,F2,Z2)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V1B=V1B+Z2
+       deallocate(Z2)
+C
+       allocate(D1(N0+1:N2,N0+1:N2,N2+1:N3,N2+1:N3))
+       call reorder3412(N2,N3,N2,N3,N0,N2,N0,N2,
+     & N0,N2,N0,N2,N2,N3,N2,N3,VCHHPP,D1)
+       allocate(F2(N0+1:N2,N0+1:N2,N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2))
+       call reorder451236(N2,N3,N2,N3,N2,N3,N0,N2,N0,N2,N0,N2,
+     & N0,N2,N0,N2,N2,N3,N2,N3,N2,N3,N0,N2,t3D,F2)
+       allocate(Z3(N2+1:N3,N0+1:N2))
+       I2=K2*K4
+       I3=K4*K4*K2*K2
+       call EGEMM2(I2,I3,D1,F2,Z3)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V1B=V1B+0.25_dp*Z3
+       deallocate(Z3)
+C
+       end

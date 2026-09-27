@@ -1,0 +1,48 @@
+! GAMESS/VB2000 Test 30
+!
+! This is similar to exam-vb26 and exam-vb27 as a calculation on water
+! with the 6-31G basis set. This one calculates the MP2 energy, but the
+! RHF energy is used by VB2000 to form the initial orbitals.
+!
+! The RHF energy is -76.0145751430 
+!
+! The MP2 energy is E(MP2) = -76.2260681342
+!
+! The final VB energy is -76.0581391806
+!
+ $CONTRL SCFTYP=RHF COORD=UNIQUE VBTYP=VB2000
+  MPLEVL=2 $END
+ $SYSTEM TIMLIM=20 MEMORY=2000000 $END
+ $BASIS GBASIS=N31 NGAUSS=6 NDFUNC=2 $END
+ $GUESS  GUESS=HUCKEL $END
+ $DATA
+Water 6-31G
+C1  
+OXYGEN    8.0    0.0000000000    0.0000000000   0.0000000000
+HYDROGEN  1.0    0.0000000000    0.7572153434  -0.5865355237
+HYDROGEN  1.0    0.0000000000   -0.7572153434  -0.5865355237
+ $END
+ $VB2000
+#! VB(4)/6-31G PRINTALL
+ 
+Water
+  
+0 1
+8    0.0000000000    0.0000000000   0.0000000000
+1    0.0000000000    0.7572153434  -0.5865355237
+1    0.0000000000   -0.7572153434  -0.5865355237
+
+ $MACROITER
+ 20
+
+ $ECONV
+ 8
+
+ $02VBORB
+ 1->2
+ 2->1
+ 1->3
+ 3->1
+
+ $END
+

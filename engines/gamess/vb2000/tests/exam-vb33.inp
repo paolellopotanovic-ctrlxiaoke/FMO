@@ -1,0 +1,49 @@
+! GAMESS/VB2000 Test 33
+!
+! This tests the use of $NOVBPROP to optimise the geometry
+! at the RHF level, followed by a VB calculation at the final 
+! geometry
+!
+! Uncommenting the $STATPT line below will also calculate
+! the Hessian after the optimisation.
+!
+ $CONTRL SCFTYP=RHF COORD=UNIQUE RUNTYP=OPTIMIZE 
+  VBTYP=VB2000 GRDTST=.T.
+ $END
+!! $STATPT HSSEND=.TRUE. $END
+ $SYSTEM TIMLIM=20 MEMORY=2000000 $END
+ $BASIS  GBASIS=N31 NGAUSS=6 $END
+ $GUESS  GUESS=HUCKEL $END
+ $DATA
+Water 6-31G
+C1  
+OXYGEN    8.0    0.0000000000    0.0000000000   0.0000000000
+HYDROGEN  1.0    0.0000000000    0.7572153434  -0.5865355237
+HYDROGEN  1.0    0.0000000000   -0.7572153434  -0.5865355237
+ $END
+ $VB2000
+#! VB(4)/6-31G PRINTALL
+ 
+Water
+  
+0 1
+8    0.0000000000    0.0000000000   0.0000000000
+1    0.0000000000    0.7572153434  -0.5865355237
+1    0.0000000000   -0.7572153434  -0.5865355237
+
+ $NOVBPROP
+
+ $MACROITER
+ 40
+
+ $ECONV
+ 7
+
+ $02VBORB
+ 1->2
+ 2->1
+ 1->3
+ 3->1
+
+ $END
+

@@ -1,0 +1,45 @@
+! A sample input for PAVE (partitioning analysis of vibrational energy)
+! It works by doing a partial Hessian, analytic or seminumeric
+! (this input is for the latter). PAVE works via FMO driver (runtyp=fmohess), 
+! so if you do not want to use fragments, define 1 large fragment.
+! In addition, thermodynamic properties are partitioned into segment values,
+! so you must also define segments. In this particular run, segments are the
+! same as fragments (modpan=33). 
+! A subset of atoms for PAVE is chosen with jactat(1)=1 -3.
+! In this run, no normal mode is excluded from thermochemistry (nzpha=0).
+! Sometimes you want to exclude 3, 6 or another number of modes.
+!
+! The main results are:
+!  Real vibrational frequencies in cm-1 are:
+!   36.580  123.372  141.401  198.204  345.815  587.754 1381.897 3510.639
+! 3836.558
+!
+!       i         ZPE         Evib(T)       -T*Svib         Fvib          Svib
+!       1        14.528         2.081        -4.500        12.109        15.093
+!
+ $contrl runtyp=fmohess nprint=-5 $end
+ $gddi ngroup=1 $end
+ $system mwords=50 $end
+ $force nzpha=0 method=seminum PROJCT=.f. jactat(1)=1 -3 vibsiz=1e-3 $end
+ $scf dirscf=.t. $end
+ $fmoprp nprint=3 modorb=3 modpan=33 $end
+ $basis gbasis=dftb $end
+ $dftb scc=.true.  dampxh=.true.  dftb3=.true. param=3ob-3-1 $end
+ $fmo nlayer=1 nfrag=3 nacut=3 modgrd=42 $end
+ $data
+water trimer
+ C1
+ h    1
+ o    8
+ $end
+ $fmoxyz
+ O           8.0   0.0189782971   0.1058673724   0.0420594796
+ H           1.0  -0.0219847136  -0.0171483445   0.9931296921
+ H           1.0   0.9370881459   0.0168381246  -0.2664144207
+ O           8.0   2.4431245049   0.8029133828  -1.0729301616
+ H           1.0   1.9094629715   1.5638348125  -1.3581946322
+ H           1.0   3.1637572570   0.6456180730  -1.6872499286
+ O           8.0   0.2007522901   2.3397166023  -1.5681897048
+ H           1.0  -0.1571369332   1.6625711599  -0.9662070375
+ H           1.0  -0.4783718199   2.6471788171  -2.1730022862
+ $end

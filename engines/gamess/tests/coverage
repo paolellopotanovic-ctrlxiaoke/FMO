@@ -1,0 +1,4 @@
+#!/bin/bash
+
+gcov -n object/*.[fF]* 2> /dev/null
+#gcov -n object/*.f object/*.F object/*.f90 2> /dev/null

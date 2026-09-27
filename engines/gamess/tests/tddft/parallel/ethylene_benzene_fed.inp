@@ -1,0 +1,133 @@
+!  Adapted Dominik Lindorfer's ethylene-benzenze
+!  dimer tests originally written for Q-Chem
+!
+!  https://github.com/DominikLindorfer/Multi-FED-FCD/blob/master/QChem_FED/FED_ethylene_benzene.out
+!  https://github.com/DominikLindorfer/Multi-FED-FCD/blob/master/QChem_FCD/FCD_ethylene_benzene.out
+!
+!  The CIS states from Q-Chem
+!
+!  Excited state   1: excitation energy (eV) =    6.4781
+!  ...
+!     Trans. Mom.:  0.0000 X  -0.1525 Y   0.0000 Z
+!  ...
+!  Excited state   2: excitation energy (eV) =    6.6917
+! ...
+!     Trans. Mom.:  0.0371 X   0.0000 Y   0.0000 Z
+! ...
+!  Excited state   3: excitation energy (eV) =    7.2418
+! ...
+!     Trans. Mom.:  0.0000 X   0.0000 Y  -0.1434 Z
+! ...
+!  Excited state   4: excitation energy (eV) =    7.5708
+! ...
+!     Trans. Mom.:  0.0000 X   0.0000 Y   0.0000 Z
+! ...
+!  Excited state   5: excitation energy (eV) =    7.7059
+! ...
+!     Trans. Mom.: -0.2157 X   0.0000 Y   0.0000 Z
+! ...
+!  Excited state   6: excitation energy (eV) =    8.4901
+! ...
+!     Trans. Mom.:  0.0000 X  -1.9827 Y   0.0000 Z
+! ...
+!  Excited state   7: excitation energy (eV) =    9.2702
+! ...
+!     Trans. Mom.:  2.5756 X   0.0000 Y   0.0000 Z
+!
+!  their respective FED couplings
+!
+!  --------------------------------------------------------------------------------
+!     States     X12(D)     X12(A)       dX12    Coupling(eV)   FED-dX1    FED-dX2
+!  --------------------------------------------------------------------------------
+!  ...
+!     1    6  -0.005135   0.005135  -0.010271     -0.1681796   1.941805   1.818929
+!  ...
+!     2    5  -0.011097   0.011097  -0.022193    -0.01030871   1.935670  -0.247696
+!  ...
+!     2    7  -0.035460   0.035460  -0.070921     -0.1170773   1.938671   0.376753
+!
+!  and the absolute values of their FCD couplings
+!
+!  --------------------------------------------------------------------------------
+!     States     Q12(D)     Q12(A)       dQ12    Coupling(eV)   FCD-dQ1    FCD-dQ2
+!  --------------------------------------------------------------------------------
+!  ...
+!     1    6  -0.019387   0.019387  -0.038774     -0.9795867  -0.035644  -0.115284
+!  ...
+!     2    5   0.003211  -0.003211   0.006421      0.1108799  -0.062615  -0.121348
+!  ...
+!     2    7   0.002938  -0.002938   0.005877      0.1656406  -0.062947  -0.154424
+!  ...
+!     5    7  -0.028931   0.028931  -0.057862     -0.7514507  -0.077117  -0.197566
+!
+!  can be reproduced. The CIS states in GAMESS are
+!
+!   STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!   0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!   0  A         -308.5750130899    0.000
+!   1  A         -308.3369484253    6.478    -0.0000 -0.1527  0.0000    0.0037
+!   2  A         -308.3290965057    6.692    -0.0372  0.0000  0.0000    0.0002
+!   3  A         -308.3088815934    7.242    -0.0000 -0.0000  0.1434    0.0036
+!   4  A         -308.2967902169    7.571    -0.0000 -0.0000 -0.0000    0.0000
+!   5  A         -308.2918263335    7.706    -0.2157 -0.0000  0.0000    0.0088
+!   6  A         -308.2630086297    8.490    -0.0000  1.9830  0.0000    0.8179
+!   7  A         -308.2343403053    9.270    -2.5751  0.0000  0.0000    1.5060
+!
+!  their FED couplings yield
+!
+!   STATES     X12(D)     X12(A)       DX12   COUPLING(EV)    FED-DX1    FED-DX2
+!   ...
+!   1    6   0.005113  -0.005113   0.010226     -0.1676919   1.940932   1.819952
+!   ...
+!   2    5   0.011105  -0.011105   0.022211     -0.0103171   1.935446  -0.247429
+!   ...
+!   2    7  -0.035441   0.035441  -0.070881     -0.1170027   1.935446   0.379843
+!
+!  while the FCD couplings read
+!
+!   STATES     Q12(D)     Q12(A)       DQ12   COUPLING(EV)    FCD-DQ1    FCD-DQ2
+!   ...
+!   1    6  -0.019368   0.019368  -0.038735      0.9795404  -0.066386  -0.084514
+!   ...
+!   2    5  -0.003211   0.003211  -0.006422      0.1108000  -0.063315  -0.120673
+!   ...
+!   2    7   0.002931  -0.002931   0.005862      0.1654701  -0.063315  -0.153897
+!   ...
+!   5    7   0.028928  -0.028928   0.057857      0.7517626  -0.120673  -0.153897
+!
+!  Note that contrary to Q-Chem the FCD couplings printed in GAMESS are always
+!  positive. In their their definition in eq. 3 of J. Chem. Phys. 117, 5607–5616 (2002)
+!  the sign of the FCD couplings depends only on the energy difference between
+!  the participating states. Since in our case E_2 is always larger than E_1, the
+!  printed couplings are always positive.
+!
+ $contrl scftyp=rhf runtyp=energy icut=10
+         tddft=excite dfttyp=none $end
+ $system mwords=5 $end
+ $basis  gbasis=n31 ngauss=6 $end
+ $scf    conv=1d-7 $end
+ $tddft nstate=10 iroot=1 tammd=.true.
+        unrlx=.true. fed=.true. ifedat(1)=1,6,7,18
+        cnvtol=1d-7 $end
+ $data
+ethylene-benzene dimer
+C1
+C  6.0   0.670518       0.000000      0.000000
+H  1.0   1.241372       0.927754      0.000000
+H  1.0   1.241372      -0.927754      0.000000
+C  6.0  -0.670518       0.000000      0.000000
+H  1.0  -1.241372      -0.927754      0.000000
+H  1.0  -1.241372       0.927754      0.000000
+C  6.0   1.3862000000   0.0000000000  2.5
+C  6.0   0.6931000000   1.2004844147  2.5
+C  6.0  -0.6931000000   1.2004844147  2.5
+C  6.0  -1.3862000000   0.0000000000  2.5
+C  6.0  -0.6931000000  -1.2004844147  2.5
+C  6.0   0.6931000000  -1.2004844147  2.5
+H  1.0   2.4618000000   0.0000000000  2.5
+H  1.0   1.2309000000   2.1319813390  2.5
+H  1.0  -1.2309000000   2.1319813390  2.5
+H  1.0  -2.4618000000   0.0000000000  2.5
+H  1.0  -1.2309000000  -2.1319813390  2.5
+H  1.0   1.2309000000  -2.1319813390  2.5
+ $end

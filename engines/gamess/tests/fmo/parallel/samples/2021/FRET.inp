@@ -1,0 +1,36 @@
+! Foerster resonance energy transfer (FRET) with FMO-TDDFT.
+! Excitations in two waters are coupled.
+!
+!The FRET matrix is (hartree)
+!            1           2
+!   1    0.2952317
+!   2   -0.0000117   0.2928835
+!
+ $contrl units=angs nosym=1 nprint=-5 dfttyp=lcblyp tddft=excite $end 
+ $system BALTYP=NXTVAL $end
+ $gddi ngroup=1 parout=.t. $end
+ $scf dirscf=.t. NPUNCH=0 diis=.t. soscf=.f. $end
+ $basis gbasis=n31 ngauss=6 $end
+ $tddft mult=1 nstate=3 $end
+ $fmo nfrag=3 nacut=3
+     iexcit(1)=-1,1,2,0
+     iactfg(1)=1, 0, 1
+ $end
+ $fmoprp nprint=9 $end
+ $fmoxyz
+              O  O            .000000     .000000     .000000
+              H  H            .000000     .000000     .957200
+              H  H            .926627     .000000    -.239987
+              8  8           2.542027     .893763   -1.001593
+              H  H           1.991815    1.623962   -1.284979
+              1  1           2.958433     .581215   -1.804806
+              O  O            .162059    2.462918   -1.477183
+              H  H           -.189749    1.755643    -.936605
+              H  H           -.375542    2.449889   -2.269046
+ $end
+ $data
+Basis set input using fake atomic coordinates
+c1
+h-1 1
+o-1 8
+ $end

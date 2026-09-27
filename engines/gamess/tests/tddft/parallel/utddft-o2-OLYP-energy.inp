@@ -1,0 +1,18 @@
+ $contrl scftyp=uhf dfttyp=OLYP tddft=excite
+         mult=3 runtyp=energy ispher=1 $end
+ $system mwords=6 $end
+ $dft    nrad=96 nleb=302 $end
+ $tddft  nrad=48 nleb=110 nstate=3 $end
+ $guess  guess=huckel $end
+ $scf    dirscf=.t. $end
+ $DATA
+triplet O2 open shell TDDFT test case...ground state's exp. Re used
+Dnh  2
+
+O           8.0   0.0000000000   0.0000000000  1.20752/2
+   accd
+   s 1 ; 1 0.01 1.0
+   p 1 ; 1 0.02 1.0
+   d 1 ; 1 0.04 1.0
+
+ $end

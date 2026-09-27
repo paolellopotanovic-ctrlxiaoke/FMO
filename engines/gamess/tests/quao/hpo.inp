@@ -1,0 +1,35 @@
+!  Note the QUAO populations and charges are the same for
+!  local=svd and local=ruednbrg
+!
+!      TOTAL ATOMIC QUAO POPULATIONS
+!    ATOM      QUAO POP.       CHARGE
+!    1 P       14.065756      0.934244
+!    2 O        8.794230     -0.794230
+!    3 H        1.140014     -0.140014
+!
+ $contrl
+  scftyp=rhf
+  mult=1
+  ispher=1
+!  local=ruednbrg
+  local=svd
+ $end
+ $local orient=.t. extloc=splitq2 $end
+ $scf
+  conv=1.0d-9
+  vvos=.t.
+  soscf=.t. diis=.f. shift=.t. damp=.t.
+ $end
+ $basis gbasis=ccd $end
+ $guess guess=huckel $end
+ $system mwords=50 memddi=50 $end
+ $data
+HP=O QUAO charges
+Cs
+
+P    15.0     0.47016     0.05437     0.00000
+O     8.0    -0.96670    -0.02410     0.00000
+H     1.0     0.89681    -1.28848     0.00000
+ $end
+
+

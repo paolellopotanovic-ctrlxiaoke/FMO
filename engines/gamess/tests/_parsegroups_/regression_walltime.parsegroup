@@ -1,0 +1,14 @@
+{
+  "parse_header" : "PERFORMANCE REGRESSION",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)TOTAL WALL CLOCK TIME=(\\s*).*SECONDS",
+     "parse_name"   : "TOTAL WALLTIME (S)",
+     "parse_precision" : 1,
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_required" : true,
+     "parse_tolerance" : 5.0,
+     "parse_type" : "float"
+   }
+  ]
+}

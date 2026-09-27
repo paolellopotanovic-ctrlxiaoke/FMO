@@ -1,0 +1,14 @@
+! REFERENCE ENERGY:      -75.5877112496
+!     CCSDt ENERGY:      -75.9530698174   CORR. E=  -0.3653585679
+!
+ $contrl runtyp=energy scftyp=rohf cctyp=ccsd3a units=bohr ispher=1 $end
+ $system mwords=50 $end
+ $basis gbasis=ccd $end
+ $ccinp ncore=0 nacto=5 nactu=19 $end
+ $data
+ H2O cc-pVDZ for R = 2Re; full CCSDT run
+cnv 2
+
+oxygen    8.         0.000000        0.000000      -0.0180
+hydrogen  1.         0.000000        3.030526      -2.117796
+ $end

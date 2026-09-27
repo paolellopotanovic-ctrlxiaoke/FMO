@@ -1,0 +1,2443 @@
+module ccsd3a_sum_mod
+  implicit none
+  public
+contains
+!*MODULE CCSD3A DECK SUM*
+!> @brief Multi-dimensional AXPYs with permutation
+!>
+!> @author Jun Shen
+!> - April, 2018
+!>
+!> @param K* starting index (per dimension)
+!> @param L* ending index (per dimension)
+!> @param A,B,C,... double precision array
+  subroutine sum12(K1,L1,K2,L2,A,B,C)
+!
+    integer,intent(in)    :: K2,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      A(I1,I2)=A(I1,I2)+C*B(I1,I2)
+    endforall
+!
+  endsubroutine sum12
+!
+  subroutine sum21(K1,L1,K2,L2,A,B,C)
+!
+    integer,intent(in)    :: K2,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      A(I1,I2)=A(I1,I2)+C*B(I2,I1)
+    endforall
+!
+  endsubroutine sum21
+!
+  subroutine sum123(K1,L1,K2,L2,K3,L3,A,B,C)
+!
+    integer,intent(in)    :: K2,K3,L3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      A(I1,I2,I3)=A(I1,I2,I3)+C*B(I1,I2,I3)
+    endforall
+!
+  endsubroutine sum123
+!
+  subroutine sum132(K1,L1,K2,L2,K3,L3,A,B,C)
+!
+    integer,intent(in)    :: K2,K3,L3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      A(I1,I2,I3)=A(I1,I2,I3)+C*B(I1,I3,I2)
+    endforall
+!
+  endsubroutine sum132
+!
+  subroutine sum213(K1,L1,K2,L2,K3,L3,A,B,C)
+!
+    integer,intent(in)    :: K2,K3,L3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K1+1:L1,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      A(I1,I2,I3)=A(I1,I2,I3)+C*B(I2,I1,I3)
+    endforall
+!
+  endsubroutine sum213
+!
+  subroutine sum231(K1,L1,K2,L2,K3,L3,A,B,C)
+!
+    integer,intent(in)    :: K2,K3,L3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      A(I1,I2,I3)=A(I1,I2,I3)+C*B(I2,I3,I1)
+    endforall
+!
+  endsubroutine sum231
+!
+  subroutine sum312(K1,L1,K2,L2,K3,L3,A,B,C)
+!
+    integer,intent(in)    :: K2,K3,L3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      A(I1,I2,I3)=A(I1,I2,I3)+C*B(I3,I1,I2)
+    endforall
+!
+  endsubroutine sum312
+!
+!
+  subroutine sum1234(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine sum1234
+!
+  subroutine sum1243(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I2,I4,I3)
+    endforall
+!
+  endsubroutine sum1243
+!
+  subroutine sum1324(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I3,I2,I4)
+    endforall
+!
+  endsubroutine sum1324
+!
+  subroutine sum1342(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I3,I4,I2)
+    endforall
+!
+  endsubroutine sum1342
+!
+  subroutine sum1423(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K2+1:L2,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I4,I2,I3)
+    endforall
+!
+  endsubroutine sum1423
+!
+!
+  subroutine sum2134(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I1,I3,I4)
+    endforall
+!
+  endsubroutine sum2134
+!
+  subroutine sum2143(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K1+1:L1,K4+1:L4,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I1,I4,I3)
+    endforall
+!
+  endsubroutine sum2143
+!
+  subroutine sum2314(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I3,I1,I4)
+    endforall
+!
+  endsubroutine sum2314
+!
+  subroutine sum2341(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I3,I4,I1)
+    endforall
+!
+  endsubroutine sum2341
+!
+  subroutine sum2413(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K1+1:L1,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I4,I1,I3)
+    endforall
+!
+  endsubroutine sum2413
+!
+  subroutine sum2431(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K3+1:L3,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I4,I3,I1)
+    endforall
+!
+  endsubroutine sum2431
+!
+  subroutine sum3124(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I1,I2,I4)
+    endforall
+!
+  endsubroutine sum3124
+!
+!
+!
+!
+  subroutine sum3412(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I4,I1,I2)
+    endforall
+!
+  endsubroutine sum3412
+!
+!
+  subroutine sum4123(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I1,I2,I3)
+    endforall
+!
+  endsubroutine sum4123
+!
+!
+  subroutine sum4213(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K2+1:L2,K1+1:L1,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I2,I1,I3)
+    endforall
+!
+  endsubroutine sum4213
+!
+  subroutine sum4231(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K2+1:L2,K3+1:L3,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I2,I3,I1)
+    endforall
+!
+  endsubroutine sum4231
+!
+!
+!
+!
+  subroutine sum12354(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I2,I3,I5,I4)
+    endforall
+!
+  endsubroutine sum12354
+!
+  subroutine sum12435(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K3+1:L3,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I2,I4,I3,I5)
+    endforall
+!
+  endsubroutine sum12435
+!
+  subroutine sum12453(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I2,I4,I5,I3)
+    endforall
+!
+  endsubroutine sum12453
+!
+  subroutine sum12534(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K5+1:L5,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I2,I5,I3,I4)
+    endforall
+!
+  endsubroutine sum12534
+!
+!
+  subroutine sum13245(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I3,I2,I4,I5)
+    endforall
+!
+  endsubroutine sum13245
+!
+!
+  subroutine sum13425(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K2+1:L2,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I3,I4,I2,I5)
+    endforall
+!
+  endsubroutine sum13425
+!
+  subroutine sum13452(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I3,I4,I5,I2)
+    endforall
+!
+  endsubroutine sum13452
+!
+  subroutine sum13524(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K5+1:L5,K2+1:L2,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I3,I5,I2,I4)
+    endforall
+!
+  endsubroutine sum13524
+!
+!
+  subroutine sum14523(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K5+1:L5,K2+1:L2,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I4,I5,I2,I3)
+    endforall
+!
+  endsubroutine sum14523
+!
+  subroutine sum14532(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K5+1:L5,K3+1:L3,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I1,I4,I5,I3,I2)
+    endforall
+!
+  endsubroutine sum14532
+!
+  subroutine sum21345(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I2,I1,I3,I4,I5)
+    endforall
+!
+  endsubroutine sum21345
+!
+  subroutine sum23145(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I2,I3,I1,I4,I5)
+    endforall
+!
+  endsubroutine sum23145
+!
+!
+  subroutine sum23415(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K1+1:L1,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I2,I3,I4,I1,I5)
+    endforall
+!
+  endsubroutine sum23415
+!
+  subroutine sum23451(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I2,I3,I4,I5,I1)
+    endforall
+!
+  endsubroutine sum23451
+!
+  subroutine sum23514(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K5+1:L5,K1+1:L1,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I2,I3,I5,I1,I4)
+    endforall
+!
+  endsubroutine sum23514
+!
+!
+!
+!
+!
+!
+  subroutine sum24513(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K5+1:L5,K1+1:L1,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I2,I4,I5,I1,I3)
+    endforall
+!
+  endsubroutine sum24513
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum31245(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I3,I1,I2,I4,I5)
+    endforall
+!
+  endsubroutine sum31245
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum34512(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K5+1:L5,K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I3,I4,I5,I1,I2)
+    endforall
+!
+  endsubroutine sum34512
+!
+  subroutine sum34521(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L5,K3,L3,K4,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K5+1:L5,K2+1:L2,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      A(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)+C*B(I3,I4,I5,I2,I1)
+    endforall
+!
+  endsubroutine sum34521
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum123465(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K6+1:L6,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I3,I4,I6,I5)
+    endforall
+!
+  endsubroutine sum123465
+!
+  subroutine sum123546(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5,K4+1:L4,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I3,I5,I4,I6)
+    endforall
+!
+  endsubroutine sum123546
+!
+  subroutine sum123564(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5,K6+1:L6,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I3,I5,I6,I4)
+    endforall
+!
+  endsubroutine sum123564
+!
+  subroutine sum123645(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K6+1:L6,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I3,I6,I4,I5)
+    endforall
+!
+  endsubroutine sum123645
+!
+  subroutine sum123654(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K6+1:L6,K5+1:L5,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I3,I6,I5,I4)
+    endforall
+!
+  endsubroutine sum123654
+!
+  subroutine sum124356(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K3+1:L3,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I4,I3,I5,I6)
+    endforall
+!
+  endsubroutine sum124356
+!
+  subroutine sum124365(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K3+1:L3,K6+1:L6,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I4,I3,I6,I5)
+    endforall
+!
+  endsubroutine sum124365
+!
+  subroutine sum124536(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5,K3+1:L3,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I4,I5,I3,I6)
+    endforall
+!
+  endsubroutine sum124536
+!
+  subroutine sum124563(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I4,I5,I6,I3)
+    endforall
+!
+  endsubroutine sum124563
+!
+  subroutine sum124635(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K4+1:L4,K6+1:L6,K3+1:L3,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I4,I6,I3,I5)
+    endforall
+!
+  endsubroutine sum124635
+!
+!
+  subroutine sum125346(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K5+1:L5,K3+1:L3,K4+1:L4,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I5,I3,I4,I6)
+    endforall
+!
+  endsubroutine sum125346
+!
+  subroutine sum125364(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K5+1:L5,K3+1:L3,K6+1:L6,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I5,I3,I6,I4)
+    endforall
+!
+  endsubroutine sum125364
+!
+!
+!
+  subroutine sum125634(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K5+1:L5,K6+1:L6,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I5,I6,I3,I4)
+    endforall
+!
+  endsubroutine sum125634
+!
+!
+  subroutine sum126345(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K6+1:L6,K3+1:L3,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I6,I3,I4,I5)
+    endforall
+!
+  endsubroutine sum126345
+!
+  subroutine sum126354(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K6+1:L6,K3+1:L3,K5+1:L5,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I6,I3,I5,I4)
+    endforall
+!
+  endsubroutine sum126354
+!
+!
+!
+!
+!
+  subroutine sum132456(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I2,I4,I5,I6)
+    endforall
+!
+  endsubroutine sum132456
+!
+!
+!
+!
+!
+!
+  subroutine sum134256(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K2+1:L2,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I4,I2,I5,I6)
+    endforall
+!
+  endsubroutine sum134256
+!
+  subroutine sum134265(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K2+1:L2,K6+1:L6,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I4,I2,I6,I5)
+    endforall
+!
+  endsubroutine sum134265
+!
+  subroutine sum134526(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5,K2+1:L2,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I4,I5,I2,I6)
+    endforall
+!
+  endsubroutine sum134526
+!
+  subroutine sum134562(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I4,I5,I6,I2)
+    endforall
+!
+  endsubroutine sum134562
+!
+  subroutine sum134625(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K4+1:L4,K6+1:L6,K2+1:L2,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I4,I6,I2,I5)
+    endforall
+!
+  endsubroutine sum134625
+!
+!
+  subroutine sum135246(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K5+1:L5,K2+1:L2,K4+1:L4,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I5,I2,I4,I6)
+    endforall
+!
+  endsubroutine sum135246
+!
+  subroutine sum135264(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K5+1:L5,K2+1:L2,K6+1:L6,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I5,I2,I6,I4)
+    endforall
+!
+  endsubroutine sum135264
+!
+!
+!
+  subroutine sum135624(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K5+1:L5,K6+1:L6,K2+1:L2,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I5,I6,I2,I4)
+    endforall
+!
+  endsubroutine sum135624
+!
+!
+  subroutine sum136245(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K6+1:L6,K2+1:L2,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I6,I2,I4,I5)
+    endforall
+!
+  endsubroutine sum136245
+!
+  subroutine sum136254(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K6+1:L6,K2+1:L2,K5+1:L5,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I6,I2,I5,I4)
+    endforall
+!
+  endsubroutine sum136254
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum145236(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K5+1:L5,K2+1:L2,K3+1:L3,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I5,I2,I3,I6)
+    endforall
+!
+  endsubroutine sum145236
+!
+!
+  subroutine sum145326(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K5+1:L5,K3+1:L3,K2+1:L2,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I5,I3,I2,I6)
+    endforall
+!
+  endsubroutine sum145326
+!
+!
+  subroutine sum145623(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K5+1:L5,K6+1:L6,K2+1:L2,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I5,I6,I2,I3)
+    endforall
+!
+  endsubroutine sum145623
+!
+  subroutine sum145632(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K5+1:L5,K6+1:L6,K3+1:L3,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I5,I6,I3,I2)
+    endforall
+!
+  endsubroutine sum145632
+!
+  subroutine sum146235(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K6+1:L6,K2+1:L2,K3+1:L3,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I6,I2,I3,I5)
+    endforall
+!
+  endsubroutine sum146235
+!
+!
+  subroutine sum146325(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K6+1:L6,K3+1:L3,K2+1:L2,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I6,I3,I2,I5)
+    endforall
+!
+  endsubroutine sum146325
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum156234(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K5+1:L5,K6+1:L6,K2+1:L2,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I5,I6,I2,I3,I4)
+    endforall
+!
+  endsubroutine sum156234
+!
+!
+  subroutine sum156324(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K5+1:L5,K6+1:L6,K3+1:L3,K2+1:L2,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I5,I6,I3,I2,I4)
+    endforall
+!
+  endsubroutine sum156324
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum213456(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I1,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine sum213456
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum231456(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I1,I4,I5,I6)
+    endforall
+!
+  endsubroutine sum231456
+!
+!
+!
+!
+!
+!
+  subroutine sum234156(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K1+1:L1,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I4,I1,I5,I6)
+    endforall
+!
+  endsubroutine sum234156
+!
+  subroutine sum234165(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K1+1:L1,K6+1:L6,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I4,I1,I6,I5)
+    endforall
+!
+  endsubroutine sum234165
+!
+  subroutine sum234516(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K1+1:L1,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I4,I5,I1,I6)
+    endforall
+!
+  endsubroutine sum234516
+!
+  subroutine sum234561(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I4,I5,I6,I1)
+    endforall
+!
+  endsubroutine sum234561
+!
+  subroutine sum234615(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K4+1:L4,K6+1:L6,K1+1:L1,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I4,I6,I1,I5)
+    endforall
+!
+  endsubroutine sum234615
+!
+!
+  subroutine sum235146(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K5+1:L5,K1+1:L1,K4+1:L4,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I5,I1,I4,I6)
+    endforall
+!
+  endsubroutine sum235146
+!
+  subroutine sum235164(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K5+1:L5,K1+1:L1,K6+1:L6,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I5,I1,I6,I4)
+    endforall
+!
+  endsubroutine sum235164
+!
+!
+!
+  subroutine sum235614(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K5+1:L5,K6+1:L6,K1+1:L1,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I5,I6,I1,I4)
+    endforall
+!
+  endsubroutine sum235614
+!
+!
+  subroutine sum236145(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K6+1:L6,K1+1:L1,K4+1:L4,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I6,I1,I4,I5)
+    endforall
+!
+  endsubroutine sum236145
+!
+  subroutine sum236154(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K3+1:L3,K6+1:L6,K1+1:L1,K5+1:L5,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I3,I6,I1,I5,I4)
+    endforall
+!
+  endsubroutine sum236154
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum245136(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K5+1:L5,K1+1:L1,K3+1:L3,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I5,I1,I3,I6)
+    endforall
+!
+  endsubroutine sum245136
+!
+!
+!
+!
+  subroutine sum245613(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6,K1+1:L1,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I5,I6,I1,I3)
+    endforall
+!
+  endsubroutine sum245613
+!
+  subroutine sum245631(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6,K3+1:L3,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I5,I6,I3,I1)
+    endforall
+!
+  endsubroutine sum245631
+!
+  subroutine sum246135(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K6+1:L6,K1+1:L1,K3+1:L3,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I6,I1,I3,I5)
+    endforall
+!
+  endsubroutine sum246135
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum256134(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K5+1:L5,K6+1:L6,K1+1:L1,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I5,I6,I1,I3,I4)
+    endforall
+!
+  endsubroutine sum256134
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+  subroutine sum312456(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I1,I2,I4,I5,I6)
+    endforall
+!
+  endsubroutine sum312456
+!
+  subroutine sum345126(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K5+1:L5,K1+1:L1,K2+1:L2,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I4,I5,I1,I2,I6)
+    endforall
+!
+  endsubroutine sum345126
+!
+!
+  subroutine sum345216(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K5+1:L5,K2+1:L2,K1+1:L1,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I4,I5,I2,I1,I6)
+    endforall
+!
+  endsubroutine sum345216
+!
+!
+  subroutine sum345612(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6,K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I4,I5,I6,I1,I2)
+    endforall
+!
+  endsubroutine sum345612
+!
+  subroutine sum345621(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6,K2+1:L2,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I4,I5,I6,I2,I1)
+    endforall
+!
+  endsubroutine sum345621
+!
+  subroutine sum346125(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K6+1:L6,K1+1:L1,K2+1:L2,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I4,I6,I1,I2,I5)
+    endforall
+!
+  endsubroutine sum346125
+!
+!
+  subroutine sum346215(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K6+1:L6,K2+1:L2,K1+1:L1,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I4,I6,I2,I1,I5)
+    endforall
+!
+  endsubroutine sum346215
+!
+  subroutine sum356124(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K5+1:L5,K6+1:L6,K1+1:L1,K2+1:L2,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I5,I6,I1,I2,I4)
+    endforall
+!
+  endsubroutine sum356124
+!
+!
+  subroutine sum356214(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K5+1:L5,K6+1:L6,K2+1:L2,K1+1:L1,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I5,I6,I2,I1,I4)
+    endforall
+!
+  endsubroutine sum356214
+!
+  subroutine sumx12(M1,N1,M2,N2,K1,L1,K2,L2,A,B,C)
+!
+    integer,intent(in)    :: K2,M1,M2,N2,N1,L1,L2,K1
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      A(I1,I2)=A(I1,I2)+C*B(I1,I2)
+    endforall
+!
+  endsubroutine sumx12
+!
+  subroutine sumx21(M1,N1,M2,N2,K1,L1,K2,L2,A,B,C)
+!
+    integer,intent(in)    :: K2,M1,M2,N2,N1,L1,L2,K1
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      A(I1,I2)=A(I1,I2)+C*B(I2,I1)
+    endforall
+!
+  endsubroutine sumx21
+!
+  subroutine sumx1(M1,N1,M2,N2,K1,L1,K2,L2,A,B,C)
+!
+    integer,intent(in)    :: K2,M1,M2,N2,N1,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(M1+1:N1,M2+1:N2)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      A(I1,I2)=A(I1,I2)+C*B(I1,I2)
+    endforall
+!
+  endsubroutine sumx1
+!
+  subroutine sumx2(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,K1,N4,N3,K3,M4,N2,L4,K4,L1,M3
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+    real(8),intent(inout) :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine sumx2
+!
+  subroutine sumx3(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,N6,L2,M1,M2,K5,K6,N4,K1,N5,M5,N3,L6,L5,K3,M4,N2,M6,L4,K4,L1,M3
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+    real(8),intent(inout) :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine sumx3
+!
+  subroutine sumx1234(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine sumx1234
+!
+  subroutine sumx1243(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I2,I4,I3)
+    endforall
+!
+  endsubroutine sumx1243
+!
+  subroutine sumx1324(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I3,I2,I4)
+    endforall
+!
+  endsubroutine sumx1324
+!
+  subroutine sumx1342(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I3,I4,I2)
+    endforall
+!
+  endsubroutine sumx1342
+!
+  subroutine sumx1423(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I4,I2,I3)
+    endforall
+!
+  endsubroutine sumx1423
+!
+  subroutine sumx1432(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I4,I3,I2)
+    endforall
+!
+  endsubroutine sumx1432
+!
+  subroutine sumx2134(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I1,I3,I4)
+    endforall
+!
+  endsubroutine sumx2134
+!
+  subroutine sumx2143(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I1,I4,I3)
+    endforall
+!
+  endsubroutine sumx2143
+!
+  subroutine sumx2314(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I3,I1,I4)
+    endforall
+!
+  endsubroutine sumx2314
+!
+  subroutine sumx2341(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I3,I4,I1)
+    endforall
+!
+  endsubroutine sumx2341
+!
+  subroutine sumx2413(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I4,I1,I3)
+    endforall
+!
+  endsubroutine sumx2413
+!
+  subroutine sumx2431(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I2,I4,I3,I1)
+    endforall
+!
+  endsubroutine sumx2431
+!
+  subroutine sumx3124(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I1,I2,I4)
+    endforall
+!
+  endsubroutine sumx3124
+!
+  subroutine sumx3142(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I1,I4,I2)
+    endforall
+!
+  endsubroutine sumx3142
+!
+  subroutine sumx3214(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I2,I1,I4)
+    endforall
+!
+  endsubroutine sumx3214
+!
+  subroutine sumx3241(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I2,I4,I1)
+    endforall
+!
+  endsubroutine sumx3241
+!
+  subroutine sumx3412(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I4,I1,I2)
+    endforall
+!
+  endsubroutine sumx3412
+!
+  subroutine sumx3421(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I4,I2,I1)
+    endforall
+!
+  endsubroutine sumx3421
+!
+  subroutine sumx4123(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I1,I2,I3)
+    endforall
+!
+  endsubroutine sumx4123
+!
+  subroutine sumx4132(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I1,I3,I2)
+    endforall
+!
+  endsubroutine sumx4132
+!
+  subroutine sumx4213(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I2,I1,I3)
+    endforall
+!
+  endsubroutine sumx4213
+!
+  subroutine sumx4231(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I2,I3,I1)
+    endforall
+!
+  endsubroutine sumx4231
+!
+  subroutine sumx4312(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I3,I1,I2)
+    endforall
+!
+  endsubroutine sumx4312
+!
+  subroutine sumx4321(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,N1,L3,L2,M1,M2,N4,K1,N3,K3,M4,L4,N2,K4,L1,M3
+    real(8),intent(in)    :: C,B(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I3,I2,I1)
+    endforall
+!
+  endsubroutine sumx4321
+!
+  subroutine sum1432(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K3+1:L3,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I1,I4,I3,I2)
+    endforall
+!
+  endsubroutine sum1432
+!
+  subroutine sum3214(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K2+1:L2,K1+1:L1,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I2,I1,I4)
+    endforall
+!
+  endsubroutine sum3214
+!
+  subroutine sum3241(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K2+1:L2,K4+1:L4,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I2,I4,I1)
+    endforall
+!
+  endsubroutine sum3241
+!
+  subroutine sum3421(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K4+1:L4,K2+1:L2,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I3,I4,I2,I1)
+    endforall
+!
+  endsubroutine sum3421
+!
+  subroutine sum4132(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K1+1:L1,K3+1:L3,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I1,I3,I2)
+    endforall
+!
+  endsubroutine sum4132
+!
+  subroutine sum4312(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K3+1:L3,K1+1:L1,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I3,I1,I2)
+    endforall
+!
+  endsubroutine sum4312
+!
+  subroutine sum4321(K1,L1,K2,L2,K3,L3,K4,L4,A,B,C)
+!
+    integer,intent(in)    :: K2,L4,K4,L3,K3,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K3+1:L3,K2+1:L2,K1+1:L1)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I4,I3,I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      A(I1,I2,I3,I4)=A(I1,I2,I3,I4)+C*B(I4,I3,I2,I1)
+    endforall
+!
+  endsubroutine sum4321
+!
+  subroutine sum125436(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K5+1:L5,K4+1:L4,K3+1:L3,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I5,I4,I3,I6)
+    endforall
+!
+  endsubroutine sum125436
+!
+  subroutine sum126435(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K2+1:L2,K6+1:L6,K4+1:L4,K3+1:L3,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I2,I6,I4,I3,I5)
+    endforall
+!
+  endsubroutine sum126435
+!
+  subroutine sum135426(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K5+1:L5,K4+1:L4,K2+1:L2,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I5,I4,I2,I6)
+    endforall
+!
+  endsubroutine sum135426
+!
+  subroutine sum136425(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K3+1:L3,K6+1:L6,K4+1:L4,K2+1:L2,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I3,I6,I4,I2,I5)
+    endforall
+!
+  endsubroutine sum136425
+!
+  subroutine sum146253(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K4+1:L4,K6+1:L6,K2+1:L2,K5+1:L5,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I4,I6,I2,I5,I3)
+    endforall
+!
+  endsubroutine sum146253
+!
+  subroutine sum156243(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K1+1:L1,K5+1:L5,K6+1:L6,K2+1:L2,K4+1:L4,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I1,I5,I6,I2,I4,I3)
+    endforall
+!
+  endsubroutine sum156243
+!
+  subroutine sum245316(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K5+1:L5,K3+1:L3,K1+1:L1,K6+1:L6)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I5,I3,I1,I6)
+    endforall
+!
+  endsubroutine sum245316
+!
+  subroutine sum246153(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K6+1:L6,K1+1:L1,K5+1:L5,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I6,I1,I5,I3)
+    endforall
+!
+  endsubroutine sum246153
+!
+  subroutine sum246315(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K4+1:L4,K6+1:L6,K3+1:L3,K1+1:L1,K5+1:L5)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I4,I6,I3,I1,I5)
+    endforall
+!
+  endsubroutine sum246315
+!
+  subroutine sum256143(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K5+1:L5,K6+1:L6,K1+1:L1,K4+1:L4,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I5,I6,I1,I4,I3)
+    endforall
+!
+  endsubroutine sum256143
+!
+  subroutine sum256314(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K2+1:L2,K5+1:L5,K6+1:L6,K3+1:L3,K1+1:L1,K4+1:L4)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I2,I5,I6,I3,I1,I4)
+    endforall
+!
+  endsubroutine sum256314
+!
+  subroutine sum356142(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K3+1:L3,K5+1:L5,K6+1:L6,K1+1:L1,K4+1:L4,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I3,I5,I6,I1,I4,I2)
+    endforall
+!
+  endsubroutine sum356142
+!
+  subroutine sum456123(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K5+1:L5,K6+1:L6,K1+1:L1,K2+1:L2,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I4,I5,I6,I1,I2,I3)
+    endforall
+!
+  endsubroutine sum456123
+!
+  subroutine sum456132(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K5+1:L5,K6+1:L6,K1+1:L1,K3+1:L3,K2+1:L2)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I4,I5,I6,I1,I3,I2)
+    endforall
+!
+  endsubroutine sum456132
+!
+  subroutine sum456213(K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B,C)
+!
+    integer,intent(in)    :: K2,K5,L4,L6,L5,K3,L3,K4,K6,L1,L2,K1
+    real(8),intent(in)    :: C,B(K4+1:L4,K5+1:L5,K6+1:L6,K2+1:L2,K1+1:L1,K3+1:L3)
+    real(8),intent(inout) :: A(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I2,I6,I1,I5,I4,I3
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      A(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)+C*B(I4,I5,I6,I2,I1,I3)
+    endforall
+!
+  endsubroutine sum456213
+endmodule ccsd3a_sum_mod

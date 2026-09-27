@@ -1,0 +1,132 @@
+{
+  "name": "cmirs-ch3conh2.log",
+  "validation": [
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-208.0062076566",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "5.160728",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "SVP",
+      "name": "EGAS - SVP",
+      "value": "-207.98897518",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "EINT - SVP",
+      "value": "-207.98570938",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DINT - SVP",
+      "value": "0.00326580",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DGRXN - SVP",
+      "value": "-0.02049828",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "SS(V)PE DELTAG - SVP",
+      "value": "-0.01723248",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "SS(V)PE GTOTAL - SVP",
+      "value": "-208.00620766",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DEFESR DELTAG - SVP",
+      "value": "-0.00680117",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "CMIRS DELTAG - SVP",
+      "value": "-0.02403365",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "CMIRS GTOTAL - SVP",
+      "value": "-208.01300882",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CAVITY SURFACE AREA - SS(V)PE",
+      "value": "351.83295",
+      "type": "float",
+      "precision": 5,
+      "tolerance": 0.005
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CAVITY VOLUME - SS(V)PE",
+      "value": "545.25819",
+      "type": "float",
+      "precision": 5,
+      "tolerance": 0.005
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "TOT SURFACE POLARIZATION CHARGE - SS(V)PE",
+      "value": "-0.01036953",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CHARGE PENETRATION - SS(V)PE",
+      "value": "-0.15498916",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

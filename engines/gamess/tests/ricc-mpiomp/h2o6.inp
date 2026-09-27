@@ -1,0 +1,61 @@
+! RI-CCSD(T) energy for (H2O)6 cluster using the cc-pVDZ and
+! aug-cc-pVTZ-RI basis sets. 
+!
+! (Please always run an EXETYP=CHECK job to get a detailed
+!  information about MWORDS, MEMDDI in $SYSTEM and IOSIZE in
+!  $CCINP. This is strongly recommended.)
+!
+!    ------------------------------------------------
+!             SUMMARY OF ENERGY CALCULATIONS
+!    ------------------------------------------------
+!     COUPLED-CLUSTER METHOD             CCSD(T)
+!     REFERENCE STATE ENERGY        -456.1521516152
+!     MP2 CORRELATION ENERGY          -1.2322846861
+!     CCSD CORRELATION ENERGY         -1.2864101264
+!     CCSD(T) CORRELATION ENERGY      -1.3069510992
+!    ------------------------------------------------
+!     TOTAL RI-MP2 ENERGY           -457.3844363013
+!     TOTAL RI-CCSD ENERGY          -457.4385617416
+!     TOTAL RI-CCSD(T) ENERGY       -457.4591027143
+!    ------------------------------------------------
+!
+! This job used 1 MPI rank on 1 compute node and 16 OpenMP threads.
+! This run took ~6 minutes of wall time on a 24 core 2.40 GHz Intel 
+! Xeon CPU.
+! Test case generated on September 3, 2020.
+!
+ $CONTRL ISPHER=1 MULT=1 ICHARG=0 SCFTYP=RHF 
+         CCTYP=CCSD(T) RUNTYP=ENERGY $END
+ $BASIS GBASIS=CCD $END
+ $GUESS GUESS=HUCKEL $END
+ $SCF DIRSCF=.TRUE. $END
+ $INTGRL INTOMP=1 $END
+ $CCINP MAXCC=100 ICONV=7 CCERI=RI $END
+
+ $RICC CABNAM=ACCT EXTCAB=.FALSE. USEDM3=.FALSE. 
+                                  USEDM4=.TRUE. $END
+
+ $SYSTEM PARALL=.TRUE. TIMLIM=100 MWORDS=160 $END
+ $DATA
+ (H2O)6 cluster cc-pVDZ/aug-cc-pVTZ-RI basis sets
+C1
+ O  8.0   -15.56900000   15.35800000    4.19400000
+ H  1.0   -15.04000000   14.66200000    3.71600000
+ H  1.0   -15.40900000   15.08000000    5.15800000
+ O  8.0   -16.14200000   14.06700000    1.76300000
+ H  1.0   -16.36200000   13.14500000    1.75900000
+ H  1.0   -16.34700000   14.42300000    2.68600000
+ O  8.0   -16.24300000   12.19500000    4.75900000
+ H  1.0   -15.33300000   12.18400000    4.37300000
+ H  1.0   -16.16400000   12.73600000    5.57500000
+ O  8.0   -20.41400000   16.01499900    2.73900000
+ H  1.0   -20.98500100   16.56300000    2.17900000
+ H  1.0   -19.63200000   15.95100000    2.19200000
+ O  8.0   -14.77900000   18.02199900    3.71000000
+ H  1.0   -14.84100000   17.02599900    3.67500000
+ H  1.0   -15.23400000   18.23600000    2.96300000
+ O  8.0   -12.61800000   18.96200000    1.56900000
+ H  1.0   -13.37300000   18.36700100    1.44400000
+ H  1.0   -12.97000000   19.51600100    2.30700000
+ $END
+!TRAVIS-CI LARGE

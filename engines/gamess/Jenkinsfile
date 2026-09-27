@@ -1,0 +1,119 @@
+def bash_pipeline(String pipeline_stage, String pipeline_step) {
+    sh script: "exec ./pipeline.sh '" + pipeline_stage + "' '" + pipeline_step + "'", label: pipeline_step
+}
+
+pipeline {
+    agent { label 'sandybridge' }
+    environment {
+        GIT_COMMIT_ONELINER=sh(script: "git log --pretty=format:'%s' -n 1",,returnStdout: true).trim()
+        GIT_COMMIT_SHORTHASH=sh(script: "git log --pretty=format:'%h' -n 1",,returnStdout: true).trim()
+    }
+    stages {
+        stage('Environment') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Setup clean environment')
+            }
+        }
+        stage('Pre-check') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Checking for merge conflicts')
+                bash_pipeline(STAGE_NAME, 'Build FTNCHEK')
+                bash_pipeline(STAGE_NAME, 'Run FTNCHEK')
+                bash_pipeline(STAGE_NAME, 'Download LAPACK')
+            }
+        }
+        stage('GAMESS gnu-sockets-mkl') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Build')
+                bash_pipeline(STAGE_NAME, 'Test serial')
+                bash_pipeline(STAGE_NAME, 'Validate serial')
+                bash_pipeline(STAGE_NAME, 'Test parallel')
+                bash_pipeline(STAGE_NAME, 'Validate parallel')
+            }
+        }
+        stage('GAMESS gnu-impi-mkl') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Build')
+                bash_pipeline(STAGE_NAME, 'Test serial')
+                bash_pipeline(STAGE_NAME, 'Validate serial')
+                bash_pipeline(STAGE_NAME, 'Test parallel')
+                bash_pipeline(STAGE_NAME, 'Validate parallel')
+            }
+        }
+        stage('GAMESS gnu-impi-openblas') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Build')
+                bash_pipeline(STAGE_NAME, 'Test serial')
+                bash_pipeline(STAGE_NAME, 'Validate serial')
+                bash_pipeline(STAGE_NAME, 'Test parallel')
+                bash_pipeline(STAGE_NAME, 'Validate parallel')
+            }
+        }
+        stage('GAMESS OMP gnu-impi-openblas') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Build')
+                bash_pipeline(STAGE_NAME, 'Test serial')
+                bash_pipeline(STAGE_NAME, 'Validate serial')
+                bash_pipeline(STAGE_NAME, 'Test parallel')
+                bash_pipeline(STAGE_NAME, 'Validate parallel')
+            }
+        }
+        stage('NEO gnu-impi-mkl') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Build')
+                bash_pipeline(STAGE_NAME, 'Test serial')
+                bash_pipeline(STAGE_NAME, 'Validate serial')
+            }
+        }
+        stage('VB2000 gnu-impi-mkl') {
+            steps {
+                bash_pipeline(STAGE_NAME, 'Create install.info')
+                bash_pipeline(STAGE_NAME, 'Build')
+                bash_pipeline(STAGE_NAME, 'Test serial')
+                bash_pipeline(STAGE_NAME, 'Validate serial')
+            }
+        }
+    }
+    post {
+        always {
+            echo 'End of pipeline'
+        }
+        success {
+            echo 'Pipeline was successful'
+            slackSend color: "good", message: """
+            Build Successful :heart: :boom: :jenkins-flex:
+            Jenkins Job: #${env.BUILD_NUMBER} - ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)
+            Branch: (<https://github.com/gms-bbg/gamess/tree/${env.GIT_BRANCH}|${env.GIT_BRANCH}>)
+            Commit: (<https://github.com/gms-bbg/gamess/commit/${env.GIT_COMMIT}|${env.GIT_COMMIT_SHORTHASH}>) : ${env.GIT_COMMIT_ONELINER}
+            """.stripIndent().replaceAll("%2F","/")
+        }
+        failure {
+            echo 'Pipeline experienced a failure'
+            slackSend color: "danger", message: """
+            Build Failure :broken_heart: :x: :cry:
+            Jenkins Job: #${env.BUILD_NUMBER} - ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)
+            Branch: (<https://github.com/gms-bbg/gamess/tree/${env.GIT_BRANCH}|${env.GIT_BRANCH}>)
+            Commit: (<https://github.com/gms-bbg/gamess/commit/${env.GIT_COMMIT}|${env.GIT_COMMIT_SHORTHASH}>) : ${env.GIT_COMMIT_ONELINER}
+            """.stripIndent().replaceAll("%2F","/")
+        }
+        unstable {
+            echo 'Pipeline was unstable'
+            slackSend color: "warning", message: """
+            Build Unstable :eyes: :interrobang: :grimacing:
+            Jenkins Job: #${env.BUILD_NUMBER} - ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)
+            Branch: (<https://github.com/gms-bbg/gamess/tree/${env.GIT_BRANCH}|${env.GIT_BRANCH}>)
+            Commit: (<https://github.com/gms-bbg/gamess/commit/${env.GIT_COMMIT}|${env.GIT_COMMIT_SHORTHASH}>) : ${env.GIT_COMMIT_ONELINER}
+            """.stripIndent().replaceAll("%2F","/")
+        }
+        changed {
+            echo 'Pipeline stage has changed from the previous run'
+        }
+    }
+}
+

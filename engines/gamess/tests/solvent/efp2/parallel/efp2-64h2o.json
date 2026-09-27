@@ -1,0 +1,132 @@
+{
+  "name": "efp2-64h2o.log",
+  "validation": [
+    {
+      "name": "DIPOLE MOMENT",
+      "value": "5.088173",
+      "precision": 6,
+      "type": "float",
+      "tolerance": 0.0005,
+      "header": "ELECTROSTATICS"
+    },
+    {
+      "name": "CHARGE-CHARGE",
+      "value": "-0.6886719030",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "CHARGE-DIPOLE",
+      "value": "-0.3503827582",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "CHARGE-QUADRUPOLE",
+      "value": "-0.2592468245",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "DIPOLE-DIPOLE",
+      "value": "-0.0773156483",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "DIPOLE-QUADRUPOLE",
+      "value": "-0.1310489687",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "QUADRUPOLE-QUADRUPOLE",
+      "value": "-0.0466847623",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "OVERLAP PEN. ENERGY",
+      "value": "0.0000000000",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "ELECTROSTATIC ENERGY",
+      "value": "-1.5414019770",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "REPULSION ENERGY",
+      "value": "1.0980140218",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "POLARIZATION ENERGY",
+      "value": "-0.4623242012",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "E7 DISPERSION ENERGY",
+      "value": "0.0664386380",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "E6 DISPERSION ENERGY",
+      "value": "-0.3028280183",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "CHARGE TRANSFER ENERGY",
+      "value": "-0.0784380132",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "name": "FINAL EFP ENERGY",
+      "value": "-1.3214822227",
+      "precision": 10,
+      "type": "float",
+      "tolerance": 5e-08,
+      "header": "EFP-EFP INTERACTION ENERGIES"
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

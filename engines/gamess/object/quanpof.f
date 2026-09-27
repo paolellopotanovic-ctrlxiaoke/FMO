@@ -1,0 +1,20845 @@
+C*MODULE QUANPOF  *DECK SAVEQMAB
+!>
+!> @brief    save a copy of all QM information
+!>
+!> @author   Hui Li
+!>           - May 2012
+!>
+!> @details  save a copy of all QM information
+!>
+      SUBROUTINE SAVEQMAB
+      use mx_limits, only: mxatm,mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (MXMPA=3*MXATM)
+      PARAMETER (MXMPSH=2*MXATM)
+      PARAMETER (MXMPGT=5*MXMPSH)
+C
+      COMMON /FFQMPA/ ENFFQM2,ENPAV2,
+     *                SCFTYP2,TDDFT2,MPLEVL2,CITYP2,
+     *                ICHARG2,MULT2,IDOQM2,IREDOX,IQMPKA,IQMRXN,
+     *                MATOMA,MCHARGA,MULTA,MELEA,
+     *                MATOMB,MCHARGB,MULTB,MELEB,
+     *                IECPX,NSHELLX,IMP,JMP,ICORSH,IGTF,
+     *                LFFZANX,LFFCLPX,LFFZLPX,LFFNLPX,LFFKFRSTX,
+     *                LFFKLASTX,LFFLMAXX,LFFLPSKIPX,LFFIZCOREX,
+     *                LFFCX,LFFIANX,LFFEXX,LFFCSX,LFFCPX,LFFCDX,
+     *                LFFCFX,LFFCGX,LFFCHX,LFFCIX,LFFKSTARTX,
+     *                LFFKATOMX,LFFKTYPEX,LFFKNGX,LFFKLOCX,
+     *                LFFMINX,LFFMAXX,LFFMPTYPX,LFFAN0X,
+     *                LFFALPN0X,LFFAN1X,LFFALPN1X,LFFMPSKPX,
+     *                LFFNOAN0X,LFFNOAN1X,LFFBPARX,LFFEXPMPX,
+     *                LFFCSMPX,LFFCPMPX,LFFCDMPX,LFFCFMPX,LFFMPSKIPX,
+     *                LFFNOCOSHX,LFFMPKSTAX,LFFMPKNGX,LFFMPKTYPX,
+     *                LFFMPKMINX,LFFMPKMAXX,LFFMPKLOCX,LFFANAMX
+      COMMON /FMCOM / XX(1)
+      COMMON /MACHIN/ NWDVAR,MAXFM,MAXSM,LIMFM,LIMSM
+C
+C     HUI LI, MAY 7, 2012
+C
+      CALL VALFM(LOADFM)
+      LFFZANX   = LOADFM    + 1
+      LFFCLPX   = LFFZANX   + MXATM
+      LFFZLPX   = LFFCLPX   + 400
+      LFFNLPX   = LFFZLPX   + 400
+      LFFKFRSTX = LFFNLPX   + 400/NWDVAR + 1
+      LFFKLASTX = LFFKFRSTX + MXATM*6/NWDVAR + 1
+      LFFLMAXX  = LFFKLASTX + MXATM*6/NWDVAR + 1
+      LFFLPSKIPX= LFFLMAXX  + MXATM/NWDVAR + 1
+      LFFIZCOREX= LFFLPSKIPX+ MXATM/NWDVAR + 1
+      LFFCX     = LFFIZCOREX+ MXATM/NWDVAR + 1
+      LFFIANX   = LFFCX     + MXATM*3
+      LFFANAMX  = LFFIANX   + MXATM/NWDVAR + 1
+      LFFEXX    = LFFANAMX  + MXATM
+      LFFCSX    = LFFEXX    + MXGTOT
+      LFFCPX    = LFFCSX    + MXGTOT
+      LFFCDX    = LFFCPX    + MXGTOT
+      LFFCFX    = LFFCDX    + MXGTOT
+      LFFCGX    = LFFCFX    + MXGTOT
+      LFFCHX    = LFFCGX    + MXGTOT
+      LFFCIX    = LFFCHX    + MXGTOT
+      LFFKSTARTX= LFFCIX    + MXSH
+      LFFKATOMX = LFFKSTARTX+ MXSH/NWDVAR  + 1
+      LFFKTYPEX = LFFKATOMX + MXSH/NWDVAR  + 1
+      LFFKNGX   = LFFKTYPEX + MXSH/NWDVAR  + 1
+      LFFKLOCX  = LFFKNGX   + MXSH/NWDVAR  + 1
+      LFFMINX   = LFFKLOCX  + MXSH/NWDVAR  + 1
+      LFFMAXX   = LFFMINX   + MXSH/NWDVAR  + 1
+      LFFMPTYPX = LFFMAXX   + MXSH/NWDVAR  + 1
+      LFFAN0X   = LFFMPTYPX + MXATM/NWDVAR + 1
+      LFFALPN0X = LFFAN0X   + MXMPA
+      LFFAN1X   = LFFALPN0X + MXMPA
+      LFFALPN1X = LFFAN1X   + MXMPA
+      LFFMPSKPX = LFFALPN1X + MXMPA
+      LFFNOAN0X = LFFMPSKPX + MXATM/NWDVAR + 1
+      LFFNOAN1X = LFFNOAN0X + MXATM/NWDVAR + 1
+      LFFBPARX  = LFFNOAN1X + MXATM/NWDVAR + 1
+      LFFEXPMPX = LFFBPARX  + MXMPSH
+      LFFCSMPX  = LFFEXPMPX + MXMPGT
+      LFFCPMPX  = LFFCSMPX  + MXMPGT
+      LFFCDMPX  = LFFCPMPX  + MXMPGT
+      LFFCFMPX  = LFFCDMPX  + MXMPGT
+      LFFMPSKIPX= LFFCFMPX  + MXMPGT
+      LFFNOCOSHX= LFFMPSKIPX+ MXATM/NWDVAR + 1
+      LFFMPKSTAX= LFFNOCOSHX+ MXATM/NWDVAR + 1
+      LFFMPKNGX = LFFMPKSTAX+ MXMPSH/NWDVAR+ 1
+      LFFMPKTYPX= LFFMPKNGX + MXMPSH/NWDVAR+ 1
+      LFFMPKMINX= LFFMPKTYPX+ MXMPSH/NWDVAR+ 1
+      LFFMPKMAXX= LFFMPKMINX+ MXMPSH/NWDVAR+ 1
+      LFFMPKLOCX= LFFMPKMAXX+ MXMPSH/NWDVAR+ 1
+      LAST      = LFFMPKLOCX+ MXMPSH/NWDVAR+ 1
+      NEED      = LAST      - LOADFM       - 1
+      CALL GETFM(NEED)
+      CALL VCLR(XX(LOADFM+1),1,NEED)
+C     **** WE DO NOT RETURN THE MEMORY ****
+      CALL SAVEQMABX(XX(LFFZANX),XX(LFFCLPX),XX(LFFZLPX),XX(LFFNLPX),
+     *            XX(LFFKFRSTX),XX(LFFKLASTX),XX(LFFLMAXX),
+     *            XX(LFFLPSKIPX),
+     *            XX(LFFIZCOREX),XX(LFFCX),XX(LFFIANX),
+     *            XX(LFFEXX),XX(LFFCSX),XX(LFFCPX),XX(LFFCDX),
+     *            XX(LFFCFX),XX(LFFCGX),
+     *            XX(LFFCHX),XX(LFFCIX),XX(LFFKSTARTX),XX(LFFKATOMX),
+     *            XX(LFFKTYPEX),XX(LFFKNGX),XX(LFFKLOCX),XX(LFFMINX),
+     *            XX(LFFMAXX),
+     *            XX(LFFMPTYPX),XX(LFFAN0X),XX(LFFALPN0X),XX(LFFAN1X),
+     *            XX(LFFALPN1X),XX(LFFMPSKPX),XX(LFFNOAN0X),
+     *            XX(LFFNOAN1X),
+     *            XX(LFFBPARX),XX(LFFEXPMPX),XX(LFFCSMPX),
+     *            XX(LFFCPMPX),XX(LFFCDMPX),XX(LFFCFMPX),
+     *            XX(LFFMPSKIPX),XX(LFFNOCOSHX),XX(LFFMPKSTAX),
+     *            XX(LFFMPKNGX),XX(LFFMPKTYPX),XX(LFFMPKMINX),
+     *            XX(LFFMPKMAXX),XX(LFFMPKLOCX),XX(LFFANAMX))
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK SAVEQMABX
+!>
+!> @brief    save a copy of all QM information
+!>
+!> @author   Hui Li
+!>           - May 2012
+!>
+!> @details  save a copy of all QM information
+!>
+      SUBROUTINE SAVEQMABX(ZANX,CLPX,ZLPX,NLPX,
+     *                  KFRSTX,KLASTX,LMAXX,LPSKIPX,
+     *                  IZCOREX,CX,IANX,
+     *                  EXX,CSX,CPX,CDX,CFX,CGX,
+     *                  CHX,CIX,KSTARTX,KATOMX,KTYPEX,
+     *                  KNGX,KLOCX,MINX,MAXX,
+     *                  MPTYPX,AN0X,ALPN0X,AN1X,ALPN1X,
+     *                  MPSKPX,NOAN0X,NOAN1X,
+     *                  BPARX,EXPMPX,CSMPX,
+     *                  CPMPX,CDMPX,CFMPX,
+     *                  MPSKIPX,NOCOSHX,MPKSTAX,
+     *                  MPKNGX,MPKTYPX,MPKMINX,
+     *                  MPKMAXX,MPKLOCX,ANAMX)
+      use mx_limits, only: mxsh,mxatm,mxgtot,mxao
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (MXMPA=3*MXATM)
+      PARAMETER (MXMPSH=2*MXATM)
+      PARAMETER (MXMPGT=5*MXMPSH)
+C
+      DIMENSION ZANX(MXATM),CLPX(400),ZLPX(400),NLPX(400),
+     *          KFRSTX(MXATM,6),KLASTX(MXATM,6),LMAXX(MXATM),
+     *          LPSKIPX(MXATM),IZCOREX(MXATM),CX(3,MXATM),IANX(MXATM),
+     *          EXX(MXGTOT),CSX(MXGTOT),CPX(MXGTOT),CDX(MXGTOT),
+     *          CFX(MXGTOT),CGX(MXGTOT),CHX(MXGTOT),CIX(MXGTOT),
+     *          KSTARTX(MXSH),KATOMX(MXSH),
+     *          KTYPEX(MXSH),KNGX(MXSH),
+     *          KLOCX(MXSH),MINX(MXSH),MAXX(MXSH),
+     *          MPTYPX(MXATM),AN0X(MXMPA),ALPN0X(MXMPA),
+     *          AN1X(MXMPA),ALPN1X(MXMPA),
+     *          MPSKPX(MXATM),NOAN0X(MXATM),NOAN1X(MXATM),
+     *          BPARX(MXMPSH),EXPMPX(MXMPGT),CSMPX(MXMPGT),
+     *          CPMPX(MXMPGT),CDMPX(MXMPGT),CFMPX(MXMPGT),
+     *          MPSKIPX(MXATM),NOCOSHX(MXATM),MPKSTAX(MXMPSH),
+     *          MPKNGX(MXMPSH),MPKTYPX(MXMPSH),MPKMINX(MXMPSH),
+     *          MPKMAXX(MXMPSH),MPKLOCX(MXMPSH),ANAMX(MXATM)
+C
+      COMMON /ECP2  / CLP(400),ZLP(400),NLP(400),KFRST(MXATM,6),
+     *                KLAST(MXATM,6),LMAX(MXATM),LPSKIP(MXATM),
+     *                IZCORE(MXATM)
+      COMMON /FFQMPA/ ENFFQM2,ENPAV2,
+     *                SCFTYP2,TDDFT2,MPLEVL2,CITYP2,
+     *                ICHARG2,MULT2,IDOQM2,IREDOX,IQMPKA,IQMRXN,
+     *                MATOMA,MCHARGA,MULTA,MELEA,
+     *                MATOMB,MCHARGB,MULTB,MELEB,
+     *                IECPX,NSHELLX,IMP,JMP,ICORSH,IGTF,
+     *                LFFZANX,LFFCLPX,LFFZLPX,LFFNLPX,LFFKFRSTX,
+     *                LFFKLASTX,LFFLMAXX,LFFLPSKIPX,LFFIZCOREX,
+     *                LFFCX,LFFIANX,LFFEXX,LFFCSX,LFFCPX,LFFCDX,
+     *                LFFCFX,LFFCGX,LFFCHX,LFFCIX,LFFKSTARTX,
+     *                LFFKATOMX,LFFKTYPEX,LFFKNGX,LFFKLOCX,
+     *                LFFMINX,LFFMAXX,LFFMPTYPX,LFFAN0X,
+     *                LFFALPN0X,LFFAN1X,LFFALPN1X,LFFMPSKPX,
+     *                LFFNOAN0X,LFFNOAN1X,LFFBPARX,LFFEXPMPX,
+     *                LFFCSMPX,LFFCPMPX,LFFCDMPX,LFFCFMPX,LFFMPSKIPX,
+     *                LFFNOCOSHX,LFFMPKSTAX,LFFMPKNGX,LFFMPKTYPX,
+     *                LFFMPKMINX,LFFMPKMAXX,LFFMPKLOCX,LFFANAMX
+      COMMON /FMCOM / XX(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INTOPT/ ISCHWZ,IECP,NECP,IEXTFLD
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /MMPDOC/ MPTYP(MXATM),IMVO,IMCORE
+      COMMON /MMP1  / AN0(MXMPA),ALPN0(MXMPA),AN1(MXMPA),ALPN1(MXMPA),
+     *                MPSKP(MXATM),NOAN0(MXATM),NOAN1(MXATM)
+      COMMON /MMP2  / BPAR(MXMPSH),EXPMP(MXMPGT),CSMP(MXMPGT),
+     *                CPMP(MXMPGT),CDMP(MXMPGT),CFMP(MXMPGT),
+     *                MPSKIP(MXATM),NOCOSH(MXATM),MPKSTA(MXMPSH),
+     *                MPKNG(MXMPSH),MPKTYP(MXMPSH),MPKMIN(MXMPSH),
+     *                MPKMAX(MXMPSH),MPKLOC(MXMPSH)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),MIN(MXSH),MAX(MXSH),NSHELL
+      COMMON /RUNLAB/ TITLE(10),ANAM(MXATM),BNAM(MXATM),BFLAB(MXAO)
+C
+C     HUI LI, MAY 7, 2012
+C
+      CALL VCLR(ZANX,1,MXATM)
+      CALL VCLR(CX,1,3*MXATM)
+      CALL VCLR(EXX,1,MXGTOT)
+      CALL VCLR(CSX,1,MXGTOT)
+      CALL VCLR(CPX,1,MXGTOT)
+      CALL VCLR(CDX,1,MXGTOT)
+      CALL VCLR(CFX,1,MXGTOT)
+      CALL VCLR(CGX,1,MXGTOT)
+      CALL VCLR(CHX,1,MXGTOT)
+      CALL VCLR(CIX,1,MXGTOT)
+C
+      CALL VICLR(IANX   ,1,MXATM)
+      CALL VICLR(IZCOREX,1,MXATM)
+      CALL VICLR(KSTARTX,1,MXSH)
+      CALL VICLR(KATOMX ,1,MXSH)
+      CALL VICLR(KTYPEX ,1,MXSH)
+      CALL VICLR(KNGX   ,1,MXSH)
+      CALL VICLR(KLOCX  ,1,MXSH)
+      CALL VICLR(MINX   ,1,MXSH)
+      CALL VICLR(MAXX   ,1,MXSH)
+C
+      CALL VICLR(MPTYPX ,1, MXATM)
+      CALL VCLR (AN0X   ,1, MXMPA)
+      CALL VCLR (ALPN0X ,1, MXMPA)
+      CALL VCLR (AN1X   ,1, MXMPA)
+      CALL VCLR (ALPN1X ,1, MXMPA)
+      CALL VICLR(MPSKPX ,1, MXATM)
+      CALL VICLR(NOAN0X ,1, MXATM)
+      CALL VICLR(NOAN1X ,1, MXATM)
+      CALL VCLR (BPARX  ,1, MXMPSH)
+      CALL VCLR (EXPMPX ,1, MXMPGT)
+      CALL VCLR (CSMPX  ,1, MXMPGT)
+      CALL VCLR (CPMPX  ,1, MXMPGT)
+      CALL VCLR (CDMPX  ,1, MXMPGT)
+      CALL VCLR (CFMPX  ,1, MXMPGT)
+      CALL VICLR(MPSKIPX,1, MXATM)
+      CALL VICLR(NOCOSHX,1, MXATM)
+      CALL VICLR(MPKSTAX,1, MXMPSH)
+      CALL VICLR(MPKNGX ,1, MXMPSH)
+      CALL VICLR(MPKTYPX,1, MXMPSH)
+      CALL VICLR(MPKMINX,1, MXMPSH)
+      CALL VICLR(MPKMAXX,1, MXMPSH)
+      CALL VICLR(MPKLOCX,1, MXMPSH)
+C
+C
+C     -- MAXIMUM SIZES ARE USED TO OCCUPY THE DAF SPACES
+C
+      CALL VALFM(LOADFM)
+      LWORK   = LOADFM  + 1
+      LAST    = LWORK   + NUM*NUM
+      NEED    = LAST    - LOADFM  - 1
+      CALL GETFM(NEED)
+C
+      LL2  = (NUM*NUM+NUM)/2
+      NSH2 = (NSHELL*NSHELL+NSHELL)/2
+C
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,14,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,18,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,23,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,24,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,25,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,26,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,27,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,28,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,35,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,36,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,51,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,95,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,96,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,97,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),3*NUM,250,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,308,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,355,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,418,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,428,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NSH2,54,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,15,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,19,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,61,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,71,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,72,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),(NA+NB)*(NA+NB),73,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NA*NA,74,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),(NA+NB)*(NA+NB),285,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,324,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,356,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,357,0)
+      CALL RETFM(NEED)
+C
+C     - SAVE BASIS SET INFORMATION -
+C
+      IECPX   =  IECP
+      NSHELLX =  NSHELL
+      DO III  =  1, MATOMA+MATOMB
+         ZANX(III)   = ZAN(III)
+         DO JJJ = 1, 6
+            KFRSTX(III,JJJ) = KFRST(III,JJJ)
+            KLASTX(III,JJJ) = KLAST(III,JJJ)
+         ENDDO
+         LMAXX(III)  = LMAX(III)
+         LPSKIPX(III)= LPSKIP(III)
+         IZCOREX(III)= IZCORE(III)
+         CX(1,III)   = C(1,III)
+         CX(2,III)   = C(2,III)
+         CX(3,III)   = C(3,III)
+         IANX(III)   = IAN(III)
+         ANAMX(III)  = ANAM(III)
+      ENDDO
+      DO III = 1, 400
+         CLPX(III) = CLP(III)
+         ZLPX(III) = ZLP(III)
+         NLPX(III) = NLP(III)
+      ENDDO
+C
+      DO III  =  1, MXGTOT
+         EXX(III)  = EX(III)
+         CSX(III)  = CS(III)
+         CPX(III)  = CP(III)
+         CDX(III)  = CD(III)
+         CFX(III)  = CF(III)
+         CGX(III)  = CG(III)
+         CHX(III)  = CH(III)
+         CIX(III)  = CI(III)
+      ENDDO
+      DO III  =  1, MXSH
+         KSTARTX(III)  = KSTART(III)
+         KATOMX(III)   = KATOM(III)
+         KTYPEX(III)   = KTYPE(III)
+         KNGX(III)     = KNG(III)
+         KLOCX(III)    = KLOC(III)
+         MINX(III)     = MIN(III)
+         MAXX(III)     = MAX(III)
+      ENDDO
+C
+      CALL ICOPY(MXATM ,MPTYP ,1, MPTYPX ,1)
+      CALL DCOPY(MXMPA ,AN0   ,1, AN0X   ,1)
+      CALL DCOPY(MXMPA ,ALPN0 ,1, ALPN0X ,1)
+      CALL DCOPY(MXMPA ,AN1   ,1, AN1X   ,1)
+      CALL DCOPY(MXMPA ,ALPN1 ,1, ALPN1X ,1)
+      CALL ICOPY(MXATM ,MPSKP ,1, MPSKPX ,1)
+      CALL ICOPY(MXATM ,NOAN0 ,1, NOAN0X ,1)
+      CALL ICOPY(MXATM ,NOAN1 ,1, NOAN1X ,1)
+      CALL DCOPY(MXMPSH,BPAR  ,1, BPARX  ,1)
+      CALL DCOPY(MXMPGT,EXPMP ,1, EXPMPX ,1)
+      CALL DCOPY(MXMPGT,CSMP  ,1, CSMPX  ,1)
+      CALL DCOPY(MXMPGT,CPMP  ,1, CPMPX  ,1)
+      CALL DCOPY(MXMPGT,CDMP  ,1, CDMPX  ,1)
+      CALL DCOPY(MXMPGT,CFMP  ,1, CFMPX  ,1)
+      CALL ICOPY(MXATM ,MPSKIP,1, MPSKIPX,1)
+      CALL ICOPY(MXATM ,NOCOSH,1, NOCOSHX,1)
+      CALL ICOPY(MXMPSH,MPKSTA,1, MPKSTAX,1)
+      CALL ICOPY(MXMPSH,MPKNG ,1, MPKNGX ,1)
+      CALL ICOPY(MXMPSH,MPKTYP,1, MPKTYPX,1)
+      CALL ICOPY(MXMPSH,MPKMIN,1, MPKMINX,1)
+      CALL ICOPY(MXMPSH,MPKMAX,1, MPKMAXX,1)
+      CALL ICOPY(MXMPSH,MPKLOC,1, MPKLOCX,1)
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK SETQMAB
+!>
+!> @brief    set QM information from saved copy
+!>
+!> @author   Hui Li
+!>           - May 2012
+!>
+!> @details  set QM information from saved copy
+!>
+      SUBROUTINE SETQMAB(KDOAB)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      COMMON /FFQMFE/ ETOTQA,EMP2QA,ESTATEQA,ETOTQB,EMP2QB,ESTATEQB,
+     *                FRE1QMMM,FRE2QMMM,
+     *                VIRA(3),VIRB(3),
+     *                LFFFFGRDA,LFFFFGRDB,LFFQMGRDA,LFFQMGRDB,
+     *                LFFCORDX,LFFCHARGX,LFFPOLX,LFFSIGX,LFFEPSX,
+     *                LFFSIG2X,LFFEPS2X,LFFCLPRX,LFFZLPRX,LFFCHGIMX,
+     *                LFFCRDIMX,LFFLISTAQM,LFFLISTBQM
+      COMMON /FFQMPA/ ENFFQM2,ENPAV2,
+     *                SCFTYP2,TDDFT2,MPLEVL2,CITYP2,
+     *                ICHARG2,MULT2,IDOQM2,IREDOX,IQMPKA,IQMRXN,
+     *                MATOMA,MCHARGA,MULTA,MELEA,
+     *                MATOMB,MCHARGB,MULTB,MELEB,
+     *                IECPX,NSHELLX,IMP,JMP,ICORSH,IGTF,
+     *                LFFZANX,LFFCLPX,LFFZLPX,LFFNLPX,LFFKFRSTX,
+     *                LFFKLASTX,LFFLMAXX,LFFLPSKIPX,LFFIZCOREX,
+     *                LFFCX,LFFIANX,LFFEXX,LFFCSX,LFFCPX,LFFCDX,
+     *                LFFCFX,LFFCGX,LFFCHX,LFFCIX,LFFKSTARTX,
+     *                LFFKATOMX,LFFKTYPEX,LFFKNGX,LFFKLOCX,
+     *                LFFMINX,LFFMAXX,LFFMPTYPX,LFFAN0X,
+     *                LFFALPN0X,LFFAN1X,LFFALPN1X,LFFMPSKPX,
+     *                LFFNOAN0X,LFFNOAN1X,LFFBPARX,LFFEXPMPX,
+     *                LFFCSMPX,LFFCPMPX,LFFCDMPX,LFFCFMPX,LFFMPSKIPX,
+     *                LFFNOCOSHX,LFFMPKSTAX,LFFMPKNGX,LFFMPKTYPX,
+     *                LFFMPKMINX,LFFMPKMAXX,LFFMPKLOCX,LFFANAMX
+      COMMON /FMCOM / X(1)
+C
+C     HUI LI, MAY 7, 2012
+C
+      CALL SETQMABX(KDOAB,X(LFFZANX),X(LFFCLPX),X(LFFZLPX),
+     *           X(LFFNLPX),
+     *           X(LFFKFRSTX),X(LFFKLASTX),X(LFFLMAXX),
+     *           X(LFFLPSKIPX),
+     *           X(LFFIZCOREX),X(LFFCX),X(LFFIANX),
+     *           X(LFFEXX),X(LFFCSX),X(LFFCPX),X(LFFCDX),
+     *           X(LFFCFX),X(LFFCGX),
+     *           X(LFFCHX),X(LFFCIX),X(LFFKSTARTX),
+     *           X(LFFKATOMX),
+     *           X(LFFKTYPEX),X(LFFKNGX),X(LFFKLOCX),
+     *           X(LFFMINX),X(LFFMAXX),
+     *           X(LFFMPTYPX),X(LFFAN0X),X(LFFALPN0X),
+     *           X(LFFAN1X),
+     *           X(LFFALPN1X),X(LFFMPSKPX),X(LFFNOAN0X),
+     *           X(LFFNOAN1X),
+     *           X(LFFBPARX),X(LFFEXPMPX),X(LFFCSMPX),
+     *           X(LFFCPMPX),X(LFFCDMPX),X(LFFCFMPX),
+     *           X(LFFMPSKIPX),X(LFFNOCOSHX),X(LFFMPKSTAX),
+     *           X(LFFMPKNGX),X(LFFMPKTYPX),X(LFFMPKMINX),
+     *           X(LFFMPKMAXX),X(LFFMPKLOCX),X(LFFLISTBQM),
+     *           X(LFFLISTAQM),X(LFFANAMX))
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK SETQMABX
+!>
+!> @brief    set QM information from saved copy
+!>
+!> @author   Hui Li
+!>           - May 2012
+!>
+!> @details  set QM information from saved copy
+!>
+      SUBROUTINE SETQMABX(KDOAB,ZANX,CLPX,ZLPX,NLPX,
+     *                 KFRSTX,KLASTX,LMAXX,LPSKIPX,
+     *                 IZCOREX,CX,IANX,
+     *                 EXX,CSX,CPX,CDX,CFX,CGX,
+     *                 CHX,CIX,KSTARTX,KATOMX,KTYPEX,
+     *                 KNGX,KLOCX,MINX,MAXX,
+     *                 MPTYPX,AN0X,ALPN0X,AN1X,ALPN1X,
+     *                 MPSKPX,NOAN0X,NOAN1X,
+     *                 BPARX,EXPMPX,CSMPX,
+     *                 CPMPX,CDMPX,CFMPX,
+     *                 MPSKIPX,NOCOSHX,MPKSTAX,
+     *                 MPKNGX,MPKTYPX,MPKMINX,
+     *                 MPKMAXX,MPKLOCX,LISTBQM,LISTAQM,ANAMX)
+      use mx_limits, only: mxsh,mxatm,mxgtot,mxao
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL MPTEST
+C
+      PARAMETER (MXMPA=3*MXATM)
+      PARAMETER (MXMPSH=2*MXATM)
+      PARAMETER (MXMPGT=5*MXMPSH)
+C
+      DIMENSION ZANX(MXATM),CLPX(400),ZLPX(400),NLPX(400),
+     *          KFRSTX(MXATM,6),KLASTX(MXATM,6),LMAXX(MXATM),
+     *          LPSKIPX(MXATM),IZCOREX(MXATM),CX(3,MXATM),IANX(MXATM),
+     *          EXX(MXGTOT),CSX(MXGTOT),CPX(MXGTOT),CDX(MXGTOT),
+     *          CFX(MXGTOT),CGX(MXGTOT),CHX(MXGTOT),CIX(MXGTOT),
+     *          KSTARTX(MXSH),KATOMX(MXSH),
+     *          KTYPEX(MXSH),KNGX(MXSH),
+     *          KLOCX(MXSH),MINX(MXSH),MAXX(MXSH),
+     *          MPTYPX(MXATM),AN0X(MXMPA),ALPN0X(MXMPA),
+     *          AN1X(MXMPA),ALPN1X(MXMPA),ANAMX(MXATM),
+     *          MPSKPX(MXATM),NOAN0X(MXATM),NOAN1X(MXATM),
+     *          BPARX(MXMPSH),EXPMPX(MXMPGT),CSMPX(MXMPGT),
+     *          CPMPX(MXMPGT),CDMPX(MXMPGT),CFMPX(MXMPGT),
+     *          MPSKIPX(MXATM),NOCOSHX(MXATM),MPKSTAX(MXMPSH),
+     *          MPKNGX(MXMPSH),MPKTYPX(MXMPSH),MPKMINX(MXMPSH),
+     *          MPKMAXX(MXMPSH),MPKLOCX(MXMPSH),LISTBQM(*),LISTAQM(*)
+C
+      COMMON /ECP2  / CLP(400),ZLP(400),NLP(400),KFRST(MXATM,6),
+     *                KLAST(MXATM,6),LMAX(MXATM),LPSKIP(MXATM),
+     *                IZCORE(MXATM)
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFQMPA/ ENFFQM2,ENPAV2,
+     *                SCFTYP2,TDDFT2,MPLEVL2,CITYP2,
+     *                ICHARG2,MULT2,IDOQM2,IREDOX,IQMPKA,IQMRXN,
+     *                MATOMA,MCHARGA,MULTA,MELEA,
+     *                MATOMB,MCHARGB,MULTB,MELEB,
+     *                IECPX,NSHELLX,IMP,JMP,ICORSH,IGTF,
+     *                LFFZANX,LFFCLPX,LFFZLPX,LFFNLPX,LFFKFRSTX,
+     *                LFFKLASTX,LFFLMAXX,LFFLPSKIPX,LFFIZCOREX,
+     *                LFFCX,LFFIANX,LFFEXX,LFFCSX,LFFCPX,LFFCDX,
+     *                LFFCFX,LFFCGX,LFFCHX,LFFCIX,LFFKSTARTX,
+     *                LFFKATOMX,LFFKTYPEX,LFFKNGX,LFFKLOCX,
+     *                LFFMINX,LFFMAXX,LFFMPTYPX,LFFAN0X,
+     *                LFFALPN0X,LFFAN1X,LFFALPN1X,LFFMPSKPX,
+     *                LFFNOAN0X,LFFNOAN1X,LFFBPARX,LFFEXPMPX,
+     *                LFFCSMPX,LFFCPMPX,LFFCDMPX,LFFCFMPX,LFFMPSKIPX,
+     *                LFFNOCOSHX,LFFMPKSTAX,LFFMPKNGX,LFFMPKTYPX,
+     *                LFFMPKMINX,LFFMPKMAXX,LFFMPKLOCX,LFFANAMX
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INTOPT/ ISCHWZ,IECP,NECP,IEXTFLD
+      COMMON /MMPDOC/ MPTYP(MXATM),IMVO,IMCORE
+      COMMON /MMP1  / AN0(MXMPA),ALPN0(MXMPA),AN1(MXMPA),ALPN1(MXMPA),
+     *                MPSKP(MXATM),NOAN0(MXATM),NOAN1(MXATM)
+      COMMON /MMP2  / BPAR(MXMPSH),EXPMP(MXMPGT),CSMP(MXMPGT),
+     *                CPMP(MXMPGT),CDMP(MXMPGT),CFMP(MXMPGT),
+     *                MPSKIP(MXATM),NOCOSH(MXATM),MPKSTA(MXMPSH),
+     *                MPKNG(MXMPSH),MPKTYP(MXMPSH),MPKMIN(MXMPSH),
+     *                MPKMAX(MXMPSH),MPKLOC(MXMPSH)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),MIN(MXSH),MAX(MXSH),NSHELL
+      COMMON /RESTAR/ TIMLIM,IREST,NREC,INTLOC,IST,JST,KST,LST
+      COMMON /RUNLAB/ TITLE(10),ANAM(MXATM),BNAM(MXATM),BFLAB(MXAO)
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /SYMTRY/ MAPSHL(MXSH,48),MAPCTR(MXATM,48),
+     *                T(432),INVT(48),NT
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+C     HUI LI, MAY 7, 2012
+C
+      IMP     = 0
+      JMP     = 0
+      ICORSH  = 0
+      IGTF    = 0
+C
+C     -- SET QM STATE A --
+C
+      NT      =  1
+      NAT     =  MATOMA
+      ICH     =  MCHARGA
+      MUL     =  MULTA
+      NE      =  MELEA
+      NA      =  (NE-1+MUL)/2
+      NB      =  (NE+1-MUL)/2
+      IAT     =  0
+      IECP    =  0
+      IMPIM   =  0
+      JMPIM   =  0
+      ICORSHIM=  0
+      IGTFIM  =  0
+      IMCORE  =  0
+      IF(KDOAB.EQ.1) LQMCT=LISTBQM(LQMCT) ! SET LQMCT FOR A
+      DO III  =  1, MATOMA
+         IAT      = IAT + 1
+         ZAN(IAT) = ZANX(III)
+C        - CX WAS SAVED -
+         C(1,IAT) = CX(1,III)
+         C(2,IAT) = CX(2,III)
+         C(3,IAT) = CX(3,III)
+         IAN(IAT) = IANX(III)
+         ANAM(IAT)= ANAMX(III)
+         DO JJJ = 1, 6
+            KFRST(IAT,JJJ) = KFRSTX(III,JJJ)
+            KLAST(IAT,JJJ) = KLASTX(III,JJJ)
+         ENDDO
+         LMAX(IAT) = LMAXX(III)
+         LPSKIP(IAT)= LPSKIPX(III)
+         DO LLL = 1, LMAX(IAT) + 1
+            KF = KFRST(IAT,LLL)
+            KL = KLAST(IAT,LLL)
+            KFIII = KFRSTX(III,LLL)
+            DO KKK = KF, KL
+               CLP(KKK) = CLPX(KFIII + (KKK-KF))
+               ZLP(KKK) = ZLPX(KFIII + (KKK-KF))
+               NLP(KKK) = NLPX(KFIII + (KKK-KF))
+            ENDDO
+         ENDDO
+         IZCORE(IAT) = IZCOREX(III)
+         IF(IZCOREX(III).GT.0) IECP = IECPX
+         MPTYP(IAT)  = MPTYPX(III)
+         MPSKP(IAT)  = MPSKPX(III)
+         NOAN0(IAT)  = NOAN0X(III)
+         NOAN1(IAT)  = NOAN1X(III)
+         MPSKIP(IAT) = MPSKIPX(III)
+         NOCOSH(IAT) = NOCOSHX(III)
+         DO LLL = 1, NOAN0X(III)
+            AN0(IMPIM+LLL)    = AN0X(IMP+LLL)
+            ALPN0(IMPIM+LLL)  = ALPN0X(IMP+LLL)
+         ENDDO
+         DO LLL = 1, NOAN1X(III)
+            AN1(JMPIM+LLL)    = AN1X(JMP+LLL)
+            ALPN1(JMPIM+LLL)  = ALPN1X(JMP+LLL)
+         ENDDO
+         DO LLL = 1, NOCOSHX(III)
+            BPAR  (ICORSHIM+LLL) = BPARX  (ICORSH+LLL)
+            MPKNG (ICORSHIM+LLL) = MPKNGX (ICORSH+LLL)
+            MPKTYP(ICORSHIM+LLL) = MPKTYPX(ICORSH+LLL)
+            IF(MPKTYP(ICORSHIM+LLL).EQ.1) IMCORE = IMCORE + 1
+            IF(MPKTYP(ICORSHIM+LLL).EQ.2) IMCORE = IMCORE + 3
+            IF(MPKTYP(ICORSHIM+LLL).EQ.3) IMCORE = IMCORE + 6
+            IF(MPKTYP(ICORSHIM+LLL).EQ.4) IMCORE = IMCORE + 10
+            MPKMIN(ICORSHIM+LLL) = MPKMINX(ICORSH+LLL)
+            MPKMAX(ICORSHIM+LLL) = MPKMAXX(ICORSH+LLL)
+            MPKLOC(ICORSHIM+LLL) = MPKLOCX(ICORSH+LLL)
+            MPKSTA(ICORSHIM+LLL) = MPKSTAX(ICORSH+LLL)-IGTF+IGTFIM
+            DO KKK = 1, MPKNGX(ICORSH+LLL)
+               IGTFIM        = IGTFIM + 1
+               IGTF          = IGTF   + 1
+               EXPMP(IGTFIM) = EXPMPX(IGTF)
+               CSMP(IGTFIM)  = CSMPX(IGTF)
+               CPMP(IGTFIM)  = CPMPX(IGTF)
+               CDMP(IGTFIM)  = CDMPX(IGTF)
+               CFMP(IGTFIM)  = CFMPX(IGTF)
+            ENDDO
+         ENDDO
+         IMPIM       = IMPIM   + NOAN0X (III)
+         JMPIM       = JMPIM   + NOAN1X (III)
+         ICORSHIM    = ICORSHIM+ NOCOSHX(III)
+         IMP         = IMP     + NOAN0X (III)
+         JMP         = JMP     + NOAN1X (III)
+         ICORSH      = ICORSH  + NOCOSHX(III)
+         IF(IAT.EQ.NAT) MPNUM = MPKLOC(ICORSHIM) + MPKMAX(ICORSHIM)
+     *                                           - MPKMIN(ICORSHIM)
+      ENDDO
+      MPNUMA = MPNUM
+C
+      III    = 0
+      JJJ    = 0
+      NUM    = 0
+      NPGALL = 0
+      DO KKK  =  1, NSHELLX
+         IATX=KATOMX(KKK)
+         IF(IATX.GE.1 .AND. IATX.LE.MATOMA) THEN
+            III = III + 1
+            KSTART(III)  = KSTARTX(KKK) - NPGALL
+            KATOM(III)   = KATOMX(KKK)
+            KTYPE(III)   = KTYPEX(KKK)
+            KNG(III)     = KNGX(KKK)
+            KLOC(III)    = KLOCX(KKK)
+            MIN(III)     = MINX(KKK)
+            MAX(III)     = MAXX(KKK)
+            I1 = KSTARTX(KKK)
+            I2 = I1 + KNGX(KKK) - 1
+            DO IG = I1, I2
+               JJJ = JJJ + 1
+               EX(JJJ)  = EXX(IG)
+               CS(JJJ)  = CSX(IG)
+               CP(JJJ)  = CPX(IG)
+               CD(JJJ)  = CDX(IG)
+               CF(JJJ)  = CFX(IG)
+               CG(JJJ)  = CGX(IG)
+               CH(JJJ)  = CHX(IG)
+               CI(JJJ)  = CIX(IG)
+            ENDDO
+         ELSE
+            NPGALL = NPGALL + KNGX(KKK)
+         END IF
+         IF(IATX.EQ.MATOMA) THEN
+            NUM = KLOC(III) + MAX(III) - MIN(III)
+         END IF
+      ENDDO
+      NSHELL = III
+      NQMT   = NUM
+      NUMA   = NUM
+C
+      IF(KDOAB.EQ.0) RETURN
+      IF(KDOAB.EQ.1) THEN
+         IF(IREDOX.EQ.0.AND.IQMRXN.EQ.0) THEN
+            CALL SYMORB
+            IREST = 0
+            NEVALS= 0
+         END IF
+         IF(MPLEVL.EQ.2) CALL MP2INP(MPTEST)
+         RETURN
+      END IF
+C
+C     -- SET QM STATE B --
+C        (MUST SET A BEFORE B)
+C
+      NT      =  1
+      NAT     =  MATOMB
+      ICH     =  MCHARGB
+      MUL     =  MULTB
+      NE      =  MELEB
+      NA      =  (NE-1+MUL)/2
+      NB      =  (NE+1-MUL)/2
+      IAT     =  0
+      IECP    =  0
+      IMPIM   =  0
+      JMPIM   =  0
+      ICORSHIM=  0
+      IGTFIM  =  0
+      IMCORE  =  0
+      LQMCT   = LISTAQM(LQMCT)      ! SET LQMCT FOR B
+      DO III  =  MATOMA+1, MATOMA+MATOMB
+         IAT      = IAT + 1
+         ZAN(IAT) = ZANX(III)
+         IF(IFEPTYP.EQ.1) THEN
+            IATBB = IAT
+            IATAA = LISTBQM(IATBB)
+            C(1,IAT) = CX(1,IATAA)  ! CX IS THE CURRENT A COORDINATES
+            C(2,IAT) = CX(2,IATAA)
+            C(3,IAT) = CX(3,IATAA)
+C           - UPDATE MATOMB COORDINATES, ALWAYS -
+            CX(1,III)= C(1,IAT)
+            CX(2,III)= C(2,IAT)
+            CX(3,III)= C(3,IAT)
+         END IF
+         IF(IFEPTYP.EQ.2) THEN
+            C(1,IAT) = CX(1,III)  ! CX NEVER CHANGE DUE TO NFIXMM
+            C(2,IAT) = CX(2,III)
+            C(3,IAT) = CX(3,III)
+         END IF
+C
+         IAN(IAT) = IANX(III)
+         ANAM(IAT)= ANAMX(III)
+         DO JJJ = 1, 6
+            KFRST(IAT,JJJ) = KFRSTX(III,JJJ)
+            KLAST(IAT,JJJ) = KLASTX(III,JJJ)
+         ENDDO
+         LMAX(IAT) = LMAXX(III)
+         LPSKIP(IAT)= LPSKIPX(III)
+         DO LLL = 1, LMAX(IAT) + 1
+            KF = KFRST(IAT,LLL)
+            KL = KLAST(IAT,LLL)
+            KFIII = KFRSTX(III,LLL)
+            DO KKK = KF, KL
+               CLP(KKK) = CLPX(KFIII + (KKK-KF))
+               ZLP(KKK) = ZLPX(KFIII + (KKK-KF))
+               NLP(KKK) = NLPX(KFIII + (KKK-KF))
+            ENDDO
+         ENDDO
+         IZCORE(IAT) = IZCOREX(III)
+         IF(IZCOREX(III).GT.0) IECP = IECPX
+         MPTYP(IAT)  = MPTYPX(III)
+         MPSKP(IAT)  = MPSKPX(III)
+         NOAN0(IAT)  = NOAN0X(III)
+         NOAN1(IAT)  = NOAN1X(III)
+         MPSKIP(IAT) = MPSKIPX(III)
+         NOCOSH(IAT) = NOCOSHX(III)
+         DO LLL = 1, NOAN0X(III)
+            AN0(IMPIM+LLL)    = AN0X(IMP+LLL)
+            ALPN0(IMPIM+LLL)  = ALPN0X(IMP+LLL)
+         ENDDO
+         DO LLL = 1, NOAN1X(III)
+            AN1(JMPIM+LLL)    = AN1X(JMP+LLL)
+            ALPN1(JMPIM+LLL)  = ALPN1X(JMP+LLL)
+         ENDDO
+         DO LLL = 1, NOCOSHX(III)
+            BPAR  (ICORSHIM+LLL) = BPARX  (ICORSH+LLL)
+            MPKNG (ICORSHIM+LLL) = MPKNGX (ICORSH+LLL)
+            MPKTYP(ICORSHIM+LLL) = MPKTYPX(ICORSH+LLL)
+            IF(MPKTYP(ICORSHIM+LLL).EQ.1) IMCORE = IMCORE + 1
+            IF(MPKTYP(ICORSHIM+LLL).EQ.2) IMCORE = IMCORE + 3
+            IF(MPKTYP(ICORSHIM+LLL).EQ.3) IMCORE = IMCORE + 6
+            IF(MPKTYP(ICORSHIM+LLL).EQ.4) IMCORE = IMCORE + 10
+            MPKMIN(ICORSHIM+LLL) = MPKMINX(ICORSH+LLL)
+            MPKMAX(ICORSHIM+LLL) = MPKMAXX(ICORSH+LLL)
+            MPKLOC(ICORSHIM+LLL) = MPKLOCX(ICORSH+LLL)-MPNUMA
+            MPKSTA(ICORSHIM+LLL) = MPKSTAX(ICORSH+LLL)-IGTF+IGTFIM
+            DO KKK = 1, MPKNGX(ICORSH+LLL)
+               IGTFIM        = IGTFIM + 1
+               IGTF          = IGTF   + 1
+               EXPMP(IGTFIM) = EXPMPX(IGTF)
+               CSMP(IGTFIM)  = CSMPX(IGTF)
+               CPMP(IGTFIM)  = CPMPX(IGTF)
+               CDMP(IGTFIM)  = CDMPX(IGTF)
+               CFMP(IGTFIM)  = CFMPX(IGTF)
+            ENDDO
+         ENDDO
+         IMPIM       = IMPIM   + NOAN0X (III)
+         JMPIM       = JMPIM   + NOAN1X (III)
+         ICORSHIM    = ICORSHIM+ NOCOSHX(III)
+         IMP         = IMP     + NOAN0X (III)
+         JMP         = JMP     + NOAN1X (III)
+         ICORSH      = ICORSH  + NOCOSHX(III)
+         IF(IAT.EQ.NAT) MPNUM = MPKLOC(ICORSHIM) + MPKMAX(ICORSHIM)
+     *                                           - MPKMIN(ICORSHIM)
+      ENDDO
+C
+      III    = 0
+      JJJ    = 0
+      NUM    = 0
+      NPGALL = 0
+      DO KKK  =  1, NSHELLX
+         IATX=KATOMX(KKK)
+         IF(IATX.GE.(MATOMA+1).AND. IATX.LE.(MATOMA+MATOMB)) THEN
+            III = III + 1
+            KSTART(III)  = KSTARTX(KKK) - NPGALL
+            KATOM(III)   = KATOMX(KKK) - MATOMA
+            KTYPE(III)   = KTYPEX(KKK)
+            KNG(III)     = KNGX(KKK)
+            KLOC(III)    = KLOCX(KKK) - NUMA
+            MIN(III)     = MINX(KKK)
+            MAX(III)     = MAXX(KKK)
+            I1 = KSTARTX(KKK)
+            I2 = I1 + KNGX(KKK) - 1
+            DO IG = I1, I2
+               JJJ = JJJ + 1
+               EX(JJJ)  = EXX(IG)
+               CS(JJJ)  = CSX(IG)
+               CP(JJJ)  = CPX(IG)
+               CD(JJJ)  = CDX(IG)
+               CF(JJJ)  = CFX(IG)
+               CG(JJJ)  = CGX(IG)
+               CH(JJJ)  = CHX(IG)
+               CI(JJJ)  = CIX(IG)
+            ENDDO
+         ELSE
+            NPGALL = NPGALL + KNGX(KKK)
+         END IF
+         IF(IATX.EQ.(MATOMA+MATOMB)) THEN
+            NUM = KLOC(III) + MAX(III) - MIN(III)
+         END IF
+      ENDDO
+      NSHELL = III
+      NQMT   = NUM
+C
+      IF(IREDOX.EQ.0.AND.IQMRXN.EQ.0) THEN
+         CALL SYMORB
+         IREST = 0
+         NEVALS= 0
+      END IF
+      IF(MPLEVL.EQ.2) CALL MP2INP(MPTEST)
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK SAVEABPROP
+!>
+!> @brief    save a copy of all QM properties
+!>
+!> @author   Fengchao Cui
+!>           - May 2012
+!>
+!> @details  save a copy of all QM properties
+!>
+      SUBROUTINE SAVEABPROP(KDOAB)
+      use mx_limits, only: mxatm,mxrt
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+C
+C
+      COMMON /ENRGMP/ EMP2,EMP3,EMP4,EMP2A
+      COMMON /ENRGYS/ ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2,
+     *                VEN,VEE,EPOT,EKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFQMFE/ ETOTQA,EMP2QA,ESTATEQA,ETOTQB,EMP2QB,ESTATEQB,
+     *                FRE1QMMM,FRE2QMMM,
+     *                VIRA(3),VIRB(3),
+     *                LFFFFGRDA,LFFFFGRDB,LFFQMGRDA,LFFQMGRDB,
+     *                LFFCORDX,LFFCHARGX,LFFPOLX,LFFSIGX,LFFEPSX,
+     *                LFFSIG2X,LFFEPS2X,LFFCLPRX,LFFZLPRX,LFFCHGIMX,
+     *                LFFCRDIMX,LFFLISTAQM,LFFLISTBQM
+      COMMON /FMCOM / XX(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+C     FENGCHAO CUI, MAY 7, 2012
+C
+C     -- SAVE ENERGY AND GRADIENT FOR STATE A --
+C
+      IF(KDOAB.EQ.1) THEN
+         EN12A    = EN12
+         EN123A   = EN123
+         EN12312A = EN12312
+         EN123R4A = EN123R4
+         EN234W1A = EN234W1
+         EN123B4A = EN123B4
+         ENCHARA  = ENCHAR
+         ENPOLA   = ENPOL
+         ENRXNA   = ENRXN
+         ENRXNPOLA= ENRXNPOL
+         ENRXNRA  = ENRXNR
+         ENLJRA   = ENLJR
+         ENLJDA   = ENLJD
+         ENCMAPA  = ENCMAP
+         ENFIXSOA = ENFIXSO
+         ENCENTA  = ENCENT
+                              ETOTQA   = ETOT
+         IF(MPLEVL.EQ.2)      EMP2QA   = EMP2
+         IF(TDDFTYP.NE.RNONE) ESTATEQA = ESTATE(NTHST)
+         CALL DCOPY(3*NFFAT,XX(LFFFFGRD2),1,XX(LFFFFGRDA),1)
+         CALL DCOPY(3*NAT  ,XX(LFFQMGRD2),1,XX(LFFQMGRDA),1)
+         CALL DCOPY(3      ,VIR          ,1,VIRA         ,1)
+      END IF
+C
+C     -- SAVE ENERGY AND GRADIENT FOR STATE B --
+C
+      IF(KDOAB.EQ.2) THEN
+         EN12B    = EN12
+         EN123B   = EN123
+         EN12312B = EN12312
+         EN123R4B = EN123R4
+         EN234W1B = EN234W1
+         EN123B4B = EN123B4
+         ENCHARB  = ENCHAR
+         ENPOLB   = ENPOL
+         ENRXNB   = ENRXN
+         ENRXNPOLB= ENRXNPOL
+         ENRXNRB  = ENRXNR
+         ENLJRB   = ENLJR
+         ENLJDB   = ENLJD
+         ENCMAPB  = ENCMAP
+         ENFIXSOB = ENFIXSO
+         ENCENTB  = ENCENT
+                              ETOTQB   = ETOT
+         IF(MPLEVL.EQ.2)      EMP2QB   = EMP2
+         IF(TDDFTYP.NE.RNONE) ESTATEQB = ESTATE(NTHST)
+         CALL DCOPY(3*NFFAT,XX(LFFFFGRD2),1,XX(LFFFFGRDB),1)
+         CALL DCOPY(3*NAT  ,XX(LFFQMGRD2),1,XX(LFFQMGRDB),1)
+         CALL DCOPY(3      ,VIR          ,1,VIRB         ,1)
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK MIXABPROP
+!>
+!> @brief    mix QM properties
+!>
+!> @author   Fengchao Cui
+!>           - May 2012
+!>
+!> @details  mix QM properties
+!>
+      SUBROUTINE MIXABPROP
+      use mx_limits, only: mxatm,mxrt
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+C
+C
+      COMMON /ENRGMP/ EMP2,EMP3,EMP4,EMP2A
+      COMMON /ENRGYS/ ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2,
+     *                VEN,VEE,EPOT,EKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFQMFE/ ETOTQA,EMP2QA,ESTATEQA,ETOTQB,EMP2QB,ESTATEQB,
+     *                FRE1QMMM,FRE2QMMM,
+     *                VIRA(3),VIRB(3),
+     *                LFFFFGRDA,LFFFFGRDB,LFFQMGRDA,LFFQMGRDB,
+     *                LFFCORDX,LFFCHARGX,LFFPOLX,LFFSIGX,LFFEPSX,
+     *                LFFSIG2X,LFFEPS2X,LFFCLPRX,LFFZLPRX,LFFCHGIMX,
+     *                LFFCRDIMX,LFFLISTAQM,LFFLISTBQM
+      COMMON /FMCOM / XX(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+C
+C     FENGCHAO CUI, MAY 7, 2012
+C
+C     - MIX ENERGY AND GRADIENT OF STATE A AND B -
+C
+      EN12    = (1-WSIMUL)*EN12A    + WSIMUL*EN12B
+      EN123   = (1-WSIMUL)*EN123A   + WSIMUL*EN123B
+      EN12312 = (1-WSIMUL)*EN12312A + WSIMUL*EN12312B
+      EN123R4 = (1-WSIMUL)*EN123R4A + WSIMUL*EN123R4B
+      EN234W1 = (1-WSIMUL)*EN234W1A + WSIMUL*EN234W1B
+      EN123B4 = (1-WSIMUL)*EN123B4A + WSIMUL*EN123B4B
+      ENCHAR  = (1-WSIMUL)*ENCHARA  + WSIMUL*ENCHARB
+      ENPOL   = (1-WSIMUL)*ENPOLA   + WSIMUL*ENPOLB
+      ENRXN   = (1-WSIMUL)*ENRXNA   + WSIMUL*ENRXNB
+      ENRXNPOL= (1-WSIMUL)*ENRXNPOLA+ WSIMUL*ENRXNPOLB
+      ENRXNR  = (1-WSIMUL)*ENRXNRA  + WSIMUL*ENRXNRB
+      ENLJR   = (1-WSIMUL)*ENLJRA   + WSIMUL*ENLJRB
+      ENLJD   = (1-WSIMUL)*ENLJDA   + WSIMUL*ENLJDB
+      ENCMAP  = (1-WSIMUL)*ENCMAPA  + WSIMUL*ENCMAPB
+      ENFIXSO = (1-WSIMUL)*ENFIXSOA + WSIMUL*ENFIXSOB
+      ENCENT  = (1-WSIMUL)*ENCENTA  + WSIMUL*ENCENTB
+      ETOT    = (1-WSIMUL)*ETOTQA   + WSIMUL*ETOTQB
+      EMP2    = (1-WSIMUL)*EMP2QA   + WSIMUL*EMP2QB
+      ESTATE(NTHST)
+     *        = (1-WSIMUL)*ESTATEQA + WSIMUL*ESTATEQB
+C
+      DO III=1, NFFAT
+         XX(LFFFFGRD2+3*(III-1)  )=
+     *                       (1-WSIMUL)*XX(LFFFFGRDA+3*(III-1)  )+
+     *                           WSIMUL*XX(LFFFFGRDB+3*(III-1)  )
+         XX(LFFFFGRD2+3*(III-1)+1)=
+     *                       (1-WSIMUL)*XX(LFFFFGRDA+3*(III-1)+1)+
+     *                           WSIMUL*XX(LFFFFGRDB+3*(III-1)+1)
+         XX(LFFFFGRD2+3*(III-1)+2)=
+     *                       (1-WSIMUL)*XX(LFFFFGRDA+3*(III-1)+2)+
+     *                           WSIMUL*XX(LFFFFGRDB+3*(III-1)+2)
+      ENDDO
+      DO III=1, NAT
+C        - III IS RUNNING OVER QM A, LET'S FIND THE QM B ATOM JJJ
+         JJJ = 0
+         CALL GETIFFAT(XX(LFFLISTAQM),III,JJJ)
+         IF(JJJ.EQ.0) THEN
+            XX(LFFQMGRD2+3*(III-1)  )=
+     *                       (1-WSIMUL)*XX(LFFQMGRDA+3*(III-1)  )
+            XX(LFFQMGRD2+3*(III-1)+1)=
+     *                       (1-WSIMUL)*XX(LFFQMGRDA+3*(III-1)+1)
+            XX(LFFQMGRD2+3*(III-1)+2)=
+     *                       (1-WSIMUL)*XX(LFFQMGRDA+3*(III-1)+2)
+         ELSE
+            XX(LFFQMGRD2+3*(III-1)  )=
+     *                       (1-WSIMUL)*XX(LFFQMGRDA+3*(III-1)  )+
+     *                           WSIMUL*XX(LFFQMGRDB+3*(JJJ-1)  )
+            XX(LFFQMGRD2+3*(III-1)+1)=
+     *                       (1-WSIMUL)*XX(LFFQMGRDA+3*(III-1)+1)+
+     *                           WSIMUL*XX(LFFQMGRDB+3*(JJJ-1)+1)
+            XX(LFFQMGRD2+3*(III-1)+2)=
+     *                       (1-WSIMUL)*XX(LFFQMGRDA+3*(III-1)+2)+
+     *                           WSIMUL*XX(LFFQMGRDB+3*(JJJ-1)+2)
+         END IF
+      ENDDO
+      VIR(1) = (1-WSIMUL)*VIRA(1) + WSIMUL*VIRB(1)
+      VIR(2) = (1-WSIMUL)*VIRA(2) + WSIMUL*VIRB(2)
+      VIR(3) = (1-WSIMUL)*VIRA(3) + WSIMUL*VIRB(3)
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK SAVEFFDATA
+!>
+!> @brief    save a copy of all MM information
+!>
+!> @author   Fengchao Cui
+!>           - May 2012
+!>
+!> @details  save a copy of all MM information
+!>
+      SUBROUTINE SAVEFFDATA
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FMCOM / X(1)
+      COMMON /FFQMFE/ ETOTQA,EMP2QA,ESTATEQA,ETOTQB,EMP2QB,ESTATEQB,
+     *                FRE1QMMM,FRE2QMMM,
+     *                VIRA(3),VIRB(3),
+     *                LFFFFGRDA,LFFFFGRDB,LFFQMGRDA,LFFQMGRDB,
+     *                LFFCORDX,LFFCHARGX,LFFPOLX,LFFSIGX,LFFEPSX,
+     *                LFFSIG2X,LFFEPS2X,LFFCLPRX,LFFZLPRX,LFFCHGIMX,
+     *                LFFCRDIMX,LFFLISTAQM,LFFLISTBQM
+C
+C     FENGCHAO CUI, MAY 11, 2012
+C
+      CALL DCOPY(3*NFFAT,X(LFFCORD) ,1,X(LFFCORDX)  ,1)
+      CALL DCOPY(4*NFFAT,X(LFFCLPR) ,1,X(LFFCLPRX)  ,1)
+      CALL DCOPY(4*NFFAT,X(LFFZLPR) ,1,X(LFFZLPRX)  ,1)
+      CALL DCOPY(  NFFAT,X(LFFCHARG),1,X(LFFCHARGX) ,1)
+      CALL DCOPY(  NFFAT,X(LFFPOL)  ,1,X(LFFPOLX)   ,1)
+      CALL DCOPY(  NFFAT,X(LFFSIG)  ,1,X(LFFSIGX)   ,1)
+      CALL DCOPY(  NFFAT,X(LFFEPS)  ,1,X(LFFEPSX)   ,1)
+      CALL DCOPY(  NFFAT,X(LFFSIG2) ,1,X(LFFSIG2X)  ,1)
+      CALL DCOPY(  NFFAT,X(LFFEPS2) ,1,X(LFFEPS2X)  ,1)
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK SETFFDATAB
+!>
+!> @brief    set MM information from saved
+!>
+!> @author   Fengchao Cui
+!>           - May 2012
+!>
+!> @details  set MM information from saved
+!>
+      SUBROUTINE SETFFDATAB(KDOAB)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFFRE2/ N1FFAT,N1BOND,N1ANGL,N1DIHR,N1DIHB,N1CMAP,N1WAGG,
+     *                N2FFAT,N2BOND,N2ANGL,N2DIHR,N2DIHB,N2CMAP,N2WAGG,
+     *                LFF2ATMNAM,LFF2CORD,LFF2ZANF,LFF2ZMAS,
+     *                LFF2ONEMAS,LFF2CHARG,LFF2POL,
+     *                LFF2SIG,LFF2EPS,LFF2SIG2,LFF2EPS2,
+     *                LFF2BOND0,LFF2FCBOND,LFF2ANGL0,LFF2FCANGL,
+     *                LFF2FCWAGG,LFF2DIHB0,LFF2FCDIHB,
+     *                LFF2VROT,LFF2NNN,LFF2GAMA,LFF2IPAIR,
+     *                LFF2KLIST,LFF2LLIST,LFF2MLIST,LFF2NLIST,
+     *                LFF2VEL,LFF2QMVEL,LFF2CLPR,LFF2ZLPR,
+     *                LFF2NLPR,LFF2MAPLST,
+     *                LFFLISTB2A,NTODOA,LFFNONLSA,NTODOB,LFFNONLSB,
+     *                N1213A,LFFL1213A,N1213B,LFFL1213B,
+     *                N14A,LFFL14A,N14B,LFFL14B,
+     *                NTODOPMA,LFFNONLSPMA,NBONDPMA,LFFLSBONDPMA,
+     *                NANGLPMA,LFFLSANGLPMA,NDIHRPMA,LFFLSDIHRPMA,
+     *                NDIHBPMA,LFFLSDIHBPMA,NWAGGPMA,LFFLSWAGGPMA,
+     *                NCMAPPMA,LFFLSCMAPPMA,
+     *                N1213PMA,LFFL1213PMA,
+     *                N14PMA,LFFL14PMA,
+     *                NTODOPMB,LFFNONLSPMB,NBONDPMB,LFFLSBONDPMB,
+     *                NANGLPMB,LFFLSANGLPMB,NDIHRPMB,LFFLSDIHRPMB,
+     *                NDIHBPMB,LFFLSDIHBPMB,NWAGGPMB,LFFLSWAGGPMB,
+     *                NCMAPPMB,LFFLSCMAPPMB,
+     *                N1213PMB,LFFL1213PMB,
+     *                N14PMB,LFFL14PMB
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FMCOM / X(1)
+      COMMON /FFQMFE/ ETOTQA,EMP2QA,ESTATEQA,ETOTQB,EMP2QB,ESTATEQB,
+     *                FRE1QMMM,FRE2QMMM,
+     *                VIRA(3),VIRB(3),
+     *                LFFFFGRDA,LFFFFGRDB,LFFQMGRDA,LFFQMGRDB,
+     *                LFFCORDX,LFFCHARGX,LFFPOLX,LFFSIGX,LFFEPSX,
+     *                LFFSIG2X,LFFEPS2X,LFFCLPRX,LFFZLPRX,LFFCHGIMX,
+     *                LFFCRDIMX,LFFLISTAQM,LFFLISTBQM
+C
+C     FENGCHAO CUI, MAY 11, 2012
+C
+C     -- SET FORCE FIELD STATE A --
+C
+      IF(KDOAB.EQ.1) THEN
+         CALL DCOPY(3*NFFAT,X(LFFCORDX) ,1,X(LFFCORD)  ,1)
+         CALL DCOPY(4*NFFAT,X(LFFCLPRX) ,1,X(LFFCLPR)  ,1)
+         CALL DCOPY(4*NFFAT,X(LFFZLPRX) ,1,X(LFFZLPR)  ,1)
+         CALL DCOPY(  NFFAT,X(LFFCHARGX),1,X(LFFCHARG) ,1)
+         CALL DCOPY(  NFFAT,X(LFFPOLX)  ,1,X(LFFPOL)   ,1)
+         CALL DCOPY(  NFFAT,X(LFFSIGX)  ,1,X(LFFSIG)   ,1)
+         CALL DCOPY(  NFFAT,X(LFFEPSX)  ,1,X(LFFEPS)   ,1)
+         CALL DCOPY(  NFFAT,X(LFFSIG2X) ,1,X(LFFSIG2)  ,1)
+         CALL DCOPY(  NFFAT,X(LFFEPS2X) ,1,X(LFFEPS2)  ,1)
+      END IF
+C
+C     -- SET FORCE FIELD STATE B --
+C
+      IF(KDOAB.EQ.2) THEN
+         IF(IFEPTYP.EQ.1)THEN
+            CALL DCOPY(3*NFFAT,X(LFFCORDX),1,X(LFFCORD) ,1)
+            CALL DCOPY(3*NFFAT,X(LFFCORD) ,1,X(LFF2CORD),1)
+         END IF
+         IF(IFEPTYP.EQ.2)THEN  !  NFIXMM=KFREEAB FOR IFEPTYP=2
+            CALL DCOPY(3*NFFAT,X(LFFCORDX),1,X(LFFCORD) ,1)
+            DO III=1,NFIXMM
+               IFFAT = IFIXMM(III)
+               X(LFFCORD+3*(IFFAT-1)  ) = X(LFF2CORD+3*(IFFAT-1)  )
+               X(LFFCORD+3*(IFFAT-1)+1) = X(LFF2CORD+3*(IFFAT-1)+1)
+               X(LFFCORD+3*(IFFAT-1)+2) = X(LFF2CORD+3*(IFFAT-1)+2)
+            ENDDO
+            CALL DCOPY(3*NFFAT,X(LFFCORD) ,1,X(LFF2CORD),1)
+         END IF
+         CALL DCOPY(4*NFFAT,X(LFF2CLPR) ,1,X(LFFCLPR)  ,1)
+         CALL DCOPY(4*NFFAT,X(LFF2ZLPR) ,1,X(LFFZLPR)  ,1)
+         CALL DCOPY(  NFFAT,X(LFF2CHARG),1,X(LFFCHARG) ,1)
+         CALL DCOPY(  NFFAT,X(LFF2POL)  ,1,X(LFFPOL)   ,1)
+         CALL DCOPY(  NFFAT,X(LFF2SIG)  ,1,X(LFFSIG)   ,1)
+         CALL DCOPY(  NFFAT,X(LFF2EPS)  ,1,X(LFFEPS)   ,1)
+         CALL DCOPY(  NFFAT,X(LFF2SIG2) ,1,X(LFFSIG2)  ,1)
+         CALL DCOPY(  NFFAT,X(LFF2EPS2) ,1,X(LFFEPS2)  ,1)
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK EWALDPREPARE
+!>
+!> @brief    prepare Ewald calculation
+!>
+!> @author   Hui Li
+!>           - Jun 2012
+!>
+!> @details  modified from Lyuda's code
+!>
+      SUBROUTINE EWALDPREPARE(KVEC)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (PT5=0.50D+00)
+C
+      DIMENSION KVEC(3,*)
+C
+      COMMON /FFEWLD/ SPLIT,IEWALD,KEWALD,NKVEC,
+     *                L1KVEC,L2KVEC,LFFRKEXPEL,LFFRKVEC,
+     *                LFFKVEC,LFFTCHCH,LFFCOSCH,LFFSINCH
+C
+C     HUI LI, JUNE 19, 2012
+C
+      RK2 = (KEWALD+PT5)**2
+      N = 0
+      M = 0
+C
+      DO IX = -KEWALD,KEWALD
+      DO IY = -KEWALD,KEWALD
+      DO IZ = -KEWALD,KEWALD
+         N = N + 1
+C        - L1KVEC AND L2KVEC NATURALLY CONTROL EVERYTHING -
+         IF(N.GE.L1KVEC.AND.N.LE.L2KVEC) THEN
+            IF(IEWALD.EQ.1) THEN
+               M = M + 1
+               KVEC(1,M) = IX
+               KVEC(2,M) = IY
+               KVEC(3,M) = IZ
+            END IF
+            IF(IEWALD.EQ.2) THEN
+               R2 = (ABS(IX)-PT5)**2+(ABS(IY)-PT5)**2+(ABS(IZ)-PT5)**2
+               IF(R2.LE.RK2)THEN
+                  M = M + 1
+                  KVEC(1,M) = IX
+                  KVEC(2,M) = IY
+                  KVEC(3,M) = IZ
+               END IF
+            END IF
+         END IF
+      ENDDO
+      ENDDO
+      ENDDO
+C
+      IF(IEWALD.EQ.2) L2KVEC = L1KVEC + M - 1
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK EWALDRECIPR
+!>
+!> @brief    Ewald summation calculation
+!>
+!> @author   Hui Li
+!>           - Jun 2012
+!>
+!> @details  modified from Lyuda's code
+!>
+      SUBROUTINE EWALDRECIPR(ESELF,ERECIPR,CORD,CHARG,FFGRD,RKEXPEL,
+     *                       RKVEC,TCHCH,COSCH,SINCH,KVEC)
+C
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
+C
+      PARAMETER (PI=3.14159265358979323846264338D+00)
+      PARAMETER (TWOPI=2.0D+00*PI)
+      PARAMETER (FOURPI=4.0D+00*PI)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+C
+      DIMENSION CORD(3,*),CHARG(*),FFGRD(3,*),TCHCH(*),
+     *          COSCH(*),SINCH(*),RKEXPEL(*),RKVEC(3,*),KVEC(3,*)
+C
+      COMMON /FFEWLD/ SPLIT,IEWALD,KEWALD,NKVEC,
+     *                L1KVEC,L2KVEC,LFFRKEXPEL,LFFRKVEC,
+     *                LFFKVEC,LFFTCHCH,LFFCOSCH,LFFSINCH
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFNODE/ L1BOND,L2BOND,L1ANGL,L2ANGL,L1DIHR,L2DIHR,
+     *                L1DIHB,L2DIHB,L1CMAP,L2CMAP,L1WAGG,L2WAGG,
+     *                L11213,L21213,L1N14J,L2N14J,
+     *                L11213A,L21213A,L1N14A,L2N14A,
+     *                L11213B,L21213B,L1N14B,L2N14B,
+     *                L1BONDPMF,L2BONDPMF,L1ANGLPMF,L2ANGLPMF,
+     *                L1DIHRPMF,L2DIHRPMF,L1DIHBPMF,L2DIHBPMF,
+     *                L1WAGGPMF,L2WAGGPMF,L1CMAPPMF,L2CMAPPMF,
+     *                L11213PMF,L21213PMF,L1N14PMF,L2N14PMF,
+     *                L1BONDPMB,L2BONDPMB,L1ANGLPMB,L2ANGLPMB,
+     *                L1DIHRPMB,L2DIHRPMB,L1DIHBPMB,L2DIHBPMB,
+     *                L1WAGGPMB,L2WAGGPMB,L1CMAPPMB,L2CMAPPMB,
+     *                L11213PMB,L21213PMB,L1N14PMB,L2N14PMB,
+     *                L1FFAT,L2FFAT
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+C
+C     HUI LI, JUNE 18, 2012
+C
+      SQRTPI=SQRT(PI)
+C
+C     -- SELF ENERGY --
+      ESELF = -DDOT((L2FFAT-L1FFAT+1),CHARG(L1FFAT),1,
+     *               CHARG(L1FFAT),1)*SPLIT/SQRTPI
+C
+C     -- PREPARE RKVEC --
+C     THIS MUST BE DONE AT EVERY MD STEP IF XBOX CHANGES
+C
+      RCOEFF=FOURPI*ONEXBOX*ONEYBOX*ONEZBOX
+      DO I = 1, L2KVEC-L1KVEC+1
+         RKVEC(1,I) = TWOPI*KVEC(1,I)*ONEXBOX
+         RKVEC(2,I) = TWOPI*KVEC(2,I)*ONEYBOX
+         RKVEC(3,I) = TWOPI*KVEC(3,I)*ONEZBOX
+         RK2        = RKVEC(1,I)*RKVEC(1,I)
+     *              + RKVEC(2,I)*RKVEC(2,I)
+     *              + RKVEC(3,I)*RKVEC(3,I)
+         IF(RK2.EQ.ZERO) THEN
+            RKEXPEL(I) = ZERO
+         ELSE
+            RKEXPEL(I) = RCOEFF*EXP(-RK2/(FOUR*SPLIT*SPLIT))/RK2
+         END IF
+      ENDDO
+C
+      CALL VCLR(COSCH,1,L2KVEC-L1KVEC+1)
+      CALL VCLR(SINCH,1,L2KVEC-L1KVEC+1)
+      CALL VCLR(TCHCH,1,L2KVEC-L1KVEC+1)
+C
+C     -- ENERGY --
+      DO 200 I = 1, L2KVEC-L1KVEC+1
+         DO 210 IFFAT=1,NFFAT
+            IF(CHARG(IFFAT).EQ.ZERO) GOTO 210
+            RK       = RKVEC(1,I)*CORD(1,IFFAT)
+     *               + RKVEC(2,I)*CORD(2,IFFAT)
+     *               + RKVEC(3,I)*CORD(3,IFFAT)
+            COSKR    = COS(RK)
+            SINKR    = SIN(RK)
+            COSCH(I) = COSCH(I)+CHARG(IFFAT)*COSKR
+            SINCH(I) = SINCH(I)+CHARG(IFFAT)*SINKR
+ 210     CONTINUE
+         TCHCH(I)=TCHCH(I) + COSCH(I)*COSCH(I) + SINCH(I)*SINCH(I)
+ 200  CONTINUE
+      ERECIPR=DDOT((L2KVEC-L1KVEC+1),RKEXPEL,1,TCHCH,1)
+C
+C     -- HUI LI: THIS IS THE CORRECT WAY TO DO EWALD VIRIAL --
+      VIR(1) = VIR(1) - ERECIPR/3.0D+00
+      VIR(2) = VIR(2) - ERECIPR/3.0D+00
+      VIR(3) = VIR(3) - ERECIPR/3.0D+00
+C
+C     -- GRADIENT --
+      DO 300 IFFAT=1,NFFAT
+         IF(CHARG(IFFAT).EQ.ZERO) GOTO 300
+         GCHCHX = ZERO
+         GCHCHY = ZERO
+         GCHCHZ = ZERO
+         DO I = 1, L2KVEC-L1KVEC+1
+            RK     = RKVEC(1,I)*CORD(1,IFFAT)
+     *             + RKVEC(2,I)*CORD(2,IFFAT)
+     *             + RKVEC(3,I)*CORD(3,IFFAT)
+            COSKR  = COS(RK)
+            SINKR  = SIN(RK)
+            DUM    = RKEXPEL(I)*(COSCH(I)*SINKR-SINCH(I)*COSKR)
+            GCHCHX = GCHCHX + DUM*RKVEC(1,I)
+            GCHCHY = GCHCHY + DUM*RKVEC(2,I)
+            GCHCHZ = GCHCHZ + DUM*RKVEC(3,I)
+         ENDDO
+         CONX   = -TWO*CHARG(IFFAT)*GCHCHX
+         CONY   = -TWO*CHARG(IFFAT)*GCHCHY
+         CONZ   = -TWO*CHARG(IFFAT)*GCHCHZ
+         FFGRD(1,IFFAT) = FFGRD(1,IFFAT) + CONX
+         FFGRD(2,IFFAT) = FFGRD(2,IFFAT) + CONY
+         FFGRD(3,IFFAT) = FFGRD(3,IFFAT) + CONZ
+ 300  CONTINUE
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK UMBRELLA
+!>
+!> @brief    Umbrella sampling
+!>
+!> @author   Fengchao Cui and Hui Li
+!>           - Jul 2012
+!>
+!> @details  apply the bias potentials and record
+!>           histogram
+!>
+      SUBROUTINE UMBRELLA(CORD,FFGRD,UMBHIS,UM2HIS)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      INTEGER P1,P2,P3,P4
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (PI=3.14159265358979323846264338D+00)
+      PARAMETER (PT5=0.5D+00)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),UMBHIS(*),UM2HIS(NUM2BIN,*)
+C
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFUMBR/ UMBFC,UMBR0,UMBSIZE,
+     *                NUMBBIN,NUMBATM(6),NUMBTYP,LFFUMBHIS,
+     *                UM2FC,UM2R0,UM2SIZE,
+     *                NUM2BIN,NUM2ATM(6),NUM2TYP,LFFUM2HIS
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     FENGCHAO CUI AND HUI LI, JUL 25, 2012, LINCOLN
+C
+C     FORMULA:  E = 0.5*K*(R-R0)**2
+C
+      ENBIAS = ZERO
+C
+      IF(.NOT.MASWRK)  RETURN
+      IF(NUMBTYP.EQ.0) RETURN
+C
+      R0 = UMBR0
+C
+      IF(NUMBTYP.EQ.12) THEN
+         P1    = NUMBATM(1)
+         P2    = NUMBATM(2)
+         X     = CORD(1,P1) - CORD(1,P2)
+         Y     = CORD(2,P1) - CORD(2,P2)
+         Z     = CORD(3,P1) - CORD(3,P2)
+         R2    = X*X + Y*Y + Z*Z
+         R     = SQRT(R2)
+         ENBIAS= PT5*UMBFC*(R-R0)*(R-R0)
+         DUM   = UMBFC*(R-R0)/R
+         DEX   = DUM*X
+         DEY   = DUM*Y
+         DEZ   = DUM*Z
+         FFGRD(1,P1)=FFGRD(1,P1) + DEX
+         FFGRD(2,P1)=FFGRD(2,P1) + DEY
+         FFGRD(3,P1)=FFGRD(3,P1) + DEZ
+         FFGRD(1,P2)=FFGRD(1,P2) - DEX
+         FFGRD(2,P2)=FFGRD(2,P2) - DEY
+         FFGRD(3,P2)=FFGRD(3,P2) - DEZ
+      END IF
+C
+      IF(NUMBTYP.EQ.1212) THEN
+         P1      = NUMBATM(1)
+         P2      = NUMBATM(2)
+         P3      = NUMBATM(3)
+         P4      = NUMBATM(4)
+         X12     = CORD(1,P1) - CORD(1,P2)
+         Y12     = CORD(2,P1) - CORD(2,P2)
+         Z12     = CORD(3,P1) - CORD(3,P2)
+         X34     = CORD(1,P3) - CORD(1,P4)
+         Y34     = CORD(2,P3) - CORD(2,P4)
+         Z34     = CORD(3,P3) - CORD(3,P4)
+         R12     = X12*X12 + Y12*Y12 + Z12*Z12
+         R12     = SQRT(R12)
+         R34     = X34*X34 + Y34*Y34 + Z34*Z34
+         R34     = SQRT(R34)
+         R       = R12 - R34
+         ENBIAS  = PT5*UMBFC*(R-R0)*(R-R0)
+         DUM     = UMBFC*(R-R0)
+         DUM12   = DUM/R12
+         DUM34   = DUM/R34
+         DEX12   = DUM12*X12
+         DEY12   = DUM12*Y12
+         DEZ12   = DUM12*Z12
+         DEX34   = DUM34*X34
+         DEY34   = DUM34*Y34
+         DEZ34   = DUM34*Z34
+         FFGRD(1,P1)=FFGRD(1,P1) + DEX12
+         FFGRD(2,P1)=FFGRD(2,P1) + DEY12
+         FFGRD(3,P1)=FFGRD(3,P1) + DEZ12
+         FFGRD(1,P2)=FFGRD(1,P2) - DEX12
+         FFGRD(2,P2)=FFGRD(2,P2) - DEY12
+         FFGRD(3,P2)=FFGRD(3,P2) - DEZ12
+         FFGRD(1,P3)=FFGRD(1,P3) - DEX34
+         FFGRD(2,P3)=FFGRD(2,P3) - DEY34
+         FFGRD(3,P3)=FFGRD(3,P3) - DEZ34
+         FFGRD(1,P4)=FFGRD(1,P4) + DEX34
+         FFGRD(2,P4)=FFGRD(2,P4) + DEY34
+         FFGRD(3,P4)=FFGRD(3,P4) + DEZ34
+      END IF
+C
+      IF(NUMBTYP.EQ.123) THEN
+         P1      = NUMBATM(1)
+         P2      = NUMBATM(2)
+         P3      = NUMBATM(3)
+         X12     = CORD(1,P1) - CORD(1,P2)
+         Y12     = CORD(2,P1) - CORD(2,P2)
+         Z12     = CORD(3,P1) - CORD(3,P2)
+         X13     = CORD(1,P1) - CORD(1,P3)
+         Y13     = CORD(2,P1) - CORD(2,P3)
+         Z13     = CORD(3,P1) - CORD(3,P3)
+         X23     = CORD(1,P2) - CORD(1,P3)
+         Y23     = CORD(2,P2) - CORD(2,P3)
+         Z23     = CORD(3,P2) - CORD(3,P3)
+         R13R13  = X13*X13+Y13*Y13+Z13*Z13
+         R12R12  = X12*X12+Y12*Y12+Z12*Z12
+         R23R23  = X23*X23+Y23*Y23+Z23*Z23
+         R12     = SQRT(R12R12)
+         R23     = SQRT(R23R23)
+         ONEBC   = ONE/(R12*R23)
+         COSA    = (R12R12 + R23R23 - R13R13)*ONEBC*PT5
+         IF(COSA.GT. ONE) COSA = ONE
+         IF(COSA.LT.-ONE) COSA =-ONE
+         R       = ACOS(COSA)
+         ENBIAS  = PT5*UMBFC*(R-R0)*(R-R0)
+C        - CALCULATE GRADIENTS
+         DR23X2 =-X23*ONEBC
+         DR23Y2 =-Y23*ONEBC
+         DR23Z2 =-Z23*ONEBC
+         DR12X1A=-COSA*X12/R12R12
+         DR12Y1A=-COSA*Y12/R12R12
+         DR12Z1A=-COSA*Z12/R12R12
+         DR23X2A=COSA*X23/R23R23
+         DR23Y2A=COSA*Y23/R23R23
+         DR23Z2A=COSA*Z23/R23R23
+         DR12X1 =X12*ONEBC
+         DR12Y1 =Y12*ONEBC
+         DR12Z1 =Z12*ONEBC
+         SINA   =SQRT(ABS(ONE - COSA*COSA))
+         IF(SINA.LT.1.0D-06) SINA = 1.0D-06
+         DUMY   = -UMBFC*(R-R0)/SINA
+         DEX1   = DUMY*(DR12X1A+DR23X2)
+         DEY1   = DUMY*(DR12Y1A+DR23Y2)
+         DEZ1   = DUMY*(DR12Z1A+DR23Z2)
+         FFGRD(1,P1)=FFGRD(1,P1) + DEX1
+         FFGRD(2,P1)=FFGRD(2,P1) + DEY1
+         FFGRD(3,P1)=FFGRD(3,P1) + DEZ1
+         DEX3   = DUMY*(DR23X2A+DR12X1)
+         DEY3   = DUMY*(DR23Y2A+DR12Y1)
+         DEZ3   = DUMY*(DR23Z2A+DR12Z1)
+         FFGRD(1,P3)=FFGRD(1,P3)+DEX3
+         FFGRD(2,P3)=FFGRD(2,P3)+DEY3
+         FFGRD(3,P3)=FFGRD(3,P3)+DEZ3
+         FFGRD(1,P2)=FFGRD(1,P2)-DEX1-DEX3
+         FFGRD(2,P2)=FFGRD(2,P2)-DEY1-DEY3
+         FFGRD(3,P2)=FFGRD(3,P2)-DEZ1-DEZ3
+      END IF
+C
+      IF(NUMBTYP.EQ.1234) THEN
+         P1      = NUMBATM(1)
+         P2      = NUMBATM(2)
+         P3      = NUMBATM(3)
+         P4      = NUMBATM(4)
+         X12     = CORD(1,P1) - CORD(1,P2)
+         Y12     = CORD(2,P1) - CORD(2,P2)
+         Z12     = CORD(3,P1) - CORD(3,P2)
+         X23     = CORD(1,P2) - CORD(1,P3)
+         Y23     = CORD(2,P2) - CORD(2,P3)
+         Z23     = CORD(3,P2) - CORD(3,P3)
+         X34     = CORD(1,P3) - CORD(1,P4)
+         Y34     = CORD(2,P3) - CORD(2,P4)
+         Z34     = CORD(3,P3) - CORD(3,P4)
+         R12     = SQRT(X12*X12+Y12*Y12+Z12*Z12)
+         R23     = SQRT(X23*X23+Y23*Y23+Z23*Z23)
+         R34     = SQRT(X34*X34+Y34*Y34+Z34*Z34)
+         COS123  = (-(X12*X23)-(Y12*Y23)-(Z12*Z23))/(R12*R23)
+         COS234  = (-(X23*X34)-(Y23*Y34)-(Z23*Z34))/(R23*R34)
+         SIN2123 = ONE-COS123*COS123
+         SIN2234 = ONE-COS234*COS234
+         SIN123  = SQRT(ABS(SIN2123))
+         SIN234  = SQRT(ABS(SIN2234))
+         IF(ABS(SIN123).LT.1.0D-06) GOTO 500
+         IF(ABS(SIN234).LT.1.0D-06) GOTO 500
+         ONESIN  = ONE/(SIN123*SIN234)
+         COSTOR  = ONESIN*(COS123*COS234-
+     *                    ((+X12*X34+Y12*Y34+Z12*Z34)/(R12*R34)))
+         IF(COSTOR.GT. ONE) COSTOR= ONE
+         IF(COSTOR.LT.-ONE) COSTOR=-ONE
+         TOR     = ACOS(COSTOR)
+C        -- DIHEDRAL ANGLE IS 0 - 360 DEGREES
+         XNORM   = -Y23*Z34 + Z23*Y34
+         YNORM   = -Z23*X34 + X23*Z34
+         ZNORM   = -X23*Y34 + Y23*X34
+         DOTN12  = X12*XNORM + Y12*YNORM + Z12*ZNORM
+         IF(DOTN12.LT.ZERO) TOR = TWO*PI - TOR
+         R       = TOR
+         DRR0    = R - R0
+         IF     (DRR0.GT. PI) THEN
+            DRR0 = DRR0 - TWO*PI
+         ELSE IF(DRR0.LT.-PI) THEN
+            DRR0 = DRR0 + TWO*PI
+         END IF
+         R       = DRR0 + R0
+         ENBIAS  = PT5*UMBFC*DRR0*DRR0
+C        - CALCULATING DERIVATIVES
+         A123=ONE/(R12*SIN2123)
+         A432=ONE/(R34*SIN2234)
+         B123=R12*COS123/R23
+         B432=R34*COS234/R23
+         C123=B123-ONE
+         FACT=UMBFC*DRR0
+         DUMY       =  FACT*A123/(R12*R23)
+         DEX1       =  DUMY*(-Y12*Z23+Z12*Y23)
+         DEY1       =  DUMY*(-Z12*X23+X12*Z23)
+         DEZ1       =  DUMY*(-X12*Y23+Y12*X23)
+         FFGRD(1,P1)=FFGRD(1,P1)+DEX1
+         FFGRD(2,P1)=FFGRD(2,P1)+DEY1
+         FFGRD(3,P1)=FFGRD(3,P1)+DEZ1
+         DUMY       =  FACT*(-A432)/(R23*R34)
+         DEX4       =  DUMY*(-Y23*Z34+Z23*Y34)
+         DEY4       =  DUMY*(-Z23*X34+X23*Z34)
+         DEZ4       =  DUMY*(-X23*Y34+Y23*X34)
+         FFGRD(1,P4)=FFGRD(1,P4)+DEX4
+         FFGRD(2,P4)=FFGRD(2,P4)+DEY4
+         FFGRD(3,P4)=FFGRD(3,P4)+DEZ4
+         DEX2       =  C123*DEX1 - B432*DEX4
+         DEY2       =  C123*DEY1 - B432*DEY4
+         DEZ2       =  C123*DEZ1 - B432*DEZ4
+         FFGRD(1,P2)=FFGRD(1,P2)+DEX2
+         FFGRD(2,P2)=FFGRD(2,P2)+DEY2
+         FFGRD(3,P2)=FFGRD(3,P2)+DEZ2
+         FFGRD(1,P3)=FFGRD(1,P3)-DEX1-DEX2-DEX4
+         FFGRD(2,P3)=FFGRD(2,P3)-DEY1-DEY2-DEY4
+         FFGRD(3,P3)=FFGRD(3,P3)-DEZ1-DEZ2-DEZ4
+ 500     CONTINUE
+      END IF
+C
+      UMBRLOW  = UMBR0 - (DBLE(NUMBBIN-1)/2)*UMBSIZE
+      IBIN     = NINT((R-UMBRLOW)/UMBSIZE) + 1
+      IF(IBIN.GE.1.AND.IBIN.LE.NUMBBIN) UMBHIS(IBIN)=UMBHIS(IBIN)+1
+C
+C
+C     ********* 2D UMBRELLA SAMPLING **********
+C
+      IF(NUM2TYP.EQ.0) RETURN
+C
+      R0 = UM2R0
+      IF(NUM2TYP.EQ.12) THEN
+         P1    = NUM2ATM(1)
+         P2    = NUM2ATM(2)
+         X     = CORD(1,P1) - CORD(1,P2)
+         Y     = CORD(2,P1) - CORD(2,P2)
+         Z     = CORD(3,P1) - CORD(3,P2)
+         R2    = X*X + Y*Y + Z*Z
+         R     = SQRT(R2)
+         ENBIAS= ENBIAS + PT5*UM2FC*(R-R0)*(R-R0)
+         DUM   = UM2FC*(R-R0)/R
+         DEX   = DUM*X
+         DEY   = DUM*Y
+         DEZ   = DUM*Z
+         FFGRD(1,P1)=FFGRD(1,P1) + DEX
+         FFGRD(2,P1)=FFGRD(2,P1) + DEY
+         FFGRD(3,P1)=FFGRD(3,P1) + DEZ
+         FFGRD(1,P2)=FFGRD(1,P2) - DEX
+         FFGRD(2,P2)=FFGRD(2,P2) - DEY
+         FFGRD(3,P2)=FFGRD(3,P2) - DEZ
+      END IF
+C
+      IF(NUM2TYP.EQ.1212) THEN
+         P1      = NUM2ATM(1)
+         P2      = NUM2ATM(2)
+         P3      = NUM2ATM(3)
+         P4      = NUM2ATM(4)
+         X12     = CORD(1,P1) - CORD(1,P2)
+         Y12     = CORD(2,P1) - CORD(2,P2)
+         Z12     = CORD(3,P1) - CORD(3,P2)
+         X34     = CORD(1,P3) - CORD(1,P4)
+         Y34     = CORD(2,P3) - CORD(2,P4)
+         Z34     = CORD(3,P3) - CORD(3,P4)
+         R12     = X12*X12 + Y12*Y12 + Z12*Z12
+         R12     = SQRT(R12)
+         R34     = X34*X34 + Y34*Y34 + Z34*Z34
+         R34     = SQRT(R34)
+         R       = R12 - R34
+         ENBIAS  = ENBIAS + PT5*UM2FC*(R-R0)*(R-R0)
+         DUM     = UM2FC*(R-R0)
+         DUM12   = DUM/R12
+         DUM34   = DUM/R34
+         DEX12   = DUM12*X12
+         DEY12   = DUM12*Y12
+         DEZ12   = DUM12*Z12
+         DEX34   = DUM34*X34
+         DEY34   = DUM34*Y34
+         DEZ34   = DUM34*Z34
+         FFGRD(1,P1)=FFGRD(1,P1) + DEX12
+         FFGRD(2,P1)=FFGRD(2,P1) + DEY12
+         FFGRD(3,P1)=FFGRD(3,P1) + DEZ12
+         FFGRD(1,P2)=FFGRD(1,P2) - DEX12
+         FFGRD(2,P2)=FFGRD(2,P2) - DEY12
+         FFGRD(3,P2)=FFGRD(3,P2) - DEZ12
+         FFGRD(1,P3)=FFGRD(1,P3) - DEX34
+         FFGRD(2,P3)=FFGRD(2,P3) - DEY34
+         FFGRD(3,P3)=FFGRD(3,P3) - DEZ34
+         FFGRD(1,P4)=FFGRD(1,P4) + DEX34
+         FFGRD(2,P4)=FFGRD(2,P4) + DEY34
+         FFGRD(3,P4)=FFGRD(3,P4) + DEZ34
+      END IF
+C
+      IF(NUM2TYP.EQ.123) THEN
+         P1      = NUM2ATM(1)
+         P2      = NUM2ATM(2)
+         P3      = NUM2ATM(3)
+         X12     = CORD(1,P1) - CORD(1,P2)
+         Y12     = CORD(2,P1) - CORD(2,P2)
+         Z12     = CORD(3,P1) - CORD(3,P2)
+         X13     = CORD(1,P1) - CORD(1,P3)
+         Y13     = CORD(2,P1) - CORD(2,P3)
+         Z13     = CORD(3,P1) - CORD(3,P3)
+         X23     = CORD(1,P2) - CORD(1,P3)
+         Y23     = CORD(2,P2) - CORD(2,P3)
+         Z23     = CORD(3,P2) - CORD(3,P3)
+         R13R13  = X13*X13+Y13*Y13+Z13*Z13
+         R12R12  = X12*X12+Y12*Y12+Z12*Z12
+         R23R23  = X23*X23+Y23*Y23+Z23*Z23
+         R12     = SQRT(R12R12)
+         R23     = SQRT(R23R23)
+         ONEBC   = ONE/(R12*R23)
+         COSA    = (R12R12 + R23R23 - R13R13)*ONEBC*PT5
+         IF(COSA.GT. ONE) COSA = ONE
+         IF(COSA.LT.-ONE) COSA =-ONE
+         R       = ACOS(COSA)
+         ENBIAS  = ENBIAS + PT5*UM2FC*(R-R0)*(R-R0)
+C        - CALCULATE GRADIENTS
+         DR23X2 =-X23*ONEBC
+         DR23Y2 =-Y23*ONEBC
+         DR23Z2 =-Z23*ONEBC
+         DR12X1A=-COSA*X12/R12R12
+         DR12Y1A=-COSA*Y12/R12R12
+         DR12Z1A=-COSA*Z12/R12R12
+         DR23X2A=COSA*X23/R23R23
+         DR23Y2A=COSA*Y23/R23R23
+         DR23Z2A=COSA*Z23/R23R23
+         DR12X1 =X12*ONEBC
+         DR12Y1 =Y12*ONEBC
+         DR12Z1 =Z12*ONEBC
+         SINA   =SQRT(ABS(ONE - COSA*COSA))
+         IF(SINA.LT.1.0D-06) SINA = 1.0D-06
+         DUMY   = -UM2FC*(R-R0)/SINA
+         DEX1   = DUMY*(DR12X1A+DR23X2)
+         DEY1   = DUMY*(DR12Y1A+DR23Y2)
+         DEZ1   = DUMY*(DR12Z1A+DR23Z2)
+         FFGRD(1,P1)=FFGRD(1,P1) + DEX1
+         FFGRD(2,P1)=FFGRD(2,P1) + DEY1
+         FFGRD(3,P1)=FFGRD(3,P1) + DEZ1
+         DEX3   = DUMY*(DR23X2A+DR12X1)
+         DEY3   = DUMY*(DR23Y2A+DR12Y1)
+         DEZ3   = DUMY*(DR23Z2A+DR12Z1)
+         FFGRD(1,P3)=FFGRD(1,P3)+DEX3
+         FFGRD(2,P3)=FFGRD(2,P3)+DEY3
+         FFGRD(3,P3)=FFGRD(3,P3)+DEZ3
+         FFGRD(1,P2)=FFGRD(1,P2)-DEX1-DEX3
+         FFGRD(2,P2)=FFGRD(2,P2)-DEY1-DEY3
+         FFGRD(3,P2)=FFGRD(3,P2)-DEZ1-DEZ3
+      END IF
+C
+      IF(NUM2TYP.EQ.1234) THEN
+         P1      = NUM2ATM(1)
+         P2      = NUM2ATM(2)
+         P3      = NUM2ATM(3)
+         P4      = NUM2ATM(4)
+         X12     = CORD(1,P1) - CORD(1,P2)
+         Y12     = CORD(2,P1) - CORD(2,P2)
+         Z12     = CORD(3,P1) - CORD(3,P2)
+         X23     = CORD(1,P2) - CORD(1,P3)
+         Y23     = CORD(2,P2) - CORD(2,P3)
+         Z23     = CORD(3,P2) - CORD(3,P3)
+         X34     = CORD(1,P3) - CORD(1,P4)
+         Y34     = CORD(2,P3) - CORD(2,P4)
+         Z34     = CORD(3,P3) - CORD(3,P4)
+         R12     = SQRT(X12*X12+Y12*Y12+Z12*Z12)
+         R23     = SQRT(X23*X23+Y23*Y23+Z23*Z23)
+         R34     = SQRT(X34*X34+Y34*Y34+Z34*Z34)
+         COS123  = (-(X12*X23)-(Y12*Y23)-(Z12*Z23))/(R12*R23)
+         COS234  = (-(X23*X34)-(Y23*Y34)-(Z23*Z34))/(R23*R34)
+         SIN2123 = ONE-COS123*COS123
+         SIN2234 = ONE-COS234*COS234
+         SIN123  = SQRT(ABS(SIN2123))
+         SIN234  = SQRT(ABS(SIN2234))
+         IF(ABS(SIN123).LT.1.0D-06) GOTO 600
+         IF(ABS(SIN234).LT.1.0D-06) GOTO 600
+         ONESIN  = ONE/(SIN123*SIN234)
+         COSTOR  = ONESIN*(COS123*COS234-
+     *                    ((+X12*X34+Y12*Y34+Z12*Z34)/(R12*R34)))
+         IF(COSTOR.GT. ONE) COSTOR= ONE
+         IF(COSTOR.LT.-ONE) COSTOR=-ONE
+         TOR     = ACOS(COSTOR)
+C        -- DIHEDRAL ANGLE IS 0 - 360 DEGREES
+         XNORM   = -Y23*Z34 + Z23*Y34
+         YNORM   = -Z23*X34 + X23*Z34
+         ZNORM   = -X23*Y34 + Y23*X34
+         DOTN12  = X12*XNORM + Y12*YNORM + Z12*ZNORM
+         IF(DOTN12.LT.ZERO) TOR = TWO*PI - TOR
+         R       = TOR
+         DRR0    = R - R0
+         IF     (DRR0.GT. PI) THEN
+            DRR0 = DRR0 - TWO*PI
+         ELSE IF(DRR0.LT.-PI) THEN
+            DRR0 = DRR0 + TWO*PI
+         END IF
+         R       = DRR0 + R0
+         ENBIAS  = PT5*UM2FC*DRR0*DRR0
+C        - CALCULATING DERIVATIVES
+         A123=ONE/(R12*SIN2123)
+         A432=ONE/(R34*SIN2234)
+         B123=R12*COS123/R23
+         B432=R34*COS234/R23
+         C123=B123-ONE
+         FACT=UM2FC*DRR0
+         DUMY       =  FACT*A123/(R12*R23)
+         DEX1       =  DUMY*(-Y12*Z23+Z12*Y23)
+         DEY1       =  DUMY*(-Z12*X23+X12*Z23)
+         DEZ1       =  DUMY*(-X12*Y23+Y12*X23)
+         FFGRD(1,P1)=FFGRD(1,P1)+DEX1
+         FFGRD(2,P1)=FFGRD(2,P1)+DEY1
+         FFGRD(3,P1)=FFGRD(3,P1)+DEZ1
+         DUMY       =  FACT*(-A432)/(R23*R34)
+         DEX4       =  DUMY*(-Y23*Z34+Z23*Y34)
+         DEY4       =  DUMY*(-Z23*X34+X23*Z34)
+         DEZ4       =  DUMY*(-X23*Y34+Y23*X34)
+         FFGRD(1,P4)=FFGRD(1,P4)+DEX4
+         FFGRD(2,P4)=FFGRD(2,P4)+DEY4
+         FFGRD(3,P4)=FFGRD(3,P4)+DEZ4
+         DEX2       =  C123*DEX1 - B432*DEX4
+         DEY2       =  C123*DEY1 - B432*DEY4
+         DEZ2       =  C123*DEZ1 - B432*DEZ4
+         FFGRD(1,P2)=FFGRD(1,P2)+DEX2
+         FFGRD(2,P2)=FFGRD(2,P2)+DEY2
+         FFGRD(3,P2)=FFGRD(3,P2)+DEZ2
+         FFGRD(1,P3)=FFGRD(1,P3)-DEX1-DEX2-DEX4
+         FFGRD(2,P3)=FFGRD(2,P3)-DEY1-DEY2-DEY4
+         FFGRD(3,P3)=FFGRD(3,P3)-DEZ1-DEZ2-DEZ4
+ 600     CONTINUE
+      END IF
+C
+      UM2RLOW  = UM2R0 - (DBLE(NUM2BIN-1)/2)*UM2SIZE
+      JBIN     = NINT((R-UM2RLOW)/UM2SIZE) + 1
+      IF(IBIN.GE.1.AND.IBIN.LE.NUMBBIN) THEN
+         IF(JBIN.GE.1.AND.JBIN.LE.NUM2BIN) THEN
+            UM2HIS(JBIN,IBIN)=UM2HIS(JBIN,IBIN)+1
+         END IF
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK VELDIP
+!>
+!> @brief    print out velocity and dipole moment
+!>
+!> @author   Fengchao Cui and Hui Li
+!>           - Aug 2012
+!>
+!> @details  to get Vib and IR spectra
+!>
+      SUBROUTINE VELDIP(CORD,ZMAS,CHARG,DIP,ISTEP,DIPSTEP,
+     *                  VELSTEP,VEL,IVIBMM,
+     *                  DQMSTEP,DMMSTEP,DM1STEP,
+     *                  VQMSTEP,VMMSTEP,VM1STEP,
+     *                  QMVEL,QMVSTEP,MMVSTEP,LISTQM)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DOUBLE PRECISION MMVSTEP
+C
+      PARAMETER (DB2AU=1.0D+00/2.541766D+00)
+      PARAMETER (ZERO=0.0D+00)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION CORD(3,*),ZMAS(*),CHARG(*),DIP(3,*),DIPSTEP(3,*),
+     *          VELSTEP(3,*),VEL(3,*),IVIBMM(*),QMVEL(3,*),
+     *          DQMSTEP(3,*),DMMSTEP(3,*),DM1STEP(3,*),
+     *          VQMSTEP(3,*),VMMSTEP(3,*),VM1STEP(3,*),
+     *          QMVSTEP(3,NAT+1,*),MMVSTEP(3,NVIBMM+1,*),LISTQM(*)
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFVIB / JVIBOUT,NVIBMM,LFFDIPSTEP,LFFVELSTEP,LFFIVIBMM,
+     *                LFFDQMSTEP,LFFVQMSTEP,LFFDM1STEP,LFFVM1STEP,
+     *                LFFDMMSTEP,LFFVMMSTEP,LFFQMVSTEP,LFFMMVSTEP
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /XYZPRP/ XP,YP,ZP,
+     *                DMX,DMY,DMZ,
+     *                QXX,QYY,QZZ,QXY,QXZ,QYZ,
+     *                QMXX,QMYY,QMZZ,QMXY,QMXZ,QMYZ,
+     *                OXXX,OXXY,OXXZ,OXYY,OYYY,OYYZ,
+     *                OXZZ,OYZZ,OZZZ,OXYZ,
+     *                OMXXX,OMXXY,OMXXZ,OMXYY,OMYYY,
+     *                OMYYZ,OMXZZ,OMYZZ,OMZZZ,OMXYZ
+C
+C     FENGCHAO CUI AND HUI LI, AUG 16, 2012
+C
+      IF(ISTEP.EQ.0) THEN
+         CALL VCLR(DIPSTEP,1,3*JVIBOUT)
+         CALL VCLR(DQMSTEP,1,3*JVIBOUT)
+         CALL VCLR(DM1STEP,1,3*JVIBOUT)
+         CALL VCLR(DMMSTEP,1,3*JVIBOUT)
+         CALL VCLR(VELSTEP,1,3*JVIBOUT)
+         CALL VCLR(VQMSTEP,1,3*JVIBOUT)
+         CALL VCLR(VM1STEP,1,3*JVIBOUT)
+         CALL VCLR(VMMSTEP,1,3*JVIBOUT)
+         CALL VCLR(QMVSTEP,1,3*JVIBOUT*(NAT+1))
+         CALL VCLR(MMVSTEP,1,3*JVIBOUT*(NVIBMM+1))
+         RETURN
+      END IF
+C
+      KKK = MOD(ISTEP,JVIBOUT)
+      IF(KKK.EQ.0) KKK = JVIBOUT
+C
+C
+C     -- ALL MM ATOMS --
+      AMX = ZERO
+      AMY = ZERO
+      AMZ = ZERO
+      AMT = ZERO
+      DO IFFAT = 1, NFFAT
+         AMX = AMX  + CORD(1,IFFAT)*ZMAS(IFFAT)
+         AMY = AMY  + CORD(2,IFFAT)*ZMAS(IFFAT)
+         AMZ = AMZ  + CORD(3,IFFAT)*ZMAS(IFFAT)
+         AMT = AMT  + ZMAS(IFFAT)
+      ENDDO
+      AMX = AMX/AMT
+      AMY = AMY/AMT
+      AMZ = AMZ/AMT
+      DO IFFAT = 1, NFFAT
+         DMMSTEP(1,KKK)=DMMSTEP(1,KKK)+
+     *                  CHARG(IFFAT)*(CORD(1,IFFAT)-AMX)
+         DMMSTEP(2,KKK)=DMMSTEP(2,KKK)+
+     *                  CHARG(IFFAT)*(CORD(2,IFFAT)-AMY)
+         DMMSTEP(3,KKK)=DMMSTEP(3,KKK)+
+     *                  CHARG(IFFAT)*(CORD(3,IFFAT)-AMZ)
+      ENDDO
+      IF(IDOPOL.GT.0) THEN
+         DO IFFAT = 1, NFFAT
+            DMMSTEP(1,KKK) = DMMSTEP(1,KKK) + DIP(1,IFFAT)
+            DMMSTEP(2,KKK) = DMMSTEP(2,KKK) + DIP(2,IFFAT)
+            DMMSTEP(3,KKK) = DMMSTEP(3,KKK) + DIP(3,IFFAT)
+         ENDDO
+      END IF
+C
+C     -- SOME MM ATOMS --
+      IF(NVIBMM.GT.0) THEN
+         AMX = ZERO
+         AMY = ZERO
+         AMZ = ZERO
+         AMT = ZERO
+         DO III = 1, NVIBMM
+            IFFAT= IVIBMM(III)
+            AMX  = AMX  + CORD(1,IFFAT)*ZMAS(IFFAT)
+            AMY  = AMY  + CORD(2,IFFAT)*ZMAS(IFFAT)
+            AMZ  = AMZ  + CORD(3,IFFAT)*ZMAS(IFFAT)
+            AMT  = AMT  + ZMAS(IFFAT)
+         ENDDO
+         AMX = AMX/AMT
+         AMY = AMY/AMT
+         AMZ = AMZ/AMT
+         DO III=1,NVIBMM
+            IFFAT = IVIBMM(III)
+            DM1STEP(1,KKK)=DM1STEP(1,KKK)+
+     *                     CHARG(IFFAT)*(CORD(1,IFFAT)-AMX)
+            DM1STEP(2,KKK)=DM1STEP(2,KKK)+
+     *                     CHARG(IFFAT)*(CORD(2,IFFAT)-AMY)
+            DM1STEP(3,KKK)=DM1STEP(3,KKK)+
+     *                     CHARG(IFFAT)*(CORD(3,IFFAT)-AMZ)
+         ENDDO
+         IF(IDOPOL.GT.0) THEN
+            DO III=1, NVIBMM
+               IFFAT = IVIBMM(III)
+               DM1STEP(1,KKK) = DM1STEP(1,KKK) + DIP(1,IFFAT)
+               DM1STEP(2,KKK) = DM1STEP(2,KKK) + DIP(2,IFFAT)
+               DM1STEP(3,KKK) = DM1STEP(3,KKK) + DIP(3,IFFAT)
+            ENDDO
+         END IF
+      END IF
+C
+      DIPSTEP(1,KKK) = DMMSTEP(1,KKK)
+      DIPSTEP(2,KKK) = DMMSTEP(2,KKK)
+      DIPSTEP(3,KKK) = DMMSTEP(3,KKK)
+C
+      IF(NAT.GT.0) THEN
+         DQMSTEP(1,KKK) = DMX*DB2AU
+         DQMSTEP(2,KKK) = DMY*DB2AU
+         DQMSTEP(3,KKK) = DMZ*DB2AU
+         DIPSTEP(1,KKK) = DIPSTEP(1,KKK) + DMX*DB2AU
+         DIPSTEP(2,KKK) = DIPSTEP(2,KKK) + DMY*DB2AU
+         DIPSTEP(3,KKK) = DIPSTEP(3,KKK) + DMZ*DB2AU
+      END IF
+C
+      LLLAST = ((ISTEP-1)/JVIBOUT)*JVIBOUT
+      IF(MOD(ISTEP,JVIBOUT).EQ.0.OR.ISTEP.EQ.NSTEP) THEN
+         IF(MASWRK) THEN
+            WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                20X,A,15X,A,15X,A)')
+     *      ' TOTAL DIPOLE MOMENT (E*BOHR)       FROM MD STEP ',
+     *      LLLAST+1,' TO MD STEP ',ISTEP,
+     *      'DT=',DT*2.418884326505D-02,' FS',
+     *      'DIPX','DIPY','DIPZ'
+            DO JJJ = LLLAST+1, ISTEP
+               WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *         ' DIP MD STEP= ', JJJ,
+     *         DIPSTEP(1,JJJ-LLLAST),
+     *         DIPSTEP(2,JJJ-LLLAST),
+     *         DIPSTEP(3,JJJ-LLLAST)
+            ENDDO
+            WRITE(38,*)' '
+C
+            IF(NAT.GT.0) THEN
+               WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                   20X,A,15X,A,15X,A)')
+     *         ' QM DIPOLE MOMENT (E*BOHR)          FROM MD STEP ',
+     *         LLLAST+1,' TO MD STEP ',ISTEP,
+     *         'DT=',DT*2.418884326505D-02,' FS',
+     *         'DIPX','DIPY','DIPZ'
+               DO JJJ = LLLAST+1, ISTEP
+                  WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *            ' DQM MD STEP= ', JJJ,
+     *            DQMSTEP(1,JJJ-LLLAST),
+     *            DQMSTEP(2,JJJ-LLLAST),
+     *            DQMSTEP(3,JJJ-LLLAST)
+               ENDDO
+               WRITE(38,*)' '
+            END IF
+C
+            IF(NVIBMM.GT.0) THEN
+               WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                   20X,A,15X,A,15X,A)')
+     *         ' MM1 DIPOLE MOMENT (E*BOHR)         FROM MD STEP ',
+     *         LLLAST+1,' TO MD STEP ',ISTEP,
+     *         'DT=',DT*2.418884326505D-02,' FS',
+     *         'DIPX','DIPY','DIPZ'
+               DO JJJ = LLLAST+1, ISTEP
+                  WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *            ' DM1 MD STEP= ', JJJ,
+     *            DM1STEP(1,JJJ-LLLAST),
+     *            DM1STEP(2,JJJ-LLLAST),
+     *            DM1STEP(3,JJJ-LLLAST)
+               ENDDO
+               WRITE(38,*)' '
+            END IF
+         END IF
+         CALL VCLR(DIPSTEP,1,3*JVIBOUT)
+         CALL VCLR(DQMSTEP,1,3*JVIBOUT)
+         CALL VCLR(DM1STEP,1,3*JVIBOUT)
+         CALL VCLR(DMMSTEP,1,3*JVIBOUT)
+      END IF
+C
+C
+C     -- ALL MM ATOMS --
+      DO IFFAT = 1, NFFAT
+         VMMSTEP(1,KKK)=VMMSTEP(1,KKK)+VEL(1,IFFAT)
+         VMMSTEP(2,KKK)=VMMSTEP(2,KKK)+VEL(2,IFFAT)
+         VMMSTEP(3,KKK)=VMMSTEP(3,KKK)+VEL(3,IFFAT)
+      ENDDO
+C
+C     -- SOME MM ATOMS --
+      IF(NVIBMM.GT.0) THEN
+         DO III = 1, NVIBMM
+            IFFAT= IVIBMM(III)
+            VM1STEP(1,KKK)=VM1STEP(1,KKK)+VEL(1,IFFAT)
+            VM1STEP(2,KKK)=VM1STEP(2,KKK)+VEL(2,IFFAT)
+            VM1STEP(3,KKK)=VM1STEP(3,KKK)+VEL(3,IFFAT)
+            MMVSTEP(1,IFFAT,KKK)=VEL(1,IFFAT)
+            MMVSTEP(2,IFFAT,KKK)=VEL(2,IFFAT)
+            MMVSTEP(3,IFFAT,KKK)=VEL(3,IFFAT)
+         ENDDO
+      END IF
+C
+      VELSTEP(1,KKK) = VMMSTEP(1,KKK)
+      VELSTEP(2,KKK) = VMMSTEP(2,KKK)
+      VELSTEP(3,KKK) = VMMSTEP(3,KKK)
+C
+      IF(NAT.GT.0) THEN
+         DO IAT = 1, NAT
+            VQMSTEP(1,KKK)=VQMSTEP(1,KKK)+QMVEL(1,IAT)
+            VQMSTEP(2,KKK)=VQMSTEP(2,KKK)+QMVEL(2,IAT)
+            VQMSTEP(3,KKK)=VQMSTEP(3,KKK)+QMVEL(3,IAT)
+            QMVSTEP(1,IAT,KKK)=QMVEL(1,IAT)
+            QMVSTEP(2,IAT,KKK)=QMVEL(2,IAT)
+            QMVSTEP(3,IAT,KKK)=QMVEL(3,IAT)
+         ENDDO
+         VELSTEP(1,KKK) = VELSTEP(1,KKK) + VQMSTEP(1,KKK)
+         VELSTEP(2,KKK) = VELSTEP(2,KKK) + VQMSTEP(2,KKK)
+         VELSTEP(3,KKK) = VELSTEP(3,KKK) + VQMSTEP(3,KKK)
+         DO IAT = 1, NAT
+            IF(LISTQM(NFFAT+IAT).GT.0) THEN
+               VELSTEP(1,KKK) = VELSTEP(1,KKK) - QMVEL(1,IAT)
+               VELSTEP(2,KKK) = VELSTEP(2,KKK) - QMVEL(2,IAT)
+               VELSTEP(3,KKK) = VELSTEP(3,KKK) - QMVEL(3,IAT)
+            END IF
+         ENDDO
+      END IF
+C
+      LLLAST = ((ISTEP-1)/JVIBOUT)*JVIBOUT
+      IF(MOD(ISTEP,JVIBOUT).EQ.0.OR.ISTEP.EQ.NSTEP) THEN
+         IF(MASWRK) THEN
+            WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                20X,A,15X,A,15X,A)')
+     *      ' TOTAL VELOCITY SUM                 FROM MD STEP ',
+     *      LLLAST+1,' TO MD STEP ',ISTEP,
+     *      'DT=',DT*2.418884326505D-02,' FS',
+     *      'VELX','VELY','VELZ'
+            DO JJJ = LLLAST+1, ISTEP
+               WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *         ' VEL MD STEP= ', JJJ,
+     *         VELSTEP(1,JJJ-LLLAST),
+     *         VELSTEP(2,JJJ-LLLAST),
+     *         VELSTEP(3,JJJ-LLLAST)
+            ENDDO
+            WRITE(38,*)' '
+C
+            IF(NAT.GT.0) THEN
+               WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                   20X,A,15X,A,15X,A)')
+     *         ' QM VELOCITY SUM                    FROM MD STEP ',
+     *         LLLAST+1,' TO MD STEP ',ISTEP,
+     *         'DT=',DT*2.418884326505D-02,' FS',
+     *         'VELX','VELY','VELZ'
+               DO JJJ = LLLAST+1, ISTEP
+                  WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *            ' VQM MD STEP= ', JJJ,
+     *            VQMSTEP(1,JJJ-LLLAST),
+     *            VQMSTEP(2,JJJ-LLLAST),
+     *            VQMSTEP(3,JJJ-LLLAST)
+               ENDDO
+               WRITE(38,*)' '
+C
+               WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                   20X,A,15X,A,15X,A)')
+     *         ' QM VELOCITY                        FROM MD STEP ',
+     *         LLLAST+1,' TO MD STEP ',ISTEP,
+     *         'DT=',DT*2.418884326505D-02,' FS',
+     *         'VELX','VELY','VELZ'
+               DO JJJ = LLLAST+1, ISTEP
+                  DO IAT = 1, NAT
+                     WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *               ' QMV MD STEP= ',JJJ,
+     *               QMVSTEP(1,IAT,JJJ-LLLAST),
+     *               QMVSTEP(2,IAT,JJJ-LLLAST),
+     *               QMVSTEP(3,IAT,JJJ-LLLAST)
+                  ENDDO
+               ENDDO
+               WRITE(38,*)' '
+            END IF
+C
+            IF(NVIBMM.GT.0) THEN
+               WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                   20X,A,15X,A,15X,A)')
+     *         ' NVIBMM VELOCITY SUM                FROM MD STEP ',
+     *         LLLAST+1,' TO MD STEP ',ISTEP,
+     *         'DT=',DT*2.418884326505D-02,' FS',
+     *         'VELX','VELY','VELZ'
+               DO JJJ = LLLAST+1, ISTEP
+                  WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *            ' VM1 MD STEP= ', JJJ,
+     *            VM1STEP(1,JJJ-LLLAST),
+     *            VM1STEP(2,JJJ-LLLAST),
+     *            VM1STEP(3,JJJ-LLLAST)
+               ENDDO
+               WRITE(38,*)' '
+C
+               WRITE(38,'(/A,I10,A,I10/1X,A,2X,F10.6,A,
+     *                   20X,A,15X,A,15X,A)')
+     *         ' NVIBMM VELOCITY                    FROM MD STEP ',
+     *         LLLAST+1,' TO MD STEP ',ISTEP,
+     *         'DT=',DT*2.418884326505D-02,' FS',
+     *         'VELX','VELY','VELZ'
+               DO JJJ = LLLAST+1, ISTEP
+                  DO III = 1, NVIBMM
+                     IFFAT= IVIBMM(III)
+                     WRITE(38,'(A,I10,1X,F18.10,1X,F18.10,1X,F18.10)')
+     *               ' MMV MD STEP= ', JJJ,
+     *               MMVSTEP(1,IFFAT,JJJ-LLLAST),
+     *               MMVSTEP(2,IFFAT,JJJ-LLLAST),
+     *               MMVSTEP(3,IFFAT,JJJ-LLLAST)
+                  ENDDO
+               ENDDO
+               WRITE(38,*)' '
+            END IF
+         END IF
+         CALL VCLR(VELSTEP,1,3*JVIBOUT)
+         CALL VCLR(VQMSTEP,1,3*JVIBOUT)
+         CALL VCLR(VM1STEP,1,3*JVIBOUT)
+         CALL VCLR(VMMSTEP,1,3*JVIBOUT)
+         CALL VCLR(QMVSTEP,1,3*JVIBOUT*(NAT+1))
+         CALL VCLR(MMVSTEP,1,3*JVIBOUT*(NVIBMM+1))
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK MMFFTYPE
+!>
+!> @brief    determine MMFF94 atomic types
+!>
+!> @author   Hongbo Zhu and Hui Li
+!>           - Feb 2013
+!>
+!> @details  resolve MMFF94 atomic type based on atom
+!>           connectivity
+!>
+      SUBROUTINE MMFFTYPE(CORD,ZANF,IPAIR,
+     *                    KLIST,LLIST,
+     *                    NTYPE,QMMFF,BORDER,
+     *                    LBOND,LISTRIN,NUMRIN,
+     *                    LISTRIB,NRINTYP,
+     *                    NBNDT,NBNDT2,LQATOM,RQATOM,IFFPDB)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (THIRD=1.0D+00/3.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (ONEPT5=1.5D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (THREE=3.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+      PARAMETER (FIVE=5.0D+00)
+      PARAMETER (SIX=6.0D+00)
+      PARAMETER (PT5=0.5D+00)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION CORD(3,*),ZANF(*),IPAIR(2,*),KLIST(3,*),LLIST(4,*),
+     *          NTYPE(*),QMMFF(*),LBOND(10,*),BORDER(*),
+     *          LISTRIN(10,*),NUMRIN(10,*),
+     *          LISTRIB(10,*),NRINTYP(*),
+     *          NBNDT(4,*),NBNDT2(4,*),LQATOM(50),RQATOM(50)
+      DIMENSION NLEGN2(5)
+C
+C     HONGBO ZHU, HUI LI, FEB 25, 2013, LINCOLN
+C
+      IF(MASWRK)THEN
+      WRITE(IW,*)' '
+      WRITE(IW,*)'==============================================='
+      WRITE(IW,*)'      MMFF94 IN QUANPOL IS IMPLEMENTED BY      '
+      WRITE(IW,*)'             HONGBO ZHU AND HUI LI             '
+      WRITE(IW,*)'         UNIVERSITY OF NEBRASKA-LINCOLN        '
+      WRITE(IW,*)'==============================================='
+      END IF
+C
+      IF(IFFPDB.NE.1)THEN
+         CALL FFBOND(NFFAT,IPAIR,ZANF,CORD,NBOND)
+      END IF
+      KBOND=0
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).NE. 3.AND.
+     *      NINT(ZANF(I1)).NE.11.AND.
+     *      NINT(ZANF(I1)).NE.12.AND.
+     *      NINT(ZANF(I1)).NE.19.AND.
+     *      NINT(ZANF(I1)).NE.20.AND.
+     *      NINT(ZANF(I1)).NE.26.AND.
+     *      NINT(ZANF(I1)).NE.29.AND.
+     *      NINT(ZANF(I1)).NE.30.AND.
+     *      NINT(ZANF(I2)).NE. 3.AND.
+     *      NINT(ZANF(I2)).NE.11.AND.
+     *      NINT(ZANF(I2)).NE.12.AND.
+     *      NINT(ZANF(I2)).NE.19.AND.
+     *      NINT(ZANF(I2)).NE.20.AND.
+     *      NINT(ZANF(I2)).NE.26.AND.
+     *      NINT(ZANF(I2)).NE.29.AND.
+     *      NINT(ZANF(I2)).NE.30     ) THEN
+            KBOND=KBOND+1
+            IPAIR(1,KBOND)=I1
+            IPAIR(2,kBOND)=I2
+         END IF
+      ENDDO
+      DO IBOND=KBOND+1,NBOND
+         IPAIR(1,IBOND)=0
+         IPAIR(2,IBOND)=0
+      ENDDO
+      NBOND=KBOND
+      CALL FFANGL(IPAIR,NBOND,KLIST,NANGL)
+      CALL FFDIHR(KLIST,NANGL,LLIST,NDIHR)
+C
+      CALL VICLR(NTYPE   ,1,   NFFAT)
+      CALL VICLR(NBNDT   ,1, 4*NFFAT)
+      CALL VICLR(NBNDT2  ,1, 4*NFFAT)
+      CALL VCLR (QMMFF   ,1,   NFFAT)
+      CALL VICLR(LBOND   ,1,10*NFFAT)
+      CALL VCLR (BORDER  ,1,   NBOND)
+      CALL VICLR(LISTRIN ,1,10*NFFAT)
+      CALL VICLR(LISTRIB ,1,10*NFFAT)
+      CALL VICLR(NUMRIN  ,1,10*NFFAT)
+      CALL VICLR(NRINTYP ,1,   NFFAT)
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.26) QMMFF(IFFAT)=3.0D+00
+         IF(NINT(ZANF(IFFAT)).EQ.29) QMMFF(IFFAT)=2.0D+00
+      ENDDO
+      DO I=1,50
+         IF(LQATOM(I).GT.0) QMMFF(LQATOM(I))=RQATOM(I)
+      ENDDO
+C
+C     -- DETERMINE RINGS --
+C
+      NRING = 0
+C     FIND RINGS IN MOLECULE
+C     - THREE MEMBER RING
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         DO IBOND=1,NBOND
+            I1=IPAIR(1,IBOND)
+            I2=IPAIR(2,IBOND)
+            IF(I1.EQ.K1.AND.I2.EQ.K3) THEN
+               NRING = NRING + 1
+               LISTRIN(10,NRING) = 3
+               LISTRIN(1 ,NRING) = K1
+               LISTRIN(2 ,NRING) = K2
+               LISTRIN(3 ,NRING) = K3
+               MADD   =1
+               MCHECK1=1
+               MCHECK2=1
+               DO I=1,LISTRIN(10,NRING)
+                  MCHECK1=MCHECK1+LISTRIN(I,NRING)
+                  MCHECK2=MCHECK2*(MOD(LISTRIN(I,NRING),100)+1)
+               ENDDO
+               DO IRING=1,NRING-1
+                  IF(LISTRIN(10,IRING).EQ.LISTRIN(10,NRING)) THEN
+                     LCHECK1=1
+                     LCHECK2=1
+                     DO I=1,LISTRIN(10,IRING)
+                        LCHECK1=LCHECK1+LISTRIN(I,IRING)
+                        LCHECK2=LCHECK2*(MOD(LISTRIN(I,IRING),100)+1)
+                     ENDDO
+                     IF(LCHECK1.EQ.MCHECK1.AND.LCHECK2.EQ.MCHECK2)
+     *                  MADD=0
+                  END IF
+               ENDDO
+               IF(MADD.EQ.0) THEN
+                  DO I=1,10
+                     LISTRIN(I,NRING)=0
+                  ENDDO
+                  NRING=NRING-1
+               ELSE
+                  NUMRIN(10,K1) = NUMRIN(10,K1) + 1
+                  NUMRIN(NUMRIN(10,K1),K1) = NRING
+                  NUMRIN(10,K2) = NUMRIN(10,K2) + 1
+                  NUMRIN(NUMRIN(10,K2),K2) = NRING
+                  NUMRIN(10,K3) = NUMRIN(10,K3) + 1
+                  NUMRIN(NUMRIN(10,K3),K3) = NRING
+               END IF
+            END IF
+         ENDDO
+      ENDDO
+C
+C     - FOUR MEMBER RING
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         DO JANGL=1,NANGL
+            KK1=KLIST(1,JANGL)
+            KK2=KLIST(2,JANGL)
+            KK3=KLIST(3,JANGL)
+            IF(KK1.EQ.K1.AND.KK3.EQ.K3.AND.KK2.NE.K2)THEN
+               NRING = NRING + 1
+               LISTRIN(10,NRING) = 4
+               LISTRIN(1 ,NRING) = K1
+               LISTRIN(2 ,NRING) = K2
+               LISTRIN(3 ,NRING) = K3
+               LISTRIN(4 ,NRING) = KK2
+               LCBOND=0
+               DO JBOND=1,NBOND
+                  I1=IPAIR(1,JBOND)
+                  I2=IPAIR(2,JBOND)
+                  DO I=1,LISTRIN(10,NRING)
+                     IFFAT = LISTRIN(I,NRING)
+                     DO J=I+1,LISTRIN(10,NRING)
+                        JFFAT = LISTRIN(J,NRING)
+                        IF((IFFAT.EQ.I1.AND.JFFAT.EQ.I2).OR.
+     *                     (IFFAT.EQ.I2.AND.JFFAT.EQ.I1)    )
+     *                  LCBOND=LCBOND+1
+                     ENDDO
+                  ENDDO
+               ENDDO
+               MADD   =1
+               MCHECK1=1
+               MCHECK2=1
+               DO I=1,LISTRIN(10,NRING)
+                  MCHECK1=MCHECK1+LISTRIN(I,NRING)
+                  MCHECK2=MCHECK2*(MOD(LISTRIN(I,NRING),100)+1)
+               ENDDO
+               DO IRING=1,NRING-1
+                  IF(LISTRIN(10,IRING).EQ.LISTRIN(10,NRING)) THEN
+                     LCHECK1=1
+                     LCHECK2=1
+                     DO I=1,LISTRIN(10,IRING)
+                        LCHECK1=LCHECK1+LISTRIN(I,IRING)
+                        LCHECK2=LCHECK2*(MOD(LISTRIN(I,IRING),100)+1)
+                     ENDDO
+                     IF(LCHECK1.EQ.MCHECK1.AND.LCHECK2.EQ.MCHECK2)
+     *                  MADD=0
+                  END IF
+               ENDDO
+               IF(MADD.EQ.0.OR.LCBOND.GT.LISTRIN(10,NRING))THEN
+                  DO I=1,10
+                     LISTRIN(I,NRING)=0
+                  ENDDO
+                  NRING=NRING-1
+               ELSE
+                  NUMRIN(10,K1) = NUMRIN(10,K1 ) + 1
+                  NUMRIN(NUMRIN(10,K1),K1  ) = NRING
+                  NUMRIN(10,K2) = NUMRIN(10,K2 ) + 1
+                  NUMRIN(NUMRIN(10,K2),K2  ) = NRING
+                  NUMRIN(10,K3) = NUMRIN(10,K3 ) + 1
+                  NUMRIN(NUMRIN(10,K3),K3  ) = NRING
+                  NUMRIN(10,KK2)= NUMRIN(10,KK2) + 1
+                  NUMRIN(NUMRIN(10,KK2),KK2) = NRING
+               END IF
+            END IF
+         ENDDO
+      ENDDO
+C
+C     - FIVE MEMBER RING
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         DO IDIHR=1,NDIHR
+            L1=LLIST(1,IDIHR)
+            L2=LLIST(2,IDIHR)
+            L3=LLIST(3,IDIHR)
+            L4=LLIST(4,IDIHR)
+            IF(L1.EQ.K1.AND.L4.EQ.K3.AND.L2.NE.K2.AND.L3.NE.K2) THEN
+               NRING = NRING + 1
+               LISTRIN(10,NRING) = 5
+               LISTRIN(1 ,NRING) = K1
+               LISTRIN(2 ,NRING) = K2
+               LISTRIN(3 ,NRING) = K3
+               LISTRIN(4 ,NRING) = L3
+               LISTRIN(5 ,NRING) = L2
+               LCBOND=0
+               DO JBOND=1,NBOND
+                  I1=IPAIR(1,JBOND)
+                  I2=IPAIR(2,JBOND)
+                  DO I=1,LISTRIN(10,NRING)
+                     IFFAT = LISTRIN(I,NRING)
+                     DO J=I+1,LISTRIN(10,NRING)
+                        JFFAT = LISTRIN(J,NRING)
+                        IF((IFFAT.EQ.I1.AND.JFFAT.EQ.I2).OR.
+     *                     (IFFAT.EQ.I2.AND.JFFAT.EQ.I1)    )
+     *                  LCBOND=LCBOND+1
+                     ENDDO
+                  ENDDO
+               ENDDO
+               MADD   =1
+               MCHECK1=1
+               MCHECK2=1
+               DO I=1,LISTRIN(10,NRING)
+                  MCHECK1=MCHECK1+LISTRIN(I,NRING)
+                  MCHECK2=MCHECK2*(MOD(LISTRIN(I,NRING),100)+1)
+               ENDDO
+               DO IRING=1,NRING-1
+                  IF(LISTRIN(10,IRING).EQ.LISTRIN(10,NRING)) THEN
+                     LCHECK1=1
+                     LCHECK2=1
+                     DO I=1,LISTRIN(10,IRING)
+                        LCHECK1=LCHECK1+LISTRIN(I,IRING)
+                        LCHECK2=LCHECK2*(MOD(LISTRIN(I,IRING),100)+1)
+                     ENDDO
+                     IF(LCHECK1.EQ.MCHECK1.AND.LCHECK2.EQ.MCHECK2)
+     *                  MADD=0
+                  END IF
+               ENDDO
+               IF(MADD.EQ.0.OR.LCBOND.GT.LISTRIN(10,NRING))THEN
+                  DO I=1,10
+                     LISTRIN(I,NRING)=0
+                  ENDDO
+                  NRING=NRING-1
+               ELSE
+                  NUMRIN(10,K1) = NUMRIN(10,K1) + 1
+                  NUMRIN(NUMRIN(10,K1),K1) = NRING
+                  NUMRIN(10,K2) = NUMRIN(10,K2) + 1
+                  NUMRIN(NUMRIN(10,K2),K2) = NRING
+                  NUMRIN(10,K3) = NUMRIN(10,K3) + 1
+                  NUMRIN(NUMRIN(10,K3),K3) = NRING
+                  NUMRIN(10,L3) = NUMRIN(10,L3) + 1
+                  NUMRIN(NUMRIN(10,L3),L3) = NRING
+                  NUMRIN(10,L2) = NUMRIN(10,L2) + 1
+                  NUMRIN(NUMRIN(10,L2),L2) = NRING
+               END IF
+            END IF
+         ENDDO
+      ENDDO
+C
+C     - SIX   MEMBER RING
+C
+      DO IDIHR=1,NDIHR
+         L1=LLIST(1,IDIHR)
+         L2=LLIST(2,IDIHR)
+         L3=LLIST(3,IDIHR)
+         L4=LLIST(4,IDIHR)
+         DO JDIHR=1,NDIHR
+            LL1=LLIST(1,JDIHR)
+            LL2=LLIST(2,JDIHR)
+            LL3=LLIST(3,JDIHR)
+            LL4=LLIST(4,JDIHR)
+            IF(LL1.EQ.L1.AND.LL4.EQ.L4.AND.LL2.NE.L2.AND.LL3.NE.L3)THEN
+               NRING = NRING + 1
+               LISTRIN(10,NRING) = 6
+               LISTRIN(1 ,NRING) = L1
+               LISTRIN(2 ,NRING) = L2
+               LISTRIN(3 ,NRING) = L3
+               LISTRIN(4 ,NRING) = L4
+               LISTRIN(5 ,NRING) = LL3
+               LISTRIN(6 ,NRING) = LL2
+               LCBOND=0
+               DO JBOND=1,NBOND
+                  I1=IPAIR(1,JBOND)
+                  I2=IPAIR(2,JBOND)
+                  DO I=1,LISTRIN(10,NRING)
+                     IFFAT = LISTRIN(I,NRING)
+                     DO J=I+1,LISTRIN(10,NRING)
+                        JFFAT = LISTRIN(J,NRING)
+                        IF((IFFAT.EQ.I1.AND.JFFAT.EQ.I2).OR.
+     *                     (IFFAT.EQ.I2.AND.JFFAT.EQ.I1)    )
+     *                  LCBOND=LCBOND+1
+                     ENDDO
+                  ENDDO
+               ENDDO
+               MADD   =1
+               MCHECK1=1
+               MCHECK2=1
+               DO I=1,LISTRIN(10,NRING)
+                  MCHECK1=MCHECK1+LISTRIN(I,NRING)
+                  MCHECK2=MCHECK2*(MOD(LISTRIN(I,NRING),100)+1)
+               ENDDO
+               DO IRING=1,NRING-1
+                  IF(LISTRIN(10,IRING).EQ.LISTRIN(10,NRING)) THEN
+                     LCHECK1=1
+                     LCHECK2=1
+                     DO I=1,LISTRIN(10,IRING)
+                        LCHECK1=LCHECK1+LISTRIN(I,IRING)
+                        LCHECK2=LCHECK2*(MOD(LISTRIN(I,IRING),100)+1)
+                     ENDDO
+                     IF(LCHECK1.EQ.MCHECK1.AND.LCHECK2.EQ.MCHECK2)
+     *                  MADD=0
+                  END IF
+               ENDDO
+               LCOUNT=0
+               IF(NUMRIN(10,L1).GE.1.AND.
+     *            NUMRIN(10,L2).GE.1.AND.
+     *            NUMRIN(10,L3).GE.1.AND.
+     *            NUMRIN(10,L4).GE.1     )THEN
+                  DO K1=1,NUMRIN(10,L1)
+                     DO K2=1,NUMRIN(10,L2)
+                        DO K3=1,NUMRIN(10,L3)
+                           DO K4=1,NUMRIN(10,L4)
+                              IF(NUMRIN(K4,L4).EQ.NUMRIN(K2,L2).AND.
+     *                           NUMRIN(K4,L4).EQ.NUMRIN(K1,L1).AND.
+     *                           NUMRIN(K4,L4).EQ.NUMRIN(K3,L3)     )
+     *                           LCOUNT=NUMRIN(K4,L4)
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               END IF
+               IF(LISTRIN(10,LCOUNT).GE.3.AND.
+     *            LISTRIN(10,LCOUNT).LT.6.AND.LCOUNT.NE.0) MADD=0
+               IF(MADD.EQ.0.OR.LCBOND.GT.LISTRIN(10,NRING))THEN
+                  DO I=1,10
+                     LISTRIN(I,NRING)=0
+                  ENDDO
+                  NRING=NRING-1
+               ELSE
+                  NUMRIN(10,L1) = NUMRIN(10,L1) + 1
+                  NUMRIN(NUMRIN(10,L1),L1) = NRING
+                  NUMRIN(10,L2) = NUMRIN(10,L2) + 1
+                  NUMRIN(NUMRIN(10,L2),L2) = NRING
+                  NUMRIN(10,L3) = NUMRIN(10,L3) + 1
+                  NUMRIN(NUMRIN(10,L3),L3) = NRING
+                  NUMRIN(10,L4) = NUMRIN(10,L4) + 1
+                  NUMRIN(NUMRIN(10,L4),L4) = NRING
+                  NUMRIN(10,LL3) = NUMRIN(10,LL3) + 1
+                  NUMRIN(NUMRIN(10,LL3),LL3) = NRING
+                  NUMRIN(10,LL2) = NUMRIN(10,LL2) + 1
+                  NUMRIN(NUMRIN(10,LL2),LL2) = NRING
+               END IF
+            END IF
+         ENDDO
+      ENDDO
+C
+C     - SEVEN MEMBER RING
+C     - EIGHT MEMBER RING
+C
+      DO IDIHR=1,NDIHR
+         L1=LLIST(1,IDIHR)
+         L2=LLIST(2,IDIHR)
+         L3=LLIST(3,IDIHR)
+         L4=LLIST(4,IDIHR)
+         DO JDIHR=1,NDIHR
+            LL1=LLIST(1,JDIHR)
+            LL2=LLIST(2,JDIHR)
+            LL3=LLIST(3,JDIHR)
+            LL4=LLIST(4,JDIHR)
+            IF(LL1.EQ.L1.AND.LL2.NE.L2.AND.LL3.NE.L3.AND.L4.NE.LL4)THEN
+               DO IBOND=1,NBOND
+                  I1=IPAIR(1,IBOND)
+                  I2=IPAIR(2,IBOND)
+                  IF((I1.EQ.L4.AND.I2.EQ.LL4).OR.
+     *               (I2.EQ.L4.AND.I1.EQ.LL4)    ) THEN
+                     NRING = NRING + 1
+                     LISTRIN(10,NRING) = 7
+                     LISTRIN(1 ,NRING) = L1
+                     LISTRIN(2 ,NRING) = L2
+                     LISTRIN(3 ,NRING) = L3
+                     LISTRIN(4 ,NRING) = L4
+                     LISTRIN(5 ,NRING) = LL4
+                     LISTRIN(6 ,NRING) = LL3
+                     LISTRIN(7 ,NRING) = LL2
+                     LCBOND=0
+                     DO JBOND=1,NBOND
+                        I1=IPAIR(1,JBOND)
+                        I2=IPAIR(2,JBOND)
+                        DO I=1,LISTRIN(10,NRING)
+                           IFFAT = LISTRIN(I,NRING)
+                           DO J=I+1,LISTRIN(10,NRING)
+                              JFFAT = LISTRIN(J,NRING)
+                              IF((IFFAT.EQ.I1.AND.JFFAT.EQ.I2).OR.
+     *                           (IFFAT.EQ.I2.AND.JFFAT.EQ.I1)    )
+     *                        LCBOND=LCBOND+1
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     MADD   =1
+                     MCHECK1=1
+                     MCHECK2=1
+                     DO I=1,LISTRIN(10,NRING)
+                        MCHECK1=MCHECK1+LISTRIN(I,NRING)
+                        MCHECK2=MCHECK2*(MOD(LISTRIN(I,NRING),100)+1)
+                     ENDDO
+                     DO IRING=1,NRING-1
+                        IF(LISTRIN(10,IRING).EQ.LISTRIN(10,NRING)) THEN
+                           LCHECK1=1
+                           LCHECK2=1
+                           DO I=1,LISTRIN(10,IRING)
+                              LCHECK1=LCHECK1+LISTRIN(I,IRING)
+                              LCHECK2=
+     *                        LCHECK2*(MOD(LISTRIN(I,IRING),100)+1)
+                           ENDDO
+                     IF(LCHECK1.EQ.MCHECK1.AND.LCHECK2.EQ.MCHECK2)
+     *                  MADD=0
+                        END IF
+                     ENDDO
+                     DO M=1,7
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=7
+                        MBEFO2=MBEFO-1
+                        IF(MBEFO2.EQ.0) MBEFO2=7
+                        DO JJ=1,NUMRIN(10,LISTRIN(M,NRING))
+                           DO KK=1,NUMRIN(10,LISTRIN(MBEFO2,NRING))
+                              IF(NUMRIN(JJ,LISTRIN(M,NRING)).EQ.
+     *                           NUMRIN(KK,LISTRIN(MBEFO2,NRING)) )
+     *                           MADD=0
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     IF(MADD.EQ.0.OR.LCBOND.GT.LISTRIN(10,NRING))THEN
+                        DO I=1,10
+                           LISTRIN(I,NRING)=0
+                        ENDDO
+                        NRING=NRING-1
+                     ELSE
+                        NUMRIN(10,L1) = NUMRIN(10,L1) + 1
+                        NUMRIN(NUMRIN(10,L1),L1) = NRING
+                        NUMRIN(10,L2) = NUMRIN(10,L2) + 1
+                        NUMRIN(NUMRIN(10,L2),L2) = NRING
+                        NUMRIN(10,L3) = NUMRIN(10,L3) + 1
+                        NUMRIN(NUMRIN(10,L3),L3) = NRING
+                        NUMRIN(10,L4) = NUMRIN(10,L4) + 1
+                        NUMRIN(NUMRIN(10,L4),L4) = NRING
+                        NUMRIN(10,LL4) = NUMRIN(10,LL4) + 1
+                        NUMRIN(NUMRIN(10,LL4),LL4) = NRING
+                        NUMRIN(10,LL3) = NUMRIN(10,LL3) + 1
+                        NUMRIN(NUMRIN(10,LL3),LL3) = NRING
+                        NUMRIN(10,LL2) = NUMRIN(10,LL2) + 1
+                        NUMRIN(NUMRIN(10,LL2),LL2) = NRING
+                     END IF
+                  END IF
+               ENDDO
+               DO IANGL=1,NANGL
+                  K1   =KLIST(1,IANGL)
+                  K2   =KLIST(2,IANGL)
+                  K3   =KLIST(3,IANGL)
+                  IF(K2.NE.L2.AND.K2.NE.L3.AND.K2.NE.LL2.AND.
+     *               K2.NE.LL3.AND. ((K1.EQ.L4.AND.K3.EQ.LL4).OR.
+     *                               (K1.EQ.LL4.AND.K3.EQ.L4))   )THEN
+                     NRING = NRING + 1
+                     LISTRIN(10,NRING) = 8
+                     LISTRIN(1 ,NRING) = L1
+                     LISTRIN(2 ,NRING) = L2
+                     LISTRIN(3 ,NRING) = L3
+                     LISTRIN(4 ,NRING) = L4
+                     LISTRIN(5 ,NRING) = K2
+                     LISTRIN(6 ,NRING) = LL4
+                     LISTRIN(7 ,NRING) = LL3
+                     LISTRIN(8 ,NRING) = LL2
+                     LCBOND=0
+                     DO JBOND=1,NBOND
+                        I1=IPAIR(1,JBOND)
+                        I2=IPAIR(2,JBOND)
+                        DO I=1,LISTRIN(10,NRING)
+                           IFFAT = LISTRIN(I,NRING)
+                           DO J=I+1,LISTRIN(10,NRING)
+                              JFFAT = LISTRIN(J,NRING)
+                              IF((IFFAT.EQ.I1.AND.JFFAT.EQ.I2).OR.
+     *                           (IFFAT.EQ.I2.AND.JFFAT.EQ.I1)    )
+     *                        LCBOND=LCBOND+1
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     MADD   =1
+                     MCHECK1=1
+                     MCHECK2=1
+                     DO I=1,LISTRIN(10,NRING)
+                        MCHECK1=MCHECK1+LISTRIN(I,NRING)
+                        MCHECK2=MCHECK2*(MOD(LISTRIN(I,NRING),100)+1)
+                     ENDDO
+                     DO IRING=1,NRING-1
+                        IF(LISTRIN(10,IRING).EQ.LISTRIN(10,NRING)) THEN
+                           LCHECK1=1
+                           LCHECK2=1
+                           DO I=1,LISTRIN(10,IRING)
+                              LCHECK1=LCHECK1+LISTRIN(I,IRING)
+                              LCHECK2=
+     *                        LCHECK2*(MOD(LISTRIN(I,IRING),100)+1)
+                           ENDDO
+                     IF(LCHECK1.EQ.MCHECK1.AND.LCHECK2.EQ.MCHECK2)
+     *                  MADD=0
+                        END IF
+                     ENDDO
+                     DO M=1,8
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=8
+                        MBEFO2=MBEFO-1
+                        IF(MBEFO2.EQ.0) MBEFO2=8
+                        DO JJ=1,NUMRIN(10,LISTRIN(M,NRING))
+                           DO KK=1,NUMRIN(10,LISTRIN(MBEFO2,NRING))
+                              IF(NUMRIN(JJ,LISTRIN(M,NRING)).EQ.
+     *                           NUMRIN(KK,LISTRIN(MBEFO2,NRING)) )
+     *                           MADD=0
+                           ENDDO
+                        ENDDO
+                     ENDDO
+                     IF(MADD.EQ.0.OR.LCBOND.GT.LISTRIN(10,NRING))THEN
+                        DO I=1,10
+                           LISTRIN(I,NRING)=0
+                        ENDDO
+                        NRING=NRING-1
+                     ELSE
+                        NUMRIN(10,L1) = NUMRIN(10,L1) + 1
+                        NUMRIN(NUMRIN(10,L1),L1) = NRING
+                        NUMRIN(10,L2) = NUMRIN(10,L2) + 1
+                        NUMRIN(NUMRIN(10,L2),L2) = NRING
+                        NUMRIN(10,L3) = NUMRIN(10,L3) + 1
+                        NUMRIN(NUMRIN(10,L3),L3) = NRING
+                        NUMRIN(10,L4) = NUMRIN(10,L4) + 1
+                        NUMRIN(NUMRIN(10,L4),L4) = NRING
+                        NUMRIN(10,K2) = NUMRIN(10,K2) + 1
+                        NUMRIN(NUMRIN(10,K2),K2) = NRING
+                        NUMRIN(10,LL4) = NUMRIN(10,LL4) + 1
+                        NUMRIN(NUMRIN(10,LL4),LL4) = NRING
+                        NUMRIN(10,LL3) = NUMRIN(10,LL3) + 1
+                        NUMRIN(NUMRIN(10,LL3),LL3) = NRING
+                        NUMRIN(10,LL2) = NUMRIN(10,LL2) + 1
+                        NUMRIN(NUMRIN(10,LL2),LL2) = NRING
+                     END IF
+                  END IF
+               ENDDO
+            END IF
+         ENDDO
+      ENDDO
+C
+      IF(NRING.GT.0) THEN
+         DO IRING=1,NRING
+            MB=LISTRIN(10,IRING)
+            DO M=1,MB
+               IFFAT = LISTRIN(M,IRING)
+               MNEXT = M+1
+               IF(M.EQ.MB) MNEXT=1
+               JFFAT = LISTRIN(MNEXT,IRING)
+               DO IBOND=1,NBOND
+                  I1=IPAIR(1,IBOND)
+                  I2=IPAIR(2,IBOND)
+                  IF((IFFAT.EQ.I1.AND.JFFAT.EQ.I2).OR.
+     *               (IFFAT.EQ.I2.AND.JFFAT.EQ.I1)   )
+     *               LISTRIB(M,IRING)=IBOND
+               ENDDO
+            ENDDO
+         ENDDO
+      END IF
+C
+C     -- DETERMINE BOND ATOMS AND SOME 1ST ORDER BONDS --
+C
+      ICASE=0
+      JCASE=0
+ 950  CONTINUE
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         LBOND(10,I1)=LBOND(10,I1)+1
+         IF(LBOND(10,I1).GT.9)THEN
+            IF(MASWRK)WRITE(IW,'(/1X,A,I8,A/)')
+     *      ' ERROR: ATOM ',I1,' FORMS MORE THAN 9 BONDS.'
+            IF(MASWRK)THEN
+            DO JJJ=1,LBOND(10,I1)
+            WRITE(*,*) IPAIR(1,LBOND(JJJ,I1)),
+     *                 IPAIR(2,LBOND(JJJ,I1)),LBOND(JJJ,I1)
+            ENDDO
+            END IF
+            CALL ABRT
+         END IF
+         LBOND(LBOND(10,I1),I1)=IBOND
+         LBOND(10,I2)=LBOND(10,I2)+1
+         IF(LBOND(10,I2).GT.9)THEN
+            IF(MASWRK)WRITE(IW,'(/1X,A,I8,A/)')
+     *      ' ERROR: ATOM ',I2,' FORMS MORE THAN 9 BONDS.'
+            IF(MASWRK)THEN
+            DO JJJ=1,LBOND(10,I2)
+            WRITE(*,*) IPAIR(1,LBOND(JJJ,I2)),
+     *                 IPAIR(2,LBOND(JJJ,I2)),LBOND(JJJ,I2)
+            ENDDO
+            END IF
+            CALL ABRT
+         END IF
+         LBOND(LBOND(10,I2),I2)=IBOND
+C
+         IF(NINT(ZANF(I1)).EQ.1.OR.
+     *      NINT(ZANF(I2)).EQ.1.OR.
+     *      NINT(ZANF(I1)).EQ.9.OR.
+     *      NINT(ZANF(I2)).EQ.9    ) THEN
+            BORDER(IBOND) = ONE
+         END IF
+         IF((NINT(ZANF(I1)).EQ.17.AND.NINT(ZANF(I2)).EQ. 6).OR.
+     *      (NINT(ZANF(I2)).EQ.17.AND.NINT(ZANF(I1)).EQ. 6).OR.
+     *      (NINT(ZANF(I1)).EQ.35.AND.NINT(ZANF(I2)).EQ. 6).OR.
+     *      (NINT(ZANF(I2)).EQ.35.AND.NINT(ZANF(I1)).EQ. 6).OR.
+     *      (NINT(ZANF(I1)).EQ.53.AND.NINT(ZANF(I2)).EQ. 6).OR.
+     *      (NINT(ZANF(I2)).EQ.53.AND.NINT(ZANF(I1)).EQ. 6)    )THEN
+            BORDER(IBOND) = ONE
+         END IF
+         IF((NINT(ZANF(I1)).EQ.17.AND.NINT(ZANF(I2)).EQ. 7).OR.
+     *      (NINT(ZANF(I2)).EQ.17.AND.NINT(ZANF(I1)).EQ. 7).OR.
+     *      (NINT(ZANF(I1)).EQ.35.AND.NINT(ZANF(I2)).EQ. 7).OR.
+     *      (NINT(ZANF(I2)).EQ.35.AND.NINT(ZANF(I1)).EQ. 7).OR.
+     *      (NINT(ZANF(I1)).EQ.53.AND.NINT(ZANF(I2)).EQ. 7).OR.
+     *      (NINT(ZANF(I2)).EQ.53.AND.NINT(ZANF(I1)).EQ. 7)    )THEN
+            BORDER(IBOND) = ONE
+         END IF
+         IF((NINT(ZANF(I1)).EQ.17.AND.NINT(ZANF(I2)).EQ.14).OR.
+     *      (NINT(ZANF(I2)).EQ.17.AND.NINT(ZANF(I1)).EQ.14).OR.
+     *      (NINT(ZANF(I1)).EQ.35.AND.NINT(ZANF(I2)).EQ.14).OR.
+     *      (NINT(ZANF(I2)).EQ.35.AND.NINT(ZANF(I1)).EQ.14).OR.
+     *      (NINT(ZANF(I1)).EQ.53.AND.NINT(ZANF(I2)).EQ.14).OR.
+     *      (NINT(ZANF(I2)).EQ.53.AND.NINT(ZANF(I1)).EQ.14)    )THEN
+            BORDER(IBOND) = ONE
+         END IF
+         IF((NINT(ZANF(I1)).EQ.17.AND.NINT(ZANF(I2)).EQ.15).OR.
+     *      (NINT(ZANF(I2)).EQ.17.AND.NINT(ZANF(I1)).EQ.15).OR.
+     *      (NINT(ZANF(I1)).EQ.35.AND.NINT(ZANF(I2)).EQ.15).OR.
+     *      (NINT(ZANF(I2)).EQ.35.AND.NINT(ZANF(I1)).EQ.15).OR.
+     *      (NINT(ZANF(I1)).EQ.53.AND.NINT(ZANF(I2)).EQ.15).OR.
+     *      (NINT(ZANF(I2)).EQ.53.AND.NINT(ZANF(I1)).EQ.15)    )THEN
+            BORDER(IBOND) = ONE
+         END IF
+         IF((NINT(ZANF(I1)).EQ.17.AND.NINT(ZANF(I2)).EQ.16).OR.
+     *      (NINT(ZANF(I2)).EQ.17.AND.NINT(ZANF(I1)).EQ.16).OR.
+     *      (NINT(ZANF(I1)).EQ.35.AND.NINT(ZANF(I2)).EQ.16).OR.
+     *      (NINT(ZANF(I2)).EQ.35.AND.NINT(ZANF(I1)).EQ.16).OR.
+     *      (NINT(ZANF(I1)).EQ.53.AND.NINT(ZANF(I2)).EQ.16).OR.
+     *      (NINT(ZANF(I2)).EQ.53.AND.NINT(ZANF(I1)).EQ.16)    )THEN
+            BORDER(IBOND) = ONE
+         END IF
+      ENDDO
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         DO M=1,MB
+            MBEFO=M-1
+            IF(MBEFO.EQ.0) MBEFO=MB
+            J       = LISTRIN(M     ,IRING)
+            IF(NINT(ZANF(J)).EQ.16.OR.
+     *         NINT(ZANF(J)).EQ.8     ) THEN
+               BORDER(LISTRIB(M     ,IRING))=ONE
+               BORDER(LISTRIB(MBEFO ,IRING))=ONE
+            END IF
+         ENDDO
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF((NINT(ZANF(IFFAT)).EQ.8.OR.NINT(ZANF(IFFAT)).EQ.16).AND.
+     *       LBOND(10,IFFAT).EQ.1.AND.
+     *       QMMFF(IFFAT).EQ.-ONE)
+     *       BORDER(LBOND(1,IFFAT))=ONE
+         IF((NINT(ZANF(IFFAT)).EQ.8.OR.NINT(ZANF(IFFAT)).EQ.16).AND.
+     *       LBOND(10,IFFAT).EQ.2.AND.
+     *       QMMFF(IFFAT).EQ.ONE)THEN
+             BTHERE=THREE
+             LHIDY=0
+             DO I=1,2
+                KBOND=LBOND(I,IFFAT)
+                IF(BORDER(KBOND).LT.0.1D-10) LHIDY=LHIDY+1
+                BTHERE=BTHERE-BORDER(KBOND)
+             ENDDO
+             IF(LHIDY.EQ.1)THEN
+             DO I=1,2
+                KBOND=LBOND(I,IFFAT)
+                IF(BORDER(KBOND).LT.0.1D-10)
+     *          BORDER(KBOND)=BTHERE
+             ENDDO
+             END IF
+         END IF
+         IF((NINT(ZANF(IFFAT)).EQ.8.OR.NINT(ZANF(IFFAT)).EQ.16).AND.
+     *       LBOND(10,IFFAT).EQ.1.AND.
+     *       ABS(BORDER(LBOND(1,IFFAT))-ONE).LT.0.1D-10)
+     *       QMMFF(IFFAT)=-ONE
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *      QMMFF(IFFAT).EQ.-ONE )THEN
+            BORDER(LBOND(1,IFFAT))=ONE
+            BORDER(LBOND(2,IFFAT))=ONE
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *      QMMFF(IFFAT).EQ.ONE )THEN
+            BORDER(LBOND(1,IFFAT))=TWO
+            BORDER(LBOND(2,IFFAT))=TWO
+         END IF
+      ENDDO
+C
+C     -- DETERMINE MORE BONDS --
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            LOXY1=0
+            LOXY2=0
+            LOXY1C=0
+            JBONDO1=0
+            JBONDO2=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)THEN
+                  LOXY1=LOXY1+1
+                  JBONDO1=KBOND
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *            QMMFF(JFFAT).EQ.-ONE)THEN
+                  LOXY1C=LOXY1C+1
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.2)THEN
+                  LOXY2=LOXY2+1
+                  JBONDO2=KBOND
+               END IF
+            ENDDO
+            IF(LOXY1.EQ.1.AND.LOXY2.EQ.1.AND.LOXY1C.EQ.0)THEN
+               BORDER(JBONDO1)=TWO
+               BORDER(JBONDO2)=ONE
+            END IF
+            IF(LOXY1.EQ.1.AND.LOXY2.EQ.1.AND.LOXY1C.EQ.1.AND.
+     *         NUMRIN(10,IFFAT).GT.0)THEN
+               BORDER(JBONDO1)=ONE
+               BORDER(JBONDO2)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.4)THEN
+            LOXY=0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         LOXY=LOXY+1
+            ENDDO
+            IF(LOXY.EQ.1)THEN
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)THEN
+                  BORDER(KBOND)=TWO
+               ELSE
+                  BORDER(KBOND)=ONE
+               END IF
+            ENDDO
+            END IF
+            IF(LOXY.EQ.0)THEN
+            DO I=1,LBOND(10,IFFAT)
+               BORDER(LBOND(I,IFFAT))=ONE
+            ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.4)THEN
+            DO I=1,LBOND(10,IFFAT)
+               BORDER(LBOND(I,IFFAT))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.1)THEN
+            KBOND=LBOND(1,IFFAT)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(NINT(ZANF(JFFAT)).EQ.6) THEN
+               BORDER(LBOND(1,IFFAT))=THREE
+            END IF
+         END IF
+C        - ACID RADICAL
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            NOXY = 0
+            NTWO = 0
+            NS1L = 0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.QMMFF(JFFAT).EQ.ZERO)THEN
+                  NOXY=NOXY+1
+                  IF(LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.16.AND.
+     *            LBOND(10,JFFAT).EQ.1) NS1L=NS1L+1
+            ENDDO
+            IF(NS1L.EQ.2)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.16.AND.
+     *            LBOND(10,JFFAT).EQ.1) BORDER(LBOND(1,JFFAT))=ONEPT5
+               ENDDO
+            END IF
+            IF(NOXY.EQ.1.AND.NTWO.EQ.0)THEN
+               JC = 0
+               JN = 0
+               JP = 0
+               JS = 0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ. 6) JC = JC + 1
+                  IF(NINT(ZANF(JFFAT)).EQ. 7) JN = JN + 1
+                  IF(NINT(ZANF(JFFAT)).EQ.15) JP = JP + 1
+                  IF(NINT(ZANF(JFFAT)).EQ.16) JS = JS + 1
+               ENDDO
+               IF((JC.EQ.1.AND.JN.EQ.1).OR.JN.EQ.2)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND = LBOND(I,IFFAT)
+                     JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.6)
+     *                  BORDER(KBOND) = ONE
+                     IF(NINT(ZANF(JFFAT)).EQ.7)
+     *                  BORDER(KBOND) = ONE
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  ABS(QMMFF(JFFAT)).LT.0.1D-10)
+     *                  BORDER(KBOND) = TWO
+                  ENDDO
+               END IF
+            END IF
+            IF(NOXY.EQ.2.AND.NTWO.EQ.0)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                     BORDER(KBOND) = ONEPT5
+                  ELSE
+                     BORDER(KBOND) = ONE
+                  END IF
+               ENDDO
+            END IF
+            IF(NOXY.EQ.2.AND.NTWO.EQ.1)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                     IF(LBOND(10,JFFAT).EQ.2)THEN
+                        BORDER(KBOND) = ONE
+                        DO J=1,LBOND(10,JFFAT)
+                           IF(BORDER(LBOND(J,JFFAT)).EQ.ZERO)
+     *                        BORDER(LBOND(J,JFFAT))=ONE
+                        ENDDO
+                     END IF
+                  END IF
+               ENDDO
+            END IF
+         END IF
+         IF(NUMRIN(10,IFFAT).EQ.0.AND.
+     *      NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            NNIT = 0
+            NTWO = 0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.7)THEN
+                  NNIT=NNIT+1
+                  IF(LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+               END IF
+            ENDDO
+            IF(NNIT.EQ.3.AND.NTWO.EQ.1)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(LBOND(10,JFFAT).EQ.2) BORDER(KBOND) = TWO
+                  IF(LBOND(10,JFFAT).EQ.3) BORDER(KBOND) = ONE
+               ENDDO
+            END IF
+            IF(NNIT.EQ.3.AND.NTWO.EQ.0)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  BORDER(KBOND) = FOUR/THREE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3)THEN
+            NOXY = 0
+            NTWO = 0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.QMMFF(JFFAT).EQ.ZERO.AND.
+     *            LBOND(10,JFFAT).EQ.1)THEN
+                  NOXY=NOXY+1
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *            LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+            ENDDO
+            IF(NOXY.EQ.2.AND.NTWO.EQ.0)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *            LBOND(10,JFFAT).EQ.1)THEN
+                     BORDER(KBOND) = TWO
+                  ELSE
+                     BORDER(KBOND) = ONE
+                  END IF
+               ENDDO
+            END IF
+            IF(NOXY.EQ.1.AND.NTWO.EQ.0)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               QMMFF(JFFAT).EQ.ZERO.AND.
+     *               LBOND(10,JFFAT).EQ.1)THEN
+                     BORDER(KBOND) = TWO
+                  END IF
+               ENDDO
+               BTHERE=5.0D+00
+               LINKN3=3
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  BTHERE=BTHERE-BORDER(KBOND)
+                  IF(BORDER(KBOND).GT.0.1D-10) LINKN3=LINKN3-1
+               ENDDO
+               IF(LINKN3.EQ.1)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND = LBOND(I,IFFAT)
+                     IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=BTHERE
+                  ENDDO
+               END IF
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.4)THEN
+            NOXY = 0
+            NTWO = 0
+            NCARBON=0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                  NOXY=NOXY+1
+                  IF(LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.6) NCARBON=NCARBON+1
+            ENDDO
+            IF(NTWO.EQ.0.AND.NOXY.EQ.2.AND.NCARBON.EQ.2)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                     BORDER(KBOND)=ONEPT5
+                  END IF
+                  IF(NINT(ZANF(JFFAT)).EQ.6) BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+            IF(NOXY.EQ.4)THEN
+               BTEMP = (FIVE-DBLE(NTWO))/(FOUR-DBLE(NTWO))
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                     IF(LBOND(10,JFFAT).EQ.2)THEN
+                        BORDER(KBOND) = ONE
+                        DO J=1,LBOND(10,JFFAT)
+                           IF(BORDER(LBOND(J,JFFAT)).EQ.ZERO)
+     *                        BORDER(LBOND(J,JFFAT))=ONE
+                        ENDDO
+                     END IF
+                     IF(LBOND(10,JFFAT).EQ.1)THEN
+                        BORDER(KBOND)=BTEMP
+                     END IF
+                  END IF
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.16.AND.LBOND(10,IFFAT).EQ.3)THEN
+            NOXY = 0
+            NTWO = 0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                  NOXY=NOXY+1
+                  IF(LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+               END IF
+            ENDDO
+            IF(NOXY.EQ.1.AND.NTWO.EQ.0)THEN
+               JC = 0
+               JN = 0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.6) JC = JC + 1
+                  IF(NINT(ZANF(JFFAT)).EQ.7) JN = JN + 1
+               ENDDO
+               IF((JC+JN).EQ.2)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND = LBOND(I,IFFAT)
+                     JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.6)
+     *                  BORDER(KBOND) = ONE
+                     IF(NINT(ZANF(JFFAT)).EQ.7)
+     *                  BORDER(KBOND) = ONE
+                     IF(NINT(ZANF(JFFAT)).EQ.8)
+     *                  BORDER(KBOND) = TWO
+                  ENDDO
+               END IF
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.16.AND.LBOND(10,IFFAT).EQ.4)THEN
+            NOXY = 0
+            NTWO = 0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                  NOXY=NOXY+1
+                  IF(LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+               END IF
+            ENDDO
+            BTEMP = (SIX-DBLE(NTWO))/(FOUR-DBLE(NTWO))
+            IF(NOXY.EQ.4)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8)THEN
+                     IF(LBOND(10,JFFAT).EQ.2)THEN
+                        BORDER(KBOND) = ONE
+                        DO J=1,LBOND(10,JFFAT)
+                           IF(BORDER(LBOND(J,JFFAT)).EQ.ZERO)
+     *                        BORDER(LBOND(J,JFFAT))=ONE
+                        ENDDO
+                     END IF
+                     IF(LBOND(10,JFFAT).EQ.1)THEN
+                        BORDER(KBOND)=BTEMP
+                     END IF
+                  END IF
+               ENDDO
+            END IF
+            IF(NOXY.EQ.3.AND.NTWO.EQ.1)THEN
+               JCNP = 0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ. 6.OR.
+     *               NINT(ZANF(JFFAT)).EQ. 7.OR.
+     *               NINT(ZANF(JFFAT)).EQ.15    ) JCNP=JCNP+1
+               ENDDO
+               IF(JCNP.EQ.1)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND = LBOND(I,IFFAT)
+                     JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ. 6.OR.
+     *                  NINT(ZANF(JFFAT)).EQ. 7.OR.
+     *                  NINT(ZANF(JFFAT)).EQ.15    )
+     *                  BORDER(KBOND) = ONE
+                     IF(NINT(ZANF(JFFAT)).EQ. 8) THEN
+                        IF(LBOND(10,JFFAT).EQ.1) BORDER(KBOND) = TWO
+                        IF(LBOND(10,JFFAT).EQ.2) BORDER(KBOND) = ONE
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+            IF(NOXY.EQ.2.AND.NTWO.EQ.0)THEN
+               JCNP = 0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ. 6.OR.
+     *               NINT(ZANF(JFFAT)).EQ. 7.OR.
+     *               NINT(ZANF(JFFAT)).EQ.15    ) JCNP=JCNP+1
+               ENDDO
+               IF(JCNP.EQ.2)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND = LBOND(I,IFFAT)
+                     JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ. 6.OR.
+     *                  NINT(ZANF(JFFAT)).EQ. 7.OR.
+     *                  NINT(ZANF(JFFAT)).EQ.15    )
+     *                  BORDER(KBOND) = ONE
+                     IF(NINT(ZANF(JFFAT)).EQ. 8)
+     *                  BORDER(KBOND) = TWO
+                  ENDDO
+               END IF
+            END IF
+         END IF
+      ENDDO
+C
+C     -- PROPAGATE SINGLE BONDS (3 TIMES) --
+C
+      DO L123=1,3
+         DO IFFAT=1,NFFAT
+            IF(NINT(ZANF(IFFAT)).EQ. 6.OR.
+     *         NINT(ZANF(IFFAT)).EQ.14.   ) THEN
+               BLEFT=FOUR
+               DO I=1,LBOND(10,IFFAT)
+                  BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+               ENDDO
+               IF(BLEFT.EQ.ONE)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *                  BORDER(LBOND(I,IFFAT))=ONE
+                  ENDDO
+               END IF
+            END IF
+         ENDDO
+      ENDDO
+C
+C     -- DETERMINE SOME BOND ORDER
+C
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 920  CONTINUE
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.8.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.16.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+      ENDDO
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I2
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I2).EQ.3.AND.LBOND(10,I1).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I1)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I1
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.2.AND.
+     *      LBOND(10,I2).EQ.1   )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT1+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 8.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.1.AND.
+     *      LBOND(10,I2).EQ.2   )THEN
+            BLFT1=TWO
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT2+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10)THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 6) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.BLEFT2.EQ.ONE) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF((BLEFT1.EQ.TWO.AND.BLEFT2.EQ.TWO)        .AND.
+     *         (LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.3)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF((BLEFT1.EQ.THREE.AND.BLEFT2.EQ.THREE)    .AND.
+     *         (LBOND(10,I1).EQ.2.AND.LBOND(10,I2).EQ.2)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 7) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I1).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT1.EQ.THREE.AND.LBOND(10,I2).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 7) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I2).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT2.EQ.THREE.AND.LBOND(10,I1).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF((NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 8).OR.
+     *      (NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ.16)    ) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I2).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF((NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 8).OR.
+     *      (NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ.16)    ) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I1).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ.7.AND.NINT(ZANF(I1)).EQ.7.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2).AND.
+     *      BORDER(IBOND).LT.0.1D-10                        )THEN
+            BIN1=THREE
+            BIN2=THREE
+            NIN1=LBOND(10,I1)
+            NIN2=LBOND(10,I2)
+            DO IX1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IX1,I1)).GT.0.1D-10) NIN1=NIN1-1
+               BIN1=BIN1-BORDER(LBOND(IX1,I1))
+            ENDDO
+            DO IX2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IX2,I2)).GT.0.1D-10) NIN2=NIN2-1
+               BIN2=BIN2-BORDER(LBOND(IX2,I2))
+            ENDDO
+            IF(NIN2.EQ.1.AND.NIN1.EQ.1.AND.ABS(BIN1-BIN2).LT.0.1D-10)
+     *      BORDER(IBOND)=BIN1
+         END IF
+      ENDDO
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BTHERE=THREE
+            DO JJ=1,2
+               KBOND=LBOND(JJ,IFFAT)
+               IF(BORDER(KBOND).EQ.ONE) BTHERE=BTHERE-ONE
+            ENDDO
+            IF(BTHERE.EQ.TWO)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ. 8.AND.LBOND(10,IFFAT).EQ.1)THEN
+            KBOND=LBOND(1,IFFAT)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(LBOND(10,JFFAT).EQ.1.AND.NINT(ZANF(JFFAT)).EQ. 1)THEN
+               BORDER(KBOND)=ONE
+               NTYPE(IFFAT)=35
+               NTYPE(JFFAT)=21
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.16.AND.LBOND(10,IFFAT).EQ.4)THEN
+            LOXY=0
+            LNTR=0
+            LCAB=0
+            DO JJ=1,4
+               KBOND=LBOND(JJ,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.2)
+     *         LNTR=LNTR+1
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).EQ.2)
+     *         LCAB=LCAB+1
+            ENDDO
+            IF(LCAB.EQ.1.AND.LOXY.EQ.2.AND.LNTR.EQ.1)THEN
+            DO JJ=1,4
+               KBOND=LBOND(JJ,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         BORDER(KBOND)=TWO
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.2)
+     *         BORDER(KBOND)=ONE
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).EQ.2)
+     *         BORDER(KBOND)=ONE
+            ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.2)THEN
+            ICARBN=0
+            DO I=1,2
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.BORDER(KBOND).GT.0.1D-10)
+     *         ICARBN=ICARBN+1
+            ENDDO
+            IF(ICARBN.EQ.1)THEN
+               DO I=1,2
+                  KBOND=LBOND(I,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.4)THEN
+            BLEFT=FIVE
+            NLFTP=4
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.1.0D-10) NLFTP=NLFTP-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTP.EQ.1) THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).LT.1.0D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BLEFT=FOUR
+            NLFTC=2
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.ONE)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=TWO
+               ENDDO
+            END IF
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.TWO)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3.AND.
+     *      QMMFF(IFFAT).EQ.ONE)THEN
+            BLEFT=4.0D+00
+            NLFET=3
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFET=NLFET-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFET.EQ.1)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *               BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 921
+      IF(ICOUNT.GT.300) GOTO 921
+      BCOUNT2=BCOUNT1
+      IF(ICASE.EQ.0)THEN
+         DO IRING=1,NRING
+            MB=LISTRIN(10,IRING)
+            DO M=1,MB
+               RECRIB=LISTRIB(M,IRING)
+            ENDDO
+            IF(ABS(RECRIB).LT.0.1D-10)THEN
+               DO M=1,MB
+                  KBOND=LISTRIB(M,IRING)
+                  I1=IPAIR(1,KBOND)
+                  I2=IPAIR(2,KBOND)
+                  NI1=0
+                  NI2=0
+                  DO JJ=1,LBOND(10,I1)
+                     IF(ABS(BORDER(LBOND(JJ,I1))-ONE).LT.0.1D-10)
+     *               NI1=NI1+1
+                  ENDDO
+                  DO JJ=1,LBOND(10,I2)
+                     IF(ABS(BORDER(LBOND(JJ,I2))-ONE).LT.0.1D-10)
+     *               NI2=NI2+1
+                  ENDDO
+                  IF(NI1.EQ.1.AND.NI2.EQ.1)THEN
+                     BORDER(KBOND)=ONE
+                     ICASE=2
+                     GOTO 920
+                  END IF
+               ENDDO
+            END IF
+         ENDDO
+      END IF
+      IF(ICASE.EQ.1)THEN
+         DO IRING=1,NRING
+            MB=LISTRIN(10,IRING)
+            DO M=1,MB
+               RECRIB=LISTRIB(M,IRING)
+            ENDDO
+            IF(ABS(RECRIB).LT.0.1D-10)THEN
+               DO M=1,MB
+                  KBOND=LISTRIB(M,IRING)
+                  I1=IPAIR(1,KBOND)
+                  I2=IPAIR(2,KBOND)
+                  NI1=0
+                  NI2=0
+                  DO J1=1,LBOND(10,I1)
+                     IF(ABS(BORDER(LBOND(J1,I1))-ONE).LT.0.1D-10)
+     *               NI1=NI1+1
+                  ENDDO
+                  DO J2=1,LBOND(10,I2)
+                     IF(ABS(BORDER(LBOND(J2,I2))-ONE).LT.0.1D-10)
+     *               NI2=NI2+1
+                  ENDDO
+                  IF(NI1.EQ.1.AND.NI2.EQ.1)THEN
+                     ICASE=2
+                     BORDER(KBOND)=TWO
+                     GOTO 920
+                  END IF
+               ENDDO
+            END IF
+         ENDDO
+      END IF
+      GOTO 920
+ 921  CONTINUE
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6)THEN
+            BTHERE=ZERO
+            DO I=1,LBOND(10,IFFAT)
+               BTHERE=BTHERE+BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF((BTHERE-FOUR).GT.0.2D+00)THEN
+               IF(JCASE.EQ.5) GOTO 951
+               DO IBOND=1,NBOND
+                  BORDER(IBOND)=ZERO
+               ENDDO
+               DO JFFAT=1,NFFAT
+                  LBOND(10,JFFAT)=0
+               ENDDO
+               ICASE=1
+               JCASE=JCASE+1
+               GOTO 950
+            END IF
+         END IF
+      ENDDO
+ 951  CONTINUE
+C
+C     -- DETERMINE RING BOND ORDERS (HIGH PRIORITY) --
+C
+C     DETERMINE PHENOXIDE SALT AND ALKOXIDE
+C
+      DO IFFAT=1,NFFAT
+         IF((NINT(ZANF(IFFAT)).EQ.8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16).AND.
+     *      LBOND(10,IFFAT).EQ.1.AND.
+     *      QMMFF(IFFAT).EQ.-ONE.AND.
+     *      BORDER(LBOND(1,IFFAT)).EQ.ZERO)THEN
+            BORDER(LBOND(1,IFFAT))=ONE
+         ELSE IF((NINT(ZANF(IFFAT)).EQ.8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16).AND.
+     *      LBOND(10,IFFAT).EQ.1.AND.
+     *      QMMFF(IFFAT).EQ.ZERO.AND.
+     *      BORDER(LBOND(1,IFFAT)).EQ.ZERO)THEN
+            KBOND=LBOND(1,IFFAT)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(NUMRIN(10,JFFAT).EQ.1.AND.
+     *        (LISTRIN(10,NUMRIN(1,JFFAT)).EQ.6.OR.
+     *         LISTRIN(10,NUMRIN(1,JFFAT)).EQ.5))
+     *        BORDER(LBOND(1,IFFAT))=TWO
+         END IF
+      ENDDO
+C
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IF(MB.EQ.5.OR.MB.EQ.6)THEN
+            NOXGYN=0
+            NSULFR=0
+            NCARBN=0
+            NNITR3=0
+            NNITR2=0
+            NOXYCB=0
+            NN3OXY=0
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               MNEXT=M+1
+               IF(M.EQ.MB)    MNEXT=1
+               INEXT =LISTRIN(MNEXT,IRING)
+               IBEFO =LISTRIN(MBEFO,IRING)
+               IFFAT = LISTRIN(M,IRING)
+               IF(NINT(ZANF(IFFAT)).EQ. 6.AND.
+     *            LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                  NCARBN=NCARBN+1
+                  LOXY=0
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               LBOND(10,JFFAT).EQ.1.AND.
+     *               QMMFF(JFFAT).EQ.ZERO  ) LOXY=LOXY+1
+                     IF(NINT(ZANF(JFFAT)).EQ.16.AND.
+     *               LBOND(10,JFFAT).EQ.1.AND.
+     *               QMMFF(JFFAT).EQ.ZERO    ) LOXY=LOXY+1
+                  ENDDO
+                  IF(LOXY.NE.0) NOXYCB=NOXYCB+1
+               END IF
+               IF(NINT(ZANF(IFFAT)).EQ.16.AND.
+     *            LBOND(10,IFFAT)  .EQ. 2 ) NSULFR=NSULFR+1
+               IF(NINT(ZANF(IFFAT)).EQ. 8.AND.
+     *            LBOND(10,IFFAT)  .EQ. 2 ) NOXGYN=NOXGYN+1
+               IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *            LBOND(10,IFFAT)  .EQ. 2 ) NNITR2=NNITR2+1
+               IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *            LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                  NNITR3=NNITR3+1
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  JFFAT.NE.INEXT.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *                  JFFAT.NE.IBEFO     ) NN3OXY=NN3OXY+1
+                  ENDDO
+               END IF
+            ENDDO
+            IAROMTC=NNITR2+NCARBN+2*NNITR3-NN3OXY+2*(NSULFR+NOXGYN)
+            ICOUNTA=NNITR2+NCARBN+NNITR3+NSULFR+NOXGYN
+            IF((NSULFR+NOXGYN).LT.2.AND.IAROMTC.GE.5.AND.
+     *          IAROMTC.LE.7.AND.MB.EQ.ICOUNTA) NRINTYP(IRING)=1
+         END IF
+      ENDDO
+C
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IF(MB.EQ.5) THEN
+            IRING3=0
+            IDOUBL=0
+            DO M=1,MB
+               J=LISTRIN(M,IRING)
+               IF(NUMRIN(10,J).GE.3) THEN
+                  LRING=0
+                  DO I=1,NUMRIN(10,J)
+                     IF(NRINTYP(NUMRIN(I,J)).EQ.1) LRING=LRING+1
+                  ENDDO
+                  IF(LRING.GE.3)  IRING3=IRING3+1
+               END IF
+            ENDDO
+            IF(IRING3.EQ.2) IRING3=0
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               MNEXT=M+1
+               IF(M.EQ.MB) MNEXT=1
+               J       = LISTRIN(M     ,IRING)
+               JBEFO   = LISTRIN(MBEFO ,IRING)
+               JNEXT   = LISTRIN(MNEXT ,IRING)
+               DO I=1,LBOND(10,J)
+                  IF(LBOND(I,J).NE.LISTRIB(M    ,IRING).AND.
+     *               LBOND(I,J).NE.LISTRIB(MBEFO,IRING).AND.
+     *               ABS(BORDER(LBOND(I,J))-TWO).LT.0.1D-10.AND.
+     *               NUMRIN(10,J).EQ.1)THEN
+                     IDOUBL=IDOUBL+1
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)THEN
+                        DO JJ=1,3
+                           KBOND=LBOND(JJ,J)
+                           K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(K.NE.JBEFO.AND.K.NE.JNEXT.AND.
+     *                        IDOUBL.GT.0) IDOUBL=IDOUBL-1
+                        ENDDO
+                     END IF
+                  END IF
+               ENDDO
+            ENDDO
+            IF(IRING3.EQ.0.AND.IDOUBL.EQ.0)THEN
+               NNITRO=0
+               NOXGYN=0
+               NSULFR=0
+               NCARBN=0
+               NNITR3=0
+               NNITR2=0
+               NOXYCB=0
+               NN3OXY=0
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB)    MNEXT=1
+                  INEXT =LISTRIN(MNEXT,IRING)
+                  IBEFO =LISTRIN(MBEFO,IRING)
+                  IFFAT = LISTRIN(M,IRING)
+                  IF(NINT(ZANF(IFFAT)).EQ. 6.AND.
+     *               LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                     NCARBN=NCARBN+1
+                     LOXY=0
+                     DO I=1,3
+                        KBOND=LBOND(I,IFFAT)
+                        JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                        IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  LBOND(10,JFFAT).EQ.1.AND.
+     *                  QMMFF(JFFAT).EQ.ZERO  ) LOXY=LOXY+1
+                        IF(NINT(ZANF(JFFAT)).EQ.16.AND.
+     *                  LBOND(10,JFFAT).EQ.1.AND.
+     *                  QMMFF(JFFAT).EQ.ZERO    ) LOXY=LOXY+1
+                     ENDDO
+                     IF(LOXY.NE.0) NOXYCB=NOXYCB+1
+                  END IF
+                  IF(NINT(ZANF(IFFAT)).EQ.16.AND.
+     *               LBOND(10,IFFAT)  .EQ. 2 ) NSULFR=NSULFR+1
+                  IF(NINT(ZANF(IFFAT)).EQ. 7 ) NNITRO=NNITRO+1
+                  IF(NINT(ZANF(IFFAT)).EQ. 8.AND.
+     *               LBOND(10,IFFAT)  .EQ. 2 ) NOXGYN=NOXGYN+1
+                  IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *               LBOND(10,IFFAT)  .EQ. 2 ) NNITR2=NNITR2+1
+                  IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *               LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                     NNITR3=NNITR3+1
+                     DO I=1,3
+                        KBOND=LBOND(I,IFFAT)
+                        JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                        IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                     JFFAT.NE.INEXT.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *                     JFFAT.NE.IBEFO     ) NN3OXY=NN3OXY+1
+                     ENDDO
+                  END IF
+               ENDDO
+               IF(NOXYCB.EQ.0.AND.NCARBN.EQ.1.AND.NNITR2.EQ.2.AND.
+     *            NNITR3.EQ.2.AND.NN3OXY.EQ.0)THEN
+                  LCASE=0
+                  ICASE=0
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     J    =LISTRIN(M     ,IRING)
+                     JBEFO=LISTRIN(MBEFO ,IRING)
+                     JNEXT=LISTRIN(MNEXT ,IRING)
+                     IF(NINT(ZANF(J    )).EQ.6.AND.
+     *                  NINT(ZANF(JBEFO)).EQ.7.AND.
+     *                  NINT(ZANF(JNEXT)).EQ.7.AND.
+     *                  LBOND(10,JBEFO).EQ.3.AND.
+     *                  LBOND(10,JNEXT).EQ.3     ) ICASE=1
+                     IF(NINT(ZANF(J)).EQ.7)THEN
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           IXN=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF((IXN.NE.JBEFO.AND.IXN.NE.JNEXT).AND.
+     *                         NINT(ZANF(IXN)).NE.1 .AND.
+     *                         NINT(ZANF(IXN)).NE.8 .AND.
+     *                         NINT(ZANF(IXN)).NE.16   ) LCASE=LCASE+1
+                        ENDDO
+                     END IF
+                  ENDDO
+                  IF(ICASE.EQ.1.AND.LCASE.EQ.2)THEN
+                     LRING=0
+                     DO M=1,MB
+                        J    =LISTRIN(M     ,IRING)
+                        IF(NINT(ZANF(J)).EQ.7)THEN
+                           IF(NUMRIN(10,J).GE.2) LRING=LRING+1
+                        END IF
+                     ENDDO
+                     IF(LRING.EQ.0) LCASE=0
+                  END IF
+                  IF(LCASE.NE.2) THEN
+                     IF(ICASE.EQ.1) THEN
+                     DO M=1,MB
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=MB
+                        MNEXT=M+1
+                        IF(M.EQ.MB) MNEXT=1
+                        MBEFO2=MBEFO-1
+                        IF(MBEFO2.EQ.0) MBEFO2=MB
+                        MNEXT2=MNEXT+1
+                        IF(MNEXT.EQ.MB) MNEXT2=1
+                        J    =LISTRIN(M     ,IRING)
+                        JBEFO=LISTRIN(MBEFO ,IRING)
+                        JNEXT=LISTRIN(MNEXT ,IRING)
+                        IF(NINT(ZANF(J    )).EQ.6.AND.
+     *                     NINT(ZANF(JBEFO)).EQ.7.AND.
+     *                     NINT(ZANF(JNEXT)).EQ.7.AND.
+     *                     NUMRIN(10,J).EQ.1.AND.
+     *                     LBOND(10,JBEFO).EQ.3.AND.
+     *                     LBOND(10,JNEXT).EQ.3) THEN
+                           NTYPE(J)=80
+                           BORDER(LISTRIB(M     ,IRING))=ONEPT5
+                           BORDER(LISTRIB(MBEFO ,IRING))=ONEPT5
+                           BORDER(LISTRIB(MBEFO2,IRING))=ONE
+                           BORDER(LISTRIB(MNEXT2,IRING))=TWO
+                           BORDER(LISTRIB(MNEXT ,IRING))=ONE
+                        END IF
+                     ENDDO
+                     DO M=1,MB
+                        J= LISTRIN(M,IRING)
+                        IF(NINT(ZANF(J)).EQ.7.AND.
+     *                     LBOND(10,J).EQ.3         ) THEN
+                           NTYPE(J)=81
+                           QMMFF(J)=PT5
+                        END IF
+                        IF(NINT(ZANF(J)).EQ.7.AND.
+     *                     LBOND(10,J).EQ.2) NTYPE(J)=79
+                     ENDDO
+                     END IF
+                  END IF
+               END IF
+               IF(NOXYCB.EQ.0.AND.NCARBN.EQ.1.AND.NSULFR.EQ.1.AND.
+     *            NNITR2.EQ.3.AND.NN3OXY.EQ.0)THEN
+                  DO M=1,MB
+                     J       = LISTRIN(M     ,IRING)
+                     IF(NINT(ZANF(J)).EQ.16) NTYPE(J)=44
+                     IF(NINT(ZANF(J)).EQ.7)  NTYPE(J)=79
+                     IF(NINT(ZANF(J)).EQ.6)  NTYPE(J)=78
+                  ENDDO
+               END IF
+               IF(NOXYCB.EQ.0.AND.NCARBN.EQ.2.AND.NNITR2.EQ.1.AND.
+     *            NNITR3.EQ.2.AND.NN3OXY.EQ.0)THEN
+                  ICASE=0
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     J       = LISTRIN(M     ,IRING)
+                     JNEXT   =LISTRIN(MNEXT,IRING)
+                     JBEFO   =LISTRIN(MBEFO,IRING)
+                     IF(NINT(ZANF(J)).EQ. 6.AND.
+     *                  NINT(ZANF(JNEXT)).EQ. 7.AND.
+     *                  LBOND(10,JNEXT).EQ.3.AND.
+     *                  NINT(ZANF(JBEFO)).EQ. 7.AND.
+     *                  LBOND(10,JBEFO).EQ.3)THEN
+                        NTYPE(J)=80
+                        BORDER(LISTRIB(M,IRING))=ONEPT5
+                        BORDER(LISTRIB(MBEFO,IRING))=ONEPT5
+                        ICASE=1
+                     END IF
+                     IF(ICASE.EQ.1)THEN
+                        DO MM=1,MB
+                           J   = LISTRIN(MM ,IRING)
+                           IF(NINT(ZANF(J)).EQ. 6.AND.
+     *                        NTYPE(J).EQ.0) NTYPE(J)=78
+                           IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                        LBOND(10,J)  .EQ. 3 )THEN
+                              DO I=1,3
+                                 KBOND=LBOND(I,J)
+                                 IF(BORDER(KBOND).LT.0.1D-10)
+     *                           BORDER(KBOND)=ONE
+                              ENDDO
+                              NTYPE(J)=81
+                              QMMFF(J)=PT5
+                           END IF
+                           IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                     LBOND(10,J)  .EQ. 2 )   NTYPE(J)=79
+                        ENDDO
+                     END IF
+                  ENDDO
+               END IF
+               IF(NOXYCB.EQ.0.AND.NCARBN.EQ.2.AND.NNITR2.EQ.1.AND.
+     *            NNITR3.EQ.2.AND.NN3OXY.EQ.1)THEN
+                  MFFAT=0
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     J       = LISTRIN(M     ,IRING)
+                     JBEFO   = LISTRIN(MBEFO ,IRING)
+                     JNEXT   = LISTRIN(MNEXT ,IRING)
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)THEN
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                     JFFAT.NE.INEXT.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *                     JFFAT.NE.IBEFO     ) MFFAT=J
+                        ENDDO
+                     END IF
+                  ENDDO
+                  DO M=1,MB
+                     J       = LISTRIN(M     ,IRING)
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3.AND.
+     *                  MFFAT.NE.J)THEN
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           BORDER(KBOND)=ONE
+                        ENDDO
+                        NTYPE(J)=39
+                     END IF
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.2)
+     *               NTYPE(J)=79
+                     IF(J.EQ.MFFAT) THEN
+                        NTYPE(J)=82
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                        LBOND(10,JFFAT).EQ.1) NTYPE(JFFAT)=32
+                        ENDDO
+                     END IF
+                     IF(NINT(ZANF(J)).EQ.6) NTYPE(J)=78
+                  ENDDO
+               END IF
+               IF(NOXYCB.EQ.0.AND.(NSULFR.EQ.1.OR.NOXGYN.EQ.1).AND.
+     *            (NCARBN+NNITR2).EQ.4)THEN
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     J= LISTRIN(M,IRING)
+                     IF(NINT(ZANF(J)).EQ.6)THEN
+                        NTYPE(J)=78
+                     END IF
+                     DO IBRING=1,4
+                     IF(NINT(ZANF(J)).EQ.6.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.ONE)
+     *                  BORDER(LISTRIB(MBEFO ,IRING))=TWO
+                     IF(NINT(ZANF(J)).EQ.6.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.TWO)
+     *                  BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     IF(NINT(ZANF(J)).EQ.6.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.TWO)
+     *                  BORDER(LISTRIB(M     ,IRING))=ONE
+                     IF(NINT(ZANF(J)).EQ.6.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.ONE)
+     *                  BORDER(LISTRIB(M     ,IRING))=TWO
+                     IF(NINT(ZANF(J)).EQ.7.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.ONE)
+     *                  BORDER(LISTRIB(MBEFO ,IRING))=TWO
+                     IF(NINT(ZANF(J)).EQ.7.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.TWO)
+     *                  BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     IF(NINT(ZANF(J)).EQ.7.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.TWO)
+     *                  BORDER(LISTRIB(M     ,IRING))=ONE
+                     IF(NINT(ZANF(J)).EQ.7.AND.
+     *                  BORDER(LISTRIB(M     ,IRING)).EQ.ZERO.AND.
+     *                  BORDER(LISTRIB(MBEFO ,IRING)).EQ.ONE)
+     *                  BORDER(LISTRIB(M     ,IRING))=TWO
+                     ENDDO
+                     IF(NINT(ZANF(J)).EQ.7)THEN
+                        NTYPE(J)=79
+                     END IF
+                     IF(NINT(ZANF(J)).EQ.16) NTYPE(J)=44
+                     IF(NINT(ZANF(J)).EQ.8 ) NTYPE(J)=59
+                  ENDDO
+               END IF
+               IF(NOXYCB.EQ.0.AND.(NCARBN+NNITR2).EQ.5)THEN
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     J= LISTRIN(M,IRING)
+                     IF(NINT(ZANF(J)).EQ.6)THEN
+                        BORDER(LISTRIB(M     ,IRING))=ONEPT5
+                        BORDER(LISTRIB(MBEFO ,IRING))=ONEPT5
+                        NTYPE(J)=78
+                     END IF
+                     IF(NINT(ZANF(J)).EQ.7)THEN
+                        NTYPE(J)=76
+                        QMMFF(J)=-ONE/NNITR2
+                     END IF
+                  ENDDO
+               END IF
+               IF(NCARBN.EQ.2.AND.NSULFR.EQ.1.AND.NNITRO.EQ.2.AND.
+     *         NOXYCB.EQ.0)THEN
+                  ICASE=0
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MBEFO2=MBEFO-1
+                     IF(MBEFO2.EQ.0) MBEFO2=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     MNEXT2=M+2
+                     IF(MNEXT.EQ.MB) MNEXT2=1
+                     J       = LISTRIN(M     ,IRING)
+                     JBEFO   = LISTRIN(MBEFO ,IRING)
+                     JNEXT   = LISTRIN(MNEXT ,IRING)
+                     JBEFO2  = LISTRIN(MBEFO2,IRING)
+                     JNEXT2  = LISTRIN(MNEXT2,IRING)
+                     IF(NINT(ZANF(J    )).EQ.16.AND.
+     *                  NINT(ZANF(JBEFO)).EQ.7 .AND.
+     *                  NINT(ZANF(JNEXT)).EQ.7   ) ICASE=1
+                     IF(NINT(ZANF(J    )).EQ.16.AND.
+     *                  NINT(ZANF(JBEFO)).EQ.6 .AND.
+     *                  NINT(ZANF(JNEXT)).EQ.6 .AND.
+     *                  NINT(ZANF(JNEXT2)).EQ.7.AND.
+     *                  NINT(ZANF(JBEFO2)).EQ.7  ) ICASE=2
+                  ENDDO
+                  IF(ICASE.EQ.1.OR.ICASE.EQ.2)THEN
+                     DO M=1,MB
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=MB
+                        MBEFO2=MBEFO-1
+                        IF(MBEFO2.EQ.0) MBEFO2=MB
+                        MNEXT=M+1
+                        IF(M.EQ.MB) MNEXT=1
+                        MNEXT2=M+2
+                        IF(MNEXT.EQ.MB) MNEXT2=1
+                        J       = LISTRIN(M     ,IRING)
+                        IF(NINT(ZANF(J)).EQ.16) THEN
+                           BORDER(LISTRIB(M     ,IRING))=ONE
+                           BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                           BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                           BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                           BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                        END IF
+                        IF(NINT(ZANF(J)).EQ.16) NTYPE(J)=44
+                        IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                        IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                     LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                        IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                     LBOND(10,J)  .EQ. 3) NTYPE(J)=81
+                     ENDDO
+                  ELSE
+                     DO M=1,MB
+                        J       = LISTRIN(M     ,IRING)
+                        IF(NINT(ZANF(J)).EQ.16) NTYPE(J)=44
+                        IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                        IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                     LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                        IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                     LBOND(10,J)  .EQ. 3) NTYPE(J)=81
+                     ENDDO
+                  END IF
+               END IF
+               IF(NCARBN.EQ.2.AND.NSULFR.EQ.1.AND.NNITR2.EQ.2.AND.
+     *            NOXYCB.EQ.0)THEN
+                  DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=M+2
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J       = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.16) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ.16) NTYPE(J)=44
+                  IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  ENDDO
+               END IF
+               IF(NCARBN.EQ.3.AND.NSULFR.EQ.1.AND.NNITRO.EQ.1.AND.
+     *         NOXYCB.EQ.0)THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=M+2
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J       = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.16) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ.16) NTYPE(J)=44
+                  IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 3) NTYPE(J)=81
+               ENDDO
+               END IF
+               IF(NCARBN.EQ.2.AND.NOXGYN.EQ.1.AND.NNITR2.EQ.2.AND.
+     *         NOXYCB.EQ.0)THEN
+                  ICASE=0
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MBEFO2=MBEFO-1
+                     IF(MBEFO2.EQ.0) MBEFO2=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     MNEXT2=M+2
+                     IF(MNEXT.EQ.MB) MNEXT2=1
+                     J       = LISTRIN(M     ,IRING)
+                     JBEFO   = LISTRIN(MBEFO ,IRING)
+                     JNEXT   = LISTRIN(MNEXT ,IRING)
+                     IF(NINT(ZANF(J    )).EQ.8.AND.
+     *                  NINT(ZANF(JBEFO)).EQ.7.AND.
+     *                  NINT(ZANF(JNEXT)).EQ.7    ) ICASE=1
+                  ENDDO
+                  IF(ICASE.EQ.1)THEN
+                     DO M=1,MB
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=MB
+                        MBEFO2=MBEFO-1
+                        IF(MBEFO2.EQ.0) MBEFO2=MB
+                        MNEXT=M+1
+                        IF(M.EQ.MB) MNEXT=1
+                        MNEXT2=M+2
+                        IF(MNEXT.EQ.MB) MNEXT2=1
+                        J       = LISTRIN(M     ,IRING)
+                        IF(NINT(ZANF(J)).EQ.8) THEN
+                           BORDER(LISTRIB(M     ,IRING))=ONE
+                           BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                           BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                           BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                           BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                        END IF
+                        IF(NINT(ZANF(J)).EQ. 8) NTYPE(J)=59
+                        IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                        IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                     LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                     ENDDO
+                  END IF
+               END IF
+               IF(NCARBN.EQ.2.AND.NOXGYN.EQ.1.AND.NNITR2.EQ.1.AND.
+     *         NOXYCB.EQ.0.AND.NN3OXY.EQ.0.AND.NNITR3.EQ.1)THEN
+                  DO M=1,MB
+                     J       = LISTRIN(M     ,IRING)
+                     IF(NINT(ZANF(J)).EQ. 8) NTYPE(J)=59
+                     IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                     IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                  LBOND(10,J)  .EQ. 3) THEN
+                        NTYPE(J)=81
+                        QMMFF(J)=ONE
+                     END IF
+                     IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                  LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  ENDDO
+               END IF
+               IF(NCARBN.EQ.2.AND.NOXGYN.EQ.1.AND.NNITR2.EQ.1.AND.
+     *         NOXYCB.EQ.0.AND.NN3OXY.EQ.1)THEN
+                  DO M=1,MB
+                     J       = LISTRIN(M     ,IRING)
+                     IF(NINT(ZANF(J)).EQ. 8) NTYPE(J)=59
+                     IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                     IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                  LBOND(10,J)  .EQ. 3) THEN
+                        NTYPE(J)=82
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                        LBOND(10,JFFAT).EQ.1) NTYPE(JFFAT)=32
+                        ENDDO
+                     END IF
+                     IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                  LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  ENDDO
+               END IF
+               IF(NCARBN.EQ.3.AND.NOXGYN.EQ.1.AND.NNITRO.EQ.1.AND.
+     *         NOXYCB.EQ.0)THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=M+2
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J       = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.8) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 8) NTYPE(J)=59
+                  IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 3) NTYPE(J)=81
+               ENDDO
+               END IF
+C
+               IF(NCARBN.EQ.2.AND.NNITR2.EQ.2.AND.NNITR3.EQ.1.AND.
+     *         NOXYCB.EQ.0)THEN
+                  DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=M+2
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J      = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.7.AND.
+     *               LBOND(10,J).EQ.3) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 6.AND.
+     *               NTYPE(J)     .NE.80) NTYPE(J)=78
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 3) NTYPE(J)=39
+                  ENDDO
+               END IF
+C
+               IF(NCARBN.EQ.1.AND.NNITR2.EQ.3.AND.NNITR3.EQ.1.AND.
+     *         NOXYCB.EQ.0)THEN
+                  DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=M+2
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J      = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.7.AND.
+     *               LBOND(10,J).EQ.3) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 6.AND.
+     *               NTYPE(J)     .NE.80) NTYPE(J)=78
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 3) NTYPE(J)=39
+                  ENDDO
+               END IF
+               IF(NCARBN.EQ.3.AND.NNITR2.EQ.1.AND.NNITR3.EQ.1.AND.
+     *         NOXYCB.EQ.0)THEN
+                  DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=M+2
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J      = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.7.AND.
+     *               LBOND(10,J).EQ.3) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 6.AND.
+     *               NTYPE(J)     .NE.80) NTYPE(J)=78
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 2) NTYPE(J)=79
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 3) NTYPE(J)=39
+                  ENDDO
+               END IF
+C
+               IF(NCARBN.EQ.3.AND.NNITR3.EQ.2.AND.NOXYCB.EQ.0)THEN
+                  LCASE=0
+                  ICASE=0
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     J    =LISTRIN(M     ,IRING)
+                     JBEFO=LISTRIN(MBEFO ,IRING)
+                     JNEXT=LISTRIN(MNEXT ,IRING)
+                     IF(NINT(ZANF(J    )).EQ.6.AND.
+     *                  NINT(ZANF(JBEFO)).EQ.7.AND.
+     *                  NINT(ZANF(JNEXT)).EQ.7     ) ICASE=1
+                     IF(NINT(ZANF(J)).EQ.7)THEN
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           IXN=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF((IXN.NE.JBEFO.AND.IXN.NE.JNEXT).AND.
+     *                         NINT(ZANF(IXN)).NE.1 .AND.
+     *                         NINT(ZANF(IXN)).NE.8 .AND.
+     *                         NINT(ZANF(IXN)).NE.16   ) LCASE=LCASE+1
+                        ENDDO
+                     END IF
+                  ENDDO
+                  IF(ICASE.EQ.1.AND.LCASE.EQ.2)THEN
+                     LRING=0
+                     DO M=1,MB
+                        J    =LISTRIN(M     ,IRING)
+                        IF(NINT(ZANF(J)).EQ.7)THEN
+                           IF(NUMRIN(10,J).GE.2) LRING=LRING+1
+                        END IF
+                     ENDDO
+                     IF(LRING.EQ.0) LCASE=0
+                  END IF
+                  IF(LCASE.NE.2) THEN
+                     IF(ICASE.EQ.1) THEN
+                     DO M=1,MB
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=MB
+                        MNEXT=M+1
+                        IF(M.EQ.MB) MNEXT=1
+                        MBEFO2=MBEFO-1
+                        IF(MBEFO2.EQ.0) MBEFO2=MB
+                        MNEXT2=MNEXT+1
+                        IF(MNEXT.EQ.MB) MNEXT2=1
+                        J    =LISTRIN(M     ,IRING)
+                        JBEFO=LISTRIN(MBEFO ,IRING)
+                        JNEXT=LISTRIN(MNEXT ,IRING)
+                        IF(NINT(ZANF(J    )).EQ.6.AND.
+     *                     NINT(ZANF(JBEFO)).EQ.7.AND.
+     *                     NINT(ZANF(JNEXT)).EQ.7.AND.
+     *                     NUMRIN(10,J).EQ.1.AND.
+     *                     LBOND(10,JBEFO).EQ.3.AND.
+     *                     LBOND(10,JNEXT).EQ.3) THEN
+                           NTYPE(J)=80
+                           BORDER(LISTRIB(M     ,IRING))=ONEPT5
+                           BORDER(LISTRIB(MBEFO ,IRING))=ONEPT5
+                           BORDER(LISTRIB(MBEFO2,IRING))=ONE
+                           BORDER(LISTRIB(MNEXT2,IRING))=TWO
+                           BORDER(LISTRIB(MNEXT ,IRING))=ONE
+                        END IF
+                     ENDDO
+                     DO M=1,MB
+                        J= LISTRIN(M,IRING)
+                        IF(NINT(ZANF(J)).EQ.6.AND.
+     *                     NTYPE(J).EQ.0              ) NTYPE(J)=78
+                        IF(NINT(ZANF(J)).EQ.7         ) THEN
+                           NTYPE(J)=81
+                           QMMFF(J)=PT5
+                        END IF
+                     ENDDO
+                     END IF
+                     IF(ICASE.EQ.0)THEN
+                        DO M=1,MB
+                           J= LISTRIN(M,IRING)
+                           IF(NINT(ZANF(J)).EQ.6.AND.
+     *                        NTYPE(J).EQ.0              ) NTYPE(J)=78
+                           IF(NINT(ZANF(J)).EQ.7         ) NTYPE(J)=81
+                           KBOND=LISTRIB(M,IRING)
+                           I1=IPAIR(1,KBOND)
+                           I2=IPAIR(2,KBOND)
+                           IF(NINT(ZANF(I1)).EQ.7.AND.
+     *                        NINT(ZANF(I2)).EQ.7     )THEN
+                              BORDER(KBOND)=ONE
+                           ELSE
+                              BORDER(KBOND)=ONEPT5
+                           END IF
+                        ENDDO
+                     END IF
+                  ELSE
+                     DO M=1,MB
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=MB
+                        MNEXT=M+1
+                        IF(M.EQ.MB) MNEXT=1
+                        J    =LISTRIN(M     ,IRING)
+                        IF(NINT(ZANF(J    )).EQ.7.AND.
+     *                     NUMRIN(10,J).EQ.1) THEN
+                           DO I=1,3
+                              BORDER(LBOND(I,J))=ONE
+                           ENDDO
+                        END IF
+                     ENDDO
+                  END IF
+               END IF
+C
+               IF(NCARBN.EQ.4.AND.NOXGYN.EQ.1.AND.NOXYCB.EQ.0)THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  J       = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.7) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 8) NTYPE(J)=59
+                  IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+               ENDDO
+               END IF
+C
+               IF(NCARBN.EQ.4.AND.NSULFR.EQ.1.AND.NOXYCB.EQ.0)THEN
+                  DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=MNEXT+1
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J       = LISTRIN(M     ,IRING)
+                  IF(NINT(ZANF(J)).EQ.16) THEN
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 16) NTYPE(J)=44
+                  IF(NINT(ZANF(J)).EQ. 6 ) NTYPE(J)=78
+                  ENDDO
+               END IF
+C
+               IF(NCARBN.EQ.4.AND.NNITR3.EQ.1.AND.NOXYCB.EQ.0)THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0) MBEFO=MB
+                  MBEFO2=MBEFO-1
+                  IF(MBEFO2.EQ.0) MBEFO2=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  MNEXT2=MNEXT+1
+                  IF(MNEXT.EQ.MB) MNEXT2=1
+                  J    = LISTRIN(M,IRING)
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *               LBOND(10,J)  .EQ. 3) THEN
+                     NTYPE(J)=39
+                     BORDER(LISTRIB(M     ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO ,IRING))=ONE
+                     BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT ,IRING))=TWO
+                     BORDER(LISTRIB(MNEXT2,IRING))=ONE
+                  END IF
+                  IF(NINT(ZANF(J)).EQ. 6) NTYPE(J)=78
+               ENDDO
+               END IF
+         END IF
+         END IF  ! IRING3.EQ.0
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.39)THEN
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=ONE
+            ENDDO
+         END IF
+      ENDDO
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 940  CONTINUE
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.8      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.16.AND.NINT(ZANF(K3)).EQ.16      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.8.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.16.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+      ENDDO
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I2
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I2).EQ.3.AND.LBOND(10,I1).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I1)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I1
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.2.AND.
+     *      LBOND(10,I2).EQ.1   )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT1+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 8.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.1.AND.
+     *      LBOND(10,I2).EQ.2   )THEN
+            BLFT1=TWO
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT2+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10)THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 6) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.BLEFT2.EQ.ONE) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF((BLEFT1.EQ.TWO.AND.BLEFT2.EQ.TWO)        .AND.
+     *         (LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.3)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF((BLEFT1.EQ.THREE.AND.BLEFT2.EQ.THREE)    .AND.
+     *         (LBOND(10,I1).EQ.2.AND.LBOND(10,I2).EQ.2)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 7) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I1).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT1.EQ.THREE.AND.LBOND(10,I2).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+            IF(BORDER(IBOND).EQ.ONE.AND.LBOND(10,I1).EQ.2.AND.
+     *         LBOND(10,I2).EQ.2)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,I2)).EQ.ZERO)
+     *               BORDER(LBOND(I,I2))=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 7) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I2).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT2.EQ.THREE.AND.LBOND(10,I1).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+            IF(BORDER(IBOND).EQ.ONE.AND.LBOND(10,I1).EQ.2.AND.
+     *         LBOND(10,I2).EQ.2)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,I1)).EQ.ZERO)
+     *               BORDER(LBOND(I,I1))=TWO
+               ENDDO
+            END IF
+         END IF
+         IF((NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 8).OR.
+     *      (NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ.16)    ) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I2).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF((NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 8).OR.
+     *      (NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ.16)    ) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I1).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ.8.AND. LBOND(10,I1).EQ.2.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.(LBOND(10,I2).EQ.3.OR.
+     *      LBOND(10,I2).EQ.2).AND.BORDER(IBOND).LT.0.1D-10 )THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I2)
+            DO IXN=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IXN,I2)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I2))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I1)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I1))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND. LBOND(10,I2).EQ.2.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.(LBOND(10,I1).EQ.3.OR.
+     *      LBOND(10,I1).EQ.2).AND.BORDER(IBOND).LT.0.1D-10)THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I1)
+            DO IXN=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IXN,I1)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I1))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I2)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I2))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.7.AND.NINT(ZANF(I1)).EQ.7.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2).AND.
+     *      BORDER(IBOND).LT.0.1D-10                        )THEN
+            BIN1=THREE
+            BIN2=THREE
+            NIN1=LBOND(10,I1)
+            NIN2=LBOND(10,I2)
+            DO IX1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IX1,I1)).GT.0.1D-10) NIN1=NIN1-1
+               BIN1=BIN1-BORDER(LBOND(IX1,I1))
+            ENDDO
+            DO IX2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IX2,I2)).GT.0.1D-10) NIN2=NIN2-1
+               BIN2=BIN2-BORDER(LBOND(IX2,I2))
+            ENDDO
+            IF(NIN2.EQ.1.AND.NIN1.EQ.1.AND.ABS(BIN1-BIN2).LT.0.1D-10)
+     *      BORDER(IBOND)=BIN1
+         END IF
+      ENDDO
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *      QMMFF(IFFAT).EQ.-ONE)THEN
+            NNN=2
+            DO I=1,2
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(BORDER(KBOND).GT.0.1D-10) NNN=NNN-1
+            ENDDO
+            IF(NNN.EQ.1)THEN
+               DO I=1,2
+                  KBOND=LBOND(I,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10)
+     *            BORDER(KBOND)=THREE-BTHERE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *      QMMFF(IFFAT).EQ.ZERO)THEN
+            LOXY=0
+            NNN=2
+            BTHERE=ZERO
+            DO I=1,2
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.OR.
+     *            NINT(ZANF(JFFAT)).EQ.16) LOXY=LOXY+1
+               IF(BORDER(KBOND).GT.0.1D-10) NNN=NNN-1
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(NNN.EQ.1.AND.LOXY.EQ.1)THEN
+               DO I=1,2
+                  KBOND=LBOND(I,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10)
+     *            BORDER(KBOND)=THREE-BTHERE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.16.AND.LBOND(10,IFFAT).EQ.4)THEN
+            LOXY=0
+            LNTR=0
+            LCAB=0
+            DO JJ=1,4
+               KBOND=LBOND(JJ,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.2)
+     *         LNTR=LNTR+1
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).EQ.2)
+     *         LCAB=LCAB+1
+            ENDDO
+            IF(LCAB.EQ.1.AND.LOXY.EQ.2.AND.LNTR.EQ.1)THEN
+            DO JJ=1,4
+               KBOND=LBOND(JJ,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         BORDER(KBOND)=TWO
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.2)
+     *         BORDER(KBOND)=ONE
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).EQ.2)
+     *         BORDER(KBOND)=ONE
+            ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.2)THEN
+            ICARBN=0
+            DO I=1,2
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.BORDER(KBOND).GT.0.1D-10)
+     *         ICARBN=ICARBN+1
+            ENDDO
+            IF(ICARBN.EQ.1)THEN
+               DO I=1,2
+                  KBOND=LBOND(I,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.4)THEN
+            BLEFT=FIVE
+            NLFTP=4
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.1.0D-10) NLFTP=NLFTP-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTP.EQ.1) THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).LT.1.0D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BLEFT=FOUR
+            NLFTC=2
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.ONE)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=TWO
+               ENDDO
+            END IF
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.TWO)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=THREE
+            NLFET=3
+            LOXY=0
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFET=NLFET-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         LOXY=LOXY+1
+            ENDDO
+            IF(ABS(BLEFT).LT.0.1D-10.AND.NLFET.EQ.1.AND.LOXY.EQ.0)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 941
+      IF(ICOUNT.GT.300) GOTO 941
+      BCOUNT2=BCOUNT1
+      GOTO 940
+ 941  CONTINUE
+C
+C
+C
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IF(MB.EQ.6) THEN
+            IRING3=0
+            IBCUNT=0
+            IDOUBL=0
+            I39CNT=0
+            DO M=1,MB
+               J=LISTRIN(M,IRING)
+               IF(NUMRIN(10,J).GE.3) THEN
+                  LRING=0
+                  DO I=1,NUMRIN(10,J)
+                     IF(NRINTYP(NUMRIN(I,J)).EQ.1) LRING=LRING+1
+                  ENDDO
+                  IF(LRING.GE.3)  IRING3=IRING3+1
+               END IF
+            ENDDO
+            IF(IRING3.EQ.2) IRING3=0
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               J=LISTRIN(M,IRING)
+               JBEFO=LISTRIN(MBEFO,IRING)
+               JNEXT=LISTRIN(MNEXT,IRING)
+               IF(NTYPE(J).EQ.39.OR.
+     *            NTYPE(J).EQ.59.OR.
+     *            NTYPE(J).EQ.44    ) I39CNT=I39CNT+1
+               IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3.AND.
+     *            NUMRIN(10,J).GE.2 ) IRING3=IRING3+1
+               IF(BORDER(LISTRIB(M,IRING)).GT.0.1D-10) IBCUNT=IBCUNT+1
+               DO I=1,LBOND(10,J)
+                  IF(LBOND(I,J).NE.LISTRIB(M    ,IRING).AND.
+     *               LBOND(I,J).NE.LISTRIB(MBEFO,IRING).AND.
+     *               ABS(BORDER(LBOND(I,J))-TWO).LT.0.1D-10.AND.
+     *               NUMRIN(10,J).EQ.1)THEN
+                     IDOUBL=IDOUBL+1
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)THEN
+                        DO JJ=1,3
+                           KBOND=LBOND(JJ,J)
+                           K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(K.NE.JBEFO.AND.K.NE.JNEXT.AND.
+     *                        IDOUBL.GT.0) IDOUBL=IDOUBL-1
+                        ENDDO
+                     END IF
+                  END IF
+               ENDDO
+            ENDDO
+            IF(IRING3.NE.0.AND.IDOUBL.EQ.0)THEN
+               NNITRO=0
+               NNITR3=0
+               NCARBN=0
+               DO M=1,MB
+                  IFFAT=LISTRIN(M     ,IRING)
+                  IF(NUMRIN(10,IFFAT) .EQ.3.AND.
+     *               NINT(ZANF(IFFAT)).EQ.7     ) THEN
+                     DO I=1,3
+                        BORDER(LBOND(I,IFFAT))=ONE
+                     ENDDO
+                     NNITR3=NNITR3+1
+                     JFFAT=IFFAT
+                  END IF
+                  IF(NINT(ZANF(IFFAT)).EQ. 6.AND.
+     *               LBOND(10,IFFAT)  .EQ. 3 ) NCARBN=NCARBN+1
+                  IF(NINT(ZANF(IFFAT)).EQ. 7 ) NNITRO=NNITRO+1
+               ENDDO
+               IF(NNITR3.EQ.1.AND.NNITRO.EQ.2.AND.NCARBN.EQ.4)THEN
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MBEFO2=MBEFO-1
+                     IF(MBEFO2.EQ.0) MBEFO2=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     MNEXT2=MNEXT+1
+                     IF(MNEXT.EQ.MB) MNEXT2=1
+                     J     =LISTRIN(M     ,IRING)
+                     JBEFO =LISTRIN(MBEFO ,IRING)
+                     JBEFO2=LISTRIN(MBEFO2,IRING)
+                     JNEXT =LISTRIN(MNEXT ,IRING)
+                     JNEXT2=LISTRIN(MNEXT2,IRING)
+                     IF(J.EQ.JFFAT.AND.NINT(ZANF(JBEFO)).EQ.6.AND.
+     *                  NINT(ZANF(JBEFO2)).EQ.7   )THEN
+                        BORDER(LISTRIB(MBEFO2,IRING))=TWO
+                     END IF
+                     IF(J.EQ.JFFAT.AND.NINT(ZANF(JNEXT)).EQ.6.AND.
+     *                  NINT(ZANF(JNEXT2)).EQ.7   )THEN
+                        BORDER(LISTRIB(MNEXT,IRING))=TWO
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+            IF(IRING3.EQ.0.AND.IBCUNT.NE.0.AND.IDOUBL.LE.0.AND.
+     *         I39CNT.EQ.0)THEN
+               NCARBN=0
+               NNITR2=0
+               NOXYCB=0
+               NNITR3=0
+               NN3OXY=0
+               IAROMTC=0
+               ICOUNTA=0
+               DO M=1,MB
+                  IFFAT = LISTRIN(M,IRING)
+                  IF(NINT(ZANF(IFFAT)).EQ. 6.AND.
+     *               LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                     NCARBN=NCARBN+1
+                     LOXY=0
+                     DO I=1,3
+                        KBOND=LBOND(I,IFFAT)
+                        JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                        IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  LBOND(10,JFFAT).EQ.1       ) LOXY=LOXY+1
+                        IF(NINT(ZANF(JFFAT)).EQ.16.AND.
+     *                  LBOND(10,JFFAT).EQ.1       ) LOXY=LOXY+1
+                     ENDDO
+                     IF(LOXY.NE.0) NOXYCB=NOXYCB+1
+                  END IF
+                  IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *               LBOND(10,IFFAT)  .EQ. 2 ) NNITR2=NNITR2+1
+                  IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *               LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                     NNITR3=NNITR3+1
+                     DO I=1,3
+                        KBOND=LBOND(I,IFFAT)
+                        JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                        IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                     JFFAT.NE.INEXT.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *                     JFFAT.NE.IBEFO     ) NN3OXY=NN3OXY+1
+                     ENDDO
+                  END IF
+               ENDDO
+               IF(NOXYCB.LT.2)THEN
+                  IAROMTC=NNITR2+NCARBN+2*NNITR3-NN3OXY
+                  ICOUNTA=NNITR2+NCARBN+NNITR3
+                  IF((IAROMTC.EQ.6.OR.IAROMTC.EQ.7).AND.
+     *               ICOUNTA.EQ.6)THEN
+                     DO M=1,MB
+                        MBEFO=M-1
+                        IF(MBEFO.EQ.0) MBEFO=MB
+                        MNEXT=M+1
+                        IF(M.EQ.MB) MNEXT=1
+                        JNEXT =LISTRIN(MNEXT ,IRING)
+                        JBEFO =LISTRIN(MBEFO ,IRING)
+                        J = LISTRIN(M,IRING)
+                        IF(NINT(ZANF(J)).EQ.6.AND.NTYPE(J).EQ.0)
+     *                     NTYPE(J)=37
+                        IF(NINT(ZANF(J)).EQ.7.AND.NTYPE(J).EQ.0.AND.
+     *                     LBOND(10,J).EQ.2)
+     *                     NTYPE(J)=38
+                        IF(NINT(ZANF(J)).EQ.7.AND.NTYPE(J).EQ.0.AND.
+     *                     LBOND(10,J).EQ.3) THEN
+                           LCOUNT=0
+                           DO I=1,3
+                              KBOND=LBOND(I,J)
+                              K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                              IF(K.NE.JNEXT.AND.K.NE.JBEFO.AND.
+     *                           NINT(ZANF(K)).EQ.8.AND.
+     *                           LBOND(10,K).EQ.1) LCOUNT=1
+                           ENDDO
+                           IF(LCOUNT.EQ.1)THEN
+                              NTYPE(J)=69
+                           ELSE
+                              NTYPE(J)=58
+                              QMMFF(J)=ONE
+                           END IF
+                        END IF
+                     ENDDO
+                  END IF
+               END IF
+            END IF
+            IF(IRING3.EQ.0.AND.IBCUNT.EQ.0.AND.IDOUBL.LE.0.AND.
+     *         I39CNT.EQ.0)THEN
+            NCARBN=0
+            NNITR2=0
+            NOXYCB=0
+            NNITR3=0
+            NN3OXY=0
+            IAROMTC=0
+            ICOUNTA=0
+            DO M=1,MB
+               IFFAT = LISTRIN(M,IRING)
+               IF(NINT(ZANF(IFFAT)).EQ. 6.AND.
+     *            LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                  NCARBN=NCARBN+1
+                  LOXY=0
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               LBOND(10,JFFAT).EQ.1       ) LOXY=LOXY+1
+                     IF(NINT(ZANF(JFFAT)).EQ.16.AND.
+     *               LBOND(10,JFFAT).EQ.1       ) LOXY=LOXY+1
+                  ENDDO
+                  IF(LOXY.NE.0) NOXYCB=NOXYCB+1
+               END IF
+               IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *            LBOND(10,IFFAT)  .EQ. 2 ) NNITR2=NNITR2+1
+               IF(NINT(ZANF(IFFAT)).EQ. 7.AND.
+     *            LBOND(10,IFFAT)  .EQ. 3 ) THEN
+                  NNITR3=NNITR3+1
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  JFFAT.NE.INEXT.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *                  JFFAT.NE.IBEFO     ) NN3OXY=NN3OXY+1
+                  ENDDO
+               END IF
+            ENDDO
+            IF(NOXYCB.LT.2)THEN
+               IAROMTC=NNITR2+NCARBN+2*NNITR3-NN3OXY
+               ICOUNTA=NNITR2+NCARBN+NNITR3
+               IF((IAROMTC.EQ.6.OR.IAROMTC.EQ.7).AND.
+     *            ICOUNTA.EQ.6)THEN
+                  DO M=1,MB
+                     MBEFO=M-1
+                     IF(MBEFO.EQ.0) MBEFO=MB
+                     MNEXT=M+1
+                     IF(M.EQ.MB) MNEXT=1
+                     JNEXT =LISTRIN(MNEXT ,IRING)
+                     JBEFO =LISTRIN(MBEFO ,IRING)
+                     J = LISTRIN(M,IRING)
+                     IF(NINT(ZANF(J)).EQ.6.AND.NTYPE(J).EQ.0)
+     *                  NTYPE(J)=37
+                     IF(NINT(ZANF(J)).EQ.7.AND.NTYPE(J).EQ.0.AND.
+     *                  LBOND(10,J).EQ.2)
+     *                  NTYPE(J)=38
+                     IF(NINT(ZANF(J)).EQ.7.AND.NTYPE(J).EQ.0.AND.
+     *                  LBOND(10,J).EQ.3) THEN
+                        LCOUNT=0
+                        DO I=1,3
+                           KBOND=LBOND(I,J)
+                           K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(K.NE.JNEXT.AND.K.NE.JBEFO.AND.
+     *                        NINT(ZANF(K)).EQ.8.AND.
+     *                        LBOND(10,K).EQ.1) LCOUNT=1
+                        ENDDO
+                        IF(LCOUNT.EQ.1)THEN
+                           NTYPE(J)=69
+                        ELSE
+                           NTYPE(J)=58
+                           QMMFF(J)=ONE
+                        END IF
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+            IAROMTC=NNITR2+NCARBN
+            IF(NOXYCB.EQ.0.AND.IAROMTC.EQ.6) THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0)MBEFO=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  IFFAT=LISTRIN(M,IRING)
+                  IF(NINT(ZANF(IFFAT)).EQ.6) THEN
+                     IF(NTYPE(IFFAT).EQ.0) NTYPE(IFFAT)=37
+                  END IF
+                  IF(NINT(ZANF(IFFAT)).EQ.7) THEN
+                     IF(LBOND(10,IFFAT).EQ.2) NTYPE(IFFAT)=38
+                  END IF
+                  IF(NINT(ZANF(J)).EQ.7.AND.NTYPE(J).EQ.0.AND.
+     *               LBOND(10,J).EQ.3) THEN
+                     LCOUNT=0
+                     DO I=1,3
+                        KBOND=LBOND(I,J)
+                        K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                        IF(K.NE.JNEXT.AND.K.NE.JBEFO.AND.
+     *                     NINT(ZANF(K)).EQ.8.AND.
+     *                     LBOND(10,K).EQ.1) LCOUNT=1
+                     ENDDO
+                     IF(LCOUNT.EQ.1)THEN
+                        NTYPE(J)=69
+                     ELSE
+                        NTYPE(J)=58
+                        QMMFF(J)=ONE
+                     END IF
+                  END IF
+                  BNDRIN=ZERO
+                  DO MM=1,MB
+                     BNDRIN=BNDRIN+BORDER(LISTRIB(MM,IRING))
+                  ENDDO
+                  IF(BNDRIN.LT.0.1D-10)THEN
+                     DO I=1,LBOND(10,IFFAT)
+                        KBOND=LBOND(I,IFFAT)
+                        JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                        IF(JFFAT.EQ.LISTRIN(MBEFO,IRING).OR.
+     *                     JFFAT.EQ.LISTRIN(MNEXT,IRING)    ) THEN
+                           IF(BORDER(KBOND).EQ.ZERO)BORDER(KBOND)=ONEPT5
+                        END IF
+                     ENDDO
+                  END IF
+               ENDDO
+            END IF
+            I1 = LISTRIN(1,IRING)
+            I2 = LISTRIN(2,IRING)
+            I3 = LISTRIN(3,IRING)
+            I4 = LISTRIN(4,IRING)
+            I5 = LISTRIN(5,IRING)
+            I6 = LISTRIN(6,IRING)
+            N1 = NINT(ZANF(I1))
+            N2 = NINT(ZANF(I2))
+            N3 = NINT(ZANF(I3))
+            N4 = NINT(ZANF(I4))
+            N5 = NINT(ZANF(I5))
+            N6 = NINT(ZANF(I6))
+            L1 = LBOND(10,I1)
+            L2 = LBOND(10,I2)
+            L3 = LBOND(10,I3)
+            L4 = LBOND(10,I4)
+            L5 = LBOND(10,I5)
+            L6 = LBOND(10,I6)
+            LOXY=0
+            DO M=1,MB
+               IFFAT = LISTRIN(M,IRING)
+               DO J=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(J,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+               ENDDO
+            ENDDO
+            IF(LOXY.LE.1          .AND.
+     *         N1.EQ.6.AND.L1.EQ.3.AND.
+     *         N2.EQ.6.AND.L2.EQ.3.AND.
+     *         N3.EQ.6.AND.L3.EQ.3.AND.
+     *         N4.EQ.6.AND.L4.EQ.3.AND.
+     *         N5.EQ.6.AND.L5.EQ.3.AND.
+     *         N6.EQ.6.AND.L6.EQ.3     ) THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0)MBEFO=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  IFFAT=LISTRIN(M,IRING)
+                  IF(NINT(ZANF(IFFAT)).EQ.6) THEN
+                     IF(NTYPE(IFFAT).EQ.0) NTYPE(IFFAT)=37
+                  END IF
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(JFFAT.EQ.LISTRIN(MBEFO,IRING).OR.
+     *                  JFFAT.EQ.LISTRIN(MNEXT,IRING)    ) THEN
+                        IF(BORDER(KBOND).EQ.ZERO)BORDER(KBOND)=ONEPT5
+                     END IF
+                  ENDDO
+               ENDDO
+            END IF
+            NALL = N1+N2+N3+N4+N5+N6
+            NMAX = MAX(MAX(MAX(MAX(MAX(N1,N2),N3),N4),N5),N6)
+            NMIN = MIN(MIN(MIN(MIN(MIN(N1,N2),N3),N4),N5),N6)
+            LALL = L1+L2+L3+L4+L5+L6
+            LMAX = MAX(MAX(MAX(MAX(MAX(L1,L2),L3),L4),L5),L6)
+            LMIN = MIN(MIN(MIN(MIN(MIN(L1,L2),L3),L4),L5),L6)
+            IF(LOXY.LE.1          .AND.
+     *         (NMIN.EQ.6.AND.NMAX.EQ.7.AND.NALL.EQ.37.AND.
+     *          LMIN.EQ.3.AND.LMAX.EQ.3.AND.LALL.EQ.18     ).OR.
+     *         (NMIN.EQ.6.AND.NMAX.EQ.7.AND.NALL.EQ.37.AND.
+     *          LMIN.EQ.2.AND.LMAX.EQ.3.AND.LALL.EQ.17     ).OR.
+     *         (NMIN.EQ.6.AND.NMAX.EQ.7.AND.NALL.EQ.38.AND.
+     *          LMIN.EQ.2.AND.LMAX.EQ.3.AND.LALL.EQ.16     ).OR.
+     *         (NMIN.EQ.6.AND.NMAX.EQ.7.AND.NALL.EQ.38.AND.
+     *          LMIN.EQ.2.AND.LMAX.EQ.3.AND.LALL.EQ.17     )    )THEN
+               DO M=1,MB
+                  MBEFO=M-1
+                  IF(MBEFO.EQ.0)MBEFO=MB
+                  MNEXT=M+1
+                  IF(M.EQ.MB) MNEXT=1
+                  IFFAT=LISTRIN(M,IRING)
+                  JNEXT =LISTRIN(MNEXT ,IRING)
+                  JBEFO =LISTRIN(MBEFO ,IRING)
+                  IF(NINT(ZANF(IFFAT)).EQ.6) THEN
+                     IF(NTYPE(IFFAT).EQ.0) NTYPE(IFFAT)=37
+                  END IF
+                  IF(NINT(ZANF(IFFAT)).EQ.7) THEN
+                     IF(LBOND(10,IFFAT).EQ.2) NTYPE(IFFAT)=38
+                     IF(LBOND(10,IFFAT).EQ.3) THEN
+                        LCOUNT=0
+                        DO I=1,3
+                           KBOND=LBOND(I,IFFAT)
+                           K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                           IF(K.NE.JNEXT.AND.K.NE.JBEFO.AND.
+     *                        NINT(ZANF(K)).EQ.8.AND.
+     *                        LBOND(10,K).EQ.1) LCOUNT=1
+                        ENDDO
+                        IF(LCOUNT.EQ.1)THEN
+                           NTYPE(IFFAT)=69
+                        ELSE
+                           NTYPE(IFFAT)=58
+                           QMMFF(IFFAT)=ONE
+                        END IF
+                     END IF
+                  END IF
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(JFFAT.EQ.LISTRIN(MBEFO,IRING).OR.
+     *                  JFFAT.EQ.LISTRIN(MNEXT,IRING)    ) THEN
+                        IF(BORDER(KBOND).EQ.ZERO)BORDER(KBOND)=ONEPT5
+                     END IF
+                  ENDDO
+               ENDDO
+            END IF
+         END IF
+         END IF  ! IRING3.EQ.0
+      ENDDO
+C
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         LCOUNT=0
+         DO M=1,MB
+            IF(BORDER(LISTRIB(M,IRING)).LT.0.1D-10) LCOUNT=LCOUNT+1
+         ENDDO
+         IF(LCOUNT.EQ.MB)THEN
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0)  MBEFO=MB
+               MNEXT=M+1
+               IF(MNEXT.EQ.MB) MNEXT=1
+               IFFAT=LISTRIN(M    ,IRING)
+               IBEFO=LISTRIN(MBEFO,IRING)
+               INEXT=LISTRIN(MNEXT,IRING)
+               IF(NINT(ZANF(IFFAT)).EQ.6)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF((NINT(ZANF(JFFAT)).EQ.8.OR.
+     *                   NINT(ZANF(JFFAT)).EQ.16   ).AND.
+     *                   JFFAT.NE.IBEFO.AND.JFFAT.NE.INEXT   )THEN
+                         IF(NINT(ZANF(IBEFO)).EQ.7.AND.
+     *                      LBOND(10,IBEFO).EQ.2.AND.
+     *                      NINT(ZANF(INEXT)).NE.7)
+     *                   BORDER(LISTRIB(MBEFO,IRING))=TWO
+                         IF(NINT(ZANF(INEXT)).EQ.7.AND.
+     *                      LBOND(10,INEXT).EQ.2.AND.
+     *                      NINT(ZANF(IBEFO)).NE.7)
+     *                   BORDER(LISTRIB(M,IRING))=TWO
+                     END IF
+                  ENDDO
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+C
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 933  CONTINUE
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         DO M=1,MB
+            IFFAT=LISTRIN(M,IRING)
+            MBEFO=M-1
+            IF(MBEFO.EQ.0) MBEFO=MB
+            IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *         QMMFF(IFFAT).EQ.ZERO)THEN
+               BLEFT=THREE
+               IF(BORDER(LISTRIB(M    ,IRING)).EQ.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).NE.ZERO    )
+     *         BORDER(LISTRIB(M    ,IRING))=
+     *         BLEFT-BORDER(LISTRIB(MBEFO,IRING))
+               IF(BORDER(LISTRIB(M    ,IRING)).NE.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).EQ.ZERO    )
+     *         BORDER(LISTRIB(MBEFO,IRING))=
+     *         BLEFT-BORDER(LISTRIB(M,IRING))
+            END IF
+         ENDDO
+      ENDDO
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.8.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.16.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+      ENDDO
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10)THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 6) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.BLEFT2.EQ.ONE) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF((BLEFT1.EQ.TWO.AND.BLEFT2.EQ.TWO)        .AND.
+     *         (LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.3)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF((BLEFT1.EQ.THREE.AND.BLEFT2.EQ.THREE)    .AND.
+     *         (LBOND(10,I1).EQ.2.AND.LBOND(10,I2).EQ.2)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 7) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I1).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT1.EQ.THREE.AND.LBOND(10,I2).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+            IF(BORDER(IBOND).EQ.ONE.AND.LBOND(10,I1).EQ.2.AND.
+     *         LBOND(10,I2).EQ.2)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,I2)).EQ.ZERO)
+     *               BORDER(LBOND(I,I2))=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 7) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I2).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT2.EQ.THREE.AND.LBOND(10,I1).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+            IF(BORDER(IBOND).EQ.ONE.AND.LBOND(10,I1).EQ.2.AND.
+     *         LBOND(10,I2).EQ.2)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,I1)).EQ.ZERO)
+     *               BORDER(LBOND(I,I1))=TWO
+               ENDDO
+            END IF
+         END IF
+         IF((NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 8).OR.
+     *      (NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ.16)    ) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I2).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF((NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 8).OR.
+     *      (NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ.16)    ) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I1).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ.8.AND. LBOND(10,I1).EQ.2.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.(LBOND(10,I2).EQ.3.OR.
+     *      LBOND(10,I2).EQ.2).AND.BORDER(IBOND).LT.0.1D-10 )THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I2)
+            DO IXN=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IXN,I2)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I2))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I1)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I1))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND. LBOND(10,I2).EQ.2.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.(LBOND(10,I1).EQ.3.OR.
+     *      LBOND(10,I1).EQ.2).AND.BORDER(IBOND).LT.0.1D-10)THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I1)
+            DO IXN=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IXN,I1)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I1))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I2)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I2))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.7.AND.NINT(ZANF(I1)).EQ.7.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2).AND.
+     *      BORDER(IBOND).LT.0.1D-10                        )THEN
+            BIN1=THREE
+            BIN2=THREE
+            NIN1=LBOND(10,I1)
+            NIN2=LBOND(10,I2)
+            DO IX1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IX1,I1)).GT.0.1D-10) NIN1=NIN1-1
+               BIN1=BIN1-BORDER(LBOND(IX1,I1))
+            ENDDO
+            DO IX2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IX2,I2)).GT.0.1D-10) NIN2=NIN2-1
+               BIN2=BIN2-BORDER(LBOND(IX2,I2))
+            ENDDO
+            IF(NIN2.EQ.1.AND.NIN1.EQ.1.AND.ABS(BIN1-BIN2).LT.0.1D-10)
+     *      BORDER(IBOND)=BIN1
+         END IF
+      ENDDO
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.16.AND.LBOND(10,IFFAT).EQ.4)THEN
+            LOXY=0
+            LNTR=0
+            LCAB=0
+            DO JJ=1,4
+               KBOND=LBOND(JJ,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.2)
+     *         LNTR=LNTR+1
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).EQ.2)
+     *         LCAB=LCAB+1
+            ENDDO
+            IF(LCAB.EQ.1.AND.LOXY.EQ.2.AND.LNTR.EQ.1)THEN
+            DO JJ=1,4
+               KBOND=LBOND(JJ,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         BORDER(KBOND)=TWO
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.2)
+     *         BORDER(KBOND)=ONE
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).EQ.2)
+     *         BORDER(KBOND)=ONE
+            ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.2)THEN
+            ICARBN=0
+            DO I=1,2
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.BORDER(KBOND).GT.0.1D-10)
+     *         ICARBN=ICARBN+1
+            ENDDO
+            IF(ICARBN.EQ.1)THEN
+               DO I=1,2
+                  KBOND=LBOND(I,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.4)THEN
+            BLEFT=FIVE
+            NLFTP=4
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.1.0D-10) NLFTP=NLFTP-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTP.EQ.1) THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).LT.1.0D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BLEFT=FOUR
+            NLFTC=2
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.ONE)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=TWO
+               ENDDO
+            END IF
+            IF(BLEFT.EQ.FOUR)THEN
+               LCN3=0
+               LCN2=0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  J    =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)
+     *            LCN3=LCN3+1
+                  IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.2)
+     *            LCN2=LCN2+1
+               ENDDO
+               IF(LCN2.EQ.1.AND.LCN3.EQ.2)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  J    =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)
+     *            BORDER(KBOND)=ONE
+                  IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.2)THEN
+                     DO II=1,LBOND(10,J)
+                        JBOND=LBOND(II,J)
+                        KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-J
+                        IF(KFFAT.NE.IFFAT.AND.BORDER(JBOND).LT.1.99D+00)
+     *                  BORDER(KBOND)=TWO
+                     ENDDO
+                  END IF
+               ENDDO
+               END IF
+            END IF
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.TWO)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 931
+      IF(ICOUNT.GT.300) GOTO 931
+      BCOUNT2=BCOUNT1
+      GOTO 933
+ 931  CONTINUE
+C     - DETERMINE AROMATIC RINGS
+      CALL VICLR(NRINTYP,1,NFFAT)
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IARMTC=0
+         DO M=1,MB
+            J=LISTRIN(M,IRING)
+            IF(NTYPE(J).EQ.78.OR.
+     *         NTYPE(J).EQ.79.OR.
+     *         NTYPE(J).EQ.81.OR.
+     *         NTYPE(J).EQ.80.OR.
+     *         NTYPE(J).EQ.82.OR.
+     *         NTYPE(J).EQ.37.OR.
+     *         NTYPE(J).EQ.38.OR.
+     *         NTYPE(J).EQ.39.OR.
+     *         NTYPE(J).EQ.44.OR.
+     *         NTYPE(J).EQ.58.OR.
+     *         NTYPE(J).EQ.59.OR.
+     *         NTYPE(J).EQ.63.OR.
+     *         NTYPE(J).EQ.64.OR.
+     *         NTYPE(J).EQ.65.OR.
+     *         NTYPE(J).EQ.66.OR.
+     *         NTYPE(J).EQ.69.OR.
+     *         NTYPE(J).EQ.76    ) IARMTC=IARMTC+1
+         ENDDO
+         IF(MB.EQ.IARMTC.AND.MB.GE.5) NRINTYP(IRING)=1
+      ENDDO
+C     -- TEST FOR AROMATIC RINGS
+      ICASE = 0
+      DO IRING=1,NRING
+         IF(NRINTYP(IRING).EQ.1)THEN
+            MB=LISTRIN(10,IRING)
+            IDOUBL=0
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               J=LISTRIN(M,IRING)
+               MNEXT=M+1
+               IF(M.EQ.MB) MNEXT=1
+               JNEXT=LISTRIN(MNEXT,IRING)
+               JBEFO=LISTRIN(MBEFO,IRING)
+               IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)THEN
+                  DO I=1,LBOND(10,J)
+                     KBOND=LBOND(I,J)
+                     ICN=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                     IF(ICN.NE.JNEXT.AND.ICN.NE.JBEFO.AND.
+     *                  LBOND(10,ICN).EQ.3.AND.NUMRIN(10,ICN).EQ.0)THEN
+                        INL3=0
+                        INR3=0
+                        DO JJ=1,3
+                           JBOND=LBOND(JJ,ICN)
+                           NNN=IPAIR(1,JBOND)+IPAIR(2,JBOND)-ICN
+                           IF(NINT(ZANF(NNN)).EQ.7.AND.
+     *                        LBOND(10,NNN).EQ.3 )THEN
+                              INR3=INR3+1
+                              IF(NUMRIN(10,NNN).EQ.0) INL3=INL3+1
+                           END IF
+                        ENDDO
+                        IF(INR3.EQ.3.AND.INL3.GE.1) ICASE=1
+                     END IF
+                  ENDDO
+               END IF
+               IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3.AND.
+     *            NUMRIN(10,J).EQ.2.AND.
+     *            NRINTYP(NUMRIN(1,J)).EQ.1.AND.
+     *            NRINTYP(NUMRIN(2,J)).EQ.1.AND.
+     *            LISTRIN(10,NUMRIN(1,J)).EQ.6.AND.
+     *            LISTRIN(10,NUMRIN(2,J)).EQ.6     )THEN
+                  IF(NUMRIN(10,JNEXT).EQ.2) NTYPE(JNEXT)=0
+                  IF(NUMRIN(10,JBEFO).EQ.2) NTYPE(JBEFO)=0
+                  DO JJ=1,2
+                     JRING=NUMRIN(JJ,J)
+                     JMB=LISTRIN(10,JRING)
+                     DO JM=1,JMB
+                        JK=LISTRIN(JM,JRING)
+                        IF(NUMRIN(10,JK).EQ.2)THEN
+                           LARMTC=0
+                           DO KK=1,2
+                              IF(NRINTYP(NUMRIN(KK,J)).EQ.1)
+     *                        LARMTC=LARMTC+1
+                           ENDDO
+                           IF(LARMTC.NE.2) NTYPE(J)=0
+                        END IF
+                        IF(NUMRIN(10,J).NE.2) NTYPE(J)=0
+                     ENDDO
+                  ENDDO
+               END IF
+               DO I=1,LBOND(10,J)
+                  IF(LBOND(I,J).NE.LISTRIB(M    ,IRING).AND.
+     *               LBOND(I,J).NE.LISTRIB(MBEFO,IRING).AND.
+     *               ABS(BORDER(LBOND(I,J))-TWO).LT.0.1D-10)THEN
+                     LARMTC=0
+                     DO KK=1,NUMRIN(10,J)
+                        IF(NRINTYP(NUMRIN(KK,J)).EQ.1) LARMTC=LARMTC+1
+                     ENDDO
+                     IF(LARMTC.NE.2) IDOUBL=IDOUBL+1
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.3)THEN
+                        DO JJ=1,3
+                           KBOND=LBOND(JJ,J)
+                           K=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                           IF(K.NE.JBEFO.AND.K.NE.JNEXT.AND.
+     *                        IDOUBL.GT.0)THEN
+                              IDOUBL=IDOUBL-1
+                           END IF
+                        ENDDO
+                     END IF
+                  END IF
+               ENDDO
+            ENDDO
+            IF(IDOUBL.GT.0.OR.ICASE.EQ.1)THEN
+               DO M=1,MB
+                  J=LISTRIN(M,IRING)
+                  IF(NUMRIN(10,J).EQ.2)THEN
+                     LARMTC=0
+                     DO KK=1,2
+                        IF(NRINTYP(NUMRIN(KK,J)).EQ.1) LARMTC=LARMTC+1
+                     ENDDO
+                     IF(LARMTC.NE.2) NTYPE(J)=0
+                  END IF
+                  IF(NUMRIN(10,J).NE.2) NTYPE(J)=0
+                  BORDER(LISTRIB(M,IRING))=ZERO
+               ENDDO
+            END IF
+         END IF
+      ENDDO
+C     - DETERMINE AROMATIC RINGS
+      CALL VICLR(NRINTYP ,1,   NFFAT)
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IARMTC=0
+         DO M=1,MB
+            J=LISTRIN(M,IRING)
+            IF(NTYPE(J).EQ.78.OR.
+     *         NTYPE(J).EQ.79.OR.
+     *         NTYPE(J).EQ.81.OR.
+     *         NTYPE(J).EQ.80.OR.
+     *         NTYPE(J).EQ.82.OR.
+     *         NTYPE(J).EQ.37.OR.
+     *         NTYPE(J).EQ.38.OR.
+     *         NTYPE(J).EQ.39.OR.
+     *         NTYPE(J).EQ.44.OR.
+     *         NTYPE(J).EQ.58.OR.
+     *         NTYPE(J).EQ.59.OR.
+     *         NTYPE(J).EQ.63.OR.
+     *         NTYPE(J).EQ.64.OR.
+     *         NTYPE(J).EQ.65.OR.
+     *         NTYPE(J).EQ.66.OR.
+     *         NTYPE(J).EQ.69.OR.
+     *         NTYPE(J).EQ.76    ) IARMTC=IARMTC+1
+         ENDDO
+         IF(MB.EQ.IARMTC.AND.MB.GE.5) THEN
+            NRINTYP(IRING)=1
+            BTHERE=ZERO
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               J=LISTRIN(M,IRING)
+               DO I=1,LBOND(10,J)
+                  IF(LBOND(I,J).NE.LISTRIB(M,IRING).AND.
+     *               LBOND(I,J).NE.LISTRIB(MBEFO,IRING) )THEN
+                     IF(BORDER(LBOND(I,J)).LT.0.1D-10)
+     *                  BORDER(LBOND(I,J))=ONE
+                  END IF
+               ENDDO
+               BTHERE=BTHERE+BORDER(LISTRIB(M,IRING))
+            ENDDO
+            IF(ABS(BTHERE).LT.0.1D-10.AND.MB.EQ.6)THEN
+               DO M=1,MB
+                  BORDER(LISTRIB(M,IRING))=ONEPT5
+               ENDDO
+            END IF
+         END IF
+      ENDDO
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IF(NRINTYP(IRING).EQ.1.AND.MB.EQ.5)THEN
+C           - BETA  POSITION C OR N
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               MBEFO2=MBEFO-1
+               IF(MBEFO2.EQ.0) MBEFO2=MB
+               MNEXT=M+1
+               IF(M.EQ.MB) MNEXT=1
+               MNEXT2=MNEXT+1
+               IF(MNEXT.EQ.MB) MNEXT2=1
+               J     =LISTRIN(M     ,IRING)
+               LARMRIN=0
+               DO KK=1,NUMRIN(10,J)
+                  IF(NRINTYP(NUMRIN(KK,J)).EQ.1.AND.
+     *               LISTRIN(10,NUMRIN(KK,J)).EQ.5)
+     *                LARMRIN=LARMRIN+1
+               ENDDO
+               IF(LARMRIN.NE.2)THEN
+               JBEFO =LISTRIN(MBEFO ,IRING)
+               JBEFO2=LISTRIN(MBEFO2,IRING)
+               JNEXT =LISTRIN(MNEXT ,IRING)
+               JNEXT2=LISTRIN(MNEXT2,IRING)
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.63).AND.
+     *            (NINT(ZANF(JBEFO2)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO2)).EQ.8 .OR.
+     *             NTYPE(JBEFO2).EQ.39  ))
+     *             NTYPE(J)=64
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.63).AND.
+     *            (NINT(ZANF(JNEXT2)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT2)).EQ.8 .OR.
+     *             NTYPE(JNEXT2).EQ.39  ))
+     *             NTYPE(J)=64
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.65).AND.
+     *            (NINT(ZANF(JBEFO2)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO2)).EQ.8 .OR.
+     *             NTYPE(JBEFO2).EQ.39  ))
+     *             NTYPE(J)=66
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.65).AND.
+     *            (NINT(ZANF(JNEXT2)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT2)).EQ.8 .OR.
+     *             NTYPE(JNEXT2).EQ.39  ))
+     *             NTYPE(J)=66
+               END IF
+            ENDDO
+C           - ALPHA POSITION C OR N
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               MNEXT=M+1
+               IF(M.EQ.MB) MNEXT=1
+               J     =LISTRIN(M     ,IRING)
+               JBEFO =LISTRIN(MBEFO ,IRING)
+               JNEXT =LISTRIN(MNEXT ,IRING)
+               IF(NTYPE(J).EQ.78.AND.NTYPE(JBEFO).EQ.81.AND.
+     *            NTYPE(JNEXT).EQ.81) NTYPE(J)=80
+               LARMRIN=0
+               DO KK=1,NUMRIN(10,J)
+                  IF(NRINTYP(NUMRIN(KK,J)).EQ.1.AND.
+     *               LISTRIN(10,NUMRIN(KK,J)).EQ.5)
+     *                LARMRIN=LARMRIN+1
+               ENDDO
+               IF(LARMRIN.NE.2)THEN
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.64).AND.
+     *            (NINT(ZANF(JBEFO)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO)).EQ.8 .OR.
+     *             NTYPE(JBEFO).EQ.39    ) )
+     *             NTYPE(J)=63
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.64).AND.
+     *            (NINT(ZANF(JNEXT)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT)).EQ.8 .OR.
+     *             NTYPE(JNEXT).EQ.39    ) )
+     *             NTYPE(J)=63
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.66).AND.
+     *            (NINT(ZANF(JBEFO)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO)).EQ.8 .OR.
+     *             NTYPE(JBEFO).EQ.39    ) )
+     *             NTYPE(J)=65
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.66).AND.
+     *            (NINT(ZANF(JNEXT)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT)).EQ.8 .OR.
+     *             NTYPE(JNEXT).EQ.39     ) )
+     *             NTYPE(J)=65
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         DO M=1,MB
+            MBEFO=M-1
+            IF(MBEFO.EQ.0) MBEFO=MB
+            MBEFO2=MBEFO-1
+            IF(MBEFO2.EQ.0) MBEFO2=MB
+            J     =LISTRIN(M     ,IRING)
+            JBEFO =LISTRIN(MBEFO ,IRING)
+            JBEFO2=LISTRIN(MBEFO2,IRING)
+            IF(NTYPE(J     ).EQ.81.AND.NTYPE(JBEFO).EQ.80.AND.
+     *         NTYPE(JBEFO2).EQ.81)THEN
+               BORDER(LISTRIB(MBEFO ,IRING))=ONEPT5
+               BORDER(LISTRIB(MBEFO2,IRING))=ONEPT5
+            END IF
+         ENDDO
+      ENDDO
+C     - FORCE 1.0 ORDER FOR C-C IN POLYCYCLIC AROMATIC RINGS
+      IF(NRING.GT.1) THEN
+         DO IFFAT=1,NFFAT
+            IF(NINT(ZANF(IFFAT)).EQ.6.AND.
+     *         NUMRIN(10,IFFAT).GT.1      )THEN
+               TORDER=ZERO
+               DO I=1,LBOND(10,IFFAT)
+                  TORDER=TORDER+BORDER(LBOND(I,IFFAT))
+               ENDDO
+               IF(ABS(TORDER-4.5D+00).LT.0.01D+00) THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.6.AND.
+     *                  NUMRIN(10,JFFAT).GT.1)THEN
+                        BORDER(KBOND) = ONE
+                     END IF
+                  ENDDO
+               END IF
+               IF(ABS(TORDER-5.0D+00).LT.0.01D+00) THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.6.AND.
+     *                  NUMRIN(10,JFFAT).GT.1)THEN
+                        BORDER(KBOND) = ONE
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+         ENDDO
+      END IF
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ.8.AND.LBOND(10,I1).EQ.1.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.LBOND(10,I2).EQ.2.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10)THEN
+            BTHERE =ZERO
+            LCARBON=0
+            DO II=1,LBOND(10,I2)
+               BTHERE=BTHERE+BORDER(LBOND(II,I2))
+               IF(LBOND(II,I2).NE.IBOND)THEN
+                  KBOND=LBOND(II,I2)
+                  J1=IPAIR(1,KBOND)
+                  J2=IPAIR(2,KBOND)
+                  IF(NINT(ZANF(J1)).EQ.6.OR.
+     *               NINT(ZANF(J2)).EQ.6    ) LCARBON=1
+               END IF
+            ENDDO
+            IF(ABS(BTHERE-FOUR).LT.0.1D-10.AND.LCARBON.EQ.1)THEN
+               BORDER(IBOND)=ONE
+               QMMFF(I1)=-ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND.LBOND(10,I2).EQ.1.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.LBOND(10,I1).EQ.2.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10)THEN
+            BTHERE =ZERO
+            LCARBON=0
+            DO II=1,LBOND(10,I1)
+               BTHERE=BTHERE+BORDER(LBOND(II,I1))
+               IF(LBOND(II,I1).NE.IBOND)THEN
+                  KBOND=LBOND(II,I1)
+                  J1=IPAIR(1,KBOND)
+                  J2=IPAIR(2,KBOND)
+                  IF(NINT(ZANF(J1)).EQ.6.OR.
+     *               NINT(ZANF(J1)).EQ.6    ) LCARBON=1
+               END IF
+            ENDDO
+            IF(ABS(BTHERE-FOUR).LT.0.1D-10.AND.LCARBON.EQ.1)THEN
+               BORDER(IBOND)=ONE
+               QMMFF(I2)=-ONE
+            END IF
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF((NINT(ZANF(IFFAT)).EQ.8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16).AND.
+     *      LBOND(10,IFFAT).EQ.1.AND.
+     *      QMMFF(IFFAT).EQ.-ONE.AND.
+     *      BORDER(LBOND(1,IFFAT)).EQ.ZERO)THEN
+            BORDER(LBOND(1,IFFAT))=ONE
+         ELSE IF((NINT(ZANF(IFFAT)).EQ.8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16).AND.
+     *      LBOND(10,IFFAT).EQ.1.AND.
+     *      QMMFF(IFFAT).EQ.ZERO.AND.
+     *      BORDER(LBOND(1,IFFAT)).EQ.ZERO)THEN
+            BORDER(LBOND(1,IFFAT))=TWO
+         END IF
+      ENDDO
+C
+C     -- DETERMINE MORE BOND ORDER --
+C
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 900  CONTINUE
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         DO M=1,MB
+            IFFAT=LISTRIN(M,IRING)
+            MBEFO=M-1
+            IF(MBEFO.EQ.0) MBEFO=MB
+            IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *         QMMFF(IFFAT).EQ.ZERO)THEN
+               BLEFT=THREE
+               IF(BORDER(LISTRIB(M    ,IRING)).EQ.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).NE.ZERO    )
+     *         BORDER(LISTRIB(M    ,IRING))=
+     *         BLEFT-BORDER(LISTRIB(MBEFO,IRING))
+               IF(BORDER(LISTRIB(M    ,IRING)).NE.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).EQ.ZERO    )
+     *         BORDER(LISTRIB(MBEFO,IRING))=
+     *         BLEFT-BORDER(LISTRIB(M,IRING))
+            END IF
+         ENDDO
+      ENDDO
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         NBNDN=0
+         NBNDO=0
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *      LBOND(10,K1).EQ.2  .AND.LBOND(10,K3).EQ.3      )THEN
+            BCTHERE=ZERO
+            NBNDN=0
+            NBNDO=0
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE-ONE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=TWO
+               BORDER(NBNDN)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.8.AND.NINT(ZANF(K1)).EQ.7.AND.
+     *      LBOND(10,K3).EQ.2  .AND.LBOND(10,K1).EQ.3      )THEN
+            BCTHERE=ZERO
+            NBNDN=0
+            NBNDO=0
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE-ONE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=TWO
+               BORDER(NBNDN)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.8      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.16.AND.NINT(ZANF(K3)).EQ.16      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.8.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.16.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+      ENDDO
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.2.AND.
+     *      LBOND(10,I2).EQ.1   )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT1+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I2).EQ.2.AND.
+     *      LBOND(10,I1).EQ.1   )THEN
+            BLFT2=THREE
+            BLFT1=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT2+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *       LBOND(10,I1) .EQ. 3.AND.LBOND(10 ,I2) .EQ. 2    )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 8.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *       LBOND(10,I1) .EQ. 2.AND.LBOND(10 ,I2) .EQ. 3    )THEN
+            BLFT1=TWO
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10)THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2))THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         (BLEFT1.LT.0.1D-10.OR.BLEFT2.LT.0.1D-10).AND.
+     *         (BLEFT1.GT.0.1D-10.OR.BLEFT2.GT.0.1D-10)     )THEN
+                BTHERE=MAX(BLEFT1,BLEFT2)
+                BORDER(IBOND)=BTHERE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 6) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.BLEFT2.EQ.ONE) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF((BLEFT1.EQ.TWO.AND.BLEFT2.EQ.TWO)        .AND.
+     *         (LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.3)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF((BLEFT1.EQ.THREE.AND.BLEFT2.EQ.THREE)    .AND.
+     *         (LBOND(10,I1).EQ.2.AND.LBOND(10,I2).EQ.2)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 7) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I1).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT1.EQ.THREE.AND.LBOND(10,I2).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 7) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I2).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT2.EQ.THREE.AND.LBOND(10,I1).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF((NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 8).OR.
+     *      (NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ.16)    ) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I2).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF((NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 8).OR.
+     *      (NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ.16)    ) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I1).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ.8.AND. LBOND(10,I1).EQ.2.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.(LBOND(10,I2).EQ.3.OR.
+     *      LBOND(10,I2).EQ.2).AND.BORDER(IBOND).LT.0.1D-10 )THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I2)
+            DO IXN=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IXN,I2)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I2))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I1)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I1))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND. LBOND(10,I2).EQ.2.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.(LBOND(10,I1).EQ.3.OR.
+     *      LBOND(10,I1).EQ.2).AND.BORDER(IBOND).LT.0.1D-10)THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I1)
+            DO IXN=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IXN,I1)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I1))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I2)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I2))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.7.AND.NINT(ZANF(I1)).EQ.7.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2).AND.
+     *      BORDER(IBOND).LT.0.1D-10                        )THEN
+            BIN1=THREE
+            BIN2=THREE
+            NIN1=LBOND(10,I1)
+            NIN2=LBOND(10,I2)
+            DO IX1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IX1,I1)).GT.0.1D-10) NIN1=NIN1-1
+               BIN1=BIN1-BORDER(LBOND(IX1,I1))
+            ENDDO
+            DO IX2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IX2,I2)).GT.0.1D-10) NIN2=NIN2-1
+               BIN2=BIN2-BORDER(LBOND(IX2,I2))
+            ENDDO
+            IF(NIN2.EQ.1.AND.NIN1.EQ.1.AND.ABS(BIN1-BIN2).LT.0.1D-10)
+     *      BORDER(IBOND)=BIN1
+         END IF
+      ENDDO
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3)THEN
+            NOXY = 0
+            NTWO = 0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND = LBOND(I,IFFAT)
+               JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.QMMFF(JFFAT).EQ.ZERO.AND.
+     *            LBOND(10,JFFAT).EQ.1)THEN
+                  NOXY=NOXY+1
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *            LBOND(10,JFFAT).EQ.2)NTWO=NTWO+1
+            ENDDO
+            IF(NOXY.EQ.1.AND.NTWO.EQ.0)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  JFFAT = IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               QMMFF(JFFAT).EQ.ZERO.AND.
+     *               LBOND(10,JFFAT).EQ.1)THEN
+                     BORDER(KBOND) = TWO
+                  END IF
+               ENDDO
+               BTHERE=5.0D+00
+               LINKN3=3
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND = LBOND(I,IFFAT)
+                  BTHERE=BTHERE-BORDER(KBOND)
+                  IF(BORDER(KBOND).GT.0.1D-10) LINKN3=LINKN3-1
+               ENDDO
+               IF(LINKN3.EQ.1)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND = LBOND(I,IFFAT)
+                     IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=BTHERE
+                  ENDDO
+               END IF
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.16.AND.LBOND(10,IFFAT).EQ.4)THEN
+            BTHERE=ZERO
+            LSN=0
+            LSO=0
+            LSC=0
+            NBN=0
+            DO I=1,4
+               KBOND=LBOND(I,IFFAT)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JJ)).EQ.7.AND.
+     *            ABS(BORDER(KBOND)-ONE).LT.0.1D-10   ) THEN
+                  LSN=LSN+1
+                  NBN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *            ABS(BORDER(KBOND)-TWO).LT.0.1D-10   ) LSO=LSO+1
+               IF(NINT(ZANF(JJ)).EQ.6.AND.
+     *            ABS(BORDER(KBOND)-ONE).LT.0.1D-10   ) LSC=LSC+1
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-FIVE).LT.0.1D-10.AND.LSC.EQ.2.AND.
+     *         LSO.EQ.1.AND.LSN.EQ.1   )THEN
+               BORDER(NBN)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.2)THEN
+            ICARBN=0
+            DO I=1,2
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.BORDER(KBOND).GT.0.1D-10)
+     *         ICARBN=ICARBN+1
+            ENDDO
+            IF(ICARBN.EQ.1)THEN
+               DO I=1,2
+                  KBOND=LBOND(I,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.15.AND.LBOND(10,IFFAT).EQ.4)THEN
+            BLEFT=FIVE
+            NLFTP=4
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.1.0D-10) NLFTP=NLFTP-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTP.EQ.1) THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).LT.1.0D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BLEFT=FOUR
+            NLFTC=2
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.ONE)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=TWO
+               ENDDO
+            END IF
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.TWO)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+            IF(BLEFT.EQ.THREE)THEN
+               NOXY=0
+               NBOXY=0
+               NOTWO=0
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8) NOXY=NOXY+1
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               BORDER(KBOND).LT.0.1D-10   )THEN
+                     NBOXY=KBOND
+                  END IF
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               QMMFF(JFFAT).EQ.ZERO.AND.
+     *               LBOND(10,JFFAT).EQ.2.AND.
+     *               BORDER(KBOND).LT.0.1D-10   ) THEN
+                     DO J=1,2
+                        JBOND=LBOND(J,JFFAT)
+                        KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                        IF(NINT(ZANF(KFFAT)).EQ.1) NOTWO=NOTWO+1
+                     ENDDO
+                  END IF
+               ENDDO
+               IF(NOTWO.EQ.2)THEN
+                  JCASE=0
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  LBOND(10,JFFAT).EQ.2.AND.JCASE.EQ.0.AND.
+     *                  BORDER(KBOND).LT.0.1D-10   )THEN
+                        BORDER(KBOND)=TWO
+                        JCASE=2
+                     END IF
+                  ENDDO
+               END IF
+               IF(NOXY.EQ.1)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).NE.8)THEN
+                        ICN=LBOND(10,JFFAT)
+                        IBCN=0
+                        DO J=1,ICN
+                           JBOND=LBOND(J,JFFAT)
+                           KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                           IF(BORDER(JBOND).GT.0.1D-10) ICN=ICN-1
+                           IF(KFFAT.EQ.IFFAT.AND.
+     *                        BORDER(JBOND).LT.0.1D-10) IBCN=JBOND
+                        ENDDO
+                        IF(ICN.EQ.1.AND.IBCN.NE.0)THEN
+                           BORDER(NBOXY)=TWO
+                           BORDER(IBCN) =ONE
+                        END IF
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3.AND.
+     *      NUMRIN(10,IFFAT).EQ.0)THEN
+            LOXY=0
+            LOXY1=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)THEN
+                  LOXY1=LOXY1+1
+                  KBOND2=KBOND
+               END IF
+            ENDDO
+            IF(LOXY1.EQ.1.AND.LOXY.EQ.1)THEN
+               BORDER(KBOND2)=ONE
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 901
+      IF(ICOUNT.GT.300) GOTO 901
+      BCOUNT2=BCOUNT1
+      GOTO 900
+ 901  CONTINUE
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ.8.AND.LBOND(10,I1).EQ.1.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.LBOND(10,I2).EQ.2.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10)THEN
+            BTHERE =ZERO
+            LCARBON=0
+            DO II=1,LBOND(10,I2)
+               BTHERE=BTHERE+BORDER(LBOND(II,I2))
+               IF(LBOND(II,I2).NE.IBOND)THEN
+                  KBOND=LBOND(II,I2)
+                  J1=IPAIR(1,KBOND)
+                  J2=IPAIR(2,KBOND)
+                  IF(NINT(ZANF(J1)).EQ.6.OR.
+     *               NINT(ZANF(J2)).EQ.6    ) LCARBON=1
+               END IF
+            ENDDO
+            IF(ABS(BTHERE-FOUR).LT.0.1D-10.AND.LCARBON.EQ.1)THEN
+               BORDER(IBOND)=ONE
+               QMMFF(I1)=-ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND.LBOND(10,I2).EQ.1.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.LBOND(10,I1).EQ.2.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10)THEN
+            BTHERE =ZERO
+            LCARBON=0
+            DO II=1,LBOND(10,I1)
+               BTHERE=BTHERE+BORDER(LBOND(II,I1))
+               IF(LBOND(II,I1).NE.IBOND)THEN
+                  KBOND=LBOND(II,I1)
+                  J1=IPAIR(1,KBOND)
+                  J2=IPAIR(2,KBOND)
+                  IF(NINT(ZANF(J1)).EQ.6.OR.
+     *               NINT(ZANF(J1)).EQ.6    ) LCARBON=1
+               END IF
+            ENDDO
+            IF(ABS(BTHERE-FOUR).LT.0.1D-10.AND.LCARBON.EQ.1)THEN
+               BORDER(IBOND)=ONE
+               QMMFF(I2)=-ONE
+            END IF
+         END IF
+      ENDDO
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 970  CONTINUE
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.
+     *   NUMRIN(10,IFFAT).EQ.0)THEN
+            BTHERE=FOUR
+            NCARBON=LBOND(10,IFFAT)
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10)
+     *         NCARBON=NCARBON-1
+               BTHERE=BTHERE-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NCARBON.EQ.1)THEN
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *         BORDER(LBOND(I,IFFAT))=BTHERE
+            ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.
+     *   LBOND(10,IFFAT).EQ.3.AND.
+     *   NUMRIN(10,IFFAT).EQ.0)THEN
+            BTHERE=THREE
+            NCARBON=LBOND(10,IFFAT)
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10)
+     *         NCARBON=NCARBON-1
+               BTHERE=BTHERE-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NCARBON.EQ.1)THEN
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *         BORDER(LBOND(I,IFFAT))=BTHERE
+            ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3.AND.
+     *      NUMRIN(10,IFFAT).EQ.0)THEN
+            LOXY=0
+            LOXY1=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *            QMMFF(JFFAT).EQ.ZERO)THEN
+                  LOXY1=LOXY1+1
+                  KBOND2=KBOND
+               END IF
+            ENDDO
+            IF(LOXY1.EQ.1.AND.LOXY.EQ.1)THEN
+               BORDER(KBOND2)=TWO
+            END IF
+         END IF
+      ENDDO
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 971
+      IF(ICOUNT.GT.300) GOTO 971
+      BCOUNT2=BCOUNT1
+      GOTO 970
+ 971  CONTINUE
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ.8.AND.LBOND(10,I1).EQ.1.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.LBOND(10,I2).EQ.2.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10)THEN
+            BTHERE =ZERO
+            LCARBON=0
+            DO II=1,LBOND(10,I2)
+               BTHERE=BTHERE+BORDER(LBOND(II,I2))
+               IF(LBOND(II,I2).NE.IBOND)THEN
+                  KBOND=LBOND(II,I2)
+                  J1=IPAIR(1,KBOND)
+                  J2=IPAIR(2,KBOND)
+                  IF(NINT(ZANF(J1)).EQ.6.OR.
+     *               NINT(ZANF(J2)).EQ.6    ) LCARBON=1
+               END IF
+            ENDDO
+            IF(ABS(BTHERE-FOUR).LT.0.1D-10.AND.LCARBON.EQ.1)THEN
+               BORDER(IBOND)=ONE
+               QMMFF(I1)=-ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND.LBOND(10,I2).EQ.1.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.LBOND(10,I1).EQ.2.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10)THEN
+            BTHERE =ZERO
+            LCARBON=0
+            DO II=1,LBOND(10,I1)
+               BTHERE=BTHERE+BORDER(LBOND(II,I1))
+               IF(LBOND(II,I1).NE.IBOND)THEN
+                  KBOND=LBOND(II,I1)
+                  J1=IPAIR(1,KBOND)
+                  J2=IPAIR(2,KBOND)
+                  IF(NINT(ZANF(J1)).EQ.6.OR.
+     *               NINT(ZANF(J1)).EQ.6    ) LCARBON=1
+               END IF
+            ENDDO
+            IF(ABS(BTHERE-FOUR).LT.0.1D-10.AND.LCARBON.EQ.1)THEN
+               BORDER(IBOND)=ONE
+               QMMFF(I2)=-ONE
+            END IF
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.NTYPE(IFFAT).EQ.0.AND.
+     *      LBOND(10,IFFAT).EQ.3)THEN
+            BTHERE=FOUR
+            INTRO =0
+            JBOND =0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.3) THEN
+                  INTRO=INTRO+1
+               ELSE
+                  JBOND=KBOND
+                  IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).LE.3)
+     *            JBOND=0
+               END IF
+               BTHERE=BTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE).LT.0.1D-10.AND.INTRO.EQ.3)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  BORDER(KBOND)=ONEPT5
+               ENDDO
+            END IF
+            IF(ABS(BTHERE).LT.0.1D-10.AND.INTRO.EQ.2.AND.
+     *         JBOND.NE.0)THEN
+               IF(ABS(BORDER(JBOND)-ONE).LT.0.1D-10)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.3)
+     *            BORDER(KBOND)=ONEPT5
+               ENDDO
+               END IF
+            END IF
+         END IF
+      ENDDO
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.8.AND.LBOND(10,K3).EQ.1.AND.
+     *      QMMFF(K1).EQ.ZERO.AND.QMMFF(K2).EQ.ZERO.AND.
+     *      QMMFF(K3).EQ.ZERO)THEN
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K3.OR.JFFAT.EQ.K1)THEN
+                  IF(BORDER(KBOND).EQ.ZERO)BORDER(KBOND)=TWO
+               END IF
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.LBOND(10,K1).EQ.1.AND.
+     *      QMMFF(K1).EQ.ZERO.AND.QMMFF(K2).EQ.ZERO.AND.
+     *      QMMFF(K3).EQ.ZERO)THEN
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K3.OR.JFFAT.EQ.K1)THEN
+                  IF(BORDER(KBOND).EQ.ZERO)BORDER(KBOND)=TWO
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+C
+C     -- DETERMINE N CHARGE --
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.QMMFF(IFFAT).EQ.ZERO.AND.
+     *      NTYPE(IFFAT).EQ.0) THEN
+            QTEMP = -THREE
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               QTEMP = QTEMP + BORDER(KBOND)
+            ENDDO
+            IF(QTEMP.EQ. ONE) THEN
+               LOXY=0
+               IF(LBOND(10,IFFAT).EQ.3)THEN
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *               LOXY=LOXY+1
+                  ENDDO
+               END IF
+               IF(LOXY.EQ.0)
+     *         QMMFF(IFFAT) =  ONE
+            END IF
+            IF(QTEMP.EQ.-ONE) QMMFF(IFFAT) = -ONE
+            IF(QTEMP.EQ.THIRD) QMMFF(IFFAT) = THIRD
+            IF(LBOND(10,IFFAT).EQ.3.AND.QMMFF(IFFAT).EQ.-ONE)
+     *         QMMFF(IFFAT)=ZERO
+         END IF
+      ENDDO
+C
+C
+C
+
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.NTYPE(IFFAT).EQ.0.AND.
+     *      LBOND(10,IFFAT).EQ.3)THEN
+            LOXY=0
+            LNTG=0
+            JBOND=0
+            KFFAT=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.
+     *            LBOND(10,JFFAT).EQ.2.AND.
+     *            QMMFF(JFFAT).EQ.-ONE ) THEN
+                  LNTG=LNTG+1
+                  JBOND=KBOND
+                  KFFAT=JFFAT
+               END IF
+               IF((NINT(ZANF(JFFAT)).EQ.8.OR.
+     *             NINT(ZANF(JFFAT)).EQ.16).AND.
+     *             LBOND(10,JFFAT).EQ.1.AND.
+     *             QMMFF(JFFAT).EQ.-ONE ) LOXY=LOXY+1
+            ENDDO
+            IF(LOXY.EQ.1.AND.LNTG.EQ.1.AND.JBOND.NE.0.AND.
+     *         KFFAT.NE.0)THEN
+               BORDER(JBOND)=TWO
+               QMMFF(KFFAT)=ZERO
+            END IF
+         END IF
+      ENDDO
+C
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.8)THEN
+            IF(LBOND(10,IFFAT).EQ.2)THEN
+                  KBOND1=LBOND(1,IFFAT)
+                  KBOND2=LBOND(2,IFFAT)
+                  I1 = IPAIR(1,KBOND1)+IPAIR(2,KBOND1)-IFFAT
+                  I2 = IPAIR(2,KBOND2)+IPAIR(1,KBOND2)-IFFAT
+                  IF(NINT(ZANF(I1)).EQ.1.AND.NINT(ZANF(I2)).EQ.1) THEN
+                     NTYPE(IFFAT)=70
+                     NTYPE(I1)   =31
+                     NTYPE(I2)   =31
+                  END IF
+            END IF
+            IF(LBOND(10,IFFAT).EQ.3)THEN
+               NTYPE(IFFAT)=49
+               QMMFF(IFFAT)=1.0D+00
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.9)THEN
+            IF(LBOND(10,IFFAT).EQ.0)THEN
+               NTYPE(IFFAT)=89
+               QMMFF(IFFAT)=-1.0D+00
+            ELSE
+               NTYPE(IFFAT)=11
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.14) THEN
+            IF(LBOND(10,IFFAT).EQ.4)THEN
+               NTYPE(IFFAT)=19
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.17)THEN
+            IF(LBOND(10,IFFAT).EQ.4)THEN
+               NTYPE(IFFAT)=77
+            ELSE IF(LBOND(10,IFFAT).EQ.0)THEN
+               NTYPE(IFFAT)=90
+               QMMFF(IFFAT)=-1.0D+00
+            ELSE
+               NTYPE(IFFAT)=12
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.35)THEN
+            IF(LBOND(10,IFFAT).EQ.0)THEN
+               NTYPE(IFFAT)=91
+               QMMFF(IFFAT)=-1.0D+00
+            ELSE
+               NTYPE(IFFAT)=13
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.53)THEN
+            NTYPE(IFFAT)=14
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.3)THEN
+            NTYPE(IFFAT)=92
+            QMMFF(IFFAT)=1.0D+00
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.11)THEN
+            NTYPE(IFFAT)=93
+            QMMFF(IFFAT)=1.0D+00
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.12)THEN
+            NTYPE(IFFAT)=99
+            QMMFF(IFFAT)=2.0D+00
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.19)THEN
+            NTYPE(IFFAT)=94
+            QMMFF(IFFAT)=1.0D+00
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.20)THEN
+            NTYPE(IFFAT)=96
+            QMMFF(IFFAT)=2.0D+00
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.26)THEN
+            IF     (QMMFF(IFFAT).EQ.2.0D+00)THEN
+               NTYPE(IFFAT)=87
+            ELSE IF(QMMFF(IFFAT).EQ.3.0D+00)THEN
+               NTYPE(IFFAT)=88
+            ELSE
+               IF(MASWRK) WRITE(IW,'(/1X,A,A,I8/)')
+     *         'ERROR: PLEASE USE MMFF94Q= TO',
+     *         ' DEFINE +2.0 OR +3.0 CHARGE FOR ATOM ',IFFAT
+               CALL ABRT
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.29)THEN
+            IF     (QMMFF(IFFAT).EQ.2.0D+00)THEN
+               NTYPE(IFFAT)=98
+            ELSE IF(QMMFF(IFFAT).EQ.1.0D+00)THEN
+               NTYPE(IFFAT)=97
+            ELSE
+               IF(MASWRK) WRITE(IW,'(/1X,A,A,I8/)')
+     *         'ERROR: PLEASE USE MMFF94Q= TO',
+     *         ' DEFINE +1.0 OR +2.0 CHARGE FOR ATOM ',IFFAT
+               CALL ABRT
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.30)THEN
+            NTYPE(IFFAT)=95
+            QMMFF(IFFAT)=2.0D+00
+         END IF
+      ENDDO
+C
+C
+C     -- C --
+      DO 100 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.NTYPE(IFFAT).EQ.ZERO)THEN
+C           - C ATOM ATTACHED TO 4 ATOMS
+            IF(LBOND(10,IFFAT).EQ.4)THEN
+C              -ALIPHATIC CARBON IN 3-MEMBERED RING
+               IF(LISTRIN(10,NUMRIN(1,IFFAT)).EQ.3)THEN
+                  NTYPE(IFFAT)=22
+                  GOTO 100
+               END IF
+C              -ALIPHATIC CARBON IN 4-MEMBERED RING
+               IF(LISTRIN(10,NUMRIN(1,IFFAT)).EQ.4)THEN
+                  NTYPE(IFFAT)=20
+                  GOTO 100
+               END IF
+C              -ALKYL CARBON
+               IF(NTYPE(IFFAT).EQ.0)THEN
+                  NTYPE(IFFAT)=1
+                  GOTO 100
+               END IF
+            END IF
+C           - C ATOM ATTACHED TO 3 ATOMS
+            IF(LBOND(10,IFFAT).EQ.3)THEN
+C              -CARBON IN CARBOXYLATE AND IN THIOCARBOXYLATE AND ETC.
+               LCTOH=0
+               LCTOC=0
+               LCTSC=0
+               LCTSO=0
+               LCTS3=0
+               LCTP =0
+               LCTN =0
+               LCTN3=0
+               LCTN2=0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  J=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(J)).EQ. 8.AND.
+     *                 LBOND(10,J).EQ.2) LCTOH=LCTOH+1
+                  IF(NINT(ZANF(J)).EQ. 8.AND.
+     *                 LBOND(10,J).EQ.1.AND.
+     *                 QMMFF(J).GT.-ONE) LCTOC=LCTOC+1
+                  IF(NINT(ZANF(J)).EQ.16.AND.
+     *                 LBOND(10,J).EQ.1.AND.
+     *                 QMMFF(J).GT.-ONE) LCTSC=LCTSC+1
+                  IF(NINT(ZANF(J)).EQ.16.AND.
+     *                 LBOND(10,J).EQ.2) LCTSO=LCTSO+1
+                  IF(NINT(ZANF(J)).EQ.7) LCTN =LCTN +1
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                 LBOND(10,J).EQ.3) LCTN3=LCTN3+1
+                  IF(NINT(ZANF(J)).EQ. 7.AND.
+     *                 LBOND(10,J).EQ.2) LCTN2=LCTN2+1
+                  IF(NINT(ZANF(J)).EQ.16.AND.
+     *                 LBOND(10,J).EQ.3) THEN
+                     LOXY=0
+                     DO K=1,3
+                        KBOND=LBOND(K,J)
+                        NXX  =IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                        IF(NINT(ZANF(NXX)).EQ.8) LOXY=LOXY+1
+                     ENDDO
+                     IF(LOXY.EQ.2)  LCTS3=LCTS3+1
+                  END IF
+                  IF(NINT(ZANF(J)).EQ.15)LCTP =LCTP +1
+               ENDDO
+               IF(LCTN2.EQ.1.AND.LCTN3.EQ.2)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     J=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(J)).EQ.7.AND.LBOND(10,J).EQ.2.AND.
+     *                  ABS(BORDER(KBOND)-ONE).LT.0.1D-10)THEN
+                        NTYPE(IFFAT)=57
+                        GOTO 100
+                     END IF
+                  ENDDO
+               END IF
+               IF(LCTN3.EQ.2.AND.NTYPE(IFFAT).NE.57)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     J=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(J)).EQ.1.OR.NTYPE(J).EQ.37.OR.
+     *                  NTYPE(J).EQ.1.OR.
+     *                 ((NINT(ZANF(J)).NE.7.OR.LBOND(10,J).NE.3).AND.
+     *                  ABS(BORDER(KBOND)-ONE).LT.0.1D-10      ))THEN
+                        NTYPE(IFFAT)=57
+                        GOTO 100
+                     END IF
+                  ENDDO
+               END IF
+               IF(LCTOC.EQ.2.OR.
+     *           (LCTOC.EQ.1.AND.LCTSC.EQ.1).OR.
+     *            LCTSC.EQ.2)THEN
+                  NTYPE(IFFAT)=41
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     J=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(J)).EQ.8.AND.LBOND(10,J).EQ.1.AND.
+     *                  QMMFF(J).EQ.ONE) NTYPE(IFFAT)=0
+                  ENDDO
+               END IF
+               IF(LCTOC.EQ.1.OR.LCTSC.EQ.1.OR.LCTS3.EQ.1)THEN
+                  NTYPE(IFFAT)=3
+                  GOTO 100
+               END IF
+C              -CARBON ATTACHED TO P
+               IF(NTYPE(IFFAT).EQ.0)THEN
+                  IF(LCTP.GT.0)THEN
+                     NTYPE(IFFAT)=3
+                     GOTO 100
+                  END IF
+               END IF
+            END IF
+         END IF
+ 100  CONTINUE
+C
+C     -- C -- AGAIN
+      DO 150 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.NTYPE(IFFAT).NE.41.AND.
+     *      LBOND(10,IFFAT).EQ.3)THEN
+C           - C=C IN 4-RING
+            IF(NTYPE(IFFAT).EQ.0)THEN
+               DO I=1,NUMRIN(10,IFFAT)
+                  IF(LISTRIN(10,NUMRIN(I,IFFAT)).EQ.4) THEN
+                     NCARBON=0
+                     DO II=1,3
+                        KBOND=LBOND(II,IFFAT)
+                        JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                        IF(NTYPE(JFFAT).NE.3.AND.
+     *                     NINT(ZANF(JFFAT)).EQ.6.AND.
+     *                     LBOND(10,JFFAT)  .EQ.3     )THEN
+                           IARMTC=0
+                           DO J=1,NUMRIN(10,JFFAT)
+                              IF(NRINTYP(NUMRIN(J,JFFAT)).EQ.1)
+     *                        IARMTC=IARMTC+1
+                           ENDDO
+                           IF(IARMTC.LT.1)THEN
+                              NTYPE(IFFAT)=30
+                              GOTO 150
+                           END IF
+                        END IF
+                        IF(NINT(ZANF(JFFAT)).EQ.6)THEN
+                           IARMTC=0
+                           DO J=1,NUMRIN(10,JFFAT)
+                              IF(NRINTYP(NUMRIN(J,JFFAT)).EQ.1)
+     *                        IARMTC=IARMTC+1
+                           ENDDO
+                           IF(IARMTC.LT.1) NCARBON=NCARBON+1
+                        END IF
+                     ENDDO
+                     IF(NCARBON.EQ.3)THEN
+                        NTYPE(IFFAT)=30
+                        GOTO 150
+                     END IF
+                  END IF
+               ENDDO
+            END IF
+C           - CARBON ATTACHED TO NITROGEN
+            IF(NTYPE(IFFAT).EQ.0)THEN
+               LCOUNT2=0
+               LCOUNT3=0
+               LCOUNT4=0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  IXX  =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.7)THEN
+                     LCOUNT2=LCOUNT2+1
+                     IF(LBOND(10,IXX).EQ.2.AND.
+     *                  BORDER(KBOND).NE.1) LCOUNT3=LCOUNT3+1
+                     IF(LBOND(10,IXX).EQ.3) LCOUNT4=LCOUNT4+1
+                  END IF
+               ENDDO
+               IF(LCOUNT2.GE.LCOUNT3.AND.LCOUNT3     .GE.1)
+     *                                                NTYPE(IFFAT)=3
+               IF(LCOUNT2.EQ.1.AND.LCOUNT4.EQ.1.AND.
+     *            BORDER(KBOND).EQ.TWO) THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     IXX  =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(IXX)).EQ.7.AND.
+     *                  LBOND(10,IXX)  .EQ.3.AND.
+     *                  BORDER(KBOND)  .EQ.TWO   )  NTYPE(IFFAT)=3
+                  ENDDO
+               END IF
+               IF(LCOUNT4.EQ.3) NTYPE(IFFAT)=57
+            END IF
+C           - SP2 CARBON
+            IF(NTYPE(IFFAT).EQ.0)THEN
+               NTYPE(IFFAT)=2
+               GOTO 150
+            END IF
+         END IF
+C
+C        -CARBON ATTACHED TO 2 ATOMS
+         IF(LBOND(10,IFFAT).EQ.2.AND.NINT(ZANF(IFFAT)).EQ.6)THEN
+            NTYPE(IFFAT)=4
+            GOTO 150
+         END IF
+C        - CARBON ATTACHED TO 1 ATOM
+         IF(LBOND(10,IFFAT).EQ.1.AND.NINT(ZANF(IFFAT)).EQ.6)THEN
+            NTYPE(IFFAT)=60
+            GOTO 150
+         END IF
+ 150  CONTINUE
+C
+C
+C     -- N --
+      DO 200 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7)THEN
+C           - ATTACHED TO 4 ATOMS
+            IF(LBOND(10,IFFAT).EQ.4)THEN
+               DO II=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(II,IFFAT)
+                  IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.8)THEN
+                     NTYPE(IFFAT)=68
+                     QMMFF(IFFAT)=ZERO
+                     GOTO 200
+                  END IF
+               ENDDO
+               NTYPE(IFFAT)=34
+               QMMFF(IFFAT)=1.0D+00
+               GOTO 200
+            END IF
+C           - ATTACHED TO 1 ATOM
+            IF(LBOND(10,IFFAT).EQ.1)THEN
+               ICASE=0
+               DO IANGL=1,NANGL
+                  K1=KLIST(1,IANGL)
+                  K2=KLIST(2,IANGL)
+                  K3=KLIST(3,IANGL)
+                  IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.AND.
+     *               LBOND(10,K2).EQ.2.AND.(NINT(ZANF(K3)).EQ.7.OR.
+     *               NINT(ZANF(K3)).EQ.6).AND.NTYPE(K3).NE.37) ICASE=1
+                  IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.AND.
+     *               LBOND(10,K2).EQ.2.AND.(NINT(ZANF(K1)).EQ.7.OR.
+     *               NINT(ZANF(K1)).EQ.6).AND.NTYPE(K1).NE.37) ICASE=1
+               ENDDO
+               IF(ICASE.EQ.1)THEN
+                  NTYPE(IFFAT)=47
+               END IF
+               IF(ICASE.EQ.0)THEN
+                  NTYPE(IFFAT)=42
+                  GOTO 200
+               END IF
+            END IF
+         END IF
+ 200  CONTINUE
+C
+C     -- N -- AGAIN
+      DO 230 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.(LBOND(10,IFFAT).EQ.2.
+     *      OR.LBOND(10,IFFAT).EQ.3).AND.NTYPE(IFFAT).EQ.0)THEN
+C           - NITROGEN ATTACHED TO TWO ATOMS
+            IF(LBOND(10,IFFAT).EQ.2.AND.NTYPE(IFFAT).EQ.0)THEN
+               IF(QMMFF(IFFAT).EQ.-ONE.AND.
+     *            BORDER(LBOND(1,IFFAT)).NE.TWO.AND.
+     *            BORDER(LBOND(2,IFFAT)).NE.TWO)THEN
+                  NTYPE(IFFAT)=62
+                  GOTO 230
+               END IF
+               LSO=0
+               DO IANGL=1,NANGL
+                  K1=KLIST(1,IANGL)
+                  K2=KLIST(2,IANGL)
+                  K3=KLIST(3,IANGL)
+                  IF(NINT(ZANF(K2)).EQ.16)THEN
+                     IF(K1.EQ.IFFAT.AND.NINT(ZANF(K3)).EQ.8.AND.
+     *                  LBOND(10,K3).EQ.1) LSO=LSO+1
+                     IF(K3.EQ.IFFAT.AND.NINT(ZANF(K1)).EQ.8.AND.
+     *                  LBOND(10,K1).EQ.1) LSO=LSO+1
+                  END IF
+               ENDDO
+               IF(LSO.EQ.1) THEN
+                  NTYPE(IFFAT)=48
+                  GOTO 230
+               END IF
+C              - N IN AMINIE AND IMINE NITROGEN, ISONITRILE NITROGEN
+               LCOUNT2=1
+               LCOUNT3=1
+               LSUFER =0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  IXX  =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.6.OR.
+     *               NINT(ZANF(IXX)).EQ.7)THEN
+                     NTYPE(IFFAT)=9
+                     QMMFF(IFFAT)=ZERO
+                     IF(NTYPE(IXX).EQ.60)THEN
+                        NTYPE(IFFAT)=61
+                        GOTO 230
+                     END IF
+                     IF(NTYPE(IXX).EQ.42)THEN
+                        NTYPE(IFFAT)=61
+                        QMMFF(IFFAT)=ONE
+                        GOTO 230
+                     END IF
+                  END IF
+                  IF(NINT(ZANF(IXX)).EQ.16)THEN
+                     LSUFER=LSUFER+1
+                  END IF
+                  IF(NINT(ZANF(IXX)).EQ.8.AND.LBOND(10,IXX).EQ.1.AND.
+     *               BORDER(KBOND).EQ.TWO)THEN
+                     NTYPE(IFFAT)=46
+                     GOTO 230
+                  END IF
+               ENDDO
+               IF(LSUFER.EQ.2)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     IXX  =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(IXX)).EQ.16)THEN
+                     LOXY=0
+                     DO JJ=1,LBOND(10,IXX)
+                        JBOND=LBOND(JJ,IXX)
+                        JXX=IPAIR(1,JBOND)+IPAIR(2,JBOND)-IXX
+                        IF(NINT(ZANF(JXX)).EQ.8.AND.LBOND(10,JXX).EQ.1)
+     *                  LOXY=LOXY+1
+                     ENDDO
+                     IF(LOXY.GE.2) THEN
+                        NTYPE(IFFAT)=43
+                        GOTO 230
+                     END IF
+                     END IF
+                  ENDDO
+               END IF
+C              '=N=' IN C=N=N OR -N=N=N
+               IF(NTYPE(IFFAT).EQ.9)THEN
+                  DO IANGL=1,NANGL
+                     K1=KLIST(1,IANGL)
+                     K2=KLIST(2,IANGL)
+                     K3=KLIST(3,IANGL)
+                     IF(K2.EQ.IFFAT)THEN
+                        IF(NTYPE(K1).EQ.47.OR.NTYPE(K3).EQ.47)THEN
+                           NTYPE(IFFAT)=53
+                           QMMFF(IFFAT)=ZERO
+                           GOTO 230
+                        END IF
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+C
+            IF(LBOND(10,IFFAT).EQ.3)THEN
+               LOXY=0
+               DO III=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(III,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               LBOND(10, JFFAT).EQ.1) LOXY=LOXY+1
+               ENDDO
+               IF(LOXY.GE.2) THEN
+                  NTYPE(IFFAT)=45
+                  QMMFF(IFFAT)=ZERO
+                  GOTO 230
+               END IF
+            END IF
+         END IF
+ 230  CONTINUE
+C
+C     -- N -- AGAIN
+      DO 260 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2)THEN
+            IFF53=0
+            NB53 =0
+            DO III=1,LBOND(10,IFFAT)
+               KBOND=LBOND(III,IFFAT)
+               IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(IXX).EQ.53)THEN
+                  IFF53=1
+                  NB53 =KBOND
+               END IF
+            ENDDO
+            IF(IFF53.EQ.1)THEN
+               DO III=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(III,IFFAT)
+                  IF(BORDER(KBOND).LT.0.1D-10.AND.KBOND.NE.NB53)
+     *            BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.NTYPE(IFFAT).EQ.0
+     *      .AND.LBOND(10,IFFAT).EQ.3)THEN
+            IF(QMMFF(IFFAT).EQ.ONE)THEN
+               DO III=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(III,IFFAT)
+                  IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.7.OR.NINT(ZANF(IXX)).EQ.6)THEN
+                     NTYPE(IFFAT)=54
+                     GOTO 260
+                  END IF
+               ENDDO
+            END IF
+            IF(NTYPE(IFFAT).EQ.0)THEN
+               LCOUNT2=0
+               DO III=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(III,IFFAT)
+                  IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.8.AND.LBOND(10,IXX).EQ.1.AND.
+     *               ABS(BORDER(KBOND)-ONE).GT.0.1D-10)
+     *               LCOUNT2=LCOUNT2+1
+               ENDDO
+               IF(LCOUNT2.GT.0)THEN
+                  NTYPE(IFFAT)=67
+                  GOTO 260
+               END IF
+            END IF
+            LCOUNT2=0
+            LCOUNT3=0
+            LCOUNT4=0
+            LCOUNT5=0
+            LCOUNT6=0
+            LCOUNT7=0
+            LCOUNT8=0
+            LCOUNT9=0
+            DO IANGL=1,NANGL
+               K1=KLIST(1,IANGL)
+               K2=KLIST(2,IANGL)
+               K3=KLIST(3,IANGL)
+               IF((K1.EQ.IFFAT.OR.K3.EQ.IFFAT).AND.NTYPE(K2).EQ.80.AND.
+     *            NINT(ZANF(K1)).EQ.7.AND.NINT(ZANF(K3)).EQ.7)THEN
+                  DO I=1,3
+                     KBOND=LBOND(I,K2)
+                     JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3)THEN
+                        IF(NTYPE(JJ).EQ.0) NTYPE(JJ)=56
+                        QMMFF(JJ)=THIRD
+                     END IF
+                  ENDDO
+                  GOTO 260
+               END IF
+               IF((K1.EQ.IFFAT.OR.K3.EQ.IFFAT).AND.NTYPE(K2).EQ.63.AND.
+     *            NINT(ZANF(K1)).EQ.7.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *            LBOND(10,K1).EQ.3.AND.LBOND(10,K3).EQ.3)THEN
+                  ICASE=0
+                  JCASE=0
+                  DO I=1,3
+                     KBOND=LBOND(I,K2)
+                     JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(NINT(ZANF(JJ)).NE.7.OR.LBOND(10,JJ).NE.3.AND.
+     *               ABS(BORDER(KBOND)-ONE).LT.0.1D-10) ICASE=1
+                     IF(NTYPE(JJ).EQ.81) JCASE=1
+                  ENDDO
+                  IF(ICASE.EQ.1.AND.JCASE.EQ.1)THEN
+                  DO I=1,3
+                     KBOND=LBOND(I,K2)
+                     JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3)THEN
+                        IF(NTYPE(JJ).EQ.0) NTYPE(JJ)=55
+                        QMMFF(JJ)=PT5
+                        NTYPE(K2)=80
+                     END IF
+                  ENDDO
+                  GOTO 260
+                  END IF
+               END IF
+               IF((K1.EQ.IFFAT.OR.K3.EQ.IFFAT).AND.NTYPE(K2).EQ.57.AND.
+     *            NINT(ZANF(K1)).EQ.7.AND.NINT(ZANF(K3)).EQ.7)THEN
+                  LCOUNT2=LCOUNT2+1
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.16.AND.
+     *            NINT(ZANF(K3)).EQ.8)THEN
+                  LOXY=0
+                  DO I=1,LBOND(10,K2)
+                     KBOND=LBOND(I,K2)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+                  ENDDO
+                  IF(LOXY.GE.2) LCOUNT3=LCOUNT3+1
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.16.AND.
+     *            NINT(ZANF(K1)).EQ.8)THEN
+                  LOXY=0
+                  DO I=1,LBOND(10,K2)
+                     KBOND=LBOND(I,K2)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+                  ENDDO
+                  IF(LOXY.GE.2) LCOUNT3=LCOUNT3+1
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).EQ.2.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *            LBOND(10,K3).EQ.1)THEN
+                  LCOUNT4=LCOUNT4+1
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).EQ.2.AND.NINT(ZANF(K1)).EQ.7.AND.
+     *            LBOND(10,K1).EQ.1)THEN
+                  LCOUNT4=LCOUNT4+1
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.(NINT(ZANF(K1)).EQ.7.OR.
+     *            NINT(ZANF(K1)).EQ.15.OR.NINT(ZANF(K1)).EQ.6).AND.
+     *            LBOND(10,K1).LT.4)THEN
+                  IF((NINT(ZANF(K1)).EQ.7.OR.NINT(ZANF(K1)).EQ.15).AND.
+     *                LBOND(10,K1).LT.3.AND.QMMFF(K1).NE.ONE.AND.
+     *                QMMFF(K1).NE.-ONE)THEN
+                      LCOUNT5=LCOUNT5+1
+                  END IF
+                  IF(NINT(ZANF(K1)).EQ.6)THEN
+                      LCOUNT5=LCOUNT5+1
+                  END IF
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.NINT(ZANF(K1)).EQ.6.AND.
+     *            LBOND(10,K1).LT.4)THEN
+                  DO JJ=1,LBOND(10,K2)
+                     KBOND=LBOND(JJ,K2)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(JFFAT.EQ.K1.AND.
+     *                  ABS(BORDER(KBOND)-TWO).LT.0.1D-10)
+     *                  LCOUNT8=LCOUNT8+1
+                  ENDDO
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *            LBOND(10,K3).LT.4)THEN
+                  DO JJ=1,LBOND(10,K2)
+                     KBOND=LBOND(JJ,K2)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(JFFAT.EQ.K3.AND.
+     *                  ABS(BORDER(KBOND)-TWO).LT.0.1D-10)
+     *                  LCOUNT8=LCOUNT8+1
+                  ENDDO
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.(NINT(ZANF(K3)).EQ.7.OR.
+     *            NINT(ZANF(K3)).EQ.6.OR.NINT(ZANF(K3)).EQ.15).AND.
+     *            LBOND(10,K3).LT.4)THEN
+                  IF((NINT(ZANF(K3)).EQ.7.OR.NINT(ZANF(K3)).EQ.15).AND.
+     *                LBOND(10,K3).LT.3.AND.QMMFF(K3).NE.ONE.AND.
+     *                QMMFF(K3).NE.-ONE)THEN
+                      LCOUNT5=LCOUNT5+1
+                  END IF
+                  IF(NINT(ZANF(K3)).EQ.6)THEN
+                      LCOUNT5=LCOUNT5+1
+                  END IF
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.NINT(ZANF(K3)).EQ.8.AND.
+     *            LBOND(10,K3).EQ.1)THEN
+                  LCOUNT6=LCOUNT6+1
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.NINT(ZANF(K1)).EQ.8.AND.
+     *            LBOND(10,K1).EQ.1)THEN
+                  LCOUNT6=LCOUNT6+1
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.NINT(ZANF(K3)).EQ.16.AND.
+     *            LBOND(10,K3).EQ.1)THEN
+                  LCOUNT9=LCOUNT9+1
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *            LBOND(10,K2).LT.4.AND.NINT(ZANF(K1)).EQ.16.AND.
+     *            LBOND(10,K1).EQ.1)THEN
+                  LCOUNT9=LCOUNT9+1
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.AND.
+     *            LBOND(10,K2).EQ.2.AND.NINT(ZANF(K1)).EQ.7)THEN
+                  LCOUNT7=LCOUNT7+1
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.AND.
+     *            LBOND(10,K2).EQ.2.AND.NINT(ZANF(K3)).EQ.7)THEN
+                  LCOUNT7=LCOUNT7+1
+               END IF
+            ENDDO
+            IF(LCOUNT2.EQ.1)THEN
+               NTYPE(IFFAT)=55
+               QMMFF(IFFAT)=0.5D+00
+               GOTO 260
+            END IF
+            IF(LCOUNT2.GE.2)THEN
+               NTYPE(IFFAT)=56
+               QMMFF(IFFAT)=THIRD
+               GOTO 260
+            END IF
+            IF(LCOUNT3.GT.0.OR.LCOUNT4.GT.0)THEN
+               NTYPE(IFFAT)=43
+               GOTO 260
+            END IF
+            IF(LCOUNT6.GT.0)THEN
+               NTYPE(IFFAT)=10
+               GOTO 260
+            END IF
+            IF(LCOUNT8.GT.0)THEN
+               NTYPE(IFFAT)=40
+               GOTO 260
+            END IF
+            IF(LCOUNT9.GT.0)THEN
+               NTYPE(IFFAT)=10
+               GOTO 260
+            END IF
+            IF(LCOUNT5.GT.0)THEN
+               NTYPE(IFFAT)=40
+               GOTO 260
+            END IF
+            IF(LCOUNT7.GT.0)THEN
+               NTYPE(IFFAT)=10
+               GOTO 260
+            END IF
+            IF(NTYPE(IFFAT).EQ.0)THEN
+               NTYPE(IFFAT)=8
+               QMMFF(IFFAT)=ZERO
+               GOTO 260
+            END IF
+         END IF
+ 260  CONTINUE
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         IF(NTYPE(K1).EQ.40.AND.NTYPE(K2).EQ.63.AND.
+     *      NTYPE(K3).EQ.81.AND.ABS(QMMFF(K3)-ONE).LT.0.1D-10)THEN
+            NTYPE(K1)=55
+            QMMFF(K1)=PT5
+            QMMFF(K3)=PT5
+            NTYPE(K2)=80
+         END IF
+         IF(NTYPE(K3).EQ.40.AND.NTYPE(K2).EQ.63.AND.
+     *      NTYPE(K1).EQ.81.AND.ABS(QMMFF(K1)-ONE).LT.0.1D-10)THEN
+            NTYPE(K3)=55
+            QMMFF(K1)=PT5
+            QMMFF(K3)=PT5
+            NTYPE(K2)=80
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.56.OR.NTYPE(IFFAT).EQ.55)THEN
+            DO II=1,3
+               KBOND=LBOND(II,IFFAT)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(JJ).EQ.57) THEN
+                  BORDER(KBOND)=ONEPT5
+               ELSE
+                  BORDER(KBOND)=ONE
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+C
+C     -- DETERMINE MORE BOND ORDER --
+C
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 980  CONTINUE
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         DO M=1,MB
+            IFFAT=LISTRIN(M,IRING)
+            MBEFO=M-1
+            IF(MBEFO.EQ.0) MBEFO=MB
+            IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *         QMMFF(IFFAT).EQ.ZERO)THEN
+               BLEFT=THREE
+               IF(BORDER(LISTRIB(M    ,IRING)).EQ.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).NE.ZERO    )
+     *         BORDER(LISTRIB(M    ,IRING))=
+     *         BLEFT-BORDER(LISTRIB(MBEFO,IRING))
+               IF(BORDER(LISTRIB(M    ,IRING)).NE.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).EQ.ZERO    )
+     *         BORDER(LISTRIB(MBEFO,IRING))=
+     *         BLEFT-BORDER(LISTRIB(M,IRING))
+            END IF
+         ENDDO
+      ENDDO
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         NBNDN=0
+         NBNDO=0
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *      LBOND(10,K1).EQ.1  .AND.LBOND(10,K3).EQ.2.AND.
+     *      ABS(QMMFF(K3)).LT.0.1D-10  )THEN
+            NBNDN=0
+            NBNDO=0
+            BTHERE=FOUR
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).EQ.ONE)THEN
+                  IF((BORDER(LBOND(1,JJ))+BORDER(LBOND(2,JJ))).LT.THREE)
+     *            NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1.AND.
+     *            BORDER(KBOND).EQ.TWO)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=ONE
+               BORDER(NBNDN)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.8.AND.NINT(ZANF(K1)).EQ.7.AND.
+     *      LBOND(10,K3).EQ.1  .AND.LBOND(10,K1).EQ.2.AND.
+     *      ABS(QMMFF(K1)).LT.0.1D-10  )THEN
+            NBNDN=0
+            NBNDO=0
+            BTHERE=FOUR
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).EQ.ONE)THEN
+                  IF((BORDER(LBOND(1,JJ))+BORDER(LBOND(2,JJ))).LT.THREE)
+     *            NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1.AND.
+     *            BORDER(KBOND).EQ.TWO)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=ONE
+               BORDER(NBNDN)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *      LBOND(10,K1).EQ.2  .AND.LBOND(10,K3).EQ.3      )THEN
+            BCTHERE=FOUR
+            NBNDN=0
+            NBNDO=0
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=TWO
+               BORDER(NBNDN)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.8.AND.NINT(ZANF(K1)).EQ.7.AND.
+     *      LBOND(10,K3).EQ.2  .AND.LBOND(10,K1).EQ.3      )THEN
+            BCTHERE=FOUR
+            NBNDN=0
+            NBNDO=0
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=TWO
+               BORDER(NBNDN)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.8      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.16.AND.NINT(ZANF(K3)).EQ.16      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.8.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.16.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+      ENDDO
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I2
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I2).EQ.3.AND.LBOND(10,I1).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I1)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I1
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.2.AND.
+     *      LBOND(10,I2).EQ.1   )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT1+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I2).EQ.2.AND.
+     *      LBOND(10,I1).EQ.1   )THEN
+            BLFT2=THREE
+            BLFT1=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT2+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *       LBOND(10,I1) .EQ. 3.AND.LBOND(10 ,I2) .EQ. 2    )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 8.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *       LBOND(10,I1) .EQ. 2.AND.LBOND(10 ,I2) .EQ. 3    )THEN
+            BLFT1=TWO
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10)THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2))THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         (BLEFT1.LT.0.1D-10.OR.BLEFT2.LT.0.1D-10).AND.
+     *         (BLEFT1.GT.0.1D-10.OR.BLEFT2.GT.0.1D-10)     )THEN
+                BTHERE=MAX(BLEFT1,BLEFT2)
+                BORDER(IBOND)=BTHERE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 6) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.BLEFT2.EQ.ONE) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF((BLEFT1.EQ.TWO.AND.BLEFT2.EQ.TWO)        .AND.
+     *         (LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.3)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF((BLEFT1.EQ.THREE.AND.BLEFT2.EQ.THREE)    .AND.
+     *         (LBOND(10,I1).EQ.2.AND.LBOND(10,I2).EQ.2)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 7) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I1).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT1.EQ.THREE.AND.LBOND(10,I2).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 7) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I2).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT2.EQ.THREE.AND.LBOND(10,I1).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF((NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 8).OR.
+     *      (NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ.16)    ) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I2).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF((NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 8).OR.
+     *      (NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ.16)    ) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I1).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ.8.AND. LBOND(10,I1).EQ.2.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.(LBOND(10,I2).EQ.3.OR.
+     *      LBOND(10,I2).EQ.2).AND.BORDER(IBOND).LT.0.1D-10 )THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I2)
+            DO IXN=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IXN,I2)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I2))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I1)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I1))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND. LBOND(10,I2).EQ.2.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.(LBOND(10,I1).EQ.3.OR.
+     *      LBOND(10,I1).EQ.2).AND.BORDER(IBOND).LT.0.1D-10)THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I1)
+            DO IXN=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IXN,I1)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I1))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I2)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I2))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.7.AND.NINT(ZANF(I1)).EQ.7.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2).AND.
+     *      BORDER(IBOND).LT.0.1D-10                        )THEN
+            BIN1=THREE
+            BIN2=THREE
+            NIN1=LBOND(10,I1)
+            NIN2=LBOND(10,I2)
+            DO IX1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IX1,I1)).GT.0.1D-10) NIN1=NIN1-1
+               BIN1=BIN1-BORDER(LBOND(IX1,I1))
+            ENDDO
+            DO IX2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IX2,I2)).GT.0.1D-10) NIN2=NIN2-1
+               BIN2=BIN2-BORDER(LBOND(IX2,I2))
+            ENDDO
+            IF(NIN2.EQ.1.AND.NIN1.EQ.1.AND.ABS(BIN1-BIN2).LT.0.1D-10)
+     *      BORDER(IBOND)=BIN1
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2)THEN
+            NLFTC=2
+            BLEFT=THREE
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3.AND.
+     *      NUMRIN(10,IFFAT).EQ.0)THEN
+            LOXY=0
+            LOXY1=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *            QMMFF(JFFAT).EQ.ZERO)THEN
+                  LOXY1=LOXY1+1
+                  KBOND2=KBOND
+               END IF
+            ENDDO
+            IF(LOXY1.EQ.1.AND.LOXY.EQ.1)THEN
+               BORDER(KBOND2)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BLEFT=FOUR
+            NLFTC=2
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.ONE)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=TWO
+               ENDDO
+            END IF
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.TWO)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+            IF(BLEFT.EQ.THREE)THEN
+               NOXY=0
+               NBOXY=0
+               NOTWO=0
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8) NOXY=NOXY+1
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               BORDER(KBOND).LT.0.1D-10   )THEN
+                     NBOXY=KBOND
+                  END IF
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               QMMFF(JFFAT).EQ.ZERO.AND.
+     *               LBOND(10,JFFAT).EQ.2.AND.
+     *               BORDER(KBOND).LT.0.1D-10   ) THEN
+                     DO J=1,2
+                        JBOND=LBOND(J,JFFAT)
+                        KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                        IF(NINT(ZANF(KFFAT)).EQ.1) NOTWO=NOTWO+1
+                     ENDDO
+                  END IF
+               ENDDO
+               IF(NOTWO.EQ.2)THEN
+                  JCASE=0
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  LBOND(10,JFFAT).EQ.2.AND.JCASE.EQ.0.AND.
+     *                  BORDER(KBOND).LT.0.1D-10   )THEN
+                        BORDER(KBOND)=TWO
+                        JCASE=2
+                     END IF
+                  ENDDO
+               END IF
+               IF(NOXY.EQ.1)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).NE.8)THEN
+                        ICN=LBOND(10,JFFAT)
+                        IBCN=0
+                        DO J=1,ICN
+                           JBOND=LBOND(J,JFFAT)
+                           KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                           IF(BORDER(JBOND).GT.0.1D-10) ICN=ICN-1
+                           IF(KFFAT.EQ.IFFAT.AND.
+     *                        BORDER(JBOND).LT.0.1D-10) IBCN=JBOND
+                        ENDDO
+                        IF(ICN.EQ.1.AND.IBCN.NE.0)THEN
+                           BORDER(NBOXY)=TWO
+                           BORDER(IBCN) =ONE
+                        END IF
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 981
+      IF(ICOUNT.GT.300) GOTO 981
+      BCOUNT2=BCOUNT1
+      GOTO 980
+ 981  CONTINUE
+C
+C     -- DETERMINE O, S CHARGE --
+C
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ. 8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16.AND.QMMFF(IFFAT).EQ.ZERO.AND.
+     *      NTYPE(IFFAT).EQ.0) THEN
+            QTEMP = -TWO
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               QTEMP = QTEMP + BORDER(KBOND)
+            ENDDO
+            IF(QTEMP.EQ.-PT5) QMMFF(IFFAT) = -PT5
+            IF(QTEMP.EQ.-ONE.AND.LBOND(10,IFFAT).NE.2)
+     *         QMMFF(IFFAT) = -ONE
+            IF(QTEMP.EQ. ONE.AND.LBOND(10,IFFAT).NE.1)
+     *         QMMFF(IFFAT) =  ONE
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF((NINT(ZANF(IFFAT)).EQ. 8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16).AND.QMMFF(IFFAT).EQ.ZERO.AND.
+     *      LBOND(10,IFFAT).EQ.1)THEN
+            IF(BORDER(LBOND(1,IFFAT)).EQ.ZERO)BORDER(LBOND(1,IFFAT))=TWO
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF((NINT(ZANF(IFFAT)).EQ. 8.OR.
+     *      NINT(ZANF(IFFAT)).EQ.16).AND.QMMFF(IFFAT).EQ.ZERO.AND.
+     *      LBOND(10,IFFAT).EQ.2)THEN
+            IF(BORDER(LBOND(1,IFFAT)).EQ.ZERO)BORDER(LBOND(1,IFFAT))=ONE
+            IF(BORDER(LBOND(2,IFFAT)).EQ.ZERO)BORDER(LBOND(2,IFFAT))=ONE
+         END IF
+      ENDDO
+C
+C     -- DETERMINE MORE BOND ORDER --
+C
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 990  CONTINUE
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         DO M=1,MB
+            IFFAT=LISTRIN(M,IRING)
+            MBEFO=M-1
+            IF(MBEFO.EQ.0) MBEFO=MB
+            IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2.AND.
+     *         QMMFF(IFFAT).EQ.ZERO)THEN
+               BLEFT=THREE
+               IF(BORDER(LISTRIB(M    ,IRING)).EQ.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).NE.ZERO    )
+     *         BORDER(LISTRIB(M    ,IRING))=
+     *         BLEFT-BORDER(LISTRIB(MBEFO,IRING))
+               IF(BORDER(LISTRIB(M    ,IRING)).NE.ZERO.AND.
+     *            BORDER(LISTRIB(MBEFO,IRING)).EQ.ZERO    )
+     *         BORDER(LISTRIB(MBEFO,IRING))=
+     *         BLEFT-BORDER(LISTRIB(M,IRING))
+            END IF
+         ENDDO
+      ENDDO
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         NBNDN=0
+         NBNDO=0
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *      LBOND(10,K1).EQ.1  .AND.LBOND(10,K3).EQ.2.AND.
+     *      ABS(QMMFF(K3)).LT.0.1D-10  )THEN
+            NBNDN=0
+            NBNDO=0
+            BTHERE=FOUR
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).EQ.ONE)THEN
+                  IF((BORDER(LBOND(1,JJ))+BORDER(LBOND(2,JJ))).LT.THREE)
+     *            NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1.AND.
+     *            BORDER(KBOND).EQ.TWO)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=ONE
+               BORDER(NBNDN)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.8.AND.NINT(ZANF(K1)).EQ.7.AND.
+     *      LBOND(10,K3).EQ.1  .AND.LBOND(10,K1).EQ.2.AND.
+     *      ABS(QMMFF(K1)).LT.0.1D-10  )THEN
+            NBNDN=0
+            NBNDO=0
+            BTHERE=FOUR
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).EQ.ONE)THEN
+                  IF((BORDER(LBOND(1,JJ))+BORDER(LBOND(2,JJ))).LT.THREE)
+     *            NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1.AND.
+     *            BORDER(KBOND).EQ.TWO)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=ONE
+               BORDER(NBNDN)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.7.AND.
+     *      LBOND(10,K1).EQ.2  .AND.LBOND(10,K3).EQ.3      )THEN
+            BCTHERE=FOUR
+            NBNDN=0
+            NBNDO=0
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=TWO
+               BORDER(NBNDN)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.8.AND.NINT(ZANF(K1)).EQ.7.AND.
+     *      LBOND(10,K3).EQ.2  .AND.LBOND(10,K1).EQ.3      )THEN
+            BCTHERE=FOUR
+            NBNDN=0
+            NBNDO=0
+            DO II=1,3
+               KBOND=LBOND(II,K2)
+               JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(NINT(ZANF(JJ)).EQ.7.AND.LBOND(10,JJ).EQ.3.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  NBNDN=KBOND
+               END IF
+               IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.2.AND.
+     *            BORDER(KBOND).LT.0.1D-10)THEN
+                  DO KK=1,2
+                     JBOND=LBOND(KK,JJ)
+                     MM=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JJ
+                     IF(NINT(ZANF(MM)).EQ.1) NBNDO=KBOND
+                  ENDDO
+               END IF
+               BCTHERE=BCTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BCTHERE).LT.0.1D-10.AND.NBNDN.NE.0.AND.
+     *         NBNDO.NE.0)THEN
+               BORDER(NBNDO)=TWO
+               BORDER(NBNDN)=ONE
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.8.AND.NINT(ZANF(K3)).EQ.8      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.7.AND.LBOND(10,K2).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.16.AND.NINT(ZANF(K3)).EQ.16      )THEN
+            BTHERE=ZERO
+            DO JJ=1,2
+               KBOND=LBOND(JJ,K2)
+               BTHERE=BTHERE+BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE-ONE).LT.0.1D-10)THEN
+               DO JJ=1,2
+                  KBOND=LBOND(JJ,K2)
+                  IF(BORDER(KBOND).LT.0.1D-10) BORDER(KBOND)=TWO
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.2.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.6.AND.LBOND(10,K2).EQ.3.AND.
+     *      NINT(ZANF(K3)).EQ.7.AND.LBOND(10,K3).EQ.2.AND.
+     *      NINT(ZANF(K1)).EQ.7.AND.LBOND(10,K1).EQ.3     )THEN
+            BLFTC=FOUR
+            ICASE1=0
+            ICASE2=0
+            DO I=1,3
+               KBOND=LBOND(I,K2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+               IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10) ICASE1=1
+               IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10) ICASE2=1
+               BLFTC=BLFTC-BORDER(KBOND)
+            ENDDO
+            IF(BLFTC.EQ.THREE.AND.ICASE1.EQ.1.AND.ICASE2.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,K2)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                  IF(JFFAT.EQ.K3.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=TWO
+                  IF(JFFAT.EQ.K1.AND.BORDER(KBOND).LT.0.1D-10)
+     *               BORDER(KBOND)=ONE
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(K2)).EQ.8.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+         IF(NINT(ZANF(K2)).EQ.16.AND.NINT(ZANF(K3)).EQ.6.AND.
+     *      NINT(ZANF(K1)).EQ.6.AND.LBOND(10,K2).EQ.2)THEN
+            DO I=1,LBOND(10,K2)
+               IF(BORDER(LBOND(I,K2)).LT.0.1D-10)
+     *         BORDER(LBOND(I,K2))=ONE
+            ENDDO
+         END IF
+      ENDDO
+      DO IBOND=1,NBOND
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I2)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I2
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)).LT.0.1D-10.AND.
+     *      LBOND(10,I2).EQ.3.AND.LBOND(10,I1).EQ.2)THEN
+            LHYDRG=0
+            DO I=1,2
+               KBOND=LBOND(I,I1)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-I1
+               IF(NINT(ZANF(JFFAT)).EQ.1) LHYDRG=1
+            ENDDO
+            IF(LHYDRG.EQ.1) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I1).EQ.2.AND.
+     *      LBOND(10,I2).EQ.1   )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT1+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 7.AND.NINT(ZANF(I1)).EQ. 8.AND.
+     *      ABS(BORDER(IBOND)-TWO).LT.0.1D-10.AND.LBOND(10,I2).EQ.2.AND.
+     *      LBOND(10,I1).EQ.1   )THEN
+            BLFT2=THREE
+            BLFT1=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(ABS(BLFT2+ONE).LT.0.1D-10.AND.
+     *         NLFT1.EQ.0.AND.NLFT2.EQ.0) BORDER(IBOND)=ONE
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 8.AND.
+     *       LBOND(10,I1) .EQ. 3.AND.LBOND(10 ,I2) .EQ. 2    )THEN
+            BLFT1=THREE
+            BLFT2=TWO
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 8.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *       LBOND(10,I1) .EQ. 2.AND.LBOND(10 ,I2) .EQ. 3    )THEN
+            BLFT1=TWO
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10)THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         ABS(BLFT1-BLFT2).LT.0.1D-10)
+     *      BORDER(IBOND)=BLFT1
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 7.AND.NINT(ZANF(I2)).EQ. 7.AND.
+     *      BORDER(IBOND).LT.0.1D-10.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2))THEN
+            BLFT1=THREE
+            BLFT2=THREE
+            NLFT1=LBOND(10,I1)
+            NLFT2=LBOND(10,I2)
+            DO I=1,LBOND(10,I1)
+               IF(BORDER(LBOND(I,I1)).GT.0.1D-10)
+     *         NLFT1=NLFT1-1
+               BLFT1=BLFT1-BORDER(LBOND(I,I1))
+            ENDDO
+            DO I=1,LBOND(10,I2)
+               IF(BORDER(LBOND(I,I2)).GT.0.1D-10)
+     *         NLFT2=NLFT2-1
+               BLFT2=BLFT2-BORDER(LBOND(I,I2))
+            ENDDO
+            IF(NLFT1.EQ.1.AND.NLFT2.EQ.1.AND.
+     *         (BLEFT1.LT.0.1D-10.OR.BLEFT2.LT.0.1D-10).AND.
+     *         (BLEFT1.GT.0.1D-10.OR.BLEFT2.GT.0.1D-10)     )THEN
+                BTHERE=MAX(BLEFT1,BLEFT2)
+                BORDER(IBOND)=BTHERE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 6) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.BLEFT2.EQ.ONE) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF((BLEFT1.EQ.TWO.AND.BLEFT2.EQ.TWO)        .AND.
+     *         (LBOND(10,I1).EQ.3.AND.LBOND(10,I2).EQ.3)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF((BLEFT1.EQ.THREE.AND.BLEFT2.EQ.THREE)    .AND.
+     *         (LBOND(10,I1).EQ.2.AND.LBOND(10,I2).EQ.2)     )THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 7) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I1).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT1.EQ.THREE.AND.LBOND(10,I2).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF(NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 7) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.4)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I2).EQ.3)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+            IF(BLEFT2.EQ.THREE.AND.LBOND(10,I1).EQ.1)THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=THREE
+            END IF
+         END IF
+         IF((NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ. 8).OR.
+     *      (NINT(ZANF(I1)).EQ. 6.AND.NINT(ZANF(I2)).EQ.16)    ) THEN
+            BLEFT1=FOUR
+            DO IB1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IB1,I1)).EQ.ONE)
+     *         BLEFT1=BLEFT1-BORDER(LBOND(IB1,I1))
+            ENDDO
+            IF(BLEFT1.EQ.ONE.AND.LBOND(10,I2).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT1.EQ.TWO.AND.LBOND(10,I2).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF((NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ. 8).OR.
+     *      (NINT(ZANF(I2)).EQ. 6.AND.NINT(ZANF(I1)).EQ.16)    ) THEN
+            BLEFT2=FOUR
+            DO IB2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IB2,I2)).EQ.ONE)
+     *         BLEFT2=BLEFT2-BORDER(LBOND(IB2,I2))
+            ENDDO
+            IF(BLEFT2.EQ.ONE.AND.LBOND(10,I1).EQ.2) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=ONE
+            END IF
+            IF(BLEFT2.EQ.TWO.AND.LBOND(10,I1).EQ.1) THEN
+               IF(BORDER(IBOND).EQ.ZERO) BORDER(IBOND)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(I1)).EQ.8.AND. LBOND(10,I1).EQ.2.AND.
+     *      NINT(ZANF(I2)).EQ.7.AND.(LBOND(10,I2).EQ.3.OR.
+     *      LBOND(10,I2).EQ.2).AND.BORDER(IBOND).LT.0.1D-10 )THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I2)
+            DO IXN=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IXN,I2)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I2))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I1)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I1))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.8.AND. LBOND(10,I2).EQ.2.AND.
+     *      NINT(ZANF(I1)).EQ.7.AND.(LBOND(10,I1).EQ.3.OR.
+     *      LBOND(10,I1).EQ.2).AND.BORDER(IBOND).LT.0.1D-10)THEN
+            BINO=TWO
+            BINN=THREE
+            NIBO=2
+            NIBN=LBOND(10,I1)
+            DO IXN=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IXN,I1)).GT.0.1D-10) NIBN=NIBN-1
+               BINN=BINN-BORDER(LBOND(IXN,I1))
+            ENDDO
+            DO IXO=1,2
+               IF(BORDER(LBOND(IXO,I2)).GT.0.1D-10) NIBO=NIBO-1
+               BINO=BINO-BORDER(LBOND(IXO,I2))
+            ENDDO
+            IF(NIBN.EQ.1.AND.NIBO.EQ.1.AND.ABS(BINO-BINN).LT.0.1D-10)
+     *      BORDER(IBOND)=BINO
+         END IF
+         IF(NINT(ZANF(I2)).EQ.7.AND.NINT(ZANF(I1)).EQ.7.AND.
+     *      LBOND(10,I1).EQ.LBOND(10,I2).AND.
+     *      BORDER(IBOND).LT.0.1D-10                        )THEN
+            BIN1=THREE
+            BIN2=THREE
+            NIN1=LBOND(10,I1)
+            NIN2=LBOND(10,I2)
+            DO IX1=1,LBOND(10,I1)
+               IF(BORDER(LBOND(IX1,I1)).GT.0.1D-10) NIN1=NIN1-1
+               BIN1=BIN1-BORDER(LBOND(IX1,I1))
+            ENDDO
+            DO IX2=1,LBOND(10,I2)
+               IF(BORDER(LBOND(IX2,I2)).GT.0.1D-10) NIN2=NIN2-1
+               BIN2=BIN2-BORDER(LBOND(IX2,I2))
+            ENDDO
+            IF(NIN2.EQ.1.AND.NIN1.EQ.1.AND.ABS(BIN1-BIN2).LT.0.1D-10)
+     *      BORDER(IBOND)=BIN1
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.2)THEN
+            NLFTC=2
+            BLEFT=THREE
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3.AND.
+     *      NUMRIN(10,IFFAT).EQ.0)THEN
+            LOXY=0
+            LOXY1=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.8) LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1.AND.
+     *            QMMFF(JFFAT).EQ.ZERO)THEN
+                  LOXY1=LOXY1+1
+                  KBOND2=KBOND
+               END IF
+            ENDDO
+            IF(LOXY1.EQ.1.AND.LOXY.EQ.1)THEN
+               BORDER(KBOND2)=TWO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.2)THEN
+            BLEFT=FOUR
+            NLFTC=2
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).GT.0.1D-10) NLFTC=NLFTC-1
+               BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(NLFTC.EQ.1)THEN
+               DO I=1,2
+                  IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *            BORDER(LBOND(I,IFFAT))=BLEFT
+               ENDDO
+            END IF
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.6.AND.LBOND(10,IFFAT).EQ.3)THEN
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.ONE)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=TWO
+               ENDDO
+            END IF
+            BLEFT=FOUR
+            DO I=1,LBOND(10,IFFAT)
+               IF(BORDER(LBOND(I,IFFAT)).EQ.TWO)
+     *         BLEFT=BLEFT-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BLEFT.EQ.TWO)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  IF(BORDER(LBOND(I,IFFAT)).EQ.ZERO)
+     *               BORDER(LBOND(I,IFFAT))=ONE
+               ENDDO
+            END IF
+            IF(BLEFT.EQ.THREE)THEN
+               NOXY=0
+               NBOXY=0
+               NOTWO=0
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.8) NOXY=NOXY+1
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               BORDER(KBOND).LT.0.1D-10   )THEN
+                     NBOXY=KBOND
+                  END IF
+                  IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *               QMMFF(JFFAT).EQ.ZERO.AND.
+     *               LBOND(10,JFFAT).EQ.2.AND.
+     *               BORDER(KBOND).LT.0.1D-10   ) THEN
+                     DO J=1,2
+                        JBOND=LBOND(J,JFFAT)
+                        KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                        IF(NINT(ZANF(KFFAT)).EQ.1) NOTWO=NOTWO+1
+                     ENDDO
+                  END IF
+               ENDDO
+               IF(NOTWO.EQ.2)THEN
+                  JCASE=0
+                  DO I=1,3
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).EQ.8.AND.
+     *                  LBOND(10,JFFAT).EQ.2.AND.JCASE.EQ.0.AND.
+     *                  BORDER(KBOND).LT.0.1D-10   )THEN
+                        BORDER(KBOND)=TWO
+                        JCASE=2
+                     END IF
+                  ENDDO
+               END IF
+               IF(NOXY.EQ.1)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                     IF(NINT(ZANF(JFFAT)).NE.8)THEN
+                        ICN=LBOND(10,JFFAT)
+                        IBCN=0
+                        DO J=1,ICN
+                           JBOND=LBOND(J,JFFAT)
+                           KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                           IF(BORDER(JBOND).GT.0.1D-10) ICN=ICN-1
+                           IF(KFFAT.EQ.IFFAT.AND.
+     *                        BORDER(JBOND).LT.0.1D-10) IBCN=JBOND
+                        ENDDO
+                        IF(ICN.EQ.1.AND.IBCN.NE.0)THEN
+                           BORDER(NBOXY)=TWO
+                           BORDER(IBCN) =ONE
+                        END IF
+                     END IF
+                  ENDDO
+               END IF
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 991
+      IF(ICOUNT.GT.300) GOTO 991
+      BCOUNT2=BCOUNT1
+      GOTO 990
+ 991  CONTINUE
+C
+C
+C     -- P --
+      DO 300 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.15)THEN
+            IF(LBOND(10,IFFAT).EQ.4)THEN
+               NTYPE(IFFAT)=25
+               GOTO 300
+            END IF
+            IF(LBOND(10,IFFAT).EQ.2)THEN
+               NTYPE(IFFAT)=75
+               GOTO 300
+            END IF
+            IF(LBOND(10,IFFAT).EQ.3)THEN
+               NTYPE(IFFAT)=26
+               GOTO 300
+            END IF
+         END IF
+ 300  CONTINUE
+C
+C
+C     -- S --
+      DO 400 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.16)THEN
+            IF(LBOND(10,IFFAT).EQ.2)THEN
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.8.AND.
+     *               LBOND(10,IXX).EQ.1)THEN
+                     NTYPE(IFFAT)=74
+                     QMMFF(IFFAT)=ZERO
+                     GOTO 400
+                  END IF
+               ENDDO
+               IF(NTYPE(IFFAT).EQ.0)THEN
+                  NTYPE(IFFAT)=15
+                  QMMFF(IFFAT)=ZERO
+               END IF
+            END IF
+C
+            IF(LBOND(10,IFFAT).EQ.3)THEN
+               DO IANGL=1,NANGL
+                  K1=KLIST(1,IANGL)
+                  K2=KLIST(2,IANGL)
+                  K3=KLIST(3,IANGL)
+                  IF(K2.EQ.IFFAT)THEN
+                     IF(NINT(ZANF(K1)).EQ.8.AND.(NINT(ZANF(K3)).EQ.16
+     *                  .OR.NINT(ZANF(K3)).EQ.8).AND.
+     *                  (LBOND(10,K3).EQ.1.AND.LBOND(10,K1).EQ.1))THEN
+                        LOXY=0
+                        LSUF=0
+                        IDOUBLE=0
+                        DO II=1,3
+                           KBOND=LBOND(II,K2)
+                           JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                           IF(JFFAT.NE.K1.AND.JFFAT.NE.K3.AND.
+     *                        BORDER(KBOND).EQ.TWO) IDOUBLE=IDOUBLE+1
+                           IF(NINT(ZANF(JFFAT)).EQ.8  ) LOXY=LOXY+1
+                           IF(NINT(ZANF(JFFAT)).EQ.16 ) LSUF=LSUF+1
+                        ENDDO
+                        IF(LOXY.EQ.2.OR.(LOXY.EQ.1.AND.LSUF.EQ.1))THEN
+                           IF(IDOUBLE.NE.1)THEN
+                              NTYPE(IFFAT)=73
+                           ELSE
+                              NTYPE(IFFAT)=18
+                           END IF
+                           GOTO 400
+                        END IF
+                     END IF
+                     IF(NINT(ZANF(K3)).EQ.8.AND.(NINT(ZANF(K1)).EQ.16
+     *                  .OR.NINT(ZANF(K1)).EQ.8).AND.
+     *                  (LBOND(10,K3).EQ.1.AND.LBOND(10,K1).EQ.1))THEN
+                        LOXY=0
+                        LSUF=0
+                        IDOUBLE=0
+                        DO II=1,3
+                           KBOND=LBOND(II,K2)
+                           JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                           IF(JFFAT.NE.K1.AND.JFFAT.NE.K3.AND.
+     *                        BORDER(KBOND).EQ.TWO) IDOUBLE=IDOUBLE+1
+                           IF(NINT(ZANF(JFFAT)).EQ.8  ) LOXY=LOXY+1
+                           IF(NINT(ZANF(JFFAT)).EQ.16 ) LSUF=LSUF+1
+                        ENDDO
+                        IF(LOXY.EQ.2.OR.(LOXY.EQ.1.AND.LSUF.EQ.1))THEN
+                           IF(IDOUBLE.NE.1)THEN
+                              NTYPE(IFFAT)=73
+                           ELSE
+                              NTYPE(IFFAT)=18
+                           END IF
+                           GOTO 400
+                        END IF
+                     END IF
+                  END IF
+               ENDDO
+               LCOUNT3=0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(IXX)).EQ.8.AND.
+     *                LBOND(10,IXX).EQ.1)LCOUNT3=LCOUNT3+1
+                  IF(NINT(ZANF(IXX)).EQ.7.AND.
+     *              ABS(BORDER(KBOND)-TWO).LT.0.1D-10)LCOUNT3=LCOUNT3+1
+               ENDDO
+               IF(LCOUNT3.GT.0)THEN
+                  NTYPE(IFFAT)=17
+                  GOTO 400
+               END IF
+               IF(NTYPE(IFFAT).EQ.0) NTYPE(IFFAT)=17
+            END IF
+C
+            IF(LBOND(10,IFFAT).EQ.1)THEN
+               KBOND=LBOND(1,IFFAT)
+               IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(IXX)).EQ.15)THEN
+                  NTYPE(IFFAT)=72
+                  GOTO 400
+               END IF
+               IF(NTYPE(IXX).EQ.73.OR.NTYPE(IXX).EQ.41)THEN
+                  NTYPE(IFFAT)=72
+                  QMMFF(IFFAT)=-0.5D+00
+                  GOTO 400
+               END IF
+               IF(QMMFF(IFFAT).LT.-0.1D-15)THEN
+                  NTYPE(IFFAT)=72
+                  QMMFF(IFFAT)=-1.0D+00
+                  GOTO 400
+               END IF
+               IF(NINT(ZANF(IXX)).EQ.6)THEN
+                  NTYPE(IFFAT)=16
+                  GOTO 400
+               END IF
+            END IF
+            LCOUNT2=0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(IXX)).EQ.8.AND.
+     *            LBOND(10,IXX).EQ.1)THEN
+                  LCOUNT2=LCOUNT2+1
+               END IF
+               IF(NINT(ZANF(IXX)).EQ.7)THEN
+                  LCOUNT2=LCOUNT2+1
+               END IF
+            ENDDO
+            IF(LCOUNT2.GT.1.AND.NTYPE(IFFAT).EQ.0)THEN
+               NTYPE(IFFAT)=18
+               GOTO 400
+            END IF
+         END IF
+ 400  CONTINUE
+C
+C
+C     -- O --
+      DO 500 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.8.AND.NTYPE(IFFAT).EQ.0)THEN
+C           OXYGEN ATTACHED TO TWO ATOMS
+            IF(LBOND(10,IFFAT).EQ.2)THEN
+               IF(QMMFF(IFFAT).EQ.ONE)THEN
+                  NTYPE(IFFAT)=51
+                  GOTO 500
+               END IF
+               NTYPE(IFFAT)=6
+               QMMFF(IFFAT)=ZERO
+               LCOUNT2=1
+               DO I=1,LBOND(10,IFFAT)
+                  IF(NINT(ZANF(IFFAT)).EQ.1) LCOUNT2=LCOUNT2+1
+               ENDDO
+            END IF
+C           -OXYGEN ATTACHED TO 1 ATOM
+            IF(LBOND(10,IFFAT).EQ.1)THEN
+               KBOND=LBOND(1,IFFAT)
+               IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(IXX).EQ.41)THEN
+                  NTYPE(IFFAT)=32
+                  QMMFF(IFFAT)=-0.5D+00
+                  GOTO 500
+               END IF
+               IF(NTYPE(IXX).EQ.77)THEN
+                  NTYPE(IFFAT)=32
+                  QMMFF(IFFAT)=-0.25D+00
+                  GOTO 500
+               END IF
+               IF(NTYPE(IXX).EQ.69)THEN
+                  NTYPE(IFFAT)=32
+                  QMMFF(IFFAT)=ZERO
+                  GOTO 500
+               END IF
+               IF(NINT(ZANF(IXX)).EQ.15.OR.
+     *            NINT(ZANF(IXX)).EQ.16.OR.
+     *            NINT(ZANF(IXX)).EQ.7.AND.
+     *            NTYPE(IXX).NE.46     ) NTYPE(IFFAT)=32
+               CALL VICLR(NLEGN2,1,5)
+               DO IANGL=1,NANGL
+                  K1=KLIST(1,IANGL)
+                  K2=KLIST(2,IANGL)
+                  K3=KLIST(3,IANGL)
+                  IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.15.AND.
+     *               NINT(ZANF(K3)).EQ.8)THEN
+                     OXY=ZERO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1)
+     *                  OXY=OXY+ONE
+                     ENDDO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,JJ).EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-ONE)/OXY
+                        END IF
+                     ENDDO
+                  END IF
+                  IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.15.AND.
+     *               NINT(ZANF(K1)).EQ.8)THEN
+                     OXY=ZERO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1)
+     *                  OXY=OXY+ONE
+                     ENDDO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,JJ).EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-ONE)/OXY
+                        END IF
+                     ENDDO
+                  END IF
+                  IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.
+     *               AND.NINT(ZANF(K3)).EQ.8)THEN
+                     OXY=ZERO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1)
+     *                  OXY=OXY+ONE
+                     ENDDO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,JJ).EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-TWO)/OXY
+                        END IF
+                     ENDDO
+                     GOTO 500
+                  END IF
+                  IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.
+     *               AND.NINT(ZANF(K1)).EQ.8)THEN
+                     OXY=ZERO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1)
+     *                  OXY=OXY+ONE
+                     ENDDO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,JJ).EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-TWO)/OXY
+                        END IF
+                     ENDDO
+                     GOTO 500
+                  END IF
+                  IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.16.
+     *               AND.NINT(ZANF(K3)).EQ.8.AND.LBOND(10,K3).EQ.1)THEN
+                     OXY=ZERO
+                     LCAR4=0
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1)
+     *                  OXY=OXY+ONE
+                        IF(NINT(ZANF(JJ)).EQ.6.AND.LBOND(10,JJ).EQ.4)
+     *                  LCAR4=LCAR4+1
+                     ENDDO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,JJ).EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-TWO)/OXY
+                        END IF
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,K2).EQ.3.AND.
+     *                     LBOND(10,JJ).EQ.1.AND.
+     *                     LCAR4.EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-ONE)/OXY
+                        END IF
+                     ENDDO
+                     GOTO 500
+                  END IF
+                  IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.16.
+     *               AND.NINT(ZANF(K1)).EQ.8.AND.LBOND(10,K1).EQ.1)THEN
+                     OXY=ZERO
+                     LCAR4=0
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.LBOND(10,JJ).EQ.1)
+     *                  OXY=OXY+ONE
+                        IF(NINT(ZANF(JJ)).EQ.6.AND.LBOND(10,JJ).EQ.4)
+     *                  LCAR4=LCAR4+1
+                     ENDDO
+                     DO II=1,LBOND(10,K2)
+                        KBOND=LBOND(II,K2)
+                        JJ=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,JJ).EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-TWO)/OXY
+                        END IF
+                        IF(NINT(ZANF(JJ)).EQ.8.AND.
+     *                     LBOND(10,K2).EQ.3.AND.
+     *                     LBOND(10,JJ).EQ.1.AND.
+     *                     LCAR4.EQ.1       )THEN
+                           NTYPE(JJ)=32
+                           QMMFF(JJ)=-(OXY-ONE)/OXY
+                        END IF
+                     ENDDO
+                     GOTO 500
+                  END IF
+                  IF((K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.15.
+     *               AND.NINT(ZANF(K1)).EQ.8).OR.(K1.EQ.IFFAT.AND.
+     *               NINT(ZANF(K2)).EQ.15.AND.NINT(ZANF(K3)).EQ.8))THEN
+                     NTYPE(IFFAT)=32
+                     LCOUNT5=0
+                     DO IBOND=1,NBOND
+                        J1=IPAIR(1,IBOND)
+                        J2=IPAIR(2,IBOND)
+                        IF(J1.EQ.K2.AND.NINT(ZANF(J2)).EQ.8.AND.
+     *                     LBOND(10,J2).EQ.1)THEN
+                           LCOUNT5=LCOUNT5+1
+                        END IF
+                        IF(J2.EQ.K2.AND.NINT(ZANF(J1)).EQ.8.AND.
+     *                     LBOND(10,J1).EQ.1)THEN
+                           LCOUNT5=LCOUNT5+1
+                        END IF
+                     ENDDO
+                     IF(LCOUNT5.EQ.4)THEN
+                        QMMFF(IFFAT)=-0.25D+00
+                        DO III=1,LCOUNT5-1
+                           NTYPE(NLEGN2(III))=32
+                           QMMFF(NLEGN2(III))=QMMFF(IFFAT)
+                        ENDDO
+                     END IF
+                  END IF
+                  IF((K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.15.
+     *               AND.NINT(ZANF(K1)).EQ.8).OR.(K1.EQ.IFFAT.AND.
+     *               NINT(ZANF(K2)).EQ.15.AND.NINT(ZANF(K3)).EQ.8))THEN
+                     NTYPE(IFFAT)=32
+                     LCOUNT5=1
+                     DO IBOND=1,NBOND
+                        J1=IPAIR(1,IBOND)
+                        J2=IPAIR(2,IBOND)
+                        IF(J1.EQ.K2.AND.NINT(ZANF(J2)).EQ.8.AND.
+     *                     LBOND(10,J2).EQ.1)THEN
+                           NLEGN2(LCOUNT5)=J2
+                           LCOUNT5=LCOUNT5+1
+                        END IF
+                        IF(J2.EQ.K2.AND.NINT(ZANF(J1)).EQ.8.AND.
+     *                     LBOND(10,J1).EQ.1)THEN
+                           NLEGN2(LCOUNT5)=J1
+                           LCOUNT5=LCOUNT5+1
+                        END IF
+                     ENDDO
+                     DO III=1,LCOUNT5-1
+                        NTYPE(NLEGN2(III))=32
+                     ENDDO
+                     IF(LCOUNT5.LT.6.AND.LCOUNT5.GT.2)THEN
+                        C2=0.0D+00
+                        DO III=1,LCOUNT5-1
+                           C2=C2+QMMFF(NLEGN2(III))
+                        ENDDO
+                        C2=C2+QMMFF(K2)
+                        QMMFF(IFFAT)=C2/(LCOUNT5-1)
+                        DO III=1,LCOUNT5-1
+                          NTYPE(NLEGN2(III))=32
+                          QMMFF(NLEGN2(III))=QMMFF(IFFAT)
+                        ENDDO
+                     END IF
+                     GOTO 500
+                  END IF
+                  IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.16.AND.
+     *               NINT(ZANF(K1)).EQ.16.AND.LBOND(10,K1).EQ.1)THEN
+                     NTYPE(IFFAT)=32
+                     QMMFF(IFFAT)=-0.5D+00
+                     GOTO 500
+                  END IF
+                  IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.16.AND.
+     *               NINT(ZANF(K3)).EQ.16.AND.LBOND(10,K3).EQ.1)THEN
+                     NTYPE(IFFAT)=32
+                     QMMFF(IFFAT)=-0.5D+00
+                     GOTO 500
+                  END IF
+               ENDDO
+               IF(QMMFF(IFFAT).EQ.(-1.0D+00))THEN
+                  KBOND=LBOND(1,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.6.OR.
+     *               NINT(ZANF(JFFAT)).EQ.7    )THEN
+                     NTYPE(IFFAT)=35
+                     GOTO 500
+                  END IF
+               END IF
+               KBOND=LBOND(1,IFFAT)
+               IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(IXX)).EQ.6.OR.NTYPE(IXX).EQ.46.OR.
+     *            NINT(ZANF(IXX)).EQ.16)THEN
+                  NTYPE(IFFAT)=7
+                  GOTO 500
+               END IF
+            END IF
+         END IF
+ 500  CONTINUE
+C
+C
+C     -- LOOP NTYPE
+C
+      DO 605 KLOOP=1,3
+      DO 601 IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.32)THEN
+            KBOND=LBOND(1,IFFAT)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(NTYPE(JFFAT).EQ.82) QMMFF(IFFAT)=ZERO
+         END IF
+         IF(NTYPE(IFFAT).EQ.3)THEN
+            LSUFER=0
+            LOXY  =0
+            LLOXY =0
+            LCARBON=0
+            L46CUNT=0
+            JBONDN=0
+            LNTG =0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.6) LCARBON=LCARBON+1
+               IF(NTYPE(JFFAT).EQ.46)     L46CUNT=L46CUNT+1
+               IF(NINT(ZANF(JFFAT)).EQ.16.AND.LBOND(10,JFFAT).EQ.1)
+     *         LSUFER=LSUFER+1
+               IF(NINT(ZANF(JFFAT)).EQ.8.AND.LBOND(10,JFFAT).EQ.1)
+     *         LOXY=LOXY+1
+               IF(NINT(ZANF(JFFAT)).EQ.7) THEN
+                  LNTG=LNTG+1
+                  JBONDN=KBOND
+               END IF
+               IF(NTYPE(JFFAT).EQ.25)THEN
+                  LLOXY=0
+                  DO JJ=1,LBOND(10,JFFAT)
+                     JBOND=LBOND(JJ,JFFAT)
+                     KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                     IF(NINT(ZANF(KFFAT)).EQ.8.AND.LBOND(10,KFFAT).EQ.1)
+     *               LLOXY=LLOXY+1
+                  ENDDO
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.6.AND.LBOND(10,JFFAT).LE.3.AND.
+     *            ABS(BORDER(KBOND)-TWO).LT.0.1D-10) NTYPE(IFFAT)=2
+            ENDDO
+            IF(LNTG.EQ.1.AND.LCARBON.EQ.2.AND.BORDER(JBONDN).EQ.ONE)
+     *         NTYPE(IFFAT)=2
+            IF(L46CUNT.EQ.1.AND.LCARBON.EQ.2) NTYPE(IFFAT)=2
+            IF(LSUFER.EQ.0.AND.LOXY.EQ.0.AND.LLOXY.GE.2) NTYPE(IFFAT)=2
+            IF(LSUFER.EQ.1.AND.LOXY.EQ.0)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NTYPE(JFFAT).EQ.72) NTYPE(IFFAT)=2
+              ENDDO
+            END IF
+            IF(LOXY.EQ.1.AND.LSUFER.EQ.0)THEN
+               LTYP35=0
+               LNGT  =0
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NTYPE(JFFAT).EQ.35) LTYP35=LTYP35+1
+                  IF(NINT(ZANF(JFFAT)).EQ.7.AND.BORDER(KBOND).EQ.TWO)
+     *            LNGT=LNGT+1
+              ENDDO
+              IF(LTYP35.EQ.1.AND.LNGT.EQ.0) NTYPE(IFFAT)=2
+            END IF
+         END IF
+         IF(NTYPE(IFFAT).EQ.2)THEN
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(JFFAT).EQ.51.OR.NTYPE(JFFAT).EQ.74.OR.
+     *            NTYPE(JFFAT).EQ.54) THEN
+                  NTYPE(IFFAT)=3
+                  GOTO 601
+               END IF
+               IF(NTYPE(JFFAT).EQ.67)THEN
+                  DO M=1,3
+                     MBOND=LBOND(M,JFFAT)
+                     KFFAT=IPAIR(1,MBOND)+IPAIR(2,MBOND)-JFFAT
+                     IF(KFFAT.NE.IFFAT.AND.NINT(ZANF(KFFAT)).NE.8.AND.
+     *                  BORDER(MBOND).EQ.ONE) NTYPE(IFFAT)=3
+                  ENDDO
+               END IF
+            ENDDO
+         END IF
+         IF(NTYPE(IFFAT).EQ.73)THEN
+            BTHERE=FOUR
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               BTHERE=BTHERE-BORDER(KBOND)
+            ENDDO
+            IF(ABS(BTHERE).LT.0.1D-10)
+     *         NTYPE(IFFAT)=18
+         END IF
+         IF(NTYPE(IFFAT).EQ.72.AND.ABS(QMMFF(IFFAT)).LT.0.1D-10)THEN
+            MFFAT=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(JFFAT).EQ.25)THEN
+                  LOXY=0
+                  DO J=1,LBOND(10,JFFAT)
+                     JBOND=LBOND(J,JFFAT)
+                     KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                     IF(NTYPE(KFFAT).EQ.32)THEN
+                        LOXY=LOXY+1
+                        MFFAT=KFFAT
+                     END IF
+                  ENDDO
+                  IF(LOXY.EQ.1)THEN
+                     QMMFF(IFFAT)=-PT5
+                     QMMFF(MFFAT)=-PT5
+                  END IF
+               END IF
+            ENDDO
+         END IF
+         IF(NTYPE(IFFAT).EQ.7)THEN
+            KBOND=LBOND(1,IFFAT)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(NINT(ZANF(JFFAT)).EQ.16.AND.LBOND(10,JFFAT).EQ.4)THEN
+               ICARBON=0
+               INTRONG=0
+               DO J=1,4
+                  JBOND=LBOND(J,JFFAT)
+                  KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                  IF(NINT(ZANF(KFFAT)).EQ.7.AND.
+     *            LBOND(10,KFFAT).EQ.2) INTRONG=INTRONG+1
+                  IF(NINT(ZANF(KFFAT)).EQ.6) ICARBON=ICARBON+1
+               ENDDO
+               IF(ICARBON.EQ.2.AND.INTRONG.EQ.1) THEN
+                  NTYPE(IFFAT)=32
+                  GOTO 601
+               END IF
+            END IF
+         END IF
+         IF(NTYPE(IFFAT).EQ.57)THEN
+            I56=0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(JFFAT).EQ.56) I56=I56+1
+            ENDDO
+            IF(I56.EQ.2)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NTYPE(JFFAT).EQ.56)THEN
+                     NTYPE(JFFAT)=55
+                     QMMFF(JFFAT)=PT5
+                  END IF
+               ENDDO
+            END IF
+         END IF
+         IF(NTYPE(IFFAT).EQ.8)THEN
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NTYPE(JFFAT).EQ.25)THEN
+                  LOXY=0
+                  DO J=1,LBOND(10,JFFAT)
+                     JBOND=LBOND(J,JFFAT)
+                     KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                     IF(NINT(ZANF(KFFAT)).EQ.8.AND.
+     *                  LBOND(10,KFFAT).EQ.1) LOXY=LOXY+1
+                  ENDDO
+                  IF(LOXY.GE.2)THEN
+                     NTYPE(IFFAT)=43
+                     GOTO 601
+                  END IF
+               END IF
+               IF(NINT(ZANF(JFFAT)).EQ.6)THEN
+                  DO K=1,LBOND(10,JFFAT)
+                     JBOND=LBOND(K,JFFAT)
+                     KFFAT=IPAIR(1,JBOND)+IPAIR(2,JBOND)-JFFAT
+                     IF(NTYPE(KFFAT).EQ.51)THEN
+                        NTYPE(IFFAT)=10
+                        GOTO 601
+                     END IF
+                  ENDDO
+               END IF
+            ENDDO
+         END IF
+ 601  CONTINUE
+      DO IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.9)THEN
+            LCOUNT=2
+            BTHERE=THREE
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *         LCOUNT=LCOUNT-1
+               BTHERE=BTHERE-BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(LCOUNT.EQ.1)THEN
+            DO I=1,2
+               IF(BORDER(LBOND(I,IFFAT)).LT.0.1D-10)
+     *         BORDER(LBOND(I,IFFAT))=BTHERE
+            ENDDO
+            END IF
+         END IF
+         IF(NTYPE(IFFAT).EQ.2)THEN
+            LNTRO3=0
+            LTPC3 =0
+            LNTG  =0
+            DO I=1,3
+               KBOND=LBOND(I,IFFAT)
+               JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.LBOND(10,JFFAT).EQ.3)
+     *         LNTRO3=LNTRO3+1
+               IF(NTYPE(JFFAT).EQ.3) LTPC3=LTPC3+1
+               IF(NINT(ZANF(JFFAT)).EQ.7.AND.BORDER(KBOND).EQ.TWO)
+     *         LNTG=LNTG+1
+            ENDDO
+            IF(LNTG.EQ.1) NTYPE(IFFAT)=3
+            IF(LNTRO3.EQ.2.AND.LTPC3.EQ.1)THEN
+               DO I=1,3
+                  KBOND=LBOND(I,IFFAT)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+                  IF(NINT(ZANF(JFFAT)).EQ.7.AND.
+     *               LBOND(10,JFFAT).EQ.3     )THEN
+                     NTYPE(JFFAT)=55
+                     QMMFF(JFFAT)=PT5
+                  END IF
+               ENDDO
+               NTYPE(IFFAT)=57
+            END IF
+         END IF
+      ENDDO
+ 605  CONTINUE
+C
+C     -- MORE BOND ORDER
+C
+      BCOUNT2=ZERO
+      ICOUNT=0
+ 995  CONTINUE
+      DO IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.6)THEN
+            BTHERE1=FOUR
+            LINKC1=0
+            JBOND=0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               BTHERE1=BTHERE1-BORDER(KBOND)
+               IF(BORDER(KBOND).EQ.ZERO) THEN
+                  LINKC1=LINKC1+1
+                  JBOND=KBOND
+               END IF
+            ENDDO
+            IF(LINKC1.EQ.1.AND.JBOND.NE.0) BORDER(JBOND)=BTHERE1
+         END IF
+         IF(NINT(ZANF(IFFAT)).EQ.7.AND.LBOND(10,IFFAT).EQ.3)THEN
+            LOXYB=0
+            LOXY=0
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               IF(BORDER(KBOND).EQ.TWO) LOXYB=LOXYB+1
+            ENDDO
+            IF(LOXYB.EQ.0)THEN
+               BTHERE=THREE
+               LINKN=0
+               JBOND=0
+               DO I=1,LBOND(10,IFFAT)
+                  KBOND=LBOND(I,IFFAT)
+                  BTHERE=BTHERE-BORDER(KBOND)
+                  IF(BORDER(KBOND).EQ.ZERO) THEN
+                     LINKN=LINKN+1
+                     JBOND=KBOND
+                  END IF
+               ENDDO
+               IF(LINKN.EQ.1.AND.JBOND.NE.0) BORDER(JBOND)=BTHERE
+               IF(LINKN.EQ.2.AND.BTHERE.EQ.TWO) THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     BTHERE=BTHERE-BORDER(KBOND)
+                     IF(BORDER(KBOND).EQ.ZERO)  BORDER(KBOND)=ONE
+                  ENDDO
+               END IF
+               IF(LINKN.EQ.3.AND.BTHERE.EQ.THREE)THEN
+                  DO I=1,LBOND(10,IFFAT)
+                     KBOND=LBOND(I,IFFAT)
+                     BTHERE=BTHERE-BORDER(KBOND)
+                     IF(BORDER(KBOND).EQ.ZERO)  BORDER(KBOND)=ONE
+                  ENDDO
+               END IF
+            END IF
+         END IF
+      ENDDO
+C
+      BCOUNT1=ZERO
+      ICOUNT=ICOUNT+1
+      DO IBOND=1,NBOND
+         BCOUNT1=BCOUNT1+BORDER(IBOND)
+      ENDDO
+      IF(ABS(BCOUNT1-BCOUNT2).LT.0.1D-10) GOTO 996
+      IF(ICOUNT.GT.300) GOTO 996
+      BCOUNT2=BCOUNT1
+      GOTO 995
+ 996  CONTINUE
+C
+C
+C     -- MORE NTYPE
+      DO IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.8)THEN
+            DO IANGL=1,NANGL
+               K1=KLIST(1,IANGL)
+               K2=KLIST(2,IANGL)
+               K3=KLIST(3,IANGL)
+               JBOND=0
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *                            LBOND(10,K2).LT.4.AND.
+     *            NINT(ZANF(K3)).EQ.16)THEN
+                  DO I=1,LBOND(10,K2)
+                     KBOND=LBOND(I,K2)
+                     KKK3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(BORDER(KBOND).EQ.TWO.AND.KKK3.EQ.K3) JBOND=KBOND
+                  ENDDO
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *                            LBOND(10,K2).LT.4.AND.
+     *            NINT(ZANF(K1)).EQ.16)THEN
+                  DO I=1,LBOND(10,K2)
+                     KBOND=LBOND(I,K2)
+                     KKK3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(BORDER(KBOND).EQ.TWO.AND.KKK3.EQ.K1) JBOND=KBOND
+                  ENDDO
+               END IF
+               IF(JBOND.NE.0) NTYPE(IFFAT)=10
+            ENDDO
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.40.AND.NUMRIN(10,IFFAT).EQ.1.AND.
+     *      LISTRIN(10,NUMRIN(1,IFFAT)).EQ.5.AND.
+     *      NRINTYP(NUMRIN(1,IFFAT)).EQ.0)THEN
+            DO IANGL=1,NANGL
+               K1=KLIST(1,IANGL)
+               K2=KLIST(2,IANGL)
+               K3=KLIST(3,IANGL)
+               JBOND=0
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *                            LBOND(10,K2).LT.4.AND.
+     *            NINT(ZANF(K3)).EQ.16)THEN
+                  DO I=1,LBOND(10,K2)
+                     KBOND=LBOND(I,K2)
+                     KKK3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(BORDER(KBOND).EQ.TWO.AND.KKK3.EQ.K3) JBOND=KBOND
+                  ENDDO
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.6.AND.
+     *                            LBOND(10,K2).LT.4.AND.
+     *            NINT(ZANF(K1)).EQ.16)THEN
+                  DO I=1,LBOND(10,K2)
+                     KBOND=LBOND(I,K2)
+                     KKK3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+                     IF(BORDER(KBOND).EQ.TWO.AND.KKK3.EQ.K1) JBOND=KBOND
+                  ENDDO
+               END IF
+               IF(JBOND.NE.0) NTYPE(IFFAT)=10
+            ENDDO
+         END IF
+      ENDDO
+C
+C
+C     -- H NTYPE --
+      DO 600 IFFAT=1,NFFAT
+         IF(NINT(ZANF(IFFAT)).EQ.1.AND.NTYPE(IFFAT).EQ.0)THEN
+            KBOND=LBOND(1,IFFAT)
+            IXX =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(NTYPE(IXX).EQ.54.OR.
+     *         NTYPE(IXX).EQ.55.OR.
+     *         NTYPE(IXX).EQ.56.OR.
+     *         NTYPE(IXX).EQ.81.OR.
+     *         NTYPE(IXX).EQ.58.OR.
+     *         NTYPE(IXX).EQ.34    )THEN
+               NTYPE(IFFAT)=36
+               GOTO 600
+            END IF
+            IF(NTYPE(IXX).EQ.51) THEN
+               NTYPE(IFFAT)=52
+               GOTO 600
+            END IF
+            IF(NTYPE(IXX).EQ.49) THEN
+               NTYPE(IFFAT)=50
+               GOTO 600
+            END IF
+            IF(NINT(ZANF(IXX)).EQ.16.OR.
+     *         NINT(ZANF(IXX)).EQ.15)THEN
+               NTYPE(IFFAT)=71
+               GOTO 600
+            END IF
+            IF(NTYPE(IXX).EQ.43.OR.
+     *         NTYPE(IXX).EQ.10.OR.
+     *         NTYPE(IXX).EQ.48) THEN
+               NTYPE(IFFAT)=28
+               GOTO 600
+            END IF
+            IF(NTYPE(IXX).EQ.8.OR.
+     *         NTYPE(IXX).EQ.39.OR.
+     *         NTYPE(IXX).EQ.62)THEN
+               NTYPE(IFFAT)=23
+               GOTO 600
+            END IF
+            DO IDIHR=1,NDIHR
+               L1=LLIST(1,IDIHR)
+               L2=LLIST(2,IDIHR)
+               L3=LLIST(3,IDIHR)
+               L4=LLIST(4,IDIHR)
+               IF(L1.EQ.IFFAT.AND.NTYPE(L2).EQ.40.AND.
+     *            NINT(ZANF(L3)).EQ.6.AND.NINT(ZANF(L4)).EQ.6.AND.
+     *            LBOND(10,L3).LE.3.AND.LBOND(10,L4).LE.3)THEN
+                  NTYPE(IFFAT)=28
+                  GOTO 600
+               END IF
+               IF(L4.EQ.IFFAT.AND.NTYPE(L3).EQ.40.AND.
+     *            NINT(ZANF(L2)).EQ.6.AND.NINT(ZANF(L1)).EQ.6.AND.
+     *            LBOND(10,L2).LE.3.AND.LBOND(10,L1).LE.3)THEN
+                  NTYPE(IFFAT)=28
+                  GOTO 600
+               END IF
+               IF(L1.EQ.IFFAT.AND.NINT(ZANF(L2)).EQ.8.AND.
+     *            NTYPE(L3).EQ.3.AND.NINT(ZANF(L4)).EQ.8)THEN
+                  NTYPE(IFFAT)=24
+                  GOTO 600
+               END IF
+               IF(L4.EQ.IFFAT.AND.NINT(ZANF(L3)).EQ.8.AND.
+     *            NTYPE(L2).EQ.3.AND.NINT(ZANF(L1)).EQ.8)THEN
+                  NTYPE(IFFAT)=24
+                  GOTO 600
+               END IF
+            ENDDO
+            DO IANGL=1,NANGL
+               K1=KLIST(1,IANGL)
+               K2=KLIST(2,IANGL)
+               K3=KLIST(3,IANGL)
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.AND.
+     *            NINT(ZANF(K3)).EQ.8.)THEN
+                  NTYPE(IFFAT)=23
+                  GOTO 600
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.7.AND.
+     *            NINT(ZANF(K1)).EQ.8.)THEN
+                  NTYPE(IFFAT)=23
+                  GOTO 600
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.8.AND.
+     *            NINT(ZANF(K3)).EQ.15)THEN
+                  NTYPE(IFFAT)=24
+                  GOTO 600
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.8.AND.
+     *            NINT(ZANF(K1)).EQ.15)THEN
+                  NTYPE(IFFAT)=24
+                  GOTO 600
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.8.AND.
+     *            NINT(ZANF(K3)).EQ.16.)THEN
+                  NTYPE(IFFAT)=33
+                  GOTO 600
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.8.AND.
+     *            NINT(ZANF(K1)).EQ.16.)THEN
+                  NTYPE(IFFAT)=33
+                  GOTO 600
+               END IF
+               IF(K1.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.8.AND.
+     *            (NTYPE(K3).EQ.37.OR.NTYPE(K3).EQ.2.OR.
+     *             NTYPE(K3).EQ.78.OR.NTYPE(K3).EQ.63.OR.
+     *             NTYPE(K3).EQ.64.OR.NTYPE(K3).EQ.30))THEN
+                  NTYPE(IFFAT)=29
+                  GOTO 600
+               END IF
+               IF(K3.EQ.IFFAT.AND.NINT(ZANF(K2)).EQ.8.AND.
+     *             (NTYPE(K1).EQ.37.OR.NTYPE(K1).EQ.2.OR.
+     *              NTYPE(K1).EQ.78.OR.NTYPE(K1).EQ.63.OR.
+     *              NTYPE(K1).EQ.64.OR.NTYPE(K1).EQ.30))THEN
+                  NTYPE(IFFAT)=29
+                  GOTO 600
+               END IF
+            ENDDO
+            DO IDIHR=1,NDIHR
+               L1=LLIST(1,IDIHR)
+               L2=LLIST(2,IDIHR)
+               L3=LLIST(3,IDIHR)
+               L4=LLIST(4,IDIHR)
+               IF(L1.EQ.IFFAT.AND.NINT(ZANF(L2)).EQ.8.AND.
+     *            NINT(ZANF(L3)).EQ.6.AND.NINT(ZANF(L4)).EQ.7.AND.
+     *            NTYPE(L3).NE.1)THEN
+                  NTYPE(IFFAT)=29
+                  GOTO 600
+               END IF
+               IF(L4.EQ.IFFAT.AND.NINT(ZANF(L3)).EQ.8.AND.
+     *            NINT(ZANF(L2)).EQ.6.AND.NINT(ZANF(L1)).EQ.7.AND.
+     *            NTYPE(L2).NE.1)THEN
+                  NTYPE(IFFAT)=29
+                  GOTO 600
+               END IF
+            ENDDO
+            IF(NINT(ZANF(IXX)).EQ.6.OR.
+     *         NINT(ZANF(IXX)).EQ.14)THEN
+               NTYPE(IFFAT)=5
+               GOTO 600
+            END IF
+            IF(NINT(ZANF(IXX)).EQ.8)THEN
+               NTYPE(IFFAT)=21
+               GOTO 600
+            END IF
+            IF(NINT(ZANF(IXX)).EQ.7.AND.
+     *         LBOND(10, IXX).EQ.2)THEN
+               NTYPE(IFFAT)=27
+            END IF
+            IF(NINT(ZANF(IXX)).EQ.7.AND.
+     *         LBOND(10, IXX).EQ.3)THEN
+               NTYPE(IFFAT)=28
+            END IF
+         END IF
+ 600  CONTINUE
+C
+C
+C     -- MORE NTYPE
+      DO IFFAT=1,NFFAT
+         IF(NTYPE(IFFAT).EQ.23)THEN
+            KBOND=LBOND(1,IFFAT)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+            IF(NTYPE(JFFAT).EQ.43) NTYPE(IFFAT)=28
+         END IF
+         IF(NTYPE(IFFAT).EQ.81.AND.
+     *      ABS(QMMFF(IFFAT)).LT.0.1D-10) QMMFF(IFFAT)=ONE
+         IF(NTYPE(IFFAT).NE.32.AND.
+     *      NTYPE(IFFAT).NE.34.AND.
+     *      NTYPE(IFFAT).NE.35.AND.
+     *      NTYPE(IFFAT).NE.49.AND.
+     *      NTYPE(IFFAT).NE.51.AND.
+     *      NTYPE(IFFAT).NE.54.AND.
+     *      NTYPE(IFFAT).NE.55.AND.
+     *      NTYPE(IFFAT).NE.56.AND.
+     *      NTYPE(IFFAT).NE.58.AND.
+     *      NTYPE(IFFAT).NE.62.AND.
+     *      NTYPE(IFFAT).NE.72.AND.
+     *      NTYPE(IFFAT).NE.76.AND.
+     *      NTYPE(IFFAT).NE.81.AND.
+     *      NTYPE(IFFAT).NE.61.AND.
+     *      NTYPE(IFFAT).LE.86     ) QMMFF(IFFAT)=ZERO
+      ENDDO
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IF(NRINTYP(IRING).EQ.1.AND.MB.EQ.5)THEN
+C           - BETA  POSITION C OR N
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               MBEFO2=MBEFO-1
+               IF(MBEFO2.EQ.0) MBEFO2=MB
+               MNEXT=M+1
+               IF(M.EQ.MB) MNEXT=1
+               MNEXT2=MNEXT+1
+               IF(MNEXT.EQ.MB) MNEXT2=1
+               J     =LISTRIN(M     ,IRING)
+               LARMRIN=0
+               DO KK=1,NUMRIN(10,J)
+                  IF(NRINTYP(NUMRIN(KK,J)).EQ.1.AND.
+     *               LISTRIN(10,NUMRIN(KK,J)).EQ.5)
+     *                LARMRIN=LARMRIN+1
+               ENDDO
+               IF(LARMRIN.NE.2)THEN
+               JBEFO =LISTRIN(MBEFO ,IRING)
+               JBEFO2=LISTRIN(MBEFO2,IRING)
+               JNEXT =LISTRIN(MNEXT ,IRING)
+               JNEXT2=LISTRIN(MNEXT2,IRING)
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.63).AND.
+     *            (NINT(ZANF(JBEFO2)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO2)).EQ.8 .OR.
+     *             NTYPE(JBEFO2).EQ.39  ))
+     *             NTYPE(J)=64
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.63).AND.
+     *            (NINT(ZANF(JNEXT2)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT2)).EQ.8 .OR.
+     *             NTYPE(JNEXT2).EQ.39  ))
+     *             NTYPE(J)=64
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.65).AND.
+     *            (NINT(ZANF(JBEFO2)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO2)).EQ.8 .OR.
+     *             NTYPE(JBEFO2).EQ.39  ))
+     *             NTYPE(J)=66
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.65).AND.
+     *            (NINT(ZANF(JNEXT2)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT2)).EQ.8 .OR.
+     *             NTYPE(JNEXT2).EQ.39  ))
+     *             NTYPE(J)=66
+               END IF
+            ENDDO
+C           - ALPHA POSITION C OR N
+            DO M=1,MB
+               MBEFO=M-1
+               IF(MBEFO.EQ.0) MBEFO=MB
+               MNEXT=M+1
+               IF(M.EQ.MB) MNEXT=1
+               J     =LISTRIN(M     ,IRING)
+               LARMRIN=0
+               DO KK=1,NUMRIN(10,J)
+                  IF(NRINTYP(NUMRIN(KK,J)).EQ.1.AND.
+     *               LISTRIN(10,NUMRIN(KK,J)).EQ.5)
+     *                LARMRIN=LARMRIN+1
+               ENDDO
+               IF(LARMRIN.NE.2)THEN
+               JBEFO =LISTRIN(MBEFO ,IRING)
+               JNEXT =LISTRIN(MNEXT ,IRING)
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.64).AND.
+     *            (NINT(ZANF(JBEFO)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO)).EQ.8 .OR.
+     *             NTYPE(JBEFO).EQ.39    ) )
+     *             NTYPE(J)=63
+               IF((NTYPE(J).EQ.78.OR.NTYPE(J).EQ.64).AND.
+     *            (NINT(ZANF(JNEXT)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT)).EQ.8 .OR.
+     *             NTYPE(JNEXT).EQ.39    ) )
+     *             NTYPE(J)=63
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.66).AND.
+     *            (NINT(ZANF(JBEFO)).EQ.16.OR.
+     *             NINT(ZANF(JBEFO)).EQ.8 .OR.
+     *             NTYPE(JBEFO).EQ.39    ) )
+     *             NTYPE(J)=65
+               IF((NTYPE(J).EQ.79.OR.NTYPE(J).EQ.66).AND.
+     *            (NINT(ZANF(JNEXT)).EQ.16.OR.
+     *             NINT(ZANF(JNEXT)).EQ.8 .OR.
+     *             NTYPE(JNEXT).EQ.39     ) )
+     *             NTYPE(J)=65
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+      DO IRING=1,NRING
+         MB=LISTRIN(10,IRING)
+         IF(NRINTYP(IRING).EQ.1.AND.MB.EQ.5)THEN
+C           - BETA  POSITION C OR N
+            DO K=1,MB
+               LARMRIN=0
+               J=LISTRIN(K     ,IRING)
+               DO KK=1,NUMRIN(10,J)
+                  IF(NRINTYP(NUMRIN(KK,J)).EQ.1.AND.
+     *               LISTRIN(10,NUMRIN(KK,J)).EQ.5)
+     *                LARMRIN=LARMRIN+1
+               ENDDO
+               IF(LARMRIN.EQ.2)THEN
+               NTEST1=0
+               NTEST2=0
+               DO I=1,LBOND(10,J)
+                  KBOND=LBOND(I,J)
+                  JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-J
+                  IF(NTYPE(JFFAT).EQ.59.OR.
+     *               NTYPE(JFFAT).EQ.44.OR.
+     *               NTYPE(JFFAT).EQ.39 ) NTEST1=NTEST1+1
+                  DO II=1,LBOND(10,JFFAT)
+                     MBOND=LBOND(II,JFFAT)
+                     KFFAT=IPAIR(1,MBOND)+IPAIR(2,MBOND)-JFFAT
+                     IF(NTYPE(KFFAT).EQ.59.OR.
+     *                  NTYPE(KFFAT).EQ.44.OR.
+     *                  NTYPE(KFFAT).EQ.39 ) NTEST2=NTEST2+1
+                  ENDDO
+               ENDDO
+               IF(NTEST1.EQ.2.AND.NTEST2.EQ.0) NTYPE(J)=63
+               IF(NTEST1.EQ.0.AND.NTEST2.EQ.2) NTYPE(J)=64
+               IF(NTEST1.EQ.2.AND.NTEST2.EQ.2) NTYPE(J)=63
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+C
+C     -- FINAL BOND ORDER
+C
+      DO IBOND=1,NBOND
+         IF(BORDER(IBOND).EQ.ZERO) THEN
+            IFFAT = IPAIR(1,IBOND)
+            BNDCNT=ZERO
+            DO I=1,LBOND(10,IFFAT)
+               BNDADD = ZERO
+               IF(LBOND(I,IFFAT).NE.IBOND) BNDADD = ONE
+               BNDADD = MAX(BNDADD,BORDER(LBOND(I,IFFAT)))
+               BNDCNT = BNDCNT+BNDADD
+            ENDDO
+            NBMAX = 1
+            IF(NINT(ZANF(IFFAT)).EQ. 1) NBMAX = 1
+            IF(NINT(ZANF(IFFAT)).EQ. 6) NBMAX = 4
+            IF(NINT(ZANF(IFFAT)).EQ. 7) NBMAX = 3
+            IF(NINT(ZANF(IFFAT)).EQ. 8) NBMAX = 2
+            IF(NINT(ZANF(IFFAT)).EQ. 9) NBMAX = 1
+            IF(NINT(ZANF(IFFAT)).EQ.14) NBMAX = 4
+            IF(NINT(ZANF(IFFAT)).EQ.15) NBMAX = 3
+            IF(NINT(ZANF(IFFAT)).EQ.16) NBMAX = 2
+            IF(NINT(ZANF(IFFAT)).EQ.17) NBMAX = 1
+            BMISS1 = DBLE(NBMAX) - BNDCNT
+            IFFAT = IPAIR(2,IBOND)
+            BNDCNT=ZERO
+            DO I=1,LBOND(10,IFFAT)
+               BNDADD = ZERO
+               IF(LBOND(I,IFFAT).NE.IBOND) BNDADD = ONE
+               BNDADD = MAX(BNDADD,BORDER(LBOND(I,IFFAT)))
+               BNDCNT = BNDCNT+BNDADD
+            ENDDO
+            NBMAX = 1
+            IF(NINT(ZANF(IFFAT)).EQ. 1) NBMAX = 1
+            IF(NINT(ZANF(IFFAT)).EQ. 6) NBMAX = 4
+            IF(NINT(ZANF(IFFAT)).EQ. 7) NBMAX = 3
+            IF(NINT(ZANF(IFFAT)).EQ. 8) NBMAX = 2
+            IF(NINT(ZANF(IFFAT)).EQ. 9) NBMAX = 1
+            IF(NINT(ZANF(IFFAT)).EQ.14) NBMAX = 4
+            IF(NINT(ZANF(IFFAT)).EQ.15) NBMAX = 3
+            IF(NINT(ZANF(IFFAT)).EQ.16) NBMAX = 2
+            IF(NINT(ZANF(IFFAT)).EQ.17) NBMAX = 1
+            BMISS2 = DBLE(NBMAX) - BNDCNT
+            IF(BMISS1.GT.ZERO.AND.BMISS2.GT.ZERO) THEN
+               BORDER(IBOND) = (BMISS1 + BMISS2)*PT5
+            END IF
+         END IF
+      ENDDO
+C
+C     -- SPECIAL NTYPE FOR HE, NE, AR, KR, XE, N2, O2 --
+C        FOR MD-CCS CALCULATIONS
+C
+      DO IFFAT=1,NFFAT
+C        -- SINGLE ATOM --
+         IF(NTYPE(IFFAT).EQ.0) THEN
+         IF(NINT(ZANF(IFFAT)).EQ. 2.OR.
+     *      NINT(ZANF(IFFAT)).EQ.10.OR.
+     *      NINT(ZANF(IFFAT)).EQ.18.OR.
+     *      NINT(ZANF(IFFAT)).EQ.36.OR.
+     *      NINT(ZANF(IFFAT)).EQ.54.OR.
+     *      NINT(ZANF(IFFAT)).EQ. 7.OR.
+     *      NINT(ZANF(IFFAT)).EQ. 8    ) THEN
+            BNDCNT=ZERO
+            DO I=1,LBOND(10,IFFAT)
+               BNDCNT=BNDCNT+BORDER(LBOND(I,IFFAT))
+            ENDDO
+            IF(BNDCNT.EQ.ZERO) THEN
+               IF(NINT(ZANF(IFFAT)).EQ. 2) NTYPE(IFFAT) = 120 ! HE
+               IF(NINT(ZANF(IFFAT)).EQ.10) NTYPE(IFFAT) = 119 ! NE
+               IF(NINT(ZANF(IFFAT)).EQ.18) NTYPE(IFFAT) = 118 ! AR
+               IF(NINT(ZANF(IFFAT)).EQ.36) NTYPE(IFFAT) = 117 ! KR
+               IF(NINT(ZANF(IFFAT)).EQ.54) NTYPE(IFFAT) = 116 ! XE
+            END IF
+            IF(BNDCNT.EQ.TWO) THEN
+               IF(NINT(ZANF(IFFAT)).EQ. 8) NTYPE(IFFAT) = 108 ! O2
+            END IF
+         END IF
+         END IF
+C        -- N2 WITH TRIPLE BOND --
+C           MMFF94 ALREADY IDENTIFY IT AS TYPE 42
+         IF(NTYPE(IFFAT).EQ.42) THEN
+            DO I=1,LBOND(10,IFFAT)
+               KBOND=LBOND(I,IFFAT)
+               IXX  =IPAIR(1,KBOND)+IPAIR(2,KBOND)-IFFAT
+               IF(NINT(ZANF(IXX)).EQ.7)THEN
+                  NTYPE(IFFAT)=107 ! N2
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+C
+C     -- ALL DONE AND PRINT
+      IF(MASWRK) THEN
+         WRITE(IW,'(/A)') '     ATOM    TYPE     FORMAL Q'
+         DO IFFAT=1,NFFAT
+            WRITE(IW,'(1X,I8,1X,I7,4X,F9.6)')
+     *      IFFAT,NTYPE(IFFAT),QMMFF(IFFAT)
+         ENDDO
+         WRITE(IW,*) ' '
+C
+         WRITE(IW,'(A,I6,A,A)')' THERE ARE ',NRING,' RINGS.',
+     *                       ' TYPE=1 IS AROMATIC.'
+         IF(NRING.GT.0)
+     *   WRITE(IW,'(A,A)')'    RING    TYPE     ATOM1   ATOM2',
+     *         '   ATOM3   ATOM4   ATOM5   ATOM6   ATOM7   ATOM8'
+         DO IRING=1,NRING
+            WRITE(IW,'(2(1X,I7),A,8(1X,I7))')
+     *      IRING,NRINTYP(IRING),'  ',(LISTRIN(J,IRING),J=1,8)
+         ENDDO
+C
+         DO IFFAT=1,NFFAT
+            IF(NTYPE(IFFAT).EQ.0)THEN
+               WRITE(IW,*) '****************************************'
+               WRITE(IW,'(A,I8)')
+     *                    ' ERROR: MMFF94 NTYPE=0 FOR ATOM ',IFFAT
+               WRITE(IW,*) '****************************************'
+               NUCZ = NINT(ZANF(IFFAT))
+               IF((NUCZ.GE.11.AND.NUCZ.LE.13)  .OR.
+     *            (NUCZ.GE.19.AND.NUCZ.LE.31)  .OR.
+     *            (NUCZ.GE.37.AND.NUCZ.LE.50)  .OR.
+     *            (NUCZ.GE.55.AND.NUCZ.LE.83)  .OR.
+     *            (NUCZ.GE.87) )  THEN   !  FOR METAL IONS
+               WRITE(IW,'(/1X,A,A/1X,A,A,A/1X,A,A/)')
+     *         'IT IS MOST LIKELY THAT MMFF94 HAS ',
+     *         'NO PARAMETERS FOR THIS ATOM (ELEMENT).',
+     *         'FOR QM/MM PURPOSE, WE CAN USE LI, NA,',
+     *         ' K, MG, CA, FE, CU, ZN',
+     *         ' ATOMS TO REPLACE THIS ATOM, ',
+     *         'THEN MAUNALLY CHANGE THE NAME ',
+     *         'AND NUCLEAR CHARGE BACK IN THE RESULTED $FFDATA.'
+               CALL ABRT
+               END IF
+            END IF
+            IF(NINT(ZANF(IFFAT)).EQ.6.AND.NTYPE(IFFAT).NE.57)THEN
+               BNDCNT=ZERO
+               DO I=1,LBOND(10,IFFAT)
+                  BNDCNT=BNDCNT+BORDER(LBOND(I,IFFAT))
+               ENDDO
+               IF(ABS(BNDCNT-4.0D+00).GT.0.1D-10)THEN
+               WRITE(IW,*) '*****************************************'
+               WRITE(IW,'(A,I8,A)')
+     *                   ' ERROR: ATOM ',IFFAT,' HAS WRONG BOND ORDER'
+               WRITE(IW,*) '*****************************************'
+               END IF
+            END IF
+         ENDDO
+         WRITE(IW,*) ' '
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK MMFFPAR
+!>
+!> @brief    read MMFF94 parameter files
+!>
+!> @author   Hongbo Zhu and Hui Li
+!>           - Feb 2013
+!>
+!> @details  read MMFF94 parameter files
+!>
+      SUBROUTINE MMFFPAR(MXMMTP,ATMNAM,CORD,ZANF,ZMAS,CHARG,POL,
+     *                   SIG,EPS,SIG2,EPS2,IPAIR,
+     *                   KLIST,LLIST,MLIST,KBLST,
+     *                   FCBOND,BOND0,FCANGL,ANGL0,
+     *                   FCSTBD,FCWAGG,FCDIHR,
+     *                   CLPR,ZLPR,NLPR,
+     *                   FCLJTP,NTYPE,QMMFF,
+     *                   LBOND,NRINTYP,
+     *                   NSBTYP,NBNDTYP,IDATM,IMLTB,IPILP,
+     *                   NBNDT,NBNDT2,NANGTYP,
+     *                   ITTN,VDWIN,BNDCAG,
+     *                   PCHAG,NLCBND,IADTYP,CHARGL,
+     *                   NUMRIN,BORDER,LISTRIN,ANGLBC,NTYPMP,NMPCNT,
+     *                   ICRD,LINH,IVAL)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (TOKCAL=627.509469D+00)
+      PARAMETER (TOHART=1.0D+00/TOKCAL)
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (TOBOHR=1.0D+00/TOANGS)
+      PARAMETER (DEGREE=57.2957795130823D+00)
+      PARAMETER (TORAD=1.0D+00/DEGREE)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (PT5=0.50D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (PI=3.14159265358979323846264338D+00)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      CHARACTER*10  ATMNAM
+      CHARACTER*100 WD100
+      CHARACTER*90  PARFILE
+      CHARACTER*1   ADTYPE
+      CHARACTER*27  DEFAULT
+      CHARACTER*27  BLANK
+C
+      DIMENSION ATMNAM(*),CORD(3,*),ZANF(*),ZMAS(*),
+     *          CHARG(*),POL(*),SIG(*),EPS(*),SIG2(*),EPS2(*),
+     *          BOND0(*),FCBOND(*),ANGL0(*),FCANGL(*),IPAIR(2,*),
+     *          CLPR(4,*),ZLPR(4,*),NLPR(*),
+     *          KLIST(3,*),LLIST(4,*),MLIST(4,*),
+     *          NTYPE(*),QMMFF(*),LBOND(10,*),NRINTYP(*),
+     *          FCSTBD(2,*),FCWAGG(*),FCDIHR(3,*),
+     *          NSBTYP(*),NBNDTYP(*),IDATM(2,MXMMTP),IMLTB(*),
+     *          IPILP(*),
+     *          NBNDT(4,*),NBNDT2(4,*),NANGTYP(*),
+     *          ITTN(*),VDWIN(4,MXMMTP),BNDCAG(*),
+     *          PCHAG(2,*),NLCBND(*),FCLJTP(2,MXMMTP,*),KBLST(2,*),
+     *          IADTYP(MXMMTP),CHARGL(*),NUMRIN(10,*),BORDER(*),
+     *          LISTRIN(10,*),ANGLBC(2,*),NTYPMP(5,*),NMPCNT(2,*),
+     *          ICRD(*),LINH(*),IVAL(*)
+C
+      DIMENSION XAR(86),BLOMCVLN(54),ERPFTI(2,16)
+C
+      COMMON /FFMAX / MXFFAT,MXBOND,MXANGL,MXDIHR,MXDIHB,MXCMAP,
+     *                MXWAGG
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFTYPE/ WT14LJ,WT14CH,C3BOND,C4BOND,C3ANGL,
+     *                NFFTYP,NFFFILE,LJQMMM,LJQM,INTCHG,
+     *                LJSIGMA,JTOPFILE(90),JPARFILE(90),
+     *                JTOPAMIA(90),JTOPNTER(90),JTOPCTER(90),
+     *                JTOPNUCA(90),JPARFIL2(90),JPARFIL3(90)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     XAR DATA FOUND AT:
+C     HTTP://WWW.WEBELEMENTS.COM/PERIODICITY/ELECTRONEG_ALLRED_ROCHOW/
+C     HTTP://WWW.CCL.NET/CCA/DATA/MMFF94/
+C
+      DATA (XAR(NUCZ),NUCZ=1,2)/2.20D+00,5.50D+00/
+      DATA (XAR(NUCZ),NUCZ=3,10)
+     *  /0.97D+00,1.47D+00,2.01D+00,2.50D+00,
+     *   3.07D+00,3.50D+00,4.10D+00,4.84D+00/
+      DATA (XAR(NUCZ),NUCZ=11,18)
+     *  /1.01D+00,1.23D+00,1.47D+00,1.74D+00,
+     *   2.06D+00,2.44D+00,2.83D+00,3.20D+00/
+      DATA (XAR(NUCZ),NUCZ=19,36)
+     *  /0.91D+00,1.04D+00,
+     *   1.30D+00,1.50D+00,1.60D+00,1.60D+00,1.50D+00,
+     *   1.80D+00,1.80D+00,1.80D+00,1.90D+00,1.60D+00,
+     *   1.82D+00,2.02D+00,2.20D+00,2.48D+00,2.74D+00,2.94D+00/
+      DATA (XAR(NUCZ),NUCZ=37,54)
+     *  /0.89D+00,0.99D+00,
+     *   1.30D+00,1.40D+00,1.60D+00,1.80D+00,1.90D+00,
+     *   2.20D+00,2.20D+00,2.20D+00,1.90D+00,1.70D+00,
+     *   1.49D+00,1.72D+00,1.82D+00,2.01D+00,2.21D+00,2.40D+00/
+      DATA (XAR(NUCZ),NUCZ=55,86)
+     *  /0.86D+00,0.97D+00,
+     *   1.08D+00,1.08D+00,1.07D+00,1.07D+00,1.07D+00,1.07D+00,1.01D+00,
+     *   1.11D+00,1.10D+00,1.10D+00,1.10D+00,1.11D+00,1.11D+00,1.06D+00,
+     *   1.14D+00,1.23D+00,1.33D+00,1.40D+00,1.46D+00,
+     *   1.52D+00,1.55D+00,1.44D+00,1.42D+00,1.44D+00,
+     *   1.44D+00,1.55D+00,1.67D+00,1.76D+00,1.90D+00,2.20D+00/
+C
+C     COVALENT RADII FOUND AT:
+C     HTTP://WWW.CCL.NET/CCA/DATA/MMFF94/
+C
+      DATA (BLOMCVLN(NUCZ),NUCZ=1,2)/0.33D+00,0.00D+00/
+      DATA (BLOMCVLN(NUCZ),NUCZ=3,10)
+     *  /1.34D+00,0.90D+00,0.81D+00,0.77D+00,
+     *   0.73D+00,0.72D+00,0.74D+00,0.00D+00/
+      DATA (BLOMCVLN(NUCZ),NUCZ=11,18)
+     *  /1.54D+00,1.30D+00,1.22D+00,1.15D+00,
+     *   1.09D+00,1.03D+00,1.01D+00,0.00D+00/
+      DATA (BLOMCVLN(NUCZ),NUCZ=19,36)
+     *  /1.96D+00,1.74D+00,
+     *   1.44D+00,1.36D+00,0.00D+00,0.00D+00,0.00D+00,
+     *   0.00D+00,0.00D+00,0.00D+00,1.38D+00,1.31D+00,
+     *   1.19D+00,1.20D+00,1.20D+00,1.16D+00,1.15D+00,0.00D+00/
+      DATA (BLOMCVLN(NUCZ),NUCZ=37,54)
+     *  /2.11D+00,1.92D+00,
+     *   1.62D+00,1.48D+00,0.00D+00,0.00D+00,0.00D+00,
+     *   0.00D+00,0.00D+00,0.00D+00,1.53D+00,1.48D+00,
+     *   1.46D+00,1.40D+00,1.41D+00,1.35D+00,1.33D+00,0.00D+00/
+C
+C
+C     HONGBO ZHU, HUI LI, FEB 25, 2013, LINCOLN
+C
+      CALL FFWAGG(MLIST,NFFAT,NBOND,NWAGG,IPAIR,CORD)
+C
+      MAXMAX = MAX(MXWAGG,MAX(MXBOND,MAX(MXANGL,MXDIHR)))
+      CALL VCLR (FCBOND  ,1,   NBOND)
+      CALL VCLR (BOND0   ,1,   NBOND)
+      CALL VCLR (FCSTBD  ,1, 2*NANGL)
+      CALL VCLR (FCWAGG  ,1,   NWAGG)
+      CALL VCLR (FCDIHR  ,1, 3*NDIHR)
+      CALL VICLR(NSBTYP  ,1,   NANGL)
+      CALL VICLR(IDATM   ,1, 2*MXMMTP)
+      CALL VICLR(IMLTB   ,1,   MXMMTP)
+      CALL VICLR(IPILP   ,1,   MXMMTP)
+      CALL VICLR(NBNDT   ,1, 4*NFFAT)
+      CALL VICLR(NBNDT2  ,1, 4*NFFAT)
+      CALL VICLR(NANGTYP ,1,   NANGL)
+      CALL VICLR(ITTN    ,1,   NDIHR)
+      CALL VCLR (VDWIN   ,1, 4*MXMMTP)
+      CALL VCLR (BNDCAG  ,1,   NBOND)
+      CALL VCLR (PCHAG   ,1, 2*MXMMTP)
+      CALL VCLR (CHARG   ,1,   NFFAT)
+      CALL VICLR(NLCBND  ,1,   MAXMAX)
+      CALL VICLR(KBLST   ,1, 2*NANGL)
+      CALL VCLR (FCLJTP  ,1, 2*MXMMTP*MXMMTP)
+      CALL VICLR(IADTYP  ,1,   MXMMTP)
+      CALL VCLR (CHARGL  ,1,   NFFAT)
+      CALL VICLR(NBNDTYP ,1,   NBOND)
+      DO JJJ = 1,27
+         BLANK(JJJ:JJJ) = ' '
+      ENDDO
+C
+      CALL VCLR(ERPFTI,1,32)
+      ERPFTI(1, 6)=2.00D+00
+      ERPFTI(2, 6)=2.12D+00
+      ERPFTI(1, 7)=2.00D+00
+      ERPFTI(2, 7)=1.50D+00
+      ERPFTI(1, 8)=2.00D+00
+      ERPFTI(2, 8)=0.20D+00
+      ERPFTI(1,14)=1.25D+00
+      ERPFTI(2,14)=1.22D+00
+      ERPFTI(1,15)=1.25D+00
+      ERPFTI(2,15)=2.40D+00
+      ERPFTI(1,16)=1.25D+00
+      ERPFTI(2,16)=0.49D+00
+C
+      DO IANGL=1,NANGL
+         K1 = KLIST(1,IANGL)
+         K2 = KLIST(2,IANGL)
+         K3 = KLIST(3,IANGL)
+         DO II=1,LBOND(10,K2)
+            KBOND=LBOND(II,K2)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+            IF(JFFAT.EQ.K1) KBLST(1,IANGL)=KBOND
+            IF(JFFAT.EQ.K3) KBLST(2,IANGL)=KBOND
+         ENDDO
+      ENDDO
+C
+      DO J=1,90
+         PARFILE(J:J) = CHAR(JPARFILE(J))
+      ENDDO
+      IF(JPARFILE(90).EQ.0) GOTO 100
+      OPEN(12,FILE=PARFILE(1:JPARFILE(90)),STATUS='OLD',ERR=100)
+      IF(MASWRK)WRITE(IW,*)' '
+      IF(MASWRK)WRITE(IW,*)'QUANPOL SUCCESSFULLY OPENED THE FILE:'
+      IF(MASWRK)WRITE(IW,*)"PARFILE='",PARFILE(1:JPARFILE(90)),"'"
+      IF(MASWRK)WRITE(IW,*)' '
+      GOTO 110
+ 100  CONTINUE
+      IF(MASWRK)WRITE(IW,*)' '
+      IF(MASWRK)WRITE(IW,*)'ERROR: QUANPOL CANNOT OPEN THE FILE:'
+      IF(MASWRK)WRITE(IW,*)"  PARFILE='",PARFILE(1:JPARFILE(90)),"'"
+      IF(MASWRK)WRITE(IW,*)' '
+      CALL ABRT
+C
+C
+ 110  CONTINUE
+C
+C
+      IF(MASWRK)THEN
+         REWIND(12)
+ 800     CONTINUE
+         READ(12,'(A100)',END=820) WD100
+C        ASCII CODE: 65-90 = UPPER CASE, 97-122, LOWER CASE
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*SYMBOL  TYPE   DEFAU') GOTO 800
+ 810     CONTINUE
+         READ(12,'(A100)',END=820) WD100
+         DEFAULT=WD100(9:35)
+         IF(DEFAULT.EQ.BLANK) GOTO 810
+         READ(DEFAULT,*,ERR=820) LEVEL1,LEVEL2,LEVEL3,LEVEL4,LEVEL5
+         NTYPMP(5,LEVEL1)=LEVEL1
+         NTYPMP(4,LEVEL1)=LEVEL2
+         NTYPMP(3,LEVEL1)=LEVEL3
+         NTYPMP(2,LEVEL1)=LEVEL4
+         NTYPMP(1,LEVEL1)=LEVEL5
+         GOTO 810
+ 820     CONTINUE
+      END IF
+C
+C
+      LLMMTP = 0
+      IF(MASWRK)THEN
+         REWIND(12)
+ 200     CONTINUE
+         READ(12,'(A100)',END=220) WD100
+C        ASCII CODE: 65-90 = UPPER CASE, 97-122, LOWER CASE
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'* ATYPE ASPEC CRD VAL') GOTO 200
+ 210     CONTINUE
+         READ(12,'(A100)',END=220) WD100
+         READ(WD100,*,ERR=220) ITYPE,IZANF,ICRDD,IVALD,
+     *                         IPILPD,IMLTBD,IAROM,LINHD,ISBMB
+         IZANF  = IZANF
+         ICRD(ITYPE)   = ICRDD
+         IVAL(ITYPE)   = IVALD
+         IPILP(ITYPE)  = IPILPD
+         IMLTB(ITYPE)  = IMLTBD
+         LINH(ITYPE)   = LINHD
+         LLMMTP = MAX(LLMMTP,ITYPE)
+         IDATM(1,ITYPE)=ISBMB
+         IDATM(2,ITYPE)=IAROM
+         GOTO 210
+ 220     CONTINUE
+      END IF
+      IF(GOPARR) CALL DDI_BCAST(274,'I',LLMMTP,1,MASTER)
+      IF(GOPARR) CALL DDI_BCAST(275,'I',IDATM,2*MXMMTP,MASTER)
+      IF(GOPARR) CALL DDI_BCAST(276,'I',IPILP,  MXMMTP,MASTER)
+      IF(LLMMTP.GT.MXMMTP)THEN
+         IF(MASWRK) THEN
+            WRITE(IW,*)'ERROR: ITYPE EXCEEDED MXMMTP. INCREASE MXMMTP.'
+            WRITE(IW,*)' '
+         END IF
+         CALL ABRT
+      END IF
+C
+C     -- DETERMINE THE BOND TYPE --
+C
+      DO 211 IBOND=1,NBOND
+         IF(BORDER(IBOND).EQ.ONE)THEN
+            J1=IPAIR(1,IBOND)
+            J2=IPAIR(2,IBOND)
+            IF((IDATM(2,NTYPE(J1)).NE.1 .OR.
+     *          IDATM(2,NTYPE(J2)).NE.1).AND.
+     *         (IDATM(1,NTYPE(J1)).EQ.1 .AND.
+     *          IDATM(1,NTYPE(J2)).EQ.1)     ) THEN
+                NBNDTYP(IBOND)=1
+                GOTO 211
+            END IF
+            ICNTRL=0
+            IF(IDATM(2,NTYPE(J1)).EQ.1.AND.
+     *         IDATM(2,NTYPE(J2)).EQ.1     )THEN
+               DO IRING=1,NUMRIN(10,J1)
+                  DO JRING=1,NUMRIN(10,J2)
+                     IF(NUMRIN(IRING,J1).EQ.NUMRIN(JRING,J2).AND.
+     *                  NRINTYP(NUMRIN(IRING,J1)).EQ.1) ICNTRL=1
+                  ENDDO
+               ENDDO
+               IF(ICNTRL.EQ.0)THEN
+                  NBNDTYP(IBOND)=1
+                  GOTO 211
+               END IF
+            END IF
+         END IF
+ 211  CONTINUE
+C
+C
+C     -- PRINT BOND ORDER AND TYPE --
+C
+      IF(MASWRK) THEN
+         WRITE(IW,'(/A)')
+     *   '    ATOM1    ATOM2     BOND ORDER    BONDTYPE'
+         DO IBOND=1,NBOND
+            WRITE(IW,'(1X,I8,1X,I8,7X,F8.6,10X,I2)')
+     *      IPAIR(1,IBOND),IPAIR(2,IBOND),BORDER(IBOND),NBNDTYP(IBOND)
+         ENDDO
+         WRITE(IW,*) ' '
+         DO IBOND=1,NBOND
+            IF(BORDER(IBOND).EQ.ZERO) THEN
+            WRITE(IW,'(1X,A,1X,I8,1X,A,1X,I8,1X,A)')
+     *      'WARNING: BOND BETWEEN',IPAIR(1,IBOND),'AND',
+     *      IPAIR(2,IBOND),'HAS ZERO BOND ORDER.'
+            END IF
+         ENDDO
+         WRITE(IW,*) ' '
+      END IF
+C
+C
+C
+      ANGLBC(1, 1) = 1.395D+00
+      ANGLBC(2, 1) = ZERO
+      ANGLBC(1, 5) = ZERO
+      ANGLBC(2, 5) = 0.704D+00
+      ANGLBC(1, 6) = 2.494D+00
+      ANGLBC(2, 6) = 1.016D+00
+      ANGLBC(1, 7) = 2.711D+00
+      ANGLBC(2, 7) = 1.113D+00
+      ANGLBC(1, 8) = 3.045D+00
+      ANGLBC(2, 8) = 1.337D+00
+      ANGLBC(1, 9) = 2.847D+00
+      ANGLBC(2, 9) = ZERO
+      ANGLBC(1,14) = 2.350D+00
+      ANGLBC(2,14) = 0.811D+00
+      ANGLBC(1,15) = 2.350D+00
+      ANGLBC(2,15) = 1.068D+00
+      ANGLBC(1,16) = 2.980D+00
+      ANGLBC(2,16) = 1.249D+00
+      ANGLBC(1,17) = 2.909D+00
+      ANGLBC(2,17) = 1.078D+00
+      ANGLBC(1,35) = 3.017D+00
+      ANGLBC(2,35) = ZERO
+      ANGLBC(1,33) = ZERO
+      ANGLBC(2,33) = 0.825D+00
+      ANGLBC(1,53) = 3.086D+00
+      ANGLBC(2,53) = ZERO
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         NTYP12=NBNDTYP(KBLST(1,IANGL))
+         NTYP23=NBNDTYP(KBLST(2,IANGL))
+         LCOUNT=0
+         LCOUNT2=0
+         IF(NUMRIN(10,K1).GE.1.AND.
+     *      NUMRIN(10,K2).GE.1.AND.
+     *      NUMRIN(10,K3).GE.1     )THEN
+            DO L1=1,NUMRIN(10,K1)
+               DO L2=1,NUMRIN(10,K2)
+                  DO L3=1,NUMRIN(10,K3)
+                     IF(NUMRIN(L3,K3).EQ.NUMRIN(L2,K2).AND.
+     *                  NUMRIN(L3,K3).EQ.NUMRIN(L1,K1)     )THEN
+                        LCOUNT=NUMRIN(L3,K3)
+                        IF(LCOUNT2.NE.0)THEN
+                           IF(LISTRIN(10,LCOUNT ).GT.
+     *                        LISTRIN(10,LCOUNT2).AND.
+     *                        LISTRIN(10,LCOUNT2).LE.4) LCOUNT=LCOUNT2
+                        END IF
+                        LCOUNT2=LCOUNT
+                     END IF
+                  ENDDO
+               ENDDO
+            ENDDO
+         END IF
+         LTEMPRIN=0
+         IF(LISTRIN(10,LCOUNT).GT.4.OR.LCOUNT.EQ.0)THEN
+            DO JANGL=1,NANGL
+               KK1=KLIST(1,JANGL)
+               KK2=KLIST(2,JANGL)
+               KK3=KLIST(3,JANGL)
+               IF(KK1.EQ.K1.AND.KK3.EQ.K3.AND.KK2.NE.K2)THEN
+                  LTEMPRIN=4
+               END IF
+            ENDDO
+         END IF
+         IF(LISTRIN(10,LCOUNT).GT.4) LCOUNT=0
+         IF(LCOUNT.EQ.0.OR.LCOUNT.EQ.999) NANGTYP(IANGL)=NTYP12+NTYP23
+         IF(LCOUNT.NE.0.AND.LISTRIN(10,LCOUNT).EQ.4.AND.
+     *      NTYP12.EQ.0.AND.NTYP23.EQ.0     ) NANGTYP(IANGL)=4
+         IF(LCOUNT.EQ.0.AND.LTEMPRIN.EQ.4.AND.
+     *      NTYP12.EQ.0.AND.NTYP23.EQ.0     ) NANGTYP(IANGL)=4
+         IF(LCOUNT.NE.0.AND.LISTRIN(10,LCOUNT).EQ.3.AND.
+     *      NTYP12.EQ.0.AND.NTYP23.EQ.0     ) NANGTYP(IANGL)=3
+         IF(LCOUNT.NE.0.AND.LISTRIN(10,LCOUNT).EQ.4.AND.
+     *      NANGTYP(IANGL).NE.4) NANGTYP(IANGL)=6+NTYP12+NTYP23
+         IF(LCOUNT.EQ.0.AND.LTEMPRIN.EQ.4.AND.
+     *      NANGTYP(IANGL).NE.4) NANGTYP(IANGL)=6+NTYP12+NTYP23
+         IF(LCOUNT.NE.999.AND.LISTRIN(10,LCOUNT).EQ.3.AND.
+     *      NANGTYP(IANGL).NE.3) NANGTYP(IANGL)=4+NTYP12+NTYP23
+
+      ENDDO
+      DO IANGL=1,NANGL
+         NTYPIJ=NBNDTYP(KBLST(1,IANGL))
+         NTYPJK=NBNDTYP(KBLST(2,IANGL))
+                                                 NSBTYP(IANGL)=0
+         IF(NANGTYP(IANGL).EQ.0.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.0)
+     *                                           NSBTYP(IANGL)=0
+         IF(NANGTYP(IANGL).EQ.1.AND.NTYPIJ.EQ.1.AND.NTYPJK.EQ.0)
+     *                                           NSBTYP(IANGL)=1
+         IF(NANGTYP(IANGL).EQ.1.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.1)
+     *                                           NSBTYP(IANGL)=2
+         IF(NANGTYP(IANGL).EQ.2.AND.NTYPIJ.EQ.1.AND.NTYPJK.EQ.1)
+     *                                           NSBTYP(IANGL)=3
+         IF(NANGTYP(IANGL).EQ.4.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.0)
+     *                                           NSBTYP(IANGL)=4
+         IF(NANGTYP(IANGL).EQ.3.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.0)
+     *                                           NSBTYP(IANGL)=5
+         IF(NANGTYP(IANGL).EQ.5.AND.NTYPIJ.EQ.1.AND.NTYPJK.EQ.0)
+     *                                           NSBTYP(IANGL)=6
+         IF(NANGTYP(IANGL).EQ.5.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.1)
+     *                                           NSBTYP(IANGL)=7
+         IF(NANGTYP(IANGL).EQ.6.AND.NTYPIJ.EQ.1.AND.NTYPJK.EQ.1)
+     *                                           NSBTYP(IANGL)=8
+         IF(NANGTYP(IANGL).EQ.7.AND.NTYPIJ.EQ.1.AND.NTYPJK.EQ.0)
+     *                                           NSBTYP(IANGL)=9
+         IF(NANGTYP(IANGL).EQ.7.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.1)
+     *                                           NSBTYP(IANGL)=10
+         IF(NANGTYP(IANGL).EQ.8.AND.NTYPIJ.EQ.1.AND.NTYPJK.EQ.1)
+     *                                           NSBTYP(IANGL)=11
+         IF(NTYPE(KLIST(1,IANGL)).EQ.NTYPE(KLIST(3,IANGL)))THEN
+            IF(NSBTYP(IANGL).EQ. 2) NSBTYP(IANGL) = 1
+            IF(NSBTYP(IANGL).EQ. 7) NSBTYP(IANGL) = 6
+            IF(NSBTYP(IANGL).EQ.10) NSBTYP(IANGL) = 9
+         END IF
+         IF(NTYPE(KLIST(1,IANGL)).GT.NTYPE(KLIST(3,IANGL)))THEN
+            IF     (NSBTYP(IANGL).EQ. 1) THEN
+               NSBTYP(IANGL) = 2
+            ELSE IF(NSBTYP(IANGL).EQ. 2) THEN
+               NSBTYP(IANGL) = 1
+            ELSE IF(NSBTYP(IANGL).EQ. 6) THEN
+               NSBTYP(IANGL) = 7
+            ELSE IF(NSBTYP(IANGL).EQ. 7) THEN
+               NSBTYP(IANGL) = 6
+            ELSE IF(NSBTYP(IANGL).EQ. 9) THEN
+               NSBTYP(IANGL) = 10
+            ELSE IF(NSBTYP(IANGL).EQ.10) THEN
+               NSBTYP(IANGL) = 9
+            END IF
+         END IF
+      ENDDO
+C
+      DO 340 IDIHR=1,NDIHR
+         L1=LLIST(1,IDIHR)
+         L2=LLIST(2,IDIHR)
+         L3=LLIST(3,IDIHR)
+         L4=LLIST(4,IDIHR)
+         LCOUNT=0
+         LCOUNT2=0
+         IF(NUMRIN(10,L1).GE.1.AND.
+     *      NUMRIN(10,L2).GE.1.AND.
+     *      NUMRIN(10,L3).GE.1.AND.
+     *      NUMRIN(10,L4).GE.1     )THEN
+            DO K1=1,NUMRIN(10,L1)
+               DO K2=1,NUMRIN(10,L2)
+                  DO K3=1,NUMRIN(10,L3)
+                     DO K4=1,NUMRIN(10,L4)
+                        IF(NUMRIN(K4,L4).EQ.NUMRIN(K2,L2).AND.
+     *                     NUMRIN(K4,L4).EQ.NUMRIN(K1,L1).AND.
+     *                     NUMRIN(K4,L4).EQ.NUMRIN(K3,L3)     )THEN
+                           LCOUNT=NUMRIN(K4,L4)
+                           IF(LCOUNT2.NE.0)THEN
+                              IF(LISTRIN(10,LCOUNT ).GT.
+     *                           LISTRIN(10,LCOUNT2).AND.
+     *                           LISTRIN(10,LCOUNT2).GE.4)
+     *                           LCOUNT=LCOUNT2
+                           END IF
+                           LCOUNT2=LCOUNT
+                        END IF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         END IF
+         IF(LISTRIN(10,LCOUNT).GT.5) LCOUNT=0
+         IF(LISTRIN(10,LCOUNT).EQ.5.AND.LCOUNT.NE.0) THEN
+            IF(NTYPE(L1).EQ.1.OR.NTYPE(L2).EQ.1.OR.
+     *         NTYPE(L3).EQ.1.OR.NTYPE(L4).EQ.1) ITTN(IDIHR)=5
+         END IF
+         NTYP23=0
+         NTYP12=0
+         NTYP34=0
+         DO JJ=1,LBOND(10,L2)
+            KBOND=LBOND(JJ,L2)
+            J3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L2
+            IF(J3.EQ.L3)THEN
+               NTYP23=NBNDTYP(KBOND)
+            END IF
+            IF(J3.EQ.L1)THEN
+               NTYP12=NBNDTYP(KBOND)
+            END IF
+         ENDDO
+         DO JJ=1,LBOND(10,L4)
+            KBOND=LBOND(JJ,L4)
+            J3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L4
+            IF(J3.EQ.L3)THEN
+               NTYP34=NBNDTYP(KBOND)
+            END IF
+         ENDDO
+         IF(NTYP23.EQ.0) THEN
+           IF((NTYP12.EQ.1.AND.NTYP34.EQ.0).OR.
+     *        (NTYP12.EQ.0.AND.NTYP34.EQ.1)    ) THEN
+               IF(NTYPE(L2).EQ.55.AND.NTYPE(L3).EQ.57)THEN
+                  LHRDY=0
+                  DO JJ=1,3
+                     KBOND=LBOND(JJ,L2)
+                     JJX=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L2
+                     IF(NINT(ZANF(JJX)).EQ.1) LHRDY=LHRDY+1
+                  ENDDO
+                  IF(LHRDY.EQ.2) ITTN(IDIHR)=2
+               ELSE IF(NTYPE(L3).EQ.55.AND.NTYPE(L2).EQ.57)THEN
+                  LHRDY=0
+                  DO JJ=1,3
+                     KBOND=LBOND(JJ,L3)
+                     JJX=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L3
+                     IF(NINT(ZANF(JJX)).EQ.1) LHRDY=LHRDY+1
+                  ENDDO
+                  IF(LHRDY.EQ.2) ITTN(IDIHR)=2
+               ELSE
+               IF(NTYP12.EQ.1.AND.NTYP34.EQ.0.AND.NTYPE(L1).NE.57)
+     *         ITTN(IDIHR)=2
+               IF(NTYP12.EQ.0.AND.NTYP34.EQ.1.AND.NTYPE(L4).NE.57)
+     *         ITTN(IDIHR)=2
+               END IF
+           END IF
+         END IF
+         LCOUNT=0
+         LCOUNT2=0
+         IF(NUMRIN(10,L1).GE.1.AND.
+     *      NUMRIN(10,L2).GE.1.AND.
+     *      NUMRIN(10,L3).GE.1.AND.
+     *      NUMRIN(10,L4).GE.1     )THEN
+            DO K1=1,NUMRIN(10,L1)
+               DO K2=1,NUMRIN(10,L2)
+                  DO K3=1,NUMRIN(10,L3)
+                     DO K4=1,NUMRIN(10,L4)
+                        IF(NUMRIN(K4,L4).EQ.NUMRIN(K2,L2).AND.
+     *                     NUMRIN(K4,L4).EQ.NUMRIN(K1,L1).AND.
+     *                     NUMRIN(K4,L4).EQ.NUMRIN(K3,L3)     )THEN
+                           LCOUNT=NUMRIN(K4,L4)
+                           IF(LCOUNT2.NE.0)THEN
+                              IF(LISTRIN(10,LCOUNT ).GT.
+     *                           LISTRIN(10,LCOUNT2).AND.
+     *                           LISTRIN(10,LCOUNT2).GE.4)
+     *                           LCOUNT=LCOUNT2
+                           END IF
+                           LCOUNT2=LCOUNT
+                        END IF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         END IF
+         IF(LISTRIN(10,LCOUNT).GT.5) LCOUNT=0
+         IF(LISTRIN(10,LCOUNT).EQ.4.AND.LCOUNT.NE.0) ITTN(IDIHR)=4
+         NTYP23=0
+         NTYP12=0
+         NTYP34=0
+         DO JJ=1,LBOND(10,L2)
+            KBOND=LBOND(JJ,L2)
+            J3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L2
+            IF(J3.EQ.L3)THEN
+               NTYP23=NBNDTYP(KBOND)
+            END IF
+            IF(J3.EQ.L1)THEN
+               NTYP12=NBNDTYP(KBOND)
+            END IF
+         ENDDO
+         DO JJ=1,LBOND(10,L4)
+            KBOND=LBOND(JJ,L4)
+            J3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L4
+            IF(J3.EQ.L3)THEN
+               NTYP34=NBNDTYP(KBOND)
+            END IF
+         ENDDO
+         IF(NTYP23.EQ.1) ITTN(IDIHR)=1
+ 340  CONTINUE
+      IF(MASWRK) THEN
+         WRITE(IW,*)
+     *   '   ATOM1    ATOM2    ATOM3    ATOM4     ITTN'
+         DO IDIHR=1,NDIHR
+            L1=LLIST(1,IDIHR)
+            L2=LLIST(2,IDIHR)
+            L3=LLIST(3,IDIHR)
+            L4=LLIST(4,IDIHR)
+            WRITE(IW,'(1X,I8,1X,I8,1X,I8,1X,I8,1X,I8)')
+     *      L1,L2,L3,L4,ITTN(IDIHR)
+         ENDDO
+         WRITE(IW,*)' '
+      END IF
+      DO IANGL=1,NANGL
+         K1 = KLIST(1,IANGL)
+         K2 = KLIST(2,IANGL)
+         K3 = KLIST(3,IANGL)
+         DO II=1,LBOND(10,K2)
+            KBOND=LBOND(II,K2)
+            JFFAT=IPAIR(1,KBOND)+IPAIR(2,KBOND)-K2
+            IF(JFFAT.EQ.K1) KBLST(1,IANGL)=KBOND
+            IF(JFFAT.EQ.K3) KBLST(2,IANGL)=KBOND
+         ENDDO
+      ENDDO
+C
+C     --BOND STRETCHING
+C
+      IF(MASWRK) THEN
+         REWIND(12)
+ 400     CONTINUE
+         READ(12,'(A100)',END=420) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*   TYPES       KB   ') GOTO 400
+ 410     CONTINUE
+         READ(12,'(A100)',END=420) WD100
+         READ(WD100,*,ERR=420) IBTIJ,ITYPE,JTYPE,CNSTKB,RAD0
+         DO 411 IBOND=1,NBOND
+            J1=IPAIR(1,IBOND)
+            J2=IPAIR(2,IBOND)
+            IF(NTYPE(J1).EQ.ITYPE.AND.NTYPE(J2).EQ.JTYPE.AND.
+     *         IBTIJ.EQ.NBNDTYP(IBOND))THEN
+               FCBOND(IBOND)=CNSTKB*71.96625D+00*TOANGS*TOANGS*TOHART
+               BOND0 (IBOND)=RAD0*TOBOHR
+               GOTO 411
+            END IF
+            IF(NTYPE(J2).EQ.ITYPE.AND.NTYPE(J1).EQ.JTYPE.AND.
+     *         IBTIJ.EQ.NBNDTYP(IBOND))THEN
+               FCBOND(IBOND)=CNSTKB*71.96625D+00*TOANGS*TOANGS*TOHART
+               BOND0 (IBOND)=RAD0*TOBOHR
+               GOTO 411
+            END IF
+ 411     CONTINUE
+         GOTO 410
+ 420     CONTINUE
+C
+         LCOUNT1=0
+         DO IBOND=1,NBOND
+            IF(FCBOND(IBOND).EQ.ZERO.AND.BOND0(IBOND).EQ.ZERO)
+     *         LCOUNT1=LCOUNT1+1
+         ENDDO
+         IF(LCOUNT1.EQ.0)THEN
+            GOTO 450
+         ELSE
+            GOTO 421
+         END IF
+ 421     CONTINUE
+C
+         REWIND(12)
+ 430     CONTINUE
+         READ(12,'(A100)',END=450) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*   SPECIES R0(REF) K') GOTO 430
+ 440     CONTINUE
+         READ(12,'(A100)',END=450) WD100
+         READ(WD100,*,ERR=450) IATM,JATM,RAD0,CNSTKB0
+         DO 441 IBOND=1,NBOND
+            J1=IPAIR(1,IBOND)
+            J2=IPAIR(2,IBOND)
+            NUCJ1=NINT(ZANF(J1))
+            NUCJ2=NINT(ZANF(J2))
+            IF(FCBOND(IBOND).EQ.ZERO.AND.BOND0(IBOND).EQ.ZERO.AND.
+     *         ((NUCJ1.EQ.IATM.AND.NUCJ2.EQ.JATM).OR.
+     *          (NUCJ2.EQ.IATM.AND.NUCJ1.EQ.JATM)       )) THEN
+               NBOIJ   =NINT(BORDER(IBOND))
+               IF(IMLTB(NTYPE(J1)).EQ.1.AND.IMLTB(NTYPE(J2)).EQ.1)
+     *         NBOIJ   =4
+               IF(IMLTB(NTYPE(J1)).EQ.1.AND.IMLTB(NTYPE(J2)).EQ.2)
+     *         NBOIJ   =5
+               IF(IMLTB(NTYPE(J1)).EQ.2.AND.IMLTB(NTYPE(J2)).EQ.1)
+     *         NBOIJ   =5
+               ICNTRL  =0
+               IF(IDATM(2,NTYPE(J1)).EQ.1.AND.
+     *            IDATM(2,NTYPE(J2)).EQ.1     )THEN
+                  DO IRING=1,NUMRIN(10,J1)
+                     DO JRING=1,NUMRIN(10,J2)
+                        IF(NUMRIN(IRING,J1).EQ.NUMRIN(JRING,J2).AND.
+     *                  NRINTYP(NUMRIN(IRING,J1)).EQ.1) ICNTRL=1
+                     ENDDO
+                  ENDDO
+                  IF(ICNTRL.NE.0)THEN
+                    IF(IPILP(NTYPE(J1)).EQ.0.AND.
+     *                 IPILP(NTYPE(J2)).EQ.0)THEN
+                       NBOIJ   =4
+                    ELSE
+                       NBOIJ   =5
+                    END IF
+                  END IF
+               END IF
+               NHYBI   = 3
+               NHYBJ   = 3
+               IF(IMLTB(NTYPE(J1)).EQ.1.OR.IMLTB(NTYPE(J1)).EQ.2)
+     *         NHYBI   = 2
+               IF(IMLTB(NTYPE(J1)).EQ.3)
+     *         NHYBI   = 1
+               IF(IMLTB(NTYPE(J2)).EQ.1.OR.IMLTB(NTYPE(J2)).EQ.2)
+     *         NHYBJ   = 2
+               IF(IMLTB(NTYPE(J2)).EQ.3)
+     *         NHYBJ   = 1
+               R0I    = BLOMCVLN(NUCJ1)  !SINGLE BOND COVALENT RADIUS
+               R0J    = BLOMCVLN(NUCJ2)  !SINGLE BOND COVALENT RADIUS
+               IF(NBOIJ.EQ.5) THEN
+                  R0I = R0I - 0.040D+00
+                  R0J = R0J - 0.040D+00
+               END IF
+               IF(NBOIJ.EQ.4) THEN
+                  R0I = R0I - 0.075D+00
+                  R0J = R0J - 0.075D+00
+               END IF
+               IF(NBOIJ.EQ.3) THEN
+                  R0I = R0I - 0.170D+00
+                  R0J = R0J - 0.170D+00
+               END IF
+               IF(NBOIJ.EQ.2) THEN
+                  R0I = R0I - 0.100D+00
+                  R0J = R0J - 0.100D+00
+               END IF
+               IF(NBOIJ.EQ.1) THEN
+C                 HUI LI: THE REDUCTION TERM SEEMS TO BE ZERO
+C                 IF(NHYBI.EQ.1.AND.NUCJ1.GT.1) R0I=R0I-0.08D+00
+C                 IF(NHYBI.EQ.2.AND.NUCJ1.GT.1) R0I=R0I-0.03D+00
+C                 IF(NHYBJ.EQ.1.AND.NUCJ2.GT.1) R0J=R0J-0.08D+00
+C                 IF(NHYBJ.EQ.2.AND.NUCJ2.GT.1) R0J=R0J-0.03D+00
+                  IF(NHYBI.EQ.1.AND.NUCJ1.GT.1) R0I=R0I
+                  IF(NHYBI.EQ.2.AND.NUCJ1.GT.1) R0I=R0I
+                  IF(NHYBJ.EQ.1.AND.NUCJ2.GT.1) R0J=R0J
+                  IF(NHYBJ.EQ.2.AND.NUCJ2.GT.1) R0J=R0J
+               END IF
+               XARI   = XAR(NUCJ1)
+               XARJ   = XAR(NUCJ2)
+               CCC    = 0.085D+00
+               IF(NUCJ1.EQ.1.OR.NUCJ2.EQ.1) CCC = 0.050D+00
+               DELTA  = 0.000D+00   !  HUI LI: DELTA SEEMS TO BE ZERO
+C              -- EQ (18) IN JCC, 1996, 17, 616-641
+               R0IJ   = R0I+R0J-CCC*(ABS(XARI-XARJ))**1.4D+00-DELTA
+               R0REF  = RAD0
+               CNSTKB = CNSTKB0*(R0REF/R0IJ)**6
+               FCBOND(IBOND)=CNSTKB*71.96625D+00*TOANGS*TOANGS*TOHART
+               BOND0 (IBOND)=R0IJ*TOBOHR
+               GOTO 441
+            END IF
+ 441     CONTINUE
+         GOTO 440
+ 450     CONTINUE
+C
+C        -- FOR MD-CCS --
+         DO IBOND=1,NBOND
+            J1=IPAIR(1,IBOND)
+            J2=IPAIR(2,IBOND)
+C           -- FOR N2 TRIPLE BOND --
+            IF(NTYPE(J1).EQ.107.AND.NTYPE(J2).EQ.107)THEN
+               FCBOND(IBOND)=1646.0D+00*TOANGS*TOANGS*TOHART
+               BOND0 (IBOND)=1.10D+00*TOBOHR
+            END IF
+C           -- FOR O2 DOUBLE BOND --
+            IF(NTYPE(J1).EQ.108.AND.NTYPE(J2).EQ.108)THEN
+               FCBOND(IBOND)=815.0D+00*TOANGS*TOANGS*TOHART
+               BOND0 (IBOND)=1.21D+00*TOBOHR
+            END IF
+         ENDDO
+C
+      END IF
+      IF(GOPARR) CALL DDI_BCAST(276,'F',FCBOND,NBOND,MASTER)
+      IF(GOPARR) CALL DDI_BCAST(277,'F',BOND0 ,NBOND,MASTER)
+C
+C     --ANGLE BENDING
+C
+      IF(MASWRK) THEN
+         REWIND(12)
+         CALL VICLR(NMPCNT,1,2*MAXMAX)
+         DO IANGL=1,NANGL
+            DO I=1,2
+               NMPCNT(I,IANGL)=1
+            ENDDO
+         ENDDO
+ 460     CONTINUE
+         READ(12,'(A100)',END=480) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*    ATOM TYPES      ') GOTO 460
+ 470     CONTINUE
+         READ(12,'(A100)',END=480) WD100
+         READ(WD100,*,ERR=480) IATYP,ITYP,JTYP,KTYP,CNSTKB,THETA0
+         DO IANGL=1,NANGL
+            JJXX=1
+            K1=KLIST(1,IANGL)
+            K2=KLIST(2,IANGL)
+            K3=KLIST(3,IANGL)
+            JCOUNT=NMPCNT(1,IANGL)
+            IF(NANGTYP(IANGL).EQ.IATYP.AND.NTYPE(K2).EQ.JTYP)THEN
+               DO JJ=JCOUNT,5
+                     IF(NTYPMP(JJ,NTYPE(K1)).EQ.ITYP.AND.
+     *                  NTYPMP(JJ,NTYPE(K3)).EQ.KTYP     )THEN
+                        FCANGL(IANGL)=
+     *                  CNSTKB*2.1922D-02*TOHART*DEGREE*DEGREE
+                        ANGL0 (IANGL)=THETA0*TORAD
+                        IF(JJ.GT.JJXX) JJXX=JJ
+                     END IF
+                     IF(NTYPMP(JJ,NTYPE(K1)).EQ.KTYP.AND.
+     *                  NTYPMP(JJ,NTYPE(K3)).EQ.ITYP)THEN
+                        FCANGL(IANGL)=
+     *                  CNSTKB*2.1922D-02*TOHART*DEGREE*DEGREE
+                        ANGL0 (IANGL)=THETA0*TORAD
+                        IF(JJ.GT.JJXX) JJXX=JJ
+                     END IF
+               ENDDO
+               IF(JJXX.GT.NMPCNT(1,IANGL)) NMPCNT(1,IANGL)=JJXX
+            END IF
+         ENDDO
+         GOTO 470
+ 480     CONTINUE
+      END IF
+      DO IANGL=1,NANGL
+         IF(FCANGL(IANGL).LT.0.1D-10.AND.ANGL0(IANGL).GT.0.1D-10)THEN
+            K1=KLIST(1,IANGL)
+            K2=KLIST(2,IANGL)
+            K3=KLIST(3,IANGL)
+            J1=NINT(ZANF(K1))
+            J2=NINT(ZANF(K2))
+            J3=NINT(ZANF(K3))
+            B12=BOND0(KBLST(1,IANGL))*TOANGS
+            B23=BOND0(KBLST(2,IANGL))*TOANGS
+            SUMB=B12+B23
+            DIFB=B12-B23
+            DDD=(DIFB*DIFB)/(SUMB*SUMB)
+            IF(NANGTYP(IANGL).EQ.3.OR.NANGTYP(IANGL).EQ.5.OR.
+     *         NANGTYP(IANGL).EQ.6)THEN
+               CNSTKB=8.75D-02*ANGLBC(1,J1)*ANGLBC(2,J2)*ANGLBC(1,J3)/
+     *                SUMB/(ANGL0(IANGL)*ANGL0(IANGL))*EXP(-2*DDD)
+            END IF
+            IF(NANGTYP(IANGL).EQ.4.OR.NANGTYP(IANGL).EQ.7.OR.
+     *         NANGTYP(IANGL).EQ.8)THEN
+               CNSTKB=1.4875D+00*ANGLBC(1,J1)*ANGLBC(2,J2)*ANGLBC(1,J3)/
+     *                SUMB/(ANGL0(IANGL)*ANGL0(IANGL))*EXP(-2*DDD)
+            END IF
+            IF(NANGTYP(IANGL).EQ.0.OR.NANGTYP(IANGL).EQ.1.OR.
+     *         NANGTYP(IANGL).EQ.2)THEN
+               CNSTKB=1.75D+00*ANGLBC(1,J1)*ANGLBC(2,J2)*ANGLBC(1,J3)/
+     *                SUMB/(ANGL0(IANGL)*ANGL0(IANGL))*EXP(-2*DDD)
+            END IF
+            FCANGL(IANGL)=CNSTKB*2.1922D-02*TOHART*DEGREE*DEGREE
+         END IF
+      ENDDO
+      DO IANGL=1,NANGL
+         IF(FCANGL(IANGL).LT.0.1D-10.AND.ANGL0(IANGL).LT.0.1D-10)THEN
+            IF(NANGTYP(IANGL).EQ.3.OR.NANGTYP(IANGL).EQ.5.OR.
+     *         NANGTYP(IANGL).EQ.6) ANGL0(IANGL)=60.0D+00*TORAD
+            IF(NANGTYP(IANGL).EQ.4.OR.NANGTYP(IANGL).EQ.7.OR.
+     *         NANGTYP(IANGL).EQ.8) ANGL0(IANGL)=90.0D+00*TORAD
+         END IF
+      ENDDO
+      IF(MASWRK) WRITE(IW,*)
+     *'   ATOM1    ATOM2    ATOM3  NANGTYP   NSBTYP',
+     *'      ANGL0     FCANGL'
+      DO IANGL=1,NANGL
+         K1=KLIST(1,IANGL)
+         K2=KLIST(2,IANGL)
+         K3=KLIST(3,IANGL)
+         IF(MASWRK)
+     *   WRITE(IW,'(1X,I8,1X,I8,1X,I8,1X,I8,1X,I8,1X,F10.4,1X,F10.6)')
+     *              K1,K2,K3,NANGTYP(IANGL),NSBTYP(IANGL),
+     *              ANGL0(IANGL)*DEGREE,
+     *              FCANGL(IANGL)/2.1922D-02/TOHART/DEGREE/DEGREE
+      ENDDO
+      IF(MASWRK) WRITE(IW,*)' '
+      IF(GOPARR) CALL DDI_BCAST(276,'F',FCANGL,NANGL,MASTER)
+      IF(GOPARR) CALL DDI_BCAST(277,'F',ANGL0 ,NANGL,MASTER)
+C
+C     -- STRETCH-BEND INTERACTIONS
+C
+      IF(MASWRK) THEN
+C        - SUPPLY DEFAULT FIRST -
+         REWIND(12)
+ 530     CONTINUE
+         READ(12,'(A100)',END=550) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*   IR   JR   KR   F(') GOTO 530
+ 540     CONTINUE
+         READ(12,'(A100)',END=550) WD100
+         READ(WD100,*,ERR=550) IRXXX,JRXXX,KRXXX,FIJK,FKJI
+         DO 541 IANGL=1,NANGL
+            K1=KLIST(1,IANGL)
+            K2=KLIST(2,IANGL)
+            K3=KLIST(3,IANGL)
+            IF(NINT(ZANF(K1)).LT.3)                           NROW1=0
+            IF(NINT(ZANF(K1)).GT. 2.AND.NINT(ZANF(K1)).LT.11) NROW1=1
+            IF(NINT(ZANF(K1)).GT.10.AND.NINT(ZANF(K1)).LT.19) NROW1=2
+            IF(NINT(ZANF(K1)).GT.18.AND.NINT(ZANF(K1)).LT.37) NROW1=3
+            IF(NINT(ZANF(K1)).GT.36.AND.NINT(ZANF(K1)).LT.55) NROW1=4
+            IF(NINT(ZANF(K2)).LT.3)                           NROW2=0
+            IF(NINT(ZANF(K2)).GT. 2.AND.NINT(ZANF(K2)).LT.11) NROW2=1
+            IF(NINT(ZANF(K2)).GT.10.AND.NINT(ZANF(K2)).LT.19) NROW2=2
+            IF(NINT(ZANF(K2)).GT.18.AND.NINT(ZANF(K2)).LT.37) NROW2=3
+            IF(NINT(ZANF(K2)).GT.36.AND.NINT(ZANF(K2)).LT.55) NROW2=4
+            IF(NINT(ZANF(K3)).LT.3)                           NROW3=0
+            IF(NINT(ZANF(K3)).GT. 2.AND.NINT(ZANF(K3)).LT.11) NROW3=1
+            IF(NINT(ZANF(K3)).GT.10.AND.NINT(ZANF(K3)).LT.19) NROW3=2
+            IF(NINT(ZANF(K3)).GT.18.AND.NINT(ZANF(K3)).LT.37) NROW3=3
+            IF(NINT(ZANF(K3)).GT.36.AND.NINT(ZANF(K3)).LT.55) NROW3=4
+            IF(NROW2.EQ.JRXXX)THEN
+               IF     (NROW1.EQ.IRXXX.AND.NROW3.EQ.KRXXX)THEN
+                 FCSTBD(1,IANGL)=FIJK*2.5121D+00*TOANGS*TOHART*DEGREE
+                 FCSTBD(2,IANGL)=FKJI*2.5121D+00*TOANGS*TOHART*DEGREE
+               ELSE IF(NROW1.EQ.KRXXX.AND.NROW3.EQ.IRXXX)THEN
+                 FCSTBD(1,IANGL)=FKJI*2.5121D+00*TOANGS*TOHART*DEGREE
+                 FCSTBD(2,IANGL)=FIJK*2.5121D+00*TOANGS*TOHART*DEGREE
+               END IF
+            END IF
+ 541     CONTINUE
+         GOTO 540
+ 550     CONTINUE
+C
+C        - SEARCH FOR SPECIFIC MATCHES -
+         REWIND(12)
+ 500     CONTINUE
+         READ(12,'(A100)',END=520) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'* TYPES I, J, K    KB') GOTO 500
+ 510     CONTINUE
+         READ(12,'(A100)',END=520) WD100
+         READ(WD100,*,ERR=520) ISBTYP,ITYP,JTYP,KTYP,CKBIJK,CKBKJI
+         DO IANGL=1,NANGL
+            K1=KLIST(1,IANGL)
+            K2=KLIST(2,IANGL)
+            K3=KLIST(3,IANGL)
+            KKKSW = 0
+            NTYPIJ=NBNDTYP(KBLST(1,IANGL))
+            NTYPJK=NBNDTYP(KBLST(2,IANGL))
+            IF(NTYPE(K1).EQ.NTYPE(K3))THEN
+               IF(NANGTYP(IANGL).EQ.1.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.1)
+     *                                              KKKSW=1
+               IF(NANGTYP(IANGL).EQ.5.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.1)
+     *                                              KKKSW=1
+               IF(NANGTYP(IANGL).EQ.7.AND.NTYPIJ.EQ.0.AND.NTYPJK.EQ.1)
+     *                                              KKKSW=1
+            END IF
+            IF     (NTYPE(K1).EQ.ITYP.AND.NTYPE(K3).EQ.KTYP.AND.
+     *              NTYPE(K2).EQ.JTYP)THEN
+               IF(ISBTYP.EQ.NSBTYP(IANGL))THEN
+                FCSTBD(1,IANGL)=CKBIJK*2.5121D+00*TOANGS*TOHART*DEGREE
+                FCSTBD(2,IANGL)=CKBKJI*2.5121D+00*TOANGS*TOHART*DEGREE
+                IF(KKKSW.EQ.1)THEN
+                   DUM             = FCSTBD(1,IANGL)
+                   FCSTBD(1,IANGL) = FCSTBD(2,IANGL)
+                   FCSTBD(2,IANGL) = DUM
+                END IF
+               END IF
+            ELSE IF(NTYPE(K3).EQ.ITYP.AND.NTYPE(K1).EQ.KTYP.AND.
+     *              NTYPE(K2).EQ.JTYP)THEN
+               IF(ISBTYP.EQ.NSBTYP(IANGL))THEN
+                FCSTBD(2,IANGL)=CKBIJK*2.5121D+00*TOANGS*TOHART*DEGREE
+                FCSTBD(1,IANGL)=CKBKJI*2.5121D+00*TOANGS*TOHART*DEGREE
+                IF(KKKSW.EQ.1)THEN
+                   DUM             = FCSTBD(1,IANGL)
+                   FCSTBD(1,IANGL) = FCSTBD(2,IANGL)
+                   FCSTBD(2,IANGL) = DUM
+                END IF
+               END IF
+            END IF
+         ENDDO
+         GOTO 510
+ 520     CONTINUE
+      END IF
+      DO IANGL=1,NANGL
+C        +/- 3 DEGREE TO A LINEAR BOND
+         IF(ABS(ANGL0(IANGL)-PI).LT.0.053D+00 )THEN
+            FCSTBD(1,IANGL)=ZERO
+            FCSTBD(2,IANGL)=ZERO
+         END IF
+      ENDDO
+      IF(GOPARR) CALL DDI_BCAST(276,'F',FCSTBD,2*NANGL,MASTER)
+C
+C     -- OUT-OF-PLANE BENDING AT TRICOORDINATE CENTERS
+C        MMFF PAR FILE KOOP IS IN MILIDYNE*ANGSTROM/RAD**2
+C
+      IF(MASWRK) THEN
+         CALL VICLR(NMPCNT,1,2*MAXMAX)
+         DO IWAGG=1,NWAGG
+            DO I=1,2
+               NMPCNT(I,IWAGG)=1
+            ENDDO
+         ENDDO
+         REWIND(12)
+ 560     CONTINUE
+         READ(12,'(A100)',END=580) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*   MMFF  ATOM TYPES ') GOTO 560
+ 570     CONTINUE
+         READ(12,'(A100)',END=580) WD100
+         READ(WD100,*,ERR=580) ITYP,JTYP,KTYP,LTYP,CKOOP
+         DO IWAGG=1,NWAGG
+            JJXX=1
+            K1=MLIST(1,IWAGG)
+            K2=MLIST(2,IWAGG)
+            K3=MLIST(3,IWAGG)
+            K4=MLIST(4,IWAGG)
+            JCOUNT=NMPCNT(1,IWAGG)
+            IF(NTYPE(K4).EQ.JTYP)THEN
+               DO JJ=JCOUNT,5
+                  IF(NTYPMP(JJ,NTYPE(K1)).EQ.ITYP.AND.
+     *               NTYPMP(JJ,NTYPE(K2)).EQ.KTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K3)).EQ.LTYP     )THEN
+                  FCWAGG(IWAGG)=CKOOP*2.1922D-02*TOHART*DEGREE*DEGREE
+                     IF(JJ.GT.JJXX) JJXX=JJ
+                  END IF
+                  IF(NTYPMP(JJ,NTYPE(K1)).EQ.KTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K2)).EQ.ITYP.AND.
+     *               NTYPMP(JJ,NTYPE(K3)).EQ.LTYP     )THEN
+                  FCWAGG(IWAGG)=CKOOP*2.1922D-02*TOHART*DEGREE*DEGREE
+                     IF(JJ.GT.JJXX) JJXX=JJ
+                  END IF
+                  IF(NTYPMP(JJ,NTYPE(K1)).EQ.LTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K2)).EQ.KTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K3)).EQ.ITYP     )THEN
+                  FCWAGG(IWAGG)=CKOOP*2.1922D-02*TOHART*DEGREE*DEGREE
+                     IF(JJ.GT.JJXX) JJXX=JJ
+                  END IF
+                  IF(NTYPMP(JJ,NTYPE(K1)).EQ.KTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K2)).EQ.LTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K3)).EQ.ITYP     )THEN
+                  FCWAGG(IWAGG)=CKOOP*2.1922D-02*TOHART*DEGREE*DEGREE
+                     IF(JJ.GT.JJXX) JJXX=JJ
+                  END IF
+                  IF(NTYPMP(JJ,NTYPE(K1)).EQ.LTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K2)).EQ.ITYP.AND.
+     *               NTYPMP(JJ,NTYPE(K3)).EQ.KTYP     )THEN
+                  FCWAGG(IWAGG)=CKOOP*2.1922D-02*TOHART*DEGREE*DEGREE
+                     IF(JJ.GT.JJXX) JJXX=JJ
+                  END IF
+                  IF(NTYPMP(JJ,NTYPE(K1)).EQ.ITYP.AND.
+     *               NTYPMP(JJ,NTYPE(K2)).EQ.LTYP.AND.
+     *               NTYPMP(JJ,NTYPE(K3)).EQ.KTYP     )THEN
+                  FCWAGG(IWAGG)=CKOOP*2.1922D-02*TOHART*DEGREE*DEGREE
+                     IF(JJ.GT.JJXX) JJXX=JJ
+                  END IF
+               ENDDO
+               IF(JJXX.GT.NMPCNT(1,IWAGG)) NMPCNT(1,IWAGG)=JJXX
+            END IF
+         ENDDO
+         GOTO 570
+ 580     CONTINUE
+      END IF
+      IF(GOPARR) CALL DDI_BCAST(276,'F',FCWAGG,NWAGG,MASTER)
+C     - SHRINK THE WAGGING MLIST
+      NWAGGNEW = 0
+      DO IWAGG = 1, NWAGG
+         IF(ABS(FCWAGG(IWAGG)).LT.1.0D-08)THEN
+         ELSE
+            NWAGGNEW          = NWAGGNEW + 1
+            FCWAGG(NWAGGNEW)  = FCWAGG(IWAGG)
+            MLIST(1,NWAGGNEW) = MLIST(1,IWAGG)
+            MLIST(2,NWAGGNEW) = MLIST(2,IWAGG)
+            MLIST(3,NWAGGNEW) = MLIST(3,IWAGG)
+            MLIST(4,NWAGGNEW) = MLIST(4,IWAGG)
+         END IF
+      ENDDO
+      DO IWAGG = NWAGGNEW+1, NWAGG
+         FCWAGG(IWAGG)  = ZERO
+         MLIST(1,IWAGG) = 0
+         MLIST(2,IWAGG) = 0
+         MLIST(3,IWAGG) = 0
+         MLIST(4,IWAGG) = 0
+      ENDDO
+      NWAGG = NWAGGNEW
+C
+C     -- LOAD THE TORSION INTERACTIONS
+C        MMFF PAR FILE VROT1, VROT2, VROT3 ARE IN KCAL/MOL
+C
+      IF(MASWRK) THEN
+         CALL VICLR(NLCBND,1,NDIHR)
+         CALL VICLR(NMPCNT,1,2*MAXMAX)
+         DO IDIHR=1,NDIHR
+            DO I=1,2
+               NMPCNT(I,IDIHR)=1
+            ENDDO
+         ENDDO
+         REWIND(12)
+ 600     CONTINUE
+         READ(12,'(A100)',END=620) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*      ATOM TYPES    ') GOTO 600
+ 610     CONTINUE
+         READ(12,'(A100)',END=620) WD100
+         READ(WD100,*,ERR=620)ITT,ITYP,JTYP,KTYP,LTYP,VROT1,VROT2,VROT3
+         DO 611 IDIHR=1,NDIHR
+            JJXX=1
+            KKXX=1
+            L1=LLIST(1,IDIHR)
+            L2=LLIST(2,IDIHR)
+            L3=LLIST(3,IDIHR)
+            L4=LLIST(4,IDIHR)
+            JCOUNT=NMPCNT(1,IDIHR)
+            KCOUNT=NMPCNT(2,IDIHR)
+            IF(JCOUNT.EQ.5.AND.KCOUNT.EQ.5) GOTO 611
+            IF(ITYP.EQ.0.AND.LTYP.NE.0.AND.
+     *              (JTYP.NE.20.OR.KTYP.NE.30.OR.LTYP.NE.30))THEN
+               IF(NTYPE(L2).EQ.JTYP.AND.
+     *            NTYPE(L3).EQ.KTYP.AND.
+     *            NTYPE(L2).NE.NTYPE(L3)     )THEN
+                  DO JJ=JCOUNT,5
+                     DO KK=3,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.ITYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.LTYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+               ELSE IF(NTYPE(L2).EQ.KTYP.AND.
+     *            NTYPE(L3).EQ.JTYP.AND.
+     *            NTYPE(L2).NE.NTYPE(L3)     )THEN
+                  DO JJ=3,5
+                     DO KK=KCOUNT,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.LTYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.ITYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+               ELSE IF(NTYPE(L2).EQ.KTYP.AND.
+     *            NTYPE(L3).EQ.JTYP.AND.
+     *            NTYPE(L2).EQ.NTYPE(L3)     )THEN
+                  DO JJ=3,5
+                     DO KK=KCOUNT,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.LTYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.ITYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+                  IF(NMPCNT(1,IDIHR).GT.JCOUNT) JCOUNT=NMPCNT(1,IDIHR)
+                  IF(NMPCNT(2,IDIHR).GT.KCOUNT) KCOUNT=NMPCNT(2,IDIHR)
+                  DO JJ=JCOUNT,5
+                     DO KK=3,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.ITYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.LTYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+               END IF
+            ELSE IF(ITYP.NE.0.AND.LTYP.EQ.0)THEN
+               IF(NTYPE(L2).EQ.JTYP.AND.
+     *            NTYPE(L3).EQ.KTYP.AND.
+     *            NTYPE(L2).NE.NTYPE(L3)     )THEN
+                  DO JJ=3,5
+                     DO KK=KCOUNT,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.ITYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.LTYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+               ELSE IF(NTYPE(L2).EQ.KTYP.AND.
+     *            NTYPE(L3).EQ.JTYP.AND.
+     *            NTYPE(L2).NE.NTYPE(L3)     )THEN
+                  DO JJ=JCOUNT,5
+                     DO KK=3,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.LTYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.ITYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+               ELSE IF(NTYPE(L2).EQ.KTYP.AND.
+     *            NTYPE(L3).EQ.JTYP.AND.
+     *            NTYPE(L2).EQ.NTYPE(L3)     )THEN
+                  DO JJ=JCOUNT,5
+                     DO KK=3,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.LTYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.ITYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+                  IF(NMPCNT(1,IDIHR).GT.JCOUNT) JCOUNT=NMPCNT(1,IDIHR)
+                  IF(NMPCNT(2,IDIHR).GT.KCOUNT) KCOUNT=NMPCNT(2,IDIHR)
+                  DO JJ=3,5
+                     DO KK=KCOUNT,5
+                        IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                     NTYPMP(JJ,NTYPE(L1)).EQ.ITYP.AND.
+     *                     NTYPMP(KK,NTYPE(L4)).EQ.LTYP     )THEN
+                           FCDIHR(1,IDIHR)=VROT1*TOHART
+                           FCDIHR(2,IDIHR)=VROT2*TOHART
+                           FCDIHR(3,IDIHR)=VROT3*TOHART
+                           IF(JJ.GT.JJXX) JJXX=JJ
+                           IF(KK.GT.KKXX) KKXX=KK
+                           NLCBND(IDIHR)=3
+                        END IF
+                     ENDDO
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(KKXX.GT.NMPCNT(2,IDIHR)) NMPCNT(2,IDIHR)=KKXX
+               END IF
+            ELSE
+               JCOUNT=4
+               IF(NTYPE(L2).EQ.JTYP.AND.
+     *            NTYPE(L3).EQ.KTYP.AND.
+     *            NTYPE(L2).NE.NTYPE(L3)     )THEN
+                  IF(NLCBND(IDIHR).EQ.0)THEN
+                     FCDIHR(1,IDIHR)=VROT1*TOHART
+                     FCDIHR(2,IDIHR)=VROT2*TOHART
+                     FCDIHR(3,IDIHR)=VROT3*TOHART
+                     NLCBND(IDIHR)=1
+                  END IF
+                  IF(ITTN(IDIHR).EQ.ITT.AND.NLCBND(IDIHR).LE.1)THEN
+                     FCDIHR(1,IDIHR)=VROT1*TOHART
+                     FCDIHR(2,IDIHR)=VROT2*TOHART
+                     FCDIHR(3,IDIHR)=VROT3*TOHART
+                     NLCBND(IDIHR)=2
+                  END IF
+                  DO JJ=JCOUNT,5
+                     IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                  NTYPMP(JJ,NTYPE(L1)).EQ.ITYP.AND.
+     *                  NTYPMP(JJ,NTYPE(L4)).EQ.LTYP     )THEN
+                        FCDIHR(1,IDIHR)=VROT1*TOHART
+                        FCDIHR(2,IDIHR)=VROT2*TOHART
+                        FCDIHR(3,IDIHR)=VROT3*TOHART
+                        IF(JJ.GT.JJXX) JJXX=JJ
+                        NLCBND(IDIHR)=3
+                     END IF
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+               ELSE IF(NTYPE(L2).EQ.KTYP.AND.
+     *            NTYPE(L3).EQ.JTYP.AND.
+     *            NTYPE(L2).NE.NTYPE(L3)     )THEN
+                  IF(NLCBND(IDIHR).EQ.0)THEN
+                     FCDIHR(1,IDIHR)=VROT1*TOHART
+                     FCDIHR(2,IDIHR)=VROT2*TOHART
+                     FCDIHR(3,IDIHR)=VROT3*TOHART
+                     NLCBND(IDIHR)=1
+                  END IF
+                  IF(ITTN(IDIHR).EQ.ITT.AND.NLCBND(IDIHR).LE.1)THEN
+                     FCDIHR(1,IDIHR)=VROT1*TOHART
+                     FCDIHR(2,IDIHR)=VROT2*TOHART
+                     FCDIHR(3,IDIHR)=VROT3*TOHART
+                     NLCBND(IDIHR)=2
+                  END IF
+                  DO JJ=JCOUNT,5
+                     IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                  NTYPMP(JJ,NTYPE(L1)).EQ.LTYP.AND.
+     *                  NTYPMP(JJ,NTYPE(L4)).EQ.ITYP     )THEN
+                        FCDIHR(1,IDIHR)=VROT1*TOHART
+                        FCDIHR(2,IDIHR)=VROT2*TOHART
+                        FCDIHR(3,IDIHR)=VROT3*TOHART
+                        IF(JJ.GT.JJXX) JJXX=JJ
+                        NLCBND(IDIHR)=3
+                     END IF
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+               ELSE IF(NTYPE(L2).EQ.KTYP.AND.
+     *            NTYPE(L3).EQ.JTYP.AND.
+     *            NTYPE(L2).EQ.NTYPE(L3)     )THEN
+                  IF(NLCBND(IDIHR).EQ.0)THEN
+                     FCDIHR(1,IDIHR)=VROT1*TOHART
+                     FCDIHR(2,IDIHR)=VROT2*TOHART
+                     FCDIHR(3,IDIHR)=VROT3*TOHART
+                     NLCBND(IDIHR)=1
+                  END IF
+                  IF(ITTN(IDIHR).EQ.ITT.AND.NLCBND(IDIHR).LE.1)THEN
+                     FCDIHR(1,IDIHR)=VROT1*TOHART
+                     FCDIHR(2,IDIHR)=VROT2*TOHART
+                     FCDIHR(3,IDIHR)=VROT3*TOHART
+                     NLCBND(IDIHR)=2
+                  END IF
+                  DO JJ=JCOUNT,5
+                     IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                  NTYPMP(JJ,NTYPE(L1)).EQ.LTYP.AND.
+     *                  NTYPMP(JJ,NTYPE(L4)).EQ.ITYP     )THEN
+                        FCDIHR(1,IDIHR)=VROT1*TOHART
+                        FCDIHR(2,IDIHR)=VROT2*TOHART
+                        FCDIHR(3,IDIHR)=VROT3*TOHART
+                        IF(JJ.GT.JJXX) JJXX=JJ
+                        NLCBND(IDIHR)=3
+                     END IF
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+                  IF(NMPCNT(1,IDIHR).GT.JCOUNT) JCOUNT=NMPCNT(1,IDIHR)
+                  DO JJ=JCOUNT,5
+                     IF(ITTN(IDIHR).EQ.ITT.AND.
+     *                  NTYPMP(JJ,NTYPE(L1)).EQ.ITYP.AND.
+     *                  NTYPMP(JJ,NTYPE(L4)).EQ.LTYP     )THEN
+                        FCDIHR(1,IDIHR)=VROT1*TOHART
+                        FCDIHR(2,IDIHR)=VROT2*TOHART
+                        FCDIHR(3,IDIHR)=VROT3*TOHART
+                        IF(JJ.GT.JJXX) JJXX=JJ
+                        NLCBND(IDIHR)=3
+                     END IF
+                  ENDDO
+                  IF(JJXX.GT.NMPCNT(1,IDIHR)) NMPCNT(1,IDIHR)=JJXX
+               END IF
+            END IF
+ 611     CONTINUE
+         GOTO 610
+ 620     CONTINUE
+      END IF
+      DO 621 IDIHR=1,NDIHR
+         IF(ABS(FCDIHR(1,IDIHR)).LT.0.1D-10.AND.
+     *      ABS(FCDIHR(2,IDIHR)).LT.0.1D-10.AND.
+     *      ABS(FCDIHR(3,IDIHR)).LT.0.1D-10.AND.NLCBND(IDIHR).EQ.0)THEN
+            L1=LLIST(1,IDIHR)
+            L2=LLIST(2,IDIHR)
+            L3=LLIST(3,IDIHR)
+            L4=LLIST(4,IDIHR)
+            IF(LINH(NTYPE(L2)).EQ.1.OR.LINH(NTYPE(L3)).EQ.1) GOTO 621
+            IF(IDATM(2,NTYPE(L3)).EQ.1.AND.
+     *         IDATM(2,NTYPE(L2)).EQ.1     )THEN
+               ICNTRL=0
+               DO IRING=1,NUMRIN(10,L2)
+                  DO JRING=1,NUMRIN(10,L3)
+                     IF(NUMRIN(IRING,L2).EQ.NUMRIN(JRING,L3).AND.
+     *               NRINTYP(NUMRIN(IRING,L2)).EQ.1) ICNTRL=1
+                  ENDDO
+               ENDDO
+               IF(ICNTRL.EQ.1)THEN
+                  PIJK=0.3D+00
+                  BETLA=6.0D+00
+                  IF(IPILP(NTYPE(L2)).EQ.0.AND.IPILP(NTYPE(L3)).EQ.0)
+     *            PIJK=0.5D+00
+                  IF((IVAL(NTYPE(L2)).EQ.3.AND.IVAL(NTYPE(L3)).EQ.4).OR.
+     *               (IVAL(NTYPE(L2)).EQ.4.AND.IVAL(NTYPE(L3)).EQ.3))
+     *                BETLA=3.0D+00
+                  FCDIHR(2,IDIHR)=BETLA*PIJK*
+     *                           SQRT(ERPFTI(1,NINT(ZANF(L2)))*
+     *                           ERPFTI(1,NINT(ZANF(L3))))*TOHART
+               END IF
+            END IF
+            JBOND=0
+            DO I=1,LBOND(10,L2)
+               KBOND=LBOND(I,L2)
+               LL3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L2
+               IF(LL3.EQ.L3.AND.BORDER(KBOND).EQ.2.0D+00)
+     *         JBOND=KBOND
+            ENDDO
+            IF(JBOND.NE.0)THEN
+               PIJK=0.4D+00
+               BETLA=6.0D+00
+               IF(IMLTB(NTYPE(L2)).EQ.2.AND.IMLTB(NTYPE(L3)).EQ.2)THEN
+               PIJK=1.0D+00
+               FCDIHR(2,IDIHR)=BETLA*PIJK*
+     *                         SQRT(ERPFTI(1,NINT(ZANF(L2)))*
+     *                         ERPFTI(1,NINT(ZANF(L3))))*TOHART
+               END IF
+            END IF
+            IF(ICRD(NTYPE(L2)).EQ.4.AND.ICRD(NTYPE(L3)).EQ.4)THEN
+              FCDIHR(3,IDIHR)=TOHART*SQRT(ERPFTI(2,NINT(ZANF(L2)))*
+     *                              ERPFTI(2,NINT(ZANF(L3))))/9.0D+00
+            END IF
+            IF(ICRD(NTYPE(L2)).EQ.4.AND.ICRD(NTYPE(L3)).NE.4)THEN
+               IF((ICRD(NTYPE(L3)).EQ.3.AND.(IVAL(NTYPE(L3)).EQ.4.OR.
+     *             IVAL(NTYPE(L3)).EQ.34.OR.IMLTB(NTYPE(L3)).NE.0)).OR.
+     *            (ICRD(NTYPE(L3)).EQ.2.AND.(IVAL(NTYPE(L3)).EQ.3.OR.
+     *             IMLTB(NTYPE(L3)).NE.0)))THEN
+                  FCDIHR(1,IDIHR)=ZERO
+                  FCDIHR(2,IDIHR)=ZERO
+                  FCDIHR(3,IDIHR)=ZERO
+                  GOTO 621
+               END IF
+               FCDIHR(3,IDIHR)=TOHART*SQRT(ERPFTI(2,NINT(ZANF(L2)))*
+     *                               ERPFTI(2,NINT(ZANF(L3))))/
+     *                    ((ICRD(NTYPE(L2))-1)*(ICRD(NTYPE(L3))-1))
+            END IF
+            IF(ICRD(NTYPE(L2)).NE.4.AND.ICRD(NTYPE(L3)).EQ.4)THEN
+               IF((ICRD(NTYPE(L2)).EQ.3.AND.(IVAL(NTYPE(L2)).EQ.4.OR.
+     *             IVAL(NTYPE(L2)).EQ.34.OR.IMLTB(NTYPE(L2)).NE.0)).OR.
+     *            (ICRD(NTYPE(L2)).EQ.2.AND.(IVAL(NTYPE(L2)).EQ.3.OR.
+     *             IMLTB(NTYPE(L2)).NE.0)))THEN
+                  FCDIHR(1,IDIHR)=ZERO
+                  FCDIHR(2,IDIHR)=ZERO
+                  FCDIHR(3,IDIHR)=ZERO
+                  GOTO 621
+               END IF
+               FCDIHR(3,IDIHR)=TOHART*SQRT(ERPFTI(2,NINT(ZANF(L2)))*
+     *                               ERPFTI(2,NINT(ZANF(L3))))/
+     *            ((ICRD(NTYPE(L2))-1)*(ICRD(NTYPE(L3))-1))
+            END IF
+            JBOND=0
+            DO I=1,LBOND(10,L2)
+               KBOND=LBOND(I,L2)
+               LL3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L2
+               IF(LL3.EQ.L3.AND.BORDER(KBOND).EQ.1.0D+00)
+     *         JBOND=KBOND
+            ENDDO
+            IF(LBOND(10,L3).EQ.3.AND.LBOND(10,L2).EQ.3.AND.
+     *         JBOND.NE.0)THEN
+               IF((IMLTB(NTYPE(L2)).NE.0.AND.IMLTB(NTYPE(L3)).NE.0).OR.
+     *            (IPILP(NTYPE(L2)).NE.0.AND.IMLTB(NTYPE(L3)).NE.0).OR.
+     *            (IPILP(NTYPE(L3)).NE.0.AND.IMLTB(NTYPE(L2)).NE.0))THEN
+                  IF(IPILP(NTYPE(L2)).EQ.1.AND.
+     *               IPILP(NTYPE(L3)).EQ.1     )THEN
+                     FCDIHR(1,IDIHR)=ZERO
+                     FCDIHR(2,IDIHR)=ZERO
+                     FCDIHR(3,IDIHR)=ZERO
+                     GOTO 621
+                  END IF
+                  IF(IPILP(NTYPE(L2)).NE.0.AND.
+     *               IPILP(NTYPE(L3)).NE.0     )THEN
+                     BETLA=6.0D+00
+                     PIJK=0.15D+00
+                     IF(IMLTB(NTYPE(L2)).EQ.1.OR.IMLTB(NTYPE(L3)).EQ.1)
+     *               PIJK=0.5D+00
+                     IF((NINT(ZANF(L2)).EQ.6.OR.NINT(ZANF(L2)).EQ.14)
+     *             .AND.(NINT(ZANF(L3)).EQ.6.OR.NINT(ZANF(L3)).EQ.14))
+     *               PIJK=0.3D+00
+                     FCDIHR(2,IDIHR)=BETLA*PIJK*
+     *                               SQRT(ERPFTI(1,NINT(ZANF(L2)))*
+     *                               ERPFTI(1,NINT(ZANF(L3))))*TOHART
+                     GOTO 621
+                  END IF
+                  IF((IMLTB(NTYPE(L2)).EQ.1.OR.
+     *                IMLTB(NTYPE(L3)).EQ.1).AND.
+     *               (NINT(ZANF(L2)).NE.6.OR.NINT(ZANF(L3)).NE.6))THEN
+                     BETLA=6.0D+00
+                     PIJK=0.4D+00
+                     FCDIHR(2,IDIHR)=BETLA*PIJK*
+     *                              SQRT(ERPFTI(1,NINT(ZANF(L2)))*
+     *                              ERPFTI(1,NINT(ZANF(L3))))*TOHART
+                     GOTO 621
+                  END IF
+                  BETLA=6.0D+00
+                  PIJK=0.15D+00
+                  FCDIHR(2,IDIHR)=BETLA*PIJK*
+     *   SQRT(ERPFTI(1,NINT(ZANF(L2)))*ERPFTI(1,NINT(ZANF(L3))))*TOHART
+               END IF
+               IF((NINT(ZANF(L2)).EQ.8.OR.NINT(ZANF(L2)).EQ.16).AND.
+     *            (NINT(ZANF(L3)).EQ.8.OR.NINT(ZANF(L3)).EQ.16))THEN
+                  FCDIHR(3,IDIHR)=TOHART*SQRT(ERPFTI(2,NINT(ZANF(L2)))*
+     *                               ERPFTI(2,NINT(ZANF(L3))))/
+     *                   ((ICRD(NTYPE(L2))-1)*(ICRD(NTYPE(L3))-1))
+                  IF(LBOND(10,L2).EQ.1.AND.LBOND(10,L3).EQ.1.AND.
+     *            QMMFF(L2).EQ.ZERO.AND.QMMFF(L3).EQ.ZERO)THEN
+                  IF(NINT(ZANF(L2)).EQ.8)  TSINWJ=2.0D+00
+                  IF(NINT(ZANF(L2)).EQ.16) TSINWJ=8.0D+00
+                  IF(NINT(ZANF(L3)).EQ.8)  TSINWK=2.0D+00
+                  IF(NINT(ZANF(L3)).EQ.16) TSINWK=8.0D+00
+                  FCDIHR(2,IDIHR)=- SQRT(TSINWK*TSINWJ)*TOHART
+                  END IF
+               END IF
+            END IF
+         END IF
+ 621  CONTINUE
+      DO IDIHR=1,NDIHR
+         IF(ITTN(IDIHR).EQ.5)THEN
+         L1=LLIST(1,IDIHR)
+         L2=LLIST(2,IDIHR)
+         L3=LLIST(3,IDIHR)
+         L4=LLIST(4,IDIHR)
+         IF(LINH(NTYPE(L2)).EQ.1.OR.LINH(NTYPE(L3)).EQ.1)THEN
+            FCDIHR(1,IDIHR)=ZERO
+            FCDIHR(2,IDIHR)=ZERO
+            FCDIHR(3,IDIHR)=ZERO
+         END IF
+         JBOND=0
+         DO I=1,LBOND(10,L2)
+            KBOND=LBOND(I,L2)
+            LL3=IPAIR(1,KBOND)+IPAIR(2,KBOND)-L2
+            IF(LL3.EQ.L3.AND.BORDER(KBOND).EQ.1.0D+00)
+     *      JBOND=KBOND
+         ENDDO
+         IF(LBOND(10,L3).EQ.3.AND.LBOND(10,L2).EQ.3.AND.
+     *      JBOND.NE.0)THEN
+            IF((IMLTB(NTYPE(L2)).NE.0.AND.IMLTB(NTYPE(L3)).NE.0).OR.
+     *         (IPILP(NTYPE(L2)).NE.0.AND.IMLTB(NTYPE(L3)).NE.0).OR.
+     *         (IPILP(NTYPE(L3)).NE.0.AND.IMLTB(NTYPE(L2)).NE.0))THEN
+               IF(IPILP(NTYPE(L2)).EQ.1.AND.
+     *            IPILP(NTYPE(L3)).EQ.1     )THEN
+                  FCDIHR(1,IDIHR)=ZERO
+                  FCDIHR(2,IDIHR)=ZERO
+                  FCDIHR(3,IDIHR)=ZERO
+               END IF
+            END IF
+         END IF
+         END IF
+      ENDDO
+      IF(GOPARR) CALL DDI_BCAST(276,'F',FCDIHR,3*NDIHR,MASTER)
+C
+C     -- LOAD LJ DATA FOR EACH TYPE OF ATOM
+C
+      IF(MASWRK) THEN
+         REWIND(12)
+ 630     CONTINUE
+         READ(12,'(A100)',END=650) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*  TYPE  ALPHA-I     ') GOTO 630
+         READ(12,'(A100)',END=650) WD100    ! THIS IS AN EXTRA LINE
+ 640     CONTINUE
+         READ(12,'(A100)',END=650) WD100
+         READ(WD100,*,ERR=650) IVTYP,ALPHAI,CNII,AIII,GIII,ADTYPE
+         VDWIN(1,IVTYP)=ALPHAI
+         VDWIN(2,IVTYP)=CNII
+         VDWIN(3,IVTYP)=AIII
+         VDWIN(4,IVTYP)=GIII
+         IF(ADTYPE.EQ.'D')THEN
+            IADTYP(IVTYP)=1
+         END IF
+         IF(ADTYPE.EQ.'A')THEN
+            IADTYP(IVTYP)=2
+         END IF
+         GOTO 640
+ 650     CONTINUE
+      END IF
+      IF(GOPARR) CALL DDI_BCAST(275,'I',IADTYP,MXMMTP,MASTER)
+      IF(GOPARR) CALL DDI_BCAST(276,'F',VDWIN,4*MXMMTP,MASTER)
+C
+C     -- LOAD THE POLARIZED CHARG ON EACH ATOM
+C
+      IF(MASWRK) THEN
+         REWIND(12)
+         CALL VICLR(NLCBND,1,NBOND)
+ 660     CONTINUE
+         READ(12,'(A100)',END=680) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'*  TYPES       BCI   ') GOTO 660
+ 670     CONTINUE
+         READ(12,'(A100)',END=680) WD100
+         READ(WD100,*,ERR=680) ICAGTYP,ITYP,JYP,BCI
+         DO IBOND=1,NBOND
+            J1=IPAIR(1,IBOND)
+            J2=IPAIR(2,IBOND)
+            IF(NBNDTYP(IBOND).EQ.ICAGTYP.AND.
+     *         NTYPE(J1).EQ.ITYP.AND.NTYPE(J2).EQ.JYP)THEN
+               BNDCAG(IBOND)=BCI
+               IF(BCI.EQ.0.0D+00)THEN
+                  NLCBND(IBOND)=9
+               END IF
+            END IF
+            IF(NBNDTYP(IBOND).EQ.ICAGTYP.AND.
+     *         NTYPE(J2).EQ.ITYP.AND.NTYPE(J1).EQ.JYP)THEN
+               BNDCAG(IBOND)=-BCI
+               IF(BCI.EQ.0.0D+00)THEN
+                  NLCBND(IBOND)=9
+               END IF
+            END IF
+         ENDDO
+         GOTO 670
+ 680     CONTINUE
+      END IF
+      IF(GOPARR) CALL DDI_BCAST(275,'I',NLCBND,NBOND,MASTER)
+      IF(GOPARR) CALL DDI_BCAST(276,'F',BNDCAG,NBOND,MASTER)
+C
+C     -- LOAD THE POLARIZED CHARG ON EACH ATOM
+C
+      IF(MASWRK) THEN
+         REWIND(12)
+ 700     CONTINUE
+         READ(12,'(A100)',END=720) WD100
+         DO I=1,100
+            J = IACHAR(WD100(I:I))
+            IF(J.GE.97.AND.J.LE.122) J = J - 32
+            WD100(I:I) = CHAR(J)
+         ENDDO
+         IF(WD100(1:21).NE.'* TYPE    PBCI      F') GOTO 700
+ 710     CONTINUE
+         READ(12,'(A100)',END=720) WD100
+         READ(WD100,*,ERR=720) ACONT,ITYPE,PBCI,FCDAIJ
+         ACONT=ACONT
+         DO JTYPE=1,MXMMTP
+            IF(JTYPE.EQ.ITYPE)THEN
+               PCHAG(1,JTYPE)=PBCI
+               PCHAG(2,JTYPE)=FCDAIJ
+            END IF
+         ENDDO
+         GOTO 710
+ 720     CONTINUE
+      END IF
+      IF(GOPARR) CALL DDI_BCAST(276,'F',PCHAG,2*MXMMTP,MASTER)
+C
+      CLOSE(12)
+C
+C     -- LOAD THE POLARIZED CHARG ON EACH ATOM
+C
+      CHGTOT = ZERO
+      DO IBOND=1,NBOND
+         J1=IPAIR(1,IBOND)
+         J2=IPAIR(2,IBOND)
+         IF(PCHAG(2,NTYPE(J2)).EQ.ZERO.AND.QMMFF(J1).NE.ZERO) THEN
+            CHARGL(J2)=CHARGL(J2)+QMMFF(J1)*PCHAG(2,NTYPE(J1))
+            IF(PCHAG(2,NTYPE(J1)).NE.ZERO.AND.QMMFF(J2).NE.ZERO)
+     *      CHARGL(J1)=CHARGL(J1)-QMMFF(J2)*PCHAG(2,NTYPE(J1))
+         END IF
+         IF(PCHAG(2,NTYPE(J1)).EQ.ZERO.AND.QMMFF(J2).NE.ZERO) THEN
+            CHARGL(J1)=CHARGL(J1)+QMMFF(J2)*PCHAG(2,NTYPE(J2))
+            IF(PCHAG(2,NTYPE(J2)).NE.ZERO.AND.QMMFF(J1).NE.ZERO)
+     *      CHARGL(J2)=CHARGL(J2)-QMMFF(J1)*PCHAG(2,NTYPE(J2))
+         END IF
+      ENDDO
+      DO IFFAT=1,NFFAT
+         LCOUNT1=0
+         DO IBOND=1,NBOND
+            J1=IPAIR(1,IBOND)
+            J2=IPAIR(2,IBOND)
+            IF(NLCBND(IBOND).EQ.9.OR.BNDCAG(IBOND).NE.0.0D+00)THEN
+               IF(J1.EQ.IFFAT)THEN
+                  CHARG(IFFAT)=CHARG(IFFAT)-BNDCAG(IBOND)+
+     *                         PCHAG(2,NTYPE(IFFAT))*QMMFF(J2)
+                  LCOUNT1=LCOUNT1+1
+               END IF
+               IF(J2.EQ.IFFAT)THEN
+                  CHARG(IFFAT)=CHARG(IFFAT)+BNDCAG(IBOND)+
+     *                         PCHAG(2,NTYPE(IFFAT))*QMMFF(J1)
+                  LCOUNT1=LCOUNT1+1
+               END IF
+            END IF
+         ENDDO
+         IF(LCOUNT1.LT.LBOND(10,IFFAT))THEN
+            DO IBOND=1,NBOND
+               J1=IPAIR(1,IBOND)
+               J2=IPAIR(2,IBOND)
+               IF(NLCBND(IBOND).NE.9.AND.BNDCAG(IBOND).EQ.0.0D+00.AND.
+     *            (J1.EQ.IFFAT.OR.J2.EQ.IFFAT))THEN
+                  IF(J1.EQ.IFFAT)THEN
+                     CHARG(IFFAT)=CHARG(IFFAT)
+     *                           +PCHAG(1,NTYPE(J1))
+     *                           -PCHAG(1,NTYPE(J2))
+     *                           +PCHAG(2,NTYPE(J1))*QMMFF(J2)
+                  END IF
+                  IF(J2.EQ.IFFAT)THEN
+                     CHARG(IFFAT)=CHARG(IFFAT)
+     *                           -PCHAG(1,NTYPE(J1))
+     *                           +PCHAG(1,NTYPE(J2))
+     *                           +PCHAG(2,NTYPE(J2))*QMMFF(J1)
+                  END IF
+               END IF
+            ENDDO
+         END IF
+         CHARG(IFFAT)=CHARG(IFFAT)
+     *               +(1-LBOND(10,IFFAT)*PCHAG(2,NTYPE(IFFAT)))*
+     *                QMMFF(IFFAT)+CHARGL(IFFAT)
+         CHGTOT = CHGTOT + CHARG(IFFAT)
+      ENDDO
+C
+C     -- COMPUTE THE MMFFLJ TABLE
+C
+      DO II=1,MXMMTP
+         RRII=VDWIN(3,II)*SQRT(SQRT(VDWIN(1,II)))
+         DO JJ=II,MXMMTP
+           RRJJ    = VDWIN(3,JJ)*SQRT(SQRT(VDWIN(1,JJ)))
+           IF(RRII.EQ.ZERO.OR.RRJJ.EQ.ZERO) THEN
+            FCLJTP(1,JJ,II)=ZERO
+            FCLJTP(2,JJ,II)=ZERO
+           ELSE
+            GMIJ    = (RRII-RRJJ)/(RRII+RRJJ)
+            BBB     = 0.2D+00
+            BETA    = 12.0D+00
+            IF(IADTYP(II).EQ.1.OR.IADTYP(JJ).EQ.1) BBB = 0.0D+00
+            RRIJ   = PT5*(RRII+RRJJ)*
+     *               (ONE + BBB*(ONE-EXP(-BETA*GMIJ*GMIJ)))
+            RRIJ2  = RRIJ*RRIJ
+            RRIJ6  = RRIJ2*RRIJ2*RRIJ2
+            EPSNIJ = 181.16D+00*VDWIN(4,II)*VDWIN(4,JJ)*
+     *               VDWIN(1,II)*VDWIN(1,JJ)/
+     *               ((SQRT(VDWIN(1,II)/VDWIN(2,II))+
+     *                 SQRT(VDWIN(1,JJ)/VDWIN(2,JJ)))*RRIJ6)
+            IF((IADTYP(II).EQ.1.AND.IADTYP(JJ).EQ.2).OR.
+     *         (IADTYP(II).EQ.2.AND.IADTYP(JJ).EQ.1)    )THEN
+               RRIJ    = 0.8D+00*RRIJ
+               EPSNIJ  = 0.5D+00*EPSNIJ
+            END IF
+            FCLJTP(1,JJ,II)=RRIJ*TOBOHR
+            FCLJTP(2,JJ,II)=EPSNIJ*TOHART
+           END IF
+           FCLJTP(1,II,JJ) = FCLJTP(1,JJ,II)
+           FCLJTP(2,II,JJ) = FCLJTP(2,JJ,II)
+         ENDDO
+      ENDDO
+C
+C
+C     **** PRINT OUT THE MMFF FORCE FIELD INTO $FFDATA ****
+C
+C     -- COORDINATES --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,'(A,A,F11.6,A)')
+     *   ' $FFDATA       ! FROM LOUT=1,',
+     *   ' TOTAL MM CHARGE=',CHGTOT,', MAY NEED EDITING'
+         WRITE(IP,*)'COORDINATES  NUC                   X',
+     *          '                   Y                   Z'
+         DO IFFAT=1,NFFAT
+            WRITE(IP,1010) ATMNAM(IFFAT),ZANF(IFFAT),
+     *      CORD(1,IFFAT)*TOANGS,
+     *      CORD(2,IFFAT)*TOANGS,
+     *      CORD(3,IFFAT)*TOANGS
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- LJ RMIN/2 AND EPSILON --
+C
+      IF(MASWRK)
+     *   WRITE(IP,*)'PARAMETERS       MASS         Q      ',
+     *              'POL   RMIN/2  EPSILON   RMIN/2  EPSILON'
+         DO IFFAT=1,NFFAT
+            SIG(IFFAT)  = 2.00D+00
+            EPS(IFFAT)  = 0.10D+00
+            IF(ZANF(IFFAT).EQ.1.0D+00) THEN
+               SIG(IFFAT)= 0.600D+00
+               EPS(IFFAT)= 0.016D+00
+            END IF
+C           - FOR MD-CCS (SEE: TABLE I, JCP 148, 064109, 2018)
+            IF(ZANF(IFFAT).EQ.3.0D+00) THEN
+               SIG(IFFAT)= 1.400D+00
+               EPS(IFFAT)= 0.020D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.6.0D+00) THEN
+               SIG(IFFAT)= 1.908D+00
+               EPS(IFFAT)= 0.086D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.7.0D+00) THEN
+               SIG(IFFAT)= 1.824D+00
+               EPS(IFFAT)= 0.170D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.8.0D+00) THEN
+               SIG(IFFAT)= 1.700D+00
+               EPS(IFFAT)= 0.200D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.9.0D+00) THEN
+               SIG(IFFAT)= 1.750D+00
+               EPS(IFFAT)= 0.061D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.10.0D+00) THEN
+               SIG(IFFAT)= 1.700D+00
+               EPS(IFFAT)= 0.040D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.11.0D+00) THEN
+               SIG(IFFAT)= 1.500D+00
+               EPS(IFFAT)= 0.020D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.12.0D+00) THEN
+               SIG(IFFAT)= 1.300D+00
+               EPS(IFFAT)= 0.020D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.13.0D+00) THEN
+               SIG(IFFAT)= 1.300D+00
+               EPS(IFFAT)= 0.020D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.14.0D+00) THEN
+               SIG(IFFAT)= 2.200D+00
+               EPS(IFFAT)= 0.200D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.15.0D+00) THEN
+               SIG(IFFAT)= 1.750D+00
+               EPS(IFFAT)= 0.250D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.16.0D+00) THEN
+               SIG(IFFAT)= 1.700D+00
+               EPS(IFFAT)= 0.300D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.17.0D+00) THEN
+               SIG(IFFAT)= 1.950D+00
+               EPS(IFFAT)= 0.200D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.18.0D+00) THEN
+               SIG(IFFAT)= 1.800D+00
+               EPS(IFFAT)= 0.100D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.19.0D+00) THEN
+               SIG(IFFAT)= 1.764D+00
+               EPS(IFFAT)= 0.087D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.20.0D+00) THEN
+               SIG(IFFAT)= 1.367D+00
+               EPS(IFFAT)= 0.120D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.21.0D+00) THEN
+               SIG(IFFAT)= 1.240D+00
+               EPS(IFFAT)= 0.025D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.22.0D+00) THEN
+               SIG(IFFAT)= 1.230D+00
+               EPS(IFFAT)= 0.024D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.23.0D+00) THEN
+               SIG(IFFAT)= 1.220D+00
+               EPS(IFFAT)= 0.025D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.24.0D+00) THEN
+               SIG(IFFAT)= 1.210D+00
+               EPS(IFFAT)= 0.026D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.25.0D+00) THEN
+               SIG(IFFAT)= 1.200D+00
+               EPS(IFFAT)= 0.027D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.26.0D+00) THEN
+               SIG(IFFAT)= 1.190D+00
+               EPS(IFFAT)= 0.028D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.27.0D+00) THEN
+               SIG(IFFAT)= 1.180D+00
+               EPS(IFFAT)= 0.029D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.28.0D+00) THEN
+               SIG(IFFAT)= 1.170D+00
+               EPS(IFFAT)= 0.030D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.29.0D+00) THEN
+               SIG(IFFAT)= 1.160D+00
+               EPS(IFFAT)= 0.031D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.30.0D+00) THEN
+               SIG(IFFAT)= 1.1489D+00
+               EPS(IFFAT)= 0.0325D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.35.0D+00) THEN
+               SIG(IFFAT)= 2.020D+00
+               EPS(IFFAT)= 0.250D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.36.0D+00) THEN
+               SIG(IFFAT)= 2.200D+00
+               EPS(IFFAT)= 0.200D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.37.0D+00) THEN
+               SIG(IFFAT)= 2.100D+00
+               EPS(IFFAT)= 0.150D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.53.0D+00) THEN
+               SIG(IFFAT)= 2.150D+00
+               EPS(IFFAT)= 0.280D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.54.0D+00) THEN
+               SIG(IFFAT)= 2.300D+00
+               EPS(IFFAT)= 0.250D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.55.0D+00) THEN
+               SIG(IFFAT)= 2.300D+00
+               EPS(IFFAT)= 0.200D+00
+            END IF
+            POL(IFFAT)  = 0.0D+00
+C
+            IF(NTYPE(IFFAT).EQ.107)THEN    !  N IN N2
+               SIG(IFFAT)= 1.7000D+00
+               EPS(IFFAT)= 0.1400D+00
+               POL(IFFAT)= 0.8700D+00*TOBOHR**3
+            END IF
+            IF(NTYPE(IFFAT).EQ.108)THEN    !  O IN O2
+               SIG(IFFAT)= 1.7000D+00
+               EPS(IFFAT)= 0.2000D+00
+               POL(IFFAT)= 0.7900D+00*TOBOHR**3
+            END IF
+            IF(NTYPE(IFFAT).EQ.116)THEN    !  XE
+               SIG(IFFAT)= 2.1000D+00
+               EPS(IFFAT)= 0.3500D+00
+               POL(IFFAT)= 4.1220D+00*TOBOHR**3
+            END IF
+            IF(NTYPE(IFFAT).EQ.117)THEN    !  KR
+               SIG(IFFAT)= 2.0000D+00
+               EPS(IFFAT)= 0.3000D+00
+               POL(IFFAT)= 2.5300D+00*TOBOHR**3
+            END IF
+            IF(NTYPE(IFFAT).EQ.118)THEN    !  AR
+               SIG(IFFAT)= 1.9100D+00
+               EPS(IFFAT)= 0.2380D+00
+               POL(IFFAT)= 1.6410D+00*TOBOHR**3
+            END IF
+            IF(NTYPE(IFFAT).EQ.119)THEN    !  NE
+               SIG(IFFAT)= 1.6000D+00
+               EPS(IFFAT)= 0.1000D+00
+               POL(IFFAT)= 0.3961D+00*TOBOHR**3
+            END IF
+            IF(NTYPE(IFFAT).EQ.120)THEN    !  HE
+               SIG(IFFAT)= 1.5000D+00
+               EPS(IFFAT)= 0.0400D+00
+               POL(IFFAT)= 0.2051D+00*TOBOHR**3
+            END IF
+            SIG2(IFFAT) = SIG(IFFAT)
+            EPS2(IFFAT) = EPS(IFFAT)*0.5D+00
+C
+            NLPR(IFFAT) = 2
+            CLPR(1,IFFAT) =30.0D+00
+            ZLPR(1,IFFAT) = 0.7D+00
+            CLPR(2,IFFAT) = 0.0D+00
+            ZLPR(2,IFFAT) = 0.0D+00
+            CLPR(3,IFFAT) = 0.0D+00
+            ZLPR(3,IFFAT) = 0.0D+00
+            CLPR(4,IFFAT) = 0.0D+00
+            ZLPR(4,IFFAT) = 0.0D+00
+            IF(ZANF(IFFAT).EQ.1.0D+00) THEN
+               CLPR(1,IFFAT)= 2.0D+00
+               ZLPR(1,IFFAT)= 2.0D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.6.0D+00) THEN
+               CLPR(1,IFFAT)=30.0D+00
+               ZLPR(1,IFFAT)= 0.7D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.7.0D+00) THEN
+               CLPR(1,IFFAT)=30.0D+00
+               ZLPR(1,IFFAT)= 0.6D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.8.0D+00) THEN
+               CLPR(1,IFFAT)=30.0D+00
+               ZLPR(1,IFFAT)= 0.8D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.9.0D+00) THEN
+               CLPR(1,IFFAT)=30.0D+00
+               ZLPR(1,IFFAT)= 0.8D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.16.0D+00) THEN
+               CLPR(1,IFFAT)=30.0D+00
+               ZLPR(1,IFFAT)= 0.6D+00
+            END IF
+            IF(ZANF(IFFAT).EQ.17.0D+00) THEN
+               CLPR(1,IFFAT)=30.0D+00
+               ZLPR(1,IFFAT)= 0.6D+00
+            END IF
+            IF(MASWRK)WRITE(IP,1020)ATMNAM(IFFAT),
+     *                    ZMAS(IFFAT)/1822.88850204D+00,
+     *                    CHARG(IFFAT),POL(IFFAT)*TOANGS**3,
+     *                    SIG(IFFAT),EPS(IFFAT),
+     *                    SIG2(IFFAT),EPS2(IFFAT)
+         ENDDO
+         IF(MASWRK)WRITE(IP,*)'STOP'
+C
+C     -- PRINT OUT QMMMREP --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)'QMMMREP    N       C1     Z1       C2     Z2',
+     *          '       C3     Z3       C4     Z4'
+         DO IFFAT=1,NFFAT
+            WRITE(IP,1030) ATMNAM(IFFAT),4,
+     *                 CLPR(1,IFFAT),ZLPR(1,IFFAT),
+     *                 CLPR(2,IFFAT),ZLPR(2,IFFAT),
+     *                 CLPR(3,IFFAT),ZLPR(3,IFFAT),
+     *                 CLPR(4,IFFAT),ZLPR(4,IFFAT)
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- BONDS --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)
+     *   'BOND     #     ATM1     ATM2           FC        R0'
+         DO IBOND=1,NBOND
+            WRITE(IP,1040)IBOND,IPAIR(1,IBOND),IPAIR(2,IBOND),
+     *                 FCBOND(IBOND)*TOKCAL*TOBOHR*TOBOHR,
+     *                 BOND0(IBOND)*TOANGS
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- ANGLES --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)'ANGLE    #     ATM1     ATM2     ATM3 ',
+     *          '          FC      ANGLE0'
+         DO IANGL=1,NANGL
+            WRITE(IP,1050)IANGL,KLIST(1,IANGL),KLIST(2,IANGL),
+     *                 KLIST(3,IANGL),FCANGL(IANGL)*TOKCAL,
+     *                 ANGL0(IANGL)*DEGREE
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- STRETCH-BEND INTERACTION --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)'STRBEND  #    BOND1    BOND2',
+     *          '          FC1          FC2'
+         WRITE(IW,*)'STRBEND  #    ATOM1    ATOM2',
+     *          '    ATOM3    FCSTBD1    FCSTBD2'
+         DO IANGL=1,NANGL
+            WRITE(IP,1055)IANGL,KBLST(1,IANGL),KBLST(2,IANGL),
+     *                    FCSTBD(1,IANGL)*TOBOHR*TOKCAL,
+     *                    FCSTBD(2,IANGL)*TOBOHR*TOKCAL
+            WRITE(IW,'(1X,I10,1X,I8,1X,I8,1X,I8,1X,F10.4,1X,F10.4)')
+     *      IANGL,KLIST(1,IANGL),KLIST(2,IANGL),KLIST(3,IANGL),
+     *      FCSTBD(1,IANGL)/2.5121D+00/TOANGS/TOHART/DEGREE,
+     *      FCSTBD(2,IANGL)/2.5121D+00/TOANGS/TOHART/DEGREE
+         ENDDO
+         WRITE(IP,*)'STOP'
+         WRITE(IW,*)' '
+      END IF
+C
+C     -- DIHEDRAL ROTATION 3V --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)'DIHR3V   #     ATM1     ATM2     ATM3  ',
+     *              '   ATM4     VROT1     VROT2     VROT3'
+         DO IDIHR=1,NDIHR
+            WRITE(IP,1065)
+     *                 IDIHR,LLIST(1,IDIHR),LLIST(2,IDIHR),
+     *                 LLIST(3,IDIHR),LLIST(4,IDIHR),
+     *                 FCDIHR(1,IDIHR)*TOKCAL,
+     *                 FCDIHR(2,IDIHR)*TOKCAL,
+     *                 FCDIHR(3,IDIHR)*TOKCAL
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- WAGGING --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)'WAGGING  #     ATM2     ATM3     ATM4  ',
+     *          '   ATM1         FC '
+         DO IWAGG=1,NWAGG
+            WRITE(IP,1080)IWAGG,MLIST(2,IWAGG),MLIST(3,IWAGG),
+     *                    MLIST(4,IWAGG),MLIST(1,IWAGG),
+     *                    FCWAGG(IWAGG)*TOKCAL
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- MMFF ATOM TYPE --
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)'MMTYPE   #  MMFF94 FROM LOUT=1'
+         WRITE(IP,'(2X,I9)')NFFAT
+         NLINE = (NFFAT-1)/20 + 1
+         DO I=1,NLINE
+            JSTOP = 20
+            IF(I.EQ.NLINE) JSTOP = NFFAT - (NLINE-1)*20
+            WRITE(IP,'(I3,19(1X,I3))') (NTYPE((I-1)*20+J),J=1,JSTOP)
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+C
+C     -- MMFF LJ TABLE --
+C
+      DO II=1,MXMMTP
+         DO JJ=1,MXMMTP
+            FCLJTP(1,JJ,II)=TOBOHR*1.0D-06*
+     *                      NINT(1.0D+06*FCLJTP(1,JJ,II)*TOANGS)
+            FCLJTP(2,JJ,II)=TOHART*1.0D-06*
+     *                      NINT(1.0D+06*FCLJTP(2,JJ,II)*TOKCAL)
+         ENDDO
+      ENDDO
+C
+      IF(MASWRK) THEN
+         WRITE(IP,*)
+     *   'MMFFLJ   #                  I   J      RIJ    EPSIJ'
+         WRITE(IP,'(2X,I9)')MXMMTP
+         DO II=1,MXMMTP
+            DO JJ=1,MXMMTP,3
+               IF(JJ.LE.MXMMTP-2) THEN
+                  WRITE(IP,'(3(1X,I3,1X,I3,1X,F8.6,1X,F8.6))')
+     *            II,JJ  ,FCLJTP(1,JJ  ,II)*TOANGS,
+     *                    FCLJTP(2,JJ  ,II)*TOKCAL,
+     *            II,JJ+1,FCLJTP(1,JJ+1,II)*TOANGS,
+     *                    FCLJTP(2,JJ+1,II)*TOKCAL,
+     *            II,JJ+2,FCLJTP(1,JJ+2,II)*TOANGS,
+     *                    FCLJTP(2,JJ+2,II)*TOKCAL
+               END IF
+               IF(JJ.EQ.MXMMTP-1) THEN
+                  WRITE(IP,'(2(1X,I3,1X,I3,1X,F8.6,1X,F8.6))')
+     *            II,JJ  ,FCLJTP(1,JJ  ,II)*TOANGS,
+     *                    FCLJTP(2,JJ  ,II)*TOKCAL,
+     *            II,JJ+1,FCLJTP(1,JJ+1,II)*TOANGS,
+     *                    FCLJTP(2,JJ+1,II)*TOKCAL
+               END IF
+               IF(JJ.EQ.MXMMTP  ) THEN
+                  WRITE(IP,'(1X,I3,1X,I3,1X,F8.6,1X,F8.6)')
+     *            II,JJ  ,FCLJTP(1,JJ  ,II)*TOANGS,
+     *                    FCLJTP(2,JJ  ,II)*TOKCAL
+               END IF
+            ENDDO
+         ENDDO
+         WRITE(IP,*)'STOP'
+      END IF
+      IF(MASWRK) WRITE(IP,*)'$END'
+C
+      IF(MASWRK) THEN
+         WRITE(IW,*)'********************************************'
+         WRITE(IW,*)'$FFDATA FOR MMFF94 IS GENERATED IN .DAT FILE'
+         WRITE(IW,*)'********************************************'
+      END IF
+C
+ 1010 FORMAT(1X,A10,1X,F5.1,1X,F19.13,1X,F19.13,1X,F19.13)
+ 1020 FORMAT(1X,A10,1X,F10.6,1X,F9.5,1X,F8.6,1X,
+     *       F8.6,1X,F8.6,1X,F8.6,1X,F8.6)
+ 1030 FORMAT(1X,A10,1X,I1,1X,F8.5,1X,F6.4,1X,F8.5,1X,F6.4,
+     *                    1X,F8.5,1X,F6.4,1X,F8.5,1X,F6.4,
+     *                    1X,F8.5,1X,F6.4,1X,F8.5,1X,F6.4)
+ 1040 FORMAT(1X,I10,1X,I8,1X,I8,1X,F12.6,1X,F9.6)
+ 1050 FORMAT(1X,I10,1X,I8,1X,I8,1X,I8,1X,F12.6,1X,F11.5)
+ 1055 FORMAT(1X,I10,1X,I8,1X,I8,1X,F12.6,1X,F12.6)
+ 1065 FORMAT(1X,I10,1X,I8,1X,I8,1X,I8,1X,I8,1X,F9.5,1X,F9.5,1X,F9.5)
+ 1080 FORMAT(1X,I10,1X,I8,1X,I8,1X,I8,1X,I8,1X,F10.6)
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK IRMDF1
+!>
+!> @brief    RMDF step 1
+!>
+!> @author   Rui Lai
+!>           - Jan 2016
+!>
+!> @details  Restricted MD simulation of mean force step 1
+!>
+      SUBROUTINE IRMDF1(CORD,OLDCORD,VEL,ONEMAS,ISTEP,RMDFCE)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (TOKCAL=627.509469D+00)
+      PARAMETER (TOBOHR=1.0D+00/TOANGS)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (PT5=0.50D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      DIMENSION CORD(3,*),VEL(3,*),ONEMAS(*),
+     *          OLDCORD(3,*)
+C
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFRATT/ RATOLC,RATOLV,SCALRAT,VIRRAT(3),IRATTLE,JRATTLE,
+     *                NRATTLE,MXRATT,LFFOLDCORD,LFFLSTRAT,LFFDSTRAT,
+     *                LFFVELSV,IRATQM
+      COMMON /FFRMDF/ RDIST1,RDIST2,RINTRV,NRATM1,NRATM2,INTRSTP
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     RUI LAI, JAN 12, 2016, LINCOLN
+C
+      IF(ISTEP.EQ.0) THEN
+         RMDFCE = ZERO
+         DSRMDF = RDIST1 + PT5*RINTRV
+      ELSE
+         IF(MOD((ISTEP-1),INTRSTP).EQ.0) RMDFCE = ZERO
+         DSRMDF = RDIST1 + (PT5 + DBLE((ISTEP-1)/INTRSTP))*RINTRV
+      END IF
+      DS2RMDF= DSRMDF*DSRMDF
+C
+      ONEDT  = ONE/DT
+      TWODT2 = TWO/DT2
+C
+      FORCE  = ZERO
+C
+      NDONERAT = 0
+  100 CONTINUE
+      NDONERAT = NDONERAT + 1
+      ICHECK = 0
+      IF(NDONERAT.GT.100) GOTO 110
+      IFFAT  = NRATM1
+      JFFAT  = NRATM2
+      ONERMAS= ONEMAS(IFFAT)+ONEMAS(JFFAT)
+      IF(ONERMAS.EQ.ZERO) GOTO 110
+      XSV    = OLDCORD(1,IFFAT)-OLDCORD(1,JFFAT)
+      YSV    = OLDCORD(2,IFFAT)-OLDCORD(2,JFFAT)
+      ZSV    = OLDCORD(3,IFFAT)-OLDCORD(3,JFFAT)
+C
+      X      = CORD(1,IFFAT)-CORD(1,JFFAT)
+      Y      = CORD(2,IFFAT)-CORD(2,JFFAT)
+      Z      = CORD(3,IFFAT)-CORD(3,JFFAT)
+      DIFF2  = X*X + Y*Y + Z*Z - DS2RMDF
+      DSTR   = SQRT(XSV*XSV + YSV*YSV + ZSV*ZSV)
+      IF(ABS(DIFF2).LT.RATOLV) GOTO 110
+      ICHECK = ICHECK + 1
+      DOTR   = X*XSV + Y*YSV + Z*ZSV
+      DUM1   = DOTR*ONERMAS
+      DUM1   = DUM1 + DUM1
+      GIJ    = DIFF2/DUM1
+C
+      GIJMASI  = GIJ*ONEMAS(IFFAT)
+      GIJMASIX = GIJMASI*XSV
+      GIJMASIY = GIJMASI*YSV
+      GIJMASIZ = GIJMASI*ZSV
+      GIJMASJ  = GIJ*ONEMAS(JFFAT)
+      GIJMASJX = GIJMASJ*XSV
+      GIJMASJY = GIJMASJ*YSV
+      GIJMASJZ = GIJMASJ*ZSV
+C
+      CORD(1,IFFAT) = CORD(1,IFFAT) - GIJMASIX
+      CORD(2,IFFAT) = CORD(2,IFFAT) - GIJMASIY
+      CORD(3,IFFAT) = CORD(3,IFFAT) - GIJMASIZ
+      CORD(1,JFFAT) = CORD(1,JFFAT) + GIJMASJX
+      CORD(2,JFFAT) = CORD(2,JFFAT) + GIJMASJY
+      CORD(3,JFFAT) = CORD(3,JFFAT) + GIJMASJZ
+      VEL(1,IFFAT)  = VEL(1,IFFAT)  - GIJMASIX*ONEDT
+      VEL(2,IFFAT)  = VEL(2,IFFAT)  - GIJMASIY*ONEDT
+      VEL(3,IFFAT)  = VEL(3,IFFAT)  - GIJMASIZ*ONEDT
+      VEL(1,JFFAT)  = VEL(1,JFFAT)  + GIJMASJX*ONEDT
+      VEL(2,JFFAT)  = VEL(2,JFFAT)  + GIJMASJY*ONEDT
+      VEL(3,JFFAT)  = VEL(3,JFFAT)  + GIJMASJZ*ONEDT
+C
+      GIJVIR        = GIJ*TWODT2
+      VIRRAT(1)     = VIRRAT(1) + GIJVIR*XSV*X
+      VIRRAT(2)     = VIRRAT(2) + GIJVIR*YSV*Y
+      VIRRAT(3)     = VIRRAT(3) + GIJVIR*ZSV*Z
+C
+      FORCE = FORCE + GIJVIR*DSTR
+C
+  110 CONTINUE
+C
+      IF (ICHECK.GT.0) GOTO 100
+C
+      RMDFCE = RMDFCE + FORCE
+      DST12  = DSRMDF*TOANGS
+      IF(MASWRK) THEN
+         IF(ISTEP.EQ.0) THEN
+            WRITE(IW,8998) ISTEP,ISTEP,DST12
+            WRITE(IW,8999) NRATM1,NRATM2
+         END IF
+         IF(ISTEP.NE.0.AND.MOD(ISTEP,INTRSTP).EQ.0) THEN
+            RFORCE = RMDFCE/DBLE(INTRSTP)
+            TFORCE = RFORCE*TOKCAL*TOBOHR
+            RFREEG =-RFORCE*RINTRV
+            RFREEK = RFREEG*TOKCAL
+            WRITE(IW,8998) ISTEP-INTRSTP+1,ISTEP,DST12
+            WRITE(IW,8999) NRATM1,NRATM2
+            WRITE(IW,'(1X,A)')
+     *      'POSITIVE FORCE MEANS REPULSION'
+            WRITE(IW,9000) INTRSTP,RFORCE,TFORCE
+            WRITE(IW,9001) DST12-PT5*RINTRV*TOANGS,
+     *                     DST12+PT5*RINTRV*TOANGS,
+     *                     RFREEG,RFREEK
+            WRITE(IP,9001) DST12-PT5*RINTRV*TOANGS,
+     *                     DST12+PT5*RINTRV*TOANGS,
+     *                     RFREEG,RFREEK
+         END IF
+      END IF
+C
+ 8998 FORMAT(1X,'IN MD STEPS ',I10,' TO ',I10,
+     *       ' THE DISTANCE IS FIXED AT ',F10.4,' A')
+ 8999 FORMAT(1X,'FOR MM ATOM ',I8,' AND MM ATOM ',I8)
+ 9000 FORMAT(1X,'MEAN FORCE IN',I10,' MD STEPS IS ',F12.8,
+     *       ' HARTREE/BOHR ',F12.6,' KCAL/MOL/A')
+ 9001 FORMAT(1X,'DELTA G FROM ',F10.4,' TO ',F10.4,
+     *       ' A IS',F12.8,' HARTREE',F12.6,' KCAL/MOL')
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK IRMDF2
+!>
+!> @brief    RMDF step 2
+!>
+!> @author   Rui Lai
+!>           - Jan 2016
+!>
+!> @details  Restricted MD simulation of mean force step 2
+!>
+      SUBROUTINE IRMDF2(CORD,VEL,ONEMAS,ISTEP)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (PT5=0.50D+00)
+      PARAMETER (ONE=1.0D+00)
+      DIMENSION CORD(3,*),VEL(3,*),ONEMAS(*)
+C
+      COMMON /FFRATT/ RATOLC,RATOLV,SCALRAT,VIRRAT(3),IRATTLE,JRATTLE,
+     *                NRATTLE,MXRATT,LFFOLDCORD,LFFLSTRAT,LFFDSTRAT,
+     *                LFFVELSV,IRATQM
+      COMMON /FFRMDF/ RDIST1,RDIST2,RINTRV,NRATM1,NRATM2,INTRSTP
+C
+C     RUI LAI, JAN 12, 2016, LINCOLN
+C
+      IF(ISTEP.EQ.0) THEN
+         DSRMDF = RDIST1 + PT5*RINTRV
+      ELSE
+         DSRMDF = RDIST1 + (PT5 + DBLE((ISTEP-1)/INTRSTP))*RINTRV
+      END IF
+      DS2RMDF= DSRMDF*DSRMDF
+C
+      NDONERAT = 0
+  100 CONTINUE
+      NDONERAT = NDONERAT + 1
+      ICHECK = 0
+      IF(NDONERAT.GT.100) GOTO 110
+      IFFAT  = NRATM1
+      JFFAT  = NRATM2
+      ONERMAS= ONEMAS(IFFAT)+ONEMAS(JFFAT)
+      IF(ONERMAS.EQ.ZERO) GOTO 110
+      DUM1   = ONE/(DS2RMDF*ONERMAS)
+      X      = CORD(1,IFFAT)-CORD(1,JFFAT)
+      Y      = CORD(2,IFFAT)-CORD(2,JFFAT)
+      Z      = CORD(3,IFFAT)-CORD(3,JFFAT)
+C
+      VX     = VEL(1,IFFAT)-VEL(1,JFFAT)
+      VY     = VEL(2,IFFAT)-VEL(2,JFFAT)
+      VZ     = VEL(3,IFFAT)-VEL(3,JFFAT)
+      DOT    = X*VX+Y*VY+Z*VZ
+      IF(ABS(DOT).LT.RATOLV) GOTO 110
+      ICHECK = ICHECK + 1
+      CON    = DOT*DUM1
+      CONMASI= CON*ONEMAS(IFFAT)
+      CONMASJ= CON*ONEMAS(JFFAT)
+      VEL(1,IFFAT) = VEL(1,IFFAT) - CONMASI*X
+      VEL(2,IFFAT) = VEL(2,IFFAT) - CONMASI*Y
+      VEL(3,IFFAT) = VEL(3,IFFAT) - CONMASI*Z
+      VEL(1,JFFAT) = VEL(1,JFFAT) + CONMASJ*X
+      VEL(2,JFFAT) = VEL(2,JFFAT) + CONMASJ*Y
+      VEL(3,JFFAT) = VEL(3,JFFAT) + CONMASJ*Z
+  110 CONTINUE
+C
+      IF (ICHECK.GT.0) GOTO 100
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK DFTB_QMMMCHGINT
+C>
+C>    @brief DFTB/QUANPOL MM ATOMIC CHARGES
+C>
+C>    @details This is similar to DFTB_INTMEP2
+C>
+C>    @author HUI LI
+C>    - NOV 19 2016
+C>
+C
+      SUBROUTINE DFTB_QMMMCHGINT(WRK,CORD,CHARG,NONLSTQ)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+C
+      DIMENSION WRK(*),CORD(3,*),CHARG(*),NONLSTQ(*)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      COMMON /FFMPT3/ NACTMM,LACTMM(2020),LFFDIPOLD,JUMBUP,
+     *                NACTQM,LACTQM(2020),LFFOLDC,LFFQMVELSV,MMHESS,
+     *                LFFQMCHG,LFFQMCHGB,ISWAP,R2SWAP,DFTBMM
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      IF(IDOCHG.EQ.0) RETURN
+C
+      CALL VCLR(WRK,1,NAT)
+      IPCOUNT = ME - 1
+      DO 495 IIQ = 1, NTODOQ
+         IF (GOPARR) THEN
+           IPCOUNT = IPCOUNT + 1
+           IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 495
+         END IF
+         IFFAT = NONLSTQ(IIQ)
+         ZNUC  = CHARG(IFFAT)
+         IF(ZNUC.EQ.ZERO) GOTO 495
+         DO 490 IAT = 1, NAT
+           CX    = CORD(1,IFFAT) - C(1,IAT)
+           CY    = CORD(2,IFFAT) - C(2,IAT)
+           CZ    = CORD(3,IFFAT) - C(3,IAT)
+           PBCX  = XBOX*ANINT(CX*ONEXBOX)
+           PBCY  = YBOX*ANINT(CY*ONEYBOX)
+           PBCZ  = ZBOX*ANINT(CZ*ONEZBOX)
+           CX    = CX    - PBCX
+           CY    = CY    - PBCY
+           CZ    = CZ    - PBCZ
+           R2    = CX*CX+CY*CY+CZ*CZ+DFTBMM   ! ONLY FOR DFTB
+           IF(R2.GT.SWRB2) GOTO 490
+           IF(R2.LT.1.0D-10) GOTO 490
+           R     = SQRT(R2)
+           ONER  = ONE/R
+           CALL SHIFT(R2,R,ONER,CX,CY,CZ)
+           WRK(IAT) = WRK(IAT) - SWF*ZNUC*ONER
+ 490    CONTINUE
+ 495  CONTINUE
+C
+      IF(GOPARR) CALL DDI_GSUMF(2416,WRK,NAT)
+      CALL DAWRIT(IDAF,IODA,WRK,NAT,569,0)
+C
+      RETURN
+C
+      END
+C*MODULE QUANPOF  *DECK DFTB_QMMMFQMFMM
+!>
+!> @brief    QM DFTB/TDDFTB electronic charge - MM charge/dipole/asc force
+!>
+!> @author   Hui Li
+!>           - Dec 1, 2016
+!>
+!> @details  mutual forces are calculated
+!>
+      SUBROUTINE DFTB_QMMMFQMFMM(DTOT,DHFA,DXY,QFIX,QFIXTA,QFIXXY,
+     *               DIP,DIPTA,DIPXY,
+     *               CORD,FFGRD,DETMP,CHARG,NONLSTQ,IDATOM,
+     *               QMQTOT,QMQHF,QMQXY,MUL1,MUL1S,S,L1,L2)
+      use mx_limits, only: mxatm,mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      DOUBLE PRECISION MUL1, MUL1S
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (THREE=3.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),CHARG(*),DETMP(3,*),
+     *          NONLSTQ(*),IDATOM(*),QMQTOT(*),QMQHF(*),QMQXY(*),
+     *          MUL1(*),MUL1S(*),QFIX(*),QFIXTA(*),QFIXXY(*),
+     *          S(*),DTOT(*),DIP(3,*),DIPTA(3,*),DIPXY(3,*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFMPT3/ NACTMM,LACTMM(2020),LFFDIPOLD,JUMBUP,
+     *                NACTQM,LACTQM(2020),LFFOLDC,LFFQMVELSV,MMHESS,
+     *                LFFQMCHG,LFFQMCHGB,ISWAP,R2SWAP,DFTBMM
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FMCOM / XX(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),MIN(MXSH),MAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA RNONE/8HNONE    /
+C
+C     HUI LI, NOV 30, 2016, LINCOLN
+C
+      CALL VCLR(QMQTOT,1,NAT)
+      CALL VCLR(QMQHF ,1,NAT)
+      CALL VCLR(QMQXY ,1,NAT)
+      CALL DAREAD(IDAF,IODA,S,L2,12,0)
+C     -- TD-DFTB DTOT=DHF+DTA MULLIKEN POPULATION --
+C        FOR DFTB, DTOT=DHF
+      CALL DFTB_MULLIKEN(L1,L2,DTOT,S,MUL1)
+      CALL DFTB_MULSA(MUL1,MUL1S,QMQTOT,L1,NSHELL,NAT)
+C
+      IF(TDDFTYP.NE.RNONE) THEN
+C     -- TD-DFTB DHF MULLIKEN POPULATION --
+      CALL DFTB_MULLIKEN(L1,L2,DHFA,S,MUL1)
+      CALL DFTB_MULSA(MUL1,MUL1S,QMQHF,L1,NSHELL,NAT)
+C
+C     -- TD-DFTB DXY MULLIKEN POPULATION --
+C        NOTE DXY WAS DOUBLED
+      CALL DFTB_MULLIKEN(L1,L2,DXY,S,MUL1)
+      CALL DFTB_MULSA(MUL1,MUL1S,QMQXY,L1,NSHELL,NAT)
+      END IF
+C
+      DO IAT=1,NAT
+         QMQTOT(IAT)=-QMQTOT(IAT)
+         QMQHF (IAT)=-QMQHF (IAT)
+         QMQXY (IAT)=-QMQXY (IAT)
+      ENDDO
+C
+C     -- PRINT DFTB CHARGES --
+C
+      IF(MASWRK.AND.NPRINT.NE.-5) THEN
+         IF(TDDFTYP.EQ.RNONE) THEN
+            WRITE(IW,'(1X,A)')'DFTB CHARGES FOR QM ATOMS:'
+            DO IAT=1,NAT
+               WRITE(IW,'(1X,A,I8,A,F12.8)')
+     *         'QM ATOM ',IAT,' CHARGE= ',QMQTOT(IAT)+ZAN(IAT)
+            ENDDO
+         END IF
+         IF(TDDFTYP.NE.RNONE) THEN
+            WRITE(IW,'(1X,A)')'DFTB (NOT TDDFTB) CHARGES FOR QM ATOMS:'
+            DO IAT=1,NAT
+               WRITE(IW,'(1X,A,I8,A,F12.8)')
+     *         'QM ATOM ',IAT,' CHARGE= ',QMQHF(IAT)+ZAN(IAT)
+            ENDDO
+         END IF
+         WRITE(IW,*)' '
+      END IF
+C
+C     - FORCES BETWEEN QM ELECTRON AND MM CHARGE
+C       ALWAYS USE SHIFTING FUNCTION
+C
+      IPCOUNT = ME - 1
+      DO 200 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         QI = CHARG(IFFAT)
+         IF(QI.EQ.ZERO) GOTO 200
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF (MOD(IPCOUNT,NPROC).NE.0) GOTO 200
+         END IF
+         DO 210 JAT=1,NAT
+            ZANJAT=QMQTOT(JAT)
+            IF(ZANJAT.EQ.ZERO) GOTO 210
+            X     = CORD(1,IFFAT) - C(1,JAT)
+            Y     = CORD(2,IFFAT) - C(2,JAT)
+            Z     = CORD(3,IFFAT) - C(3,JAT)
+            PBCX  = XBOX*ANINT(X*ONEXBOX)
+            PBCY  = YBOX*ANINT(Y*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(Z*ONEZBOX)
+            X     = X - PBCX
+            Y     = Y - PBCY
+            Z     = Z - PBCZ
+            R2    = X*X+Y*Y+Z*Z+DFTBMM   ! ONLY FOR DFTB
+            IF(R2.GT.SWRB2) GOTO 210
+            IF(R2.LT.1.0D-10) GOTO 210
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            CALL SHIFT(R2,R,ONER,X,Y,Z)
+            ONER2 = ONER*ONER
+            EPAIR = QI*ZANJAT*ONER
+            DUM   = -EPAIR*ONER2*SWF
+            DEX   = DUM*X
+            DEY   = DUM*Y
+            DEZ   = DUM*Z
+            FFGRD(1,IFFAT) = FFGRD(1,IFFAT) + DEX
+            FFGRD(2,IFFAT) = FFGRD(2,IFFAT) + DEY
+            FFGRD(3,IFFAT) = FFGRD(3,IFFAT) + DEZ
+            FFGRD(1,IFFAT) = FFGRD(1,IFFAT) + EPAIR*SWFDX
+            FFGRD(2,IFFAT) = FFGRD(2,IFFAT) + EPAIR*SWFDY
+            FFGRD(3,IFFAT) = FFGRD(3,IFFAT) + EPAIR*SWFDZ
+            DETMP(1,JAT )  = DETMP(1,JAT )  - DEX
+            DETMP(2,JAT )  = DETMP(2,JAT )  - DEY
+            DETMP(3,JAT )  = DETMP(3,JAT )  - DEZ
+C           - QM ATOMS NEED SHIFTING SWFDX TERM
+            DETMP(1,JAT )  = DETMP(1,JAT )  - EPAIR*SWFDX
+            DETMP(2,JAT )  = DETMP(2,JAT )  - EPAIR*SWFDY
+            DETMP(3,JAT )  = DETMP(3,JAT )  - EPAIR*SWFDZ
+            VIR(1)         = VIR(1) + DEX*X + EPAIR*SWFDX*X
+            VIR(2)         = VIR(2) + DEY*Y + EPAIR*SWFDY*Y
+            VIR(3)         = VIR(3) + DEZ*Z + EPAIR*SWFDZ*Z
+            IYES = 0
+            DO KFIX=1,NFIXMM
+               IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+            ENDDO
+            IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+               VIR(1)      = VIR(1) - DEX*X - EPAIR*SWFDX*X
+               VIR(2)      = VIR(2) - DEY*Y - EPAIR*SWFDY*Y
+               VIR(3)      = VIR(3) - DEZ*Z - EPAIR*SWFDZ*Z
+            END IF
+  210    CONTINUE
+  200 CONTINUE
+C
+C     - FORCES BETWEEN QM ELECTRON AND MM INDUCED DIPOLE
+C
+      IPCOUNT = ME - 1
+      DO 300 IIQ = 1, NTODOQ
+         IFFAT = NONLSTQ(IIQ)
+         IF(XX(LFFPOL+IFFAT-1).EQ.ZERO) GOTO 300
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 300
+         END IF
+         DIPIX   = DIP(1,IFFAT)
+         DIPIY   = DIP(2,IFFAT)
+         DIPIZ   = DIP(3,IFFAT)
+         DIPIXTA = DIPTA(1,IFFAT)
+         DIPIYTA = DIPTA(2,IFFAT)
+         DIPIZTA = DIPTA(3,IFFAT)
+         DIPIXXY = DIPXY(1,IFFAT)
+         DIPIYXY = DIPXY(2,IFFAT)
+         DIPIZXY = DIPXY(3,IFFAT)
+         DO 310 JAT=1,NAT
+            QJ    = QMQTOT(JAT)
+            QJHF  = QMQHF(JAT)
+            QJXY  = QMQXY(JAT)
+C
+            X     = CORD(1,IFFAT) - C(1,JAT)
+            Y     = CORD(2,IFFAT) - C(2,JAT)
+            Z     = CORD(3,IFFAT) - C(3,JAT)
+            PBCX  = XBOX*ANINT(X*ONEXBOX)
+            PBCY  = YBOX*ANINT(Y*ONEYBOX)
+            PBCZ  = ZBOX*ANINT(Z*ONEZBOX)
+            X     = X - PBCX
+            Y     = Y - PBCY
+            Z     = Z - PBCZ
+            R2    = X*X+Y*Y+Z*Z
+            IF(R2.GT.SWRB2) GOTO 310
+            IF(R2.LT.1.0D-10) GOTO 310
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            ONER5 = ONER2*ONER3
+            IF(IPOLSHF.EQ.1) CALL SHIFT(R2,R,ONER,X,Y,Z)
+            IF(IPOLSHF.EQ.0) CALL SWFUNC(R2,X,Y,Z)
+C
+            QJDOT = THREE*ONER5*(DIPIX*X+DIPIY*Y+DIPIZ*Z)*QJ
+            QJONER3= QJ*ONER3
+C                 NEGATIVE FORCE ON QJ BY DIPI
+C                          FORCE ON DIPI BY QJ
+            DXJ   = DIPIX*QJONER3 - QJDOT*X
+            DYJ   = DIPIY*QJONER3 - QJDOT*Y
+            DZJ   = DIPIZ*QJONER3 - QJDOT*Z
+            IF(TDDFTYP.NE.RNONE) THEN
+              QJHFDOT=THREE*ONER5*(DIPIXTA*X+DIPIYTA*Y+DIPIZTA*Z)*QJHF
+              QJHFONER3=QJHF*ONER3
+              DXJ = DXJ + DIPIXTA*QJHFONER3 - QJHFDOT*X
+              DYJ = DYJ + DIPIYTA*QJHFONER3 - QJHFDOT*Y
+              DZJ = DZJ + DIPIZTA*QJHFONER3 - QJHFDOT*Z
+              QJXYDOT=THREE*ONER5*(DIPIXXY*X+DIPIYXY*Y+DIPIZXY*Z)*QJXY
+              QJXYONER3=QJXY*ONER3
+              DXJ = DXJ + DIPIXXY*QJXYONER3 - QJXYDOT*X
+              DYJ = DYJ + DIPIYXY*QJXYONER3 - QJXYDOT*Y
+              DZJ = DZJ + DIPIZXY*QJXYONER3 - QJXYDOT*Z
+            END IF
+C                 NEGATIVE FORCE ON IFFAT
+            DX    = - DXJ
+            DY    = - DYJ
+            DZ    = - DZJ
+C
+C           - ENERGY-SWFDX TERMS
+C
+            FLDIX = QJONER3*X      ! FIELD AT DIPI DUE TO QJ
+            FLDIY = QJONER3*Y
+            FLDIZ = QJONER3*Z
+            EPAIR = -(FLDIX*DIPIX+FLDIY*DIPIY+FLDIZ*DIPIZ) ! E = -F*D
+            IF(TDDFTYP.NE.RNONE) THEN
+              FLDIX = QJHFONER3*X
+              FLDIY = QJHFONER3*Y
+              FLDIZ = QJHFONER3*Z
+              EPAIR = EPAIR-(FLDIX*DIPIXTA+FLDIY*DIPIYTA+FLDIZ*DIPIZTA)
+              FLDIX = QJXYONER3*X
+              FLDIY = QJXYONER3*Y
+              FLDIZ = QJXYONER3*Z
+              EPAIR = EPAIR-(FLDIX*DIPIXXY+FLDIY*DIPIYXY+FLDIZ*DIPIZXY)
+            END IF
+C
+            DEX   = DX*SWF + EPAIR*SWFDX
+            DEY   = DY*SWF + EPAIR*SWFDY
+            DEZ   = DZ*SWF + EPAIR*SWFDZ
+            FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DEX
+            FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DEY
+            FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DEZ
+            DETMP(1,JAT)  =DETMP(1,JAT)   - DEX
+            DETMP(2,JAT)  =DETMP(2,JAT)   - DEY
+            DETMP(3,JAT)  =DETMP(3,JAT)   - DEZ
+            VIR(1)        =VIR(1) + DEX*X
+            VIR(2)        =VIR(2) + DEY*Y
+            VIR(3)        =VIR(3) + DEZ*Z
+            IYES = 0
+            DO KFIX=1,NFIXMM
+               IF(IFFAT.EQ.IFIXMM(KFIX)) IYES = 1
+            ENDDO
+            IF(IYES.EQ.1.AND.NFIXQM.GT.0) THEN
+               VIR(1)     =VIR(1) - DEX*X
+               VIR(2)     =VIR(2) - DEY*Y
+               VIR(3)     =VIR(3) - DEZ*Z
+            END IF
+ 310     CONTINUE
+ 300  CONTINUE
+C
+C     - FORCE BETWEEN QM ELECTRON AND ASC
+C
+      IF(IFIXSOL.EQ.0) NTS = ISPHSOL
+      IF(IFIXSOL.EQ.1) NTS = NFFTS
+      IPCOUNT = ME - 1
+      DO 700 JTS = 1, NTS
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 700
+         END IF
+         IF(IFIXSOL.EQ.0) THEN
+            XJ    = XX(LFFXTS+JTS-1)
+            YJ    = XX(LFFYTS+JTS-1)
+            ZJ    = XX(LFFZTS+JTS-1)
+            QJ    = XX(LFFQRXN1+JTS-1)+XX(LFFQRXN2+JTS-1)
+            QJTA  = XX(LFFQRXNTA+JTS-1)
+            QJXY  = XX(LFFQRXNXY+JTS-1)
+         END IF
+         IF(IFIXSOL.EQ.1) THEN
+            XJ    = XX(LFFXTSFIX+JTS-1)
+            YJ    = XX(LFFYTSFIX+JTS-1)
+            ZJ    = XX(LFFZTSFIX+JTS-1)
+            QJ    = QFIX(JTS)
+            QJTA  = QFIXTA(JTS)
+            QJXY  = QFIXXY(JTS)
+            JFFAT = IDATOM(JTS)
+         END IF
+         DO 710 IAT=1,NAT
+            QIAT  = QMQTOT(IAT)
+            QIATHF= QMQHF(IAT)
+            QIATXY= QMQXY(IAT)
+            XI    = C(1,IAT)
+            YI    = C(2,IAT)
+            ZI    = C(3,IAT)
+            X     = XI - XJ
+            Y     = YI - YJ
+            Z     = ZI - ZJ
+            R2    = (XI-XJ)**2 + (YI-YJ)**2 + (ZI-ZJ)**2
+            ONER2 = ONE/R2
+            ONER  = SQRT(ONER2)
+            ONER3 = ONER2*ONER
+            DUM   = -(QIAT*QJ + QIATHF*QJTA + QIATXY*QJXY)*ONER3
+            DX    = DUM*X
+            DY    = DUM*Y
+            DZ    = DUM*Z
+            DETMP(1,IAT) = DETMP(1,IAT) + DX
+            DETMP(2,IAT) = DETMP(2,IAT) + DY
+            DETMP(3,IAT) = DETMP(3,IAT) + DZ
+            VIR(1)    =VIR(1) + DX*C(1,IAT)
+            VIR(2)    =VIR(2) + DY*C(2,IAT)
+            VIR(3)    =VIR(3) + DZ*C(3,IAT)
+            IYES = 0
+            DO KFIX=1,NFIXQM
+               IF(IAT.EQ.IFIXQM(KFIX)) IYES = 1
+            ENDDO
+            IF(IYES.EQ.1) THEN
+               VIR(1)    =VIR(1) - DX*C(1,IAT)
+               VIR(2)    =VIR(2) - DY*C(2,IAT)
+               VIR(3)    =VIR(3) - DZ*C(3,IAT)
+            END IF
+            IF(IFIXSOL.EQ.1) THEN
+               IF(JFFAT.LE.NFFAT) THEN
+                  FFGRD(1,JFFAT)=FFGRD(1,JFFAT) - DX
+                  FFGRD(2,JFFAT)=FFGRD(2,JFFAT) - DY
+                  FFGRD(3,JFFAT)=FFGRD(3,JFFAT) - DZ
+               END IF
+               IF(JFFAT.GT.NFFAT) THEN
+                  JAT = JFFAT - NFFAT
+                  DETMP(1,JAT)=DETMP(1,JAT) - DX
+                  DETMP(2,JAT)=DETMP(2,JAT) - DY
+                  DETMP(3,JAT)=DETMP(3,JAT) - DZ
+               END IF
+            END IF
+ 710     CONTINUE
+ 700  CONTINUE
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK DFTB_TD_GRAD_POL
+C>
+C>    @brief Gradient for TD-DFTB
+C>
+C>    @details Add QuanPol induced dipole and ASC contributions
+C>             to shift matrices
+C>
+C>    @author Hui Li
+C>    - Nov 29, 2016
+C>
+C>           --- INPUT ---
+C>    @param DMES    P(=T+Z)
+C>    @param DMXY    (X+Y) in AO basis
+C>           --- OUTPUT ---
+C>    @param SHIFTES Shift matrix with DQES
+C>    @param SHIFTXY Shift matrix with DQXY
+C>
+C
+      SUBROUTINE DFTB_TD_GRAD_POL(DMES,DMXY,SHIFTES,SHIFTXY,L1,L2)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (MXSPE=10)
+      PARAMETER (HALF=0.5D+00)
+C
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+C
+      DIMENSION DMES(*),DMXY(*),SHIFTES(*),SHIFTXY(*)
+C
+      COMMON /DFTBPR/ ETEMP,DFTBDP(MXSPE*14),DAMPXHE,HUBDER(MXSPE),
+     *                ZREF(MXATM),SPNCST(6,MXSPE),SPE(MXATM),NSPE,
+     *                MAXANG(MXATM),ISPE(MXATM),IND(MXATM+1),IDFTBD,
+     *                PARAMDIR
+      COMMON /DFTBS / LS
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+C
+C
+      ITDFG = 1
+C
+      CALL VALFM(LOADFM)
+      LSOL    = LOADFM  + 1
+      LS      = LSOL    + L2
+      LDIPTMP = LS      + L2
+      LAST    = LDIPTMP + 3*NFFAT
+      NEED    = LAST    - LOADFM
+      CALL GETFM(NEED)
+C
+      CALL DAREAD(IDAF,IODA,X(LS),L2,12,0)
+C
+C     ----- UPDATE SHIFTES -----
+C
+      CALL VCLR(X(LSOL),1,L2)
+      CALL QMMMPOLINT2(X(LSOL),DMES,X(LDIPTMP),L2,L1,X(LFFNONLSTQ))
+      !! P IS ALREADY DOUBLED IN DENTD SUBOUROUTINE.
+      !! HOWEVER, X(LSOL) IS DOUBLED IN QMMMPOLINT2 (FACTOR=2),
+      !! SO X(LSOL) HAS TO BE SCALED BY HALF.
+      NSEQ = 0
+      DO IAT = 1, NAT
+        DO K = 1, MAXANG(ISPE(IAT))*MAXANG(ISPE(IAT))
+          MU = IND(IAT) + K
+          NSEQ = NSEQ + MU
+          !! Note that DMES is already multiplied with two
+          IF (K.EQ.1) SHIFTES(IAT) = SHIFTES(IAT) + X(LSOL+NSEQ-1)*HALF
+        END DO
+      END DO
+C
+C     ----- UPDATE SHIFTXY -----
+C
+      CALL VCLR(X(LSOL),1,L2)
+      CALL QMMMPOLINT2(X(LSOL),DMXY,X(LDIPTMP),L2,L1,X(LFFNONLSTQ))
+      !! (X+Y) IS NOT DOUBLED, AND X(LSOL) IS DOUBLED,
+      !! SO NO NEED TO SCALE.
+      NSEQ = 0
+      DO IAT = 1, NAT
+        DO K = 1, MAXANG(ISPE(IAT))*MAXANG(ISPE(IAT))
+          MU = IND(IAT) + K
+          NSEQ = NSEQ + MU
+          IF (K.EQ.1) SHIFTXY(IAT) = SHIFTXY(IAT) + X(LSOL+NSEQ-1)
+        END DO
+      END DO
+C
+      CALL RETFM(NEED)
+C
+      ITDFG = 0
+C
+      RETURN
+C
+      END
+C*MODULE QUANPOF  *DECK SWAPWATER
+!>
+!> @brief    Swap QM and MM water molecules
+!>
+!> @author   Hui Li
+!>           - Dec 2016
+!>
+!> @details  swap QM water with MM water molecules on-the-fly
+!>           in QM/MM MD simulation
+!>
+      SUBROUTINE SWAPWATER(CORD,ZANF,VEL,QMVEL,LISTQM,ATMNAM)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      CHARACTER*10 ATMNAM
+C
+      LOGICAL GOPARR, DSKWRK, MASWRK
+C
+      PARAMETER (ZERO=0.0D+00)
+C
+      DIMENSION CORD(3,*),ZANF(*),VEL(3,*),QMVEL(3,*),LISTQM(*),
+     *          ATMNAM(*)
+C
+      COMMON /FFMPT3/ NACTMM,LACTMM(2020),LFFDIPOLD,JUMBUP,
+     *                NACTQM,LACTQM(2020),LFFOLDC,LFFQMVELSV,MMHESS,
+     *                LFFQMCHG,LFFQMCHGB,ISWAP,R2SWAP,DFTBMM
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, DEC 20, 2016
+C
+C     -- THE SIMPLEST WAY IS TO EXCHANGE THE COORD/VEL BETWEEN
+C        A PAIR OF WATER MOLECULES. THIS WORKS ONLY WITH 3-POINT
+C        WATER MODEL.
+C
+      IF(NAT.LE.0.OR.NFFAT.LE.0) RETURN
+      IF(ISWAP.EQ.0) RETURN
+C
+C     -- IDENTIFY THE FARTHEST QM WATER MOLECULE FROM QM CENTER --
+C
+      IWATO1 = 0
+      IWATH2 = 0
+      IWATH3 = 0
+      R2SAVE = ZERO
+      DO 100 IAT=1,NAT
+         IYES1 = 0
+         IYES2 = 0
+         IF(INT(ZAN(IAT)+0.01D+00).EQ.8) THEN
+            CX = C(1,IAT) - QMCX
+            CY = C(2,IAT) - QMCY
+            CZ = C(3,IAT) - QMCZ
+            R2 = CX*CX+CY*CY+CZ*CZ
+            DO 110 JAT=1,NAT
+               IF(INT(ZAN(JAT)+0.01D+00).EQ.1) THEN
+                  CXH = C(1,IAT)-C(1,JAT)
+                  CYH = C(2,IAT)-C(2,JAT)
+                  CZH = C(3,IAT)-C(3,JAT)
+                  R2H = CXH*CXH+CYH*CYH+CZH*CZH
+C                 --  1.4 A  --
+                  IF(R2H.LE.7.0D+00) THEN
+                     IF(IYES1.GT.0.AND.IYES2.EQ.0) IYES2 = JAT
+                     IF(IYES1.EQ.0)                IYES1 = JAT
+                  END IF
+               END IF
+ 110        CONTINUE
+         END IF
+         IF(R2.GT.R2SAVE.AND.IYES1.GT.0.AND.IYES2.GT.0) THEN
+            IWATO1 = IAT
+            IWATH2 = IYES1
+            IWATH3 = IYES2
+            R2SAVE = R2
+         END IF
+ 100  CONTINUE
+C
+      IF(IWATO1.EQ.0) RETURN
+      R2QM = R2SAVE
+C
+C     -- IDENTIFY THE CLOSEST MM WATER --
+C        IT SHOULD NOT BE A QM WATER, AND SHOULD BE CLOSER
+C        THEN THE QM WATER.
+C
+      JWATO1 = 0
+      JWATH2 = 0
+      JWATH3 = 0
+      R2SAVE = 1.0D+30
+      DO 200 JFFAT=1,NFFAT
+         IF(ATMNAM(JFFAT  )(1:2).EQ.'O1'.AND.
+     *      ATMNAM(JFFAT+1)(1:2).EQ.'H2'.AND.
+     *      ATMNAM(JFFAT+2)(1:2).EQ.'H3'.AND.
+     *      ATMNAM(JFFAT+3)(1:2).EQ.'L4'.AND.
+     *      ATMNAM(JFFAT+4)(1:2).EQ.'L5') THEN
+            IF(MASWRK)WRITE(IW,'(/1X,A,/)')
+     *      'ERROR: ISWAP CAN ONLY WORK WITH 3-POINT WATER MODEL.'
+            CALL ABRT
+         END IF
+         IF(LISTQM(JFFAT).GT.0) GOTO 200
+         JYES1 = 0
+         JYES2 = 0
+         IF(INT(ZANF(JFFAT)+0.01D+00).EQ.8) THEN
+            CX    = CORD(1,JFFAT) - QMCX
+            CY    = CORD(2,JFFAT) - QMCY
+            CZ    = CORD(3,JFFAT) - QMCZ
+            PBCX  = XBOX * ANINT(CX*ONEXBOX)
+            PBCY  = YBOX * ANINT(CY*ONEYBOX)
+            PBCZ  = ZBOX * ANINT(CZ*ONEZBOX)
+            CX    = CX    - PBCX
+            CY    = CY    - PBCY
+            CZ    = CZ    - PBCZ
+            R2    = CX*CX+CY*CY+CZ*CZ
+            IF(R2.LE.R2SWAP)THEN
+               DO 210 KFFAT=JFFAT+1,JFFAT+2
+                  IF(INT(ZANF(KFFAT)+0.01D+00).EQ.1) THEN
+                     CXH = CORD(1,JFFAT)-CORD(1,KFFAT)
+                     CYH = CORD(2,JFFAT)-CORD(2,KFFAT)
+                     CZH = CORD(3,JFFAT)-CORD(3,KFFAT)
+                     R2H = CXH*CXH+CYH*CYH+CZH*CZH
+C                    --  1.4 A  --
+                     IF(R2H.LE.7.0D+00) THEN
+                        IF(JYES1.GT.0.AND.JYES2.EQ.0) JYES2 = KFFAT
+                        IF(JYES1.EQ.0)                JYES1 = KFFAT
+                     END IF
+                  END IF
+ 210           CONTINUE
+            END IF
+         END IF
+         IF(R2.LT.R2SAVE.AND.JYES1.GT.0.AND.JYES2.GT.0) THEN
+            JWATO1 = JFFAT
+            JWATH2 = JYES1
+            JWATH3 = JYES2
+            R2SAVE = R2
+         END IF
+ 200  CONTINUE
+C
+      IF(JWATO1.EQ.0) RETURN
+      R2MM = R2SAVE
+C
+      IF(IWATO1.GT.0.AND.JWATO1.GT.0.AND.R2MM.LT.R2QM) THEN
+         XSAVE  = C(1,IWATO1)
+         YSAVE  = C(2,IWATO1)
+         ZSAVE  = C(3,IWATO1)
+         VXSAVE = QMVEL(1,IWATO1)
+         VYSAVE = QMVEL(2,IWATO1)
+         VZSAVE = QMVEL(3,IWATO1)
+         C(1,IWATO1)     = CORD(1,JWATO1)
+         C(2,IWATO1)     = CORD(2,JWATO1)
+         C(3,IWATO1)     = CORD(3,JWATO1)
+         QMVEL(1,IWATO1) = VEL(1,JWATO1)
+         QMVEL(2,IWATO1) = VEL(2,JWATO1)
+         QMVEL(3,IWATO1) = VEL(3,JWATO1)
+         IFFAT = LISTQM(NFFAT+IWATO1)
+         IF(IFFAT.GT.0) THEN
+            CORD(1,IFFAT)= CORD(1,JWATO1)
+            CORD(2,IFFAT)= CORD(2,JWATO1)
+            CORD(3,IFFAT)= CORD(3,JWATO1)
+            VEL(1,IFFAT) = VEL(1,JWATO1)
+            VEL(2,IFFAT) = VEL(2,JWATO1)
+            VEL(3,IFFAT) = VEL(3,JWATO1)
+         END IF
+         CORD(1,JWATO1)  = XSAVE
+         CORD(2,JWATO1)  = YSAVE
+         CORD(3,JWATO1)  = ZSAVE
+         VEL(1,JWATO1)   = VXSAVE
+         VEL(2,JWATO1)   = VYSAVE
+         VEL(3,JWATO1)   = VZSAVE
+C
+         XSAVE  = C(1,IWATH2)
+         YSAVE  = C(2,IWATH2)
+         ZSAVE  = C(3,IWATH2)
+         VXSAVE = QMVEL(1,IWATH2)
+         VYSAVE = QMVEL(2,IWATH2)
+         VZSAVE = QMVEL(3,IWATH2)
+         C(1,IWATH2)     = CORD(1,JWATH2)
+         C(2,IWATH2)     = CORD(2,JWATH2)
+         C(3,IWATH2)     = CORD(3,JWATH2)
+         QMVEL(1,IWATH2) = VEL(1,JWATH2)
+         QMVEL(2,IWATH2) = VEL(2,JWATH2)
+         QMVEL(3,IWATH2) = VEL(3,JWATH2)
+         IFFAT = LISTQM(NFFAT+IWATH2)
+         IF(IFFAT.GT.0) THEN
+            CORD(1,IFFAT)= CORD(1,JWATH2)
+            CORD(2,IFFAT)= CORD(2,JWATH2)
+            CORD(3,IFFAT)= CORD(3,JWATH2)
+            VEL(1,IFFAT) = VEL(1,JWATH2)
+            VEL(2,IFFAT) = VEL(2,JWATH2)
+            VEL(3,IFFAT) = VEL(3,JWATH2)
+         END IF
+         CORD(1,JWATH2)  = XSAVE
+         CORD(2,JWATH2)  = YSAVE
+         CORD(3,JWATH2)  = ZSAVE
+         VEL(1,JWATH2)   = VXSAVE
+         VEL(2,JWATH2)   = VYSAVE
+         VEL(3,JWATH2)   = VZSAVE
+C
+         XSAVE  = C(1,IWATH3)
+         YSAVE  = C(2,IWATH3)
+         ZSAVE  = C(3,IWATH3)
+         VXSAVE = QMVEL(1,IWATH3)
+         VYSAVE = QMVEL(2,IWATH3)
+         VZSAVE = QMVEL(3,IWATH3)
+         C(1,IWATH3)     = CORD(1,JWATH3)
+         C(2,IWATH3)     = CORD(2,JWATH3)
+         C(3,IWATH3)     = CORD(3,JWATH3)
+         QMVEL(1,IWATH3) = VEL(1,JWATH3)
+         QMVEL(2,IWATH3) = VEL(2,JWATH3)
+         QMVEL(3,IWATH3) = VEL(3,JWATH3)
+         IFFAT = LISTQM(NFFAT+IWATH3)
+         IF(IFFAT.GT.0) THEN
+            CORD(1,IFFAT)= CORD(1,JWATH3)
+            CORD(2,IFFAT)= CORD(2,JWATH3)
+            CORD(3,IFFAT)= CORD(3,JWATH3)
+            VEL(1,IFFAT) = VEL(1,JWATH3)
+            VEL(2,IFFAT) = VEL(2,JWATH3)
+            VEL(3,IFFAT) = VEL(3,JWATH3)
+         END IF
+         CORD(1,JWATH3)  = XSAVE
+         CORD(2,JWATH3)  = YSAVE
+         CORD(3,JWATH3)  = ZSAVE
+         VEL(1,JWATH3)   = VXSAVE
+         VEL(2,JWATH3)   = VYSAVE
+         VEL(3,JWATH3)   = VZSAVE
+C
+C        - ENSURE THE NEW QM WATER (AND ITS MM IMAGE) IS IN THE QM REGION -
+         CX    = C(1,IWATO1) - QMCX
+         CY    = C(2,IWATO1) - QMCY
+         CZ    = C(3,IWATO1) - QMCZ
+         PBCX  = XBOX * ANINT(CX*ONEXBOX)
+         PBCY  = YBOX * ANINT(CY*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(CZ*ONEZBOX)
+         C(1,IWATO1) = C(1,IWATO1) - PBCX
+         C(2,IWATO1) = C(2,IWATO1) - PBCY
+         C(3,IWATO1) = C(3,IWATO1) - PBCZ
+         IFFAT = LISTQM(NFFAT+IWATO1)
+         IF(IFFAT.GT.0) THEN
+            CORD(1,IFFAT)= C(1,IWATO1)
+            CORD(2,IFFAT)= C(2,IWATO1)
+            CORD(3,IFFAT)= C(3,IWATO1)
+         END IF
+         C(1,IWATH2) = C(1,IWATH2) - PBCX
+         C(2,IWATH2) = C(2,IWATH2) - PBCY
+         C(3,IWATH2) = C(3,IWATH2) - PBCZ
+         IFFAT = LISTQM(NFFAT+IWATH2)
+         IF(IFFAT.GT.0) THEN
+            CORD(1,IFFAT)= C(1,IWATH2)
+            CORD(2,IFFAT)= C(2,IWATH2)
+            CORD(3,IFFAT)= C(3,IWATH2)
+         END IF
+         C(1,IWATH3) = C(1,IWATH3) - PBCX
+         C(2,IWATH3) = C(2,IWATH3) - PBCY
+         C(3,IWATH3) = C(3,IWATH3) - PBCZ
+         IFFAT = LISTQM(NFFAT+IWATH3)
+         IF(IFFAT.GT.0) THEN
+            CORD(1,IFFAT)= C(1,IWATH3)
+            CORD(2,IFFAT)= C(2,IWATH3)
+            CORD(3,IFFAT)= C(3,IWATH3)
+         END IF
+C
+         IF(MASWRK) THEN
+            WRITE(IW,*)' '
+            WRITE(IW,'(/1X,A,3I8,A,/1X,A,3I8/)')
+     *      'A QM WATER MOLECULE ',IWATO1,IWATH2,IWATH3,
+     *      '   IS SWAPPED WITH','A MM WATER MOLECULE ',
+     *      JWATO1,JWATH2,JWATH3
+         END IF
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK ELJ126QM
+!>
+!> @brief    LJ dispersion energy between QM atoms
+!>
+!> @author   Hui Li
+!>           - Feb 2017
+!>
+!> @details  force field LJ term is used for QM atoms.
+!>           The attraction part is used (when R > Rm
+!>           in 12-6 LJ). The repulsion part is replaced
+!>           by a plain line (constant).
+!>           This is designed for DFTB, but may also be
+!>           good for HF and DFT methods.
+!>
+      SUBROUTINE ELJ126QM(CORD,FFGRD,SIG,EPS,FCLJTP,
+     *                    NTYPE,LISTQM)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR, DSKWRK, MASWRK
+      LOGICAL DC,DCCHG,DCABC
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (SEVEN=7.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (ONE4=1.0D+00/4.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),SIG(*),EPS(*),
+     *          FCLJTP(2,MXMMTP,*),NTYPE(*),LISTQM(*)
+C
+      COMMON /DFTDC / DC,IDCVER,DCCHG,DCABC,DCSR,DCS6,DCS8,DCALP,DCA1,
+     *                DCA2
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFMPT2/ MXMMTP,LFFKBLST,LFFFCSTBD,LFFFCDIHR,
+     *                LFFFCLJTP,LFFNTYPE,
+     *                LFF2KBLST,LFF2FCSTBD,LFF2FCDIHR,
+     *                LFF2FCLJTP,LFF2NTYPE
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFTYPE/ WT14LJ,WT14CH,C3BOND,C4BOND,C3ANGL,
+     *                NFFTYP,NFFFILE,LJQMMM,LJQM,INTCHG,
+     *                LJSIGMA,JTOPFILE(90),JPARFILE(90),
+     *                JTOPAMIA(90),JTOPNTER(90),JTOPCTER(90),
+     *                JTOPNUCA(90),JPARFIL2(90),JPARFIL3(90)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, FEB 21, 2017 LINCOLN
+C
+C     FORMULA:  E = 4*EPSILON*[(SIGMA/R)**12 - (SIGMA/R)**6)]
+C
+C               SIGMA(I,J)   = 0.5*(SIGMA_I   + SIGMA_J  )
+C                         OR = SQRT(SIGMA_I*SIGMA_J)
+C               EPSILON(I,J) = SQRT(EPSILON_I * EPSILON_J)
+C
+      IF(IDOLJ.EQ.0) RETURN
+      IF(LJQM.EQ.0)  RETURN
+C
+C     - IN CASE IT COMES TO THIS POINT -
+      IF(LJQM.NE.0.AND.DC) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A,A/)')
+     *   'ERROR: $QUANPO LJQM=1 CANNOT WORK WITH $DFT DC=.T. ',
+     *   'OR $DFTB DISP=[1,2,3,...].'
+         CALL ABRT
+      END IF
+C
+      IPCOUNT = ME - 1
+      DO 110 IAT=1,NAT-1     !  QM ATOMS
+      DO 100 JAT=IAT+1,NAT
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         IFFAT = LISTQM(NFFAT+IAT)
+         JFFAT = LISTQM(NFFAT+JAT)
+         I     = IFFAT
+         J     = JFFAT
+         IF(I.EQ.0.OR.J.EQ.0) GOTO 100
+C
+         IF(NFFTYP/10000.NE.5) THEN
+            SIGI  = SIG(I)
+            EPSI  = EPS(I)
+            SIGJ  = SIG(J)
+            EPSJ  = EPS(J)
+            IF(SIGI.EQ.ZERO .OR. EPSI.EQ.ZERO) GOTO 100
+            IF(SIGJ.EQ.ZERO .OR. EPSJ.EQ.ZERO) GOTO 100
+         END IF
+         IF(NFFTYP/10000.EQ.5) THEN
+            II    = NTYPE(I)
+            JJ    = NTYPE(J)
+            RRIJ  = FCLJTP(1,JJ,II)
+            EPSNO = FCLJTP(2,JJ,II)
+            IF(RRIJ.EQ.ZERO.OR.EPSNO.EQ.ZERO) GOTO 100
+            RRIJ2 = RRIJ*RRIJ
+            RRIJ6 = RRIJ2*RRIJ2*RRIJ2
+            RRIJ7 = RRIJ6*RRIJ
+         END IF
+C
+         X     = CORD(1,I) - CORD(1,J)
+         Y     = CORD(2,I) - CORD(2,J)
+         Z     = CORD(3,I) - CORD(3,J)
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.LT.0.01D+00) GOTO 100
+         ONER2 = ONE/R2
+C
+         IF(NFFTYP/10000.NE.5) THEN
+            SIG1  = 0.5D+00*(SIGI+SIGJ)
+            FOUREP= EPSI*EPSJ
+            SIGSQ = SIG1*SIG1*ONER2
+            IF(NFFTYP/10000.EQ.4) SIGSQ  = SIGI*SIGJ*ONER2
+            DISP  = -SIGSQ*SIGSQ*SIGSQ
+            REP   = DISP*DISP
+C
+            EPAIRR  = FOUREP*REP
+            EPAIRD  = FOUREP*DISP
+            DUM     =-6.0D+00*FOUREP*(2.0D+00*REP+DISP)*
+     *                   ONER2
+         END IF
+         IF(NFFTYP/10000.EQ.5) THEN
+            R       = SQRT(R2)
+            ONER    = ONE/R
+            R6      = R2*R2*R2
+            R7      = R6*R
+            C1LJ    = ONE/(R+0.07D+00*RRIJ)
+            C2LJ    = ONE/(R7+0.12D+00*RRIJ7)
+            FM1VDW  = 1.07D+00*RRIJ*C1LJ
+            FM1VDW2 = FM1VDW*FM1VDW
+            FM1VDW6 = FM1VDW2*FM1VDW2*FM1VDW2
+            FM1VDW7 = FM1VDW6*FM1VDW
+            FM2VDW  = 1.12D+00*RRIJ7*C2LJ
+C
+            EPAIRR   = EPSNO*FM1VDW7*FM2VDW
+            EPAIRD   =-EPSNO*FM1VDW7*TWO
+            DUM      = -EPSNO*SEVEN*FM1VDW7*
+     *                 ( (FM2VDW-TWO)*C1LJ + FM2VDW*C2LJ*R6 )
+     *                 *ONER
+         END IF
+C
+         IF(NFFTYP/10000.NE.5) THEN
+            SIG1  = 0.5D+00*(SIGI+SIGJ)
+            RM2   = SIG1*SIG1*1.259921049894873D+00
+            IF(NFFTYP/10000.EQ.4)
+     *      RM2   = SIGI*SIGJ*1.259921049894873D+00
+         END IF
+         IF(NFFTYP/10000.EQ.5)
+     *      RM2   = RRIJ*RRIJ*0.992379947013274D+00
+         IF(R2.LT.RM2) THEN
+            IF(NFFTYP/10000.NE.5)
+     *      ENLJD = ENLJD - FOUREP*ONE4
+            IF(NFFTYP/10000.EQ.5)
+     *      ENLJD = ENLJD - EPSNO*1.00056484728720D+00  ! MINIMUM
+            GOTO 100
+         END IF
+C
+         ENLJR = ENLJR + EPAIRR
+         ENLJD = ENLJD + EPAIRD
+C
+         DEX   = DUM*X
+         DEY   = DUM*Y
+         DEZ   = DUM*Z
+         FFGRD(1,I)=FFGRD(1,I) + DEX
+         FFGRD(2,I)=FFGRD(2,I) + DEY
+         FFGRD(3,I)=FFGRD(3,I) + DEZ
+         FFGRD(1,J)=FFGRD(1,J) - DEX
+         FFGRD(2,J)=FFGRD(2,J) - DEY
+         FFGRD(3,J)=FFGRD(3,J) - DEZ
+C        - NO NEED VIR -
+C        VIR(1)    =VIR(1)     + DEX*X
+C        VIR(2)    =VIR(2)     + DEY*Y
+C        VIR(3)    =VIR(3)     + DEZ*Z
+ 100  CONTINUE
+ 110  CONTINUE
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK ELJ126CCS
+!>
+!> @brief    LJ energy for MD-CCS calculation
+!>
+!> @author   Hui Li
+!>           - Oct 2017
+!>
+!> @details  14-7 or 12-6 LJ terms within ion atoms
+!>           only 12-6 LJ terms for ion-gas, gas-gas
+!>
+      SUBROUTINE ELJ126CCS(CORD,FFGRD,SIG,EPS,
+     *                     NONLS1,L1213J,FCLJTP,NTYPE)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (SEVEN=7.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),SIG(*),EPS(*),
+     *          NONLS1(2,*),L1213J(2,*),
+     *          FCLJTP(2,MXMMTP,*),NTYPE(*)
+C
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFMPT2/ MXMMTP,LFFKBLST,LFFFCSTBD,LFFFCDIHR,
+     *                LFFFCLJTP,LFFNTYPE,
+     *                LFF2KBLST,LFF2FCSTBD,LFF2FCDIHR,
+     *                LFF2FCLJTP,LFF2NTYPE
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFNODE/ L1BOND,L2BOND,L1ANGL,L2ANGL,L1DIHR,L2DIHR,
+     *                L1DIHB,L2DIHB,L1CMAP,L2CMAP,L1WAGG,L2WAGG,
+     *                L11213,L21213,L1N14J,L2N14J,
+     *                L11213A,L21213A,L1N14A,L2N14A,
+     *                L11213B,L21213B,L1N14B,L2N14B,
+     *                L1BONDPMA,L2BONDPMA,L1ANGLPMA,L2ANGLPMA,
+     *                L1DIHRPMA,L2DIHRPMA,L1DIHBPMA,L2DIHBPMA,
+     *                L1WAGGPMA,L2WAGGPMA,L1CMAPPMA,L2CMAPPMA,
+     *                L11213PMA,L21213PMA,L1N14PMA,L2N14PMA,
+     *                L1BONDPMB,L2BONDPMB,L1ANGLPMB,L2ANGLPMB,
+     *                L1DIHRPMB,L2DIHRPMB,L1DIHBPMB,L2DIHBPMB,
+     *                L1WAGGPMB,L2WAGGPMB,L1CMAPPMB,L2CMAPPMB,
+     *                L11213PMB,L21213PMB,L1N14PMB,L2N14PMB,
+     *                L1FFAT,L2FFAT
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FFTYPE/ WT14LJ,WT14CH,C3BOND,C4BOND,C3ANGL,
+     *                NFFTYP,NFFFILE,LJQMMM,LJQM,INTCHG,
+     *                LJSIGMA,JTOPFILE(90),JPARFILE(90),
+     *                JTOPAMIA(90),JTOPNTER(90),JTOPCTER(90),
+     *                JTOPNUCA(90),JPARFIL2(90),JPARFIL3(90)
+C
+C     HUI LI, OCT 2017, LINCOLN
+C
+C     FORMULA:  E = 4*EPSILON*[(SIGMA/R)**12 - (SIGMA/R)**6)]
+C
+C               SIGMA(I,J)   = 0.5*(SIGMA_I   + SIGMA_J  )
+C                         OR = SQRT(SIGMA_I*SIGMA_J)
+C               EPSILON(I,J) = SQRT(EPSILON_I * EPSILON_J)
+C
+      ENLJR  =ZERO
+      ENLJD  =ZERO
+      SOL1LJ =ZERO
+      SOL2LJ =ZERO
+      PMF1LJ =ZERO
+      IF(IDOLJ.EQ.0) RETURN
+C
+      NFFTYPSV = NFFTYP
+C
+      LLTODO = 2
+      DO 110 LL=1,LLTODO
+      IF(LL.EQ.1) THEN
+         NN1  = 1
+         NN2  = NTODO
+         SIGN = 1.0D+00
+      END IF
+      IF(LL.EQ.2) THEN
+         NN1  = L11213
+         NN2  = L21213
+         SIGN = -1.0D+00
+      END IF
+      DO 100 III=NN1, NN2
+         IF(LL.EQ.1) THEN
+            I = NONLS1(1,III)
+            J = NONLS1(2,III)
+         END IF
+         IF(LL.EQ.2) THEN
+            I = L1213J(1,III)
+            J = L1213J(2,III)
+         END IF
+         IF(I.LE.0.OR.J.LE.0) GOTO 100
+         NFFTYP=NFFTYPSV
+         IF(I.GT.NATPDB.OR.J.GT.NATPDB) NFFTYP=0
+C
+         IF(NFFTYP/10000.NE.5) THEN
+            SIGI  = SIG(I)
+            EPSI  = EPS(I)
+            SIGJ  = SIG(J)
+            EPSJ  = EPS(J)
+            IF(SIGI.EQ.ZERO .OR. EPSI.EQ.ZERO) GOTO 100
+            IF(SIGJ.EQ.ZERO .OR. EPSJ.EQ.ZERO) GOTO 100
+         END IF
+         IF(NFFTYP/10000.EQ.5) THEN
+            II    = NTYPE(I)
+            JJ    = NTYPE(J)
+            RRIJ  = FCLJTP(1,JJ,II)
+            EPSNO = FCLJTP(2,JJ,II)
+            IF(RRIJ.EQ.ZERO.OR.EPSNO.EQ.ZERO) GOTO 100
+            RRIJ2 = RRIJ*RRIJ
+            RRIJ6 = RRIJ2*RRIJ2*RRIJ2
+            RRIJ7 = RRIJ6*RRIJ
+         END IF
+C
+         X     = CORD(1,I) - CORD(1,J)
+         Y     = CORD(2,I) - CORD(2,J)
+         Z     = CORD(3,I) - CORD(3,J)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.GT.SWRB2) GOTO 100
+         IF(R2.LT.0.01D+00) GOTO 100
+         CALL SWFUNC(R2,X,Y,Z)
+         ONER2 = ONE/R2
+C
+         IF(NFFTYP/10000.NE.5) THEN
+            SIG1  = 0.5D+00*(SIGI+SIGJ)
+            FOUREP= EPSI*EPSJ
+            SIGSQ = SIG1*SIG1*ONER2
+            IF(NFFTYP/10000.EQ.4) SIGSQ  = SIGI*SIGJ*ONER2
+            DISP  = -SIGSQ*SIGSQ*SIGSQ
+            REP   = DISP*DISP
+            EPAIRR  = FOUREP*REP
+            EPAIRD  = FOUREP*DISP
+            EPAIRR  = EPAIRR*SIGN
+            EPAIRD  = EPAIRD*SIGN
+            DUM     =-SWF*6.0D+00*FOUREP*(2.0D+00*REP+DISP)*
+     *                ONER2*SIGN
+         END IF
+         IF(NFFTYP/10000.EQ.5) THEN
+            R       = SQRT(R2)
+            ONER    = ONE/R
+            R6      = R2*R2*R2
+            R7      = R6*R
+            C1LJ    = ONE/(R+0.07D+00*RRIJ)
+            C2LJ    = ONE/(R7+0.12D+00*RRIJ7)
+            FM1VDW  = 1.07D+00*RRIJ*C1LJ
+            FM1VDW2 = FM1VDW*FM1VDW
+            FM1VDW6 = FM1VDW2*FM1VDW2*FM1VDW2
+            FM1VDW7 = FM1VDW6*FM1VDW
+            FM2VDW  = 1.12D+00*RRIJ7*C2LJ
+C
+            EPAIRR   = EPSNO*FM1VDW7*FM2VDW
+            EPAIRD   =-EPSNO*FM1VDW7*TWO
+            EPAIRR   = EPAIRR*SIGN
+            EPAIRD   = EPAIRD*SIGN
+            DUM      = -SWF*EPSNO*SEVEN*FM1VDW7*
+     *                 ( (FM2VDW-TWO)*C1LJ + FM2VDW*C2LJ*R6 )
+     *                 *ONER*SIGN
+         END IF
+C
+         EPAIR = EPAIRR+EPAIRD
+         ENLJR = ENLJR + EPAIRR*SWF
+         ENLJD = ENLJD + EPAIRD*SWF
+C
+         DEX   = DUM*X + EPAIR*SWFDX
+         DEY   = DUM*Y + EPAIR*SWFDY
+         DEZ   = DUM*Z + EPAIR*SWFDZ
+         FFGRD(1,I)=FFGRD(1,I) + DEX
+         FFGRD(2,I)=FFGRD(2,I) + DEY
+         FFGRD(3,I)=FFGRD(3,I) + DEZ
+         FFGRD(1,J)=FFGRD(1,J) - DEX
+         FFGRD(2,J)=FFGRD(2,J) - DEY
+         FFGRD(3,J)=FFGRD(3,J) - DEZ
+         VIR(1)    =VIR(1)     + DEX*X
+         VIR(2)    =VIR(2)     + DEY*Y
+         VIR(3)    =VIR(3)     + DEZ*Z
+ 100  CONTINUE
+ 110  CONTINUE
+C
+      NFFTYP = NFFTYPSV
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK ECHARGCCS
+!>
+!> @brief    charge-charge interaction
+!>
+!> @author   Hui Li
+!>           - Nov 2017
+!>
+!> @details  force field charge-charge term
+!>
+      SUBROUTINE ECHARGCCS(CORD,FFGRD,CHARG,L1213J,L14J)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR, DSKWRK, MASWRK
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (TOBOHR=1.0D+00/TOANGS)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),CHARG(*),
+     *          L1213J(2,*),L14J(2,*)
+C
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFNODE/ L1BOND,L2BOND,L1ANGL,L2ANGL,L1DIHR,L2DIHR,
+     *                L1DIHB,L2DIHB,L1CMAP,L2CMAP,L1WAGG,L2WAGG,
+     *                L11213,L21213,L1N14J,L2N14J,
+     *                L11213A,L21213A,L1N14A,L2N14A,
+     *                L11213B,L21213B,L1N14B,L2N14B,
+     *                L1BONDPMA,L2BONDPMA,L1ANGLPMA,L2ANGLPMA,
+     *                L1DIHRPMA,L2DIHRPMA,L1DIHBPMA,L2DIHBPMA,
+     *                L1WAGGPMA,L2WAGGPMA,L1CMAPPMA,L2CMAPPMA,
+     *                L11213PMA,L21213PMA,L1N14PMA,L2N14PMA,
+     *                L1BONDPMB,L2BONDPMB,L1ANGLPMB,L2ANGLPMB,
+     *                L1DIHRPMB,L2DIHRPMB,L1DIHBPMB,L2DIHBPMB,
+     *                L1WAGGPMB,L2WAGGPMB,L1CMAPPMB,L2CMAPPMB,
+     *                L11213PMB,L21213PMB,L1N14PMB,L2N14PMB,
+     *                L1FFAT,L2FFAT
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FFTYPE/ WT14LJ,WT14CH,C3BOND,C4BOND,C3ANGL,
+     *                NFFTYP,NFFFILE,LJQMMM,LJQM,INTCHG,
+     *                LJSIGMA,JTOPFILE(90),JPARFILE(90),
+     *                JTOPAMIA(90),JTOPNTER(90),JTOPCTER(90),
+     *                JTOPNUCA(90),JPARFIL2(90),JPARFIL3(90)
+      COMMON /FMCOM / XX(1)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, NOV 29, 2017, LINCOLN
+C
+C     FORMULA:  E = QI*QJ/RIJ  (IN VACUUM)
+C          OR:  E = SHF*(QI*QJ/RIJ)
+C                   SHF = SHIFTING  FUNCTION IN RANGE 0 - SWRB
+C
+CMMFF
+CMMFF           E = QI*QJ/[D*(RIJ+0.05)]  !  0.05 ANGSTROM
+CMMFF               D = DIELECTRIC CONSTANT, USUALLY 1.0
+CMMFF
+      ENCHAR    = ZERO
+      SOL1CH    = ZERO
+      SOL2CH    = ZERO
+      PMF1CH    = ZERO
+      IF(IDOCHG.EQ.0) RETURN
+C
+C     -- MMFF94 BUFFER DISTANCE IS USED
+C
+      RBUF      = ZERO
+      IF(NFFTYP/10000.EQ.5) RBUF = 0.05D+00*TOBOHR
+C
+C
+      SIGN = 1.0D+00           !  ALL I-J PAIRS
+      IPCOUNT = ME - 1
+      DO 110 I = 1, NATPDB-1
+      DO 100 J = I+1, NATPDB
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         QI  = CHARG(I)
+         QJ  = CHARG(J)
+         IF(QI.EQ.ZERO.OR.QJ.EQ.ZERO) GOTO 100
+         QIQJ  = QI*QJ
+C
+         X     = CORD(1,I) - CORD(1,J)
+         Y     = CORD(2,I) - CORD(2,J)
+         Z     = CORD(3,I) - CORD(3,J)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.LT.0.01D+00) GOTO 100
+C
+         R     = SQRT(R2)
+         ONERX = ONE/R
+         R     = R + RBUF
+         R2    = R*R
+         ONER  = ONE/R
+         ONER2 = ONER*ONER
+         ONER3 = ONER2*ONERX
+C
+         EDUM  = QIQJ*ONER*SIGN
+         DUM   = -QIQJ*ONER3*SIGN
+         EPAIR = EDUM
+         ENCHAR= ENCHAR  + EPAIR
+         DEX   = DUM*X
+         DEY   = DUM*Y
+         DEZ   = DUM*Z
+         FFGRD(1,I)=FFGRD(1,I) + DEX
+         FFGRD(2,I)=FFGRD(2,I) + DEY
+         FFGRD(3,I)=FFGRD(3,I) + DEZ
+         FFGRD(1,J)=FFGRD(1,J) - DEX
+         FFGRD(2,J)=FFGRD(2,J) - DEY
+         FFGRD(3,J)=FFGRD(3,J) - DEZ
+         VIR(1)    =VIR(1)     + DEX*X
+         VIR(2)    =VIR(2)     + DEY*Y
+         VIR(3)    =VIR(3)     + DEZ*Z
+ 100  CONTINUE
+ 110  CONTINUE
+C
+C
+      SIGN = -1.0D+00          !  REMOVE 1-2, 1-3 PAIRS
+      DO 200 III=L11213, L21213
+         I = L1213J(1,III)
+         J = L1213J(2,III)
+         IF(I.EQ.0.OR.J.EQ.0) GOTO 200
+         QI  = CHARG(I)
+         QJ  = CHARG(J)
+         IF(QI.EQ.ZERO.OR.QJ.EQ.ZERO) GOTO 200
+         QIQJ  = QI*QJ
+C
+         X     = CORD(1,I) - CORD(1,J)
+         Y     = CORD(2,I) - CORD(2,J)
+         Z     = CORD(3,I) - CORD(3,J)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.LT.0.01D+00) GOTO 200
+C
+         R     = SQRT(R2)
+         ONERX = ONE/R
+         R     = R + RBUF
+         R2    = R*R
+         ONER  = ONE/R
+         ONER2 = ONER*ONER
+         ONER3 = ONER2*ONERX
+C
+         EDUM  = QIQJ*ONER*SIGN
+         DUM   = -QIQJ*ONER3*SIGN
+         EPAIR = EDUM
+         ENCHAR= ENCHAR  + EPAIR
+         DEX   = DUM*X
+         DEY   = DUM*Y
+         DEZ   = DUM*Z
+         FFGRD(1,I)=FFGRD(1,I) + DEX
+         FFGRD(2,I)=FFGRD(2,I) + DEY
+         FFGRD(3,I)=FFGRD(3,I) + DEZ
+         FFGRD(1,J)=FFGRD(1,J) - DEX
+         FFGRD(2,J)=FFGRD(2,J) - DEY
+         FFGRD(3,J)=FFGRD(3,J) - DEZ
+         VIR(1)    =VIR(1)     + DEX*X
+         VIR(2)    =VIR(2)     + DEY*Y
+         VIR(3)    =VIR(3)     + DEZ*Z
+ 200  CONTINUE
+C
+C     -- IF WT14CH IS NOT 1.0, ADD (WT14CH-1)
+C
+      IF(WT14CH.NE.1.0D+00) THEN
+      FACT   =  WT14CH - 1.0D+00
+      SIGN = 1.0D+00
+      DO 300 III=L1N14J, L2N14J
+         I = L14J(1,III)
+         J = L14J(2,III)
+         IF(I.EQ.0.OR.J.EQ.0) GOTO 300
+         QI  = CHARG(I)
+         QJ  = CHARG(J)
+         IF(QI.EQ.ZERO.OR.QJ.EQ.ZERO) GOTO 300
+         QIQJ  = QI*QJ
+C
+         X     = CORD(1,I) - CORD(1,J)
+         Y     = CORD(2,I) - CORD(2,J)
+         Z     = CORD(3,I) - CORD(3,J)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+C
+         R     = SQRT(R2)
+         ONERX = ONE/R
+         R     = R + RBUF
+         R2    = R*R
+         ONER  = ONE/R
+         ONER2 = ONER*ONER
+         ONER3 = ONER2*ONERX
+C
+         EDUM  = QIQJ*ONER*FACT*SIGN
+         DUM   = -QIQJ*ONER3*FACT*SIGN
+         EPAIR = EDUM
+         ENCHAR= ENCHAR  + EPAIR
+         DEX   = DUM*X
+         DEY   = DUM*Y
+         DEZ   = DUM*Z
+         FFGRD(1,I)=FFGRD(1,I) + DEX
+         FFGRD(2,I)=FFGRD(2,I) + DEY
+         FFGRD(3,I)=FFGRD(3,I) + DEZ
+         FFGRD(1,J)=FFGRD(1,J) - DEX
+         FFGRD(2,J)=FFGRD(2,J) - DEY
+         FFGRD(3,J)=FFGRD(3,J) - DEZ
+         VIR(1)    =VIR(1)     + DEX*X
+         VIR(2)    =VIR(2)     + DEY*Y
+         VIR(3)    =VIR(3)     + DEZ*Z
+ 300  CONTINUE
+      END IF
+C
+C     -- EXTERNAL ELECTRIC FIELD --
+      CALL EEFIELD(CORD,CHARG,FFGRD,XX(LFFZMAS))
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK POLCCS
+!>
+!> @brief    induced dipole
+!>
+!> @author   Hui Li
+!>           - Nov 2017
+!>
+!> @details  calculate the induced dipole
+!>           due to MM charges
+!>
+      SUBROUTINE POLCCS(CORD,FFGRD,CHARG,POL,DIP,FIELD1,LSTPOL)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (PT5=0.5D+00)
+      PARAMETER (THREE=3.0D+00)
+C
+      DIMENSION CORD(3,*),FFGRD(3,*),LSTPOL(*),CHARG(*),
+     *          POL(*),DIP(3,*),FIELD1(3,*)
+C
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, NOV 29, 2017, LINCOLN
+C
+      ENPOL    = ZERO
+      ENRXNPOL = ZERO
+      IF(IDOCHG.EQ.0) RETURN
+      IF(IDOPOL.EQ.0) RETURN
+C
+C     -- FIELD1: FIELD AT POL DUE TO MM CHARGE --
+C
+      CALL VCLR(FIELD1,1,3*NFFAT)
+C
+      IPCOUNT = ME - 1
+      DO 110 IFFAT=1,NATPDB
+         QI    = CHARG(IFFAT)
+         IF(QI  .EQ.ZERO) GOTO 110
+      DO 100 J=1,LSTPOL(NFFAT)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 100
+         END IF
+         JFFAT = LSTPOL(J)
+         POLJ  = POL(JFFAT)
+         IF(POLJ.EQ.ZERO) GOTO 100
+C
+         X     = CORD(1,IFFAT) - CORD(1,JFFAT)
+         Y     = CORD(2,IFFAT) - CORD(2,JFFAT)
+         Z     = CORD(3,IFFAT) - CORD(3,JFFAT)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.GT.SWRB2) GOTO 100
+         IF(R2.LT.0.01D+00) GOTO 100
+         R     = SQRT(R2)
+         ONER  = ONE/R
+         CALL SWFUNC(R2,X,Y,Z)
+C
+         ONER2 = ONER*ONER
+         ONER3 = ONER2*ONER
+         DUMJ  = QI*ONER3*SWF
+         FIELD1(1,JFFAT)=FIELD1(1,JFFAT)-DUMJ*X
+         FIELD1(2,JFFAT)=FIELD1(2,JFFAT)-DUMJ*Y
+         FIELD1(3,JFFAT)=FIELD1(3,JFFAT)-DUMJ*Z
+ 100  CONTINUE
+ 110  CONTINUE
+      IF(GOPARR) CALL DDI_GSUMF(2405,FIELD1,3*NFFAT)
+C
+C     -- COMPUTE DIPOLES AND POLARIZATION ENERGY --
+      ENPOL = ZERO
+      DO IFFAT=NATPDB+1,NFFAT
+         DIP(1,IFFAT)=POL(IFFAT)*FIELD1(1,IFFAT)
+         DIP(2,IFFAT)=POL(IFFAT)*FIELD1(2,IFFAT)
+         DIP(3,IFFAT)=POL(IFFAT)*FIELD1(3,IFFAT)
+C        -- ONLY EXTRENAL FIELD SHOULD BE USED
+         ENPOL = ENPOL - FIELD1(1,IFFAT)*DIP(1,IFFAT)
+     *                 - FIELD1(2,IFFAT)*DIP(2,IFFAT)
+     *                 - FIELD1(3,IFFAT)*DIP(3,IFFAT)
+      ENDDO
+      ENPOL    = PT5*ENPOL
+C
+C     -- COMPUTE GRADIENTS --
+C
+      IPCOUNT = ME - 1
+      DO 410 IFFAT=1,NATPDB
+         QI    = CHARG(IFFAT)
+         IF(QI  .EQ.ZERO) GOTO 410
+      DO 400 J=1,LSTPOL(NFFAT)
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 400
+         END IF
+         JFFAT = LSTPOL(J)
+         POLJ  = POL(JFFAT)
+         IF(POLJ.EQ.ZERO) GOTO 400
+         DIPJX = DIP(1,JFFAT)
+         DIPJY = DIP(2,JFFAT)
+         DIPJZ = DIP(3,JFFAT)
+C
+         X     = CORD(1,IFFAT) - CORD(1,JFFAT)
+         Y     = CORD(2,IFFAT) - CORD(2,JFFAT)
+         Z     = CORD(3,IFFAT) - CORD(3,JFFAT)
+         PBCX  = XBOX * ANINT(X*ONEXBOX)
+         PBCY  = YBOX * ANINT(Y*ONEYBOX)
+         PBCZ  = ZBOX * ANINT(Z*ONEZBOX)
+         X     = X - PBCX
+         Y     = Y - PBCY
+         Z     = Z - PBCZ
+         R2    = X*X+Y*Y+Z*Z
+         IF(R2.GT.SWRB2) GOTO 400
+         IF(R2.LT.0.01D+00) GOTO 400
+         R     = SQRT(R2)
+C
+         ONER  = ONE/R
+         CALL SWFUNC(R2,X,Y,Z)
+C
+         ONER2 = ONER*ONER
+         ONER3 = ONER2*ONER
+         ONER5 = ONER2*ONER3
+C
+C        - FORCES BETWEEN CHARGE AND DIPOLE
+C
+         QIDOT = THREE*ONER5*(DIPJX*X+DIPJY*Y+DIPJZ*Z)*QI
+         QIONER3= QI*ONER3
+C              NEGATIVE FORCE ON QI BY DIPJ
+         DXI   = DIPJX*QIONER3 - QIDOT*X
+         DYI   = DIPJY*QIONER3 - QIDOT*Y
+         DZI   = DIPJZ*QIONER3 - QIDOT*Z
+C              NEGATIVE FORCE ON IFFAT
+         DX    = DXI
+         DY    = DYI
+         DZ    = DZI
+C
+C
+C        - ENERGY-SWFDX TERMS
+C
+         FLDJX = QIONER3*(-X)   ! FIELD AT DIPJ DUE TO QI
+         FLDJY = QIONER3*(-Y)
+         FLDJZ = QIONER3*(-Z)
+         EDJQI = -(FLDJX*DIPJX+FLDJY*DIPJY+FLDJZ*DIPJZ) ! E = -F*D
+         EPAIR = EDJQI
+C
+         DEX   = DX*SWF
+         DEY   = DY*SWF
+         DEZ   = DZ*SWF
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT) + DEX
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT) + DEY
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT) + DEZ
+         FFGRD(1,IFFAT)=FFGRD(1,IFFAT)+EPAIR*SWFDX
+         FFGRD(2,IFFAT)=FFGRD(2,IFFAT)+EPAIR*SWFDY
+         FFGRD(3,IFFAT)=FFGRD(3,IFFAT)+EPAIR*SWFDZ
+         FFGRD(1,JFFAT)=FFGRD(1,JFFAT) - DEX
+         FFGRD(2,JFFAT)=FFGRD(2,JFFAT) - DEY
+         FFGRD(3,JFFAT)=FFGRD(3,JFFAT) - DEZ
+         FFGRD(1,JFFAT)=FFGRD(1,JFFAT)-EPAIR*SWFDX
+         FFGRD(2,JFFAT)=FFGRD(2,JFFAT)-EPAIR*SWFDY
+         FFGRD(3,JFFAT)=FFGRD(3,JFFAT)-EPAIR*SWFDZ
+         VIR(1)    =VIR(1)     + DEX*X + EPAIR*SWFDX*X
+         VIR(2)    =VIR(2)     + DEY*Y + EPAIR*SWFDY*Y
+         VIR(3)    =VIR(3)     + DEZ*Z + EPAIR*SWFDZ*Z
+ 400  CONTINUE
+ 410  CONTINUE
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK CROSSSECTION
+!>
+!> @brief    calculate the cross section of a molecule
+!>
+!> @author   Hui Li
+!>           - Feb 12, 2017
+!>
+!> @details  use 960 points to define planes
+!>           and calculate the area of the molecular projection,
+!>           and finally average the 960 values.
+!>
+      SUBROUTINE CROSSSECTION(CORD,ZANF,ZMAS,CORDP,RADIUS)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (PT5=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (ONE3RD=1.0D+00/3.0D+00)
+      PARAMETER (RT2=1.414213562373095D+00)
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (TOBOHR=1.0D+00/TOANGS)
+C
+      DIMENSION CDTST(3,960),ATS(960),NBIN(20000),
+     *          IDUM(360),THEV(24),FIV(24),JVT1(6,60),CV(122,3),
+     *          CORD(3,*),ZANF(*),ZMAS(*),CORDP(3,*),RADIUS(*)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      EQUIVALENCE (IDUM(1),JVT1(1,1))
+C
+      DATA THEV/0.6523581398D+00,1.107148718D+00,1.382085796D+00,
+     *          1.759506858D+00,2.034443936D+00,2.489234514D+00,
+     *                         0.3261790699D+00,0.5535743589D+00,
+     *          0.8559571251D+00,0.8559571251D+00,1.017221968D+00,
+     *          1.229116717D+00,1.229116717D+00,1.433327788D+00,
+     *          1.570796327D+00,1.570796327D+00,1.708264866D+00,
+     *          1.912475937D+00,1.912475937D+00,2.124370686D+00,
+     *          2.285635528D+00,2.285635528D+00,2.588018295D+00,
+     *          2.815413584D+00/
+      DATA FIV/               0.6283185307D+00,0.0000000000D+00,
+     *         0.6283185307D+00,0.0000000000D+00,0.6283185307D+00,
+     *         0.0000000000D+00,0.6283185307D+00,0.0000000000D+00,
+     *         0.2520539002D+00,1.004583161D+00,0.6283185307D+00,
+     *         0.3293628477D+00,0.9272742138D+00,0.0000000000D+00,
+     *         0.3141592654D+00,0.9424777961D+00,0.6283185307D+00,
+     *         0.2989556830D+00,0.9576813784D+00,0.0000000000D+00,
+     *         0.3762646305D+00,0.8803724309D+00,0.6283188307D+00,
+     *         0.0000000000D+00/
+      DATA FIR/1.256637061D+00/
+C
+      DATA (IDUM(III),III=1,280)/
+     *   1, 6, 2, 32, 36, 37, 1, 2, 3, 33, 32, 38, 1, 3, 4, 34,
+     *   33, 39, 1, 4, 5, 35, 34, 40, 1, 5, 6, 36, 35, 41, 7, 2, 6, 51,
+     *   42, 37, 8, 3, 2, 47, 43, 38, 9, 4, 3, 48, 44, 39, 10, 5, 4,
+     *   49, 45, 40, 11, 6, 5, 50, 46, 41, 8, 2, 12, 62, 47, 52, 9,
+     *   3, 13, 63, 48, 53, 10, 4, 14, 64, 49, 54, 11, 5, 15, 65, 50,
+     *   55, 7, 6, 16, 66, 51, 56, 7, 12, 2, 42, 57, 52, 8, 13, 3,
+     *   43, 58, 53, 9, 14, 4, 44, 59, 54, 10, 15, 5, 45, 60, 55, 11,
+     *   16, 6, 46, 61, 56, 8, 12, 18, 68, 62, 77, 9, 13, 19, 69, 63,
+     *   78, 10, 14, 20, 70, 64, 79, 11, 15, 21, 71, 65, 80, 7, 16,
+     *   17, 67, 66, 81, 7, 17, 12, 57, 67, 72, 8, 18, 13, 58, 68, 73,
+     *   9, 19, 14, 59, 69, 74, 10, 20, 15, 60, 70, 75, 11, 21, 16,
+     *   61, 71, 76, 22, 12, 17, 87, 82, 72, 23, 13, 18, 88, 83, 73,
+     *   24, 14, 19, 89, 84, 74, 25, 15, 20, 90, 85, 75, 26, 16, 21,
+     *   91, 86, 76, 22, 18, 12, 82, 92, 77, 23, 19, 13, 83, 93, 78,
+     *   24, 20, 14, 84, 94, 79, 25, 21, 15, 85, 95, 80, 26, 17, 16,
+     *   86, 96, 81, 22, 17, 27, 102, 87, 97, 23, 18, 28, 103, 88, 98,
+     *   24, 19, 29, 104, 89, 99, 25, 20, 30, 105, 90, 100, 26, 21,
+     *   31, 106, 91, 101, 22, 28, 18, 92, 107, 98, 23, 29, 19, 93/
+      DATA (IDUM(III),III=281,360)/
+     *   108, 99, 24, 30, 20, 94, 109, 100, 25, 31, 21, 95, 110, 101,
+     *   26, 27, 17, 96, 111, 97, 22, 27, 28, 107, 102, 112, 23, 28,
+     *   29, 108, 103, 113, 24, 29, 30, 109, 104, 114, 25, 30, 31,
+     *   110, 105, 115, 26, 31, 27, 111, 106, 116, 122, 28, 27, 117,
+     *   118, 112, 122, 29, 28, 118, 119, 113, 122, 30, 29, 119, 120,
+     *   114, 122, 31, 30, 120, 121, 115, 122, 27, 31, 121, 117, 116 /
+C
+C     HUI LI, FEB 12, 2017, LINCOLN
+C     THE WORKING UNIT IS BOHR
+C
+C     COORDINATES OF VERTICES OF TESSERAE IN A SPHERE WITH UNIT RADIUS.
+C
+C                                    1
+C
+C                                 4     5
+C
+C                              3     6     2
+C
+      CV(  1,1) =  0.0D+00
+      CV(  1,2) =  0.0D+00
+      CV(  1,3) =  1.0D+00
+      CV(122,1) =  0.0D+00
+      CV(122,2) =  0.0D+00
+      CV(122,3) = -1.0D+00
+      II=1
+      DO I=1,24
+         TH=THEV(I)
+         FI=FIV(I)
+         CTH=COS(TH)
+         STH=SIN(TH)
+         DO J=1,5
+            FI=FI+FIR
+            IF(J.EQ.1) FI=FIV(I)
+            II=II+1
+            CV(II,1)=STH*COS(FI)
+            CV(II,2)=STH*SIN(FI)
+            CV(II,3)=CTH
+         ENDDO
+      ENDDO
+C
+      IF(MASWRK) WRITE(IW,'(A/A)')
+     *' CALCULATE CROSS SECTION...',
+     *' PROGRAM WRITTEN BY HUI LI, 2017 FEB 12'
+C
+C     -- ASSIGN THE RADIUS OF THE PROBING MOLECULE: HE, N2 --
+C        THE DEFAULT IS HE
+C
+C     RPROB = 1.466D+00    !  H2
+C     RPROB = 1.784D+00    !  O2
+C     RPROB = 1.850D+00    !  N2
+C     RPROB = 2.720D+00    !  CL2
+      RPROB = 1.293D+00    !  HE
+C     RPROB = 1.382D+00    !  NE
+C     RPROB = 1.693D+00    !  AR
+C     RPROB = 2.646D+00    !  C6H6
+C     RPROB = 2.034D+00    !  CO2
+      IF(RALLMM.GT.0.0D+00) RPROB = RALLMM*TOANGS
+      IF(MASWRK) WRITE(IW,'(A,F12.8,A)')' RPROB =',RPROB,' A'
+C
+C     -- IDENTIFY THE METAL ION --
+C
+      AREA0 = ZERO
+      ION = 0
+      DO IFFAT = 1,NFFAT
+         NUCZ = INT(ZANF(IFFAT)+0.001D+00)
+         IF(NUCZ.EQ.  3) ION=IFFAT
+         IF(NUCZ.EQ. 11) ION=IFFAT
+         IF(NUCZ.EQ. 19) ION=IFFAT
+         IF(NUCZ.EQ. 37) ION=IFFAT
+         IF(NUCZ.EQ. 55) ION=IFFAT
+      ENDDO
+C
+C     -- ASSIGN RADIUS TO EACH ATOM --
+C
+      DO IFFAT = 1,NFFAT
+         NUCZ = INT(ZANF(IFFAT)+0.001D+00)
+C        IF(NUCZ.EQ.  1) RADIUS(IFFAT)=  1.28D+00    ! GOOD FOR H2
+         IF(NUCZ.EQ.  1) RADIUS(IFFAT)=  0.40D+00    ! GOOD FOR C-H  ?
+         IF(NUCZ.EQ.  2) RADIUS(IFFAT)=  1.293D+00   ! GOOD
+         IF(NUCZ.EQ.  3) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ.  4) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ.  5) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ.  6) RADIUS(IFFAT)=  1.64D+00    ! GOOD FOR C6H6 ?
+         IF(NUCZ.EQ.  7) RADIUS(IFFAT)=  1.585D+00   ! GOOD
+         IF(NUCZ.EQ.  8) RADIUS(IFFAT)=  1.496D+00   ! GOOD
+         IF(NUCZ.EQ.  9) RADIUS(IFFAT)=  1.40D+00
+         IF(NUCZ.EQ. 10) RADIUS(IFFAT)=  1.382D+00   ! GOOD
+         IF(NUCZ.EQ. 11) RADIUS(IFFAT)=  1.40D+00
+         IF(NUCZ.EQ. 12) RADIUS(IFFAT)=  1.30D+00
+         IF(NUCZ.EQ. 13) RADIUS(IFFAT)=  1.20D+00
+         IF(NUCZ.EQ. 14) RADIUS(IFFAT)=  2.00D+00
+         IF(NUCZ.EQ. 15) RADIUS(IFFAT)=  2.10D+00
+         IF(NUCZ.EQ. 16) RADIUS(IFFAT)=  2.20D+00
+         IF(NUCZ.EQ. 17) RADIUS(IFFAT)=  2.253D+00   ! GOOD
+         IF(NUCZ.EQ. 18) RADIUS(IFFAT)=  1.693D+00   ! GOOD
+         IF(NUCZ.EQ. 19) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 20) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 21) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 22) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 23) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 24) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ. 25) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 26) RADIUS(IFFAT)=  1.80D+00
+         IF(NUCZ.EQ. 27) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 28) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ. 29) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 30) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 31) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 32) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 33) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 34) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ. 35) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 36) RADIUS(IFFAT)=  1.80D+00
+         IF(NUCZ.EQ. 37) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 38) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ. 39) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 40) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 40) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 41) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 42) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 43) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 44) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ. 45) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 46) RADIUS(IFFAT)=  1.80D+00
+         IF(NUCZ.EQ. 47) RADIUS(IFFAT)=  1.70D+00
+         IF(NUCZ.EQ. 48) RADIUS(IFFAT)=  1.60D+00
+         IF(NUCZ.EQ. 49) RADIUS(IFFAT)=  1.50D+00
+         IF(NUCZ.EQ. 50) RADIUS(IFFAT)=  1.50D+00
+         DO II=1,NRADMM
+            IF(NUCZ.EQ.INT(RADMM(II))) THEN
+               RFFAT = (RADMM(II) - DBLE(NUCZ))*1.0D+04
+               RADIUS(IFFAT) = RFFAT*TOANGS
+            ENDIF
+         ENDDO
+         IF(MASWRK) WRITE(IW,'(A,F12.8,A)')
+     *              ' RADIUS=',RADIUS(IFFAT),' A'
+C        - ADD RPROB -
+         RADIUS(IFFAT) = (RADIUS(IFFAT) + RPROB)*TOBOHR
+      ENDDO
+C
+C     -- FIND THE CENTER OF MASS OF THE MOLECULE --
+C
+      XCOM = ZERO
+      YCOM = ZERO
+      ZCOM = ZERO
+      TMAS = ZERO
+      DO IFFAT = 1,NFFAT
+         XCOM = XCOM + CORD(1,IFFAT)*ZMAS(IFFAT)
+         YCOM = YCOM + CORD(2,IFFAT)*ZMAS(IFFAT)
+         ZCOM = ZCOM + CORD(3,IFFAT)*ZMAS(IFFAT)
+         TMAS = TMAS + ZMAS(IFFAT)
+      ENDDO
+      XII = XCOM/TMAS
+      YII = YCOM/TMAS
+      ZII = ZCOM/TMAS
+      RII = ONE      !  RADIUS
+      IF(MASWRK) WRITE(IW,'(A,3F18.6/)')' COM=',XII*TOANGS,
+     *           YII*TOANGS,ZII*TOANGS
+C
+C     --- USE 960 POINTS ---
+      CALL VCLR(CDTST,1,3*960)
+      DO 380 KTS = 1, 60
+      DO 381 JTS = 1, 4
+         IF(JTS.EQ.1) THEN
+            N1 = JVT1(1,KTS)
+            N2 = JVT1(4,KTS)
+            N3 = JVT1(5,KTS)
+         END IF
+         IF(JTS.EQ.2) THEN
+            N1 = JVT1(6,KTS)
+            N2 = JVT1(4,KTS)
+            N3 = JVT1(5,KTS)
+         END IF
+         IF(JTS.EQ.3) THEN
+            N1 = JVT1(3,KTS)
+            N2 = JVT1(4,KTS)
+            N3 = JVT1(6,KTS)
+         END IF
+         IF(JTS.EQ.4) THEN
+            N1 = JVT1(2,KTS)
+            N2 = JVT1(6,KTS)
+            N3 = JVT1(5,KTS)
+         END IF
+         P1X = CV(N1,1)
+         P1Y = CV(N1,2)
+         P1Z = CV(N1,3)
+         P2X = CV(N2,1)
+         P2Y = CV(N2,2)
+         P2Z = CV(N2,3)
+         P3X = CV(N3,1)
+         P3Y = CV(N3,2)
+         P3Z = CV(N3,3)
+C           COMPUTE THE COORDINATES OF POINTS 4, 5, 6
+C
+C                          1
+C
+C                       4     5
+C
+C                    3     6     2
+C
+C
+         P4X = (P1X+P3X)*PT5
+         P4Y = (P1Y+P3Y)*PT5
+         P4Z = (P1Z+P3Z)*PT5
+         P5X = (P1X+P2X)*PT5
+         P5Y = (P1Y+P2Y)*PT5
+         P5Z = (P1Z+P2Z)*PT5
+         P6X = (P2X+P3X)*PT5
+         P6Y = (P2Y+P3Y)*PT5
+         P6Z = (P2Z+P3Z)*PT5
+C
+         DNORM4 = P4X**2+P4Y**2+P4Z**2
+         DNORM5 = P5X**2+P5Y**2+P5Z**2
+         DNORM6 = P6X**2+P6Y**2+P6Z**2
+         SCALE4 = ONE/SQRT(DNORM4)
+         SCALE5 = ONE/SQRT(DNORM5)
+         SCALE6 = ONE/SQRT(DNORM6)
+         P4X    = P4X*SCALE4
+         P4Y    = P4Y*SCALE4
+         P4Z    = P4Z*SCALE4
+         P5X    = P5X*SCALE5
+         P5Y    = P5Y*SCALE5
+         P5Z    = P5Z*SCALE5
+         P6X    = P6X*SCALE6
+         P6Y    = P6Y*SCALE6
+         P6Z    = P6Z*SCALE6
+C
+      DO 382 LTS = 1, 4
+         ITS = ((KTS-1)*4 + JTS-1)*4 + LTS
+         IF(LTS.EQ.1) THEN
+           PTS11=P1X
+           PTS21=P1Y
+           PTS31=P1Z
+           PTS12=P4X
+           PTS22=P4Y
+           PTS32=P4Z
+           PTS13=P5X
+           PTS23=P5Y
+           PTS33=P5Z
+         ELSE IF(LTS.EQ.2) THEN
+           PTS11=P6X
+           PTS21=P6Y
+           PTS31=P6Z
+           PTS12=P4X
+           PTS22=P4Y
+           PTS32=P4Z
+           PTS13=P5X
+           PTS23=P5Y
+           PTS33=P5Z
+         ELSE IF(LTS.EQ.3) THEN
+           PTS11=P3X
+           PTS21=P3Y
+           PTS31=P3Z
+           PTS12=P4X
+           PTS22=P4Y
+           PTS32=P4Z
+           PTS13=P6X
+           PTS23=P6Y
+           PTS33=P6Z
+         ELSE IF(LTS.EQ.4) THEN
+           PTS11=P2X
+           PTS21=P2Y
+           PTS31=P2Z
+           PTS12=P6X
+           PTS22=P6Y
+           PTS32=P6Z
+           PTS13=P5X
+           PTS23=P5Y
+           PTS33=P5Z
+         END IF
+C
+         P7X = (PTS11+PTS12+PTS13)*ONE3RD
+         P7Y = (PTS21+PTS22+PTS23)*ONE3RD
+         P7Z = (PTS31+PTS32+PTS33)*ONE3RD
+         DNORM7 = P7X**2+P7Y**2+P7Z**2
+         SCALE7 = ONE/SQRT(DNORM7)
+         CDTST(1,ITS) = XII + P7X*SCALE7*RII
+         CDTST(2,ITS) = YII + P7Y*SCALE7*RII
+         CDTST(3,ITS) = ZII + P7Z*SCALE7*RII
+ 382  CONTINUE
+ 381  CONTINUE
+ 380  CONTINUE
+C
+      CALL VCLR(ATS,1,960)
+      IPCOUNT = ME - 1
+      DO 500 ITS=0,960
+         AREA=ZERO
+         IF(GOPARR) THEN
+            IPCOUNT = IPCOUNT + 1
+            IF(MOD(IPCOUNT,NPROC).NE.0) GOTO 500
+         END IF
+C
+C        -- THE UNIT VECTOR FROM COM TO ITS --
+         IF(ITS.EQ.0) THEN
+            V1X  = CORD(1,ION) - XII
+            V1Y  = CORD(2,ION) - YII
+            V1Z  = CORD(3,ION) - ZII
+         ELSE
+            V1X  = CDTST(1,ITS) - XII
+            V1Y  = CDTST(2,ITS) - YII
+            V1Z  = CDTST(3,ITS) - ZII
+         END IF
+         ONER = ONE/SQRT(V1X*V1X+V1Y*V1Y+V1Z*V1Z)
+         V1X  = V1X*ONER
+         V1Y  = V1Y*ONER
+         V1Z  = V1Z*ONER
+C        -- PROJECT THE ATOMIC COORDINATES ONTO THE PLANE --
+         DO IFFAT=1,NFFAT
+C           - ATOM VECTOR -
+            VXIAT = CORD(1,IFFAT) - XII
+            VYIAT = CORD(2,IFFAT) - YII
+            VZIAT = CORD(3,IFFAT) - ZII
+C           - VECTOR (CROSS) PRODUCT -
+            V2X  = V1Y*VZIAT - V1Z*VYIAT
+            V2Y  = V1Z*VXIAT - V1X*VZIAT
+            V2Z  = V1X*VYIAT - V1Y*VXIAT
+            IF(ABS(V2X)+ABS(V2Y)+ABS(V2Z).LE.1.0D-06) THEN
+               CORDP(1,IFFAT) = XII
+               CORDP(2,IFFAT) = YII
+               CORDP(3,IFFAT) = ZII
+            ELSE
+               ONER = ONE/SQRT(V2X*V2X+V2Y*V2Y+V2Z*V2Z)
+               V2X  = V2X*ONER
+               V2Y  = V2Y*ONER
+               V2Z  = V2Z*ONER
+               V3X = V1Y*V2Z - V1Z*V2Y
+               V3Y = V1Z*V2X - V1X*V2Z
+               V3Z = V1X*V2Y - V1Y*V2X
+               ONER = ONE/SQRT(V3X*V3X+V3Y*V3Y+V3Z*V3Z)
+               V3X  = V3X*ONER
+               V3Y  = V3Y*ONER
+               V3Z  = V3Z*ONER
+               PV3  = V3X*VXIAT + V3Y*VYIAT + V3Z*VZIAT
+               CORDP(1,IFFAT) = PV3*V3X + XII
+               CORDP(2,IFFAT) = PV3*V3Y + YII
+               CORDP(3,IFFAT) = PV3*V3Z + ZII
+               V2XSV= V2X
+               V2YSV= V2Y
+               V2ZSV= V2Z
+               V3XSV= V3X
+               V3YSV= V3Y
+               V3ZSV= V3Z
+            END IF
+         ENDDO
+C
+C        -- OBTAIN THE SIZE OF THE PROJECTED MOLECULE --
+         SIZE2 = ZERO
+         DO IFFAT=1,NFFAT
+            X  = CORDP(1,IFFAT) - XII
+            Y  = CORDP(2,IFFAT) - YII
+            Z  = CORDP(3,IFFAT) - ZII
+            R2 = X*X+Y*Y+Z*Z
+            IF(R2.GT.SIZE2) SIZE2 = R2
+         ENDDO
+         SIZE   = SQRT(SIZE2)
+         NGRID  = 2*(INT(SIZE)+1+14)  !  1.0 BOHR GRID SIZE
+         GRIDN  = DBLE(NGRID)
+         RGRID2 = (GRIDN*PT5)**2
+C
+C        -- V2X, V2Y, V2Z, V3X, V3Y, V3Z --
+C           ARE FROM ABOVE CALCULATION, PROBABLY THE LAST IFFAT
+C
+         V2X = V2XSV
+         V2Y = V2YSV
+         V2Z = V2ZSV
+         V3X = V3XSV
+         V3Y = V3YSV
+         V3Z = V3ZSV
+C
+C        -- CALCULATE THE PROJECTION AREA --
+C
+         DO 400 IGRID=1,NGRID
+         DO 410 JGRID=1,NGRID       !  LEVEL 1, 1.0 BOHR
+            GRIDI = DBLE(IGRID)
+            GRIDJ = DBLE(JGRID)
+            GRIDX1= XII+(GRIDI-GRIDN*PT5-PT5)*V2X
+     *                 +(GRIDJ-GRIDN*PT5-PT5)*V3X
+            GRIDY1= YII+(GRIDI-GRIDN*PT5-PT5)*V2Y
+     *                 +(GRIDJ-GRIDN*PT5-PT5)*V3Y
+            GRIDZ1= ZII+(GRIDI-GRIDN*PT5-PT5)*V2Z
+     *                 +(GRIDJ-GRIDN*PT5-PT5)*V3Z
+            X     = GRIDX1-XII
+            Y     = GRIDY1-YII
+            Z     = GRIDZ1-ZII
+            R2    = X*X+Y*Y+Z*Z
+            IF(R2.GT.RGRID2) GOTO 410
+            CUT   =ZERO
+            DO IFFAT=1,NFFAT
+               X    = GRIDX1 - CORDP(1,IFFAT)
+               Y    = GRIDY1 - CORDP(2,IFFAT)
+               Z    = GRIDZ1 - CORDP(3,IFFAT)
+               R2   = X*X+Y*Y+Z*Z
+               RIAT = RADIUS(IFFAT)
+               DIFF = RT2*PT5
+               RA2  = (RIAT+DIFF)**2
+               RB2  = (RIAT-DIFF)**2
+               IF(R2.LE.RB2)THEN
+                  AREA = AREA + ONE
+                  GOTO 410
+               ENDIF
+               IF(R2.LT.RA2) THEN
+                  CUT=PT5
+               END IF
+            ENDDO
+            IF(CUT.EQ.ZERO) GOTO 410
+            DO 420 IIGRID=1,10
+            DO 430 JJGRID=1,10      !  LEVEL 2, 0.1 BOHR
+               GRIDII=DBLE(IIGRID)
+               GRIDJJ=DBLE(JJGRID)
+               GRIDX2=GRIDX1+0.1D+00*((GRIDII-5.5D+00)*V2X
+     *                               +(GRIDJJ-5.5D+00)*V3X)
+               GRIDY2=GRIDY1+0.1D+00*((GRIDII-5.5D+00)*V2Y
+     *                               +(GRIDJJ-5.5D+00)*V3Y)
+               GRIDZ2=GRIDZ1+0.1D+00*((GRIDII-5.5D+00)*V2Z
+     *                               +(GRIDJJ-5.5D+00)*V3Z)
+               CUT   =ZERO
+               DO IIFFAT=1,NFFAT
+                  X    = GRIDX2 - CORDP(1,IIFFAT)
+                  Y    = GRIDY2 - CORDP(2,IIFFAT)
+                  Z    = GRIDZ2 - CORDP(3,IIFFAT)
+                  R2   = X*X+Y*Y+Z*Z
+                  RIAT = RADIUS(IIFFAT)
+                  DIFF = RT2*PT5*0.1D+00
+                  RA2  = (RIAT+DIFF)**2
+                  RB2  = (RIAT-DIFF)**2
+                  IF(R2.LE.RB2)THEN
+                     AREA = AREA + 1.0D-02
+                     GOTO 430
+                  ENDIF
+                  IF(R2.LT.RA2) CUT=PT5
+               ENDDO
+               IF(CUT.EQ.ZERO) GOTO 430
+               DO 440 IIIGRID=1,10
+               DO 450 JJJGRID=1,10       !  LEVEL 3, 0.01 BOHR
+                  GRIDIII=DBLE(IIIGRID)
+                  GRIDJJJ=DBLE(JJJGRID)
+                  GRIDX3=GRIDX2+0.01D+00*((GRIDIII-5.5D+00)*V2X
+     *                                   +(GRIDJJJ-5.5D+00)*V3X)
+                  GRIDY3=GRIDY2+0.01D+00*((GRIDIII-5.5D+00)*V2Y
+     *                                   +(GRIDJJJ-5.5D+00)*V3Y)
+                  GRIDZ3=GRIDZ2+0.01D+00*((GRIDIII-5.5D+00)*V2Z
+     *                                   +(GRIDJJJ-5.5D+00)*V3Z)
+                  CUT   =ZERO
+                  DO IIIFFAT=1,NFFAT
+                     X    = GRIDX3 - CORDP(1,IIIFFAT)
+                     Y    = GRIDY3 - CORDP(2,IIIFFAT)
+                     Z    = GRIDZ3 - CORDP(3,IIIFFAT)
+                     R2   = X*X+Y*Y+Z*Z
+                     RIAT = RADIUS(IIIFFAT)
+                     DIFF = RT2*PT5*0.01D+00
+                     RA2  = (RIAT+DIFF)**2
+                     RB2  = (RIAT-DIFF)**2
+                     IF(R2.LE.RB2)THEN
+                        AREA = AREA + 1.0D-04
+                        GOTO 450
+                     ENDIF
+                     IF(R2.LT.RA2) CUT=0.5D+00
+                  ENDDO
+                  IF(CUT.EQ.ZERO) GOTO 450
+                  DO 460 IIIIGRID=1,10
+                  DO 470 JJJJGRID=1,10       !  LEVEL 4, 0.001 BOHR
+                     GRIDIIII=DBLE(IIIIGRID)
+                     GRIDJJJJ=DBLE(JJJJGRID)
+                     GRIDX4=GRIDX3+0.001D+00*((GRIDIIII-5.5D+00)*V2X
+     *                                       +(GRIDJJJJ-5.5D+00)*V3X)
+                     GRIDY4=GRIDY3+0.001D+00*((GRIDIIII-5.5D+00)*V2Y
+     *                                       +(GRIDJJJJ-5.5D+00)*V3Y)
+                     GRIDZ4=GRIDZ3+0.001D+00*((GRIDIIII-5.5D+00)*V2Z
+     *                                       +(GRIDJJJJ-5.5D+00)*V3Z)
+                     DO IIIIFFAT=1,NFFAT
+                        X    = GRIDX4 - CORDP(1,IIIIFFAT)
+                        Y    = GRIDY4 - CORDP(2,IIIIFFAT)
+                        Z    = GRIDZ4 - CORDP(3,IIIIFFAT)
+                        R2   = X*X+Y*Y+Z*Z
+                        RIAT = RADIUS(IIIIFFAT)
+                        RA2  = RIAT**2
+                        IF(R2.LE.RA2)THEN
+                           AREA = AREA + 1.0D-06
+                           GOTO 470
+                        ENDIF
+                     ENDDO
+ 470              CONTINUE
+ 460              CONTINUE
+ 450           CONTINUE
+ 440           CONTINUE
+ 430        CONTINUE
+ 420        CONTINUE
+ 410     CONTINUE
+ 400     CONTINUE
+         IF(ITS.GT.0) ATS(ITS)=AREA
+         IF(ITS.EQ.0) AREA0   =AREA
+ 500  CONTINUE
+      AREA0 = AREA0*TOANGS*TOANGS
+C
+      IF(GOPARR) CALL DDI_GSUMF(2415,AREA0,1)
+      IF(GOPARR) CALL DDI_GSUMF(2416,ATS,960)
+C
+C     -- AVERAGE --
+C
+      ATOTAL = ZERO
+      DO ITS=1,960
+C        - THE FOLLOWING ARE THE WEIGHTS OF EACH SURFACE AREA -
+C          THE SUM IS 16.00
+         KKK = MOD(ITS,16)
+         IF(KKK.EQ. 1) FACTOR = 0.96853843384D+00
+         IF(KKK.EQ. 2) FACTOR = 0.98634758299D+00
+         IF(KKK.EQ. 3) FACTOR = 0.97310155328D+00
+         IF(KKK.EQ. 4) FACTOR = 0.97310155328D+00
+         IF(KKK.EQ. 5) FACTOR = 1.04026074020D+00
+         IF(KKK.EQ. 6) FACTOR = 1.05941468448D+00
+         IF(KKK.EQ. 7) FACTOR = 1.04376817374D+00
+         IF(KKK.EQ. 8) FACTOR = 1.04376817369D+00
+         IF(KKK.EQ. 9) FACTOR = 0.98544774054D+00
+         IF(KKK.EQ.10) FACTOR = 1.00020007354D+00
+         IF(KKK.EQ.11) FACTOR = 0.98676349755D+00
+         IF(KKK.EQ.12) FACTOR = 0.98343824680D+00
+         IF(KKK.EQ.13) FACTOR = 0.98544774307D+00
+         IF(KKK.EQ.14) FACTOR = 1.00020007615D+00
+         IF(KKK.EQ.15) FACTOR = 0.98343824928D+00
+         IF(KKK.EQ. 0) FACTOR = 0.98676350013D+00
+         ATOTAL  = ATOTAL + ATS(ITS)*FACTOR
+      ENDDO
+C
+      IF(ION.GT.0.AND.MASWRK) WRITE(IW,'(A,A/A,F18.8,A)')
+     * ' ION LEAD CROSS SECTION IS THE CROSS SECTION',
+     * ' FACING THE METAL ION FROM THE COM:',
+     * ' ION LEAD CROSS SECTION= ',AREA0,' A**2'
+      CROSS=(ATOTAL/960.0D+00)*TOANGS*TOANGS
+      IF(MASWRK) WRITE(IW,'(A,F18.8,A/)')
+     * ' AVERAGED CROSS SECTION= ',CROSS,' A**2'
+C
+C     -- STATISTICS OF ATS(ITS) --
+C
+      DO I=1,20000
+         NBIN(I) = 0
+      ENDDO
+      NMIN = 20000
+      NMAX = 0
+      DO ITS=1,960
+         N = INT(ATS(ITS)*TOANGS*TOANGS+0.5D+00)
+         NBIN(N)=NBIN(N)+1
+         IF(N.LT.NMIN) NMIN = N
+         IF(N.GT.NMAX) NMAX = N
+      ENDDO
+      IF(MASWRK) THEN
+         WRITE(IW,'(A)')
+     *   ' STATISTICS OF 960 CROSS SECTIONS:'
+         DO I=NMIN,NMAX
+            WRITE(IW,'(A,I6,A,I3)')
+     *      ' AREA= ',I,' A**2   COUNTS= ',NBIN(I)
+         ENDDO
+         WRITE(IW,'(/A/)')
+     *      ' DONE WITH CROSS SECTION CALCULATION.'
+      END IF
+C
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK DIMERX
+!>
+!> @brief    add DIMERX to set up for DIMER
+!>
+!> @author   Hui Li
+!>           July 2020
+!>
+      SUBROUTINE DIMERX
+      use mx_limits, only: mxatm,mxsh,mxgtot,mxrt
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      PARAMETER (NMO=500)
+      PARAMETER (MAXML=1024)
+      PARAMETER (MXMPA=3*MXATM)
+      PARAMETER (MXMPSH=2*MXATM)
+      PARAMETER (MXMPGT=5*MXMPSH)
+C
+      COMMON /FFMAX / MXFFAT,MXBOND,MXANGL,MXDIHR,MXDIHB,MXCMAP,
+     *                MXWAGG
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFMPT2/ MXMMTP,LFFKBLST,LFFFCSTBD,LFFFCDIHR,
+     *                LFFFCLJTP,LFFNTYPE,
+     *                LFF2KBLST,LFF2FCSTBD,LFF2FCDIHR,
+     *                LFF2FCLJTP,LFF2NTYPE
+      COMMON /FMCOM / X(1)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /MACHIN/ NWDVAR,MAXFM,MAXSM,LIMFM,LIMSM
+C
+C
+      CALL VALFM(LOADFM)
+      LKCOREA = LOADFM  + 1
+      LKCOREB = LKCOREA + NMO/NWDVAR + 1
+      LKMINA  = LKCOREB + NMO/NWDVAR + 1
+      LKMINB  = LKMINA  + NMO/NWDVAR + 1
+      LEMONO  = LKMINB  + NMO/NWDVAR + 1
+      LE2MONO = LEMONO  + MAXML+1
+      LKNATM  = LE2MONO + MAXML+1
+      LIDATOM1= LKNATM  + (MXATM+1)*MXATM/NWDVAR + 1
+      LIDATOM2= LIDATOM1+ MXATM/NWDVAR + 1
+      LNEWID  = LIDATOM2+ MXATM/NWDVAR + 1
+      LVIRMONO= LNEWID  + MXATM/NWDVAR + 1
+      LVIR2MONO=LVIRMONO+ (MAXML+1)*3
+      LEDIMRST= LVIR2MONO+(MAXML+1)*3
+      LEMONOST= LEDIMRST+ MXRT
+      LETOTST = LEMONOST+ MXRT
+      LZANX   = LETOTST + MXRT
+      LCLPX   = LZANX   + MXATM
+      LZLPX   = LCLPX   + 400
+      LNLPX   = LZLPX   + 400
+      LKFRSTX = LNLPX   + 400/NWDVAR + 1
+      LKLASTX = LKFRSTX + MXATM*6/NWDVAR + 1
+      LLMAXSV = LKLASTX + MXATM*6/NWDVAR + 1
+      LLPSKIPX= LLMAXSV + MXATM/NWDVAR + 1
+      LIZCOREX= LLPSKIPX+ MXATM/NWDVAR + 1
+      LIMP    = LIZCOREX+ MXATM/NWDVAR + 1
+      LJMP    = LIMP    + MXATM/NWDVAR + 1
+      LICORSH = LJMP    + MXATM/NWDVAR + 1
+      LGMONOQ = LICORSH + MXATM/NWDVAR + 1
+      LG2MONOQ= LGMONOQ + MXATM*3*(MAXML+1)
+      LGDIMRQ = LG2MONOQ+ MXATM*3*(MAXML+1)
+      LG2DIMRQ= LGDIMRQ + MXATM*3
+      LGMONOM = LG2DIMRQ+ MXATM*3
+      LG2MONOM= LGMONOM + MXFFAT*3
+      LGDIMRM = LG2MONOM+ MXFFAT*3
+      LG2DIMRM= LGDIMRM + MXFFAT*3
+      LCX     = LG2DIMRM+ MXFFAT*3
+      LIANX   = LCX     + MXATM*3
+      LANAMX  = LIANX   + MXATM/NWDVAR + 1
+      LEXX    = LANAMX  + MXATM
+      LCSX    = LEXX    + MXGTOT
+      LCPX    = LCSX    + MXGTOT
+      LCDX    = LCPX    + MXGTOT
+      LCFX    = LCDX    + MXGTOT
+      LCGX    = LCFX    + MXGTOT
+      LCHX    = LCGX    + MXGTOT
+      LCIX    = LCHX    + MXGTOT
+      LKSTARTX= LCIX    + MXSH
+      LKATOMX = LKSTARTX+ MXSH/NWDVAR  + 1
+      LKTYPEX = LKATOMX + MXSH/NWDVAR  + 1
+      LKNGX   = LKTYPEX + MXSH/NWDVAR  + 1
+      LKLOCX  = LKNGX   + MXSH/NWDVAR  + 1
+      LMINX   = LKLOCX  + MXSH/NWDVAR  + 1
+      LMAXX   = LMINX   + MXSH/NWDVAR  + 1
+      LNSTART = LMAXX   + MXSH/NWDVAR  + 1
+      LNUMALL = LNSTART + MAXML/NWDVAR + 2
+      LMPNUMALL=LNUMALL + MAXML/NWDVAR + 2
+      LIGTFALL= LMPNUMALL+MAXML/NWDVAR + 2
+      LNPGALL = LIGTFALL+ MAXML/NWDVAR + 2
+      LMPTYPX = LNPGALL + MAXML/NWDVAR + 2
+      LAN0X   = LMPTYPX + MXATM/NWDVAR + 1
+      LALPN0X = LAN0X   + MXMPA
+      LAN1X   = LALPN0X + MXMPA
+      LALPN1X = LAN1X   + MXMPA
+      LMPSKPX = LALPN1X + MXMPA
+      LNOAN0X = LMPSKPX + MXATM/NWDVAR + 1
+      LNOAN1X = LNOAN0X + MXATM/NWDVAR + 1
+      LBPARX  = LNOAN1X + MXATM/NWDVAR + 1
+      LEXPMPX = LBPARX  + MXMPSH
+      LCSMPX  = LEXPMPX + MXMPGT
+      LCPMPX  = LCSMPX  + MXMPGT
+      LCDMPX  = LCPMPX  + MXMPGT
+      LCFMPX  = LCDMPX  + MXMPGT
+      LMPSKIPX= LCFMPX  + MXMPGT
+      LNOCOSHX= LMPSKIPX+ MXATM/NWDVAR + 1
+      LMPKSTAX= LNOCOSHX+ MXATM/NWDVAR + 1
+      LMPKNGX = LMPKSTAX+ MXMPSH/NWDVAR+ 1
+      LMPKTYPX= LMPKNGX + MXMPSH/NWDVAR+ 1
+      LMPKMINX= LMPKTYPX+ MXMPSH/NWDVAR+ 1
+      LMPKMAXX= LMPKMINX+ MXMPSH/NWDVAR+ 1
+      LMPKLOCX= LMPKMAXX+ MXMPSH/NWDVAR+ 1
+      LAST    = LMPKLOCX+ MXMPSH/NWDVAR+ 1
+C
+C     - A FULL SET OF FORCE FIELD PARAMETERS -
+      LFF5ATMNAM  = LAST
+      LFF5CORD    = LFF5ATMNAM  +   2*MXFFAT
+      LFF5ZANF    = LFF5CORD    +   3*MXFFAT
+      LFF5ZMAS    = LFF5ZANF    +     MXFFAT
+      LFF5ONEMAS  = LFF5ZMAS    +     MXFFAT
+      LFF5CHARG   = LFF5ONEMAS  +     MXFFAT
+      LFF5POL     = LFF5CHARG   +     MXFFAT
+      LFF5SIG     = LFF5POL     +     MXFFAT
+      LFF5EPS     = LFF5SIG     +     MXFFAT
+      LFF5SIG2    = LFF5EPS     +     MXFFAT
+      LFF5EPS2    = LFF5SIG2    +     MXFFAT
+      LFF5BOND0   = LFF5EPS2    +     MXFFAT
+      LFF5FCBOND  = LFF5BOND0   +     MXBOND
+      LFF5ANGL0   = LFF5FCBOND  +     MXBOND
+      LFF5FCANGL  = LFF5ANGL0   +     MXANGL
+      LFF5FCWAGG  = LFF5FCANGL  +     MXANGL
+      LFF5VROT    = LFF5FCWAGG  +     MXWAGG
+      LFF5NNN     = LFF5VROT    +     MXDIHR
+      LFF5GAMA    = LFF5NNN     +     MXDIHR/NWDVAR + 1
+      LFF5IPAIR   = LFF5GAMA    +     MXDIHR
+      LFF5DIHB0   = LFF5IPAIR   +   2*MXBOND/NWDVAR + 1
+      LFF5FCDIHB  = LFF5DIHB0   +     MXDIHB
+      LFF5KLIST   = LFF5FCDIHB  +     MXDIHB
+      LFF5LLIST   = LFF5KLIST   +   3*MXANGL/NWDVAR + 1
+      LFF5MLIST   = LFF5LLIST   +   4*MXDIHR/NWDVAR + 1
+      LFF5NLIST   = LFF5MLIST   +   4*MXWAGG/NWDVAR + 1
+      LFF5MAPLST  = LFF5NLIST   +   4*MXDIHB/NWDVAR + 1
+      LFF5VEL     = LFF5MAPLST  +   6*MXCMAP/NWDVAR + 1
+      LFF5CLPR    = LFF5VEL     +   3*MXFFAT
+      LFF5ZLPR    = LFF5CLPR    +   4*MXFFAT
+      LFF5NLPR    = LFF5ZLPR    +   4*MXFFAT
+      LFF5QMVEL   = LFF5NLPR    +     MXFFAT/NWDVAR + 1
+      LFF5KBLST   = LFF5QMVEL   +    3*MXATM
+      LFF5FCSTBD  = LFF5KBLST   +   2*MXANGL/NWDVAR + 1
+      LFF5FCDIHR  = LFF5FCSTBD  +   2*MXANGL
+      LFF5FCLJTP  = LFF5FCDIHR  +   3*MXDIHR/NWDVAR + 1
+      LFF5NTYPE   = LFF5FCLJTP  +   2*MXMMTP*MXMMTP
+      LFIELD1     = LFF5NTYPE   +     MXFFAT/NWDVAR + 1
+      LDIP        = LFIELD1     +   3*MXATM
+      LFF5L1213J  = LDIP        +   3*MXATM
+      LAST        = LFF5L1213J  +   2*(MXBOND+MXANGL+NAT*NAT)/NWDVAR+1
+C
+      NEED = LAST - LOADFM - 1
+      CALL GETFM(NEED)
+      CALL DIMER(X(LKCOREA),X(LKCOREB),
+     *           X(LKMINA),X(LKMINB),
+     *           X(LZANX),X(LCLPX),X(LZLPX),X(LNLPX),
+     *           X(LKFRSTX),X(LKLASTX),X(LLMAXSV),X(LLPSKIPX),
+     *           X(LIZCOREX),X(LCX),X(LIANX),X(LANAMX),
+     *           X(LEXX),X(LCSX),X(LCPX),X(LCDX),X(LCFX),X(LCGX),
+     *           X(LCHX),X(LCIX),X(LKSTARTX),X(LKATOMX),X(LKTYPEX),
+     *           X(LKNGX),X(LKLOCX),X(LMINX),X(LMAXX),
+     *           X(LMPTYPX),X(LAN0X),X(LALPN0X),X(LAN1X),X(LALPN1X),
+     *           X(LMPSKPX),X(LNOAN0X),X(LNOAN1X),
+     *           X(LBPARX),X(LEXPMPX),X(LCSMPX),
+     *           X(LCPMPX),X(LCDMPX),X(LCFMPX),
+     *           X(LMPSKIPX),X(LNOCOSHX),X(LMPKSTAX),
+     *           X(LMPKNGX),X(LMPKTYPX),X(LMPKMINX),
+     *           X(LMPKMAXX),X(LMPKLOCX),X(LNSTART),
+     *           X(LIMP),X(LJMP),X(LICORSH),
+     *           X(LNUMALL),X(LMPNUMALL),X(LIGTFALL),X(LNPGALL),
+     *           X(LGMONOQ),X(LGDIMRQ),X(LEMONO),X(LE2MONO),
+     *           X(LGMONOM),X(LGDIMRM),X(LFIELD1),X(LDIP),
+     *           X(LG2MONOQ),X(LG2DIMRQ),X(LG2MONOM),X(LG2DIMRM),
+     *           X(LFF5ATMNAM),X(LFF5CORD),X(LFF5ZANF),X(LFF5ZMAS),
+     *           X(LFF5ONEMAS),X(LFF5CHARG),X(LFF5POL),X(LFF5SIG),
+     *           X(LFF5EPS),X(LFF5SIG2),X(LFF5EPS2),X(LFF5BOND0),
+     *           X(LFF5FCBOND),X(LFF5ANGL0),X(LFF5FCANGL),
+     *           X(LFF5FCWAGG),X(LFF5VROT),X(LFF5NNN),X(LFF5GAMA),
+     *           X(LFF5IPAIR),X(LFF5DIHB0),X(LFF5FCDIHB),
+     *           X(LFF5KLIST),X(LFF5LLIST),X(LFF5MLIST),
+     *           X(LFF5NLIST),X(LFF5MAPLST),X(LFF5VEL),X(LFF5CLPR),
+     *           X(LFF5ZLPR),X(LFF5NLPR),X(LFF5QMVEL),X(LFF5KBLST),
+     *           X(LFF5FCSTBD),X(LFF5FCDIHR),X(LFF5FCLJTP),
+     *           X(LFF5NTYPE),X(LFF5L1213J),
+     *           X(LFFATMNAM),X(LFFCORD),X(LFFZANF),X(LFFZMAS),
+     *           X(LFFONEMAS),X(LFFCHARG),X(LFFPOL),X(LFFSIG),
+     *           X(LFFEPS),X(LFFSIG2),X(LFFEPS2),X(LFFBOND0),
+     *           X(LFFFCBOND),X(LFFANGL0),X(LFFFCANGL),
+     *           X(LFFFCWAGG),X(LFFVROT),X(LFFNNN),X(LFFGAMA),
+     *           X(LFFIPAIR),X(LFFDIHB0),X(LFFFCDIHB),
+     *           X(LFFKLIST),X(LFFLLIST),X(LFFMLIST),
+     *           X(LFFNLIST),X(LFFMAPLST),X(LFFVEL),X(LFFCLPR),
+     *           X(LFFZLPR),X(LFFNLPR),X(LFFQMVEL),X(LFFKBLST),
+     *           X(LFFFCSTBD),X(LFFFCDIHR),X(LFFFCLJTP),
+     *           X(LFFNTYPE),X(LFFL1213J),
+     *           X(LFFFFGRD2),X(LFFLISTQM),
+     *           X(LKNATM),X(LIDATOM1),X(LIDATOM2),X(LNEWID),
+     *           X(LVIRMONO),X(LVIR2MONO),
+     *           X(LEDIMRST),X(LEMONOST),X(LETOTST))
+      CALL RETFM(NEED)
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK DIMER
+!>
+!> @brief    add DIMER
+!>
+!> @author   Hui Li
+!>           Aug 15, 2020
+!>
+!> @details  new subroutine for DIMER
+!>
+      SUBROUTINE DIMER(KCOREA,KCOREB,KMINA,KMINB,
+     *                 ZANX,CLPX,ZLPX,NLPX,
+     *                 KFRSTX,KLASTX,LMAXSV,LPSKIPX,
+     *                 IZCOREX,CX,IANX,ANAMX,
+     *                 EXX,CSX,CPX,CDX,CFX,CGX,
+     *                 CHX,CIX,KSTARTX,KATOMX,KTYPEX,
+     *                 KNGX,KLOCX,MINX,MAXX,
+     *                 MPTYPX,AN0X,ALPN0X,AN1X,ALPN1X,
+     *                 MPSKPX,NOAN0X,NOAN1X,
+     *                 BPARX,EXPMPX,CSMPX,
+     *                 CPMPX,CDMPX,CFMPX,
+     *                 MPSKIPX,NOCOSHX,MPKSTAX,
+     *                 MPKNGX,MPKTYPX,MPKMINX,
+     *                 MPKMAXX,MPKLOCX,NSTART,
+     *                 IMP,JMP,ICORSH,
+     *                 NUMALL,MPNUMALL,IGTFALL,NPGALL,
+     *                 GMONOQ,GDIMRQ,EMONO,E2MONO,
+     *                 GMONOM,GDIMRM,FIELD1,DIP,
+     *                 G2MONOQ,G2DIMRQ,G2MONOM,G2DIMRM,
+     *                 ATMNAMX5,CORDX5,ZANFX5,ZMASX5,
+     *                 ONEMASX5,CHARGX5,POLX5,SIGX5,
+     *                 EPSX5,SIG2X5,EPS2X5,BOND0X5,
+     *                 FCBONDX5,ANGL0X5,FCANGLX5,
+     *                 FCWAGGX5,VROTX5,NNNX5,GAMAX5,
+     *                 IPAIRX5,DIHB0X5,FCDIHBX5,
+     *                 KLISTX5,LLISTX5,MLISTX5,
+     *                 NLISTX5,MAPLSTX5,VELX5,CLPRX5,
+     *                 ZLPRX5,NLPRX5,QMVELX5,KBLSTX5,
+     *                 FCSTBDX5,FCDIHRX5,FCLJTPX5,
+     *                 NTYPEX5,L1213JX5,
+     *                 ATMNAM,CORD,ZANF,ZMAS,
+     *                 ONEMAS,CHARG,POL,SIG,
+     *                 EPS,SIG2,EPS2,BOND0,
+     *                 FCBOND,ANGL0,FCANGL,
+     *                 FCWAGG,VROT,NNN,GAMA,
+     *                 IPAIR,DIHB0,FCDIHB,
+     *                 KLIST,LLIST,MLIST,
+     *                 NLIST,MAPLST,VEL,CLPR,
+     *                 ZLPR,NLPR,QMVEL,KBLST,
+     *                 FCSTBD,FCDIHR,FCLJTP,
+     *                 NTYPE,L1213J,
+     *                 FFGRD2,LISTQM,
+     *                 KNATM,IDATOM1,IDATOM2,NEWID,
+     *                 VIRMONO,VIR2MONO,EDIMRST,EMONOST,ETOTST)
+      use mx_limits, only: mxsh,mxatm,mxgtot,mxrt,mxao
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK,MPTEST
+      LOGICAL TRIPLET,SG1T,TAMMD,TPA,ALPHKWD,BETAKWD
+      LOGICAL MREKT,MRDEA
+      LOGICAL DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+C
+      INTEGER CMSG(100)
+C
+      CHARACTER*4 CDUMMY
+      CHARACTER*10  ATMNAM, ATMNAMX5
+      CHARACTER*6  NAME6
+      CHARACTER*100  WD100
+C
+      PARAMETER (MAXML=1024)
+      PARAMETER (NMO=500)
+      PARAMETER (MXMPA=3*MXATM)
+      PARAMETER (MXMPSH=2*MXATM)
+      PARAMETER (MXMPGT=5*MXMPSH)
+      PARAMETER (TOANGS=0.52917724924D+00)
+      PARAMETER (TOBOHR=1.0D+00/TOANGS)
+      PARAMETER (TOEV=27.21138386D+00)
+      PARAMETER (TOKCAL=627.509469D+00)
+      PARAMETER (TOHART=1.0D+00/TOKCAL)
+C
+      DIMENSION KCOREA(NMO),KCOREB(NMO),
+     *          KMINA(NMO),KMINB(NMO),
+     *          ZANX(MXATM),CLPX(400),ZLPX(400),NLPX(400),
+     *          KFRSTX(MXATM,6),KLASTX(MXATM,6),LMAXSV(MXATM),
+     *          LPSKIPX(MXATM),IZCOREX(MXATM),CX(3,MXATM),IANX(MXATM),
+     *          ANAMX(MXATM),
+     *          EXX(MXGTOT),CSX(MXGTOT),CPX(MXGTOT),CDX(MXGTOT),
+     *          CFX(MXGTOT),CGX(MXGTOT),CHX(MXGTOT),CIX(MXGTOT),
+     *          KSTARTX(MXSH),KATOMX(MXSH),
+     *          KTYPEX(MXSH),KNGX(MXSH),
+     *          KLOCX(MXSH),MINX(MXSH),MAXX(MXSH),NSTART(MAXML+1),
+     *          MPTYPX(MXATM),AN0X(MXMPA),ALPN0X(MXMPA),
+     *          AN1X(MXMPA),ALPN1X(MXMPA),
+     *          MPSKPX(MXATM),NOAN0X(MXATM),NOAN1X(MXATM),
+     *          BPARX(MXMPSH),EXPMPX(MXMPGT),CSMPX(MXMPGT),
+     *          CPMPX(MXMPGT),CDMPX(MXMPGT),CFMPX(MXMPGT),
+     *          MPSKIPX(MXATM),NOCOSHX(MXATM),MPKSTAX(MXMPSH),
+     *          MPKNGX(MXMPSH),MPKTYPX(MXMPSH),MPKMINX(MXMPSH),
+     *          MPKMAXX(MXMPSH),MPKLOCX(MXMPSH),
+     *          IMP(MXATM),JMP(MXATM),ICORSH(MXATM),
+     *          NUMALL(MAXML+1),MPNUMALL(MAXML+1),IGTFALL(MAXML+1),
+     *          NPGALL(MAXML+1),GMONOQ(3,MXATM,MAXML+1),GDIMRQ(3,MXATM),
+     *          EMONO(MAXML+1),E2MONO(MAXML+1),ATMNAM(MXFFAT),
+     *          ATMNAMX5(MXFFAT),GMONOM(3,MXFFAT),GDIMRM(3,MXFFAT),
+     *          FFGRD2(3,MXFFAT),LISTQM(MXFFAT+MXATM+1),L1213J(2,*),
+     *          L1213JX5(2,*),G2MONOQ(3,MXATM,MAXML+1),G2DIMRQ(3,MXATM),
+     *          G2MONOM(3,MXFFAT),G2DIMRM(3,MXFFAT)
+      DIMENSION LQATOM(50),RQATOM(50)
+      DIMENSION ZANF(MXFFAT),CHARG(MXFFAT),SIG(MXFFAT),EPS(MXFFAT),
+     *          SIG2(MXFFAT),EPS2(MXFFAT),SIGX5(MXFFAT),EPSX5(MXFFAT),
+     *          SIG2X5(MXFFAT),EPS2X5(MXFFAT),NTYPE(MXFFAT),
+     *          NTYPEX5(MXFFAT),
+     *          CORD(3,MXFFAT),POL(MXFFAT),FIELD1(3,MXATM),DIP(3,MXATM),
+     *          ZMAS(MXFFAT),POLX5(MXFFAT),CHARGX5(MXFFAT)
+      DIMENSION KNATM(MXATM+1,MXATM),IDATOM1(MXATM),IDATOM2(MXATM),
+     *          IPAIR(2,*),NEWID(MXATM)
+      DIMENSION RMASS(200)
+      DIMENSION VIRDIMR(3),VIRMONO(3,MAXML+1),VIR2ALL(3),VIR2DIMR(3),
+     *          VIR2MONO(3,MAXML+1),VIRMONOT(3),VIR2MONOT(3)
+      DIMENSION LSTCAP(6),CLPR(4,*),ZLPR(4,*)
+      DIMENSION EDIMRST(MXRT),EMONOST(MXRT),ETOTST(MXRT)
+C
+      COMMON /CONV  / DENTOL,EN,ETOT,EHF,EHF0,DIFF,ITER,ICALP,ICBET
+      COMMON /DFTB  / DFTBFL,SCC,SRSCC,DFTB3,DAMPXH,LRDFTB
+      COMMON /ECP2  / CLP(400),ZLP(400),NLP(400),KFRST(MXATM,6),
+     *                KLAST(MXATM,6),LMAX(MXATM),LPSKIP(MXATM),
+     *                IZCORE(MXATM)
+      COMMON /ENRGMP/ EMP2,EMP3,EMP4,EMP2A
+      COMMON /ENRGYS/ ENUC,EELEC,ETOTX,SZ,SZZ,ECORE,ESCF,EERD,E1,E2,
+     *                VEN,VEE,EPOT,EKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+      COMMON /FFDIMR/ IDIMER,IBREAK(81),N1213JMM,NMOLE,MATOM(MAXML),
+     *                MCHARG(MAXML),MMULT(MAXML),MELEC(MAXML),RDIMER
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFMAX / MXFFAT,MXBOND,MXANGL,MXDIHR,MXDIHB,MXCMAP,
+     *                MXWAGG
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMPT2/ MXMMTP,LFFKBLST,LFFFCSTBD,LFFFCDIHR,
+     *                LFFFCLJTP,LFFNTYPE,
+     *                LFF2KBLST,LFF2FCSTBD,LFF2FCDIHR,
+     *                LFF2FCLJTP,LFF2NTYPE
+      COMMON /FFNODE/ L1BOND,L2BOND,L1ANGL,L2ANGL,L1DIHR,L2DIHR,
+     *                L1DIHB,L2DIHB,L1CMAP,L2CMAP,L1WAGG,L2WAGG,
+     *                L11213,L21213,L1N14J,L2N14J,
+     *                L11213A,L21213A,L1N14A,L2N14A,
+     *                L11213B,L21213B,L1N14B,L2N14B,
+     *                L1BONDPMA,L2BONDPMA,L1ANGLPMA,L2ANGLPMA,
+     *                L1DIHRPMA,L2DIHRPMA,L1DIHBPMA,L2DIHBPMA,
+     *                L1WAGGPMA,L2WAGGPMA,L1CMAPPMA,L2CMAPPMA,
+     *                L11213PMA,L21213PMA,L1N14PMA,L2N14PMA,
+     *                L1BONDPMB,L2BONDPMB,L1ANGLPMB,L2ANGLPMB,
+     *                L1DIHRPMB,L2DIHRPMB,L1DIHBPMB,L2DIHBPMB,
+     *                L1WAGGPMB,L2WAGGPMB,L1CMAPPMB,L2CMAPPMB,
+     *                L11213PMB,L21213PMB,L1N14PMB,L2N14PMB,
+     *                L1FFAT,L2FFAT
+      COMMON /FFRMSD/ DIPT(8),TIMGYRA,TIMRALL,
+     *                NATPDB,NGYRA,NDIEL,NRALL,
+     *                LFFRALL0,NRMSD,LFFRMSD0,KFREEAB(201),
+     *                NRIJMM,IJRMM(2,100),NRIJQM,IJRQM(2,100),
+     *                NAIJKMM,IJKMM(3,100),NAIJKQM,IJKQM(3,100),
+     *                NFIXMM,IFIXMM(200),NFIXQM,IFIXQM(200)
+      COMMON /FFTYPE/ WT14LJ,WT14CH,C3BOND,C4BOND,C3ANGL,
+     *                NFFTYP,NFFFILE,LJQMMM,LJQM,INTCHG,
+     *                LJSIGMA,JTOPFILE(90),JPARFILE(90),
+     *                JTOPAMIA(90),JTOPNTER(90),JTOPCTER(90),
+     *                JTOPNUCA(90),JPARFIL2(90),JPARFIL3(90)
+      COMMON /FMCOM / XX(1)
+      COMMON /FUNCT / E,EG(3,MXATM)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /INFOTD/ CNVTOL,PFREQ(2),MODTD,
+     *                JANST,NRADT,NTHET,NPHIT,NLEBT,
+     *                NSTAT,NTRIAL,MAXVEC,NTHST,IRECTD,ITDFG,ITDPRP,
+     *                TRIPLET,SG1T,NONEQR,TAMMD,TPA,ALPHKWD,BETAKWD,
+     *                SPCP(3),MULTD,MREKT,MRDEA,MTHST,IFEDAT(4)
+      COMMON /INTOPT/ ISCHWZ,IECP,NECP,IEXTFLD
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /MACHIN/ NWDVAR,MAXFM,MAXSM,LIMFM,LIMSM
+      COMMON /MASSES/ ZMASS(MXATM)
+      COMMON /MMPDOC/ MPTYP(MXATM),IMVO,IMCORE
+      COMMON /MMP1  / AN0(MXMPA),ALPN0(MXMPA),AN1(MXMPA),ALPN1(MXMPA),
+     *                MPSKP(MXATM),NOAN0(MXATM),NOAN1(MXATM)
+      COMMON /MMP2  / BPAR(MXMPSH),EXPMP(MXMPGT),CSMP(MXMPGT),
+     *                CPMP(MXMPGT),CDMP(MXMPGT),CFMP(MXMPGT),
+     *                MPSKIP(MXATM),NOCOSH(MXATM),MPKSTA(MXMPSH),
+     *                MPKNG(MXMPSH),MPKTYP(MXMPSH),MPKMIN(MXMPSH),
+     *                MPKMAX(MXMPSH),MPKLOC(MXMPSH)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),MIN(MXSH),MAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /RESTAR/ TIMLIM,IREST,NREC,INTLOC,IST,JST,KST,LST
+      COMMON /RUNLAB/ TITLE(10),ANAM(MXATM),BNAM(MXATM),BFLAB(MXAO)
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /SYMTRY/ MAPSHL(MXSH,48),MAPCTR(MXATM,48),
+     *                T(432),INVT(48),NT
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      DATA OPTMIZ /8HOPTIMIZE/
+      DATA HSSIAN /8HHESSIAN /
+      DATA GVB,RMC/8HGVB     ,8HMCSCF   /
+      DATA RNONE  /8HNONE    /
+      DATA NONE   /4HNONE/
+      DATA ZERO,PT5,ONE,THREE/0.00D+00, 0.50D+00, 1.0D+00,3.0D+00/
+C
+C     HUI LI, AUG 19, 2020, LINCOLN
+C
+C
+      CALL SEQOPN(37,'QMWAVE' ,'UNKNOWN',.FALSE.,'FORMATTED')
+      IWSAVE = IW
+      IPSAVE = IP
+C
+      IF(LJQMMM.EQ.0) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: IDIMER=1, 2, 3 MUST USE LJQMMM=1'
+         CALL ABRT
+      END IF
+      IF(SCFTYP.EQ.GVB.OR.SCFTYP.EQ.RMC) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: IDIMER=1, 2, 3 DO NOT WORK FOR GVB AND MCSCF'
+         CALL ABRT
+      END IF
+      IF(MPCTYP.NE.NONE.OR.DFTBFL) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: IDIMER=1, 2, 3 DO NOT WORK FOR AM1, PM3 AND DFTB'
+         CALL ABRT
+      END IF
+      IF(IFEPTYP.GT.0) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: IDIMER=1, 2, 3 DO NOT WORK FOR IFEPTYP>0'
+         CALL ABRT
+      END IF
+C
+      TDDFTYPSV= TDDFTYP
+      MPTEST   = .FALSE.
+      NT=1
+C
+      CALL RAMS(RMASS,2)
+C
+      IF(NMOLE.EQ.0) GOTO 80
+      IF(NMOLE.GT.0) GOTO 90
+C
+C     -------------------------------------
+C     - AUTO-SELECT QM ATOMS FROM $FFDATA -
+C     -------------------------------------
+C
+      IF(NMOLE.EQ.-1.AND.NAT.GT.1) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: IDIMER=3 NMOLE=-1 NEEDS ONLY ONE QM ATOM IN $DATA'
+         CALL ABRT
+      END IF
+C     - GET THE BONDING INFO: IGNORE THE $FFDATA INPUT VALUES -
+      CALL FFBOND(NFFAT,IPAIR,ZANF,CORD,NBOND)
+C     - GET THE QM ATOMS IN A SPHERE -
+      R2CUT = 57.1371D+00   !   4.0 A
+      DO IFFAT=1,NFFAT
+         NUZ=NINT(ZANF(IFFAT))
+         X  =CORD(1,IFFAT)-C(1,1)
+         Y  =CORD(2,IFFAT)-C(2,1)
+         Z  =CORD(3,IFFAT)-C(3,1)
+         R2 = X*X+Y*Y+Z*Z
+         IF(R2.GT.0.01D+00.AND.R2.LE.R2CUT.AND.NUZ.GE.5)THEN
+            NAT = NAT + 1
+            ZAN(NAT) = ZANF(IFFAT)
+            IAN(NAT) = NINT(ZAN(NAT))
+            IZCORE(NAT) = 0
+            READ(UNIT=ATMNAM(IFFAT)(1:8),FMT='(A8)') ANAM(NAT)
+            C(1,NAT) = CORD(1,IFFAT)
+            C(2,NAT) = CORD(2,IFFAT)
+            C(3,NAT) = CORD(3,IFFAT)
+            LISTQM(NFFAT+NAT)=IFFAT
+            LISTQM(IFFAT)    =NAT
+         END IF
+      ENDDO
+      DO LTIME = 1, 8
+C     - EXPAND THE SELECTION -
+      DO IBOND=1,NBOND
+         K1=0
+         K2=0
+         I1=IPAIR(1,IBOND)
+         I2=IPAIR(2,IBOND)
+         IF(LISTQM(I1).GT.0.AND.LISTQM(I2).EQ.0) THEN
+            K1=I1
+            K2=I2
+         END IF
+         IF(LISTQM(I2).GT.0.AND.LISTQM(I1).EQ.0) THEN
+            K1=I2
+            K2=I1
+         END IF
+         JAT = LISTQM(K1)
+         IF(K1.GT.0.AND.K2.GT.0.AND.IAN(JAT).NE.-1) THEN
+            NAT = NAT + 1
+            ZAN(NAT) = ZANF(K2)
+            IAN(NAT) = NINT(ZAN(NAT))
+            IZCORE(NAT) = 0
+            READ(UNIT=ATMNAM(K2)(1:8),FMT='(A8)') ANAM(NAT)
+            C(1,NAT) = CORD(1,K2)
+            C(2,NAT) = CORD(2,K2)
+            C(3,NAT) = CORD(3,K2)
+            LISTQM(NFFAT+NAT)=K2
+            LISTQM(K2)    =NAT
+C           - K2 MAY BECOME THE QM/MM LINK CAPPING H ATOM -
+            NUCK1 = NINT(ZANF(K1))
+            NUCK2 = NINT(ZANF(K2))
+            NBDK1 = 0
+            NBDK2 = 0
+            DO J=1,NBOND
+               J1=IPAIR(1,J)
+               J2=IPAIR(2,J)
+               IF(J1.EQ.K1.OR.J2.EQ.K1) NBDK1 = NBDK1 + 1
+               IF(J1.EQ.K2.OR.J2.EQ.K2) NBDK2 = NBDK2 + 1
+            ENDDO
+            IF(NBDK2.EQ.4.AND.NUCK2.EQ.6.AND.
+     *         NBDK1.EQ.4.AND.NUCK1.EQ.6) THEN
+               ATMNAM(MXFFAT)='HX      '
+               READ(UNIT=ATMNAM(MXFFAT)(1:8),FMT='(A8)') ANAM(NAT)
+               ZAN(NAT) = -1.0D+00
+               IAN(NAT) = NINT(ZAN(NAT))
+            END IF
+         END IF
+      ENDDO
+C     - DOUBLE CHECK QM/MM LINK CAPPING H ATOMS -
+C     - A HX ATOM CAN BOND TO ONLY ONE HEAVY QM ATOM -
+      DO IAT=1,NAT
+         IF(IAN(IAT).EQ.-1)THEN
+            LINK=0
+            DO IBOND=1,NBOND
+               JAT1 = LISTQM(IPAIR(1,IBOND))
+               JAT2 = LISTQM(IPAIR(2,IBOND))
+               IF(JAT1.EQ.IAT.AND.JAT2.GT.0) LINK=LINK+1
+               IF(JAT2.EQ.IAT.AND.JAT1.GT.0) LINK=LINK+1
+            ENDDO
+            IF(LINK.GT.1) THEN
+               ATMNAM(MXFFAT)=ATMNAM(LISTQM(NFFAT+IAT))
+               READ(UNIT=ATMNAM(MXFFAT)(1:8),FMT='(A8)') ANAM(IAT)
+               ZAN(IAT) = ZANF(LISTQM(NFFAT+IAT))
+               IAN(IAT) = NINT(ZAN(IAT))
+            END IF
+         END IF
+C        - A HEAVY QM ATOM CAN BOND TO ONLY ONE HX ATOM -
+         NHX = 0
+         DO IBOND=1,NBOND
+            JAT1 = LISTQM(IPAIR(1,IBOND))
+            JAT2 = LISTQM(IPAIR(2,IBOND))
+            IF(JAT1.GT.0.AND.JAT2.GT.0) THEN
+               IF(JAT1.EQ.IAT.AND.IAN(JAT2).EQ.-1) NHX=NHX+1
+               IF(JAT2.EQ.IAT.AND.IAN(JAT1).EQ.-1) NHX=NHX+1
+            END IF
+         ENDDO
+         IF(NHX.GT.1)THEN
+            DO IBOND=1,NBOND
+               JAT  = 0
+               JAT1 = LISTQM(IPAIR(1,IBOND))
+               JAT2 = LISTQM(IPAIR(2,IBOND))
+               IF(JAT1.GT.0.AND.JAT2.GT.0) THEN
+                  IF(JAT1.EQ.IAT.AND.IAN(JAT2).EQ.-1) JAT = JAT2
+                  IF(JAT2.EQ.IAT.AND.IAN(JAT1).EQ.-1) JAT = JAT1
+               END IF
+               IF(JAT.GT.0) THEN
+                  ATMNAM(MXFFAT)=ATMNAM(LISTQM(NFFAT+JAT))
+                  READ(UNIT=ATMNAM(MXFFAT)(1:8),FMT='(A8)') ANAM(JAT)
+                  ZAN(JAT) = ZANF(LISTQM(NFFAT+JAT))
+                  IAN(JAT) = NINT(ZAN(JAT))
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+C
+      ENDDO
+C
+      IF(MASWRK) THEN
+      WRITE(IW,'(/1X,79(1H=),/1X,A,I2,A)')
+     *  'QUANPOL IDIMER=',IDIMER,
+     *  ' WITH NMOLE= -1 RESULTS:'
+      WRITE(IW,'(3(/1X,A))')
+     *  '$DATA',
+     *  'COMMENTS: QUANPOL IDIMER NMOLE=-1 AUTO-SELECTED QM ATOMS',
+     *  'C1'
+      DO IAT=1,NAT
+         ZAN(IAT) = ABS(ZAN(IAT))
+         WRITE(IW,'(A8,4X,F5.1,3(1X,F19.13))')
+     *   ANAM(IAT),ZAN(IAT)+IZCORE(IAT),C(1,IAT)*TOANGS,
+     *   C(2,IAT)*TOANGS,C(3,IAT)*TOANGS
+      ENDDO
+      IF(MASWRK) WRITE(IW,'(1X,A,/1X,79(1H=)/)') '$END'
+C
+      END IF
+C
+  80  CONTINUE
+C
+C     -----------------------------------
+C     - BREAK QM INTO MONOMERS (NMOLE=0) -
+C     -----------------------------------
+C
+      CALL VICLR(KNATM,1,(MXATM+1)*MXATM)
+      CALL VICLR(IDATOM1,1,MXATM)
+      CALL VICLR(IDATOM2,1,MXATM)
+      CALL VICLR(NEWID,1,MXATM)
+C
+C     - GET THE BONDING INFORMATION -
+C
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+      ENDDO
+      CALL FFBOND(NAT,IPAIR,ZAN,C,NBOND)
+C     - REMOVE METAL ION COORDINATE BONDS -
+      DO IBOND=1,NBOND
+         I=IPAIR(1,IBOND)
+         J=IPAIR(2,IBOND)
+         NUCZI = NINT(ZAN(I))
+         NUCZJ = NINT(ZAN(J))
+         IF((NUCZI.GE. 3.AND.NUCZI.LE. 4).OR.     !  Li - Be
+     *      (NUCZI.GE.11.AND.NUCZI.LE.13).OR.     !  Na - Al
+     *      (NUCZI.GE.19.AND.NUCZI.LE.31).OR.     !   K - Ga
+     *      (NUCZI.GE.37.AND.NUCZI.LE.50).OR.     !  Rb - Sn
+     *      (NUCZI.GE.55.AND.NUCZI.LE.84).OR.     !  Cs - Po
+     *      (NUCZI.GE.87.AND.NUCZI.LE.118)) THEN  !  Fr -
+            IPAIR(1,IBOND) = 0
+            IPAIR(2,IBOND) = 0
+         END IF
+         IF((NUCZJ.GE. 3.AND.NUCZJ.LE. 4).OR.     !  Li - Be
+     *      (NUCZJ.GE.11.AND.NUCZJ.LE.13).OR.     !  Na - Al
+     *      (NUCZJ.GE.19.AND.NUCZJ.LE.31).OR.     !   K - Ga
+     *      (NUCZJ.GE.37.AND.NUCZJ.LE.50).OR.     !  Rb - Sn
+     *      (NUCZJ.GE.55.AND.NUCZJ.LE.84).OR.     !  Cs - Po
+     *      (NUCZJ.GE.87.AND.NUCZJ.LE.118)) THEN  !  Fr -
+            IPAIR(1,IBOND) = 0
+            IPAIR(2,IBOND) = 0
+         END IF
+      ENDDO
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+      ENDDO
+C
+C     - REMOVE THESE BONDS TO BREAK -
+C
+      DO ILK=1,IBREAK(81)
+         II=IBREAK(2*ILK-1)
+         JJ=IBREAK(2*ILK  )
+         IF(II.GT.0.AND.JJ.GT.0) THEN
+         MEET = 0
+         DO IBOND=1,NBOND
+            I=IPAIR(1,IBOND)
+            J=IPAIR(2,IBOND)
+            IF((I.EQ.II.AND.J.EQ.JJ).OR.(I.EQ.JJ.AND.J.EQ.II)) THEN
+               MEET           = 1
+               IPAIR(1,IBOND) = 0
+               IPAIR(2,IBOND) = 0
+            END IF
+         ENDDO
+         IF(MEET.EQ.0) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,1X,I4,A/)')
+     *      'ERROR: $QUANPO IBREAK ATOMS ',II,JJ,
+     *                 ' ARE PROBLEMATIC. PLEASE FIX.'
+            CALL ABRT
+         END IF
+         END IF
+      ENDDO
+      NBONDNEW = NBOND
+      DO IBOND=1,NBOND
+         I=IPAIR(1,IBOND)
+         J=IPAIR(2,IBOND)
+         IF(I.EQ.0.AND.J.EQ.0) THEN
+            DO JBOND=IBOND+1,NBOND
+               IPAIR(1,JBOND-1) = IPAIR(1,JBOND)
+               IPAIR(2,JBOND-1) = IPAIR(2,JBOND)
+            ENDDO
+            NBONDNEW = NBONDNEW - 1
+         END IF
+      ENDDO
+      NBOND=NBONDNEW
+C
+C     - ADD BONDS TO JOIN PIECES -
+C
+      DO ILK=1,IBREAK(81)
+         II=IBREAK(2*ILK-1)
+         JJ=IBREAK(2*ILK  )
+         IF(II.LT.0.AND.JJ.LT.0) THEN
+            IF(-II.GT.NAT.OR.-JJ.GT.NAT) THEN
+               IF(MASWRK) WRITE(IW,'(/1X,A,I4,1X,I4,A/)')
+     *         'ERROR: $QUANPO IBREAK ATOMS ',II,JJ,
+     *                    ' ARE PROBLEMATIC. PLEASE FIX.'
+               CALL ABRT
+            END IF
+            NBOND = NBOND + 1
+            IPAIR(1,NBOND) = -II
+            IPAIR(2,NBOND) = -JJ
+         END IF
+      ENDDO
+C
+C     - FIRST, EACH ATOM IS A GROUP -
+C
+      DO IAT=1,NAT
+         IDATOM1(IAT) = IAT
+         IDATOM2(IAT) = IAT
+      ENDDO
+C
+C     - SECOND, CHECK IF ATOMS CAN JOIN A LOWER-NUMBER GROUP -
+C
+  10  CONTINUE
+      DO IBOND=1,NBOND
+         I=IPAIR(1,IBOND)
+         J=IPAIR(2,IBOND)
+         IF(IDATOM2(I).LT.IDATOM2(J)) IDATOM2(J)=IDATOM2(I)
+         IF(IDATOM2(I).GT.IDATOM2(J)) IDATOM2(I)=IDATOM2(J)
+      ENDDO
+      DO IAT=1,NAT
+         IF(IDATOM2(IAT).NE.IDATOM1(IAT)) THEN
+            CALL ICOPY(NAT,IDATOM2,1,IDATOM1,1)
+            GOTO 10
+         END IF
+      ENDDO
+C
+C     - NOW WE HAVE ALL QM ATOMS GROUPED -
+C
+      DO IGRP=1,NAT
+         N = 0
+         DO IAT=1,NAT
+            IF(IDATOM2(IAT).EQ.IGRP) THEN
+               N = N + 1
+               KNATM(NAT+1,IGRP) = N
+               KNATM(N    ,IGRP) = IAT
+            END IF
+         ENDDO
+      ENDDO
+      NGRP = 0
+      DO IGRP=1,NAT
+         IF(KNATM(NAT+1,IGRP).GT.0) THEN
+            NGRP = NGRP + 1
+            CALL ICOPY(NAT+1,KNATM(1,IGRP),1,KNATM(1,NGRP),1)
+            DO I=1,KNATM(NAT+1,NGRP)
+               IAT=KNATM(I,NGRP)
+               IDATOM1(IAT) = NGRP
+               IDATOM2(IAT) = NGRP
+            ENDDO
+         END IF
+      ENDDO
+      N = 0
+      DO IGRP=1,NGRP
+         DO I=1,KNATM(NAT+1,IGRP)
+            IAT = KNATM(I,IGRP)
+            N = N + 1
+            NEWID(IAT) = N
+         ENDDO
+      ENDDO
+C
+C     - SPLIT LARGE GROUPS -
+C
+      DO IGRP=1,NGRP
+         IBREAKSV=IBREAK(81)
+         IF(KNATM(NAT+1,IGRP).GT.30) THEN
+            DO IBOND=1,NBOND
+               CALL ICOPY(NAT,IDATOM2,1,IDATOM1,1)
+               I1=IPAIR(1,IBOND)
+               I2=IPAIR(2,IBOND)
+               IF(IAN(I1).EQ.6.AND.IDATOM1(I1).EQ.IGRP.AND.
+     *            IAN(I2).EQ.6)THEN
+                  NBDI1=0
+                  NBDI2=0
+                  DO JBOND=1,NBOND
+                    J1=IPAIR(1,JBOND)
+                    J2=IPAIR(2,JBOND)
+                    IF(J1.EQ.I1.OR.J2.EQ.I1) NBDI1=NBDI1+1
+                    IF(J1.EQ.I2.OR.J2.EQ.I2) NBDI2=NBDI2+1
+                  ENDDO
+                  IF(NBDI1+NBDI2.GE.7)THEN
+                    IDATOM1(I1) = 100000
+                    DO N=1,NBOND
+                    DO JBOND=1,NBOND
+                      IF(JBOND.NE.IBOND) THEN
+                      J1=IPAIR(1,JBOND)
+                      J2=IPAIR(2,JBOND)
+                      IF(IDATOM1(J1).LT.IDATOM1(J2))
+     *                      IDATOM1(J1)=IDATOM1(J2)
+                      IF(IDATOM1(J1).GT.IDATOM1(J2))
+     *                      IDATOM1(J2)=IDATOM1(J1)
+                      END IF
+                    ENDDO
+                    ENDDO
+                    NI1=0
+                    DO IAT=1,NAT
+                       IF(IDATOM1(IAT).EQ.100000) NI1=NI1+1
+                    ENDDO
+                    IDATOM1(I2) = 200000
+                    DO N=1,NBOND
+                    DO JBOND=1,NBOND
+                      IF(JBOND.NE.IBOND) THEN
+                      J1=IPAIR(1,JBOND)
+                      J2=IPAIR(2,JBOND)
+                      IF(IDATOM1(J1).LT.IDATOM1(J2))
+     *                      IDATOM1(J1)=IDATOM1(J2)
+                      IF(IDATOM1(J1).GT.IDATOM1(J2))
+     *                      IDATOM1(J2)=IDATOM1(J1)
+                      END IF
+                    ENDDO
+                    ENDDO
+                    NI2=0
+                    DO IAT=1,NAT
+                       IF(IDATOM1(IAT).EQ.200000) NI2=NI2+1
+                    ENDDO
+                    IF(NI1.EQ.KNATM(NAT+1,IGRP).OR.
+     *                 NI2.EQ.KNATM(NAT+1,IGRP)) THEN
+                    ELSE IF((NI1+NI2).NE.KNATM(NAT+1,IGRP)) THEN
+                    ELSE IF(ABS(NI1-NI2).GE.25) THEN
+                    ELSE
+                       IBREAK(81)=IBREAK(81)+1
+                       I = IBREAK(81)
+                       IBREAK(2*I-1) = I1*10000000+NI1
+                       IBREAK(2*I  ) = I2*10000000+NI2
+                    END IF
+                  END IF
+               END IF
+            ENDDO
+         END IF
+         IF(IBREAK(81).GT.IBREAKSV) THEN
+            IDIFF=10000000
+            DO I=IBREAKSV+1,IBREAK(81)
+               I1=IBREAK(2*I-1)
+               I2=IBREAK(2*I  )
+               NI1=MOD(I1,10000000)
+               NI2=MOD(I2,10000000)
+               I1=(I1-NI1)/10000000
+               I2=(I2-NI2)/10000000
+               IBREAK(2*I-1) = I1
+               IBREAK(2*I  ) = I2
+               IF(ABS(NI1-NI2).LE.IDIFF) THEN
+                  IDIFF=ABS(NI1-NI2)
+                  K1=I1
+                  K2=I2
+               END IF
+            ENDDO
+            IBREAK(81)=IBREAKSV+1
+            I = IBREAK(81)
+            IBREAK(2*I-1) = K1
+            IBREAK(2*I  ) = K2
+            GOTO 80
+         END IF
+      ENDDO
+C
+C     - COMBINE METAL IONS AND THEIR SMALL LIGANDS -
+C       (E.G., -S-, SH-, H2S, -O-, OH-, H2O, NH3, CL-, F-)
+C
+      DO IGRP=1,NGRP
+         IF(KNATM(NAT+1,IGRP).EQ.1) THEN
+            IAT=KNATM(1,IGRP)
+            NUCZI=IAN(IAT)
+            IF((NUCZI.GE. 3.AND.NUCZI.LE. 4).OR.     !  Li - Be
+     *         (NUCZI.GE.11.AND.NUCZI.LE.13).OR.     !  Na - Al
+     *         (NUCZI.GE.19.AND.NUCZI.LE.31).OR.     !   K - Ga
+     *         (NUCZI.GE.37.AND.NUCZI.LE.50).OR.     !  Rb - Sn
+     *         (NUCZI.GE.55.AND.NUCZI.LE.84).OR.     !  Cs - Po
+     *         (NUCZI.GE.87.AND.NUCZI.LE.118)) THEN  !  Fr -
+               DO JGRP=1,NGRP
+                IF(JGRP.NE.IGRP.AND.KNATM(NAT+1,JGRP).LE.4) THEN
+                  JOIN=0
+                  DO J=1,KNATM(NAT+1,JGRP)
+                    JAT=KNATM(J,JGRP)
+                    X=C(1,IAT)-C(1,JAT)
+                    Y=C(2,IAT)-C(2,JAT)
+                    Z=C(3,IAT)-C(3,JAT)
+                    R2=X*X+Y*Y+Z*Z
+                    IF(R2.LE.22.319D+00) JOIN=1   !  2.50 A
+                  ENDDO
+                  IF(JOIN.EQ.1) THEN
+                    IID = IDATOM2(KNATM(1,IGRP))
+                    JID = IDATOM2(KNATM(1,JGRP))
+                    IF(IID.LT.JID) THEN
+                      DO J=1,KNATM(NAT+1,JGRP)
+                        JAT=KNATM(J,JGRP)
+                        IDATOM2(JAT) = IID
+                      ENDDO
+C                     - OTHER GROUPS THAT ARE ALREADY REDUCED TO JID -
+                      DO KGRP=1,NGRP
+                        IF(KGRP.NE.IGRP.AND.KGRP.NE.JGRP) THEN
+                          IF(IDATOM2(KNATM(1,KGRP)).EQ.JID) THEN
+                            DO K=1,KNATM(NAT+1,KGRP)
+                              KAT=KNATM(K,KGRP)
+                              IDATOM2(KAT) = IID
+                            ENDDO
+                          END IF
+                        END IF
+                      ENDDO
+                    END IF
+                    IF(IID.GT.JID) THEN
+                      IDATOM2(IAT) = JID
+C                     - OTHER GROUPS THAT ARE ALREADY REDUCED TO IID -
+                      DO KGRP=1,NGRP
+                        IF(KGRP.NE.IGRP.AND.KGRP.NE.JGRP) THEN
+                          IF(IDATOM2(KNATM(1,KGRP)).EQ.IID) THEN
+                            DO K=1,KNATM(NAT+1,KGRP)
+                              KAT=KNATM(K,KGRP)
+                              IDATOM2(KAT) = JID
+                            ENDDO
+                          END IF
+                        END IF
+                      ENDDO
+                    END IF
+                  END IF
+                END IF
+               ENDDO
+            END IF
+         END IF
+      ENDDO
+      CALL VICLR(KNATM,1,(MXATM+1)*MXATM)
+      DO IGRP=1,NAT
+         N = 0
+         DO IAT=1,NAT
+            IF(IDATOM2(IAT).EQ.IGRP) THEN
+               N = N + 1
+               KNATM(NAT+1,IGRP) = N
+               KNATM(N    ,IGRP) = IAT
+            END IF
+         ENDDO
+      ENDDO
+      NGRP = 0
+      DO IGRP=1,NAT
+         IF(KNATM(NAT+1,IGRP).GT.0) THEN
+            NGRP = NGRP + 1
+            CALL ICOPY(NAT+1,KNATM(1,IGRP),1,KNATM(1,NGRP),1)
+            DO I=1,KNATM(NAT+1,NGRP)
+               IAT=KNATM(I,NGRP)
+               IDATOM1(IAT) = NGRP
+               IDATOM2(IAT) = NGRP
+            ENDDO
+         END IF
+      ENDDO
+      N = 0
+      DO IGRP=1,NGRP
+         DO I=1,KNATM(NAT+1,IGRP)
+            IAT = KNATM(I,IGRP)
+            N = N + 1
+            NEWID(IAT) = N
+         ENDDO
+      ENDDO
+C
+C     - GET THE MMFF94 CHARGE FOR EACH GROUP (MONOMER) -
+C
+      DO IGRP=1,NGRP
+C
+C        - PASS QM INFO TO MM -
+C
+         IFFAT = 0
+         DO I=1,KNATM(NAT+1,IGRP)
+            IFFAT = IFFAT + 1
+            IAT = KNATM(I,IGRP)
+            WRITE(ATMNAM(IFFAT),'(A8)')ANAM(IAT)
+            ZANF(IFFAT)   = ZAN(IAT) + IZCORE(IAT)
+            ZMAS(IFFAT)   = ZMASS(IAT)*1822.88850204D+00
+            CORD(1,IFFAT) = C(1,IAT)
+            CORD(2,IFFAT) = C(2,IAT)
+            CORD(3,IFFAT) = C(3,IAT)
+         ENDDO
+         NFFAT = IFFAT
+C
+C        - ADD SOME CAPPING H ATOMS TO IGRP IF NEEDED -
+C
+         DO I = 1, IBREAK(81)
+            I1=IBREAK(2*I-1)
+            I2=IBREAK(2*I  )
+            IF(I1.GT.0.AND.I2.GT.0) THEN
+            X1=C(1,I1)
+            Y1=C(2,I1)
+            Z1=C(3,I1)
+            X2=C(1,I2)
+            Y2=C(2,I2)
+            Z2=C(3,I2)
+            LKCT = 0
+            LK1  = 0
+            LK2  = 0
+            DO IFFAT=1, NFFAT
+               CDIFF1 = ABS(CORD(1,IFFAT)-X1)
+     *                + ABS(CORD(2,IFFAT)-Y1)
+     *                + ABS(CORD(3,IFFAT)-Z1)
+               CDIFF2 = ABS(CORD(1,IFFAT)-X2)
+     *                + ABS(CORD(2,IFFAT)-Y2)
+     *                + ABS(CORD(3,IFFAT)-Z2)
+               IF(CDIFF1.LT.1.0D-06)THEN
+                  LKCT= LKCT + 1
+                  LK1 = I1
+                  LK2 = I2
+               END IF
+               IF(CDIFF2.LT.1.0D-06)THEN
+                  LKCT= LKCT + 1
+                  LK1 = I2
+                  LK2 = I1
+               END IF
+            ENDDO
+            IF(LKCT.EQ.2) THEN   !  LINK ATOMS ARE WITHIN IGRP
+               LK1 = 0
+               LK2 = 0
+               LKCT= 0
+            END IF
+C           - ADD CAPPING H ATOMS AT THE END -
+            IF(LKCT.EQ.1 .AND. LK1.GT.0 .AND. LK1.NE.LK2)THEN
+               NFFAT         = NFFAT + 1
+               ZANF(NFFAT)   = 1.0D+00
+               IZANF         = NINT(ZANF(NFFAT))
+               ZMAS(NFFAT)   = RMASS(IZANF)*1822.88850204D+00
+               CORD(1,NFFAT) = C(1,LK2)
+               CORD(2,NFFAT) = C(2,LK2)
+               CORD(3,NFFAT) = C(3,LK2)
+               ATMNAM(NFFAT) = 'H'
+            END IF
+            END IF
+         ENDDO
+C        - DONE ADDING CAPPING H ATOMS -
+C
+C        - GENERATE MMFF94 MODEL FOR IGRP MONOMER -
+C
+         CALL VICLR(LQATOM,1,50)
+         CALL VCLR(RQATOM,1,50)
+         CALL VALFM(LOADFM)
+         MAXMAX    =   MAX0(MXWAGG,MAX0(MXBOND,MAX0(MXANGL,MXDIHR)))
+         LENQMMFF  =   LOADFM     +   1
+         LENBORDER =   LENQMMFF   +   MXFFAT
+         LENLBOND  =   LENBORDER  +   MXBOND
+         LENLISTRIN=   LENLBOND   +10*MXFFAT/NWDVAR + 1
+         LENLISTRIB=   LENLISTRIN +10*MXFFAT/NWDVAR + 1
+         LENNUMRIN =   LENLISTRIB +10*MXFFAT/NWDVAR + 1
+         LENNSBTYP =   LENNUMRIN  +10*MXFFAT/NWDVAR + 1
+         LENNRINTYP=   LENNSBTYP  +   MXANGL/NWDVAR + 1
+         LENNBNDTYP=   LENNRINTYP +   MXFFAT/NWDVAR + 1
+         LENIDATM  =   LENNBNDTYP +   MXBOND/NWDVAR + 1
+         LENIMLTB  =   LENIDATM   + 2*MXMMTP/NWDVAR + 1
+         LENIPILP  =   LENIMLTB   +   MXMMTP/NWDVAR + 1
+         LENIVAL   =   LENIPILP   +   MXMMTP/NWDVAR + 1
+         LENICRD   =   LENIVAL    +   MXMMTP/NWDVAR + 1
+         LENLINH   =   LENICRD    +   MXMMTP/NWDVAR + 1
+         LENNBNDT  =   LENLINH    +   MXMMTP/NWDVAR + 1
+         LENNBNDT2 =   LENNBNDT   + 4*MXFFAT/NWDVAR + 1
+         LENNANGTYP=   LENNBNDT2  + 4*MXFFAT/NWDVAR + 1
+         LENITTN   =   LENNANGTYP +   MXANGL/NWDVAR + 1
+         LENVDWIN  =   LENITTN    +   MXDIHR/NWDVAR + 1
+         LENBNDCAG =   LENVDWIN   + 4*MXMMTP
+         LENPCHAG  =   LENBNDCAG  +   MXBOND
+         LENNLCBND =   LENPCHAG   + 2*MXMMTP
+         LENIADTYP =   LENNLCBND  +   MAXMAX/NWDVAR + 1
+         LENCHARGL =   LENIADTYP  +   MXMMTP/NWDVAR + 1
+         LENANGLBC =   LENCHARGL  +   MXFFAT
+         LENNTYPMP =   LENANGLBC  +      300/NWDVAR + 1
+         LENNMPCNT =   LENNTYPMP  + 5*MXMMTP/NWDVAR + 1
+         LAST      =   LENNMPCNT  + 2*MXMMTP/NWDVAR + 1
+         NEED      =   LAST       -   LOADFM -1
+         CALL GETFM(NEED)
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         CALL MMFFTYPE(CORD,ZANF,IPAIR,
+     *             KLIST,LLIST,
+     *             NTYPE,XX(LENQMMFF),XX(LENBORDER),
+     *             XX(LENLBOND),XX(LENLISTRIN),
+     *             XX(LENNUMRIN),XX(LENLISTRIB),
+     *             XX(LENNRINTYP),
+     *             XX(LENNBNDT),XX(LENNBNDT2),
+     *             LQATOM,RQATOM,0)
+         CALL MMFFPAR(MXMMTP,ATMNAM,CORD,ZANF,ZMAS,CHARG,POL,
+     *             SIG,EPS,SIG2,EPS2,IPAIR,
+     *             KLIST,LLIST,MLIST,KBLST,
+     *             FCBOND,BOND0,FCANGL,ANGL0,
+     *             FCSTBD,FCWAGG,FCDIHR,
+     *             CLPR,ZLPR,NLPR,
+     *             FCLJTP,NTYPE,XX(LENQMMFF),
+     *             XX(LENLBOND),XX(LENNRINTYP),
+     *             XX(LENNSBTYP),XX(LENNBNDTYP),XX(LENIDATM),
+     *             XX(LENIMLTB),
+     *             XX(LENIPILP),
+     *             XX(LENNBNDT),XX(LENNBNDT2),XX(LENNANGTYP),
+     *             XX(LENITTN),XX(LENVDWIN),XX(LENBNDCAG),
+     *             XX(LENPCHAG),XX(LENNLCBND),XX(LENIADTYP),
+     *             XX(LENCHARGL),
+     *             XX(LENNUMRIN),XX(LENBORDER),XX(LENLISTRIN),
+     *             XX(LENANGLBC),
+     *             XX(LENNTYPMP),XX(LENNMPCNT),XX(LENICRD),XX(LENLINH),
+     *             XX(LENIVAL))
+         IW = IWSAVE
+         IP = IPSAVE
+         CALL RETFM(NEED)
+C        - CHECK MMFF94 CHARGE -
+         QSUM   = ZERO
+         NUCTOT = 0
+         DO IFFAT=1,NFFAT
+            QSUM   = QSUM   + CHARG(IFFAT)
+            NUCTOT = NUCTOT + NINT(ZANF(IFFAT))
+         ENDDO
+         IQSUM=NINT(QSUM)
+         IF(ABS(QSUM-IQSUM).GT.1.0D-10) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',IGRP,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         MCHARG(IGRP) = IQSUM
+         MELEC(IGRP)  = NUCTOT - MCHARG(IGRP)
+         MMULT(IGRP)  = 2*MOD(MELEC(IGRP),2) + 1
+      ENDDO
+C
+C     - ALL DONE, PRINT THE MESSAGE -
+C
+      IF(MASWRK) THEN
+      WRITE(IW,'(/1X,79(1H=),/1X,A,I2,A/9X,A,I2,",",14(I4,1X))')
+     *  'QUANPOL IDIMER=',IDIMER,
+     *  ' WITH NMOLE= -1 OR 0 AND','IBREAK=',
+     *  IBREAK(81),(IBREAK(2*I-1),IBREAK(2*I),I=1,IBREAK(81))
+      WRITE(IW,'(/1X,A)')
+     *  'HERE ARE THE MOLECULAR GROUPS IN THE INPUT $DATA:'
+      DO IGRP=1,NGRP
+         WRITE(IW,'(/1X,A,I4,A,I4,A,(/1X,10(I5,1X)))')'GROUP',IGRP,
+     *   ' HAS ',KNATM(NAT+1,IGRP),' ATOMS:',
+     *   (KNATM(J,IGRP),J=1,KNATM(NAT+1,IGRP))
+      ENDDO
+      WRITE(IW,'(/1X,A/1X,A,A/)')
+     *  'USE THE FOLLOWING IN $QUANPO:',
+     *  '(PLEASE VERIFY/EDIT THE CHARGE ',
+     *  'OF METAL IONS AND THE MULTIPLICITY)'
+      WRITE(IW,'(4X,A,I4,",",12(I4,1X),">",999(/16X,12(I4,1X),">"))')
+     *  ' NMOLE=',NGRP,(KNATM(NAT+1,I),I=1,NGRP)
+      WRITE(IW,'(4X,A,I4,",",12(I4,1X),">",999(/16X,12(I4,1X),">"))')
+     *  'MCHARG=',NGRP,(MCHARG(I),I=1,NGRP)
+      WRITE(IW,'(4X,A,I4,",",12(I4,1X),">",999(/16X,12(I4,1X),">"))')
+     *  ' MMULT=',NGRP,(MMULT(I),I=1,NGRP)
+      IF(IBREAK(81).GT.0)
+     *WRITE(IW,'(4X,A,I4,",",12(I4,1X),">",999(/16X,12(I4,1X),">"))')
+     *  'IBREAK=',
+     *  IBREAK(81),((IBREAK(2*I-1)/ABS(IBREAK(2*I-1)))*
+     *               NEWID(ABS(IBREAK(2*I-1))),
+     *              (IBREAK(2*I  )/ABS(IBREAK(2*I  )))*
+     *               NEWID(ABS(IBREAK(2*I  ))),
+     *               I=1,IBREAK(81)                    )
+      WRITE(IW,'(4(/1X,A))')
+     *  'WITH THE FOLLOWING $DATA (DO NOT CHANGE $FFDATA):',
+     *  '$DATA',
+     *  'COMMENTS: QUANPOL IDIMER AUTO-GROUPED ATOMS',
+     *  'C1'
+      END IF
+C
+      DO I=1,NAT
+      DO IAT=1,NAT
+         IF(NEWID(IAT).EQ.I) THEN
+            IF(MASWRK) WRITE(IW,'(A8,4X,F5.1,3(1X,F19.13))')
+     *      ANAM(IAT),ZAN(IAT)+IZCORE(IAT),C(1,IAT)*TOANGS,
+     *      C(2,IAT)*TOANGS,C(3,IAT)*TOANGS
+C           - GET EXPLICIT BASIS SET FROM JOB INPUT FILE -
+            IEOF = 0
+            CALL SEQREW(IR)
+            CALL FNDGRP(IR,' $DATA  ',IEOF)
+            CALL OPNCRD(IR,-IW)
+            CALL RDCARD(' $DATA  ',IEOF)  ! SKIP COMMENT LINE
+            CALL RDCARD(' $DATA  ',IEOF)  ! SKIP SYMMETRY LINE
+   20       CONTINUE
+            IEOF = 0
+            IF(MASWRK) THEN
+               READ(IR,'(A100)',END=21)WD100
+               DO J=1,100
+                  CMSG(J) = ICHAR(WD100(J:J))
+               ENDDO
+               GOTO 22
+   21          IEOF = 1
+   22          CONTINUE
+            END IF
+            IF(GOPARR) CALL DDI_BCAST(275,'I',IEOF,1,MASTER)
+            IF (IEOF.EQ.1) GOTO 40
+            IF (GOPARR) CALL DDI_BCAST(301,'I',CMSG,100,MASTER)
+            IF (.NOT.MASWRK) THEN
+               DO J=1,100
+                  WD100(J:J) = CHAR(CMSG(J))
+               ENDDO
+            END IF
+            IF(WD100(1:6).EQ.' $END ') GOTO 40
+            CALL CHECKWD100(WD100,NSTRING)
+            IF(NSTRING.NE.5) GOTO 20
+            READ(WD100,*) NAME6,RNUC,CORDX,CORDY,CORDZ
+            NAME6 = NAME6
+            DIFF = ABS(CORDX-C(1,IAT)*TOANGS)
+     *           + ABS(CORDY-C(2,IAT)*TOANGS)
+     *           + ABS(CORDZ-C(3,IAT)*TOANGS)
+     *           + ABS(ZAN(IAT)+IZCORE(IAT) - RNUC)
+            IF(DIFF.LT.1.0D-4) THEN
+   30          CONTINUE
+               IEOF = 0
+               IF(MASWRK) THEN
+                  READ(IR,'(A100)',END=31)WD100
+                  DO J=1,100
+                     CMSG(J) = ICHAR(WD100(J:J))
+                  ENDDO
+                  GOTO 32
+   31             IEOF = 1
+   32             CONTINUE
+               END IF
+               IF(GOPARR) CALL DDI_BCAST(275,'I',IEOF,1,MASTER)
+               IF (IEOF.EQ.1) GOTO 40
+               IF (GOPARR) CALL DDI_BCAST(301,'I',CMSG,100,MASTER)
+               IF (.NOT.MASWRK) THEN
+                  DO J=1,100
+                     WD100(J:J) = CHAR(CMSG(J))
+                  ENDDO
+               END IF
+               IF(WD100(1:6).EQ.' $END ') GOTO 40
+               CALL CHECKWD100(WD100,NSTRING)
+               IF(NSTRING.EQ.5) GOTO 40   ! HIT THE NEXT ATOM LINE
+               IF(MASWRK) WRITE(IW,'(A100)') WD100
+               GOTO 30                    ! KEEP READING BASIS SET
+            ELSE
+               GOTO 20
+            END IF
+   40       CONTINUE
+         END IF
+      ENDDO
+      ENDDO
+      IF(MASWRK) WRITE(IW,'(1X,A,/1X,79(1H=)/)') '$END'
+C
+C     - THIS IS A SERVICE JOB, NO REAL CALCULATION -
+      IF(IDIMER.GT.0.AND.(NMOLE.EQ.0.OR.NMOLE.EQ.-1)) THEN
+         NSTEP = -1
+         NAT   =  0
+         RUNTYP=  OPTMIZ
+         RETURN
+      END IF
+C
+  90  CONTINUE
+C
+C     - CHECK NMOLE, MCHARG, MMULT, IBREAK -
+C
+      KKK = 0
+      JJJ = 0
+      DO IM = 1, NMOLE
+         KKK = KKK + MATOM(IM)
+         JJJ = JJJ + MCHARG(IM)
+         IF(MATOM(IM).LE.0) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *      'ERROR: NUMBER OF ATOMS IN $QUANPO NMOLE= IS WRONG.'
+            CALL ABRT
+         END IF
+         IF(ABS(MCHARG(IM)).GT.5) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *      'ERROR: CHARGE IN $QUANPO MCHARG= IS TOO HIGH.'
+            CALL ABRT
+         END IF
+         IF(MMULT(IM).LE.0) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *      'ERROR: MULTIPLICITY IN $QUANPO MMULT= IS TOO LOW.'
+            CALL ABRT
+         END IF
+         IF(MMULT(IM).GT.MUL) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *      'ERROR: MULTIPLICITY IN $QUANPO MMULT= IS TOO HIGH.'
+            CALL ABRT
+         END IF
+      ENDDO
+      IF(KKK.NE.NAT) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: TOTAL NUMBER OF ATOMS IN $QUANPO NMOLE= IS WRONG.'
+         CALL ABRT
+      END IF
+      IF(JJJ.NE.ICH) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: TOTAL CHARGE IN $QUANPO MCHARG= IS WRONG.'
+         CALL ABRT
+      END IF
+      IERROR = 0
+      DO I = 1, IBREAK(81)
+         I1=IBREAK(2*I-1)
+         I2=IBREAK(2*I  )
+         IF(I1.LT.0.AND.I2.GT.0) IERROR = 1
+         IF(I1.EQ.0  ) IERROR = 1
+         IF(I2.EQ.0  ) IERROR = 1
+         IF(ABS(I1).GT.NAT) IERROR = 1
+         IF(ABS(I2).GT.NAT) IERROR = 1
+         IF(I1.EQ.I2 ) IERROR = 1
+         IZI1 = NINT(ZAN(ABS(I1)))
+         IZI2 = NINT(ZAN(ABS(I2)))
+         IF(IZI1.EQ.1.OR.IZI2.EQ.1) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *      'ERROR: AN ATOM IN $QUANPO IBREAK= IS HYDROGEN.'
+            CALL ABRT
+         END IF
+      ENDDO
+      IF(IERROR.EQ.1) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A/)')
+     *   'ERROR: PROBLEMS IN $QUANPO IBREAK=.'
+         CALL ABRT
+      END IF
+C
+C     - START IDIMER PROCEDURE -
+C
+      EDIMR = ZERO
+      E2DIMR= ZERO
+      CALL VICLR(LQATOM,1,50)
+      CALL VCLR(RQATOM,1,50)
+      CALL VCLR(EMONO,1,MAXML+1)
+      CALL VCLR(E2MONO,1,MAXML+1)
+      CALL VCLR(ZANX,1,MXATM)
+      CALL VCLR(CX,1,3*MXATM)
+      CALL VCLR(GMONOQ,1,3*MXATM*(MAXML+1))
+      CALL VCLR(GDIMRQ,1,3*MXATM)
+      CALL VCLR(GMONOM,1,3*MXFFAT)
+      CALL VCLR(GDIMRM,1,3*MXFFAT)
+      CALL VCLR(G2MONOQ,1,3*MXATM*(MAXML+1))
+      CALL VCLR(G2DIMRQ,1,3*MXATM)
+      CALL VCLR(G2MONOM,1,3*MXFFAT)
+      CALL VCLR(G2DIMRM,1,3*MXFFAT)
+      CALL VCLR(EDIMRST,1,MXRT)
+      CALL VCLR(EMONOST,1,MXRT)
+      CALL VCLR(ETOTST,1,MXRT)
+      CALL VCLR(EXX,1,MXGTOT)
+      CALL VCLR(CSX,1,MXGTOT)
+      CALL VCLR(CPX,1,MXGTOT)
+      CALL VCLR(CDX,1,MXGTOT)
+      CALL VCLR(CFX,1,MXGTOT)
+      CALL VCLR(CGX,1,MXGTOT)
+      CALL VCLR(CHX,1,MXGTOT)
+      CALL VCLR(CIX,1,MXGTOT)
+C
+      CALL VICLR(IANX,1,MXATM)
+      CALL VICLR(IZCOREX,1,MXATM)
+      CALL VICLR(KSTARTX,1,MXSH)
+      CALL VICLR(KATOMX,1,MXSH)
+      CALL VICLR(KTYPEX,1,MXSH)
+      CALL VICLR(KNGX,1,MXSH)
+      CALL VICLR(KLOCX,1,MXSH)
+      CALL VICLR(MINX,1,MXSH)
+      CALL VICLR(MAXX,1,MXSH)
+      CALL VICLR(KCOREA,1,NMO)
+      CALL VICLR(KCOREB,1,NMO)
+      CALL VICLR(KMINA,1,NMO)
+      CALL VICLR(KMINB,1,NMO)
+      CALL VICLR(NSTART,1,MAXML+1)
+C
+      CALL VICLR(MPTYPX ,1, MXATM)
+      CALL VCLR (AN0X   ,1, MXMPA)
+      CALL VCLR (ALPN0X ,1, MXMPA)
+      CALL VCLR (AN1X   ,1, MXMPA)
+      CALL VCLR (ALPN1X ,1, MXMPA)
+      CALL VICLR(MPSKPX ,1, MXATM)
+      CALL VICLR(NOAN0X ,1, MXATM)
+      CALL VICLR(NOAN1X ,1, MXATM)
+      CALL VCLR (BPARX  ,1, MXMPSH)
+      CALL VCLR (EXPMPX ,1, MXMPGT)
+      CALL VCLR (CSMPX  ,1, MXMPGT)
+      CALL VCLR (CPMPX  ,1, MXMPGT)
+      CALL VCLR (CDMPX  ,1, MXMPGT)
+      CALL VCLR (CFMPX  ,1, MXMPGT)
+      CALL VICLR(MPSKIPX,1, MXATM)
+      CALL VICLR(NOCOSHX,1, MXATM)
+      CALL VICLR(MPKSTAX,1, MXMPSH)
+      CALL VICLR(MPKNGX ,1, MXMPSH)
+      CALL VICLR(MPKTYPX,1, MXMPSH)
+      CALL VICLR(MPKMINX,1, MXMPSH)
+      CALL VICLR(MPKMAXX,1, MXMPSH)
+      CALL VICLR(MPKLOCX,1, MXMPSH)
+C
+C     - HUI LI: IT IS CRAZY BUT NECESSARY TO CALL THEM HERE -
+C       SECRET: TO OCCUPY THE DAF SPACES !
+C     DIMER CHANGES SIZES SO HERE THE MAXIMUM SIZES ARE USED
+C
+      CALL VALFM(LOADFM)
+      LWORK   = LOADFM  + 1
+      LAST    = LWORK   + NUM*NUM
+      NEED    = LAST - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      LL2     = (NUM*NUM+NUM)/2
+      NSH2 = (NSHELL*NSHELL+NSHELL)/2
+      CALL VCLR(XX(LWORK),1,NUM*NUM)
+C
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),3*NAT, 3,0)   ! QM GRADIENT
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,14,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,18,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,23,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,24,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,25,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,26,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,27,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,28,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,35,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,36,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,51,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,69,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,80,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,95,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,96,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,97,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),3*NUM,250,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,307,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,308,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,309,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,355,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,411,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,412,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,413,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,414,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,415,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,416,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,417,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,418,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,419,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,421,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,422,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,423,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,424,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,425,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,426,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,427,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,428,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),LL2,429,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NSH2,54,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,15,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,19,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,61,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,71,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,72,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),(NA+NB)*(NA+NB),73,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NA*NA,74,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),(NA+NB)*(NA+NB),285,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,324,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,356,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM,357,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,472,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,473,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,474,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,475,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,476,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,477,0)
+      CALL DAWRIT(IDAF,IODA,XX(LWORK),NUM*NUM,478,0)
+      CALL RETFM(NEED)
+C
+      IF(RDIMER.GT.ZERO) THEN    !  ONE TIME CALL
+         CALL ONEEI
+         CALL GUESMO(GUESS)
+         RDIMER = -RDIMER
+      END IF
+C
+C     - SAVE QM MOLECULAR INFORMATION -
+C
+      NATX    =  NAT
+      ICHX    =  ICH
+      MULX    =  MUL
+      NUMX    =  NUM
+      NQMTX   =  NQMT
+      NEX     =  NE
+      NAX     =  NA
+      NBX     =  NB
+      IECPX   =  IECP
+      IMCOREX =  IMCORE
+      DO III  =  1, NAT
+         ZANX(III)   = ZAN(III)
+         DO JJJ = 1, 6
+            KFRSTX(III,JJJ) = KFRST(III,JJJ)
+            KLASTX(III,JJJ) = KLAST(III,JJJ)
+         ENDDO
+         LMAXSV(III) = LMAX(III)
+         LPSKIPX(III)= LPSKIP(III)
+         IZCOREX(III)= IZCORE(III)
+         CX(1,III)   = C(1,III)
+         CX(2,III)   = C(2,III)
+         CX(3,III)   = C(3,III)
+         IANX(III)   = IAN(III)
+         ANAMX(III)  = ANAM(III)
+      ENDDO
+      DO III = 1, 400
+         CLPX(III) = CLP(III)
+         ZLPX(III) = ZLP(III)
+         NLPX(III) = NLP(III)
+      ENDDO
+C
+      DO III  =  1, MXGTOT
+         EXX(III)  = EX(III)
+         CSX(III)  = CS(III)
+         CPX(III)  = CP(III)
+         CDX(III)  = CD(III)
+         CFX(III)  = CF(III)
+         CGX(III)  = CG(III)
+         CHX(III)  = CH(III)
+         CIX(III)  = CI(III)
+      ENDDO
+      DO III  =  1, MXSH
+         KSTARTX(III)  = KSTART(III)
+         KATOMX(III)   = KATOM(III)
+         KTYPEX(III)   = KTYPE(III)
+         KNGX(III)     = KNG(III)
+         KLOCX(III)    = KLOC(III)
+         MINX(III)     = MIN(III)
+         MAXX(III)     = MAX(III)
+      ENDDO
+      NSHELLX = NSHELL
+C
+      CALL ICOPY(MXATM ,MPTYP ,1, MPTYPX ,1)
+      CALL DCOPY(MXMPA ,AN0   ,1, AN0X   ,1)
+      CALL DCOPY(MXMPA ,ALPN0 ,1, ALPN0X ,1)
+      CALL DCOPY(MXMPA ,AN1   ,1, AN1X   ,1)
+      CALL DCOPY(MXMPA ,ALPN1 ,1, ALPN1X ,1)
+      CALL ICOPY(MXATM ,MPSKP ,1, MPSKPX ,1)
+      CALL ICOPY(MXATM ,NOAN0 ,1, NOAN0X ,1)
+      CALL ICOPY(MXATM ,NOAN1 ,1, NOAN1X ,1)
+      CALL DCOPY(MXMPSH,BPAR  ,1, BPARX  ,1)
+      CALL DCOPY(MXMPGT,EXPMP ,1, EXPMPX ,1)
+      CALL DCOPY(MXMPGT,CSMP  ,1, CSMPX  ,1)
+      CALL DCOPY(MXMPGT,CPMP  ,1, CPMPX  ,1)
+      CALL DCOPY(MXMPGT,CDMP  ,1, CDMPX  ,1)
+      CALL DCOPY(MXMPGT,CFMP  ,1, CFMPX  ,1)
+      CALL ICOPY(MXATM ,MPSKIP,1, MPSKIPX,1)
+      CALL ICOPY(MXATM ,NOCOSH,1, NOCOSHX,1)
+      CALL ICOPY(MXMPSH,MPKSTA,1, MPKSTAX,1)
+      CALL ICOPY(MXMPSH,MPKNG ,1, MPKNGX ,1)
+      CALL ICOPY(MXMPSH,MPKTYP,1, MPKTYPX,1)
+      CALL ICOPY(MXMPSH,MPKMIN,1, MPKMINX,1)
+      CALL ICOPY(MXMPSH,MPKMAX,1, MPKMAXX,1)
+      CALL ICOPY(MXMPSH,MPKLOC,1, MPKLOCX,1)
+C
+C     - SAVE MM FORCE FIELD PARAMETERS -
+C
+      NFFATX5 = NFFAT
+      NBONDX5 = NBOND
+      NANGLX5 = NANGL
+      NDIHRX5 = NDIHR
+      NDIHBX5 = NDIHB
+      NCMAPX5 = NCMAP
+      NWAGGX5 = NWAGG
+      DO IFFAT=1,NFFAT
+         ATMNAMX5(IFFAT)=ATMNAM(IFFAT)
+      ENDDO
+      CALL DCOPY(3*MXFFAT,  CORD    ,1,   CORDX5,1)
+      CALL DCOPY(  MXFFAT,  ZANF    ,1,   ZANFX5,1)
+      CALL DCOPY(  MXFFAT,  ZMAS    ,1,   ZMASX5,1)
+      CALL DCOPY(  MXFFAT,  ONEMAS  ,1, ONEMASX5,1)
+      CALL DCOPY(  MXFFAT,  CHARG   ,1,  CHARGX5,1)
+      CALL DCOPY(  MXFFAT,  POL     ,1,    POLX5,1)
+      CALL DCOPY(  MXFFAT,  SIG     ,1,    SIGX5,1)
+      CALL DCOPY(  MXFFAT,  EPS     ,1,    EPSX5,1)
+      CALL DCOPY(  MXFFAT,  SIG2    ,1,   SIG2X5,1)
+      CALL DCOPY(  MXFFAT,  EPS2    ,1,   EPS2X5,1)
+      CALL DCOPY(  MXBOND,  BOND0   ,1,  BOND0X5,1)
+      CALL DCOPY(  MXBOND,  FCBOND  ,1, FCBONDX5,1)
+      CALL DCOPY(  MXANGL,  ANGL0   ,1,  ANGL0X5,1)
+      CALL DCOPY(  MXANGL,  FCANGL  ,1, FCANGLX5,1)
+      CALL DCOPY(  MXWAGG,  FCWAGG  ,1, FCWAGGX5,1)
+      CALL DCOPY(  MXDIHR,  VROT    ,1,   VROTX5,1)
+      CALL ICOPY(  MXDIHR,  NNN     ,1,    NNNX5,1)
+      CALL DCOPY(  MXDIHR,  GAMA    ,1,   GAMAX5,1)
+      CALL ICOPY(2*MXBOND,  IPAIR   ,1,  IPAIRX5,1)
+      CALL DCOPY(  MXDIHB,  DIHB0   ,1,  DIHB0X5,1)
+      CALL DCOPY(  MXDIHB,  FCDIHB  ,1, FCDIHBX5,1)
+      CALL ICOPY(3*MXANGL,  KLIST   ,1,  KLISTX5,1)
+      CALL ICOPY(4*MXDIHR,  LLIST   ,1,  LLISTX5,1)
+      CALL ICOPY(4*MXWAGG,  MLIST   ,1,  MLISTX5,1)
+      CALL ICOPY(4*MXDIHB,  NLIST   ,1,  NLISTX5,1)
+      CALL ICOPY(6*MXCMAP,  MAPLST  ,1, MAPLSTX5,1)
+      CALL DCOPY(3*MXFFAT,  VEL     ,1,    VELX5,1)
+      CALL DCOPY(4*MXFFAT,  CLPR    ,1,   CLPRX5,1)
+      CALL DCOPY(4*MXFFAT,  ZLPR    ,1,   ZLPRX5,1)
+      CALL ICOPY(  MXFFAT,  NLPR    ,1,   NLPRX5,1)
+      CALL DCOPY(3*MXATM,   QMVEL   ,1,  QMVELX5,1)
+      CALL DCOPY(2*MXANGL,  KBLST   ,1,  KBLSTX5,1)
+      CALL DCOPY(2*MXANGL,  FCSTBD  ,1, FCSTBDX5,1)
+      CALL DCOPY(3*MXDIHR,  FCDIHR  ,1, FCDIHRX5,1)
+      CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTP,1, FCLJTPX5,1)
+      CALL ICOPY(  MXFFAT,  NTYPE   ,1,  NTYPEX5,1)
+      CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213J,1,L1213JX5,1)
+C
+C
+C     ----------------------------
+C     - MM (ALL) ENERGY/GRADIENT -
+C     ----------------------------
+C     THE ENTIRE MM IS CONSIDERED AS A GIANT 'QM' MONOMER.
+C     SHOULD BE DONE WITH THE MM PARAMETERS IN THE QM/MM SETTING.
+C
+      NATSV   = NAT
+      DO IFFAT=1,NFFAT        !  NEED TO ZERO OFF LJ ON ALL QM ATOMS
+         KK = LISTQM(IFFAT)
+         IF(KK.GT.0) THEN
+            SIG(IFFAT)  = ZERO
+            EPS(IFFAT)  = ZERO
+            SIG2(IFFAT) = ZERO
+            EPS2(IFFAT) = ZERO
+            NTYPE(IFFAT)= MXMMTP !  MMFF94 NTYPE=MXMMTP HAS ZERO LJ
+         END IF
+      ENDDO
+      NAT     = 0         !  PURE MM, NO QM
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+      IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A/1X,61(1H-)/)')
+     *'QUANPOL IDIMER: MONOMER MM(ALL)'
+      CALL FFGRADX
+      IW = IWSAVE
+      IP = IPSAVE
+      NAT     = NATSV
+      DO IFFAT=1,NFFAT        !  NEED TO RESTORE LJ ON QM
+         KK = LISTQM(IFFAT)
+         IF(KK.GT.0) THEN
+            SIG(IFFAT)  = SIGX5(IFFAT)
+            EPS(IFFAT)  = EPSX5(IFFAT)
+            SIG2(IFFAT) = SIG2X5(IFFAT)
+            EPS2(IFFAT) = EPS2X5(IFFAT)
+            NTYPE(IFFAT)= NTYPEX5(IFFAT)
+         END IF
+      ENDDO
+C     - SAVE MM MONOMER ENERGY/GRADIENT -
+      EMONO(NMOLE+1) = ENPOT    !  STORE AS A 'QM' MONOMER
+      DO IFFAT=1,NFFAT
+         GMONOM(1,IFFAT)=GMONOM(1,IFFAT)+FFGRD2(1,IFFAT)
+         GMONOM(2,IFFAT)=GMONOM(2,IFFAT)+FFGRD2(2,IFFAT)
+         GMONOM(3,IFFAT)=GMONOM(3,IFFAT)+FFGRD2(3,IFFAT)
+      ENDDO
+      VIRMONO(1,NMOLE+1) = VIR(1)
+      VIRMONO(2,NMOLE+1) = VIR(2)
+      VIRMONO(3,NMOLE+1) = VIR(3)
+C
+C     --------------------------------------------
+C     - MM (CHARGE, POL, FIXSOL) ENERGY/GRADIENT -
+C     --------------------------------------------
+C     THIS IS FOR MANY-BODY POLARIZATION CORRECTION
+C
+      NATSV     = NAT
+      NAT       = 0         !  PURE MM, NO QM
+      IDOLJSV   = IDOLJ
+      IDOCMAPSV = IDOCMAP
+      L2BONDSV  = L2BOND
+      L2ANGLSV  = L2ANGL
+      L2DIHRSV  = L2DIHR
+      L2DIHBSV  = L2DIHB
+      L2WAGGSV  = L2WAGG
+      IDOLJ     = 0
+      IDOCMAP   = 0
+      L2BOND    = 0
+      L2ANGL    = 0
+      L2DIHR    = 0
+      L2DIHB    = 0
+      L2WAGG    = 0
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+      IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A/1X,61(1H-)/)')
+     *'QUANPOL IDIMER: MONOMER MM(CHARGE,POL,FIXSOL)'
+      CALL FFGRADX
+      IW = IWSAVE
+      IP = IPSAVE
+      IDOLJ     = IDOLJSV
+      IDOCMAP   = IDOCMAPSV
+      L2BOND    = L2BONDSV
+      L2ANGL    = L2ANGLSV
+      L2DIHR    = L2DIHRSV
+      L2DIHB    = L2DIHBSV
+      L2WAGG    = L2WAGGSV
+      NAT       = NATSV
+C     - SAVE MM MONOMER ENERGY/GRADIENT -
+      E2MONO(NMOLE+1) = ENPOT
+      DO IFFAT=1,NFFAT
+         G2MONOM(1,IFFAT)=G2MONOM(1,IFFAT)+FFGRD2(1,IFFAT)
+         G2MONOM(2,IFFAT)=G2MONOM(2,IFFAT)+FFGRD2(2,IFFAT)
+         G2MONOM(3,IFFAT)=G2MONOM(3,IFFAT)+FFGRD2(3,IFFAT)
+      ENDDO
+      VIR2MONO(1,NMOLE+1) = VIR(1)
+      VIR2MONO(2,NMOLE+1) = VIR(2)
+      VIR2MONO(3,NMOLE+1) = VIR(3)
+C
+C     ------------------------------
+C     - SOME SMALL PREPARATION -
+C     ------------------------------
+C
+      NSTART(1)=1
+      DO IM=2,NMOLE+1
+         NSTART(IM)=NSTART(IM-1)+MATOM(IM-1)
+      ENDDO
+      DO IM=1,NMOLE
+         NUCTOT = 0
+         DO IAT=NSTART(IM),NSTART(IM+1)-1
+            NUCTOT = NUCTOT + NINT(ZAN(IAT)+IZCORE(IAT))
+         ENDDO
+         MELEC(IM)=NUCTOT - MCHARG(IM)
+         IF(MELEC(IM).LE.0)THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I6,A/)')
+     *      'ERROR: MONOMER ',IM,' HAS NO ELECTRON.'
+            CALL ABRT
+         END IF
+      ENDDO
+C
+      IMP(1)   = 0
+      JMP(1)   = 0
+      ICORSH(1)= 0
+      DO III=2,NAT
+         IMP(III)    = IMP(III-1)    + NOAN0 (III-1)
+         JMP(III)    = JMP(III-1)    + NOAN1 (III-1)
+         ICORSH(III) = ICORSH(III-1) + NOCOSH(III-1)
+      ENDDO
+C
+C     ------------------------------
+C     - QM MONOMER ENERGY/GRADIENT -
+C     ------------------------------
+C
+      NUMALL(1)   = 0
+      NPGALL(1)   = 0
+      MPNUMALL(1) = 0
+      IGTFALL(1)  = 0
+      DO 100 IM = 1, NMOLE
+         IF (MASWRK.AND.NSTEP.LE.1.AND.RUNTYP.NE.HSSIAN)
+     *       WRITE(IW,5000) IM
+         NAT     =  MATOM(IM)
+         MUL     =  MMULT(IM)
+         NE      =  MELEC(IM)
+         IAT     =  0
+         IECP    =  0
+         IMPIM   =  0
+         JMPIM   =  0
+         ICORSHIM=  0
+         IGTFIM  =  0
+         IMCORE  =  0
+         DO III  =  NSTART(IM), NSTART(IM+1)-1
+            IAT      = IAT + 1
+            ZAN(IAT) = ZANX(III)
+            C(1,IAT) = CX(1,III)
+            C(2,IAT) = CX(2,III)
+            C(3,IAT) = CX(3,III)
+            IAN(IAT) = IANX(III)
+            ANAM(IAT)= ANAMX(III)
+            DO JJJ = 1, 6
+               KFRST(IAT,JJJ) = KFRSTX(III,JJJ)
+               KLAST(IAT,JJJ) = KLASTX(III,JJJ)
+            ENDDO
+            LMAX(IAT) = LMAXSV(III)
+            LPSKIP(IAT)= LPSKIPX(III)
+            DO LLL = 1, LMAX(IAT) + 1
+               KF = KFRST(IAT,LLL)
+               KL = KLAST(IAT,LLL)
+               KFIII = KFRSTX(III,LLL)
+               DO KKK = KF, KL
+                  CLP(KKK) = CLPX(KFIII + (KKK-KF))
+                  ZLP(KKK) = ZLPX(KFIII + (KKK-KF))
+                  NLP(KKK) = NLPX(KFIII + (KKK-KF))
+               ENDDO
+            ENDDO
+            IZCORE(IAT) = IZCOREX(III)
+            IF(IZCOREX(III).GT.0) IECP = IECPX
+            MPTYP(IAT)  = MPTYPX(III)
+            MPSKP(IAT)  = MPSKPX(III)
+            NOAN0(IAT)  = NOAN0X(III)
+            NOAN1(IAT)  = NOAN1X(III)
+            MPSKIP(IAT) = MPSKIPX(III)
+            NOCOSH(IAT) = NOCOSHX(III)
+            DO LLL = 1, NOAN0X(III)
+               AN0(IMPIM+LLL)    = AN0X(IMP(III)+LLL)
+               ALPN0(IMPIM+LLL)  = ALPN0X(IMP(III)+LLL)
+            ENDDO
+            DO LLL = 1, NOAN1X(III)
+               AN1(JMPIM+LLL)    = AN1X(JMP(III)+LLL)
+               ALPN1(JMPIM+LLL)  = ALPN1X(JMP(III)+LLL)
+            ENDDO
+            DO LLL = 1, NOCOSHX(III)
+               BPAR  (ICORSHIM+LLL) = BPARX  (ICORSH(III)+LLL)
+               MPKNG (ICORSHIM+LLL) = MPKNGX (ICORSH(III)+LLL)
+               MPKTYP(ICORSHIM+LLL) = MPKTYPX(ICORSH(III)+LLL)
+               IF(MPKTYP(ICORSHIM+LLL).EQ.1) IMCORE = IMCORE + 1
+               IF(MPKTYP(ICORSHIM+LLL).EQ.2) IMCORE = IMCORE + 3
+               IF(MPKTYP(ICORSHIM+LLL).EQ.3) IMCORE = IMCORE + 6
+               IF(MPKTYP(ICORSHIM+LLL).EQ.4) IMCORE = IMCORE + 10
+               MPKMIN(ICORSHIM+LLL) = MPKMINX(ICORSH(III)+LLL)
+               MPKMAX(ICORSHIM+LLL) = MPKMAXX(ICORSH(III)+LLL)
+               MPKLOC(ICORSHIM+LLL) = MPKLOCX(ICORSH(III)+LLL)
+     *                                - MPNUMALL(IM)
+               MPKSTA(ICORSHIM+LLL) = MPKSTAX(ICORSH(III)+LLL)
+     *                                - IGTFALL(IM)
+               DO KKK = 1, MPKNGX(ICORSH(III)+LLL)
+                  EXPMP(IGTFIM+KKK) = EXPMPX(IGTFALL(IM)+KKK)
+                  CSMP(IGTFIM+KKK)  = CSMPX(IGTFALL(IM)+KKK)
+                  CPMP(IGTFIM+KKK)  = CPMPX(IGTFALL(IM)+KKK)
+                  CDMP(IGTFIM+KKK)  = CDMPX(IGTFALL(IM)+KKK)
+                  CFMP(IGTFIM+KKK)  = CFMPX(IGTFALL(IM)+KKK)
+               ENDDO
+               IGTFIM = IGTFIM + MPKNGX(ICORSH(III)+LLL)
+            ENDDO
+            IMPIM       = IMPIM   + NOAN0X (III)
+            JMPIM       = JMPIM   + NOAN1X (III)
+            ICORSHIM    = ICORSHIM+ NOCOSHX(III)
+            IF(IAT.EQ.NAT) MPNUM = MPKLOC(ICORSHIM) + MPKMAX(ICORSHIM)
+     *                                              - MPKMIN(ICORSHIM)
+         ENDDO
+         MPNUMALL(IM+1) = MPNUMALL(IM) + MPNUM
+         IGTFALL(IM+1)  = IGTFALL(IM)  + IGTFIM
+         NE = NE - 2*IMCORE
+         NA = (NE-1+MUL)/2
+         NB = (NE+1-MUL)/2
+C
+         III = 0
+         JJJ = 0
+         NUM = 0
+         NPGIM = 0
+         DO KKK  =  1, NSHELLX
+            IATX=KATOMX(KKK)
+            IF(IATX.GE.NSTART(IM).AND.IATX.LE.(NSTART(IM+1)-1))THEN
+               III = III + 1
+               KSTART(III)  = KSTARTX(KKK) - NPGALL(IM)
+               KATOM(III)   = KATOMX(KKK) - NSTART(IM) + 1
+               KTYPE(III)   = KTYPEX(KKK)
+               KNG(III)     = KNGX(KKK)
+               KLOC(III)    = KLOCX(KKK) - NUMALL(IM)
+               MIN(III)     = MINX(KKK)
+               MAX(III)     = MAXX(KKK)
+               I1 = KSTARTX(KKK)
+               I2 = I1 + KNGX(KKK) - 1
+               DO IG = I1, I2
+                  JJJ = JJJ + 1
+                  EX(JJJ)  = EXX(IG)
+                  CS(JJJ)  = CSX(IG)
+                  CP(JJJ)  = CPX(IG)
+                  CD(JJJ)  = CDX(IG)
+                  CF(JJJ)  = CFX(IG)
+                  CG(JJJ)  = CGX(IG)
+                  CH(JJJ)  = CHX(IG)
+                  CI(JJJ)  = CIX(IG)
+               ENDDO
+               NPGIM = NPGIM + KNGX(KKK)
+            END IF
+            IF(IATX.EQ.(NSTART(IM+1)-1)) THEN
+               NUM = KLOC(III) + MAX(III) - MIN(III)
+            END IF
+         ENDDO
+         NUMALL(IM+1) = NUMALL(IM) + NUM
+         NPGALL(IM+1) = NPGALL(IM) + NPGIM
+         NSHELL = III
+         JJJSAVE= JJJ
+         NQMT   = NUM
+C
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+         ENDDO
+         CALL SETLAB(1,CDUMMY)
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+         ENDDO
+C
+C        - ADD SOME CAPPING H ATOMS TO IM IF NEEDED -
+C        SELECT AN EXISTING H ATOM (THE LAST) FROM QM -
+C
+         IAMH = 0
+         DO III=1,NATX
+            NUCZ=NINT(ZANX(III)+IZCOREX(III))
+            IF(NUCZ.EQ.1) IAMH=III
+         ENDDO
+C
+         NHADD = 0
+         DO I = 1, IBREAK(81)
+            I1=IBREAK(2*I-1)
+            I2=IBREAK(2*I  )
+            X1=CX(1,I1)
+            Y1=CX(2,I1)
+            Z1=CX(3,I1)
+            X2=CX(1,I2)
+            Y2=CX(2,I2)
+            Z2=CX(3,I2)
+            LKCT = 0
+            LK1  = 0
+            LK2  = 0
+            DO IAT=1, MATOM(IM)
+               CDIFF1 = ABS(C(1,IAT)-X1)
+     *                + ABS(C(2,IAT)-Y1)
+     *                + ABS(C(3,IAT)-Z1)
+               CDIFF2 = ABS(C(1,IAT)-X2)
+     *                + ABS(C(2,IAT)-Y2)
+     *                + ABS(C(3,IAT)-Z2)
+               IF(CDIFF1.LT.1.0D-06)THEN
+                  LKCT= LKCT + 1
+                  LK1 = I1
+                  LK2 = I2
+               END IF
+               IF(CDIFF2.LT.1.0D-06)THEN
+                  LKCT= LKCT + 1
+                  LK1 = I2
+                  LK2 = I1
+               END IF
+            ENDDO
+            IF(LKCT.EQ.2) THEN   !  LINK ATOMS ARE WITHIN IM
+               LK1 = 0
+               LK2 = 0
+               LKCT= 0
+            END IF
+C           - ADD CAPPING H ATOMS AT THE END -
+            IF(LKCT.EQ.1 .AND. LK1.GT.0 .AND. LK1.NE.LK2)THEN
+               IF(IAMH.EQ.0)THEN
+                  IF(MASWRK) WRITE(IW,'(/1X,A,A/)')
+     *            'ERROR: CAPPING H ATOM CANNOT BE ADDED ',
+     *            'BECAUSE NO H ATOM IS FOUND IN THE QM.'
+                  CALL ABRT
+               END IF
+               NHADD = NHADD + 1
+               NAT = NAT + 1
+               IAT = NAT
+               ZAN(IAT) = 1.0D+00
+               C(1,IAT) = CX(1,LK2)
+               C(2,IAT) = CX(2,LK2)
+               C(3,IAT) = CX(3,LK2)
+               IAN(IAT) = 1
+               ANAM(IAT)= ANAMX(IAMH)
+C
+               III = NSHELL       !  ADD UP SHELL
+               JJJ = JJJSAVE      !  ADD UP JJJ
+               DO KKK  =  1, NSHELLX
+                  IATX=KATOMX(KKK)
+                  IF(IATX.EQ.IAMH)THEN
+                     III = III + 1
+                     KSTART(III)  = KSTART(III-1) + KNGX(KKK)
+                     KATOM(III)   = NAT
+                     KTYPE(III)   = KTYPEX(KKK)
+                     KNG(III)     = KNGX(KKK)
+                     KLOC(III)    = KLOC(III-1)+1+MAX(KKK)-MIN(KKK)
+                     MIN(III)     = MINX(KKK)
+                     MAX(III)     = MAXX(KKK)
+                     I1 = KSTARTX(KKK)
+                     I2 = I1 + KNGX(KKK) - 1
+                     DO IG = I1, I2
+                        JJJ = JJJ + 1
+                        EX(JJJ)  = EXX(IG)
+                        CS(JJJ)  = CSX(IG)
+                        CP(JJJ)  = CPX(IG)
+                        CD(JJJ)  = CDX(IG)
+                        CF(JJJ)  = CFX(IG)
+                        CG(JJJ)  = CGX(IG)
+                        CH(JJJ)  = CHX(IG)
+                        CI(JJJ)  = CIX(IG)
+                     ENDDO
+                     NUM = KLOC(III) + MAX(III) - MIN(III)
+                  END IF
+               ENDDO
+               NSHELL = III
+               JJJSAVE= JJJ     !  MUST SAVE
+               NQMT   = NUM
+C
+               NE = NE + 1
+               NA = (NE-1+MUL)/2
+               NB = (NE+1-MUL)/2
+               IF(NHADD.GT.6) THEN
+                  IF(MASWRK) WRITE(IW,'(/1X,A,I6,A,A/)')
+     *            'ERROR: MONOMER ',IM,' HAS MORE THAN 6 CAPPING ',
+     *            'H ATOMS.'
+                  CALL ABRT
+               END IF
+C              - ADD QMREP TO THE CAPPING H ATOM -
+C                MUST CLEAR THEM AFTER GRADX
+               IFFAT = LISTQM(NFFAT+LK2)
+               LSTCAP(NHADD) = IFFAT
+               CLPR(1,IFFAT) = 3.0D+00
+               ZLPR(1,IFFAT) = 3.0D+00
+            END IF
+         ENDDO
+C        - DONE ADDING CAPPING H ATOMS -
+C
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         IF(MASWRK.AND.NSTEP.LE.1.AND.RUNTYP.NE.HSSIAN) THEN
+           WRITE(IW,'(/1X,79(1H=),/1X,A,I4,A)')
+     *       'MONOMER ',IM,
+     *       ' COORDINATES (MAY HAVE CAPPING H ATOMS AT THE END):'
+           DO IAT=1,NAT
+             WRITE(IW,'(A8,4X,F5.1,3(1X,F19.13))')
+     *       ANAM(IAT),ZAN(IAT)+IZCORE(IAT),C(1,IAT)*TOANGS,
+     *       C(2,IAT)*TOANGS,C(3,IAT)*TOANGS
+           ENDDO
+           WRITE(IW,'(1X,79(1H=))')
+         END IF
+         CALL SYMORB
+         IW = IWSAVE
+         IP = IPSAVE
+C
+         ETOT     = ZERO
+         EMP2     = ZERO
+         ESCF     = ZERO
+         IF(MPLEVL.EQ.2) CALL MP2INP(MPTEST)
+         IREST = 0
+         NEVALS= 0
+         NPRINTSV = NPRINT
+         NPRINT   = -5
+C
+C        - IM-MM DIMER (QM-MM) -
+C
+C        In the original QM/MM setting, IM must be part of the MM,
+C        and all interactions are zero off, except for LJ (LJQMMM=1).
+C        Only keep the IM LJ parameters for the MATOM(IM) atoms.
+C        There is no need to use LJ for capping H atoms.
+C
+         DO IAT=1,NATX                   !  CLEAR ALL IN NATX
+            IFFAT = LISTQM(NFFAT+IAT)
+            SIG(IFFAT)  = ZERO
+            EPS(IFFAT)  = ZERO
+            SIG2(IFFAT) = ZERO
+            EPS2(IFFAT) = ZERO
+            NTYPE(IFFAT)= MXMMTP    ! MMFF94 NTYPE=MXMMTP HAS ZERO LJ
+         ENDDO
+         DO IAT=1, MATOM(IM)             !  CURRENT IAT OF NAT
+            JAT=NSTART(IM)+IAT-1         !  ORIGINAL JAT
+            IFFAT = LISTQM(NFFAT+JAT)    !  ORIGINAL IFFAT
+            SIG(IFFAT)  = SIGX5(IFFAT)   !  COPY
+            EPS(IFFAT)  = EPSX5(IFFAT)
+            SIG2(IFFAT) = SIG2X5(IFFAT)
+            EPS2(IFFAT) = EPS2X5(IFFAT)
+            NTYPE(IFFAT)= NTYPEX5(IFFAT)
+         ENDDO
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         TDDFTYP= RNONE
+         IF(IM.EQ.1.AND.TDDFTYPSV.NE.RNONE) TDDFTYP = TDDFTYPSV
+         CALL VCLR(EG,1,3*NAT)
+         CALL VCLR(DE,1,3*NAT)
+         CALL VCLR(FFGRD2,1,3*NFFAT)
+         IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4,A/1X,61(1H-)/)')
+     *   'QUANPOL IDIMER: QM ',IM,' AND MM(ALL)'
+         CALL GRADX
+C        -- ESCF WAS ZERO IF SCF NOT CONVERGED --
+         IF(ABS(ESCF).LT.1.0D-12) THEN
+            IF(MASWRK) WRITE(IWSAVE,'(/A/)')
+     *         ' ERROR: SCF WAS NOT CONVERGED. QUANPOL MUST STOP.'
+            CALL ABRT
+         END IF
+         IW = IWSAVE
+         IP = IPSAVE
+         DO IAT=1, NATX                  !  RESTORE ALL IN NATX
+            IFFAT = LISTQM(NFFAT+IAT)
+            SIG(IFFAT)  = SIGX5(IFFAT)
+            EPS(IFFAT)  = EPSX5(IFFAT)
+            SIG2(IFFAT) = SIG2X5(IFFAT)
+            EPS2(IFFAT) = EPS2X5(IFFAT)
+            NTYPE(IFFAT)= NTYPEX5(IFFAT)
+         ENDDO
+C        - SAVE IM-MM DIMER (QM/MM) ENERGY/GRADIENT -
+                            EIMMM = ESCF
+         IF(MPLEVL.EQ.2)    EIMMM = EMP2
+         IF(TDDFTYP.NE.RNONE)EIMMM= ESTATE(NTHST)
+         EDIMR = EDIMR + EIMMM     !  STORE AS DIMER ENERGY
+         IF(TDDFTYP.NE.RNONE) THEN
+            EDIMRST(1) = EDIMRST(1) + ESCF
+            DO II=1,NSTAT
+               EDIMRST(II+1) = EDIMRST(II+1) + ESTATE(II)
+            ENDDO
+         END IF
+         DO IAT=1,MATOM(IM)          !  IGNORE CAPPING H ATOMS
+            JAT = NSTART(IM)+IAT-1
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+1,MATOM(IM)+NHADD !  NOW CAPPING H ATOMS
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,NATX
+               X=C(1,IAT)-CX(1,J)
+               Y=C(2,IAT)-CX(2,J)
+               Z=C(3,IAT)-CX(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            JAT = KK
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+EG(3,IAT)
+         ENDDO
+         DO IFFAT=1,NFFAT  ! INCLUDING QMREP OF QM/MM LINK H ATOMS AND NHADD H
+            GDIMRM(1,IFFAT)=GDIMRM(1,IFFAT)+FFGRD2(1,IFFAT)
+            GDIMRM(2,IFFAT)=GDIMRM(2,IFFAT)+FFGRD2(2,IFFAT)
+            GDIMRM(3,IFFAT)=GDIMRM(3,IFFAT)+FFGRD2(3,IFFAT)
+         ENDDO
+         VIRDIMR(1) = VIR(1)
+         VIRDIMR(2) = VIR(2)
+         VIRDIMR(3) = VIR(3)
+C
+C        - IM MONOMER (QM) -
+C          ABSOLUTELY NO MM
+C
+         IFIXSOLSV = IFIXSOL
+         IDOLJSV   = IDOLJ
+         IDOCMAPSV = IDOCMAP
+         IDOCHGSV  = IDOCHG
+         L2BONDSV  = L2BOND
+         L2ANGLSV  = L2ANGL
+         L2DIHRSV  = L2DIHR
+         L2DIHBSV  = L2DIHB
+         L2WAGGSV  = L2WAGG
+         IFIXSOL   = 0
+         ENFIXSO   = ZERO
+         IDOLJ     = 0
+         IDOCMAP   = 0
+         IDOCHG    = 0
+         L2BOND    = 0
+         L2ANGL    = 0
+         L2DIHR    = 0
+         L2DIHB    = 0
+         L2WAGG    = 0
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         TDDFTYP= RNONE
+         IF(IM.EQ.1.AND.TDDFTYPSV.NE.RNONE) TDDFTYP = TDDFTYPSV
+         CALL VCLR(EG,1,3*NAT)
+         CALL VCLR(DE,1,3*NAT)
+         CALL VCLR(FFGRD2,1,3*NFFAT)
+         IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4/1X,61(1H-)/)')
+     *   'QUANPOL IDIMER: MONOMER QM ',IM
+         CALL GRADX
+C        -- ESCF WAS ZERO IF SCF NOT CONVERGED --
+         IF(ABS(ESCF).LT.1.0D-12) THEN
+            IF(MASWRK) WRITE(IWSAVE,'(/A/)')
+     *         ' ERROR: SCF WAS NOT CONVERGED. QUANPOL MUST STOP.'
+            CALL ABRT
+         END IF
+         IW = IWSAVE
+         IP = IPSAVE
+         IFIXSOL   = IFIXSOLSV
+         IDOLJ     = IDOLJSV
+         IDOCMAP   = IDOCMAPSV
+         IDOCHG    = IDOCHGSV
+         L2BOND    = L2BONDSV
+         L2ANGL    = L2ANGLSV
+         L2DIHR    = L2DIHRSV
+         L2DIHB    = L2DIHBSV
+         L2WAGG    = L2WAGGSV
+C        - SAVE IM MONOMER (QM) ENERGY/GRADIENT -
+                            EIM = ESCF
+         IF(MPLEVL.EQ.2)    EIM = EMP2
+         IF(TDDFTYP.NE.RNONE)EIM= ESTATE(NTHST)
+         EMONO(IM) = EIM
+         IF(TDDFTYP.NE.RNONE) THEN
+            EMONOST(1) = EMONOST(1) + ESCF
+            DO II=1,NSTAT
+               EMONOST(II+1) = EMONOST(II+1) + ESTATE(II)
+            ENDDO
+         END IF
+         DO IAT=1,MATOM(IM)          !  IGNORE CAPPING H ATOMS
+            JAT = NSTART(IM)+IAT-1
+            GMONOQ(1,JAT,IM)=GMONOQ(1,JAT,IM) + EG(1,IAT)
+            GMONOQ(2,JAT,IM)=GMONOQ(2,JAT,IM) + EG(2,IAT)
+            GMONOQ(3,JAT,IM)=GMONOQ(3,JAT,IM) + EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+1,MATOM(IM)+NHADD !  NOW CAPPING H ATOMS
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,NATX
+               X=C(1,IAT)-CX(1,J)
+               Y=C(2,IAT)-CX(2,J)
+               Z=C(3,IAT)-CX(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            JAT = KK
+            GMONOQ(1,JAT,IM)=GMONOQ(1,JAT,IM) + EG(1,IAT)
+            GMONOQ(2,JAT,IM)=GMONOQ(2,JAT,IM) + EG(2,IAT)
+            GMONOQ(3,JAT,IM)=GMONOQ(3,JAT,IM) + EG(3,IAT)
+         ENDDO
+         DO IFFAT=1,NFFAT     !   QMREP OF QM/MM LINK H ATOMS AND NHADD H
+            JAT   = LISTQM(IFFAT)
+            GMONOQ(1,JAT,IM)=GMONOQ(1,JAT,IM) + FFGRD2(1,IFFAT)
+            GMONOQ(2,JAT,IM)=GMONOQ(2,JAT,IM) + FFGRD2(2,IFFAT)
+            GMONOQ(3,JAT,IM)=GMONOQ(3,JAT,IM) + FFGRD2(3,IFFAT)
+         ENDDO
+C        - CLEAR QMREP FOR ALL NHADD CAPPING H ATOMS -
+         DO I=1,NHADD
+            IFFAT = LSTCAP(I)
+            CLPR(1,IFFAT) = ZERO
+            ZLPR(1,IFFAT) = ZERO
+         ENDDO
+         VIRMONO(1,IM) = VIR(1)
+         VIRMONO(2,IM) = VIR(2)
+         VIRMONO(3,IM) = VIR(3)
+         NPRINT   = NPRINTSV
+C
+C        - GENERATE MMFF94 MODEL FOR IM MONOMER -
+C
+         NFFAT = NAT
+         CALL DCOPY(3*NFFAT, C    ,1, CORD,1)
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+         ENDDO
+         CALL DCOPY(  NFFAT, ZAN  ,1, ZANF,1)
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+         ENDDO
+         DO LLL = 1, NAT
+            WRITE(ATMNAM(LLL),'(A8)')ANAM(LLL)
+            IZANF     = NINT(ZANF(LLL))
+            ZMAS(LLL) = RMASS(IZANF)*1822.88850204D+00
+         ENDDO
+         CALL VALFM(LOADFM)
+         MAXMAX    =   MAX0(MXWAGG,MAX0(MXBOND,MAX0(MXANGL,MXDIHR)))
+         LENQMMFF  =   LOADFM     +   1
+         LENBORDER =   LENQMMFF   +   MXFFAT
+         LENLBOND  =   LENBORDER  +   MXBOND
+         LENLISTRIN=   LENLBOND   +10*MXFFAT/NWDVAR + 1
+         LENLISTRIB=   LENLISTRIN +10*MXFFAT/NWDVAR + 1
+         LENNUMRIN =   LENLISTRIB +10*MXFFAT/NWDVAR + 1
+         LENNSBTYP =   LENNUMRIN  +10*MXFFAT/NWDVAR + 1
+         LENNRINTYP=   LENNSBTYP  +   MXANGL/NWDVAR + 1
+         LENNBNDTYP=   LENNRINTYP +   MXFFAT/NWDVAR + 1
+         LENIDATM  =   LENNBNDTYP +   MXBOND/NWDVAR + 1
+         LENIMLTB  =   LENIDATM   + 2*MXMMTP/NWDVAR + 1
+         LENIPILP  =   LENIMLTB   +   MXMMTP/NWDVAR + 1
+         LENIVAL   =   LENIPILP   +   MXMMTP/NWDVAR + 1
+         LENICRD   =   LENIVAL    +   MXMMTP/NWDVAR + 1
+         LENLINH   =   LENICRD    +   MXMMTP/NWDVAR + 1
+         LENNBNDT  =   LENLINH    +   MXMMTP/NWDVAR + 1
+         LENNBNDT2 =   LENNBNDT   + 4*MXFFAT/NWDVAR + 1
+         LENNANGTYP=   LENNBNDT2  + 4*MXFFAT/NWDVAR + 1
+         LENITTN   =   LENNANGTYP +   MXANGL/NWDVAR + 1
+         LENVDWIN  =   LENITTN    +   MXDIHR/NWDVAR + 1
+         LENBNDCAG =   LENVDWIN   + 4*MXMMTP
+         LENPCHAG  =   LENBNDCAG  +   MXBOND
+         LENNLCBND =   LENPCHAG   + 2*MXMMTP
+         LENIADTYP =   LENNLCBND  +   MAXMAX/NWDVAR + 1
+         LENCHARGL =   LENIADTYP  +   MXMMTP/NWDVAR + 1
+         LENANGLBC =   LENCHARGL  +   MXFFAT
+         LENNTYPMP =   LENANGLBC  +      300/NWDVAR + 1
+         LENNMPCNT =   LENNTYPMP  + 5*MXMMTP/NWDVAR + 1
+         LAST      =   LENNMPCNT  + 2*MXMMTP/NWDVAR + 1
+         NEED      =   LAST       -   LOADFM -1
+         CALL GETFM(NEED)
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         CALL MMFFTYPE(CORD,ZANF,IPAIR,
+     *             KLIST,LLIST,
+     *             NTYPE,XX(LENQMMFF),XX(LENBORDER),
+     *             XX(LENLBOND),XX(LENLISTRIN),
+     *             XX(LENNUMRIN),XX(LENLISTRIB),
+     *             XX(LENNRINTYP),
+     *             XX(LENNBNDT),XX(LENNBNDT2),
+     *             LQATOM,RQATOM,0)
+         CALL MMFFPAR(MXMMTP,ATMNAM,CORD,ZANF,ZMAS,CHARG,POL,
+     *             SIG,EPS,SIG2,EPS2,IPAIR,
+     *             KLIST,LLIST,MLIST,KBLST,
+     *             FCBOND,BOND0,FCANGL,ANGL0,
+     *             FCSTBD,FCWAGG,FCDIHR,
+     *             CLPR,ZLPR,NLPR,
+     *             FCLJTP,NTYPE,XX(LENQMMFF),
+     *             XX(LENLBOND),XX(LENNRINTYP),
+     *             XX(LENNSBTYP),XX(LENNBNDTYP),XX(LENIDATM),
+     *             XX(LENIMLTB),
+     *             XX(LENIPILP),
+     *             XX(LENNBNDT),XX(LENNBNDT2),XX(LENNANGTYP),
+     *             XX(LENITTN),XX(LENVDWIN),XX(LENBNDCAG),
+     *             XX(LENPCHAG),XX(LENNLCBND),XX(LENIADTYP),
+     *             XX(LENCHARGL),
+     *             XX(LENNUMRIN),XX(LENBORDER),XX(LENLISTRIN),
+     *             XX(LENANGLBC),
+     *             XX(LENNTYPMP),XX(LENNMPCNT),XX(LENICRD),XX(LENLINH),
+     *             XX(LENIVAL))
+         IW = IWSAVE
+         IP = IPSAVE
+         CALL RETFM(NEED)
+C        - CHECK THE ORIGINAL INPUT BOND AND ANGLE -
+         IF(NBOND.GT.0.AND.N1213JMM.EQ.0) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,A/)')
+     *      'ERROR: IDIMER=1, 2, 3 MUST USE A $FFDATA WITH BOND ',
+     *      'AND ANGLE SECTIONS.'
+            CALL ABRT
+         END IF
+C        - ASSIGN POL (MMFF94 HAS ZERO POL) -
+         FACTOR=TOBOHR**3
+         DO IFFAT=1,NFFAT
+            POL(IFFAT) = 0.0000D+00
+            NZ = NINT(ZANF(IFFAT))
+            KT = NTYPE(IFFAT)
+            IF(NZ.EQ. 1) POL(IFFAT) = 0.3930D+00                ! H
+            IF(NZ.EQ. 3) POL(IFFAT) = 0.0320D+00                ! LI+
+            IF(NZ.EQ. 6) POL(IFFAT) = 1.0000D+00                ! C
+            IF(KT.EQ. 1.OR.KT.EQ.20.OR.KT.EQ.22.OR.KT.EQ.30)
+     *                   POL(IFFAT) = 0.8760D+00                ! C SP3
+            IF(KT.EQ. 2.OR.KT.EQ. 3.OR.KT.EQ.37.OR.KT.EQ.78.OR.
+     *         KT.EQ.57.OR.KT.EQ.41.OR.KT.EQ.63.OR.KT.EQ.64.OR.
+     *         KT.EQ.80)
+     *                   POL(IFFAT) = 1.3080D+00                ! C SP2
+            IF(KT.EQ. 4.OR.KT.EQ.60)
+     *                   POL(IFFAT) = 1.3450D+00                ! C SP
+            IF(NZ.EQ. 7) POL(IFFAT) = 0.9000D+00                ! N
+            IF(KT.EQ. 8) POL(IFFAT) = 0.9240D+00                ! N SP3
+            IF(KT.EQ.42) POL(IFFAT) = 0.8550D+00                ! N SP
+            IF(NZ.EQ. 8) POL(IFFAT) = 0.9000D+00                ! O
+            IF(KT.EQ. 6.OR.KT.EQ.70.OR.KT.EQ.59)
+     *                   POL(IFFAT) = 0.9340D+00                ! O SP3
+            IF(KT.EQ. 7) POL(IFFAT) = 0.7810D+00                ! O SP2
+            IF(KT.EQ.32) POL(IFFAT) = 1.2000D+00                ! O SP2 -
+            IF(KT.EQ.35) POL(IFFAT) = 1.5000D+00                ! O SP2 -
+            IF(KT.EQ.49.OR.KT.EQ.51)
+     *                   POL(IFFAT) = 0.7000D+00                ! O +
+            IF(NZ.EQ. 9) POL(IFFAT) = 0.5800D+00                ! F
+            IF(KT.EQ.89) POL(IFFAT) = 2.5000D+00                ! F-
+            IF(NZ.EQ.11) POL(IFFAT) = 0.1570D+00                ! NA+
+            IF(NZ.EQ.12) POL(IFFAT) = 0.0750D+00                ! MG2+
+            IF(NZ.EQ.14) POL(IFFAT) = 3.2050D+00                ! SI
+            IF(NZ.EQ.15) POL(IFFAT) = 3.0580D+00                ! P
+            IF(NZ.EQ.16) POL(IFFAT) = 2.8440D+00                ! S
+            IF(KT.EQ.73) POL(IFFAT) = 7.0000D+00                ! S-
+            IF(KT.EQ.16) POL(IFFAT) = 3.9020D+00                ! S
+            IF(KT.EQ.17) POL(IFFAT) = 2.9620D+00                ! S
+            IF(KT.EQ.18) POL(IFFAT) = 2.6130D+00                ! S
+            IF(KT.EQ.44) POL(IFFAT) = 2.3700D+00                ! S
+            IF(KT.EQ.74) POL(IFFAT) = 2.3200D+00                ! S
+            IF(NZ.EQ.17) POL(IFFAT) = 2.3050D+00                ! CL
+            IF(KT.EQ.90) POL(IFFAT) = 5.5000D+00                ! CL-
+            IF(NZ.EQ.19) POL(IFFAT) = 0.8300D+00                ! K+
+            IF(NZ.EQ.20) POL(IFFAT) = 0.4900D+00                ! CA2+
+            IF(NZ.EQ.26) POL(IFFAT) = 0.5000D+00                ! FE
+            IF(NZ.EQ.29) POL(IFFAT) = 0.5000D+00                ! CU
+            IF(NZ.EQ.30) POL(IFFAT) = 0.6000D+00                ! ZN2+
+            IF(NZ.EQ.35) POL(IFFAT) = 3.2160D+00                ! BR
+            IF(KT.EQ.91) POL(IFFAT) = 7.3000D+00                ! BR-
+            IF(NZ.EQ.53) POL(IFFAT) = 5.0600D+00                ! I
+            POL(IFFAT) = POL(IFFAT)*FACTOR
+         ENDDO
+C        - CHECK MMFF94 CHARGE -
+         NIONS = 0
+         QSUM  = ZERO
+         DO IFFAT=1,NFFAT
+            QSUM=QSUM+CHARG(IFFAT)
+            IONZ=INT(ZANF(IFFAT)+1.0D-06)
+            IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *         (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *         (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *         (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+               NIONS = NIONS + 1
+            END IF
+         ENDDO
+         IQSUM=NINT(QSUM)
+         IF(ABS(QSUM-IQSUM).GT.1.0D-10) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',IM,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         IQDIF=MCHARG(IM)-IQSUM
+         IF(NIONS.EQ.0 .AND. ABS(IQDIF).GT.4) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',IM,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         IF(IQDIF.NE.0) THEN
+            IF(NIONS.EQ.0) THEN
+               QADD = DBLE(IQDIF)/NFFAT
+               DO IFFAT=1,NFFAT
+                  CHARG(IFFAT)=CHARG(IFFAT)+QADD
+               ENDDO
+            ELSE
+               QADD = DBLE(IQDIF)/NIONS
+               DO IFFAT=1,NFFAT
+                  IONZ=INT(ZANF(IFFAT)+1.0D-06)
+                  IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *               (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *               (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *               (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+                  CHARG(IFFAT)=CHARG(IFFAT)+QADD
+                  END IF
+               ENDDO
+            END IF
+         END IF
+C
+C        - MI-MM DIMER (MM-MM) -
+C
+C        IMPLEMENT IM MMFF94 MODEL (CHARGE + POL) INTO THE GIANT MM.
+C        WHEN GENERATING THE MMFF94 PARAMETERS, THE MM PARAMETERS
+C        ARE DESTROYED. MUST RESTORE. WHEN RESTORE, CAREFULLY USE
+C        THE MMFF94 CHARGE AND POL. THE CHARGE OF THE CAPPING H ATOMS
+C        ARE ABSOBED BY THEIR HEAVY ATOMS.
+C
+C        - ABSORB CAPPING H ATOM CHARGE -
+         DO I=MATOM(IM)+1,MATOM(IM)+NHADD
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,MATOM(IM)
+               X=CORD(1,I)-CORD(1,J)
+               Y=CORD(2,I)-CORD(2,J)
+               Z=CORD(3,I)-CORD(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            CHARG(KK) = CHARG(KK) + CHARG(I)
+            CHARG(I)  = ZERO
+         ENDDO
+C
+C        - RESTORE MM FORCE FIELD PARAMETERS -
+         NFFAT = NFFATX5
+         NBOND = NBONDX5
+         NANGL = NANGLX5
+         NDIHR = NDIHRX5
+         NDIHB = NDIHBX5
+         NCMAP = NCMAPX5
+         NWAGG = NWAGGX5
+         DO IFFAT=1,NFFAT
+            ATMNAM(IFFAT)=ATMNAMX5(IFFAT)
+         ENDDO
+         CALL DCOPY(  MXFFAT,  CHARG     ,1,   ZANF,1)   !  BORROW
+         CALL DCOPY(  MXFFAT,  POL       ,1,   ZMAS,1)   !  BORROW
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)   !  ORIGINAL IAT
+            IF(IAT.GE.NSTART(IM) .AND. IAT.LE.NSTART(IM+1)-1) THEN
+               JAT = IAT - NSTART(IM) + 1
+               CHARG(IFFAT) = ZANF(JAT)   !  CURRENT JAT
+               POL  (IFFAT) = ZMAS(JAT)
+            ELSE
+               CHARG(IFFAT) = CHARGX5(IFFAT)
+               POL  (IFFAT) = POLX5  (IFFAT)
+            END IF
+         ENDDO
+         CALL DCOPY(3*MXFFAT,  CORDX5    ,1,   CORD,1)
+         CALL DCOPY(  MXFFAT,  ZANFX5    ,1,   ZANF,1)
+         CALL DCOPY(  MXFFAT,  ZMASX5    ,1,   ZMAS,1)
+         CALL DCOPY(  MXFFAT,  ONEMASX5  ,1, ONEMAS,1)
+C        CALL DCOPY(  MXFFAT,  CHARGX5   ,1,  CHARG,1)   !  BLOCK
+C        CALL DCOPY(  MXFFAT,  POLX5     ,1,    POL,1)   !  BLOCK
+         CALL DCOPY(  MXFFAT,  SIGX5     ,1,    SIG,1)
+         CALL DCOPY(  MXFFAT,  EPSX5     ,1,    EPS,1)
+         CALL DCOPY(  MXFFAT,  SIG2X5    ,1,   SIG2,1)
+         CALL DCOPY(  MXFFAT,  EPS2X5    ,1,   EPS2,1)
+         CALL DCOPY(  MXBOND,  BOND0X5   ,1,  BOND0,1)
+         CALL DCOPY(  MXBOND,  FCBONDX5  ,1, FCBOND,1)
+         CALL DCOPY(  MXANGL,  ANGL0X5   ,1,  ANGL0,1)
+         CALL DCOPY(  MXANGL,  FCANGLX5  ,1, FCANGL,1)
+         CALL DCOPY(  MXWAGG,  FCWAGGX5  ,1, FCWAGG,1)
+         CALL DCOPY(  MXDIHR,  VROTX5    ,1,   VROT,1)
+         CALL ICOPY(  MXDIHR,  NNNX5     ,1,    NNN,1)
+         CALL DCOPY(  MXDIHR,  GAMAX5    ,1,   GAMA,1)
+         CALL ICOPY(2*MXBOND,  IPAIRX5   ,1,  IPAIR,1)
+         CALL DCOPY(  MXDIHB,  DIHB0X5   ,1,  DIHB0,1)
+         CALL DCOPY(  MXDIHB,  FCDIHBX5  ,1, FCDIHB,1)
+         CALL ICOPY(3*MXANGL,  KLISTX5   ,1,  KLIST,1)
+         CALL ICOPY(4*MXDIHR,  LLISTX5   ,1,  LLIST,1)
+         CALL ICOPY(4*MXWAGG,  MLISTX5   ,1,  MLIST,1)
+         CALL ICOPY(4*MXDIHB,  NLISTX5   ,1,  NLIST,1)
+         CALL ICOPY(6*MXCMAP,  MAPLSTX5  ,1, MAPLST,1)
+         CALL DCOPY(3*MXFFAT,  VELX5     ,1,    VEL,1)
+         CALL DCOPY(4*MXFFAT,  CLPRX5    ,1,   CLPR,1)
+         CALL DCOPY(4*MXFFAT,  ZLPRX5    ,1,   ZLPR,1)
+         CALL ICOPY(  MXFFAT,  NLPRX5    ,1,   NLPR,1)
+         CALL DCOPY(3*MXATM,   QMVELX5   ,1,  QMVEL,1)
+         CALL DCOPY(2*MXANGL,  KBLSTX5   ,1,  KBLST,1)
+         CALL DCOPY(2*MXANGL,  FCSTBDX5  ,1, FCSTBD,1)
+         CALL DCOPY(3*MXDIHR,  FCDIHRX5  ,1, FCDIHR,1)
+         CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTPX5,1, FCLJTP,1)
+         CALL ICOPY(  MXFFAT,  NTYPEX5   ,1,  NTYPE,1)
+         CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213JX5,1,L1213J,1)
+C
+         NATSV     = NAT
+         NAT       = 0         !  PURE MM, NO QM
+         IDOLJSV   = IDOLJ
+         IDOCMAPSV = IDOCMAP
+         L2BONDSV  = L2BOND
+         L2ANGLSV  = L2ANGL
+         L2DIHRSV  = L2DIHR
+         L2DIHBSV  = L2DIHB
+         L2WAGGSV  = L2WAGG
+         IDOLJ     = 0
+         IDOCMAP   = 0
+         L2BOND    = 0
+         L2ANGL    = 0
+         L2DIHR    = 0
+         L2DIHB    = 0
+         L2WAGG    = 0
+         DO I=N1213JMM+1,N1213J    !  TURN OFF EXCLUSION FOR QM
+            L1213J(1,I) = 0
+            L1213J(2,I) = 0
+         ENDDO
+         IDOPOLSV  = IDOPOL
+         IDOPOL    = 100
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4,A/1X,61(1H-)/)')
+     *   'QUANPOL IDIMER: DIMER ',IM,
+     *   ' AND MM, BOTH MM(CHARGE,POL,FIXSOL)'
+         CALL FFGRADX
+         IW = IWSAVE
+         IP = IPSAVE
+         DO I=N1213JMM+1,N1213J    !  TURN ON EXCLUSION FOR QM
+            L1213J(1,I) = L1213JX5(1,I)
+            L1213J(2,I) = L1213JX5(2,I)
+         ENDDO
+         IDOPOL    = IDOPOLSV
+         IDOLJ     = IDOLJSV
+         IDOCMAP   = IDOCMAPSV
+         L2BOND    = L2BONDSV
+         L2ANGL    = L2ANGLSV
+         L2DIHR    = L2DIHRSV
+         L2DIHB    = L2DIHBSV
+         L2WAGG    = L2WAGGSV
+         NAT       = NATSV
+C        - SAVE MI-MM DIMER (MM-MM) ENERGY/GRADIENT -
+         E2DIMR = E2DIMR + ENPOT
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)
+            IF(IAT.GT.0)THEN         !  QM ATOMS, NO CAPPING H
+               G2DIMRQ(1,IAT)=G2DIMRQ(1,IAT)+FFGRD2(1,IFFAT)
+               G2DIMRQ(2,IAT)=G2DIMRQ(2,IAT)+FFGRD2(2,IFFAT)
+               G2DIMRQ(3,IAT)=G2DIMRQ(3,IAT)+FFGRD2(3,IFFAT)
+            ELSE                     !  MM ATOMS
+               G2DIMRM(1,IFFAT)=G2DIMRM(1,IFFAT)+FFGRD2(1,IFFAT)
+               G2DIMRM(2,IFFAT)=G2DIMRM(2,IFFAT)+FFGRD2(2,IFFAT)
+               G2DIMRM(3,IFFAT)=G2DIMRM(3,IFFAT)+FFGRD2(3,IFFAT)
+            END IF
+         ENDDO
+         VIR2DIMR(1) = VIR(1)
+         VIR2DIMR(2) = VIR(2)
+         VIR2DIMR(3) = VIR(3)
+C
+C        - MI MONOMER (MM) -
+C
+C        FOLLOWING THE ABOVE MI-MM DIMER (MM-MM) SETTING, TURN OFF THE MM.
+C        SIMPLY ZERO OFF CHARGE, POL, IFIXSOL OF MM
+C
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)   !  ORIGINAL IAT
+            IF(IAT.GE.NSTART(IM) .AND. IAT.LE.NSTART(IM+1)-1) THEN
+            ELSE
+               CHARG(IFFAT) = ZERO
+               POL  (IFFAT) = ZERO
+            END IF
+         ENDDO
+         NATSV     = NAT
+         NAT       = 0         !  PURE MM, NO QM
+         IFIXSOLSV = IFIXSOL
+         IDOLJSV   = IDOLJ
+         IDOCMAPSV = IDOCMAP
+         L2BONDSV  = L2BOND
+         L2ANGLSV  = L2ANGL
+         L2DIHRSV  = L2DIHR
+         L2DIHBSV  = L2DIHB
+         L2WAGGSV  = L2WAGG
+         IFIXSOL   = 0
+         ENFIXSO   = ZERO
+         IDOLJ     = 0
+         IDOCMAP   = 0
+         L2BOND    = 0
+         L2ANGL    = 0
+         L2DIHR    = 0
+         L2DIHB    = 0
+         L2WAGG    = 0
+         DO I=N1213JMM+1,N1213J    !  TURN OFF EXCLUSION FOR QM
+            L1213J(1,I) = 0
+            L1213J(2,I) = 0
+         ENDDO
+         IDOPOLSV  = IDOPOL
+         IDOPOL    = 100
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4,A/1X,61(1H-)/)')
+     *   'QUANPOL IDIMER: MONOMER ',IM,' AS MM(CHARGE,POL)'
+         CALL FFGRADX
+         IW = IWSAVE
+         IP = IPSAVE
+         DO I=N1213JMM+1,N1213J    !  TURN ON EXCLUSION FOR QM
+            L1213J(1,I) = L1213JX5(1,I)
+            L1213J(2,I) = L1213JX5(2,I)
+         ENDDO
+         IDOPOL    = IDOPOLSV
+         IFIXSOL   = IFIXSOLSV
+         IDOLJ     = IDOLJSV
+         IDOCMAP   = IDOCMAPSV
+         L2BOND    = L2BONDSV
+         L2ANGL    = L2ANGLSV
+         L2DIHR    = L2DIHRSV
+         L2DIHB    = L2DIHBSV
+         L2WAGG    = L2WAGGSV
+         NAT       = NATSV
+C        - SAVE MI MONOMER (MM) ENERGY/GRADIENT -
+         E2MONO(IM) = ENPOT
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)
+            IF(IAT.GT.0)THEN ! QM ATOMS, NO CAPPING H, NO MM ATOMS
+               G2MONOQ(1,IAT,IM)=G2MONOQ(1,IAT,IM)+FFGRD2(1,IFFAT)
+               G2MONOQ(2,IAT,IM)=G2MONOQ(2,IAT,IM)+FFGRD2(2,IFFAT)
+               G2MONOQ(3,IAT,IM)=G2MONOQ(3,IAT,IM)+FFGRD2(3,IFFAT)
+            END IF
+         ENDDO
+         VIR2MONO(1,IM) = VIR(1)
+         VIR2MONO(2,IM) = VIR(2)
+         VIR2MONO(3,IM) = VIR(3)
+C
+C        - RESTORE MM FORCE FIELD PARAMETERS -
+C
+         NFFAT = NFFATX5
+         NBOND = NBONDX5
+         NANGL = NANGLX5
+         NDIHR = NDIHRX5
+         NDIHB = NDIHBX5
+         NCMAP = NCMAPX5
+         NWAGG = NWAGGX5
+         DO IFFAT=1,NFFAT
+            ATMNAM(IFFAT)=ATMNAMX5(IFFAT)
+         ENDDO
+         CALL DCOPY(3*MXFFAT,  CORDX5    ,1,   CORD,1)
+         CALL DCOPY(  MXFFAT,  ZANFX5    ,1,   ZANF,1)
+         CALL DCOPY(  MXFFAT,  ZMASX5    ,1,   ZMAS,1)
+         CALL DCOPY(  MXFFAT,  ONEMASX5  ,1, ONEMAS,1)
+         CALL DCOPY(  MXFFAT,  CHARGX5   ,1,  CHARG,1)
+         CALL DCOPY(  MXFFAT,  POLX5     ,1,    POL,1)
+         CALL DCOPY(  MXFFAT,  SIGX5     ,1,    SIG,1)
+         CALL DCOPY(  MXFFAT,  EPSX5     ,1,    EPS,1)
+         CALL DCOPY(  MXFFAT,  SIG2X5    ,1,   SIG2,1)
+         CALL DCOPY(  MXFFAT,  EPS2X5    ,1,   EPS2,1)
+         CALL DCOPY(  MXBOND,  BOND0X5   ,1,  BOND0,1)
+         CALL DCOPY(  MXBOND,  FCBONDX5  ,1, FCBOND,1)
+         CALL DCOPY(  MXANGL,  ANGL0X5   ,1,  ANGL0,1)
+         CALL DCOPY(  MXANGL,  FCANGLX5  ,1, FCANGL,1)
+         CALL DCOPY(  MXWAGG,  FCWAGGX5  ,1, FCWAGG,1)
+         CALL DCOPY(  MXDIHR,  VROTX5    ,1,   VROT,1)
+         CALL ICOPY(  MXDIHR,  NNNX5     ,1,    NNN,1)
+         CALL DCOPY(  MXDIHR,  GAMAX5    ,1,   GAMA,1)
+         CALL ICOPY(2*MXBOND,  IPAIRX5   ,1,  IPAIR,1)
+         CALL DCOPY(  MXDIHB,  DIHB0X5   ,1,  DIHB0,1)
+         CALL DCOPY(  MXDIHB,  FCDIHBX5  ,1, FCDIHB,1)
+         CALL ICOPY(3*MXANGL,  KLISTX5   ,1,  KLIST,1)
+         CALL ICOPY(4*MXDIHR,  LLISTX5   ,1,  LLIST,1)
+         CALL ICOPY(4*MXWAGG,  MLISTX5   ,1,  MLIST,1)
+         CALL ICOPY(4*MXDIHB,  NLISTX5   ,1,  NLIST,1)
+         CALL ICOPY(6*MXCMAP,  MAPLSTX5  ,1, MAPLST,1)
+         CALL DCOPY(3*MXFFAT,  VELX5     ,1,    VEL,1)
+         CALL DCOPY(4*MXFFAT,  CLPRX5    ,1,   CLPR,1)
+         CALL DCOPY(4*MXFFAT,  ZLPRX5    ,1,   ZLPR,1)
+         CALL ICOPY(  MXFFAT,  NLPRX5    ,1,   NLPR,1)
+         CALL DCOPY(3*MXATM,   QMVELX5   ,1,  QMVEL,1)
+         CALL DCOPY(2*MXANGL,  KBLSTX5   ,1,  KBLST,1)
+         CALL DCOPY(2*MXANGL,  FCSTBDX5  ,1, FCSTBD,1)
+         CALL DCOPY(3*MXDIHR,  FCDIHRX5  ,1, FCDIHR,1)
+         CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTPX5,1, FCLJTP,1)
+         CALL ICOPY(  MXFFAT,  NTYPEX5   ,1,  NTYPE,1)
+         CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213JX5,1,L1213J,1)
+C
+  100 CONTINUE
+C
+C
+C     ----------------------------
+C     - QM DIMER ENERGY/GRADIENT -
+C     ----------------------------
+C
+      DO 200 IM = 1, NMOLE-1
+      DO 210 JM = IM+1, NMOLE
+         IF (MASWRK.AND.NSTEP.LE.1.AND.RUNTYP.NE.HSSIAN)
+     *       WRITE(IW,5010) IM,JM
+         NAT     =  MATOM(IM)+MATOM(JM)
+         MUL     =  ABS(MMULT(IM) - MMULT(JM)) + 1
+         NE      =  MELEC(IM)+MELEC(JM)
+C
+         IAT     =  0
+         IECP    =  0
+         IMPIM   =  0
+         JMPIM   =  0
+         ICORSHIM=  0
+         IGTFIM  =  0
+         IMCORE  =  0
+         DO IJ=1,2
+         IF(IJ.EQ.1) IMJM=IM
+         IF(IJ.EQ.2) IMJM=JM
+         DO III  =  NSTART(IMJM), NSTART(IMJM+1)-1
+            IAT      = IAT + 1
+            ZAN(IAT) = ZANX(III)
+            C(1,IAT) = CX(1,III)
+            C(2,IAT) = CX(2,III)
+            C(3,IAT) = CX(3,III)
+            IAN(IAT) = IANX(III)
+            ANAM(IAT)= ANAMX(III)
+            DO JJJ = 1, 6
+               KFRST(IAT,JJJ) = KFRSTX(III,JJJ)
+               KLAST(IAT,JJJ) = KLASTX(III,JJJ)
+            ENDDO
+            LMAX(IAT) = LMAXSV(III)
+            LPSKIP(IAT)= LPSKIPX(III)
+            DO LLL = 1, LMAX(IAT) + 1
+               KF = KFRST(IAT,LLL)
+               KL = KLAST(IAT,LLL)
+               KFIII = KFRSTX(III,LLL)
+               DO KKK = KF, KL
+                  CLP(KKK) = CLPX(KFIII + (KKK-KF))
+                  ZLP(KKK) = ZLPX(KFIII + (KKK-KF))
+                  NLP(KKK) = NLPX(KFIII + (KKK-KF))
+               ENDDO
+            ENDDO
+            IZCORE(IAT) = IZCOREX(III)
+            IF(IZCOREX(III).GT.0) IECP = IECPX
+            MPTYP(IAT)  = MPTYPX(III)
+            MPSKP(IAT)  = MPSKPX(III)
+            NOAN0(IAT)  = NOAN0X(III)
+            NOAN1(IAT)  = NOAN1X(III)
+            MPSKIP(IAT) = MPSKIPX(III)
+            NOCOSH(IAT) = NOCOSHX(III)
+            DO LLL = 1, NOAN0X(III)
+               AN0(IMPIM+LLL)    = AN0X(IMP(III)+LLL)
+               ALPN0(IMPIM+LLL)  = ALPN0X(IMP(III)+LLL)
+            ENDDO
+            DO LLL = 1, NOAN1X(III)
+               AN1(JMPIM+LLL)    = AN1X(JMP(III)+LLL)
+               ALPN1(JMPIM+LLL)  = ALPN1X(JMP(III)+LLL)
+            ENDDO
+            DO LLL = 1, NOCOSHX(III)
+               BPAR  (ICORSHIM+LLL) = BPARX  (ICORSH(III)+LLL)
+               MPKNG (ICORSHIM+LLL) = MPKNGX (ICORSH(III)+LLL)
+               MPKTYP(ICORSHIM+LLL) = MPKTYPX(ICORSH(III)+LLL)
+               IF(MPKTYP(ICORSHIM+LLL).EQ.1) IMCORE = IMCORE + 1
+               IF(MPKTYP(ICORSHIM+LLL).EQ.2) IMCORE = IMCORE + 3
+               IF(MPKTYP(ICORSHIM+LLL).EQ.3) IMCORE = IMCORE + 6
+               IF(MPKTYP(ICORSHIM+LLL).EQ.4) IMCORE = IMCORE + 10
+               MPKMIN(ICORSHIM+LLL) = MPKMINX(ICORSH(III)+LLL)
+               MPKMAX(ICORSHIM+LLL) = MPKMAXX(ICORSH(III)+LLL)
+               IF(IJ.EQ.1)
+     *         MPKLOC(ICORSHIM+LLL) = MPKLOCX(ICORSH(III)+LLL)
+     *                                - MPNUMALL(IMJM)
+               IF(IJ.EQ.2)
+     *         MPKLOC(ICORSHIM+LLL) = MPKLOCX(ICORSH(III)+LLL)
+     *                                - MPNUMALL(IMJM)
+     *                                + MPNUMALL(IM+1)
+     *                                - MPNUMALL(IM)
+               IF(IJ.EQ.1)
+     *         MPKSTA(ICORSHIM+LLL) = MPKSTAX(ICORSH(III)+LLL)
+     *                                - IGTFALL(IMJM)
+               IF(IJ.EQ.2)
+     *         MPKSTA(ICORSHIM+LLL) = MPKSTAX(ICORSH(III)+LLL)
+     *                                - IGTFALL(IMJM)
+     *                                + IGTFALL(IM+1)
+     *                                - IGTFALL(IM)
+               DO KKK = 1, MPKNGX(ICORSH(III)+LLL)
+                  EXPMP(IGTFIM+KKK) = EXPMPX(IGTFALL(IMJM)+KKK)
+                  CSMP(IGTFIM+KKK)  = CSMPX(IGTFALL(IMJM)+KKK)
+                  CPMP(IGTFIM+KKK)  = CPMPX(IGTFALL(IMJM)+KKK)
+                  CDMP(IGTFIM+KKK)  = CDMPX(IGTFALL(IMJM)+KKK)
+                  CFMP(IGTFIM+KKK)  = CFMPX(IGTFALL(IMJM)+KKK)
+               ENDDO
+               IGTFIM = IGTFIM + MPKNGX(ICORSH(III)+LLL)
+            ENDDO
+            IMPIM       = IMPIM   + NOAN0X (III)
+            JMPIM       = JMPIM   + NOAN1X (III)
+            ICORSHIM    = ICORSHIM+ NOCOSHX(III)
+         ENDDO
+         ENDDO
+C
+         NE = NE - 2*IMCORE
+         NA = (NE-1+MUL)/2
+         NB = (NE+1-MUL)/2
+C
+         III = 0
+         JJJ = 0
+         NUM = 0
+         DO IJ=1,2
+         IF(IJ.EQ.1) IMJM=IM
+         IF(IJ.EQ.2) IMJM=JM
+         DO KKK  =  1, NSHELLX
+            IATX=KATOMX(KKK)
+            IF(IATX.GE.NSTART(IMJM).AND.IATX.LE.(NSTART(IMJM+1)-1))THEN
+               III = III + 1
+               IF(IMJM.EQ.IM)
+     *         KSTART(III)  = KSTARTX(KKK) - NPGALL(IMJM)
+               IF(IMJM.EQ.JM)
+     *         KSTART(III)  = KSTARTX(KKK) - NPGALL(IMJM)
+     *                                     + NPGALL(IM+1)-NPGALL(IM)
+               IF(IMJM.EQ.IM)
+     *         KATOM(III)   = KATOMX(KKK) - NSTART(IMJM)+1
+               IF(IMJM.EQ.JM)
+     *         KATOM(III)   = KATOMX(KKK) - NSTART(IMJM)+1+MATOM(IM)
+               KTYPE(III)   = KTYPEX(KKK)
+               KNG(III)     = KNGX(KKK)
+               IF(IMJM.EQ.IM)
+     *         KLOC(III)    = KLOCX(KKK) - NUMALL(IMJM)
+               IF(IMJM.EQ.JM)
+     *         KLOC(III)    = KLOCX(KKK) - NUMALL(IMJM)
+     *                                   + NUMALL(IM+1)-NUMALL(IM)
+               MIN(III)     = MINX(KKK)
+               MAX(III)     = MAXX(KKK)
+               I1 = KSTARTX(KKK)
+               I2 = I1 + KNGX(KKK) - 1
+               DO IG = I1, I2
+                  JJJ = JJJ + 1
+                  EX(JJJ)  = EXX(IG)
+                  CS(JJJ)  = CSX(IG)
+                  CP(JJJ)  = CPX(IG)
+                  CD(JJJ)  = CDX(IG)
+                  CF(JJJ)  = CFX(IG)
+                  CG(JJJ)  = CGX(IG)
+                  CH(JJJ)  = CHX(IG)
+                  CI(JJJ)  = CIX(IG)
+               ENDDO
+            END IF
+         ENDDO
+         ENDDO
+         NUM    = NUMALL(IM+1) - NUMALL(IM)
+     *          + NUMALL(JM+1) - NUMALL(JM)
+         NSHELL = III
+         JJJSAVE= JJJ
+         NQMT   = NUM
+C
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+         ENDDO
+         CALL SETLAB(1,CDUMMY)
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+         ENDDO
+C
+C        - ADD SOME CAPPING H ATOMS TO IM-JM -
+C          ADD TO THE END
+C
+         NHADD   = 0
+         NHADDIM = 0
+         NHADDJM = 0
+         DO I = 1, IBREAK(81)
+            I1=IBREAK(2*I-1)
+            I2=IBREAK(2*I  )
+            X1=CX(1,I1)
+            Y1=CX(2,I1)
+            Z1=CX(3,I1)
+            X2=CX(1,I2)
+            Y2=CX(2,I2)
+            Z2=CX(3,I2)
+            LKCTIM = 0
+            LKCTJM = 0
+            LKCT   = 0
+            LK1    = 0
+            LK2    = 0
+            DO IAT=1, MATOM(IM)+MATOM(JM)
+               CDIFF1 = ABS(C(1,IAT)-X1)
+     *                + ABS(C(2,IAT)-Y1)
+     *                + ABS(C(3,IAT)-Z1)
+               CDIFF2 = ABS(C(1,IAT)-X2)
+     *                + ABS(C(2,IAT)-Y2)
+     *                + ABS(C(3,IAT)-Z2)
+               IF(CDIFF1.LT.1.0D-06)THEN
+                  IF(IAT.LE.MATOM(IM))LKCTIM = LKCTIM + 1
+                  IF(IAT.GT.MATOM(IM))LKCTJM = LKCTJM + 1
+                  LK1    = I1
+                  LK2    = I2
+               END IF
+               IF(CDIFF2.LT.1.0D-06)THEN
+                  IF(IAT.LE.MATOM(IM))LKCTIM = LKCTIM + 1
+                  IF(IAT.GT.MATOM(IM))LKCTJM = LKCTJM + 1
+                  LK1 = I2
+                  LK2 = I1
+               END IF
+            ENDDO
+            IF(LKCTIM.EQ.1.AND.LKCTJM.EQ.0) NHADDIM = NHADDIM + 1
+            IF(LKCTIM.EQ.0.AND.LKCTJM.EQ.1) NHADDJM = NHADDJM + 1
+            IF(LKCTIM.EQ.1.AND.LKCTJM.EQ.1) THEN ! LINK ATOMS IN IM-JM
+               LK1    = 0
+               LK2    = 0
+               LKCTIM = 0
+               LKCTJM = 0
+            END IF
+            LKCT = LKCTIM + LKCTJM
+C           - ADD CAPPING H ATOMS AT THE END -
+            IF(LKCT.EQ.1 .AND. LK1.GT.0 .AND. LK1.NE.LK2)THEN
+               NHADD = NHADD + 1
+               NAT = NAT + 1
+               IAT = NAT
+               ZAN(IAT) = 1.0D+00
+               C(1,IAT) = CX(1,LK2)
+               C(2,IAT) = CX(2,LK2)
+               C(3,IAT) = CX(3,LK2)
+               IAN(IAT) = 1
+               ANAM(IAT)= ANAMX(IAMH)
+C
+               III = NSHELL       !  ADD UP SHELL
+               JJJ = JJJSAVE      !  ADD UP JJJ
+               DO KKK  =  1, NSHELLX
+                  IATX=KATOMX(KKK)
+                  IF(IATX.EQ.IAMH)THEN
+                     III = III + 1
+                     KSTART(III)  = KSTART(III-1) + KNGX(KKK)
+                     KATOM(III)   = NAT
+                     KTYPE(III)   = KTYPEX(KKK)
+                     KNG(III)     = KNGX(KKK)
+                     KLOC(III)    = KLOC(III-1)+1+MAX(KKK)-MIN(KKK)
+                     MIN(III)     = MINX(KKK)
+                     MAX(III)     = MAXX(KKK)
+                     I1 = KSTARTX(KKK)
+                     I2 = I1 + KNGX(KKK) - 1
+                     DO IG = I1, I2
+                        JJJ = JJJ + 1
+                        EX(JJJ)  = EXX(IG)
+                        CS(JJJ)  = CSX(IG)
+                        CP(JJJ)  = CPX(IG)
+                        CD(JJJ)  = CDX(IG)
+                        CF(JJJ)  = CFX(IG)
+                        CG(JJJ)  = CGX(IG)
+                        CH(JJJ)  = CHX(IG)
+                        CI(JJJ)  = CIX(IG)
+                     ENDDO
+                     NUM = KLOC(III) + MAX(III) - MIN(III)
+                  END IF
+               ENDDO
+               NSHELL = III
+               JJJSAVE= JJJ     !  MUST SAVE
+               NQMT   = NUM
+C
+               NE = NE + 1
+               NA = (NE-1+MUL)/2
+               NB = (NE+1-MUL)/2
+               IF(NHADD.GT.6) THEN
+                  IF(MASWRK) WRITE(IW,'(/1X,A,I6,1X,I6,A,A/)')
+     *            'ERROR: DIMER ',IM,JM,' HAS MORE THAN 6 CAPPING ',
+     *            'H ATOMS.'
+                  CALL ABRT
+               END IF
+C              - ADD QMREP TO THE CAPPING H ATOM -
+C                MUST CLEAR THEM AFTER GRADX
+               IFFAT = LISTQM(NFFAT+LK2)
+               LSTCAP(NHADD) = IFFAT
+               CLPR(1,IFFAT) = 3.0D+00
+               ZLPR(1,IFFAT) = 3.0D+00
+            END IF
+         ENDDO
+C        - DONE ADDING CAPPING H ATOMS -
+C
+C        - FOR DISTANT IM-JM PAIRS, SKIP SCF, USE MM TO SAVE TIME -
+C          NOTE: CAPPING H ATOMS ARE AT THE END
+C
+         R2CUT   = RDIMER*RDIMER
+         IMJMSCF = 0
+         DO I=1, MATOM(IM)              !  IGNORE THE CAPPING H
+          DO J=MATOM(IM)+1, NAT-NHADD   !  IGNORE THE CAPPING H
+            X   = C(1,I) - C(1,J)
+            Y   = C(2,I) - C(2,J)
+            Z   = C(3,I) - C(3,J)
+            R2  = X*X+Y*Y+Z*Z
+            IF(R2.LT.R2CUT) IMJMSCF = 1
+          ENDDO
+          DO J=MATOM(IM)+MATOM(JM)+NHADDIM+1, NAT   !  NOW CAPPING H
+            X   = C(1,I) - C(1,J)
+            Y   = C(2,I) - C(2,J)
+            Z   = C(3,I) - C(3,J)
+            R2  = X*X+Y*Y+Z*Z
+            IF(R2.LT.R2CUT) IMJMSCF = 1
+          ENDDO
+         ENDDO
+         DO I=MATOM(IM)+MATOM(JM)+1,MATOM(IM)+MATOM(JM)+NHADDIM    !  THE CAPPING H
+          DO J=MATOM(IM)+1, NAT-NHADD   !  IGNORE THE CAPPING H
+            X   = C(1,I) - C(1,J)
+            Y   = C(2,I) - C(2,J)
+            Z   = C(3,I) - C(3,J)
+            R2  = X*X+Y*Y+Z*Z
+            IF(R2.LT.R2CUT) IMJMSCF = 1
+          ENDDO
+          DO J=MATOM(IM)+MATOM(JM)+NHADDIM+1, NAT   !  NOW CAPPING H
+            X   = C(1,I) - C(1,J)
+            Y   = C(2,I) - C(2,J)
+            Z   = C(3,I) - C(3,J)
+            R2  = X*X+Y*Y+Z*Z
+            IF(R2.LT.R2CUT) IMJMSCF = 1
+          ENDDO
+         ENDDO
+C
+         IF(IMJMSCF.EQ.0) GOTO 220
+C
+C        - IM-JM DIMER (QM) -
+C          NOTE: CAPPING H ATOMS ARE AT THE END
+C
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         CALL SYMORB
+         IW = IWSAVE
+         IP = IPSAVE
+         ETOT     = ZERO
+         EMP2     = ZERO
+         ESCF     = ZERO
+         IF(NE.GT.0) THEN
+            IF(MPLEVL.EQ.2) CALL MP2INP(MPTEST)
+            IREST = 0
+            NEVALS= 0
+            NPRINTSV = NPRINT
+            NPRINT   = -5
+            IFIXSOLSV = IFIXSOL
+            IDOLJSV   = IDOLJ
+            IDOCMAPSV = IDOCMAP
+            IDOCHGSV  = IDOCHG
+            L2BONDSV  = L2BOND
+            L2ANGLSV  = L2ANGL
+            L2DIHRSV  = L2DIHR
+            L2DIHBSV  = L2DIHB
+            L2WAGGSV  = L2WAGG
+            IFIXSOL   = 0
+            ENFIXSO   = ZERO
+            IDOLJ     = 0
+            IDOCMAP   = 0
+            IDOCHG    = 0
+            L2BOND    = 0
+            L2ANGL    = 0
+            L2DIHR    = 0
+            L2DIHB    = 0
+            L2WAGG    = 0
+            IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+            IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+            TDDFTYP= RNONE
+            IF(IM.EQ.1.AND.TDDFTYPSV.NE.RNONE) TDDFTYP = TDDFTYPSV
+            CALL VCLR(EG,1,3*NAT)
+            CALL VCLR(DE,1,3*NAT)
+            CALL VCLR(FFGRD2,1,3*NFFAT)
+            IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4,A,I4/1X,61(1H-)/)')
+     *      'QUANPOL IDIMER: DIMER QM ',IM,' AND ',JM
+            CALL GRADX
+C           -- ESCF WAS ZERO IF SCF NOT CONVERGED --
+            IF(ABS(ESCF).LT.1.0D-12) THEN
+               IF(MASWRK) WRITE(IWSAVE,'(/A/)')
+     *            ' ERROR: SCF WAS NOT CONVERGED. QUANPOL MUST STOP.'
+               CALL ABRT
+            END IF
+            IW = IWSAVE
+            IP = IPSAVE
+            IFIXSOL   = IFIXSOLSV
+            IDOLJ     = IDOLJSV
+            IDOCMAP   = IDOCMAPSV
+            IDOCHG    = IDOCHGSV
+            L2BOND    = L2BONDSV
+            L2ANGL    = L2ANGLSV
+            L2DIHR    = L2DIHRSV
+            L2DIHB    = L2DIHBSV
+            L2WAGG    = L2WAGGSV
+            NPRINT   = NPRINTSV
+         END IF
+C        - SAVE IM-JM DIMER (QM) ENERGY/GRADIENT -
+                            EIMJM = ESCF
+         IF(MPLEVL.EQ.2)    EIMJM = EMP2
+         IF(TDDFTYP.NE.RNONE)EIMJM= ESTATE(NTHST)
+         EDIMR = EDIMR + EIMJM
+         IF(TDDFTYP.NE.RNONE) THEN
+            EDIMRST(1) = EDIMRST(1) + ESCF
+            DO II=1,NSTAT
+               EDIMRST(II+1) = EDIMRST(II+1) + ESTATE(II)
+            ENDDO
+         END IF
+         DO IAT=1,MATOM(IM)
+            JAT = NSTART(IM)+IAT-1
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+1,MATOM(IM)+MATOM(JM)  !  IGNORE CAPPING H ATOMS
+            JAT = NSTART(JM)+IAT-MATOM(IM)-1
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+MATOM(JM)+1, MATOM(IM)+MATOM(JM)+NHADDIM  !  NOW CAPPING H ATOMS
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,NATX
+               X=C(1,IAT)-CX(1,J)
+               Y=C(2,IAT)-CX(2,J)
+               Z=C(3,IAT)-CX(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            JAT = KK
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+MATOM(JM)+NHADDIM+1, NAT  !  NOW CAPPING H ATOMS
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,NATX
+               X=C(1,IAT)-CX(1,J)
+               Y=C(2,IAT)-CX(2,J)
+               Z=C(3,IAT)-CX(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            JAT = KK
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+EG(3,IAT)
+         ENDDO
+         DO IFFAT=1,NFFAT     !   QMREP OF QM/MM LINK H ATOMS AND NHADD H
+            JAT   = LISTQM(IFFAT)
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+FFGRD2(1,IFFAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+FFGRD2(2,IFFAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+FFGRD2(3,IFFAT)
+         ENDDO
+C        - CLEAR QMREP FOR ALL NHADD CAPPING H ATOMS -
+         DO I=1,NHADD
+            IFFAT = LSTCAP(I)
+            CLPR(1,IFFAT) = ZERO
+            ZLPR(1,IFFAT) = ZERO
+         ENDDO
+         VIRDIMR(1) = VIR(1)
+         VIRDIMR(2) = VIR(2)
+         VIRDIMR(3) = VIR(3)
+C
+  220    CONTINUE
+C
+C        - GENERATE MMFF94 MODEL FOR IM-JM DIMER -
+C          BECAUSE CAPPING H ATOMS ARE AT THE END, RE-ARRANGE THEM
+C          SO IM AND JM ARE WITH THEIR OWN H ATOMS
+C
+         NFFAT = NAT
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+         ENDDO
+         IF(NHADDIM.EQ.0) THEN
+            CALL DCOPY(3*NFFAT, C    ,1, CORD,1)
+            CALL DCOPY(  NFFAT, ZAN  ,1, ZANF,1)
+            DO LLL = 1, NAT
+               WRITE(ATMNAM(LLL),'(A8)')ANAM(LLL)
+            ENDDO
+         ELSE
+            CALL DCOPY(3*MATOM(IM), C    ,1, CORD,1)
+            CALL DCOPY(  MATOM(IM), ZAN  ,1, ZANF,1)
+            DO LLL = 1, MATOM(IM)
+               WRITE(ATMNAM(LLL),'(A8)')ANAM(LLL)
+            ENDDO
+            DO I=1,NHADDIM
+               CORD(1,MATOM(IM)+I)=C(1,MATOM(IM)+MATOM(JM)+I)
+               CORD(2,MATOM(IM)+I)=C(2,MATOM(IM)+MATOM(JM)+I)
+               CORD(3,MATOM(IM)+I)=C(3,MATOM(IM)+MATOM(JM)+I)
+               ZANF(  MATOM(IM)+I)=ZAN(MATOM(IM)+MATOM(JM)+I)
+               WRITE(ATMNAM(MATOM(IM)+I),'(A8)')
+     *                            ANAM(MATOM(IM)+MATOM(JM)+I)
+            ENDDO
+            DO I=1,MATOM(JM)
+               CORD(1,MATOM(IM)+NHADDIM+I)=C(1,MATOM(IM)+I)
+               CORD(2,MATOM(IM)+NHADDIM+I)=C(2,MATOM(IM)+I)
+               CORD(3,MATOM(IM)+NHADDIM+I)=C(3,MATOM(IM)+I)
+               ZANF(  MATOM(IM)+NHADDIM+I)=ZAN(MATOM(IM)+I)
+               WRITE(ATMNAM(MATOM(IM)+NHADDIM+I),'(A8)')
+     *                                    ANAM(MATOM(IM)+I)
+            ENDDO
+            DO I=1,NHADDJM
+               CORD(1,MATOM(IM)+MATOM(JM)+NHADDIM+I)=
+     *            C(1,MATOM(IM)+MATOM(JM)+NHADDIM+I)
+               CORD(2,MATOM(IM)+MATOM(JM)+NHADDIM+I)=
+     *            C(2,MATOM(IM)+MATOM(JM)+NHADDIM+I)
+               CORD(3,MATOM(IM)+MATOM(JM)+NHADDIM+I)=
+     *            C(3,MATOM(IM)+MATOM(JM)+NHADDIM+I)
+               ZANF(  MATOM(IM)+MATOM(JM)+NHADDIM+I)=
+     *            ZAN(MATOM(IM)+MATOM(JM)+NHADDIM+I)
+               WRITE(ATMNAM(MATOM(IM)+MATOM(JM)+NHADDIM+I),'(A8)')
+     *                 ANAM(MATOM(IM)+MATOM(JM)+NHADDIM+I)
+            ENDDO
+         END IF
+         DO LLL = 1, NAT
+            ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+         ENDDO
+         DO LLL = 1, NAT
+            IZANF     = NINT(ZANF(LLL))
+            ZMAS(LLL) = RMASS(IZANF)*1822.88850204D+00
+         ENDDO
+C
+         CALL VALFM(LOADFM)
+         MAXMAX    =   MAX0(MXWAGG,MAX0(MXBOND,MAX0(MXANGL,MXDIHR)))
+         LENQMMFF  =   LOADFM     +   1
+         LENBORDER =   LENQMMFF   +   MXFFAT
+         LENLBOND  =   LENBORDER  +   MXBOND
+         LENLISTRIN=   LENLBOND   +10*MXFFAT/NWDVAR + 1
+         LENLISTRIB=   LENLISTRIN +10*MXFFAT/NWDVAR + 1
+         LENNUMRIN =   LENLISTRIB +10*MXFFAT/NWDVAR + 1
+         LENNSBTYP =   LENNUMRIN  +10*MXFFAT/NWDVAR + 1
+         LENNRINTYP=   LENNSBTYP  +   MXANGL/NWDVAR + 1
+         LENNBNDTYP=   LENNRINTYP +   MXFFAT/NWDVAR + 1
+         LENIDATM  =   LENNBNDTYP +   MXBOND/NWDVAR + 1
+         LENIMLTB  =   LENIDATM   + 2*MXMMTP/NWDVAR + 1
+         LENIPILP  =   LENIMLTB   +   MXMMTP/NWDVAR + 1
+         LENIVAL   =   LENIPILP   +   MXMMTP/NWDVAR + 1
+         LENICRD   =   LENIVAL    +   MXMMTP/NWDVAR + 1
+         LENLINH   =   LENICRD    +   MXMMTP/NWDVAR + 1
+         LENNBNDT  =   LENLINH    +   MXMMTP/NWDVAR + 1
+         LENNBNDT2 =   LENNBNDT   + 4*MXFFAT/NWDVAR + 1
+         LENNANGTYP=   LENNBNDT2  + 4*MXFFAT/NWDVAR + 1
+         LENITTN   =   LENNANGTYP +   MXANGL/NWDVAR + 1
+         LENVDWIN  =   LENITTN    +   MXDIHR/NWDVAR + 1
+         LENBNDCAG =   LENVDWIN   + 4*MXMMTP
+         LENPCHAG  =   LENBNDCAG  +   MXBOND
+         LENNLCBND =   LENPCHAG   + 2*MXMMTP
+         LENIADTYP =   LENNLCBND  +   MAXMAX/NWDVAR + 1
+         LENCHARGL =   LENIADTYP  +   MXMMTP/NWDVAR + 1
+         LENANGLBC =   LENCHARGL  +   MXFFAT
+         LENNTYPMP =   LENANGLBC  +      300/NWDVAR + 1
+         LENNMPCNT =   LENNTYPMP  + 5*MXMMTP/NWDVAR + 1
+         LAST      =   LENNMPCNT  + 2*MXMMTP/NWDVAR + 1
+         NEED      =   LAST       -   LOADFM -1
+         CALL GETFM(NEED)
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         IF(MASWRK.AND.NSTEP.LE.1.AND.RUNTYP.NE.HSSIAN) THEN
+           WRITE(IW,'(/1X,79(1H=),/1X,A,I4,A,I4,A)')
+     *       'DIMER ',IM,' AND ',JM,
+     *       ' COORDINATES (MAY HAVE CAPPING H ATOMS AT THE END):'
+           DO IFFAT=1,NFFAT
+             WRITE(IW,'(A8,4X,F5.1,3(1X,F19.13))')
+     *       ATMNAM(IFFAT),ZANF(IFFAT),CORD(1,IFFAT)*TOANGS,
+     *       CORD(2,IFFAT)*TOANGS,CORD(3,IFFAT)*TOANGS
+           ENDDO
+           WRITE(IW,'(1X,79(1H=))')
+         END IF
+         CALL MMFFTYPE(CORD,ZANF,IPAIR,
+     *             KLIST,LLIST,
+     *             NTYPE,XX(LENQMMFF),XX(LENBORDER),
+     *             XX(LENLBOND),XX(LENLISTRIN),
+     *             XX(LENNUMRIN),XX(LENLISTRIB),
+     *             XX(LENNRINTYP),
+     *             XX(LENNBNDT),XX(LENNBNDT2),
+     *             LQATOM,RQATOM,0)
+         CALL MMFFPAR(MXMMTP,ATMNAM,CORD,ZANF,ZMAS,CHARG,POL,
+     *             SIG,EPS,SIG2,EPS2,IPAIR,
+     *             KLIST,LLIST,MLIST,KBLST,
+     *             FCBOND,BOND0,FCANGL,ANGL0,
+     *             FCSTBD,FCWAGG,FCDIHR,
+     *             CLPR,ZLPR,NLPR,
+     *             FCLJTP,NTYPE,XX(LENQMMFF),
+     *             XX(LENLBOND),XX(LENNRINTYP),
+     *             XX(LENNSBTYP),XX(LENNBNDTYP),XX(LENIDATM),
+     *             XX(LENIMLTB),
+     *             XX(LENIPILP),
+     *             XX(LENNBNDT),XX(LENNBNDT2),XX(LENNANGTYP),
+     *             XX(LENITTN),XX(LENVDWIN),XX(LENBNDCAG),
+     *             XX(LENPCHAG),XX(LENNLCBND),XX(LENIADTYP),
+     *             XX(LENCHARGL),
+     *             XX(LENNUMRIN),XX(LENBORDER),XX(LENLISTRIN),
+     *             XX(LENANGLBC),
+     *             XX(LENNTYPMP),XX(LENNMPCNT),XX(LENICRD),XX(LENLINH),
+     *             XX(LENIVAL))
+         DO IFFAT=1,NFFAT
+            SIG(IFFAT)  = SIG (IFFAT)*TOBOHR*1.781797436280679D+00
+            SIG2(IFFAT) = SIG2(IFFAT)*TOBOHR*1.781797436280679D+00
+            EPS(IFFAT)  = 2.0D+00*SQRT(EPS (IFFAT)*TOHART)
+            EPS2(IFFAT) = 2.0D+00*SQRT(EPS2(IFFAT)*TOHART)
+         ENDDO
+         IW = IWSAVE
+         IP = IPSAVE
+         CALL RETFM(NEED)
+C        - ASSIGN POL (MMFF94 HAS ZERO POL) -
+         FACTOR=TOBOHR**3
+         DO IFFAT=1,NFFAT
+            POL(IFFAT) = 0.0000D+00
+            NZ = NINT(ZANF(IFFAT))
+            KT = NTYPE(IFFAT)
+            IF(NZ.EQ. 1) POL(IFFAT) = 0.3930D+00                ! H
+            IF(NZ.EQ. 3) POL(IFFAT) = 0.0320D+00                ! LI+
+            IF(NZ.EQ. 6) POL(IFFAT) = 1.0000D+00                ! C
+            IF(KT.EQ. 1.OR.KT.EQ.20.OR.KT.EQ.22.OR.KT.EQ.30)
+     *                   POL(IFFAT) = 0.8760D+00                ! C SP3
+            IF(KT.EQ. 2.OR.KT.EQ. 3.OR.KT.EQ.37.OR.KT.EQ.78.OR.
+     *         KT.EQ.57.OR.KT.EQ.41.OR.KT.EQ.63.OR.KT.EQ.64.OR.
+     *         KT.EQ.80)
+     *                   POL(IFFAT) = 1.3080D+00                ! C SP2
+            IF(KT.EQ. 4.OR.KT.EQ.60)
+     *                   POL(IFFAT) = 1.3450D+00                ! C SP
+            IF(NZ.EQ. 7) POL(IFFAT) = 0.9000D+00                ! N
+            IF(KT.EQ. 8) POL(IFFAT) = 0.9240D+00                ! N SP3
+            IF(KT.EQ.42) POL(IFFAT) = 0.8550D+00                ! N SP
+            IF(NZ.EQ. 8) POL(IFFAT) = 0.9000D+00                ! O
+            IF(KT.EQ. 6.OR.KT.EQ.70.OR.KT.EQ.59)
+     *                   POL(IFFAT) = 0.9340D+00                ! O SP3
+            IF(KT.EQ. 7) POL(IFFAT) = 0.7810D+00                ! O SP2
+            IF(KT.EQ.32) POL(IFFAT) = 1.2000D+00                ! O SP2 -
+            IF(KT.EQ.35) POL(IFFAT) = 1.5000D+00                ! O SP2 -
+            IF(KT.EQ.49.OR.KT.EQ.51)
+     *                   POL(IFFAT) = 0.7000D+00                ! O +
+            IF(NZ.EQ. 9) POL(IFFAT) = 0.5800D+00                ! F
+            IF(KT.EQ.89) POL(IFFAT) = 2.5000D+00                ! F-
+            IF(NZ.EQ.11) POL(IFFAT) = 0.1570D+00                ! NA+
+            IF(NZ.EQ.12) POL(IFFAT) = 0.0750D+00                ! MG2+
+            IF(NZ.EQ.14) POL(IFFAT) = 3.2050D+00                ! SI
+            IF(NZ.EQ.15) POL(IFFAT) = 3.0580D+00                ! P
+            IF(NZ.EQ.16) POL(IFFAT) = 2.8440D+00                ! S
+            IF(KT.EQ.73) POL(IFFAT) = 7.0000D+00                ! S-
+            IF(KT.EQ.16) POL(IFFAT) = 3.9020D+00                ! S
+            IF(KT.EQ.17) POL(IFFAT) = 2.9620D+00                ! S
+            IF(KT.EQ.18) POL(IFFAT) = 2.6130D+00                ! S
+            IF(KT.EQ.44) POL(IFFAT) = 2.3700D+00                ! S
+            IF(KT.EQ.74) POL(IFFAT) = 2.3200D+00                ! S
+            IF(NZ.EQ.17) POL(IFFAT) = 2.3050D+00                ! CL
+            IF(KT.EQ.90) POL(IFFAT) = 5.5000D+00                ! CL-
+            IF(NZ.EQ.19) POL(IFFAT) = 0.8300D+00                ! K+
+            IF(NZ.EQ.20) POL(IFFAT) = 0.4900D+00                ! CA2+
+            IF(NZ.EQ.26) POL(IFFAT) = 0.5000D+00                ! FE
+            IF(NZ.EQ.29) POL(IFFAT) = 0.5000D+00                ! CU
+            IF(NZ.EQ.30) POL(IFFAT) = 0.6000D+00                ! ZN2+
+            IF(NZ.EQ.35) POL(IFFAT) = 3.2160D+00                ! BR
+            IF(KT.EQ.91) POL(IFFAT) = 7.3000D+00                ! BR-
+            IF(NZ.EQ.53) POL(IFFAT) = 5.0600D+00                ! I
+            POL(IFFAT) = POL(IFFAT)*FACTOR
+         ENDDO
+C        - CHECK MMFF94 CHARGE FOR IM -
+C        IM AND JM HAVE BEEN CHECKED IN THE MONOMER LOOP.
+C        HERE IM AND JM MAY FORM A COVALENT BOND, AND BOTH
+C        HAVE NON-INTEGER CHARGES. SO LOOSE THE CRETIERION.
+C
+         NIONS = 0
+         QSUM  = ZERO
+         DO IFFAT=1,MATOM(IM)+NHADDIM
+            QSUM=QSUM+CHARG(IFFAT)
+            IONZ=INT(ZANF(IFFAT)+1.0D-06)
+            IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *         (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *         (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *         (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+               NIONS = NIONS + 1
+            END IF
+         ENDDO
+         IQSUM=NINT(QSUM)
+         IF(ABS(QSUM-IQSUM).GT.0.3D+00) THEN    !  0.30
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',IM,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         IQDIF=MCHARG(IM)-IQSUM
+         IF(NIONS.EQ.0 .AND. ABS(IQDIF).GT.4) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',IM,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         IF(IQDIF.NE.0) THEN
+            IF(NIONS.EQ.0) THEN
+               QADD = DBLE(IQDIF)/(MATOM(IM)+NHADDIM)
+               DO IFFAT=1,MATOM(IM)+NHADDIM
+                  CHARG(IFFAT)=CHARG(IFFAT)+QADD
+               ENDDO
+            ELSE
+               QADD = DBLE(IQDIF)/NIONS
+               DO IFFAT=1,MATOM(IM)+NHADDIM
+                  IONZ=INT(ZANF(IFFAT)+1.0D-06)
+                  IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *               (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *               (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *               (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+                  CHARG(IFFAT)=CHARG(IFFAT)+QADD
+                  END IF
+               ENDDO
+            END IF
+         END IF
+C        - CHECK MMFF94 CHARGE FOR JM -
+         NIONS = 0
+         QSUM  = ZERO
+         DO IFFAT=MATOM(IM)+NHADDIM+1,NFFAT
+            QSUM=QSUM+CHARG(IFFAT)
+            IONZ=INT(ZANF(IFFAT)+1.0D-06)
+            IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *         (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *         (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *         (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+               NIONS = NIONS + 1
+            END IF
+         ENDDO
+         IQSUM=NINT(QSUM)
+         IF(ABS(QSUM-IQSUM).GT.0.3D+00) THEN    ! 0.30
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',JM,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         IQDIF=MCHARG(JM)-IQSUM
+         IF(NIONS.EQ.0 .AND. ABS(IQDIF).GT.4) THEN
+            IF(MASWRK) WRITE(IW,'(/1X,A,I4,A/)')'ERROR: MONOMER ',JM,
+     *                 ' HAS WRONG MMFF94 CHARGE.'
+            CALL ABRT
+         END IF
+         IF(IQDIF.NE.0) THEN
+            IF(NIONS.EQ.0) THEN
+               QADD = DBLE(IQDIF)/(MATOM(JM)+NHADDJM)
+               DO IFFAT=MATOM(IM)+NHADDIM+1,NFFAT
+                  CHARG(IFFAT)=CHARG(IFFAT)+QADD
+               ENDDO
+            ELSE
+               QADD = DBLE(IQDIF)/NIONS
+               DO IFFAT=MATOM(IM)+NHADDIM+1,NFFAT
+                  IONZ=INT(ZANF(IFFAT)+1.0D-06)
+                  IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *               (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *               (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *               (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+                  CHARG(IFFAT)=CHARG(IFFAT)+QADD
+                  END IF
+               ENDDO
+            END IF
+         END IF
+C
+         IF(IMJMSCF.EQ.1) GOTO 230
+C
+C        - IM-JM DIMER (FAKE QM) -
+C        DETERMINE IM-JM INTERACTION: ONLY LJ, CHARGE, POL.
+C        MUST INCLUDE CAPPING H ATOMS.
+C
+         IYES = 0        !  PRE-CHECK NFIXQM. IF IM AND JM BOTH
+         JYES = 0        !  HAVE AT LEAST ONE ATOM FIXED, NO VIR
+         DO I=1, MATOM(IM)
+          DO J=MATOM(IM)+NHADDIM+1, NAT-NHADDJM
+            DO KFIX=1,NFIXQM
+               IAT = NSTART(IM) + I - 1
+               JAT = NSTART(JM) + J - MATOM(IM)-NHADDIM-1
+               IF(IAT.EQ.IFIXQM(KFIX)) IYES = 1
+               IF(JAT.EQ.IFIXQM(KFIX)) JYES = 1
+            ENDDO
+          ENDDO
+         ENDDO
+C
+         CALL VCLR(EG,1,3*NAT)
+         CALL VCLR(VIR,1,3)
+         ELJIMJM = ZERO
+         ECHIMJM = ZERO
+         EPOIMJM = ZERO
+         DO I=1, MATOM(IM)+NHADDIM
+          DO J=MATOM(IM)+NHADDIM+1, NAT
+C           - LJ -
+            SIGI=SIG(I)
+            EPSI=EPS(I)
+            SIGJ=SIG(J)
+            EPSJ=EPS(J)
+            X   = CORD(1,I) - CORD(1,J)
+            Y   = CORD(2,I) - CORD(2,J)
+            Z   = CORD(3,I) - CORD(3,J)
+            R2  = X*X+Y*Y+Z*Z
+            ONER2  = ONE/R2
+            SIG1   = 0.5D+00*(SIGI+SIGJ)
+            FOUREP = EPSI*EPSJ
+            SIGSQ  = SIG1*SIG1*ONER2
+            DISP   = -SIGSQ*SIGSQ*SIGSQ
+            REP    = DISP*DISP
+            ELJIMJM= ELJIMJM + FOUREP*REP + FOUREP*DISP
+            DUM    =-6.0D+00*FOUREP*(2.0D+00*REP+DISP)*ONER2
+            DEX    = DUM*X
+            DEY    = DUM*Y
+            DEZ    = DUM*Z
+            EG(1,I)= EG(1,I) + DEX
+            EG(2,I)= EG(2,I) + DEY
+            EG(3,I)= EG(3,I) + DEZ
+            EG(1,J)= EG(1,J) - DEX
+            EG(2,J)= EG(2,J) - DEY
+            EG(3,J)= EG(3,J) - DEZ
+            VIR(1) = VIR(1)  + DEX*X
+            VIR(2) = VIR(2)  + DEY*Y
+            VIR(3) = VIR(3)  + DEZ*Z
+            IF(IYES.EQ.1.AND.JYES.EQ.1) THEN
+               VIR(1) = VIR(1)  - DEX*X
+               VIR(2) = VIR(2)  - DEY*Y
+               VIR(3) = VIR(3)  - DEZ*Z
+            END IF
+C           - CHARGE -
+            QI     = CHARG(I)
+            QJ     = CHARG(J)
+            QIQJ   = QI*QJ
+            X      = CORD(1,I) - CORD(1,J)
+            Y      = CORD(2,I) - CORD(2,J)
+            Z      = CORD(3,I) - CORD(3,J)
+            R2     = X*X+Y*Y+Z*Z
+            R      = SQRT(R2)
+            ONER   = ONE/R
+            ONER2  = ONER*ONER
+            ONER3  = ONER2*ONER
+            ECHIMJM= ECHIMJM + QIQJ*ONER
+            DUM    = -QIQJ*ONER3
+            DEX    = DUM*X
+            DEY    = DUM*Y
+            DEZ    = DUM*Z
+            EG(1,I)= EG(1,I) + DEX
+            EG(2,I)= EG(2,I) + DEY
+            EG(3,I)= EG(3,I) + DEZ
+            EG(1,J)= EG(1,J) - DEX
+            EG(2,J)= EG(2,J) - DEY
+            EG(3,J)= EG(3,J) - DEZ
+            VIR(1) = VIR(1)  + DEX*X
+            VIR(2) = VIR(2)  + DEY*Y
+            VIR(3) = VIR(3)  + DEZ*Z
+            IF(IYES.EQ.1.AND.JYES.EQ.1) THEN
+               VIR(1) = VIR(1)  - DEX*X
+               VIR(2) = VIR(2)  - DEY*Y
+               VIR(3) = VIR(3)  - DEZ*Z
+            END IF
+          ENDDO
+         ENDDO
+C        -- POL --
+C        - FIELD1: FIELD AT POL DUE TO MM CHARGE -
+         CALL VCLR(FIELD1,1,3*NAT)
+         DO I=1, MATOM(IM)+NHADDIM
+          DO J=MATOM(IM)+NHADDIM+1, NAT
+            QI    = CHARG(I)
+            QJ    = CHARG(J)
+            X     = CORD(1,I) - CORD(1,J)
+            Y     = CORD(2,I) - CORD(2,J)
+            Z     = CORD(3,I) - CORD(3,J)
+            R2    = X*X+Y*Y+Z*Z
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            DUMI  = QJ*ONER3
+            DUMJ  = QI*ONER3
+            FIELD1(1,I)=FIELD1(1,I)+DUMI*X
+            FIELD1(2,I)=FIELD1(2,I)+DUMI*Y
+            FIELD1(3,I)=FIELD1(3,I)+DUMI*Z
+            FIELD1(1,J)=FIELD1(1,J)-DUMJ*X
+            FIELD1(2,J)=FIELD1(2,J)-DUMJ*Y
+            FIELD1(3,J)=FIELD1(3,J)-DUMJ*Z
+          ENDDO
+         ENDDO
+C        - COMPUTE DIPOLES AND POLARIZATION ENERGY -
+         DO I=1,NAT
+            DIP(1,I)=POL(I)*FIELD1(1,I)
+            DIP(2,I)=POL(I)*FIELD1(2,I)
+            DIP(3,I)=POL(I)*FIELD1(3,I)
+C           -- ONLY EXTRENAL FIELD SHOULD BE USED
+            EPOIMJM = EPOIMJM - FIELD1(1,I)*DIP(1,I)
+     *                        - FIELD1(2,I)*DIP(2,I)
+     *                        - FIELD1(3,I)*DIP(3,I)
+         ENDDO
+         EPOIMJM = PT5*EPOIMJM
+C        - COMPUTE GRADIENTS -
+         DO I=1, MATOM(IM)+NHADDIM
+          DO J=MATOM(IM)+NHADDIM+1, NAT
+            QI    = CHARG(I)
+            QJ    = CHARG(J)
+            DIPIX = DIP(1,I)
+            DIPIY = DIP(2,I)
+            DIPIZ = DIP(3,I)
+            DIPJX = DIP(1,J)
+            DIPJY = DIP(2,J)
+            DIPJZ = DIP(3,J)
+            X     = CORD(1,I) - CORD(1,J)
+            Y     = CORD(2,I) - CORD(2,J)
+            Z     = CORD(3,I) - CORD(3,J)
+            R2    = X*X+Y*Y+Z*Z
+            R     = SQRT(R2)
+            ONER  = ONE/R
+            ONER2 = ONER*ONER
+            ONER3 = ONER2*ONER
+            ONER5 = ONER2*ONER3
+C           - FORCES BETWEEN CHARGE AND DIPOLE
+            QIDOT  = THREE*ONER5*(DIPJX*X+DIPJY*Y+DIPJZ*Z)*QI
+            QJDOT  = THREE*ONER5*(DIPIX*X+DIPIY*Y+DIPIZ*Z)*QJ
+            QIONER3= QI*ONER3
+            QJONER3= QJ*ONER3
+C              NEGATIVE FORCE ON QI BY DIPJ
+            DXI   = DIPJX*QIONER3 - QIDOT*X
+            DYI   = DIPJY*QIONER3 - QIDOT*Y
+            DZI   = DIPJZ*QIONER3 - QIDOT*Z
+C              NEGATIVE FORCE ON QJ BY DIPI
+C                       FORCE ON DIPI BY QJ
+            DXJ   = DIPIX*QJONER3 - QJDOT*X
+            DYJ   = DIPIY*QJONER3 - QJDOT*Y
+            DZJ   = DIPIZ*QJONER3 - QJDOT*Z
+C              NEGATIVE FORCE ON IAT
+            DEX    = DXI - DXJ
+            DEY    = DYI - DYJ
+            DEZ    = DZI - DZJ
+            EG(1,I)= EG(1,I) + DEX
+            EG(2,I)= EG(2,I) + DEY
+            EG(3,I)= EG(3,I) + DEZ
+            EG(1,J)= EG(1,J) - DEX
+            EG(2,J)= EG(2,J) - DEY
+            EG(3,J)= EG(3,J) - DEZ
+            VIR(1) = VIR(1)  + DEX*X
+            VIR(2) = VIR(2)  + DEY*Y
+            VIR(3) = VIR(3)  + DEZ*Z
+            IF(IYES.EQ.1.AND.JYES.EQ.1) THEN
+               VIR(1) = VIR(1)  - DEX*X
+               VIR(2) = VIR(2)  - DEY*Y
+               VIR(3) = VIR(3)  - DEZ*Z
+            END IF
+          ENDDO
+         ENDDO
+         EIMJM = EMONO(IM)+EMONO(JM)+ELJIMJM+ECHIMJM+EPOIMJM
+C
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4,A,I4,A)')
+     *   'QUANPOL IDIMER: DIMER QM ',IM,' AND ',JM,' (SKIP SCF)'
+         IF(MASWRK)WRITE(IW,'(1X,A,I6,A,F22.10/
+     *                        1X,A,I6,A,F22.10/
+     *                        1X,A,F22.10/
+     *                        1X,A,F22.10/
+     *                        1X,A,F22.10/
+     *                        1X,A,F22.10/
+     *                        1X,61(1H-)/)')
+     *   'MONOMER ',IM,'  ENERGY =',EMONO(IM),
+     *   'MONOMER ',JM,'  ENERGY =',EMONO(JM),
+     *   'LJ              ENERGY =',ELJIMJM,
+     *   'CHARGE          ENERGY =',ECHIMJM,
+     *   'POLARIZATION    ENERGY =',EPOIMJM,
+     *   'ESTIMATED TOTAL ENERGY =',EIMJM
+         IW = IWSAVE
+         IP = IPSAVE
+C
+C        - SAVE IM-JM DIMER (FAKE QM) ENERGY/GRADIENT -
+         EDIMR=EDIMR+EMONO(IM)+EMONO(JM)+ELJIMJM+ECHIMJM+EPOIMJM
+         IF(IM.EQ.1.AND.TDDFTYPSV.NE.RNONE) THEN
+            DO II=0,NSTAT
+               EDIMRST(II+1) = EDIMRST(II+1) +
+     *               EMONO(IM)+EMONO(JM)+ELJIMJM+ECHIMJM+EPOIMJM
+     *              +EMONOST(II+1) - EMONOST(NTHST+1)
+            ENDDO
+         END IF
+         DO IAT=1,MATOM(IM)   !  IGNORE CAPPING H ATOMS
+            JAT = NSTART(IM)+IAT-1
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+GMONOQ(1,JAT,IM)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+GMONOQ(2,JAT,IM)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+GMONOQ(3,JAT,IM)+EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+1,MATOM(IM)+NHADDIM  ! NOW CAPPING H ATOMS
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,NATX
+               X=CORD(1,IAT)-CX(1,J)   !  MUST USE CORD, NOT C
+               Y=CORD(2,IAT)-CX(2,J)
+               Z=CORD(3,IAT)-CX(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            JAT = KK
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+GMONOQ(1,JAT,IM)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+GMONOQ(2,JAT,IM)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+GMONOQ(3,JAT,IM)+EG(3,IAT)
+         ENDDO
+         DO IAT=MATOM(IM)+NHADDIM+1,NAT-NHADDJM  !  IGNORE CAPPING H ATOMS
+            JAT = NSTART(JM)+IAT-MATOM(IM)-NHADDIM-1
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+GMONOQ(1,JAT,JM)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+GMONOQ(2,JAT,JM)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+GMONOQ(3,JAT,JM)+EG(3,IAT)
+         ENDDO
+         DO IAT=NAT-NHADDJM+1,NAT     ! NOW CAPPING H ATOMS
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,NATX
+               X=CORD(1,IAT)-CX(1,J)   !  MUST USE CORD, NOT C
+               Y=CORD(2,IAT)-CX(2,J)
+               Z=CORD(3,IAT)-CX(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            JAT = KK
+            GDIMRQ(1,JAT)=GDIMRQ(1,JAT)+GMONOQ(1,JAT,JM)+EG(1,IAT)
+            GDIMRQ(2,JAT)=GDIMRQ(2,JAT)+GMONOQ(2,JAT,JM)+EG(2,IAT)
+            GDIMRQ(3,JAT)=GDIMRQ(3,JAT)+GMONOQ(3,JAT,JM)+EG(3,IAT)
+         ENDDO
+         VIRDIMR(1) = VIR(1) + VIRMONO(1,IM) + VIRMONO(1,JM)
+         VIRDIMR(2) = VIR(2) + VIRMONO(2,IM) + VIRMONO(2,JM)
+         VIRDIMR(3) = VIR(3) + VIRMONO(3,IM) + VIRMONO(3,JM)
+C
+  230    CONTINUE
+C
+C        - MI-MJ DIMER (MM) -
+C
+C        IMPLEMENT IM+JM MMFF94 MODEL (CHARGE + POL) INTO THE GIANT MM.
+C        WHEN GENERATING THE MMFF94 PARAMETERS, THE MM PARAMETERS
+C        ARE DESTROYED. MUST RESTORE. WHEN RESTORE, CAREFULLY USE
+C        THE MMFF94 CHARGE AND POL. THE CHARGE OF THE CAPPING H ATOMS
+C        ARE ABSOBED BY THEIR HEAVY ATOMS.
+C
+C        - ABSORB CAPPING H ATOM CHARGE -
+         DO I=MATOM(IM)+1,MATOM(IM)+NHADDIM
+            R0 = 1.0D+20
+            KK = 0
+            DO J=1,MATOM(IM)
+               X=CORD(1,I)-CORD(1,J)
+               Y=CORD(2,I)-CORD(2,J)
+               Z=CORD(3,I)-CORD(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            CHARG(KK) = CHARG(KK) + CHARG(I)
+            CHARG(I)  = ZERO
+         ENDDO
+         DO I=MATOM(IM)+NHADDIM+MATOM(JM)+1,
+     *        MATOM(IM)+NHADDIM+MATOM(JM)+NHADDJM
+            R0 = 1.0D+20
+            KK = 0
+            DO J=MATOM(IM)+NHADDIM+1,MATOM(IM)+NHADDIM+MATOM(JM)
+               X=CORD(1,I)-CORD(1,J)
+               Y=CORD(2,I)-CORD(2,J)
+               Z=CORD(3,I)-CORD(3,J)
+               R2=X*X+Y*Y+Z*Z
+               IF(R2.LT.R0) THEN
+                  KK = J
+                  R0 = R2
+               END IF
+            ENDDO
+            CHARG(KK) = CHARG(KK) + CHARG(I)
+            CHARG(I)  = ZERO
+         ENDDO
+C
+C        - RESTORE MM FORCE FIELD PARAMETERS -
+         NFFAT = NFFATX5
+         NBOND = NBONDX5
+         NANGL = NANGLX5
+         NDIHR = NDIHRX5
+         NDIHB = NDIHBX5
+         NCMAP = NCMAPX5
+         NWAGG = NWAGGX5
+         DO IFFAT=1,NFFAT
+            ATMNAM(IFFAT)=ATMNAMX5(IFFAT)
+         ENDDO
+         CALL DCOPY(  MXFFAT,  CHARG     ,1,   ZANF,1)   !  BORROW
+         CALL DCOPY(  MXFFAT,  POL       ,1,   ZMAS,1)   !  BORROW
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)   !  ORIGINAL IAT
+            IF(IAT.GE.NSTART(IM) .AND. IAT.LE.NSTART(IM+1)-1)THEN
+               JAT = IAT - NSTART(IM) + 1   ! CURRENT JAT=1, MATOM(IM)
+               CHARG(IFFAT) = ZANF(JAT)
+               POL  (IFFAT) = ZMAS(JAT)
+            ELSE IF(IAT.GE.NSTART(JM) .AND. IAT.LE.NSTART(JM+1)-1)THEN
+               JAT = IAT - NSTART(JM) + MATOM(IM) + NHADDIM + 1  ! JAT=MATOM(IM)+NHADDIM+1,
+               CHARG(IFFAT) = ZANF(JAT)
+               POL  (IFFAT) = ZMAS(JAT)
+            ELSE
+               CHARG(IFFAT) = CHARGX5(IFFAT)
+               POL  (IFFAT) = POLX5  (IFFAT)
+            END IF
+         ENDDO
+         CALL DCOPY(3*MXFFAT,  CORDX5    ,1,   CORD,1)
+         CALL DCOPY(  MXFFAT,  ZANFX5    ,1,   ZANF,1)
+         CALL DCOPY(  MXFFAT,  ZMASX5    ,1,   ZMAS,1)
+         CALL DCOPY(  MXFFAT,  ONEMASX5  ,1, ONEMAS,1)
+C        CALL DCOPY(  MXFFAT,  CHARGX5   ,1,  CHARG,1)   !  BLOCK
+C        CALL DCOPY(  MXFFAT,  POLX5     ,1,    POL,1)   !  BLOCK
+         CALL DCOPY(  MXFFAT,  SIGX5     ,1,    SIG,1)
+         CALL DCOPY(  MXFFAT,  EPSX5     ,1,    EPS,1)
+         CALL DCOPY(  MXFFAT,  SIG2X5    ,1,   SIG2,1)
+         CALL DCOPY(  MXFFAT,  EPS2X5    ,1,   EPS2,1)
+         CALL DCOPY(  MXBOND,  BOND0X5   ,1,  BOND0,1)
+         CALL DCOPY(  MXBOND,  FCBONDX5  ,1, FCBOND,1)
+         CALL DCOPY(  MXANGL,  ANGL0X5   ,1,  ANGL0,1)
+         CALL DCOPY(  MXANGL,  FCANGLX5  ,1, FCANGL,1)
+         CALL DCOPY(  MXWAGG,  FCWAGGX5  ,1, FCWAGG,1)
+         CALL DCOPY(  MXDIHR,  VROTX5    ,1,   VROT,1)
+         CALL ICOPY(  MXDIHR,  NNNX5     ,1,    NNN,1)
+         CALL DCOPY(  MXDIHR,  GAMAX5    ,1,   GAMA,1)
+         CALL ICOPY(2*MXBOND,  IPAIRX5   ,1,  IPAIR,1)
+         CALL DCOPY(  MXDIHB,  DIHB0X5   ,1,  DIHB0,1)
+         CALL DCOPY(  MXDIHB,  FCDIHBX5  ,1, FCDIHB,1)
+         CALL ICOPY(3*MXANGL,  KLISTX5   ,1,  KLIST,1)
+         CALL ICOPY(4*MXDIHR,  LLISTX5   ,1,  LLIST,1)
+         CALL ICOPY(4*MXWAGG,  MLISTX5   ,1,  MLIST,1)
+         CALL ICOPY(4*MXDIHB,  NLISTX5   ,1,  NLIST,1)
+         CALL ICOPY(6*MXCMAP,  MAPLSTX5  ,1, MAPLST,1)
+         CALL DCOPY(3*MXFFAT,  VELX5     ,1,    VEL,1)
+         CALL DCOPY(4*MXFFAT,  CLPRX5    ,1,   CLPR,1)
+         CALL DCOPY(4*MXFFAT,  ZLPRX5    ,1,   ZLPR,1)
+         CALL ICOPY(  MXFFAT,  NLPRX5    ,1,   NLPR,1)
+         CALL DCOPY(3*MXATM,   QMVELX5   ,1,  QMVEL,1)
+         CALL DCOPY(2*MXANGL,  KBLSTX5   ,1,  KBLST,1)
+         CALL DCOPY(2*MXANGL,  FCSTBDX5  ,1, FCSTBD,1)
+         CALL DCOPY(3*MXDIHR,  FCDIHRX5  ,1, FCDIHR,1)
+         CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTPX5,1, FCLJTP,1)
+         CALL ICOPY(  MXFFAT,  NTYPEX5   ,1,  NTYPE,1)
+         CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213JX5,1,L1213J,1)
+C
+C        - TURN OFF THE MM -
+C        SIMPLY ZERO OFF CHARGE, POL, IFIXSOL OF MM
+C
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)     !  ORIGINAL IAT
+            IF((IAT.GE.NSTART(IM) .AND. IAT.LE.NSTART(IM+1)-1).OR.
+     *         (IAT.GE.NSTART(JM) .AND. IAT.LE.NSTART(JM+1)-1))THEN
+            ELSE
+               CHARG(IFFAT) = ZERO
+               POL  (IFFAT) = ZERO
+            END IF
+         ENDDO
+         NATSV     = NAT
+         NAT       = 0         !  PURE MM, NO QM
+         IFIXSOLSV = IFIXSOL
+         IDOLJSV   = IDOLJ
+         IDOCMAPSV = IDOCMAP
+         L2BONDSV  = L2BOND
+         L2ANGLSV  = L2ANGL
+         L2DIHRSV  = L2DIHR
+         L2DIHBSV  = L2DIHB
+         L2WAGGSV  = L2WAGG
+         IFIXSOL   = 0
+         ENFIXSO   = ZERO
+         IDOLJ     = 0
+         IDOCMAP   = 0
+         L2BOND    = 0
+         L2ANGL    = 0
+         L2DIHR    = 0
+         L2DIHB    = 0
+         L2WAGG    = 0
+         DO I=N1213JMM+1,N1213J    !  TURN OFF EXCLUSION FOR QM
+            L1213J(1,I) = 0
+            L1213J(2,I) = 0
+         ENDDO
+         IDOPOLSV  = IDOPOL
+         IDOPOL    = 100
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+         IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+         IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A,I4,A,I4,A/1X,61(1H-)/)')
+     *   'QUANPOL IDIMER: DIMER ',IM,' AND ',JM,' BOTH MM(CHARGE,POL)'
+         CALL FFGRADX
+         IW = IWSAVE
+         IP = IPSAVE
+         DO I=N1213JMM+1,N1213J    !  TURN ON EXCLUSION FOR QM
+            L1213J(1,I) = L1213JX5(1,I)
+            L1213J(2,I) = L1213JX5(2,I)
+         ENDDO
+         IDOPOL    = IDOPOLSV
+         IFIXSOL   = IFIXSOLSV
+         IDOLJ     = IDOLJSV
+         IDOCMAP   = IDOCMAPSV
+         L2BOND    = L2BONDSV
+         L2ANGL    = L2ANGLSV
+         L2DIHR    = L2DIHRSV
+         L2DIHB    = L2DIHBSV
+         L2WAGG    = L2WAGGSV
+         NAT       = NATSV
+C        - SAVE MI-MJ DIMER (MM) ENERGY/GRADIENT -
+         E2DIMR = E2DIMR + ENPOT
+         DO IFFAT=1,NFFAT
+            IAT = LISTQM(IFFAT)
+            IF(IAT.GT.0)THEN ! QM ATOMS, NO CAPPING H, NO MM ATOMS
+               G2DIMRQ(1,IAT)=G2DIMRQ(1,IAT)+FFGRD2(1,IFFAT)
+               G2DIMRQ(2,IAT)=G2DIMRQ(2,IAT)+FFGRD2(2,IFFAT)
+               G2DIMRQ(3,IAT)=G2DIMRQ(3,IAT)+FFGRD2(3,IFFAT)
+            END IF
+         ENDDO
+         VIR2DIMR(1) = VIR(1)
+         VIR2DIMR(2) = VIR(2)
+         VIR2DIMR(3) = VIR(3)
+C
+C        - RESTORE MM FORCE FIELD PARAMETERS -
+C
+         NFFAT = NFFATX5
+         NBOND = NBONDX5
+         NANGL = NANGLX5
+         NDIHR = NDIHRX5
+         NDIHB = NDIHBX5
+         NCMAP = NCMAPX5
+         NWAGG = NWAGGX5
+         DO IFFAT=1,NFFAT
+            ATMNAM(IFFAT)=ATMNAMX5(IFFAT)
+         ENDDO
+         CALL DCOPY(3*MXFFAT,  CORDX5    ,1,   CORD,1)
+         CALL DCOPY(  MXFFAT,  ZANFX5    ,1,   ZANF,1)
+         CALL DCOPY(  MXFFAT,  ZMASX5    ,1,   ZMAS,1)
+         CALL DCOPY(  MXFFAT,  ONEMASX5  ,1, ONEMAS,1)
+         CALL DCOPY(  MXFFAT,  CHARGX5   ,1,  CHARG,1)
+         CALL DCOPY(  MXFFAT,  POLX5     ,1,    POL,1)
+         CALL DCOPY(  MXFFAT,  SIGX5     ,1,    SIG,1)
+         CALL DCOPY(  MXFFAT,  EPSX5     ,1,    EPS,1)
+         CALL DCOPY(  MXFFAT,  SIG2X5    ,1,   SIG2,1)
+         CALL DCOPY(  MXFFAT,  EPS2X5    ,1,   EPS2,1)
+         CALL DCOPY(  MXBOND,  BOND0X5   ,1,  BOND0,1)
+         CALL DCOPY(  MXBOND,  FCBONDX5  ,1, FCBOND,1)
+         CALL DCOPY(  MXANGL,  ANGL0X5   ,1,  ANGL0,1)
+         CALL DCOPY(  MXANGL,  FCANGLX5  ,1, FCANGL,1)
+         CALL DCOPY(  MXWAGG,  FCWAGGX5  ,1, FCWAGG,1)
+         CALL DCOPY(  MXDIHR,  VROTX5    ,1,   VROT,1)
+         CALL ICOPY(  MXDIHR,  NNNX5     ,1,    NNN,1)
+         CALL DCOPY(  MXDIHR,  GAMAX5    ,1,   GAMA,1)
+         CALL ICOPY(2*MXBOND,  IPAIRX5   ,1,  IPAIR,1)
+         CALL DCOPY(  MXDIHB,  DIHB0X5   ,1,  DIHB0,1)
+         CALL DCOPY(  MXDIHB,  FCDIHBX5  ,1, FCDIHB,1)
+         CALL ICOPY(3*MXANGL,  KLISTX5   ,1,  KLIST,1)
+         CALL ICOPY(4*MXDIHR,  LLISTX5   ,1,  LLIST,1)
+         CALL ICOPY(4*MXWAGG,  MLISTX5   ,1,  MLIST,1)
+         CALL ICOPY(4*MXDIHB,  NLISTX5   ,1,  NLIST,1)
+         CALL ICOPY(6*MXCMAP,  MAPLSTX5  ,1, MAPLST,1)
+         CALL DCOPY(3*MXFFAT,  VELX5     ,1,    VEL,1)
+         CALL DCOPY(4*MXFFAT,  CLPRX5    ,1,   CLPR,1)
+         CALL DCOPY(4*MXFFAT,  ZLPRX5    ,1,   ZLPR,1)
+         CALL ICOPY(  MXFFAT,  NLPRX5    ,1,   NLPR,1)
+         CALL DCOPY(3*MXATM,   QMVELX5   ,1,  QMVEL,1)
+         CALL DCOPY(2*MXANGL,  KBLSTX5   ,1,  KBLST,1)
+         CALL DCOPY(2*MXANGL,  FCSTBDX5  ,1, FCSTBD,1)
+         CALL DCOPY(3*MXDIHR,  FCDIHRX5  ,1, FCDIHR,1)
+         CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTPX5,1, FCLJTP,1)
+         CALL ICOPY(  MXFFAT,  NTYPEX5   ,1,  NTYPE,1)
+         CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213JX5,1,L1213J,1)
+C
+  210 CONTINUE
+  200 CONTINUE
+C
+C
+C     - RESTORE QM MOLECULAR INFORMATION -
+C
+      NAT    =  NATX
+      ICH    =  ICHX
+      MUL    =  MULX
+      NUM    =  NUMX
+      NQMT   =  NQMTX
+      NE     =  NEX
+      NA     =  NAX
+      NB     =  NBX
+      IECP   =  IECPX
+      IMCORE =  IMCOREX
+      DO III  =  1, NATX
+         ZAN(III) = ZANX(III)
+         DO JJJ = 1, 6
+            KFRST(III,JJJ) = KFRSTX(III,JJJ)
+            KLAST(III,JJJ) = KLASTX(III,JJJ)
+         ENDDO
+         LMAX(III) = LMAXSV(III)
+         LPSKIP(III)= LPSKIPX(III)
+         IZCORE(III)= IZCOREX(III)
+         C(1,III) = CX(1,III)
+         C(2,III) = CX(2,III)
+         C(3,III) = CX(3,III)
+         IAN(III) = IANX(III)
+         ANAM(III)= ANAMX(III)
+      ENDDO
+      DO III = 1, 400
+         CLP(III) = CLPX(III)
+         ZLP(III) = ZLPX(III)
+         NLP(III) = NLPX(III)
+      ENDDO
+      DO III  =  1, MXGTOT
+         EX(III)  = EXX(III)
+         CS(III)  = CSX(III)
+         CP(III)  = CPX(III)
+         CD(III)  = CDX(III)
+         CF(III)  = CFX(III)
+         CG(III)  = CGX(III)
+         CH(III)  = CHX(III)
+         CI(III)  = CIX(III)
+      ENDDO
+      DO III  =  1, MXSH
+         KSTART(III)  = KSTARTX(III)
+         KATOM(III)   = KATOMX(III)
+         KTYPE(III)   = KTYPEX(III)
+         KNG(III)     = KNGX(III)
+         KLOC(III)    = KLOCX(III)
+         MIN(III)     = MINX(III)
+         MAX(III)     = MAXX(III)
+      ENDDO
+      NSHELL = NSHELLX
+C
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+      ENDDO
+      CALL SETLAB(1,CDUMMY)
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+      ENDDO
+C
+      CALL ICOPY(MXATM ,MPTYPX ,1, MPTYP ,1)
+      CALL DCOPY(MXMPA ,AN0X   ,1, AN0   ,1)
+      CALL DCOPY(MXMPA ,ALPN0X ,1, ALPN0 ,1)
+      CALL DCOPY(MXMPA ,AN1X   ,1, AN1   ,1)
+      CALL DCOPY(MXMPA ,ALPN1X ,1, ALPN1 ,1)
+      CALL ICOPY(MXATM ,MPSKPX ,1, MPSKP ,1)
+      CALL ICOPY(MXATM ,NOAN0X ,1, NOAN0 ,1)
+      CALL ICOPY(MXATM ,NOAN1X ,1, NOAN1 ,1)
+      CALL DCOPY(MXMPSH,BPARX  ,1, BPAR  ,1)
+      CALL DCOPY(MXMPGT,EXPMPX ,1, EXPMP ,1)
+      CALL DCOPY(MXMPGT,CSMPX  ,1, CSMP  ,1)
+      CALL DCOPY(MXMPGT,CPMPX  ,1, CPMP  ,1)
+      CALL DCOPY(MXMPGT,CDMPX  ,1, CDMP  ,1)
+      CALL DCOPY(MXMPGT,CFMPX  ,1, CFMP  ,1)
+      CALL ICOPY(MXATM ,MPSKIPX,1, MPSKIP,1)
+      CALL ICOPY(MXATM ,NOCOSHX,1, NOCOSH,1)
+      CALL ICOPY(MXMPSH,MPKSTAX,1, MPKSTA,1)
+      CALL ICOPY(MXMPSH,MPKNGX ,1, MPKNG ,1)
+      CALL ICOPY(MXMPSH,MPKTYPX,1, MPKTYP,1)
+      CALL ICOPY(MXMPSH,MPKMINX,1, MPKMIN,1)
+      CALL ICOPY(MXMPSH,MPKMAXX,1, MPKMAX,1)
+      CALL ICOPY(MXMPSH,MPKLOCX,1, MPKLOC,1)
+C     - END OF RESTORE QM MOLECULAR INFORMATION -
+C
+C
+C     ----------------------------------------------
+C     - FINALLY RUN MM FOR THE ENTIRE QM/MM SYSTEM -
+C     ----------------------------------------------
+C
+C     IMPLEMENT QM MMFF94 MODEL (CHARGE + POL) INTO THE GIANT MM.
+C     WHEN GENERATING THE MMFF94 PARAMETERS, THE MM PARAMETERS
+C     ARE DESTROYED. MUST RESTORE. WHEN RESTORE, CAREFULLY USE
+C     THE MMFF94 CHARGE AND POL.
+C
+C     - GENERATE MMFF94 MODEL FOR ALL QM ATOMS -
+C
+      NFFAT = NAT
+      CALL DCOPY(3*NFFAT, C    ,1, CORD,1)
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+      ENDDO
+      CALL DCOPY(  NFFAT, ZAN  ,1, ZANF,1)
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+      ENDDO
+      DO LLL = 1, NAT
+         WRITE(ATMNAM(LLL),'(A8)')ANAM(LLL)
+         IZANF     = NINT(ZANF(LLL))
+         ZMAS(LLL) = RMASS(IZANF)*1822.88850204D+00
+      ENDDO
+      CALL VALFM(LOADFM)
+      MAXMAX    =   MAX0(MXWAGG,MAX0(MXBOND,MAX0(MXANGL,MXDIHR)))
+      LENQMMFF  =   LOADFM     +   1
+      LENBORDER =   LENQMMFF   +   MXFFAT
+      LENLBOND  =   LENBORDER  +   MXBOND
+      LENLISTRIN=   LENLBOND   +10*MXFFAT/NWDVAR + 1
+      LENLISTRIB=   LENLISTRIN +10*MXFFAT/NWDVAR + 1
+      LENNUMRIN =   LENLISTRIB +10*MXFFAT/NWDVAR + 1
+      LENNSBTYP =   LENNUMRIN  +10*MXFFAT/NWDVAR + 1
+      LENNRINTYP=   LENNSBTYP  +   MXANGL/NWDVAR + 1
+      LENNBNDTYP=   LENNRINTYP +   MXFFAT/NWDVAR + 1
+      LENIDATM  =   LENNBNDTYP +   MXBOND/NWDVAR + 1
+      LENIMLTB  =   LENIDATM   + 2*MXMMTP/NWDVAR + 1
+      LENIPILP  =   LENIMLTB   +   MXMMTP/NWDVAR + 1
+      LENIVAL   =   LENIPILP   +   MXMMTP/NWDVAR + 1
+      LENICRD   =   LENIVAL    +   MXMMTP/NWDVAR + 1
+      LENLINH   =   LENICRD    +   MXMMTP/NWDVAR + 1
+      LENNBNDT  =   LENLINH    +   MXMMTP/NWDVAR + 1
+      LENNBNDT2 =   LENNBNDT   + 4*MXFFAT/NWDVAR + 1
+      LENNANGTYP=   LENNBNDT2  + 4*MXFFAT/NWDVAR + 1
+      LENITTN   =   LENNANGTYP +   MXANGL/NWDVAR + 1
+      LENVDWIN  =   LENITTN    +   MXDIHR/NWDVAR + 1
+      LENBNDCAG =   LENVDWIN   + 4*MXMMTP
+      LENPCHAG  =   LENBNDCAG  +   MXBOND
+      LENNLCBND =   LENPCHAG   + 2*MXMMTP
+      LENIADTYP =   LENNLCBND  +   MAXMAX/NWDVAR + 1
+      LENCHARGL =   LENIADTYP  +   MXMMTP/NWDVAR + 1
+      LENANGLBC =   LENCHARGL  +   MXFFAT
+      LENNTYPMP =   LENANGLBC  +      300/NWDVAR + 1
+      LENNMPCNT =   LENNTYPMP  + 5*MXMMTP/NWDVAR + 1
+      LAST      =   LENNMPCNT  + 2*MXMMTP/NWDVAR + 1
+      NEED      =   LAST       -   LOADFM -1
+      CALL GETFM(NEED)
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+      CALL MMFFTYPE(CORD,ZANF,IPAIR,
+     *          KLIST,LLIST,
+     *          NTYPE,XX(LENQMMFF),XX(LENBORDER),
+     *          XX(LENLBOND),XX(LENLISTRIN),
+     *          XX(LENNUMRIN),XX(LENLISTRIB),
+     *          XX(LENNRINTYP),
+     *          XX(LENNBNDT),XX(LENNBNDT2),
+     *          LQATOM,RQATOM,0)
+      CALL MMFFPAR(MXMMTP,ATMNAM,CORD,ZANF,ZMAS,CHARG,POL,
+     *          SIG,EPS,SIG2,EPS2,IPAIR,
+     *          KLIST,LLIST,MLIST,KBLST,
+     *          FCBOND,BOND0,FCANGL,ANGL0,
+     *          FCSTBD,FCWAGG,FCDIHR,
+     *          CLPR,ZLPR,NLPR,
+     *          FCLJTP,NTYPE,XX(LENQMMFF),
+     *          XX(LENLBOND),XX(LENNRINTYP),
+     *          XX(LENNSBTYP),XX(LENNBNDTYP),XX(LENIDATM),
+     *          XX(LENIMLTB),
+     *          XX(LENIPILP),
+     *          XX(LENNBNDT),XX(LENNBNDT2),XX(LENNANGTYP),
+     *          XX(LENITTN),XX(LENVDWIN),XX(LENBNDCAG),
+     *          XX(LENPCHAG),XX(LENNLCBND),XX(LENIADTYP),
+     *          XX(LENCHARGL),
+     *          XX(LENNUMRIN),XX(LENBORDER),XX(LENLISTRIN),
+     *          XX(LENANGLBC),
+     *          XX(LENNTYPMP),XX(LENNMPCNT),XX(LENICRD),XX(LENLINH),
+     *          XX(LENIVAL))
+      IW = IWSAVE
+      IP = IPSAVE
+      CALL RETFM(NEED)
+C     - ASSIGN POL (MMFF94 HAS ZERO POL) -
+      FACTOR=TOBOHR**3
+      DO IFFAT=1,NFFAT
+            POL(IFFAT) = 0.0000D+00
+            NZ = NINT(ZANF(IFFAT))
+            KT = NTYPE(IFFAT)
+            IF(NZ.EQ. 1) POL(IFFAT) = 0.3930D+00                ! H
+            IF(NZ.EQ. 3) POL(IFFAT) = 0.0320D+00                ! LI+
+            IF(NZ.EQ. 6) POL(IFFAT) = 1.0000D+00                ! C
+            IF(KT.EQ. 1.OR.KT.EQ.20.OR.KT.EQ.22.OR.KT.EQ.30)
+     *                   POL(IFFAT) = 0.8760D+00                ! C SP3
+            IF(KT.EQ. 2.OR.KT.EQ. 3.OR.KT.EQ.37.OR.KT.EQ.78.OR.
+     *         KT.EQ.57.OR.KT.EQ.41.OR.KT.EQ.63.OR.KT.EQ.64.OR.
+     *         KT.EQ.80)
+     *                   POL(IFFAT) = 1.3080D+00                ! C SP2
+            IF(KT.EQ. 4.OR.KT.EQ.60)
+     *                   POL(IFFAT) = 1.3450D+00                ! C SP
+            IF(NZ.EQ. 7) POL(IFFAT) = 0.9000D+00                ! N
+            IF(KT.EQ. 8) POL(IFFAT) = 0.9240D+00                ! N SP3
+            IF(KT.EQ.42) POL(IFFAT) = 0.8550D+00                ! N SP
+            IF(NZ.EQ. 8) POL(IFFAT) = 0.9000D+00                ! O
+            IF(KT.EQ. 6.OR.KT.EQ.70.OR.KT.EQ.59)
+     *                   POL(IFFAT) = 0.9340D+00                ! O SP3
+            IF(KT.EQ. 7) POL(IFFAT) = 0.7810D+00                ! O SP2
+            IF(KT.EQ.32) POL(IFFAT) = 1.2000D+00                ! O SP2 -
+            IF(KT.EQ.35) POL(IFFAT) = 1.5000D+00                ! O SP2 -
+            IF(KT.EQ.49.OR.KT.EQ.51)
+     *                   POL(IFFAT) = 0.7000D+00                ! O +
+            IF(NZ.EQ. 9) POL(IFFAT) = 0.5800D+00                ! F
+            IF(KT.EQ.89) POL(IFFAT) = 2.5000D+00                ! F-
+            IF(NZ.EQ.11) POL(IFFAT) = 0.1570D+00                ! NA+
+            IF(NZ.EQ.12) POL(IFFAT) = 0.0750D+00                ! MG2+
+            IF(NZ.EQ.14) POL(IFFAT) = 3.2050D+00                ! SI
+            IF(NZ.EQ.15) POL(IFFAT) = 3.0580D+00                ! P
+            IF(NZ.EQ.16) POL(IFFAT) = 2.8440D+00                ! S
+            IF(KT.EQ.73) POL(IFFAT) = 7.0000D+00                ! S-
+            IF(KT.EQ.16) POL(IFFAT) = 3.9020D+00                ! S
+            IF(KT.EQ.17) POL(IFFAT) = 2.9620D+00                ! S
+            IF(KT.EQ.18) POL(IFFAT) = 2.6130D+00                ! S
+            IF(KT.EQ.44) POL(IFFAT) = 2.3700D+00                ! S
+            IF(KT.EQ.74) POL(IFFAT) = 2.3200D+00                ! S
+            IF(NZ.EQ.17) POL(IFFAT) = 2.3050D+00                ! CL
+            IF(KT.EQ.90) POL(IFFAT) = 5.5000D+00                ! CL-
+            IF(NZ.EQ.19) POL(IFFAT) = 0.8300D+00                ! K+
+            IF(NZ.EQ.20) POL(IFFAT) = 0.4900D+00                ! CA2+
+            IF(NZ.EQ.26) POL(IFFAT) = 0.5000D+00                ! FE
+            IF(NZ.EQ.29) POL(IFFAT) = 0.5000D+00                ! CU
+            IF(NZ.EQ.30) POL(IFFAT) = 0.6000D+00                ! ZN2+
+            IF(NZ.EQ.35) POL(IFFAT) = 3.2160D+00                ! BR
+            IF(KT.EQ.91) POL(IFFAT) = 7.3000D+00                ! BR-
+            IF(NZ.EQ.53) POL(IFFAT) = 5.0600D+00                ! I
+            POL(IFFAT) = POL(IFFAT)*FACTOR
+      ENDDO
+C     - CHECK MMFF94 CHARGE FOR QM -
+      NIONS = 0
+      QSUM  = ZERO
+      DO IFFAT=1,NFFAT
+         QSUM=QSUM+CHARG(IFFAT)
+         IONZ=INT(ZANF(IFFAT)+1.0D-06)
+         IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *      (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *      (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *      (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+            NIONS = NIONS + 1
+         END IF
+      ENDDO
+      IQSUM=NINT(QSUM)
+      IF(ABS(QSUM-IQSUM).GT.1.0D-10) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A,A/)')'ERROR: QM REGION',
+     *              ' HAS WRONG MMFF94 CHARGE.'
+         CALL ABRT
+      END IF
+      IQDIF=ICH-IQSUM
+      IF(NIONS.EQ.0 .AND. ABS(IQDIF).GT.4) THEN
+         IF(MASWRK) WRITE(IW,'(/1X,A,A/)')'ERROR: QM REGION',
+     *              ' HAS WRONG MMFF94 CHARGE.'
+         CALL ABRT
+      END IF
+      IF(IQDIF.NE.0) THEN
+         IF(NIONS.EQ.0) THEN
+            QADD = DBLE(IQDIF)/NFFAT
+            DO IFFAT=1,NFFAT
+               CHARG(IFFAT)=CHARG(IFFAT)+QADD
+            ENDDO
+         ELSE
+            QADD = DBLE(IQDIF)/NIONS
+            DO IFFAT=1,NFFAT
+               IONZ=INT(ZANF(IFFAT)+1.0D-06)
+               IF((IONZ.GE.22.AND.IONZ.LE.29).OR.     !  Ti - Cu
+     *            (IONZ.GE.40.AND.IONZ.LE.50).OR.     !  Zr - Sn
+     *            (IONZ.GE.58.AND.IONZ.LE.82).OR.     !  Ce - Pb
+     *            (IONZ.GE.90.AND.IONZ.LE.118)) THEN  !  Th -
+               CHARG(IFFAT)=CHARG(IFFAT)+QADD
+               END IF
+            ENDDO
+         END IF
+      END IF
+C
+C     - RESTORE MM FORCE FIELD PARAMETERS -
+C
+      NFFAT = NFFATX5
+      NBOND = NBONDX5
+      NANGL = NANGLX5
+      NDIHR = NDIHRX5
+      NDIHB = NDIHBX5
+      NCMAP = NCMAPX5
+      NWAGG = NWAGGX5
+      DO IFFAT=1,NFFAT
+         ATMNAM(IFFAT)=ATMNAMX5(IFFAT)
+      ENDDO
+      CALL DCOPY(  MXFFAT,  CHARG     ,1,   ZANF,1)   !  BORROW
+      CALL DCOPY(  MXFFAT,  POL       ,1,   ZMAS,1)   !  BORROW
+      DO IFFAT=1,NFFAT
+         IAT = LISTQM(IFFAT)   !  ORIGINAL IAT
+         IF(IAT.GT.0) THEN
+            CHARG(IFFAT) = ZANF(IAT)
+            POL  (IFFAT) = ZMAS(IAT)
+         ELSE
+            CHARG(IFFAT) = CHARGX5(IFFAT)
+            POL  (IFFAT) = POLX5  (IFFAT)
+         END IF
+      ENDDO
+C
+      CALL DCOPY(3*MXFFAT,  CORDX5    ,1,   CORD,1)
+      CALL DCOPY(  MXFFAT,  ZANFX5    ,1,   ZANF,1)
+      CALL DCOPY(  MXFFAT,  ZMASX5    ,1,   ZMAS,1)
+      CALL DCOPY(  MXFFAT,  ONEMASX5  ,1, ONEMAS,1)
+C     CALL DCOPY(  MXFFAT,  CHARGX5   ,1,  CHARG,1)   !  BLOCK
+C     CALL DCOPY(  MXFFAT,  POLX5     ,1,    POL,1)   !  BLOCK
+      CALL DCOPY(  MXFFAT,  SIGX5     ,1,    SIG,1)
+      CALL DCOPY(  MXFFAT,  EPSX5     ,1,    EPS,1)
+      CALL DCOPY(  MXFFAT,  SIG2X5    ,1,   SIG2,1)
+      CALL DCOPY(  MXFFAT,  EPS2X5    ,1,   EPS2,1)
+      CALL DCOPY(  MXBOND,  BOND0X5   ,1,  BOND0,1)
+      CALL DCOPY(  MXBOND,  FCBONDX5  ,1, FCBOND,1)
+      CALL DCOPY(  MXANGL,  ANGL0X5   ,1,  ANGL0,1)
+      CALL DCOPY(  MXANGL,  FCANGLX5  ,1, FCANGL,1)
+      CALL DCOPY(  MXWAGG,  FCWAGGX5  ,1, FCWAGG,1)
+      CALL DCOPY(  MXDIHR,  VROTX5    ,1,   VROT,1)
+      CALL ICOPY(  MXDIHR,  NNNX5     ,1,    NNN,1)
+      CALL DCOPY(  MXDIHR,  GAMAX5    ,1,   GAMA,1)
+      CALL ICOPY(2*MXBOND,  IPAIRX5   ,1,  IPAIR,1)
+      CALL DCOPY(  MXDIHB,  DIHB0X5   ,1,  DIHB0,1)
+      CALL DCOPY(  MXDIHB,  FCDIHBX5  ,1, FCDIHB,1)
+      CALL ICOPY(3*MXANGL,  KLISTX5   ,1,  KLIST,1)
+      CALL ICOPY(4*MXDIHR,  LLISTX5   ,1,  LLIST,1)
+      CALL ICOPY(4*MXWAGG,  MLISTX5   ,1,  MLIST,1)
+      CALL ICOPY(4*MXDIHB,  NLISTX5   ,1,  NLIST,1)
+      CALL ICOPY(6*MXCMAP,  MAPLSTX5  ,1, MAPLST,1)
+      CALL DCOPY(3*MXFFAT,  VELX5     ,1,    VEL,1)
+      CALL DCOPY(4*MXFFAT,  CLPRX5    ,1,   CLPR,1)
+      CALL DCOPY(4*MXFFAT,  ZLPRX5    ,1,   ZLPR,1)
+      CALL ICOPY(  MXFFAT,  NLPRX5    ,1,   NLPR,1)
+      CALL DCOPY(3*MXATM,   QMVELX5   ,1,  QMVEL,1)
+      CALL DCOPY(2*MXANGL,  KBLSTX5   ,1,  KBLST,1)
+      CALL DCOPY(2*MXANGL,  FCSTBDX5  ,1, FCSTBD,1)
+      CALL DCOPY(3*MXDIHR,  FCDIHRX5  ,1, FCDIHR,1)
+      CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTPX5,1, FCLJTP,1)
+      CALL ICOPY(  MXFFAT,  NTYPEX5   ,1,  NTYPE,1)
+      CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213JX5,1,L1213J,1)
+C
+      NATSV     = NAT
+      NAT       = 0         !  PURE MM, NO QM
+      IDOLJSV   = IDOLJ
+      IDOCMAPSV = IDOCMAP
+      L2BONDSV  = L2BOND
+      L2ANGLSV  = L2ANGL
+      L2DIHRSV  = L2DIHR
+      L2DIHBSV  = L2DIHB
+      L2WAGGSV  = L2WAGG
+      IDOLJ     = 0
+      IDOCMAP   = 0
+      L2BOND    = 0
+      L2ANGL    = 0
+      L2DIHR    = 0
+      L2DIHB    = 0
+      L2WAGG    = 0
+      DO I=N1213JMM+1,N1213J    !  TURN OFF EXCLUSION FOR QM
+         L1213J(1,I) = 0
+         L1213J(2,I) = 0
+      ENDDO
+      IDOPOLSV  = IDOPOL
+      IDOPOL    = 100
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IW = 37
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) IP = 37
+      IF(MASWRK)WRITE(IW,'(/1X,61(1H-)/1X,A/1X,61(1H-)/)')
+     *'QUANPOL IDIMER: ENTIRE QM/MM AS MM(CHARGE,POL,FIXSOL)'
+      CALL FFGRADX
+      IW = IWSAVE
+      IP = IPSAVE
+      DO I=N1213JMM+1,N1213J    !  TURN ON EXCLUSION FOR QM
+         L1213J(1,I) = L1213JX5(1,I)
+         L1213J(2,I) = L1213JX5(2,I)
+      ENDDO
+      IDOPOL    = IDOPOLSV
+      IDOLJ     = IDOLJSV
+      IDOCMAP   = IDOCMAPSV
+      L2BOND    = L2BONDSV
+      L2ANGL    = L2ANGLSV
+      L2DIHR    = L2DIHRSV
+      L2DIHB    = L2DIHBSV
+      L2WAGG    = L2WAGGSV
+      NAT       = NATSV
+C     - SAVE MM-MM ENERGY/GRADIENT -
+      E2ALL = ENPOT
+      DO IFFAT=1,NFFAT
+         IAT = LISTQM(IFFAT)
+         IF(IAT.GT.0)THEN         !  QM ATOMS, NEGATIVE
+            G2DIMRQ(1,IAT)=G2DIMRQ(1,IAT)-FFGRD2(1,IFFAT)
+            G2DIMRQ(2,IAT)=G2DIMRQ(2,IAT)-FFGRD2(2,IFFAT)
+            G2DIMRQ(3,IAT)=G2DIMRQ(3,IAT)-FFGRD2(3,IFFAT)
+         ELSE                     !  MM ATOMS, NEGATIVE
+            G2DIMRM(1,IFFAT)=G2DIMRM(1,IFFAT)-FFGRD2(1,IFFAT)
+            G2DIMRM(2,IFFAT)=G2DIMRM(2,IFFAT)-FFGRD2(2,IFFAT)
+            G2DIMRM(3,IFFAT)=G2DIMRM(3,IFFAT)-FFGRD2(3,IFFAT)
+         END IF
+      ENDDO
+      VIR2ALL(1) = VIR(1)
+      VIR2ALL(2) = VIR(2)
+      VIR2ALL(3) = VIR(3)
+C     - CLEAN QUANPOL FORCE FIELD ENERGIES -
+      ENCHAR  = ZERO
+      ENLJR   = ZERO
+      ENLJD   = ZERO
+      ENPOL   = ZERO
+      XENPOL  = ZERO
+      ENRXN   = ZERO
+      XENRXN  = ZERO
+      ENRXNPOL= ZERO
+      ENRXNR  = ZERO
+      ENBIAS  = ZERO
+      ENCENT  = ZERO
+      ENUCCH  = ZERO
+      ENCMAP  = ZERO
+      ENFIXSO = ZERO
+C
+C
+C     -----------------------------------------
+C     - CONSTRUCT TOTAL QM/MM ENERGY/GRADIENT -
+C     -----------------------------------------
+C
+      EMONOT =ZERO
+      E2MONOT=ZERO
+      VIRMONOT(1)=ZERO
+      VIRMONOT(2)=ZERO
+      VIRMONOT(3)=ZERO
+      VIR2MONOT(1)=ZERO
+      VIR2MONOT(2)=ZERO
+      VIR2MONOT(3)=ZERO
+      DO IM=1,NMOLE+1         !  INCLUDE MM AS A GIANT 'QM'
+         EMONOT =EMONOT +EMONO(IM)
+         E2MONOT=E2MONOT+E2MONO(IM)
+         VIRMONOT(1) = VIRMONOT(1) + VIRMONO(1,IM)
+         VIRMONOT(2) = VIRMONOT(2) + VIRMONO(2,IM)
+         VIRMONOT(3) = VIRMONOT(3) + VIRMONO(3,IM)
+         VIR2MONOT(1) = VIR2MONOT(1) + VIR2MONO(1,IM)
+         VIR2MONOT(2) = VIR2MONOT(2) + VIR2MONO(2,IM)
+         VIR2MONOT(3) = VIR2MONOT(3) + VIR2MONO(3,IM)
+         DO IAT=1,NATX
+          GMONOQ(1,IAT,MAXML+1)=GMONOQ(1,IAT,MAXML+1)+GMONOQ(1,IAT,IM)
+          GMONOQ(2,IAT,MAXML+1)=GMONOQ(2,IAT,MAXML+1)+GMONOQ(2,IAT,IM)
+          GMONOQ(3,IAT,MAXML+1)=GMONOQ(3,IAT,MAXML+1)+GMONOQ(3,IAT,IM)
+          G2MONOQ(1,IAT,MAXML+1)=G2MONOQ(1,IAT,MAXML+1)
+     *                          +G2MONOQ(1,IAT,IM)
+          G2MONOQ(2,IAT,MAXML+1)=G2MONOQ(2,IAT,MAXML+1)
+     *                          +G2MONOQ(2,IAT,IM)
+          G2MONOQ(3,IAT,MAXML+1)=G2MONOQ(3,IAT,MAXML+1)
+     *                          +G2MONOQ(3,IAT,IM)
+         ENDDO
+      ENDDO
+      ETOTC = E2ALL  - (E2DIMR - (NMOLE+1-2)*E2MONOT)
+      ETOT0 = EMONOT
+      ETOT1 = EDIMR  - (NMOLE+1-2)*EMONOT
+      ETOT2 = ETOT1  + ETOTC
+      IF(MASWRK)WRITE(IW,'(/1X,25(1H-),A,25(1H-),/1X,13X,A,/1X,74(1H-),
+     *                   4(/1X,A,F22.10))')
+     *  ' QUANPOL IDIMER RESULTS ',
+     *  ' CODED BY HUI LI, UNIVERSITY OF NEBRASKA-LINCOLN ',
+     *  '                  QM/MM MONOMER ENERGY =',ETOT0,
+     *  '                  QM/MM   DIMER ENERGY =',ETOT1,
+     *  '  MM MANY-BODY POLARIZATION CORRECTION =',ETOTC,
+     *  '       QM/MM DIMER ENERGY WITH MM MBPC =',ETOT2
+C
+      IF(TDDFTYPSV.NE.RNONE)THEN
+         DO II=0,NSTAT
+            ETOTST(II+1)=EDIMRST(II+1) - (NMOLE+1-2)*EMONOST(II+1)
+         ENDDO
+         ESCF = ETOT2+ETOTST(1)-ETOTST(NTHST+1)
+         DO II=1,NSTAT
+            ESTATE(II) = ETOT2+ETOTST(II+1)-ETOTST(NTHST+1)
+         ENDDO
+         IF(MASWRK)WRITE(IW,'(/1X,A)')
+     *     'QUANPOL IDIMER TDDFT RESULTS:'
+         DO II=0,NSTAT
+            IF(MASWRK)WRITE(IW,'(/1X,A,I3,
+     *                         3(/1X,A,F22.10,1X,F8.3,A),
+     *                          (/1X,A,F22.10),
+     *                          (/1X,A,F22.10,1X,F8.3,A))')
+     *     'TDDFT STATE =',II,
+     *     '    MONOMER 1 (GAS PHASE) TDDFT ENERGY =',
+     *                  EMONOST(II+1),
+     *                  (EMONOST(II+1)-EMONOST(1))*TOEV,' EV',
+     *     '            QM/MM MONOMER TDDFT ENERGY =',
+     *                  ETOT0+EMONOST(II+1)-EMONOST(NTHST+1),
+     *                  (EMONOST(II+1)-EMONOST(1))*TOEV,' EV',
+     *     '            QM/MM   DIMER TDDFT ENERGY =',
+     *                  ETOT1+ETOTST(II+1)-ETOTST(NTHST+1),
+     *                  (ETOTST(II+1)-ETOTST(1))*TOEV,' EV',
+     *     '  MM MANY-BODY POLARIZATION CORRECTION =',
+     *                  ETOTC,
+     *     ' QM/MM DIMER TDDFT ENERGY WITH MM MBPC =',
+     *                  ETOT2+ETOTST(II+1)-ETOTST(NTHST+1),
+     *                  (ETOTST(II+1)-ETOTST(1))*TOEV,' EV'
+         ENDDO
+      END IF
+C
+      IF(IDIMER.EQ.1) THEN
+      ETOTX= ETOT0
+      E    = ETOTX
+      EMP2 = ETOTX
+      IF(TDDFTYPSV.NE.RNONE) ESTATE(NTHST) = ETOTX
+      IF(MASWRK)WRITE(IW,5020)IDIMER,ETOTX
+      DO IAT=1,NATX
+         EG(1,IAT)=GMONOQ(1,IAT,MAXML+1)
+         EG(2,IAT)=GMONOQ(2,IAT,MAXML+1)
+         EG(3,IAT)=GMONOQ(3,IAT,MAXML+1)
+         DE(1,IAT)=EG(1,IAT)
+         DE(2,IAT)=EG(2,IAT)
+         DE(3,IAT)=EG(3,IAT)
+      ENDDO
+      DO IFFAT=1,NFFATX5
+         FFGRD2(1,IFFAT)=GMONOM(1,IFFAT)
+         FFGRD2(2,IFFAT)=GMONOM(2,IFFAT)
+         FFGRD2(3,IFFAT)=GMONOM(3,IFFAT)
+      ENDDO
+      VIR(1) = VIRMONOT(1)
+      VIR(2) = VIRMONOT(2)
+      VIR(3) = VIRMONOT(3)
+      END IF
+      IF(IDIMER.EQ.2) THEN
+      ETOTX= ETOT1
+      E    = ETOTX
+      EMP2 = ETOTX
+      IF(TDDFTYPSV.NE.RNONE) ESTATE(NTHST) = ETOTX
+      IF(MASWRK)WRITE(IW,5020)IDIMER,ETOTX
+      DO IAT=1,NATX
+         EG(1,IAT)=GDIMRQ(1,IAT) - (NMOLE+1-2)*GMONOQ(1,IAT,MAXML+1)
+         EG(2,IAT)=GDIMRQ(2,IAT) - (NMOLE+1-2)*GMONOQ(2,IAT,MAXML+1)
+         EG(3,IAT)=GDIMRQ(3,IAT) - (NMOLE+1-2)*GMONOQ(3,IAT,MAXML+1)
+         DE(1,IAT)=EG(1,IAT)
+         DE(2,IAT)=EG(2,IAT)
+         DE(3,IAT)=EG(3,IAT)
+      ENDDO
+      DO IFFAT=1,NFFATX5
+         FFGRD2(1,IFFAT)=GDIMRM(1,IFFAT)-(NMOLE+1-2)*GMONOM(1,IFFAT)
+         FFGRD2(2,IFFAT)=GDIMRM(2,IFFAT)-(NMOLE+1-2)*GMONOM(2,IFFAT)
+         FFGRD2(3,IFFAT)=GDIMRM(3,IFFAT)-(NMOLE+1-2)*GMONOM(3,IFFAT)
+      ENDDO
+      VIR(1)= VIRDIMR(1) - (NMOLE+1-2)*VIRMONOT(1)
+      VIR(2)= VIRDIMR(2) - (NMOLE+1-2)*VIRMONOT(2)
+      VIR(3)= VIRDIMR(3) - (NMOLE+1-2)*VIRMONOT(3)
+      END IF
+      IF(IDIMER.EQ.3) THEN
+      ETOTX= ETOT2
+      E    = ETOTX
+      EMP2 = ETOTX
+      IF(TDDFTYPSV.NE.RNONE) ESTATE(NTHST) = ETOTX
+      IF(MASWRK)WRITE(IW,5020)IDIMER,ETOTX
+      DO IAT=1,NATX
+         EG(1,IAT)=GDIMRQ(1,IAT) - (NMOLE+1-2)*GMONOQ(1,IAT,MAXML+1)
+     *            -G2DIMRQ(1,IAT)+ (NMOLE+1-2)*G2MONOQ(1,IAT,MAXML+1)
+         EG(2,IAT)=GDIMRQ(2,IAT) - (NMOLE+1-2)*GMONOQ(2,IAT,MAXML+1)
+     *            -G2DIMRQ(2,IAT)+ (NMOLE+1-2)*G2MONOQ(2,IAT,MAXML+1)
+         EG(3,IAT)=GDIMRQ(3,IAT) - (NMOLE+1-2)*GMONOQ(3,IAT,MAXML+1)
+     *            -G2DIMRQ(3,IAT)+ (NMOLE+1-2)*G2MONOQ(3,IAT,MAXML+1)
+         DE(1,IAT)=EG(1,IAT)
+         DE(2,IAT)=EG(2,IAT)
+         DE(3,IAT)=EG(3,IAT)
+      ENDDO
+      DO IFFAT=1,NFFATX5
+         FFGRD2(1,IFFAT)=GDIMRM(1,IFFAT)-(NMOLE+1-2)*GMONOM(1,IFFAT)
+     *                  -G2DIMRM(1,IFFAT)+(NMOLE+1-2)*G2MONOM(1,IFFAT)
+         FFGRD2(2,IFFAT)=GDIMRM(2,IFFAT)-(NMOLE+1-2)*GMONOM(2,IFFAT)
+     *                  -G2DIMRM(2,IFFAT)+(NMOLE+1-2)*G2MONOM(2,IFFAT)
+         FFGRD2(3,IFFAT)=GDIMRM(3,IFFAT)-(NMOLE+1-2)*GMONOM(3,IFFAT)
+     *                  -G2DIMRM(3,IFFAT)+(NMOLE+1-2)*G2MONOM(3,IFFAT)
+      ENDDO
+      VIRC1 = VIR2ALL(1) - (VIR2DIMR(1) - (NMOLE+1-2)*VIR2MONOT(1))
+      VIRC2 = VIR2ALL(2) - (VIR2DIMR(2) - (NMOLE+1-2)*VIR2MONOT(2))
+      VIRC3 = VIR2ALL(3) - (VIR2DIMR(3) - (NMOLE+1-2)*VIR2MONOT(3))
+      VIR(1)= VIRDIMR(1) - (NMOLE+1-2)*VIRMONOT(1) + VIRC1
+      VIR(2)= VIRDIMR(2) - (NMOLE+1-2)*VIRMONOT(2) + VIRC2
+      VIR(3)= VIRDIMR(3) - (NMOLE+1-2)*VIRMONOT(3) + VIRC3
+      END IF
+C
+C
+C     - RESTORE MM FORCE FIELD PARAMETERS -
+C
+      NFFAT = NFFATX5
+      NBOND = NBONDX5
+      NANGL = NANGLX5
+      NDIHR = NDIHRX5
+      NDIHB = NDIHBX5
+      NCMAP = NCMAPX5
+      NWAGG = NWAGGX5
+      DO IFFAT=1,NFFAT
+         ATMNAM(IFFAT)=ATMNAMX5(IFFAT)
+      ENDDO
+      CALL DCOPY(3*MXFFAT,  CORDX5    ,1,   CORD,1)
+      CALL DCOPY(  MXFFAT,  ZANFX5    ,1,   ZANF,1)
+      CALL DCOPY(  MXFFAT,  ZMASX5    ,1,   ZMAS,1)
+      CALL DCOPY(  MXFFAT,  ONEMASX5  ,1, ONEMAS,1)
+      CALL DCOPY(  MXFFAT,  CHARGX5   ,1,  CHARG,1)
+      CALL DCOPY(  MXFFAT,  POLX5     ,1,    POL,1)
+      CALL DCOPY(  MXFFAT,  SIGX5     ,1,    SIG,1)
+      CALL DCOPY(  MXFFAT,  EPSX5     ,1,    EPS,1)
+      CALL DCOPY(  MXFFAT,  SIG2X5    ,1,   SIG2,1)
+      CALL DCOPY(  MXFFAT,  EPS2X5    ,1,   EPS2,1)
+      CALL DCOPY(  MXBOND,  BOND0X5   ,1,  BOND0,1)
+      CALL DCOPY(  MXBOND,  FCBONDX5  ,1, FCBOND,1)
+      CALL DCOPY(  MXANGL,  ANGL0X5   ,1,  ANGL0,1)
+      CALL DCOPY(  MXANGL,  FCANGLX5  ,1, FCANGL,1)
+      CALL DCOPY(  MXWAGG,  FCWAGGX5  ,1, FCWAGG,1)
+      CALL DCOPY(  MXDIHR,  VROTX5    ,1,   VROT,1)
+      CALL ICOPY(  MXDIHR,  NNNX5     ,1,    NNN,1)
+      CALL DCOPY(  MXDIHR,  GAMAX5    ,1,   GAMA,1)
+      CALL ICOPY(2*MXBOND,  IPAIRX5   ,1,  IPAIR,1)
+      CALL DCOPY(  MXDIHB,  DIHB0X5   ,1,  DIHB0,1)
+      CALL DCOPY(  MXDIHB,  FCDIHBX5  ,1, FCDIHB,1)
+      CALL ICOPY(3*MXANGL,  KLISTX5   ,1,  KLIST,1)
+      CALL ICOPY(4*MXDIHR,  LLISTX5   ,1,  LLIST,1)
+      CALL ICOPY(4*MXWAGG,  MLISTX5   ,1,  MLIST,1)
+      CALL ICOPY(4*MXDIHB,  NLISTX5   ,1,  NLIST,1)
+      CALL ICOPY(6*MXCMAP,  MAPLSTX5  ,1, MAPLST,1)
+      CALL DCOPY(3*MXFFAT,  VELX5     ,1,    VEL,1)
+      CALL DCOPY(4*MXFFAT,  CLPRX5    ,1,   CLPR,1)
+      CALL DCOPY(4*MXFFAT,  ZLPRX5    ,1,   ZLPR,1)
+      CALL ICOPY(  MXFFAT,  NLPRX5    ,1,   NLPR,1)
+      CALL DCOPY(3*MXATM,   QMVELX5   ,1,  QMVEL,1)
+      CALL DCOPY(2*MXANGL,  KBLSTX5   ,1,  KBLST,1)
+      CALL DCOPY(2*MXANGL,  FCSTBDX5  ,1, FCSTBD,1)
+      CALL DCOPY(3*MXDIHR,  FCDIHRX5  ,1, FCDIHR,1)
+      CALL DCOPY(2*MXMMTP*MXMMTP, FCLJTPX5,1, FCLJTP,1)
+      CALL ICOPY(  MXFFAT,  NTYPEX5   ,1,  NTYPE,1)
+      CALL ICOPY(2*(MXBOND+MXANGL+NATX*NATX),L1213JX5,1,L1213J,1)
+C
+C     - RESTORE QM MOLECULAR INFORMATION -
+C
+      NAT    =  NATX
+      ICH    =  ICHX
+      MUL    =  MULX
+      NUM    =  NUMX
+      NQMT   =  NQMTX
+      NE     =  NEX
+      NA     =  NAX
+      NB     =  NBX
+      IECP   =  IECPX
+      IMCORE =  IMCOREX
+      DO III  =  1, NATX
+         ZAN(III) = ZANX(III)
+         DO JJJ = 1, 6
+            KFRST(III,JJJ) = KFRSTX(III,JJJ)
+            KLAST(III,JJJ) = KLASTX(III,JJJ)
+         ENDDO
+         LMAX(III) = LMAXSV(III)
+         LPSKIP(III)= LPSKIPX(III)
+         IZCORE(III)= IZCOREX(III)
+         C(1,III) = CX(1,III)
+         C(2,III) = CX(2,III)
+         C(3,III) = CX(3,III)
+         IAN(III) = IANX(III)
+         ANAM(III)= ANAMX(III)
+      ENDDO
+      DO III = 1, 400
+         CLP(III) = CLPX(III)
+         ZLP(III) = ZLPX(III)
+         NLP(III) = NLPX(III)
+      ENDDO
+      DO III  =  1, MXGTOT
+         EX(III)  = EXX(III)
+         CS(III)  = CSX(III)
+         CP(III)  = CPX(III)
+         CD(III)  = CDX(III)
+         CF(III)  = CFX(III)
+         CG(III)  = CGX(III)
+         CH(III)  = CHX(III)
+         CI(III)  = CIX(III)
+      ENDDO
+      DO III  =  1, MXSH
+         KSTART(III)  = KSTARTX(III)
+         KATOM(III)   = KATOMX(III)
+         KTYPE(III)   = KTYPEX(III)
+         KNG(III)     = KNGX(III)
+         KLOC(III)    = KLOCX(III)
+         MIN(III)     = MINX(III)
+         MAX(III)     = MAXX(III)
+      ENDDO
+      NSHELL = NSHELLX
+      TDDFTYP= TDDFTYPSV
+C
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) + IZCORE(LLL)
+      ENDDO
+      CALL SETLAB(1,CDUMMY)
+      DO LLL = 1, NAT
+         ZAN(LLL) = ZAN(LLL) - IZCORE(LLL)
+      ENDDO
+C
+      CALL ICOPY(MXATM ,MPTYPX ,1, MPTYP ,1)
+      CALL DCOPY(MXMPA ,AN0X   ,1, AN0   ,1)
+      CALL DCOPY(MXMPA ,ALPN0X ,1, ALPN0 ,1)
+      CALL DCOPY(MXMPA ,AN1X   ,1, AN1   ,1)
+      CALL DCOPY(MXMPA ,ALPN1X ,1, ALPN1 ,1)
+      CALL ICOPY(MXATM ,MPSKPX ,1, MPSKP ,1)
+      CALL ICOPY(MXATM ,NOAN0X ,1, NOAN0 ,1)
+      CALL ICOPY(MXATM ,NOAN1X ,1, NOAN1 ,1)
+      CALL DCOPY(MXMPSH,BPARX  ,1, BPAR  ,1)
+      CALL DCOPY(MXMPGT,EXPMPX ,1, EXPMP ,1)
+      CALL DCOPY(MXMPGT,CSMPX  ,1, CSMP  ,1)
+      CALL DCOPY(MXMPGT,CPMPX  ,1, CPMP  ,1)
+      CALL DCOPY(MXMPGT,CDMPX  ,1, CDMP  ,1)
+      CALL DCOPY(MXMPGT,CFMPX  ,1, CFMP  ,1)
+      CALL ICOPY(MXATM ,MPSKIPX,1, MPSKIP,1)
+      CALL ICOPY(MXATM ,NOCOSHX,1, NOCOSH,1)
+      CALL ICOPY(MXMPSH,MPKSTAX,1, MPKSTA,1)
+      CALL ICOPY(MXMPSH,MPKNGX ,1, MPKNG ,1)
+      CALL ICOPY(MXMPSH,MPKTYPX,1, MPKTYP,1)
+      CALL ICOPY(MXMPSH,MPKMINX,1, MPKMIN,1)
+      CALL ICOPY(MXMPSH,MPKMAXX,1, MPKMAX,1)
+      CALL ICOPY(MXMPSH,MPKLOCX,1, MPKLOC,1)
+C     - END OF RESTORE QM MOLECULAR INFORMATION -
+C
+C
+      IF(NSTEP.GT.1.OR.RUNTYP.EQ.HSSIAN) CALL SEQCLO(37,'DELETE')
+      CALL TIMIT(1)
+C
+ 5000 FORMAT(/10X,11(1H-)/10X,'MONOMER',I4/
+     *        10X,11(1H-))
+ 5010 FORMAT(/10X,17(1H-)/10X,'DIMER (',I4,',',I4,')'/
+     *        10X,17(1H-))
+ 5020 FORMAT(/1X,'IDIMER=',I2,' E=',F22.10,
+     *  ' IS SELECTED FOR ENERGY AND GRADIENTS',/1X,74(1H-)/)
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK FFGRADX
+!>
+!> @brief    Set up for FFGRAD
+!>
+!> @author   Hui Li
+!>           - Aug 12, 2020
+!>
+!> @details  Set up for FFGRAD
+!>
+      SUBROUTINE FFGRADX
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFFRE2/ N1FFAT,N1BOND,N1ANGL,N1DIHR,N1DIHB,N1CMAP,N1WAGG,
+     *                N2FFAT,N2BOND,N2ANGL,N2DIHR,N2DIHB,N2CMAP,N2WAGG,
+     *                LFF2ATMNAM,LFF2CORD,LFF2ZANF,LFF2ZMAS,
+     *                LFF2ONEMAS,LFF2CHARG,LFF2POL,
+     *                LFF2SIG,LFF2EPS,LFF2SIG2,LFF2EPS2,
+     *                LFF2BOND0,LFF2FCBOND,LFF2ANGL0,LFF2FCANGL,
+     *                LFF2FCWAGG,LFF2DIHB0,LFF2FCDIHB,
+     *                LFF2VROT,LFF2NNN,LFF2GAMA,LFF2IPAIR,
+     *                LFF2KLIST,LFF2LLIST,LFF2MLIST,LFF2NLIST,
+     *                LFF2VEL,LFF2QMVEL,LFF2CLPR,LFF2ZLPR,
+     *                LFF2NLPR,LFF2MAPLST,
+     *                LFFLISTB2A,NTODOA,LFFNONLSA,NTODOB,LFFNONLSB,
+     *                N1213A,LFFL1213A,N1213B,LFFL1213B,
+     *                N14A,LFFL14A,N14B,LFFL14B,
+     *                NTODOPMA,LFFNONLSPMA,NBONDPMA,LFFLSBONDPMA,
+     *                NANGLPMA,LFFLSANGLPMA,NDIHRPMA,LFFLSDIHRPMA,
+     *                NDIHBPMA,LFFLSDIHBPMA,NWAGGPMA,LFFLSWAGGPMA,
+     *                NCMAPPMA,LFFLSCMAPPMA,
+     *                N1213PMA,LFFL1213PMA,
+     *                N14PMA,LFFL14PMA,
+     *                NTODOPMB,LFFNONLSPMB,NBONDPMB,LFFLSBONDPMB,
+     *                NANGLPMB,LFFLSANGLPMB,NDIHRPMB,LFFLSDIHRPMB,
+     *                NDIHBPMB,LFFLSDIHBPMB,NWAGGPMB,LFFLSWAGGPMB,
+     *                NCMAPPMB,LFFLSCMAPPMB,
+     *                N1213PMB,LFFL1213PMB,
+     *                N14PMB,LFFL14PMB
+      COMMON /FFMPNT/ LFFATMNAM,LFFCORD,LFFZANF,
+     *                LFFZMAS,LFFONEMAS,LFFQMZMAS,LFFQM1MAS,
+     *                LFFCHARG,LFFPOL,LFFDIP,
+     *                LFFFIELD1,LFFFIELD2,LFFFIELD3,
+     *                LFFSIG,LFFEPS,LFFSIG2,LFFEPS2,
+     *                LFFBOND0,LFFFCBOND,
+     *                LFFANGL0,LFFFCANGL,LFFFCWAGG,
+     *                LFFDIHB0,LFFFCDIHB,
+     *                LFFVROT,LFFNNN,LFFGAMA,LFFIPAIR,
+     *                LFFKLIST,LFFLLIST,LFFL1213J,LFFL14J,
+     *                LFFMLIST,LFFNLIST,LFFLKQMMM,
+     *                LFFVEL,LFFQMVEL,
+     *                LFFFFGRD0,LFFFFGRD1,LFFFFGRD2,
+     *                LFFQMGRD0,LFFQMGRD1,LFFQMGRD2,LFFDETMP,
+     *                LFFCLPR,LFFZLPR,LFFNLPR,
+     *                LFFXTS,LFFYTS,LFFZTS,LFFCMAT1,
+     *                LFFQRXN1,LFFQRXN2,LFFPOT1,LFFPOT2,LFFQRXNMP,
+     *                LFFQRXNTA,LFFQRXNXY,LFFNONLSTQ,
+     *                LFFDIPMP,LFFDIPTA,LFFDIPXY,LFFLISTQM,LFFNONLS1,
+     *                LFFMAPLST,LFFCMAPCO
+      COMMON /FFMPT2/ MXMMTP,LFFKBLST,LFFFCSTBD,LFFFCDIHR,
+     *                LFFFCLJTP,LFFNTYPE,
+     *                LFF2KBLST,LFF2FCSTBD,LFF2FCDIHR,
+     *                LFF2FCLJTP,LFF2NTYPE
+      COMMON /FFPBSW/ XBOX,YBOX,ZBOX,SWF,SWFDX,SWFDY,SWFDZ,
+     *                SWRA,ONESWRA,SWRA2,ONESWRA2,
+     *                SWRB,ONESWRB,SWRB2,ONESWRB2,ONESWRB4,
+     *                SWFDUM3,SWFDUM4,SWFDUM5,
+     *                SWRAQ,ONESWRAQ,SWRAQ2,ONESWRAQ2,
+     *                SWRBQ,ONESWRBQ,SWRBQ2,ONESWRBQ2,ONESWRBQ4,
+     *                SWFDUM3Q,SWFDUM4Q,SWFDUM5Q,
+     *                QMSIZE,QMCX,QMCY,QMCZ,QMCXSV,QMCYSV,QMCZSV,
+     *                CENTX,CENTY,CENTZ,BUFWID1,BUFWID2,RDAMP,
+     *                EFIELDX,EFIELDY,EFIELDZ,QMCXSV2,QMCYSV2,QMCZSV2,
+     *                EPS1RB,EPS1RB3,ONEXBOX,ONEYBOX,ONEZBOX,
+     *                LQMCT,MXLIST1,NTODO,NTODOSV,NTODOQ,
+     *                ISWITCH,ISHIFT,IPOLSHF,
+     *                LFFLSTCELL,LFFCORDSV,
+     *                LFFPOLSV,LFFCORDSV2,LFFNONLS2,LFFCORDSVQ,
+     *                LFFMVFASTS2,LFFMVFASTS3,LFFMVFASTS4,
+     *                LFFMVFASTL2,LFFMVFASTL3,LFFMVFASTL4,
+     *                MXCHECK,MXLIST2,NTODO2,NTODO2SV
+      COMMON /FFRXN / RXNEPS,RSPHSOL,ISPHSOL
+      COMMON /FFUMBR/ UMBFC,UMBR0,UMBSIZE,
+     *                NUMBBIN,NUMBATM(6),NUMBTYP,LFFUMBHIS,
+     *                UM2FC,UM2R0,UM2SIZE,
+     *                NUM2BIN,NUM2ATM(6),NUM2TYP,LFFUM2HIS
+      COMMON /FMCOM / X(1)
+C
+C     HUI LI, AUG 12, 2020, LINCOLN
+C
+      NTS = ISPHSOL
+      CALL FFGRAD(X(LFFCORD),X(LFFZANF),
+     *            X(LFFCHARG),X(LFFPOL),X(LFFPOLSV),X(LFFDIP),
+     *            X(LFFFIELD1),X(LFFFIELD2),X(LFFFIELD3),
+     *            X(LFFSIG),X(LFFEPS),X(LFFSIG2),X(LFFEPS2),
+     *            X(LFFBOND0),X(LFFFCBOND),X(LFFFCSTBD),
+     *            X(LFFANGL0),X(LFFFCANGL),X(LFFFCWAGG),
+     *            X(LFFDIHB0),X(LFFFCDIHB),X(LFFFCDIHR),
+     *            X(LFFVROT),X(LFFNNN),X(LFFGAMA),X(LFFIPAIR),
+     *            X(LFFKLIST),X(LFFLLIST),X(LFFKBLST),
+     *            X(LFFMLIST),X(LFFNLIST),
+     *            X(LFFL1213J),X(LFFL14J),
+     *            X(LFFFFGRD2),X(LFFFCLJTP),X(LFFNTYPE),
+     *            X(LFFXTS),X(LFFYTS),X(LFFZTS),X(LFFCMAT1),
+     *            X(LFFPOT1),X(LFFPOT2),X(LFFQRXN1),X(LFFQRXN2),NTS,
+     *            X(LFFNONLS1),
+     *            X(LFFMAPLST),X(LFFCMAPCO),
+     *            X(LFFAFIX),X(LFFQFIX),
+     *            X(LFFRFIX),X(LFFIDATOM),X(LFFDAI),X(LFFIDDAI),
+     *            X(LFFVFIX1),X(LFFVFIX2),
+     *            X(LFFXTSFIX),X(LFFYTSFIX),X(LFFZTSFIX),
+     *            X(LFFNONLSA),X(LFFNONLSB),X(LFFL1213A),
+     *            X(LFFL1213B),X(LFFL14A),X(LFFL14B),
+     *            X(LFF2CHARG),
+     *            X(LFF2SIG),X(LFF2EPS),X(LFF2SIG2),X(LFF2EPS2),
+     *            X(LFFNONLSPMA),X(LFFL1213PMA),X(LFFL14PMA),
+     *            X(LFF2CORD),X(LFFLSBONDPMA),X(LFFLSANGLPMA),
+     *            X(LFFLSDIHRPMA),X(LFFLSDIHBPMA),
+     *            X(LFFLSWAGGPMA),X(LFFLSCMAPPMA),
+     *            X(LFFNONLSPMB),X(LFFL1213PMB),X(LFFL14PMB),
+     *            X(LFFLSBONDPMB),X(LFFLSANGLPMB),
+     *            X(LFFLSDIHRPMB),X(LFFLSDIHBPMB),
+     *            X(LFFLSWAGGPMB),X(LFFLSCMAPPMB),
+     *            X(LFFUMBHIS),X(LFFUM2HIS))
+      RETURN
+      END
+C*MODULE QUANPOF  *DECK FFGRAD
+!>
+!> @brief    pure MM energy/gradient
+!>
+!> @author   Hui Li
+!>           - Aug 12, 2020
+!>
+!> @details  calculate the QuanPol force field energy and gradients
+!>
+      SUBROUTINE FFGRAD(CORD,ZANF,
+     *                  CHARG,POL,POLSV,DIP,
+     *                  FIELD1,FIELD2,FIELD3,
+     *                  SIG,EPS,SIG2,EPS2,
+     *                  BOND0,FCBOND,FCSTBD,
+     *                  ANGL0,FCANGL,FCWAGG,
+     *                  DIHB0,FCDIHB,FCDIHR,
+     *                  VROT,NNN,GAMA,IPAIR,
+     *                  KLIST,LLIST,KBLST,MLIST,NLIST,
+     *                  L1213J,L14J,
+     *                  FFGRD2,FCLJTP,NTYPE,
+     *                  XTS,YTS,ZTS,CMAT1,
+     *                  POT1,POT2,QRXN1,QRXN2,NTS,
+     *                  NONLS1,MAPLST,CMAPCO,
+     *                  AFIX,QFIX,
+     *                  RFIX,IDATOM,DAI,IDDAI,
+     *                  VFIX1,VFIX2,XTSFIX,YTSFIX,ZTSFIX,
+     *                  NONLSA,NONLSB,L1213A,L1213B,L14A,L14B,
+     *                  CHARGB,
+     *                  SIGB,EPSB,SIG2B,EPS2B,
+     *                  NONLSPMA,
+     *                  L1213PMA,L14PMA,CORDB,
+     *                  LSBONDPMA,LSANGLPMA,
+     *                  LSDIHRPMA,LSDIHBPMA,
+     *                  LSWAGGPMA,LSCMAPPMA,
+     *                  NONLSPMB,L1213PMB,L14PMB,
+     *                  LSBONDPMB,LSANGLPMB,
+     *                  LSDIHRPMB,LSDIHBPMB,
+     *                  LSWAGGPMB,LSCMAPPMB,UMBHIS,UM2HIS)
+C
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (TOKCAL=627.509469D+00)
+C
+      DIMENSION CORD(3,NFFAT),ZANF(NFFAT),
+     *          CHARG(NFFAT),
+     *          POL(NFFAT),DIP(3,NFFAT),
+     *          FIELD1(3,NFFAT),FIELD2(3,NFFAT),FIELD3(3,NFFAT),
+     *          SIG(NFFAT),EPS(NFFAT),SIG2(NFFAT),EPS2(NFFAT),
+     *          BOND0(NBOND),FCBOND(NBOND),
+     *          ANGL0(NANGL),FCANGL(NANGL),
+     *          FCWAGG(NWAGG),FCDIHB(NDIHB),FCDIHR(3,*),
+     *          VROT(NDIHR),NNN(NDIHR),GAMA(NDIHR),IPAIR(2,NBOND),
+     *          KLIST(3,NANGL),
+     *          LLIST(4,NDIHR),MLIST(4,NWAGG),
+     *          L1213J(2,*),L14J(2,NDIHR),
+     *          FFGRD2(3,NFFAT),NTYPE(*),
+     *          XTS(NTS),YTS(NTS),ZTS(NTS),CMAT1(NTS,NTS),
+     *          POT1(NTS),POT2(NTS),QRXN1(NTS),QRXN2(NTS),NONLS1(2,*),
+     *          MAPLST(6,*),CMAPCO(4,4,24,24,3)
+      DIMENSION ENALL(100)
+C
+      COMMON /FFENGY/ EN12,EN123,EN123R4,EN123B4,EN234W1,ENCHAR,ENLJR,
+     *                ENLJD,ENPOL,XENPOL,ENRXN,XENRXN,ENRXNPOL,ENRXNR,
+     *                EN12312,ENQUANP(30),
+     *                ENBIAS,ENCENT,ENUCCH,ENCMAP,ENPOT,ENKIN,ENTOT
+      COMMON /FFFIXS/ ENFIXSO,FIXEPS,FIXTOL,FIXA,FIXQ,RALLMM,RALLQM,
+     *                RADMM(200),RADQM(200),NRADMM,NRADQM,IFIXSOL,
+     *                LFFDAI,LFFDAIT,LFFIDDAI,LFFIDTMP,LFFTMPTS,
+     *                LFFAFIX,LFFIDATOM,LFFRFIX,LFFQFIX,NTSATM,
+     *                LFFQFIXMP,LFFQFIXTA,LFFQFIXXY,
+     *                LFFXTSFIX,LFFYTSFIX,LFFZTSFIX,
+     *                LFFVFIX1,LFFVFIX2,NCYCLE,MXFFTS,NFFTS
+      COMMON /FFFREE/ SOL1CH,SOL1LJ,SOL1IM,SOLFRE1MM,
+     *                SOL2CH,SOL2LJ,SOL2IM,SOLFRE2MM,
+     *                ASOL1CH,ASOL1LJ,ASOL1IM,ASOL1MM,
+     *                ASOL2CH,ASOL2LJ,ASOL2IM,ASOL2MM,
+     *                PMF1BD,PMF1AG,PMF1DR,PMF1DB,PMF1WG,PMF1CM,
+     *                PMF1CH,PMF1PO,PMF1LJ,PMF1IM,PMFFRE1MM,
+     *                EN12A,EN12B,EN123A,EN123B,EN123R4A,EN123R4B,
+     *                EN234W1A,EN234W1B,EN123B4A,EN123B4B,
+     *                EN12312A,EN12312B,
+     *                ENCHARA,ENCHARB,ENPOLA,ENPOLB,
+     *                ENRXNA,ENRXNB,ENRXNPOLA,ENRXNPOLB,
+     *                ENRXNRA,ENRXNRB,ENLJRA,ENLJRB,ENLJDA,ENLJDB,
+     *                ENCMAPA,ENCMAPB,ENFIXSOA,ENFIXSOB,
+     *                ENCENTA,ENCENTB,WSIMUL,WPERT1,WPERT2,
+     *                IFEPTYP
+      COMMON /FFPARM/ NFFAT,NBOND,NANGL,NDIHR,NDIHB,NCMAP,NWAGG,
+     *                N1213J,N14J,NLKQMM,IDOCHG,IDOPOL,IDOLJ,IDOCMAP
+      COMMON /FFMDPA/ DT,DT2,TEMP0,PRES0,POLTOL,VIR(3),PMEAN,VOLAV,
+     *                ENPAV,ENKAV,TEMPAV,BERENDT,BERENDP,VELMAX,
+     *                PMEANX,PMEANY,PMEANZ,NSTEP,KMASTER,KOUTACT(2),
+     *                IHESS,INTALG,ITSTAT,IPSTAT,JOUT,KOUT,LOUT
+      COMMON /FFUMBR/ UMBFC,UMBR0,UMBSIZE,
+     *                NUMBBIN,NUMBATM(6),NUMBTYP,LFFUMBHIS,
+     *                UM2FC,UM2R0,UM2SIZE,
+     *                NUM2BIN,NUM2ATM(6),NUM2TYP,LFFUM2HIS
+      COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C     HUI LI, AUG 10, 2020, LINCOLN
+C
+C
+      CALL VCLR(FFGRD2,1,3*NFFAT)
+      CALL VCLR(VIR,1,3)    !  NEED TO DO THIS - HUI LI
+C
+      CALL E00012(CORD,FFGRD2,BOND0,FCBOND,IPAIR,CORDB,
+     *            LSBONDPMA,LSBONDPMB)
+      CALL E00123(CORD,FFGRD2,ANGL0,FCANGL,KLIST,CORDB,
+     *            LSANGLPMA,LSANGLPMB)
+      CALL E12312(CORD,FFGRD2,ANGL0,KLIST,BOND0,FCSTBD,
+     *            KBLST,CORDB,LSANGLPMA,LSANGLPMB)
+      CALL E123B4(CORD,FFGRD2,DIHB0,FCDIHB,NLIST,CORDB,
+     *            LSDIHBPMA,LSDIHBPMB)
+      CALL E234W1(CORD,FFGRD2,      FCWAGG,MLIST,CORDB,
+     *            LSWAGGPMA,LSWAGGPMB)
+      CALL E123R4(CORD,FFGRD2,VROT,GAMA,NNN,LLIST,CORDB,
+     *            LSDIHRPMA,LSDIHRPMB,FCDIHR)
+      CALL ECMAP (CORD,FFGRD2,MAPLST,CMAPCO,CORDB,
+     *            LSCMAPPMA,LSCMAPPMB)
+      CALL ELJ126(CORD,FFGRD2,SIG,EPS,SIG2,EPS2,L14J,NONLS1,
+     *            L1213J,SIGB,EPSB,SIG2B,EPS2B,
+     *            NONLSA,NONLSB,L1213A,L1213B,L14A,L14B,
+     *            NONLSPMA,L1213PMA,L14PMA,CORDB,
+     *            NONLSPMB,L1213PMB,L14PMB,FCLJTP,NTYPE)
+      CALL ESPHER(CORD,FFGRD2)
+      CALL ECHARG(CORD,FFGRD2,CHARG,NONLS1,L1213J,L14J,
+     *            CHARGB,NONLSA,NONLSB,L1213A,L1213B,L14A,L14B,
+     *            NONLSPMA,L1213PMA,L14PMA,CORDB,
+     *            NONLSPMB,L1213PMB,L14PMB)
+      CALL UMBRELLA(CORD,FFGRD2,UMBHIS,UM2HIS)
+      IF(IFIXSOL.EQ.0) THEN
+         CALL CHGRXN(CORD,FFGRD2,CHARG,XTS,YTS,ZTS,
+     *               CMAT1,POT1,QRXN1,NTS)
+         CALL POLRXN(CORD,FFGRD2,CHARG,POL,POLSV,DIP,
+     *               FIELD1,FIELD2,FIELD3,
+     *               XTS,YTS,ZTS,CMAT1,POT1,POT2,QRXN1,QRXN2,NTS,
+     *               NONLS1,L1213J)
+      END IF
+      IF(IFIXSOL.EQ.1) THEN
+         CALL FIXSOL(CORD,FFGRD2,CHARG,ZANF,AFIX,QFIX,
+     *               VFIX1,VFIX2,XTSFIX,YTSFIX,ZTSFIX,
+     *               RFIX,IDATOM,DAI,IDDAI,
+     *               POL,POLSV,DIP,FIELD1,FIELD2,FIELD3,
+     *               NONLS1,L1213J)
+      END IF
+      IF(GOPARR) THEN
+         CALL VCLR(ENALL,1,100)
+         ENALL( 1) = EN12
+         ENALL( 2) = EN123
+         ENALL( 3) = EN123R4
+         ENALL( 4) = EN123B4
+         ENALL( 5) = EN234W1
+         ENALL( 6) = ENCHAR
+         ENALL( 7) = ENLJR
+         ENALL( 8) = ENLJD
+         ENALL( 9) = VIR(1)
+         ENALL(10) = VIR(2)
+         ENALL(11) = VIR(3)
+C        ENALL(12) = ENUCCH
+         ENALL(13) = ENRXN
+         ENALL(14) = ENRXNR
+C        ENALL(15) = ENCENT
+         ENALL(16) = ENCMAP
+         ENALL(18) = SOL1CH
+         ENALL(19) = SOL1LJ
+         ENALL(21) = SOL2CH
+         ENALL(22) = SOL2LJ
+         ENALL(33) = PMF1BD
+         ENALL(34) = PMF1AG
+         ENALL(35) = PMF1DR
+         ENALL(36) = PMF1DB
+         ENALL(37) = PMF1WG
+         ENALL(38) = PMF1CM
+         ENALL(39) = PMF1CH
+         ENALL(40) = PMF1LJ
+         ENALL(41) = ENBIAS
+         ENALL(42) = EN12312
+         CALL DDI_GSUMF(2410,ENALL  ,42)
+         CALL DDI_GSUMF(2411,FFGRD2,3*NFFAT)
+         EN12      = ENALL( 1)
+         EN123     = ENALL( 2)
+         EN123R4   = ENALL( 3)
+         EN123B4   = ENALL( 4)
+         EN234W1   = ENALL( 5)
+         ENCHAR    = ENALL( 6)
+         ENLJR     = ENALL( 7)
+         ENLJD     = ENALL( 8)
+         VIR(1)    = ENALL( 9)
+         VIR(2)    = ENALL(10)
+         VIR(3)    = ENALL(11)
+C        ENUCCH    = ENALL(12)
+         ENRXN     = ENALL(13)
+         ENRXNR    = ENALL(14)
+C        ENCENT    = ENALL(15)
+         ENCMAP    = ENALL(16)
+         SOL1CH    = ENALL(18)
+         SOL1LJ    = ENALL(19)
+         SOL2CH    = ENALL(21)
+         SOL2LJ    = ENALL(22)
+         PMF1BD    = ENALL(33)
+         PMF1AG    = ENALL(34)
+         PMF1DR    = ENALL(35)
+         PMF1DB    = ENALL(36)
+         PMF1WG    = ENALL(37)
+         PMF1CM    = ENALL(38)
+         PMF1CH    = ENALL(39)
+         PMF1LJ    = ENALL(40)
+         ENBIAS    = ENALL(41)
+         EN12312   = ENALL(42)
+      END IF
+C
+      IF(IFIXSOL.GT.0) THEN
+         IF(MASWRK)
+     *      WRITE(IW,'(A,F20.10,A,A,I8)')
+     *      ' FIXSOL TOTAL SURFACE AREA =',FIXA,' A**2,',
+     *      ' NFFTS=',NFFTS
+         IF(MASWRK.AND.NCYCLE.LT.200)
+     *      WRITE(IW,'(A,I3,A,F11.6)')
+     *      ' FIXSOL CONVERGED IN ',NCYCLE,
+     *      ' ITERATIONS, TOTAL SURFACE CHARGE=',FIXQ
+         IF(MASWRK.AND.NCYCLE.EQ.200)
+     *       WRITE(IW,'(A,I3,A,F10.6,A,F12.10)')
+     *      ' FIXSOL NOT CONVERGED IN ',NCYCLE,
+     *      ' ITERATIONS.  TOTAL SURFACE CHARGE=',FIXQ
+      END IF
+C
+      ENPOT = EN12 + EN123 + EN123R4 + EN234W1 + EN123B4 + ENCHAR
+     *      + ENPOL  + ENRXN  + ENRXNPOL+ENRXNR + ENLJR + ENLJD
+     *      + ENCMAP + ENFIXSO+ EN12312
+      ENRXN = ENRXN + ENRXNPOL
+C
+      IF(MASWRK) THEN
+         WRITE(IW,*)' '
+         WRITE(IW,9000)
+     *   'BOND STRETCHING               ENERGY = ', EN12   *TOKCAL
+         WRITE(IW,9000)
+     *   'BOND ANGLE BENDING            ENERGY = ', EN123  *TOKCAL
+         WRITE(IW,9000)
+     *   'STRETCHING BENDING            ENERGY = ', EN12312*TOKCAL
+         WRITE(IW,9000)
+     *   'DIHEDRAL ROTATION             ENERGY = ', EN123R4*TOKCAL
+         WRITE(IW,9000)
+     *   'DIHEDRAL BENDING              ENERGY = ', EN123B4*TOKCAL
+         WRITE(IW,9000)
+     *   'CMAP                          ENERGY = ', ENCMAP *TOKCAL
+         WRITE(IW,9000)
+     *   'WAGGING                       ENERGY = ', EN234W1*TOKCAL
+         IF(NUMBTYP.GT.0)
+     *   WRITE(IW,9000)
+     *   'UMBRELLA SAMPLING BIAS        ENERGY = ', ENBIAS *TOKCAL
+         WRITE(IW,9000)
+     *   'LJ REPULSION                  ENERGY = ', ENLJR  *TOKCAL
+         WRITE(IW,9000)
+     *   'LJ DISPERSION                 ENERGY = ', ENLJD  *TOKCAL
+         WRITE(IW,9000)
+     *   'CHARGE                        ENERGY = ', ENCHAR *TOKCAL
+         WRITE(IW,9000)
+     *   'INDUCED DIPOLE                ENERGY = ', ENPOL  *TOKCAL
+         WRITE(IW,9000)
+     *   'SPHSOL                        ENERGY = ', ENRXN  *TOKCAL
+         WRITE(IW,9000)
+     *   'FIXSOL                        ENERGY = ', ENFIXSO*TOKCAL
+         WRITE(IW,9000)
+     *   'QM CENTER                     ENERGY = ', ENCENT *TOKCAL
+         WRITE(IW,9000)
+     *   'SPHERE                        ENERGY = ', ENRXNR *TOKCAL
+         WRITE(IW,9000)
+     *   'POTENTIAL                     ENERGY = ', ENPOT  *TOKCAL
+         WRITE(IW,9000)
+         WRITE(IW,*)' '
+         CALL TIMIT(1)
+         WRITE(IW,*)' '
+      END IF
+C
+ 9000 FORMAT(1X,A,F30.10,2X,'KCAL/MOL')
+C
+      RETURN
+      END

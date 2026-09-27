@@ -1,0 +1,720 @@
+MODULE omp_fmo
+
+    USE prec, ONLY: fp
+    USE mx_limits, ONLY: MXSH, MXGTOT, MXANG2, MXG2, MXGSH
+    USE ompmod, ONLY: ompmod_shellquart
+
+    IMPLICIT NONE
+
+    REAL(KIND=fp), PARAMETER :: ZERO=0.0E+00, FOUR = 4.0E+00
+
+    PRIVATE
+    PUBLIC omp_fmo2ei
+
+    INTERFACE
+        REAL(KIND=fp) FUNCTION fmodist(ifg,jfg,kfg,lfg)
+            USE prec, ONLY: fp
+            INTEGER, INTENT(IN) :: ifg,jfg,kfg,lfg
+        END FUNCTION
+
+        REAL(KIND=fp) FUNCTION fmosdist(iifg0,jjfg0,iifgg,jjfgg,ifg,jfg,kfg,lfg,bimer)
+            USE prec, ONLY: fp
+            INTEGER, INTENT(IN) :: iifg0,jjfg0,iifgg(*),jjfgg(*),ifg,jfg,kfg,lfg
+            LOGICAL, INTENT(IN) :: bimer(3)
+        END FUNCTION
+    END INTERFACE
+
+CONTAINS
+!*MODULE OMP_FMO  *DECK omp_fmo2ei
+!>
+!> @brief calculates two-electron electrostatic potential (ESP)
+!>
+!> @details Compute 2e contribution to ESP for FMO.
+!>  This subroutine contains the outer 4 shell loops
+!>  and it is cloned from TWOEI. Additional comments
+!>  are available there and most of them apply.
+!>  Much less symmetry (no 1-2 particle permutation
+!>  symmetry; enforced C1 symmetry) promted not calling
+!>  TWOEI but having an independent subroutine.
+!>  For smart distances one- and two-electron terms
+!>  must be used in the same fashion, based on these
+!>  smart distances! PK option is NOT supported!
+!>  This subroutine is based on `fmo2ei` from `FMOINT.SRC`
+!>
+!> @author Vladimir Mironov, 2018
+!>
+ SUBROUTINE omp_fmo2ei(schwrz,numint,nschwz,nschwzb,nschwnzb,l1,l2,xints, &
+                          nsh2,maxg,ia,lda,ldp,fa,db,fb,dsh,dshb, &
+                          iaglob,indat,indatg,bssedim,respapi,resppci, &
+                          espap,esdder,esder,ifg,jfg,kfg,lfg,nxyz,conn,l2k)
+
+    LOGICAL, INTENT(IN) :: &
+        schwrz, bssedim, espap, esdder, esder, conn
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+        xints(nsh2), fa(l2*nxyz), db(*), fb(l2k), &
+        dsh(nsh2), dshb(nsh2), respapi, resppci
+
+    INTEGER, INTENT(IN) :: &
+        l1, l2, nsh2, maxg, ia(l1), lda, ldp, &
+        iaglob(*), indat(*), indatg(natfmo,*), &
+        ifg, jfg, kfg, lfg, nxyz, l2k
+
+    INTEGER, INTENT(INOUT) :: &
+        numint, nschwz, nschwzb, nschwnzb
+
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    COMMON /nshel / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot), &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot), &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh), &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /restar/ timlim,irest,nrec,intloc,ist,jst,kst,lst
+        INTEGER :: irest,nrec,intloc,ist,jst,kst,lst
+        REAL(KIND=fp) :: timlim
+
+    COMMON /shlexc/ norgsh(3),norgsp(3),iexch,nangm,ngth(4)
+        INTEGER :: norgsh,norgsp,iexch,nangm,ngth
+
+    COMMON /shlg70/ ish,jsh,ksh,lsh,ijklxx(4)
+        INTEGER :: ish,jsh,ksh,lsh,ijklxx
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+            mini,minj,mink,minl,maxi,maxj,maxk,maxl,nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /shlt  / tol,cutoff,icount,out
+        REAL(KIND=fp) :: tol, cutoff
+        INTEGER :: icount
+        LOGICAL :: out
+
+    COMMON /fmcom / x(1)
+        REAL(KIND=fp) :: x
+
+    COMMON /fmoopt/ espsca(9),respap(2),resppc(2),resdim,restri(4), &
+                    rcorsd,respct,convfg,cnvdmp,coroff,rflmo(4), &
+                    orshft,orshft2,cnvafo,ascreen(4),ixesp,mxitfg, &
+                    nguess,nbsse,modorb,modpar,irststp,irstlay,nprfmo, &
+                    nfmopal,modprp,maxl1c,ipieda,modgrd,modesp,ivmul, &
+                    modlmo,nopden,mofock,modfd,modfmm,ncentm,ndualb, &
+                    ngab,modpan
+        REAL(KIND=fp) :: espsca,respap,resppc,resdim,restri, &
+            rcorsd,respct,convfg,cnvdmp,coroff,rflmo, &
+            orshft,orshft2,cnvafo,ascreen
+        INTEGER :: ixesp,mxitfg,nguess,nbsse,modorb,modpar,&
+            irststp,irstlay,nprfmo,nfmopal,modprp,maxl1c,ipieda,&
+            modgrd,modesp,ivmul,modlmo,nopden,mofock,modfd,&
+            modfmm,ncentm,ndualb,ngab,modpan
+
+    COMMON /fmorun/ espscf,e0scf(2),emp2s,idafmo,icurfg,jcurfg,kcurfg, &
+                    icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+                    moncor,needr,modrst,norbproj,nunesp,iskipesp, &
+                    iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo, &
+                    iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo(2)
+        REAL(KIND=fp) :: espscf,e0scf,emp2s
+        INTEGER :: idafmo,icurfg,jcurfg,kcurfg, &
+            icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+            moncor,needr,modrst,norbproj,nunesp,iskipesp, &
+            iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo, &
+            iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo
+
+    COMMON /fmoinf/ nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+        INTEGER :: nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+
+! The following common modules contains mixed private and shared data
+! required for ERI calculation
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+!$omp threadprivate(/maxc  /,/shlnos/,/shlg70/,/dftpar/,/gout  /,/nlrcf /)
+
+    LOGICAL :: bimer(3), espapij, smartr(2), screen
+
+    INTEGER :: &
+        nder, ipcount, next, mine, nloop, &
+        ii, jj, kk, ll, jj0, ijij, klkl, kkat, kkfg, &
+        llat, llfg, ldd, iloop, idum
+
+    INTEGER :: klmax, kl_joined
+
+    REAL(KIND=fp) :: tim, denmax, xintmax, dmaxij, rk
+
+    REAL(KIND=fp), ALLOCATABLE :: ddij_t(:), ghondo_t(:)
+!dir$ attributes align : 64 :: ddij_t, ghondo_t
+
+!   parstat: GroupNone/GroupFull
+    IF (nxyz>1) THEN
+!      double check
+       CALL derchk(nder)
+       IF (nder/=2) CALL abrt
+    END IF
+
+    bimer(1:3) = .FALSE.
+    tim = ZERO
+    CALL tsecnd(tim)
+
+!   Initialization for parallel work
+    ipcount = me-1
+    next = -1
+    mine = -1
+
+    ngth(4) = 1
+    ngth(3) = ngth(4) * nangm
+    ngth(2) = ngth(3) * nangm
+    ngth(1) = ngth(2) * nangm
+
+    norgsh(1:3) = 0
+    norgsp(1:3) = 0
+
+    numint = 0
+    nschwz = 0
+    nschwzb = 0
+    nschwnzb = 0
+    denmax = 0.0
+
+!   Exchange terms for ESP calculation:
+    nloop = 0 ! no exchange
+    IF (iand(modESP,32)/=0) nloop = 2 ! full exchange
+    IF (iand(modESP,2048)/=0 .AND. .NOT.conn) nloop = 0
+
+
+!   Screening flags
+    smartr(1) = iand(modesp,7)==1 .AND. jfg/=0
+    smartr(2) = iand(modesp,7)==2 .AND. jfg/=0
+
+!   No symmetry:
+    qq4 = 1
+
+!   Turn off n-mer consistent distances for connected n-mers (MODESP==1).
+    IF (smartr(1) .AND. nbdfg/=0) THEN
+        bimer(1) = fmodist(ifg,0,0,jfg)==0
+
+        IF (kfg==0) THEN
+            IF (bimer(1)) smartr(1) = .FALSE.
+        ELSE
+            bimer(2) = fmodist(ifg,0,0,kfg)==0
+            bimer(3) = fmodist(jfg,0,0,kfg)==0
+            IF (bimer(1) .AND. (bimer(2) .OR. bimer(3)) .OR. &
+                bimer(2) .AND.  bimer(3)) THEN
+                smartr(1) = .FALSE.
+            END IF
+        END IF
+    END IF
+
+    screen = smartr(1).OR.smartr(2)
+
+!   *DGF*
+!   The problem with skipping superblocks of shells and ESDDER is
+!   not fundamental but rather foolish ignorance of trying to do
+!   both contractions over 1st and 2nd electrons in one 4-loop,
+!   rather than contracting them separately (in which case one could
+!   skip superblocks for ESDDER). Since normally `ESDDER==.TRUE.`
+!   (for runs with gradient, that is), this addition of skipping superblocks
+!   is fairly useless, except mostly 3-body runs for which ESDDER is always
+!   .FALSE. (with the present code).
+    !IF (schwrz .AND. .NOT.esdder) xintmax = xints(idamax(nsh2,xints,1))
+    IF (schwrz .AND. .NOT.esdder) xintmax = xints( maxloc( abs(xints(1:nsh2)), dim=1 ) )
+
+!   *DGF*
+!   For FMO ESP runs the indices are divided as follows:
+!     particle one (II,JJ):   <interacting monomer K>     (NCURSH+1,...,NSHELL)
+!     particle two (KK,LL):   <original monomer(dimer)>   (1,...,NCURSH)
+!   NCURSH gives the border line between the two in the stored basis.
+!   K is looped over somewhere above.
+
+!   Check CPU time (moved out of the nest)
+    CALL tsecnd(tim)
+    IF (tim>=timlim) THEN
+        IF (maswrk) WRITE(iw,FMT='(//&
+            &" *** THIS JOB HAS EXHAUSTED ITS CPU TIME ***"/&
+            &"      (WHILE COMPUTING 2E- INTEGRALS)"///)')
+        CALL abrt
+    END IF
+
+    klmax = ncursh*(ncursh+1)/2
+
+!$omp parallel &
+!$omp   private(ddij_t, ghondo_t, ii, jj, kk, ll, &
+!$omp           jj0, ijij, dmaxij, kkat, kkfg, &
+!$omp           llat, llfg, rk, espapij, ldd, ipcount, &
+!$omp           iexch, klkl, iloop, kl_joined &
+!$omp   ) &
+!$omp   firstprivate(denmax) &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/) &
+!$omp   reduction(+:numint, nschwnzb, nschwzb, nschwz, fa, fb)
+
+    ALLOCATE(ddij_t(MXANG2*MXG2),ghondo_t(maxg))
+    ipcount = 0
+
+    jj0 = ncursh+1
+    iShell: DO ii = ncursh+1, nshell
+
+        IF (espap) jj0 = ii
+
+        jShell: DO jj = jj0, ii
+
+!           *DGF*
+!           For smart distances Schwarz tests are based upon full density,
+!           not populations if ESPAP is .FALSE., even though it is populations that
+!           are used below (ESPAPIJ .TRUE.). The reason is DSH that has been
+!           constructed before it was known if one uses populations or density.
+!           There may be some room for improvement here.
+            IF (schwrz) THEN
+                ijij = (ii*ii-ii)/2 + jj
+!               *DGF*
+!               DSH is written for the external monomer with no offset
+!               ESPAP and not ESPAPIJ should be used because DSH was written
+!               with ESPAP ere shells came to be.
+                IF (espap) THEN
+                    dmaxij = FOUR*dsh(ii-ncursh)
+                ELSE
+                    dmaxij = FOUR*dsh(ia(ii-ncursh)+jj-ncursh)
+                END IF
+
+                IF (schwrz .AND. .NOT.esdder) THEN
+                    IF (xints(ijij)*xintmax*dmaxij < cutoff) THEN
+                        nschwzb = nschwzb+1
+                        CYCLE
+                    END IF
+                END IF
+            END IF
+
+!           Go parallel!
+            IF ((ibtyp==1) .AND. goparr) THEN ! Dynamic load balance
+!$omp barrier
+!$omp master
+                mine = mine + 1
+                IF (mine>next) CALL ddi_dlbnext(next)
+!$omp end master
+!$omp flush(next, mine)
+!$omp barrier
+                IF (next/=mine) CYCLE
+            ELSE IF (goparr) THEN ! Static load balance
+                ipcount = ipcount + 1
+                IF (mod(ipcount,nproc)/=me) CYCLE
+            END IF
+
+            nschwnzb = nschwnzb+1
+
+!$omp do schedule(dynamic,1)
+            klShells: DO kl_joined = 1, klmax
+
+                kk = nint(sqrt(2.0*kl_joined))
+                ll = kl_joined - kk*(kk-1)/2
+
+                kkat = iaglob(katom(kk))
+                llat = iaglob(katom(ll))
+                kkfg = indat(kkat)
+                llfg = indat(llat)
+
+                IF (bssedim .AND. (kkfg/=icurfg.OR.llfg/=icurfg)) CYCLE
+
+                IF (screen) THEN
+                    rk = fmosdist(kkfg,llfg,indatg(kkat,1),indatg(llat,1),ifg,jfg,kfg,lfg,bimer)
+                    IF (rk>resppci .AND. resppci/=ZERO) CYCLE
+
+!                   *DGF*
+!                   Skip fragments treated by point charges
+                    espapij = rk>respapi .AND. respapi/=ZERO
+
+!                   *DGF*
+!                   Double check: ESPAPIJ is based on larger or equal distance that
+!                   ESPAP and thus ESPAPIJ is more often .TRUE. than ESPAP
+!                   (approximations are more efficient with smart distances).
+                    IF (espap .AND. .NOT.espapij) CALL abrt
+
+!                   *DGF*
+!                   Skip off-diagonal for fragments treated by atomic populations
+!                   it is nay good that II,JJ are outer loops, not KK,LL.
+                    IF (espapij .AND. ii/=jj) CYCLE
+                ELSE
+                    espapij = espap
+                END IF
+
+                ldd = lda
+                IF (espapij) ldd = ldp
+
+!               Compute two-electron integrals
+
+!               (II,JJ|KK,LL)
+                iexch = 1
+                ish = ii
+                jsh = jj
+                ksh = kk
+                lsh = ll
+
+
+                DO iloop = 0, nloop
+                    IF (iloop==1) THEN
+!                       Compute exchange terms
+                        iexch = 2
+                        ish = ii
+                        jsh = kk
+                        ksh = jj
+                        lsh = ll
+                    END IF
+                    IF (iloop==2) THEN
+                        IF (ii==jj .OR. ll==kk) CYCLE
+!                       Compute exchange terms
+                        iexch = 3
+                        ish = ii
+                        jsh = ll
+                        ksh = jj
+                        lsh = kk
+                    END IF
+
+!                   Apply the Schwarz inequality, which is
+!                   (II,JJ|KK,LL) <= sqrt((II,JJ|II,JJ)*(KK,LL|KK,LL))
+!                   See, for example, J.L.Whitten, J.Chem.Phys. 58,4496-4501(1973)
+                    IF (schwrz) THEN
+                        klkl = (ksh*ksh-ksh)/2 + lsh
+                        IF (esdder) THEN
+                            denmax = max(dmaxij,four*dshb(ia(ksh)+lsh))
+                        ELSE
+                            denmax = dmaxij
+                        END IF
+
+
+                        IF (xints(ijij)*xints(klkl)*denmax < cutoff) THEN
+                            nschwz = nschwz + 1
+                            CYCLE
+                        END IF
+                    END IF
+
+                    CALL ompmod_shellquart(ii,jj,kk,ll,ghondo_t,ddij_t)
+
+                    CALL omp_fmoesp2(x(ldd),fa,db,fb,ghondo_t,l1,numint,iloop,ncursh,espapij, &
+                                     esdder,esder,nxyz,l2)
+                END DO
+
+            END DO klShells
+!$omp end do nowait
+
+        END DO jShell
+    END DO iShell
+
+    DEALLOCATE(ddij_t, ghondo_t)
+
+!$omp end parallel
+
+    IF (ibtyp==1 .AND. goparr) CALL ddi_dlbreset
+    IF (schwrz .AND. goparr) THEN
+        idum = 0
+        CALL ddi_nsumi(1055,nschwz,numint,idum,idum,2)
+    END IF
+
+ END SUBROUTINE
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE OMP_FMO  *DECK omp_fmoesp2
+!> @brief This subroutine computes 2e contributions to the ESP on a given
+!>  monomer(dimer) by an external monomer.
+!> @details Density matrices are from that external monomer.
+!>  In (II JJ | KK LL) II and JJ are from the external monomer;
+!>                     KK and LL are from the main monomer(dimer).
+!>  any of II,JJ are NEVER equal to any of KK,LL.
+!>  There is much less permutation symmetry compared to the usual case
+!>  when all 4 indices are from the same entity.
+!>  Usually only Coulomb contribution is added (iloop==0).
+!>  Exchange contribution is added with iloop==1.
+!> @note This subroutine is based on `fmoesp2` from `FMOINT.SRC`
+ SUBROUTINE omp_fmoesp2(da,fa,db,fb,ghondo,l1,numint,iloop,ncursh,espap,&
+                          esdder,esder,nxyz,l2k)
+
+    REAL(KIND=fp), PARAMETER :: FOUR = 4.0D+00, HALF = 0.5D+00
+
+    LOGICAL, INTENT(IN) :: espap, esdder, esder
+
+    INTEGER, INTENT(IN) :: l1, iloop, ncursh, nxyz, l2k
+    INTEGER, INTENT(INOUT) :: numint
+    REAL(KIND=fp), INTENT(IN) :: da(*),db(*),ghondo(:)
+    REAL(KIND=fp), INTENT(INOUT) :: fa(*),fb(*)
+
+
+    COMMON /eriout/ ish,jsh,ksh,lsh,lstri,lstrj,lstrk,lstrl
+        INTEGER :: ish,jsh,ksh,lsh,lstri,lstrj,lstrk,lstrl
+
+    COMMON /nshel / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot), &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot), &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh), &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nijx,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+            mini,minj,mink,minl,maxi,maxj,maxk,maxl,nijx,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /shlt  / tol,cutoff,icount,out
+        REAL(KIND=fp) :: tol, cutoff
+        INTEGER :: icount
+        LOGICAL :: out
+
+!$omp threadprivate(/eriout/,/shlnos/)
+
+!    COMMON /misc  / iandj,kandl,same
+!!$omp threadprivate(/misc  /)
+
+    INTEGER :: inds(4)
+    INTEGER :: l2ij, indi, indj, indk, indl, ijn, jmin, jmax, lmax
+    INTEGER :: i, j, k, l, i_index, ij_index, ijk_index, ijkl_index, ixyz
+    INTEGER :: ii, jj, kk, ll, n, indv1, kln, nij, nkl, ijnum, knum
+    REAL(KIND=fp) :: cutint, val, val4
+    LOGICAL :: espap3, espap4
+    LOGICAL :: iandj, kandl, same
+
+!   parstat: NodeNone
+!   Note that off-diagonal elements will need to be halved later.
+
+    l2ij   = l1*(l1+1)/2
+    cutint = cutoff
+
+    same = ish==ksh .AND. jsh==lsh
+    iandj = ish==jsh
+    kandl = ksh==lsh
+    mini = kmin(ish)
+    minj = kmin(jsh)
+    mink = kmin(ksh)
+    minl = kmin(lsh)
+    maxi = kmax(ish)
+    maxj = kmax(jsh)
+    maxk = kmax(ksh)
+    maxl = kmax(lsh)
+    loci = kloc(ish)-mini
+    locj = kloc(jsh)-minj
+    lock = kloc(ksh)-mink
+    locl = kloc(lsh)-minl
+
+!   Find which 2 out of 4 indices come from the external monomer. These would
+!   normally be ISH and JSH (see fmo2ei), but some integral drivers
+!   (Pople and Eric) like to reorder integrals according to the L value.
+!   Such reordering is irrelevant for ordinary integrals in RHF but has to be
+!   untangled here.
+
+    IF (ish>ncursh .AND. jsh>ncursh) THEN
+        indi = 1
+        indj = 2
+        indk = 3
+        indl = 4
+    ELSEIF (ish>ncursh .AND. ksh>ncursh) THEN
+        indi=1
+        indj=3
+        indk=2
+        indl=4
+    ELSEIF (ish>ncursh .AND. lsh>ncursh) then
+        indi=1
+        indj=4
+        indk=2
+        indl=3
+    ELSEIF (jsh>ncursh .AND. ksh>ncursh) then
+        indi=2
+        indj=3
+        indk=1
+        indl=4
+    ELSEIF (jsh>ncursh .AND. lsh>ncursh) then
+        indi=2
+        indj=4
+        indk=1
+        indl=3
+    ELSEIF (ksh>ncursh .AND. lsh>ncursh) then
+        indi=3
+        indj=4
+        indk=1
+        indl=2
+    ELSE
+!       We do not really check if more than 2 are .gt.ncursh but that is
+!       not needed as long as fmo2ei is sane.
+        CALL abrt
+    END IF
+
+!   ESPAP is a headache fountain.
+!   For ESPAP we want to do diagonal terms in the second external monomer
+!   shell. Such shell is stored in INDJ
+!   (that is, INDJ==2 means JSH, INDJ==3 is KSH and INDJ==4 is LSH).
+    espap3 = espap .AND. indj==3
+    espap4 = espap .AND. indj==4
+
+    ijn  = 0
+    jmin = minj
+    jmax = maxj
+
+    icart: DO i = mini, maxi
+        i_index = (i-mini)*lstri + 1
+        IF (iandj) jmax = i
+        inds(1) = loci+i
+
+!       ESPAP does only diagonal terms for the 2nd index (1st=2nd).
+        IF (espap .AND. indj==2) THEN
+          jmin = jmax
+          ijn  = ijn+jmin-minj
+        END IF
+
+        indv1 = i
+        jcart: DO j = jmin,jmax
+            ijn = ijn+1
+            ij_index = (j-minj)*lstrj + i_index
+!           Fix index offset to point to the proper elements
+            inds(2) = locj+j
+            lmax = maxl
+            kln = 0
+            IF (indi==2) indv1 = j
+            kcart: DO k =  mink,maxk
+                ijk_index = (k-mink)*lstrk + ij_index
+                IF (kandl) lmax = k
+                inds(3) = lock+k
+                IF (indi==3) indv1 = k
+
+                lcart: DO l = minl,lmax
+                    kln = kln+1
+!                   Skip off-diagonal terms for ESPAP.
+!                   Clumsy but perhaps fairly clear.
+!                   INDV1 points to the first index (i,j or k) with which
+!                   the second (k or l) has to be equal.
+!                   The whole fuss is raised to cover the knavish SAME.
+                    IF (espap3 .AND. k/=indv1 .OR. espap4 .AND. l/=indv1) CYCLE
+                    IF (same .AND. kln>ijn) CYCLE jcart
+
+                    ijkl_index = (l-minl)*lstrl + ijk_index
+                    val = ghondo(ijkl_index)
+                    IF (abs(val)<cutint) CYCLE
+
+                    numint = numint + 1
+
+                    inds(4) = locl+l
+                    IF (iloop==0) THEN
+                       ii = inds(indi)
+                       jj = inds(indj)
+                       kk = inds(indk)
+                       ll = inds(indl)
+
+!                      ii,jj,kk,ll are now in the semicanonic order. They only
+!                      need to be reordered triangularly (I>J).
+!                      ii,jj are external, kk,ll are n-mer.
+                       IF (ii<jj) THEN
+                         n  = ii
+                         ii = jj
+                         jj = n
+                       END IF
+
+                       IF (kk<ll) THEN
+                         n  = kk
+                         kk = ll
+                         ll = n
+                       END IF
+
+                       IF (espap) THEN
+                         nij = ii-l1
+                       ELSE
+                         !nij = ia(ii-l1)+jj-l1
+                         nij = (ii-l1)*(ii-l1-1)/2+jj-l1
+                       END IF
+
+                       !nkl = ia(kk)+ll
+                       nkl = kk*(kk-1)/2 + ll
+                       IF (ii==jj)              val = val*half
+                       IF (kk==ll)              val = val*half
+                       IF (ii==kk .AND. jj==ll) val = val*half
+                       val4 = val*four
+
+                    ELSE
+
+!                      To the best of the present knowledge the code below is
+!                      correct (even for Eric). However, if IXESP==1 is to be
+!                      used for something real, perhaps detailed comparison
+!                      (i.e. RHF exchange vs exchange here) should be conducted.
+
+                       ii = inds(indi)
+                       jj = inds(indk)
+                       kk = inds(indj)
+                       ll = inds(indl)
+
+!                      ii,jj,kk,ll are now in the semicanonic order. They only
+!                      need to be reordered triangularly (I>J).
+!                      ii,kk are external, jj,ll are n-mer.
+                       IF (ii<kk) THEN
+                         n  = ii
+                         ii = kk
+                         kk = n
+                       END IF
+
+                       IF (jj<ll) THEN
+                         n  = jj
+                         jj = ll
+                         ll = n
+                       ENDIF
+
+                       IF (espap) THEN
+                         nij = ii-l1
+                       ELSE
+                         !nij = ia(ii-l1)+kk-l1
+                         nij = (ii-l1)*(ii-l1-1)/2+kk-l1
+                       END IF
+
+                       !nkl = ia(jj)+ll
+                       nkl = jj*(jj-1)/2+ll
+                       IF (ii==jj)              val = val*half
+                       IF (kk==ll)              val = val*half
+                       IF (ii==kk .AND. jj==ll) val = val*half
+!                      Exchange is -1/2 compared to Coulomb.
+                       val4 = -val
+                    END IF
+
+!                   We now have everything ready, put integrals into Fock matrix
+
+!                   External monomer had shell indices in the lower part
+!                   of the basis set storage, density matrix, however, is
+!                   stored as if the monomer were the only thing on Earth.
+                    IF (nxyz>1) THEN
+                        IF (.NOT.esder) THEN
+                            DO ixyz = 1, nxyz
+                              ijnum = l2ij * (ixyz - 1)
+                              knum  = l2k  * (ixyz - 1)
+                              fa(nkl+ijnum) = fa(nkl+ijnum)+val4*db(nij+knum)
+                            END DO
+                        END IF
+                        IF (esdder) fb(nij) = fb(nij)+val4*da(nkl)
+                    ELSE
+                        IF (.NOT.esder) fa(nkl) = fa(nkl)+val4*da(nij)
+                        IF (esdder) fb(nij) = fb(nij)+val4*db(nkl)
+                    END IF
+
+                END DO lcart
+            END DO kcart
+        END DO jcart
+    END DO icart
+
+ END SUBROUTINE
+
+END MODULE

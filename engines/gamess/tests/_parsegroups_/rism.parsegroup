@@ -1,0 +1,76 @@
+{
+  "parse_header" : "RISM AND RISM-SCF-cSED RESULTS",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)Delta mu \\(HNC    \\) \\(kcal\\/mol\\).*$",
+     "parse_name"   : "Delta mu (HCN) (kcal/mol)",
+     "parse_precision" : 3,
+     "parse_recipe" : "lastinstance_firstindex"
+   },
+   {
+     "regex_string" : "^(\\s*)Delta mu \\(GF     \\) \\(kcal\\/mol\\).*$",
+     "parse_name"   : "Delta mu (GF)  (kcal/mol)",
+     "parse_precision" : 3,
+     "parse_recipe" : "lastinstance_firstindex"
+   },
+   {
+     "regex_string" : "^(\\s*)E\\(UU\\)\\+Delta mu \\(HNC    \\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "E(UU)+Delta mu (HNC)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex"
+   },
+   {
+     "regex_string" : "^(\\s*)E\\(UU\\)\\+Delta mu \\(GF     \\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "E(UU)+Delta mu (GF) ",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex"
+   },
+   {
+     "regex_string" : "^(\\s*)INITIAL STATE \\(EQ \\) S_[0-9]+ (\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "INITIAL STATE (EQ) ",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex"
+   },
+   {
+     "regex_string" : "^(\\s*)FINAL   STATE \\(NEQ\\) S_[0-9]+ (\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "FINAL   STATE (NEQ)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex"
+   },
+   {
+     "regex_string" : "^(\\s*)STATE  1  \\(EQ \\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "STATE 1  (EQ)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_required":true
+   },
+   {
+     "regex_string" : "^(\\s*)STATE  2  \\(NEQ\\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "STATE 2 (NEQ)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_required":true
+   },
+   {
+     "regex_string" : "^(\\s*)STATE  3  \\(NEQ\\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "STATE 3 (NEQ)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_required":true
+   },
+   {
+     "regex_string" : "^(\\s*)STATE  4  \\(NEQ\\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "STATE 4 (NEQ)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_required":true
+   },
+   {
+     "regex_string" : "^(\\s*)STATE  5  \\(NEQ\\)(\\s*)\\(a.u.\\).*$",
+     "parse_name"   : "STATE 5 (NEQ)",
+     "parse_precision" : 8,
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_required":true
+   }
+  ]
+}

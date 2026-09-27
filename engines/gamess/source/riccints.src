@@ -1,0 +1,2250 @@
+
+ MODULE RICC_ints
+
+   USE RICC_GMS_globals
+   USE RICC_BasInfo
+   USE RICC_Shared_Data
+   USE RICC_memalloc
+   USE RICC_procs
+
+   IMPLICIT NONE
+
+!------------------------------------------------------------------------
+! Declarations:
+!------------------------------------------------------------------------
+
+   PRIVATE
+   PUBLIC :: RICC_gen_Ints
+
+   REAL(KIND=dp),PARAMETER :: sqrt3=1.73205080756888D+00,                 &
+                              sqrt5=2.23606797749979D+00,                 &
+                              sqrt7=2.64575131106459D+00,                 &
+                              sqrt9=3.0D+00,                              &
+                              sqrt11=3.3166247903553998D+00
+
+   INTEGER,PARAMETER :: lx(84) =                                          &
+         [0,   1,   0,   0,   2,   0,   0,   1,   1,   0,                 &
+          3,   0,   0,   2,   2,   1,   0,   1,   0,   1,                 &
+          4,   0,   0,   3,   3,   1,   0,   1,   0,   2,                 &
+          2,   0,   2,   1,   1,                                          &
+          5,   0,   0,   4,   4,   1,   0,   1,   0,   3,                 &
+          3,   2,   0,   2,   0,   3,   1,   1,   2,   2,                 &
+          1,                                                              &
+          6,   0,   0,   5,   5,   1,   0,   1,   0,   4,                 &
+          4,   2,   0,   2,   0,   4,   1,   1,   3,   3,                 &
+          0,   3,   3,   2,   1,   2,   1,   2]
+   INTEGER,PARAMETER :: ly(84) =                                          &
+         [0,   0,   1,   0,   0,   2,   0,   1,   0,   1,                 &
+          0,   3,   0,   1,   0,   2,   2,   0,   1,   1,                 &
+          0,   4,   0,   1,   0,   3,   3,   0,   1,   2,                 &
+          0,   2,   1,   2,   1,                                          &
+          0,   5,   0,   1,   0,   4,   4,   0,   1,   2,                 &
+          0,   3,   3,   0,   2,   1,   3,   1,   2,   1,                 &
+          2,                                                              &
+          0,   6,   0,   1,   0,   5,   5,   0,   1,   2,                 &
+          0,   4,   4,   0,   2,   1,   4,   1,   3,   0,                 &
+          3,   2,   1,   3,   3,   1,   2,   2]                            
+   INTEGER,PARAMETER :: lz(84) =                                          &
+         [0,   0,   0,   1,   0,   0,   2,   0,   1,   1,                 &
+          0,   0,   3,   0,   1,   0,   1,   2,   2,   1,                 &
+          0,   0,   4,   0,   1,   0,   1,   3,   3,   0,                 &
+          2,   2,   1,   1,   2,                                          &
+          0,   0,   5,   0,   1,   0,   1,   4,   4,   0,                 &
+          2,   0,   2,   3,   3,   1,   1,   3,   1,   2,                 &
+          2,                                                              &
+          0,   0,   6,   0,   1,   0,   1,   5,   5,   0,                 &
+          2,   0,   2,   4,   4,   1,   1,   4,   0,   3,                 &
+          3,   1,   2,   1,   2,   3,   3,   2]
+
+! Maximum angular momenta in the RI and AO bases and the maximum
+! numbers of cartesian bases in a shell with angular momemtum L.
+
+   INTEGER :: Lmxri,Lmxao
+   INTEGER :: Lnbasri,Lnbasao,mxlnbas
+
+! Maximum number of Gaussian primitives in a shell
+
+   INTEGER :: mxngsri,mxngsao 
+
+! The Normal-Product Hamiltonian
+
+   TYPE, PUBLIC :: NormH
+
+         INTEGER                   :: INTS(3)
+         REAL(KIND=dp),ALLOCATABLE :: ORBEN(:)
+         REAL(KIND=dp),ALLOCATABLE :: FHH(:,:),FHP(:,:),FPP(:,:) 
+         REAL(KIND=dp),ALLOCATABLE :: BmnX(:,:,:),BmeX(:,:,:),BefX(:,:,:)
+
+         CONTAINS
+
+            PROCEDURE :: InitH
+            PROCEDURE :: DelH
+            PROCEDURE :: SetZERO
+
+   END TYPE NormH
+
+!------------------------------------------------------------------------
+! Procedures:
+!------------------------------------------------------------------------
+   CONTAINS
+
+!------------------------------------------------------------------------
+! Type-bound procedures: Creator and destructor for replicated memory 
+!------------------------------------------------------------------------
+
+   SUBROUTINE InitH(this)
+
+   CLASS(NormH),INTENT(INOUT) :: this
+
+   call RICC_dalloc1(nctot,this%ORBEN)
+   call RICC_dalloc2(no,no,this%FHH)
+   call RICC_dalloc2(no,nu,this%FHP)
+   call RICC_dalloc2(nu,nu,this%FPP)
+
+   if(.NOT. usedm3)then
+      call RICC_dalloc3(no,nauxbas,no,this%BmnX) 
+      call RICC_dalloc3(nu,nauxbas,no,this%BmeX) 
+      call RICC_dalloc3(nu,nauxbas,nu,this%BefX) 
+   end if
+   
+   END SUBROUTINE InitH
+
+   SUBROUTINE DelH(this)
+
+   CLASS(NormH),INTENT(INOUT) :: this
+
+   call RICC_dfree1(this%ORBEN)
+   call RICC_dfree2(this%FHH)
+   call RICC_dfree2(this%FHP)
+   call RICC_dfree2(this%FPP)
+
+   if(.NOT. usedm3)then
+      call RICC_dfree3(this%BmnX) 
+      call RICC_dfree3(this%BmeX) 
+      call RICC_dfree3(this%BefX) 
+   end if
+
+   END SUBROUTINE DelH
+ 
+   SUBROUTINE SetZERO(this)
+
+   CLASS(NormH),INTENT(INOUT) :: this
+
+   call RICC_vzero(1,nctot,this%ORBEN)
+   call RICC_dzero(1,no,1,no,this%FHH)
+   call RICC_dzero(1,no,1,nu,this%FHP)
+   call RICC_dzero(1,nu,1,nu,this%FPP)
+
+   if(.NOT. usedm3)then
+      call RICC_dzero(1,no*nauxbas,1,no,this%BmnX)
+      call RICC_dzero(1,nu*nauxbas,1,no,this%BmeX)
+      call RICC_dzero(1,nu*nauxbas,1,nu,this%BefX)
+   end if
+
+   END SUBROUTINE SetZERO
+
+!*MODULE RICCINTS  * DECK RICC_GEN_INTS   
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Generate and distribute three-center
+!>             two-electron repulsion integrals.
+!>             B(pq|AUX), p, q MO indices. 
+!>
+!>    OUTPUT:  Initialized normal-product CC Hamiltonian HNP
+!>
+!>
+ 
+   SUBROUTINE RICC_gen_Ints(cabnam,extcab,HNP,MemInts,DMem3,DMemIn)
+
+   TYPE(NormH),INTENT(INOUT) :: HNP 
+   REAL(KIND=dp),INTENT(IN)  :: cabnam
+   LOGICAL,INTENT(IN)        :: extcab
+   INTEGER,INTENT(OUT)       :: MemInts,DMem3
+   INTEGER,INTENT(IN)        :: DMemIn
+   INTEGER,ALLOCATABLE       :: locsph(:)    
+   REAL(KIND=dp),ALLOCATABLE :: Vaux(:,:),CMO(:,:),ImnX(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: DFRI(:,:,:),DFAO(:,:,:)
+   REAL(KIND=dp)             :: tim,tstrt,wall0
+   INTEGER                   :: DDI_NP,DDI_ME,D3TMP,nricart,nrisph
+   INTEGER                   :: D3AO,D3OO,D3OV,D3VV
+   INTEGER                   :: nauxbas1,nauxbasd,nchunk,nmod
+   INTEGER                   :: i,MemIn,RMem0,RMem1,RMem2
+   INTEGER                   :: RMem3,RMem4,RMem5
+
+   MemIn = MaxCor
+!-------------------------------------------------------------------------
+!  Read Auxiliary Basis Set
+!-------------------------------------------------------------------------
+   call ricauxbas(cabnam,extcab,nricart)
+
+   call RICC_ialloc1(nauxsh,locsph)
+   FORALL(i=1:nauxsh)
+      locsph(i) = 0
+   END FORALL 
+
+   nauxbas = nricart
+   if(iauxbf .EQ. 1)then
+      call sphaux(locsph,nrisph)
+      nauxbas = nrisph
+   end if
+
+   Lmxri   = MAXVAL(kauxty)-1
+   Lmxao   = MAXVAL(ktype)-1
+!-------------------------------------------------------------------------
+! We need to be careful when defining the following parameters, as there
+! might be L type radial functions in the AO and/or the auxiliary basis 
+! set. An L function has the angular momentum 1 just like a P function, 
+! but contributes 4 (kmin=1,kmax=4) cartesian basis functions and just 1 
+! spherical harmonic. If Lmx=1, this may correspond to either an L function 
+! or a P. For safety, we allocate a little larger memory for this case.
+!-------------------------------------------------------------------------
+   if(Lmxri .EQ. 1)then
+     Lnbasri = 4
+   else
+     Lnbasri = (Lmxri+1)*(Lmxri+2)/2
+   end if
+   if(Lmxao .EQ. 1)then
+     Lnbasao = 4
+   else
+     Lnbasao = (Lmxao+1)*(Lmxao+2)/2
+   end if
+   mxlnbas = MAX(Lnbasri,Lnbasao)
+   mxngsri = MAXVAL(kauxng)
+   mxngsao = MAXVAL(kng)
+
+!-------------------------------------------------------------------------
+! Estimate max. replicated memory required for integral generation.
+! We do not store the RI basis overlap matrix or the Coulomb Metric 
+! matrix in the distributed memory for now. 
+!-------------------------------------------------------------------------
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+
+!  1. This subroutine: Vaux + locsph + CMO + AO & RI basis density factors
+!     CMO: MO coefficients matrix: MOs including frozen core
+!     and virtuals.
+   RMem0 = nauxbas*nauxbas + nauxsh + nbas2                               &
+           + nauxsh*mxngsri*Lnbasri+naosh*mxngsao*Lnbasao                  
+
+!  2. Subroutine RICC_form_CMet and its lower-level components 
+   RMem1 = 4*Lnbasri*Lnbasri + 6
+   if(othaux) Rmem1 = Rmem1 + nauxbas*nauxbas
+!  Subroutine RICC_EIG_Dcomp  
+!     if(othaux)     Get Saux**(-1/2) 
+!     if(ivmtd.EQ.2) Get Vaux**(-1/2)
+!  The maximum dimenison is determined by nauxbas.
+   if(othaux .OR. ivmtd.EQ.2)then
+     RMem1 = RMem1 + nauxbas*nauxbas + nauxbas*(nauxbas+1)/2 + 10*nauxbas 
+   end if
+!  Subroutine RICC_PROJ2ORTHO and RICC_VTransHalf: only if(othaux). 
+   if(othaux)RMem1 = RMem1 + 2*nauxbas*nauxbas 
+
+!  3. Subroutine RICC_form_ImnX and the underlying components      
+   RMem2 = 2*mxlnbas*mxlnbas*mxlnbas+Lnbasri*Lnbasri+Lnbasao*Lnbasao      &
+           + Lnbasri*mxngsri + 9                                          & 
+           + nnbas + nbas
+!  We make a rough estimate for the size of the integral buffer ImnX that 
+!  does not account for an even distribution as invoked by DDI_CREATE.
+   nchunk = nauxbas/DDI_NP
+   nmod   = MOD(nauxbas,DDI_NP)
+   RMem2  = Rmem2 + nnbas*(nchunk+nmod)
+
+!  4. Subroutine RICC_form_BpqX: just like above, but now nctots is split.
+   nchunk = nctots/DDI_NP
+   nmod   = MOD(nctots,DDI_NP)
+   RMem3  = 2*nauxbas*(nchunk+nmod)
+
+!  5. Splitting of the RI integrals into OO, OV, and VV blocks.
+   RMem4 = nctots + nu2
+
+!  6. AO -> MO transformation for Fock matrix
+   RMem5 = nnbas + nctots + nbas
+
+   MemInts = RMem0 + MAX(RMem1,RMem2,RMem3,RMem4,RMem5)
+  
+!-------------------------------------------------------------------------
+! Now estimate the distributed memory need. Note that the AO based RI 
+! integrals need not be stored. The distributed memory for this matrix is 
+! first allocated, and once the OO, OV, and VV blocks are constructed, 
+! the distributed array 0 for the AO RI integral matrix is destroyed. 
+!-------------------------------------------------------------------------
+   DMem3 = 0
+   if(memchk .OR. usedm3)then
+     DMem3 = nauxbas*nctots + nauxbas*no2 + nauxbas*nu2 + nauxbas*nou
+!             -  AO ints -    - OO block-   - VV block-   - OV block-
+   end if
+
+!  EXETYP = CHECK jobs return from here.
+   if(memchk)then
+     call RICC_ifree1(locsph)
+     RETURN
+   end if
+
+   if(usedm3 .AND. (1+DMem3/INT(1.0D+6)).GT.DMemIn)then
+     if(maswrk)write(LuOut,9001)DMemIn,1+DMem3/INT(1.0D+6)
+     call abrt
+   end if
+   if(maswrk)then
+      write(LuOut,9002)
+      write(LuOut,9003)REAL(MemInts,dp)*EIGHT/1.0D+9,                     &
+                       REAL(MemInts,dp)*EIGHT/(TWO**30),                  &
+                       REAL(MaxCor,dp)*EIGHT/1.0D+9,                      &
+                       REAL(MaxCor,dp)*EIGHT/(TWO**30)
+   end if
+!-------------------------------------------------------------------------
+! 1. Construct the Coulomb Metric matrix in auxiliary basis and invert it.
+!-------------------------------------------------------------------------
+   call TSECND(tim)
+   wall0 = wall
+   tstrt = wall
+  
+! Compute density factors for Gaussian primitives from contraction coeffs.
+
+   call RICC_dalloc3(nauxsh,mxngsri,Lnbasri,DFRI)
+   call RICC_dalloc3(naosh, mxngsao,Lnbasao,DFAO)
+
+   call RICC_DF4Prims(DFRI,DFAO)
+
+! Form integrals and accumulate in Ibuff.
+
+   call RICC_dalloc2(nauxbas,nauxbas,Vaux)
+   call RICC_form_CMet(locsph,nauxbasd,nauxbas1,DFRI,Vaux)
+
+   if(maswrk)then
+     write(LuOut,9004)nauxsh
+     write(LuOut,9005)nricart
+     write(LuOut,9006)nricart-nrisph
+     write(LuOut,9007)nauxbas-nauxbas1
+     write(LuOut,9008)nauxbas1
+   end if
+
+   call TSECND(tim)
+   if(maswrk)write(LuOut,9009)wall-wall0
+   wall0 = wall
+   call flshbf(LuOut)
+
+!-------------------------------------------------------------------------
+! 2. Construct the Raw 3-center 2-electron integral matrix in AO/MO basis
+!    ImnX => (\mu\nu|X) or (pq|X). Create distributed array for ImnX. At
+!    this stage, we perform AO to MO transformation as well. Hence, load
+!    the MO coefficient matrix from disc.  
+!-------------------------------------------------------------------------
+
+   call RICC_dalloc2(nbas,nbas,CMO)
+   call DAREAD(idaf,ioda,CMO,nbas2,15,0)
+
+   if(usedm3)then
+     call DDI_CREATE(nauxbas,nctots,D3AO)
+     call RICC_form_ImnX_DDI(locsph,D3AO,CMO,DFRI,DFAO)
+   else 
+     call RICC_dalloc2(nauxbas,nctots,ImnX)
+     call RICC_dzero(1,nauxbas,1,nctots,ImnX)
+     call RICC_form_ImnX_REP(locsph,ImnX,CMO,DFRI,DFAO)
+   end if
+
+   call TSECND(tim)
+   if(maswrk)write(LuOut,9010)wall-wall0
+   wall0 = wall
+   call flshbf(LuOut)
+
+!-------------------------------------------------------------------------
+! 3. Construct the final 3-center 2-electron integral matrix in MO basis
+!    BpqX => \sum_Z (pq|Z) V**(-1)ZX. Unlike ImnX, BpqX is defined in 
+!    terms of the linearly independent auxiliary basis set. The final
+!    dimension of X is nauxbasd = nauxbas1. 
+!-------------------------------------------------------------------------
+   
+   if(usedm3)then
+     call RICC_form_BpqX_DDI(Vaux,D3AO,nauxbasd,nauxbas)
+   else
+     call RICC_form_BpqX_REP(Vaux,ImnX,nauxbasd,nauxbas)
+   end if
+
+   call TSECND(tim)
+   if(maswrk)write(LuOut,9011)wall-wall0
+   wall0 = wall
+   call flshbf(LuOut)
+
+!-------------------------------------------------------------------------
+! Now is the time to update the value of nauxbas globally. We create 
+! distributed memory (or, if .NOT. usedm3, allocate replicated memory)
+! for the final MO-transformed RI integrals also with the updated nauxbas. 
+!
+! Initialize the Normal-product CC Hamiltonian at this stage.
+!-------------------------------------------------------------------------
+   nauxbas = nauxbasd
+
+   call HNP%InitH()
+   call HNP%SetZERO()
+
+   if(usedm3)then
+     call DDI_CREATE(no*nauxbas,no,D3OO)
+     call DDI_CREATE(nu*nauxbas,no,D3OV)
+     call DDI_CREATE(nu*nauxbas,nu,D3VV)
+
+     HNP%INTS(1) = D3OO
+     HNP%INTS(2) = D3OV
+     HNP%INTS(3) = D3VV
+   else
+
+! Set dummy. MO RI integrals are stored into HNP%BmnX, HNP%BmeX, and HNP%BefX
+
+     HNP%INTS(1) = -1
+     HNP%INTS(2) = -1
+     HNP%INTS(3) = -1
+   end if
+
+!-------------------------------------------------------------------------
+! 4. Split and distribute the BpqX integrals into various blocks: 
+!    a. (ij|X), b. (ab|X), c. (ia|X). 
+!    We do not need the AO based RI integrals any more. Destroy it.
+!-------------------------------------------------------------------------
+
+   if(usedm3)then
+     call RICC_split_MOInts_DDI(D3AO,HNP)
+     call DDI_DESTROY(D3AO)
+   else
+     call RICC_split_MOInts_REP(ImnX,HNP)
+     call RICC_dfree2(ImnX)
+   end if
+
+   call TSECND(tim)
+   if(maswrk)then
+     write(LuOut,9012)wall-wall0
+     if(usedm3) write(LuOut,9013)D3AO,nauxbas*nctots
+   end if
+   wall0 = wall
+   call flshbf(LuOut)
+
+!-------------------------------------------------------------------------
+! 5. Read AO based Fock matrix and transform to MO basis. Get orbital
+!    energies as well. 
+!-------------------------------------------------------------------------
+
+   call RICC_read_FockMat(CMO,HNP)
+
+   call TSECND(tim)
+   if(maswrk)then
+     write(LuOut,9014)wall-wall0
+     write(LuOut,9015)wall-tstrt
+     write(LuOut,9016)
+   end if
+   call flshbf(LuOut)
+
+   call RICC_ifree1(locsph)
+   call RICC_dfree2(Vaux)
+   call RICC_dfree2(CMO)
+   call RICC_dfree3(DFRI)
+   call RICC_dfree3(DFAO)
+
+   9001 format(//5X,'        *** INSUFFICIENT DISTRIBUTED MEMORY REQUESTED *** '     ,/,   &
+                 5X,'INPUT VALUE FOR MEMDDI: ',I7,' MWORDS, REQUIRED: ',I7,' MWORDS.',/,   &
+                 5X,'PLEASE PERFORM AN EXETYP=CHECK RUN FOR AN ESTIMATION OF MEMDDI.',//)
+   9002 format(//,1X,31('-'),' RI INTEGRAL GENERATION ',31('-'))
+   9003 format(/,1X,'REPLICATED MEMORY NEED FOR RI INTEGRAL GENERATION: ',F9.2,' GB ',     & 
+                    '(',F9.2,' GiB)'                                                 ,/,   &
+                 1X,'                                 MEMORY AVAILABLE: ',F9.2,' GB ',     &
+                    '(',F9.2,' GiB)')
+   9004 format(/,1X,'NUMBER OF SHELLS IN THE AUXILIARY BASIS SET             ... ',I7)
+   9005 format(  1X,'NUMBER OF CARTESIAN AUXILIARY BASIS FUNCTIONS           ... ',I7)
+   9006 format(  1X,'NUMBER OF SPHERICAL CONTAMINANTS DROPPED                ... ',I7)
+   9007 format(  1X,'NUMBER OF LINEARLY DEPENDENT BASIS FUNCTIONS DROPPED    ... ',I7) 
+   9008 format(  1X,'TOTAL NUMBER OF AUXILIARY BASIS FUNCTIONS RETAINED      ... ',I7,/)  
+   9009 format(  1X,'CONSTRUCTION OF THE DECOMPOSED COULOMB METRIC MATRIX',                &
+                    '    ... DONE IN ',F12.2,' SEC.'/)
+   9010 format(/,1X,'CONSTRUCTION OF THE 3C-2E INTEGRAL MATRIX I(P Q|AUX)',                &
+                    '    ... DONE IN ',F12.2,' SEC.') 
+   9011 format(  1X,'CONSTRUCTION OF THE FINAL RI INTEGRAL MATRIX B(P Q|AUX)',             &
+                    ' ... DONE IN ',F12.2,' SEC.',/) 
+   9012 format(/,1X,'SPLITTING OF THE RI INTEGRALS INTO OO, OV, VV BLOCKS',                &
+                '    ... DONE IN ',F12.2,' SEC.')  
+   9013 format(/,1X,'THE DISTRIBUTED ARRAY#',I2,' WAS DESTROYED AND ',/,                   &
+                I12,' WORDS OF MEMORY WAS RELEASED.',/)
+   9014 format(  1X,'AO TO MO TRANSFORMATION OF THE FOCK MATRIX', 14(' '),                 &
+                    '... DONE IN ',F12.2,' SEC.',//)
+   9015 format(  1X,'TIME TO COMPLETE THE RI INTEGRAL GENERATION STEP: ',F12.2,' SEC.(WALL)')  
+   9016 format(  1X,86('-'),/)
+
+   END SUBROUTINE RICC_gen_Ints
+
+!*MODULE RICCINTS   *DECK RICC_FORM_CMET
+!>
+!>     @author  Dipayan Datta 
+!>
+!>     @date    March 5, 2020 First submission to github
+!> 
+!>     @brief   This subroutine has been adopted from the RIMP2 
+!>              module and the procedures involved are parallel-
+!>              ized via OpenMP.
+!>
+!>     @detail  Construct the Coulomb Metric (CM) matrix in the 
+!>              auxiliary basis set and invert it. Care for the 
+!>              possible linear dependency in the RI basis. This
+!>              is particularly important for RICC calculations, 
+!>              which require using correlation-consistent basis
+!>              sets. These basis sets and the RI versions thereof 
+!>              often have such linear dependencies. The default 
+!>              value for OTHAUX in $RICC is thus set to .TRUE.
+!>   
+!>     NOTE:    Vaux is returned as nauxbasd*nauxbas irrespective
+!>              of the combination of othaux and ivmtd options.
+!>
+!>
+
+   SUBROUTINE RICC_form_CMet(locsph,nauxbasd,nauxbas1,DFRI,Vaux)
+
+   INTEGER,INTENT(IN)          :: locsph(:)
+   INTEGER,INTENT(OUT)         :: nauxbasd,nauxbas1    
+   REAL(KIND=dp),INTENT(OUT)   :: Vaux(:,:)
+   REAL(KIND=dp),INTENT(IN)    :: DFRI(:,:,:)
+   REAL(KIND=dp),ALLOCATABLE   :: Saux(:,:),CCORD(:,:)
+   REAL(KIND=dp),ALLOCATABLE   :: GHONDO(:),TI(:),TJ(:),WRK(:)
+   INTEGER                     :: i,IntID,MemIn
+   
+   MemIn = MaxCor
+!-------------------------------------------------------------------------
+! Construct the crude two-center matrix in GHONDO first. This corresponds 
+! either to the two-electron Coulomb Metric or to the one-electron RI-basis 
+! overlap matrix. GHONDO contains the matrix in cartesian basis functions. 
+! If iauxbf = 1, we need in addition to transform the matrix to the one 
+! expressed in terms of the spherical harmonics. TI and TJ are the transf.
+! matrices for shell-I and shell-J, respectively. For D functions, z.B., 
+! TI would have the dimension 6*5 (Ni-cart*Ni-sph). In order to avoid memory 
+! allocation wihin loop over shells, allocate TI, TJ etc. with the maximum
+! dimension for the largest angular momentum Lmxri in the RI-basis. Note that, 
+! the col. dimension of TI, TJ would be smaller than Lnbasri, yet we assume 
+! a square matrix.
+!-------------------------------------------------------------------------
+
+   call RICC_dalloc1(Lnbasri*Lnbasri,GHONDO)     
+   call RICC_dalloc1(Lnbasri*Lnbasri,TI) 
+   call RICC_dalloc1(Lnbasri*Lnbasri,TJ)
+   call RICC_dalloc1(Lnbasri*Lnbasri,WRK) 
+   call RICC_dalloc2(3,2,CCORD) 
+
+   nauxbas1 = nauxbas
+
+   block_calc_Spq: if(othaux)then
+
+      call RICC_dalloc2(nauxbas,nauxbas,Saux)
+
+!-------------------------------------------------------------------------
+! Get orthogonal RI basis from the raw RI basis: \phi' = Saux^(-1/2)\phi.
+! 1. Generate the 2c-1e overlap matrix Saux(P|Q). 
+! 2. Diagonalize Spq, discard eigenvalues (controlled by stol), remove 
+!    linear dependency, if any. The new dimension is nauxbas1. 
+!    Generate the orthogonalization transformation matrix Saux^-1/2. 
+!-------------------------------------------------------------------------
+      IntID = 0
+      call RICC_form_Ipq(Saux,GHONDO,TI,TJ,WRK,CCORD,locsph,DFRI,IntID)
+      call RICC_EIG_Dcomp('N',Saux,stol,nauxbas1,nauxbas)
+
+   end if block_calc_Spq 
+
+!-------------------------------------------------------------------------
+! Construct the 2C-2E Coulomb Metric matrix Vaux(P|Q)
+!-------------------------------------------------------------------------
+
+   IntID = 1
+   call RICC_form_Ipq(Vaux,GHONDO,TI,TJ,WRK,CCORD,locsph,DFRI,IntID)
+
+   if(DBGFLG .AND. maswrk)then
+     write(LuOut,*)'THE COULOMB METRIC MATRIX IN AUXILIARY BASIS SET'
+     call PRSQ(Vaux,nauxbas,nauxbas,nauxbas)
+   end if
+
+!-------------------------------------------------------------------------
+! Project the 2C-2E Coulomb Metric matrix Vaux(P|Q) to the orthogonal
+! auxiliary basis \phi' = Saux^(-1/2)\phi
+!-------------------------------------------------------------------------
+
+   if(othaux) call RICC_Proj2Ortho(Vaux,Saux,nauxbas,nauxbas1)
+
+!-------------------------------------------------------------------------
+! Now decompose Vaux and get its inverse.           
+! ivmtd = 0: Cholesky decomposition + inversion. No eigenvalue 
+!            rejection at this stage. Hence, nauxbasd = nauxbas1 
+! ivmtd = 2: Eigendecomposition. V**(-1) = V**(-1/2) X V**(-1/2). 
+!            The usual method employed for obtaining the three-index 
+!            RI integrals. Discard eigenvalues smaller than vtol.
+!            The dimension of the regularized Vaux matrix is nauxbasd.  
+!            Caution: Perform NO further SVD on B later.
+!-------------------------------------------------------------------------
+
+   SELECT CASE(ivmtd)
+      CASE(0)
+         call RICC_Chol_Dcomp(Vaux,nauxbas1)
+         nauxbasd = nauxbas1
+      CASE(2)
+         call RICC_EIG_Dcomp('T',Vaux,vtol,nauxbasd,nauxbas1)
+   END SELECT
+
+!-------------------------------------------------------------------------
+! We now have Vaux(nauxbasd,nauxbas1). For the final contraction of Vaux 
+! with (\mu\nu|X), where X is still in the original aux. basis with the 
+! dimension nauxbas, we perform a partial transformation of Vaux at this 
+! stage. If(.NOT.othaux), this is not needed.
+!-------------------------------------------------------------------------
+
+   if(othaux)then
+      call RICC_VTransHalf(Saux,Vaux,nauxbasd,nauxbas,nauxbas1)
+      call RICC_dfree2(Saux)
+   end if
+
+   call RICC_dfree1(GHONDO)
+   call RICC_dfree1(TI)
+   call RICC_dfree1(TJ)
+   call RICC_dfree1(WRK)
+   call RICC_dfree2(CCORD)
+
+   if(DBGFLG .AND. maswrk)then
+     write(LuOut,*)'THE DECOMPOSED INVERSE OF THE COULOMB METRIC MATRIX'
+     call PRSQ(Vaux,nauxbas,nauxbasd,nauxbasd)
+   end if
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_form_CMet.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_form_CMet
+
+!*MODULE RICCINTS  *DECK RICC_FORM_IPQ
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!>    @date    July  7, 2021 Bug fix: avoid using GEN2C2ERI
+!>                           from riint.src. Conflicts with
+!>                           the common block ROOT, which
+!>                           should be declared threadprivate
+!>                           within the OpenMP implementation.
+!> 
+!>    @brief   Form two-index integrals in auxiliary basis
+!>             set.
+!>    @detail  IntID = 0: RI basis overlap matrix
+!>                   = 1: 2-center 2-electron Coulomb Metric
+!>
+!>
+
+   SUBROUTINE RICC_form_Ipq(Iaux,GHONDO,TI,TJ,WRK,CCORD,locsph,DFRI,IntID)
+ 
+   REAL(KIND=dp),INTENT(OUT)   :: Iaux(:,:)
+   REAL(KIND=dp),INTENT(IN)    :: DFRI(:,:,:)
+   REAL(KIND=dp),INTENT(INOUT) :: CCORD(:,:)
+   REAL(KIND=dp),INTENT(INOUT) :: GHONDO(:),TI(:),TJ(:),WRK(:)
+   INTEGER,INTENT(IN)          :: IntID,locsph(:)
+   REAL(KIND=dp)               :: time1
+   INTEGER :: ish,i1,iat,Langi,ngi,mini,maxi,loci,Ni,minis,maxis,locis,Nis
+   INTEGER :: jsh,j1,jat,Langj,ngj,minj,maxj,locj,Nj,minjs,maxjs,locjs,Njs
+
+!------------------------------------------------------------------------
+! We begin by cleaning all scratch arrays, as they may have been used 
+! earlier and might already hold some data.  
+!------------------------------------------------------------------------
+   call RICC_dzero(1,SIZE(Iaux,1),1,SIZE(Iaux,2),Iaux)
+   call RICC_vzero(1,SIZE(GHONDO),GHONDO)
+   call RICC_vzero(1,SIZE(TI),TI)
+   call RICC_vzero(1,SIZE(TJ),TJ)
+   call RICC_vzero(1,SIZE(WRK),WRK)
+ 
+   time1 = OMP_get_wtime() 
+
+   loop_ishell: do ish = 1,nauxsh
+                iat        = kauxat(ish)
+                CCORD(1,1) = c(1,iat)
+                CCORD(2,1) = c(2,iat)
+                CCORD(3,1) = c(3,iat)
+                Langi      = kauxty(ish)-1
+                ngi        = kauxng(ish)
+                mini       = kauxmi(ish)
+                maxi       = kauxmx(ish)
+                i1         = kauxst(ish)
+                loci       = kauxlo(ish)-mini
+                Ni         = maxi-mini+1
+                if(iauxbf.EQ.1)then
+                   call rimp2cstrm(TI,Langi,mini,Ni,minis,maxis)
+                   locis = locsph(ish)-minis
+                    Nis   = maxis-minis+1
+                end if
+
+   loop_jshell: do jsh = 1,ish
+                jat        = kauxat(jsh)
+                CCORD(1,2) = C(1,jat)
+                CCORD(2,2) = C(2,jat)
+                CCORD(3,2) = C(3,jat)
+                Langj      = kauxty(jsh)-1
+                ngj        = kauxng(jsh)
+                minj       = kauxmi(jsh)
+                maxj       = kauxmx(jsh)
+                j1         = kauxst(jsh)
+                locj       = kauxlo(jsh)-minj
+                Nj         = maxj-minj+1
+                if(iauxbf.EQ.1)then
+                   call rimp2cstrm(TJ,Langj,minj,Nj,minjs,maxjs)
+                   locjs = locsph(jsh)-minjs
+                   Njs   = maxjs-minjs+1
+                end if
+ 
+! Evaluate GHONDO 
+ 
+      call RICC_gen2c2eri(CCORD,ish,jsh,GHONDO,DFRI,exaux(i1),exaux(j1),  &
+                          Langi,Langj,ngi,ngj,mini,maxi,minj,maxj,        &
+                          IntID)
+ 
+! Transform (if iauxbf.EQ.1) GHONDO and copy to Iaux 
+ 
+      call cp2cauxint(GHONDO,Iaux,TI,TJ,WRK,nauxbas,loci,locj,            &
+                      mini,maxi,minj,maxj,Ni,Nj,locis,locjs,              &
+                      minis,maxis,minjs,maxjs,Nis,Njs,iauxbf.EQ.1,        &
+                      ish.EQ.jsh)
+      
+   end do loop_jshell
+   end do loop_ishell
+
+   if(DBGFLG .AND. maswrk) write(LuOut,9000)OMP_get_wtime()-time1
+
+   9000 format(/1X,'THE OVERLAP MATRIX IN RI BASIS IS FORMED IN ',F10.3,' SECONDS.')
+
+   END SUBROUTINE RICC_form_Ipq
+
+!*MODULE RICCINTS  *DECK RICC_FORM_IMNX_DDI
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Form crude three-index integrals in auxiliary basis
+!>             DDI version. ImnX is distributed. 
+!>
+!>
+
+   SUBROUTINE RICC_form_ImnX_DDI(locsph,D3AO,CMO,DFRI,DFAO)
+
+   INTEGER,INTENT(IN)        :: locsph(:),D3AO
+   REAL(KIND=dp),INTENT(IN)  :: CMO(:,:)         
+   REAL(KIND=dp),INTENT(IN)  :: DFRI(:,:,:),DFAO(:,:,:)
+   REAL(KIND=dp),ALLOCATABLE :: GHONDO(:),WRK(:),TK(:),DB(:)
+   REAL(KIND=dp),ALLOCATABLE :: CCORD(:,:),DK(:,:),Ibuff(:,:),MOWRK(:),MOWRK2(:)
+   INTEGER,ALLOCATABLE       :: DDIXD(:,:)
+   INTEGER                   :: Langi,Langj,Langk,ngi,ngj,ngk,i1,j1,k1
+   INTEGER                   :: ilo,ihi,ish,jsh,ksh,mini,maxi,minj,maxj
+   INTEGER                   :: iat,jat,kat,loci,locj,k,Nk
+   INTEGER                   :: lock,locks,mink,maxk,minks,maxks
+   INTEGER                   :: MemIn,Nks,DDI_NP,DDI_ME,klen,koffstrt,koffend
+   INTEGER                   :: kstrt,kend,kshstrt,kshend,kddistrt,kddiend
+
+   MemIn = MaxCor
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIXD)
+   call RICC_LoopDist(DDIXD,DDI_NP,1,nauxsh)
+   koffstrt = 0
+   koffend  = 0
+   if(DDI_ME .NE. 0)then
+     kshstrt = DDIXD(DDI_ME-1,1)
+     kshend  = DDIXD(DDI_ME-1,2)
+     call RICC_get_XBChunk(locsph,kshstrt,kshend,koffstrt,koffend) 
+   end if
+   kshstrt = DDIXD(DDI_ME,1)
+   kshend  = DDIXD(DDI_ME,2)
+   call RICC_get_XBChunk(locsph,kshstrt,kshend,kddistrt,kddiend) 
+   call RICC_ifree2(DDIXD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nauxsh-1)then
+
+   call RICC_dalloc1(mxlnbas*mxlnbas*mxlnbas,GHONDO)
+   call RICC_dalloc1(mxlnbas*mxlnbas*mxlnbas,WRK)
+   call RICC_dalloc1(Lnbasri*Lnbasri,TK)
+   call RICC_dalloc1(Lnbasao*Lnbasao,DB) 
+   call RICC_dalloc1(nnbas,MOWRK)
+   call RICC_dalloc1(nbas,MOWRK2)
+   call RICC_dalloc2(Lnbasri,mxngsri,DK)
+   call RICC_dalloc2(3,3,CCORD)
+
+   klen = kddiend-kddistrt+1
+   call RICC_dalloc2(nnbas,klen,Ibuff)
+
+! Form integrals and accumulate in Ibuff.
+
+   call RICC_dzero(1,nnbas,1,klen,Ibuff)
+
+   loop_kaux_shell: do ksh=kshstrt,kshend
+                    kat        = kauxat(ksh)
+                    CCORD(1,3) = c(1,kat)
+                    CCORD(2,3) = c(2,kat)
+                    CCORD(3,3) = c(3,kat)
+                    Langk      = kauxty(ksh)-1
+                    ngk        = kauxng(ksh)
+                    mink       = kauxmi(ksh)
+                    maxk       = kauxmx(ksh)
+                    k1         = kauxst(ksh)
+                    lock       = kauxlo(ksh)-mink
+                    Nk         = maxk-mink+1
+                    SELECT CASE(iauxbf)
+                        CASE(0)
+                           kstrt = lock+mink-koffend
+                           kend  = kstrt+Nk-1 
+                        CASE(1)
+                           call rimp2cstrm(TK,Langk,mink,Nk,minks,maxks)
+                           locks = locsph(ksh)-minks
+                           Nks   = maxks-minks+1
+                           kstrt = locks+minks-koffend
+                           kend  = kstrt+Nks-1
+                    END SELECT
+
+   loop_iao_shell: do ish=1,naosh
+                   iat = katom(ish)
+                   CCORD(1,1) = c(1,iat)
+                   CCORD(2,1) = c(2,iat)
+                   CCORD(3,1) = c(3,iat)
+                   Langi = ktype(ish)-1
+                   ngi   = kng(ish)
+                   mini  = kmin(ish)
+                   maxi  = kmax(ish)
+                   i1    = kstart(ish)
+                   loci  = kloc(ish)-mini
+ 
+   loop_jao_shell: do jsh=1,ish
+                   jat = katom(jsh)
+                   CCORD(1,2) = c(1,jat)
+                   CCORD(2,2) = c(2,jat)
+                   CCORD(3,2) = c(3,jat)
+                   Langj = ktype(jsh)-1
+                   ngj   = kng(jsh)
+                   minj  = kmin(jsh)
+                   maxj  = kmax(jsh)
+                   j1    = kstart(jsh)
+                   locj  = kloc(jsh)-minj
+
+! GHONDO holds integrals in cartesian auxiliary basis.
+
+                   call RICC_gen3c2eri(CCORD,ish,jsh,ksh,ex(i1),ex(j1),   &
+                                       exaux(k1),GHONDO,Langi,Langj,Langk,&
+                                       ngi,ngj,ngk,mini,maxi,minj,maxj,   &
+                                       mink,maxk,DFRI,DFAO,DK,DB)
+
+! Transform the auxiliary basis index to spherical harmonics.
+! Unfold AO basis indices.
+                  
+                   call RICC_trfc2s_Ints(GHONDO,Ibuff(:,kstrt),TK,WRK,    &
+                                         loci,locj,mini,maxi,minj,maxj,   &
+                                         mink,maxk,minks,maxks,kstrt,     &
+                                         kend,ish.EQ.jsh)
+
+   end do loop_jao_shell
+   end do loop_iao_shell
+   end do loop_kaux_shell
+
+! Cross check for safety.
+
+   if(kend+koffend .NE. kddiend)then
+     if(maswrk)write(LuOut,7000)kend+koffend,kddiend
+     call abrt
+   end if
+ 
+! Transform ImnX to IpqX (AO to MO). The transformed integrals only include 
+! correlated occupied and virtual orbitals: dimension reduces from nnbas to nctots. 
+! Put the integral buffer into distributed memory
+
+   do k=kddistrt,kddiend
+      call RICC_gen_MOInts(Ibuff(:,k-koffend),CMO(:,nfc+1),MOWRK,         &
+                           MOWRK2,nctot,nbas,nbas)
+      call DDI_PUT(D3AO,k,k,1,nctots,Ibuff(1:nctots,k-koffend))
+   end do
+
+   call RICC_dfree1(GHONDO)
+   call RICC_dfree1(WRK)
+   call RICC_dfree1(TK)
+   call RICC_dfree1(DB)
+   call RICC_dfree1(MOWRK)
+   call RICC_dfree1(MOWRK2)
+   call RICC_dfree2(DK)
+   call RICC_dfree2(Ibuff)
+   call RICC_dfree2(CCORD)
+
+   end if block_mpi_excess
+
+   call DDI_SYNC(3011) 
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7001)MemIn-MaxCor
+   end if
+
+   7000 format(1X,'FATAL ERROR: PROBLEM IN RICC_FORM_IMNX_DDI ',2I4)
+   7001 format(/,1X,'Warning: Replicated memory leak in RICC_form_ImnX_DDI.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_form_ImnX_DDI
+
+!*MODULE RICCINTS  *DECK RICC_FORM_IMNX_REP
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Form crude three-index integrals in auxiliary basis
+!>             In core (on replicated memory) version. 
+!>
+!>
+
+   SUBROUTINE RICC_form_ImnX_REP(locsph,ImnX,CMO,DFRI,DFAO)
+
+   REAL(KIND=dp),INTENT(OUT) :: ImnX(:,:)
+   INTEGER,INTENT(IN)        :: locsph(:)
+   REAL(KIND=dp),INTENT(IN)  :: CMO(:,:)         
+   REAL(KIND=dp),INTENT(IN)  :: DFRI(:,:,:),DFAO(:,:,:)
+   REAL(KIND=dp),ALLOCATABLE :: GHONDO(:),WRK(:),TK(:),DB(:)
+   REAL(KIND=dp),ALLOCATABLE :: CCORD(:,:),DK(:,:),Ibuff(:,:),MOWRK(:),MOWRK2(:)
+   INTEGER,ALLOCATABLE       :: DDIXD(:,:)
+   INTEGER                   :: Langi,Langj,Langk,ngi,ngj,ngk,i1,j1,k1
+   INTEGER                   :: ilo,ihi,ish,jsh,ksh,mini,maxi,minj,maxj
+   INTEGER                   :: iat,jat,kat,loci,locj,k,Nk
+   INTEGER                   :: lock,locks,mink,maxk,minks,maxks
+   INTEGER                   :: MemIn,Nks,DDI_NP,DDI_ME,klen,koffstrt,koffend
+   INTEGER                   :: kstrt,kend,kshstrt,kshend,kddistrt,kddiend
+
+   MemIn = MaxCor
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIXD)
+   call RICC_LoopDist(DDIXD,DDI_NP,1,nauxsh)
+   koffstrt = 0
+   koffend  = 0
+   if(DDI_ME .NE. 0)then
+     kshstrt = DDIXD(DDI_ME-1,1)
+     kshend  = DDIXD(DDI_ME-1,2)
+     call RICC_get_XBChunk(locsph,kshstrt,kshend,koffstrt,koffend) 
+   end if
+   kshstrt = DDIXD(DDI_ME,1)
+   kshend  = DDIXD(DDI_ME,2)
+   call RICC_get_XBChunk(locsph,kshstrt,kshend,kddistrt,kddiend) 
+   call RICC_ifree2(DDIXD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nauxsh-1)then
+
+   call RICC_dalloc1(mxlnbas*mxlnbas*mxlnbas,GHONDO)
+   call RICC_dalloc1(mxlnbas*mxlnbas*mxlnbas,WRK)
+   call RICC_dalloc1(Lnbasri*Lnbasri,TK)
+   call RICC_dalloc1(Lnbasao*Lnbasao,DB) 
+   call RICC_dalloc1(nnbas,MOWRK)
+   call RICC_dalloc1(nbas,MOWRK2)
+   call RICC_dalloc2(Lnbasri,mxngsri,DK)
+   call RICC_dalloc2(3,3,CCORD)
+
+   klen = kddiend-kddistrt+1
+   call RICC_dalloc2(nnbas,klen,Ibuff)
+
+! Form integrals and accumulate in Ibuff.
+
+   call RICC_dzero(1,nnbas,1,klen,Ibuff)
+
+   loop_kaux_shell: do ksh=kshstrt,kshend
+                    kat        = kauxat(ksh)
+                    CCORD(1,3) = c(1,kat)
+                    CCORD(2,3) = c(2,kat)
+                    CCORD(3,3) = c(3,kat)
+                    Langk      = kauxty(ksh)-1
+                    ngk        = kauxng(ksh)
+                    mink       = kauxmi(ksh)
+                    maxk       = kauxmx(ksh)
+                    k1         = kauxst(ksh)
+                    lock       = kauxlo(ksh)-mink
+                    Nk         = maxk-mink+1
+                    SELECT CASE(iauxbf)
+                        CASE(0)
+                           kstrt = lock+mink-koffend
+                           kend  = kstrt+Nk-1 
+                        CASE(1)
+                           call rimp2cstrm(TK,Langk,mink,Nk,minks,maxks)
+                           locks = locsph(ksh)-minks
+                           Nks   = maxks-minks+1
+                           kstrt = locks+minks-koffend
+                           kend  = kstrt+Nks-1
+                    END SELECT
+
+   loop_iao_shell: do ish=1,naosh
+                   iat = katom(ish)
+                   CCORD(1,1) = c(1,iat)
+                   CCORD(2,1) = c(2,iat)
+                   CCORD(3,1) = c(3,iat)
+                   Langi = ktype(ish)-1
+                   ngi   = kng(ish)
+                   mini  = kmin(ish)
+                   maxi  = kmax(ish)
+                   i1    = kstart(ish)
+                   loci  = kloc(ish)-mini
+ 
+   loop_jao_shell: do jsh=1,ish
+                   jat = katom(jsh)
+                   CCORD(1,2) = c(1,jat)
+                   CCORD(2,2) = c(2,jat)
+                   CCORD(3,2) = c(3,jat)
+                   Langj = ktype(jsh)-1
+                   ngj   = kng(jsh)
+                   minj  = kmin(jsh)
+                   maxj  = kmax(jsh)
+                   j1    = kstart(jsh)
+                   locj  = kloc(jsh)-minj
+
+! GHONDO holds integrals in cartesian auxiliary basis.
+
+                   call RICC_gen3c2eri(CCORD,ish,jsh,ksh,ex(i1),ex(j1),   &
+                                       exaux(k1),GHONDO,Langi,Langj,Langk,&
+                                       ngi,ngj,ngk,mini,maxi,minj,maxj,   &
+                                       mink,maxk,DFRI,DFAO,DK,DB)
+
+! Transform the auxiliary basis index to spherical harmonics.
+! Unfold AO basis indices.
+                  
+                   call RICC_trfc2s_Ints(GHONDO,Ibuff(:,kstrt),TK,WRK,    &
+                                         loci,locj,mini,maxi,minj,maxj,   &
+                                         mink,maxk,minks,maxks,kstrt,     &
+                                         kend,ish.EQ.jsh)
+
+   end do loop_jao_shell
+   end do loop_iao_shell
+   end do loop_kaux_shell
+
+! Cross check for safety.
+
+   if(kend+koffend .NE. kddiend)then
+     if(maswrk)write(LuOut,7000)kend+koffend,kddiend
+     call abrt
+   end if
+ 
+! Transform ImnX to IpqX. The transformed integrals only include 
+! correlated occupied and virtual orbitals: dimension reduces from
+! nnbas to nctots. 
+
+   do k=kddistrt,kddiend
+      call RICC_gen_MOInts(Ibuff(:,k-koffend),CMO(:,nfc+1),MOWRK,         &
+                           MOWRK2,nctot,nbas,nbas)
+      call DCOPY(nctots,Ibuff(1:nctots,k-koffend),1,ImnX(k,:),1)
+   end do
+
+   call RICC_dfree1(GHONDO)
+   call RICC_dfree1(WRK)
+   call RICC_dfree1(TK)
+   call RICC_dfree1(DB)
+   call RICC_dfree1(MOWRK)
+   call RICC_dfree1(MOWRK2)
+   call RICC_dfree2(DK)
+   call RICC_dfree2(Ibuff)
+   call RICC_dfree2(CCORD)
+
+   end if block_mpi_excess
+
+   call DDI_GSUMF(3011,ImnX,nauxbas*nctots)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7001)MemIn-MaxCor
+   end if
+
+   7000 format(1X,'FATAL ERROR: PROBLEM IN RICC_FORM_IMNX_REP ',2I4)
+   7001 format(/,1X,'Warning: Replicated memory leak in RICC_form_ImnX_REP.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_form_ImnX_REP
+
+!*MODULE RICCINTS *DECK RICC_trf_Ints
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Transform the auxiliary basis index in ImnX from
+!>             cartesian to spherical. Unfold the mu and nu indices 
+!>             to the full dimension of the AO basis, num. The 
+!>             dimension of X still remains to be the number of basis 
+!>             functions for a given angular momentum. 
+!>          
+!>
+
+   SUBROUTINE RICC_trfc2s_Ints(GHONDO,Ibuff,TK,WRK,loci,locj,mini,        &
+                               maxi,minj,maxj,mink,maxk,minks,maxks,      &
+                               kstrt,kend,ieqj)
+ 
+   INTEGER,INTENT(IN)          :: mini,maxi,minj,maxj,mink,maxk,minks,maxks
+   INTEGER,INTENT(IN)          :: loci,locj,kstrt,kend
+   LOGICAL,INTENT(IN)          :: ieqj
+   REAL(KIND=dp),INTENT(INOUT) :: Ibuff(nnbas,kstrt:kend)
+   REAL(KIND=dp),INTENT(INOUT) :: TK(:),WRK(:),GHONDO(:)
+   INTEGER                     :: Nkt,Ni,Nj,Nk,i,j,k,ijk,ijmax,ijmin
+   INTEGER                     :: icount,jcount,kcount,ibf,jbf,ijbf,jmax
+
+   Ni = maxi-mini+1
+   Nj = maxj-minj+1
+   Nk = maxk-mink+1
+
+   SELECT CASE(iauxbf)
+       CASE(0)
+          Nkt  = Nk
+       CASE(1)
+          Nkt  = maxks-minks+1
+          call DGEMM('T','N',Nkt,Ni*Nj,Nk,ONE,TK,Nk,GHONDO,Nk,ZERO,WRK,Nkt)
+          call RICC_vzero(1,Ni*Nj*Nkt,GHONDO)
+          call DCOPY(Ni*Nj*Nkt,WRK,1,GHONDO,1)
+   END SELECT
+
+   jmax   = maxj
+   kcount = 0
+   loop_k: do k=kstrt,kend
+           kcount = kcount+1
+           icount = 0
+   loop_i: do i=mini,maxi
+           icount = icount+1
+           ibf    = loci+i 
+           jcount = 0
+           if(ieqj)jmax = i
+   loop_j: do j=minj,jmax
+           jcount = jcount+1 
+           jbf    = locj+j
+           ijk    = (icount-1)*Nj*Nkt+(jcount-1)*Nkt+kcount 
+           ijmax  = MAX(ibf,jbf)
+           ijmin  = MIN(ibf,jbf)
+           ijbf   = ijmax*(ijmax-1)/2 + ijmin
+           Ibuff(ijbf,k) = GHONDO(ijk)
+   end do loop_j
+   end do loop_i
+   end do loop_k
+
+   END SUBROUTINE RICC_trfc2s_Ints
+
+!*MODULE RICCINTS *DECK RICC_FORM_BPQX_DDI   
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Form final RI-integrals: BpqX = SumY IpqY V**(-1/2) (XY)
+!>                                      (OR) = SumY IpqY L**(-1)   (XY)  
+!>             Distributed storage for ImnX
+!>           
+!>              
+
+   SUBROUTINE RICC_form_BpqX_DDI(Vaux,D3AO,nauxbasd,nauxbas)
+
+   INTEGER,INTENT(IN)        :: nauxbas,nauxbasd,D3AO
+   REAL(KIND=dp),INTENT(IN)  :: Vaux(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: Ibuff(:,:),WRK(:,:)
+   INTEGER                   :: ilo,ihi,jstrt,jend,jlen
+   INTEGER                   :: MemIn,DDI_NP,DDI_ME
+
+   MemIn = MaxCor
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call DDI_DISTRIB(D3AO,DDI_ME,ilo,ihi,jstrt,jend)
+
+   jlen = jend-jstrt+1
+   call RICC_dalloc2(nauxbas, jlen,Ibuff)
+   call RICC_dalloc2(nauxbasd,jlen,WRK)
+
+   call DDI_GET(D3AO,1,nauxbas,jstrt,jend,Ibuff)   
+
+   call DGEMM('N','N',nauxbasd,jlen,nauxbas,ONE,                       &
+              Vaux,nauxbasd,                                           &
+              Ibuff,nauxbas,ZERO,                                      &
+              WRK,nauxbasd)
+
+   call DDI_PUT(D3AO,1,nauxbasd,jstrt,jend,WRK)
+
+   call RICC_dfree2(Ibuff) 
+   call RICC_dfree2(WRK)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_form_BpqX_DDI.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_form_BpqX_DDI
+
+!*MODULE RICCINTS *DECK RICC_FORM_BPQX_REP
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Form final RI-integrals: BpqX = SumY IpqY V**(-1/2) (XY)
+!>                                      (OR) = SumY IpqY L**(-1)   (XY)  
+!>             In core (on replicated memory storage for ImnX)           
+!>
+!>              
+
+   SUBROUTINE RICC_form_BpqX_REP(Vaux,ImnX,nauxbasd,nauxbas)
+
+   INTEGER,INTENT(IN)          :: nauxbas,nauxbasd
+   REAL(KIND=dp),INTENT(INOUT) :: ImnX(nauxbas,nctots)
+   REAL(KIND=dp),INTENT(IN)    :: Vaux(:,:)
+   REAL(KIND=dp),ALLOCATABLE   :: WRK(:,:)
+   INTEGER,ALLOCATABLE         :: OMPWD(:,:)
+   INTEGER                     :: MemIn,kaux,Mxthreads,Nthreads
+   INTEGER                     :: ithread,istrt,iend,ilen
+
+   MemIn = MaxCor
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,nctots)
+   call omp_set_dynamic(.false.)
+
+   call RICC_ialloc20(Nthreads,2,OMPWD)
+   call RICC_dalloc2(nauxbasd,nctots,WRK)
+
+   call RICC_LoopDist(OMPWD,Nthreads,1,nctots)
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(nauxbasd,nauxbas,OMPWD,Vaux,ImnX,WRK)                        &
+!$omp private(ithread,istrt,iend,ilen)    
+
+   ithread = omp_get_thread_num()
+   istrt = OMPWD(ithread,1)
+   iend  = OMPWD(ithread,2) 
+   ilen  = iend-istrt+1
+
+   call DGEMM('N','N',nauxbasd,ilen,nauxbas,ONE,                          &
+              Vaux,nauxbasd,ImnX(:,istrt:iend),nauxbas,                   &
+              ZERO,WRK(:,istrt:iend),nauxbasd)
+
+!$omp end parallel
+
+   do kaux = 1,nauxbasd
+      call DCOPY(nctots,WRK(kaux,:),1,ImnX(kaux,:),1)
+   end do
+ 
+   call RICC_ifree2(OMPWD)
+   call RICC_dfree2(WRK)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_form_BpqX_REP.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_form_BpqX_REP
+
+!*MODULE RICCINTS *DECK RICC_GEN_MOINTS
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   AO to MO transformation for 3-index RI integrals.
+!>              
+!>
+       
+   SUBROUTINE RICC_gen_MOInts(Ibuff,CMO,WRK,WRK2,M,N,LDC)
+
+   INTEGER,INTENT(IN)          :: M,N,LDC
+   REAL(KIND=dp),INTENT(IN)    :: CMO(LDC,M)
+   REAL(KIND=dp),INTENT(INOUT) :: Ibuff(:),WRK(:),WRK2(N)
+   INTEGER                     :: i,j,ij,M2,N2
+ 
+   M2 = M*(M+1)/2
+   N2 = N*(N+1)/2
+ 
+   call DCOPY(N2,Ibuff,1,WRK,1)
+
+   call RICC_vzero(1,M2,Ibuff)
+   do i = 1,M
+      ij = i*(i-1)/2
+      call DSPMV('U',N,ONE,WRK,CMO(:,i),1,ZERO,WRK2,1)
+      call DGEMV('T',N,i,ONE,CMO,LDC,WRK2,1,ZERO,Ibuff(ij+1),1)
+   end do
+
+   END SUBROUTINE RICC_gen_MOInts
+
+!*MODULE RICCINTS *DECK RICC_SPLIT_MOINTS_DDI
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Split MO-transformed RI integrals into OO, OV, and VV
+!>             blocks and distribute.
+!>              
+!>    @detail  MOs => only correlated occupied and virtuals excluding
+!>             frozen core and frozen virtuals. DDI based algorithm.
+!>
+!>
+       
+   SUBROUTINE RICC_split_MOInts_DDI(D3AO,HNP)
+
+   TYPE(NormH),INTENT(IN)    :: HNP
+   INTEGER,INTENT(IN)        :: D3AO
+   REAL(KIND=dp),ALLOCATABLE :: MObuff(:),IMO(:,:)
+   INTEGER,ALLOCATABLE       :: DDIXD(:,:)
+   INTEGER                   :: i,j,ii,ij,k,kstrt,kend,klo,khi
+   INTEGER                   :: MemIN,DDI_NP,DDI_ME
+
+   MemIn = MaxCor
+
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call RICC_ialloc20(DDI_NP,2,DDIXD)
+   call RICC_LoopDist(DDIXD,DDI_NP,1,nauxbas)
+   kstrt = DDIXD(DDI_ME,1)
+   kend  = DDIXD(DDI_ME,2)
+   call RICC_ifree2(DDIXD)
+
+!-------------------------------------------------------------------------
+! DDI/MPI ranks in excess of loop iterations should skip the computation
+! below and wait at the exit until other ranks have finished their tasks.
+!-------------------------------------------------------------------------
+   block_mpi_excess: if(DDI_ME .LE. nauxbas-1)then
+
+   call RICC_dalloc1(nctots,MObuff)
+   call RICC_dalloc2(nu,nu,IMO)
+
+   loop_kauxbas: do k=kstrt,kend
+
+                 call DDI_GET(D3AO,k,k,1,nctots,MObuff)
+
+!  (a) Occupied-Occupied Block
+
+                 do i=1,no
+                    ii  = i*(i-1)/2
+                    do j=1,i
+                       ij  = ii + j
+                       IMO(i,j) = MObuff(ij)
+                       IMO(j,i) = MObuff(ij)
+                    end do
+                 end do
+                 klo = (k-1)*no+1
+                 khi = k*no
+                 call DDI_PUT(HNP%INTS(1),klo,khi,1,no,IMO(1:no,1:no))
+
+!  (b) Virtual-Virtual Block
+
+                 do i=1,nu
+                    ii = (no+i)*(no+i-1)/2
+                    do j=1,i
+                       ij  = ii + j+no
+                       IMO(i,j) = MObuff(ij)
+                       IMO(j,i) = MObuff(ij)
+                    end do
+                 end do
+                 klo = (k-1)*nu+1
+                 khi = k*nu 
+                 call DDI_PUT(HNP%INTS(3),klo,khi,1,nu,IMO(1:nu,1:nu))
+
+!  (c) Occupied-Virtual Block
+!      Note that the leading dimension for the bra part is nu.
+                
+                 do i=1,nu
+                    ii = (no+i)*(no+i-1)/2
+                    do j=1,no
+                       ij = ii + j
+                       IMO(i,j) = MObuff(ij)
+                    end do
+                 end do
+                 klo = (k-1)*nu+1
+                 khi = k*nu 
+                 call DDI_PUT(HNP%INTS(2),klo,khi,1,no,IMO(1:nu,1:no))
+
+   end do loop_kauxbas
+
+   call RICC_dfree2(IMO)
+   call RICC_dfree1(MObuff)    
+
+   end if block_mpi_excess
+   if(DDI_NP .GT. nauxbas)call DDI_SYNC(3012)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_split_MOInts_DDI.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_split_MOInts_DDI
+
+!*MODULE RICCINTS *DECK RICC_SPLIT_MOINTS_REP
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Split MO-transformed RI integrals into OO, OV, and VV
+!>             blocks and distribute.
+!>              
+!>    @detail  MOs => only correlated occupied and virtuals excluding
+!>             frozen core and frozen virtuals. In core algorithm.
+!>
+!>
+       
+   SUBROUTINE RICC_split_MOInts_REP(ImnX,HNP)
+
+   TYPE(NormH),INTENT(INOUT) :: HNP
+   REAL(KIND=dp),INTENT(IN)  :: ImnX(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: MObuff(:)
+   INTEGER                   :: i,j,ii,ij,k,MemThrd
+   INTEGER                   :: MemIN,Mxthreads,Nthreads
+
+   MemIn = MaxCor
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,nauxbas)
+   call omp_set_dynamic(.false.)
+
+   MemThrd = nctots
+   do 
+     if(Nthreads*MemThrd .LE. MaxCor) EXIT
+     Nthreads = Nthreads-1
+   end do
+   if(Nthreads .EQ. 0) Nthreads = 1
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,nctots,nauxbas,ImnX,HNP)                               &
+!$omp private(i,j,ii,ij,k,MObuff)                                         &
+!$omp firstprivate(MemThrd)
+
+   call RICC_dalloc1thrd(nctots,MObuff,MemThrd)
+
+!$omp do schedule(static)
+
+   loop_kauxbas: do k=1,nauxbas
+
+                 call DCOPY(nctots,ImnX(k,:),1,MObuff,1)
+
+!  (a) Occupied-Occupied Block
+
+                 do i=1,no
+                    ii  = i*(i-1)/2
+                    do j=1,i
+                       ij  = ii + j
+                       HNP%BmnX(i,k,j) = MObuff(ij)
+                       HNP%BmnX(j,k,i) = MObuff(ij)
+                    end do
+                 end do
+
+!  (b) Virtual-Virtual Block
+
+                 do i=1,nu
+                    ii = (no+i)*(no+i-1)/2
+                    do j=1,i
+                       ij  = ii + j+no
+                       HNP%BefX(i,k,j) = MObuff(ij)
+                       HNP%BefX(j,k,i) = MObuff(ij)
+                    end do
+                 end do
+
+!  (c) Occupied-Virtual Block
+!      Note that the leading dimension for the bra part is nu.
+                
+                 do i=1,nu
+                    ii = (no+i)*(no+i-1)/2
+                    do j=1,no
+                       ij = ii + j
+                       HNP%BmeX(i,k,j) = MObuff(ij)
+                    end do
+                 end do
+
+   end do loop_kauxbas
+
+!$omp end do nowait
+
+   call RICC_dfree1thrd(MObuff,MemThrd)    
+
+!$omp end parallel
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_split_MOInts_REP.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_split_MOInts_REP
+
+!*MODULE RICCINTS *DECK RICC_READ_FOCKMAT
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Read AO based Fock matrix and transform it to MO basis.
+!>
+!>
+
+   SUBROUTINE RICC_read_FockMat(CMO,HNP)
+
+   TYPE(NormH),INTENT(INOUT) :: HNP
+   REAL(KIND=dp),INTENT(IN)  :: CMO(:,:)
+   REAL(KIND=dp),ALLOCATABLE :: FAO(:),FMO(:),WRK(:)
+   INTEGER                   :: i,j,ii,ij,MemIn
+
+   MemIn = MaxCor 
+
+   call RICC_dalloc1(nnbas,FAO)
+   call RICC_dalloc1(nctots,FMO)
+   call RICC_dalloc1(nbas,WRK)
+
+   call DAREAD(idaf,ioda,FAO,nnbas,14,0)
+
+! Transform AO to MO, the MO space includes only the
+! correlated occupied and virtual orbitals.
+
+   call TFTRI(FMO,FAO,CMO(:,nfc+1),WRK,nctot,nbas,nbas)
+
+   ASSOCIATE(FOO => HNP%FHH, FOV  =>    HNP%FHP,                          &
+             FVV => HNP%FPP, eval => HNP%ORBEN)
+
+             do i=1,nctot
+                ii = i*(i-1)/2 + i
+                eval(i) = FMO(ii)
+             end do
+
+!                   1. FOO 
+
+             do i=1,no
+                ii = i*(i-1)/2
+                do j=1,i
+                   ij = ii + j
+                   FOO(i,j) = FMO(ij)
+                   FOO(j,i) = FMO(ij)
+                end do
+                FOO(i,i) = ZERO
+             end do   
+
+!                   2. FVV
+
+             do i=1,nu
+                ii = (no+i)*(no+i-1)/2
+                do j=1,i
+                   ij = ii + j+no
+                   FVV(i,j) = FMO(ij)
+                   FVV(j,i) = FMO(ij) 
+                end do
+                FVV(i,i) = ZERO
+             end do
+
+!                   3. FOV
+
+             do i=1,nu
+                ii = (no+i)*(no+i-1)/2
+                do j=1,no
+                   ij = ii + j
+                   FOV(j,i) = FMO(ij)
+                end do
+             end do  
+
+   END ASSOCIATE
+
+   call RICC_dfree1(FAO)
+   call RICC_dfree1(FMO)
+   call RICC_dfree1(WRK)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_read_FockMat.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_read_FockMat
+
+!*MODULE RICCINTS *DECK RICC_EIG_DCOMP
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Eigendecomposition of a matrix
+!>
+!>    @detail  1) MAT = U EIGV U^{\dagger},EIGV=eigenvalues   
+!>             2) MAT^(-1) = U EIGV^(-1) U^{\dagger}
+!>                         =   U EIGV^(-1/2) U^{\dagger}
+!>                           X U EIGV^(-1/2) U^{\dagger}
+!>                U^{\dagger}U = I
+!>             Discard eigenvalues smaller than eigtol, 
+!>             the new dimension is Ndim1. 
+!>             
+!>    Note:    Depending upon the situation, the result matrix
+!>             might be needed as Ndim * Ndim1 (e.g., a 
+!>             transformation matrix) or as Ndim1 * Ndim (Vaux)
+!>             The standard is taken to be Ndim * Ndim1. This
+!>             is characterized by TRAN = 'N' or ='T' otherwise.
+!>
+!>
+
+   SUBROUTINE RICC_EIG_Dcomp(TRAN,MAT,eigtol,Ndim1,Ndim)
+
+   CHARACTER(LEN=1),INTENT(IN) :: TRAN
+   INTEGER,INTENT(IN)          :: Ndim
+   INTEGER,INTENT(OUT)         :: Ndim1
+   REAL(KIND=dp),INTENT(INOUT) :: MAT(Ndim,Ndim)
+   REAL(KIND=dp),INTENT(IN)    :: eigtol
+   REAL(KIND=dp),ALLOCATABLE   :: WRK(:),EIGV(:),TRI(:),DWRK(:,:)
+   INTEGER,ALLOCATABLE         :: IWRK(:)
+   INTEGER                     :: i,ij,iaux,jaux,ndim2,nndim
+   INTEGER                     :: imin,imax,ierr,MemIn
+
+   MemIn = MaxCor
+   ndim2 = Ndim*Ndim
+   nndim = Ndim*(Ndim+1)/2
+
+   call RICC_dalloc1(nndim,TRI) 
+   call RICC_dalloc1(ndim2,WRK)
+   call RICC_dalloc1(Ndim,EIGV)
+   call RICC_ialloc1(Ndim,IWRK)
+   call RICC_dalloc2(Ndim,8,DWRK)
+
+!------------------------------------------------------------------------
+! Diagonalize MAT: Get eigenvalues in EIGV and eigenvectors in MAT.
+! CPYSQT: copies MAT(Ndim,Ndim) to a triangular matrix TRI Ndim*(Ndim+1)/2. 
+! GLDIAG: in eigen.src, kdiag = 0.
+!------------------------------------------------------------------------
+ 
+   call CPYSQT(MAT,TRI,Ndim,1)                                         
+   call GLDIAG(Ndim,Ndim,Ndim,TRI,DWRK,EIGV,MAT,ierr,IWRK)
+ 
+   if(DBGFLG .AND. maswrk)then
+     write(LuOut,*)'EIGENVECTORS OF THE INPUT MATRIX:'
+     call PRSQ(MAT,Ndim,Ndim,Ndim)
+     write(LuOut,*)'EIGENVALUES OF THE INPUT MATRIX:'
+     write(LuOut,*)(EIGV(i),i=1,Ndim)
+   end if
+ 
+   Ndim1 = 0
+   do i = Ndim,1,-1
+      if(EIGV(i).LT.eigtol)then
+        CYCLE
+      else  
+        Ndim1 = Ndim1+1
+        WRK(Ndim1) = EIGV(i)
+      end if
+   end do
+
+!------------------------------------------------------------------------
+! Raise alert if negative eigenvalues are found. They are discarded anyway. 
+! Search among the discarded eigenvalues!
+!------------------------------------------------------------------------
+   iaux = 0 
+   do i=1,Ndim-Ndim1
+      if(EIGV(i).LT.ZERO)iaux=iaux+1
+   end do
+   if(maswrk .AND. iaux.NE.0)write(LuOut,7000)iaux
+
+   do i = 1,Ndim1
+      EIGV(i) = ONE/SQRT(WRK(i))
+   end do
+   ij = 0
+   do jaux = 1,Ndim1
+      do iaux = 1,Ndim
+         ij = ij+1
+         WRK(ij)=MAT(iaux,Ndim-jaux+1)*EIGV(jaux)
+      end do
+   end do
+ 
+   SELECT CASE(TRAN)
+       CASE('N')
+         call DCOPY(Ndim1*Ndim,WRK,1,MAT,1)
+       CASE('T')
+         do i=1,Ndim1
+            imin = (i-1)*Ndim+1
+            imax = i*Ndim
+            call DCOPY(Ndim,WRK(imin:imax),1,MAT(i,:),1)
+         end do     
+   END SELECT  
+
+   if(DBGFLG .AND. maswrk)then
+     write(LuOut,*)'THE A**(-1/2) MATRIX'
+     SELECT CASE(TRAN)
+         CASE('N')
+            call PRSQ(MAT,Ndim1,Ndim,Ndim)
+         CASE('T')
+            call PRSQ(MAT,Ndim,Ndim1,Ndim1)
+     END SELECT
+   end if
+ 
+   call RICC_dfree1(TRI) 
+   call RICC_dfree1(WRK)
+   call RICC_dfree1(EIGV)
+   call RICC_ifree1(IWRK)
+   call RICC_dfree2(DWRK)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7001)MemIn-MaxCor
+   end if
+
+   7000 format(1X,'THE INPUT MATRIX HAS ',I5,' NEGATIVE EIGENVALUES.')
+   7001 format(/,1X,'Warning: Replicated memory leak in RICC_EIG_Dcomp.',/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_EIG_Dcomp
+
+!*MODULE RICCINTS *DECK RICC_Chol_DCOMP
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Cholesky decomposition of a real
+!>             symmetric positive definite
+!>             matrix, followed by its inversion 
+!>             MAT = L X L^T
+!>
+!>
+
+   SUBROUTINE RICC_Chol_Dcomp(MAT,Ndim)
+
+   INTEGER,INTENT(IN)          :: Ndim 
+   REAL(KIND=dp),INTENT(INOUT) :: MAT(Ndim,Ndim)
+   INTEGER                     :: i,j,info
+
+   call DPOTRF('L',Ndim,MAT,Ndim,info)
+
+   if(info.NE.0)then
+   if(maswrk)write(LuOut,*)'UNSUCCESSFUL CHOLESKY DECOMPOSITION OF MAT'
+   call abrt
+   end if 
+
+   call DTRTRI('L','N',Ndim,MAT,Ndim,info)
+
+   if(info.NE.0)then
+   if(maswrk)write(LuOut,*)'ERROR IN DTRTRI'
+   call abrt
+   end if 
+!------------------------------------------------------------------------
+! Since UPLO = 'L', the lower triangular matrix L is contained in the 
+! lower triangular part of MAT, while the upper triangular part of MAT
+! is "Not Referenced". Zero out the upper triangle explicitly.
+!------------------------------------------------------------------------
+   do j=2,Ndim
+      do i=1,j-1
+         MAT(i,j)=ZERO
+      end do
+   end do
+
+   END SUBROUTINE RICC_Chol_Dcomp
+
+!*MODULE RICCINTS *DECK RICC_PROJ2ORTHO
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Project a square matrix onto an orthogonal basis
+!>
+!>    @detail  MAT(N,N) = (S**(-1/2))^T X MAT(M,M) X (S**(-1/2))
+!>             M = Dim. of the nonorthogonal basis (nauxbas ).
+!>             N = Dim. of the    orthogonal basis (nauxbas1).
+!>             
+!>             
+
+   SUBROUTINE RICC_Proj2Ortho(MAT,Shalf,M,N)
+
+   INTEGER,INTENT(IN)          :: M,N
+   REAL(KIND=dp),INTENT(INOUT) :: MAT(M,M)
+   REAL(KIND=dp),INTENT(IN)    :: Shalf(M,N)
+   REAL(KIND=dp),ALLOCATABLE   :: WRK(:,:)
+
+   call RICC_dalloc2(N,M,WRK)
+
+   call DGEMM('T','N',N,M,M,ONE,Shalf,M,MAT,M,ZERO,WRK,N)
+   call DGEMM('N','N',N,N,M,ONE,WRK,N,Shalf,M,ZERO,MAT,N)
+
+   if(DBGFLG .AND. maswrk)then
+     write(LuOut,*)'THE INPUT MATRIX PROJECTED ONTO THE ORTHOGONAL BASIS SET:'
+     call PRSQ(MAT,N,N,N)
+   end if
+
+   call RICC_dfree2(WRK)
+
+   END SUBROUTINE RICC_Proj2Ortho
+
+!*MODULE RICCINTS  *DECK RICC_VTransHalf
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Half transformation of Vaux to the original
+!>             auxiliary basis prior to contraction with ImnX.
+!>             Saux(M*K) X Vaux(K*N) with
+!>             M = nauxbasd, N = nauxbas, K = nauxbas1
+!> 
+!>
+
+   SUBROUTINE RICC_VTransHalf(Saux,Vaux,M,N,K)
+
+   INTEGER,INTENT(IN)          :: M,N,K
+   REAL(KIND=dp),INTENT(IN)    :: Saux(N,K)
+   REAL(KIND=dp),INTENT(INOUT) :: Vaux(M,N)
+   REAL(KIND=dp),ALLOCATABLE   :: WRK(:,:)
+
+   call RICC_dalloc2(M,N,WRK)
+
+   call DGEMM('N','T',M,N,K,ONE,Vaux,M,Saux,N,ZERO,WRK,M)
+
+   call DCOPY(M*N,WRK,1,Vaux,1)
+
+   call RICC_dfree2(WRK)
+
+   END SUBROUTINE RICC_VTransHalf
+
+!*MODULE RICCINTS  *DECK RICC_DF4Prims
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   The following two subroutines (pre)compute
+!>             density factors for Gaussian primitives from
+!>             contraction coefficients. DFRI: aux. basis
+!>             primitives and DFAO: AO basis primitives.
+!>
+!>
+
+   SUBROUTINE RICC_DF4Prims(DFRI,DFAO)
+
+   REAL(KIND=dp),INTENT(OUT) :: DFRI(:,:,:),DFAO(:,:,:)
+   INTEGER                   :: ish,mini,maxi,ngi,i1
+   LOGICAL                   :: norm
+
+   norm = normf.NE.1 .OR. normp.NE.1
+
+   DFRI = ZERO
+   do ish=1,nauxsh
+      ngi  = kauxng(ish)
+      mini = kauxmi(ish)
+      maxi = kauxmx(ish)
+      i1   = kauxst(ish)
+      call RICC_GetDF(ish,exaux(i1),cauxs(i1),cauxp(i1),cauxd(i1),        &
+                      cauxf(i1),cauxg(i1),cauxh(i1),cauxi(i1),ngi,        &
+                      mini,maxi,DFRI,norm)
+   end do
+
+   DFAO = ZERO
+   do ish=1,naosh
+      ngi  = kng(ish)
+      mini = kmin(ish)
+      maxi = kmax(ish)
+      i1   = kstart(ish)
+      call RICC_GetDF(ish,ex(i1),cs(i1),cp(i1),cd(i1),cf(i1),cg(i1),      &
+                      ch(i1),ci(i1),ngi,mini,maxi,DFAO,norm)
+   end do
+
+   END SUBROUTINE RICC_DF4Prims
+
+   SUBROUTINE RICC_GetDF(ish,exi,cis,cip,cid,cif,cig,cih,cii,ngi,mini,     &
+                         maxi,DF,norm)
+
+   REAL(KIND=dp),INTENT(INOUT) :: DF(:,:,:)
+   INTEGER,INTENT(IN)          :: ish,ngi,mini,maxi
+   REAL(KIND=dp),INTENT(IN)    :: exi(ngi),cis(ngi),cip(ngi),cid(ngi)
+   REAL(KIND=dp),INTENT(IN)    :: cif(ngi),cig(ngi),cih(ngi),cii(ngi)
+   LOGICAL,INTENT(IN)          :: norm
+   REAL(KIND=dp)               :: VAL
+   INTEGER                     :: i,ig,icount   
+
+
+! Density factor for i primitive
+
+   loop_prims_in_shl: do ig=1,ngi
+   icount = 0
+   loop_bases_in_Lang: do i=mini,maxi
+
+        block_Lang:  if(i .EQ. 1)then
+                     VAL = cis(ig)
+        else if(i .LE.  4)then block_Lang
+                     VAL = cip(ig)
+        else if(i .LE. 10)then block_Lang
+                     VAL = cid(ig)
+                     if(i.GE.8 .AND. norm)VAL = VAL*sqrt3
+        else if(i .LE. 20)then block_Lang
+                     VAL = cif(ig)
+                     if(i.GE.14 .AND. norm)then
+                     if(i.LE.19)then
+                       VAL = VAL*sqrt5
+                     else
+                       VAL = VAL*sqrt3*sqrt5
+                     end if
+                     end if
+        else if(i .LE. 35)then block_Lang
+                     VAL = cig(ig)
+                     if(i .GE. 24 .AND. norm)then
+                     if(i .LE. 29)then
+                       VAL = VAL*sqrt7
+                     else if(i .LE. 32)then
+                       VAL = VAL*sqrt7*sqrt5/sqrt3
+                     else
+                      VAL = VAL*sqrt7*sqrt5
+                     end if
+                     end if
+        else if(i .LE. 56)then block_Lang
+                     VAL = cih(ig)
+                     if(i .GE. 39 .AND. norm)then
+                     if(i .LE. 44)then
+                       VAL = VAL*sqrt9
+                     else if(i .LE. 50)then
+                       VAL = VAL*sqrt7*sqrt3
+                     else if(i .LE. 53)then
+                       VAL = VAL*sqrt9*sqrt7
+                     else
+                       VAL = VAL*sqrt7*sqrt5*sqrt3
+                     end if
+                     end if
+        else block_Lang
+                     VAL = cii(ig)
+                     if(i .GE. 60 .AND. norm)then
+                     if(i .LE. 65)then
+                       VAL = VAL*sqrt11
+                     else if(i .LE. 71)then
+                       VAL = VAL*sqrt11*sqrt3
+                     else if(i .LE. 74)then
+                       VAL = VAL*sqrt11*sqrt9
+                     else if(i .LE. 77)then
+                       VAL = VAL*sqrt11*sqrt7*sqrt3/sqrt5
+                     else if(i .LE. 83)then
+                       VAL = VAL*sqrt11*sqrt7*sqrt3
+                     else
+                       VAL = VAL*sqrt11*sqrt7*sqrt5
+                    end if
+                    end if
+         end if block_Lang
+
+         icount = icount+1
+         DF(ish,ig,icount) = VAL
+
+   end do loop_bases_in_Lang
+   end do loop_prims_in_shl
+
+   END SUBROUTINE RICC_GetDF
+
+!*MODULE RICCINTS  *DECK RICC_gen2c2eri
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    July 7, 2021 First submission to github
+!> 
+!>    @brief   Compute shell-shell 2-center 2-ERIs for primitives
+!>             belonging to iauxsh, jauxsh. Could be overlap or 
+!>             Coulomb metric integrals
+!>
+!>
+
+   SUBROUTINE RICC_gen2c2eri(CCORD,ish,jsh,GG,DFRI,exi,exj,li,lj,         &
+                             ngi,ngj,mini,maxi,minj,maxj,IntID)
+
+   REAL(KIND=dp),INTENT(INOUT) :: GG(:)
+   INTEGER,INTENT(IN)          :: ish,jsh,li,lj,ngi,ngj,mini,maxi,minj,maxj
+   INTEGER,INTENT(IN)          :: IntID
+   REAL(KIND=dp),INTENT(IN)    :: DFRI(:,:,:),CCORD(:,:),exi(ngi),exj(ngj)
+ 
+! Local variables: scratch arrays for the lower-level subroutines
+ 
+   REAL(KIND=dp),PARAMETER :: rln10=2.30258D+00
+   REAL(KIND=dp) :: G(1911),DI(28),DJ(28),U(13),W(13),ai,aj,Rab2,rho,VAL
+   REAL(KIND=dp) :: A1(3,13),B1(13),C1(13),A2(3,13),B2(13),F00(13),xx
+   REAL(KIND=dp) :: AA1(3),AA2(3),S1(39),S2(147),expfac,tol
+   INTEGER       :: LLI(3,28),LLJ(3,28),ltot,i,j,ig,jg,icount,Ni,Nj,nroots
+
+   common/root/xx,U,W,nroots
+!$omp threadprivate( /root/ )
+
+   Ni  = maxi-mini+1
+   Nj  = maxj-minj+1
+   tol = rln10*TEN*TWO
+
+   call RICC_vzero(1,Ni*Nj,GG)
+
+   ltot   = li+lj
+   nroots = (li+lj)/2+1
+
+   AA1(1) = CCORD(1,1)-CCORD(1,2)
+   AA1(2) = CCORD(2,1)-CCORD(2,2)
+   AA1(3) = CCORD(3,1)-CCORD(3,2)
+   Rab2   = AA1(1)*AA1(1)+AA1(2)*AA1(2)+AA1(3)*AA1(3)
+
+   LLI = ZERO
+   LLJ = ZERO
+
+   do i=mini,maxi
+      icount = i-mini+1
+      LLI(1,icount) = lx(i)
+      LLI(2,icount) = ly(i)
+      LLI(3,icount) = lz(i)
+   end do
+   do j=minj,maxj
+      icount = j-minj+1
+      LLJ(1,icount) = lx(j)
+      LLJ(2,icount) = ly(j)
+      LLJ(3,icount) = lz(j)
+   end do
+
+! Loops over shell primitives begin.
+
+   loop_i_primitive: do ig=1,ngi
+          ai    = exi(ig)
+
+          do i=1,Ni
+             SELECT CASE(IntID)
+             CASE(0)
+                DI(i) = DFRI(ish,ig,i)
+             CASE(1)
+                DI(i) = DFRI(ish,ig,i)/ai
+             END SELECT
+          end do
+
+   loop_j_primitive: do jg=1,ngj
+          aj     = exj(jg)
+
+          do j=1,Nj
+             SELECT CASE(IntID)
+             CASE(0)
+                DJ(j) = DFRI(jsh,jg,j)
+             CASE(1)
+                DJ(j) = DFRI(jsh,jg,j)/aj
+             END SELECT
+          end do
+
+! Roots and weights for quadrature: Use routines from ryspol.src.
+! Get U and W arrays as output via the common block 'ROOT'.
+
+          rho = ai*aj/(ai+aj)
+          xx  = rho*Rab2
+          if(IntID.EQ.0 .AND. xx.GT.tol) CYCLE
+          expfac = EXP(-xx)
+
+          SELECT CASE(nroots)
+              CASE(:3)
+                  call RT123
+              CASE(4)
+                  call ROOT4
+              CASE(5)
+                  call ROOT5
+              CASE(6:)
+                  call ROOT6
+          END SELECT
+
+          SELECT CASE(IntID)
+              CASE(0)
+                call xyz2c1ov(S1,S2,AA1,AA2,ai,aj,expfac,li,lj,ltot)
+                call form2c1ov(S2,DI,DJ,GG,LLI,LLJ,li,lj,ni,nj)
+              CASE(1)
+                call xyz2c2e(CCORD,U,W,G,A1,B1,C1,A2,B2,F00,ai,aj,li,     &
+                             lj,nroots)
+                call form2c2e(G,DI,DJ,GG,LLI,LLJ,li,lj,ni,nj,nroots)
+          END SELECT
+
+   end do loop_j_primitive
+   end do loop_i_primitive
+
+   END SUBROUTINE RICC_gen2c2eri 
+
+!*MODULE RICCINTS  *DECK RICC_gen3c2eri
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   Compute shell-shell 3-center 2-ERIs for primitives
+!>             belonging to ish, jsh, and kauxsh
+!>
+!>
+
+   SUBROUTINE RICC_gen3c2eri(CCORD,ish,jsh,ksh,exi,exj,exk,GG,            &
+                             li,lj,lk,ngi,ngj,ngk,mini,maxi,minj,         &
+                             maxj,mink,maxk,DFRI,DFAO,DK,DB)
+ 
+
+   REAL(KIND=dp),INTENT(OUT)   :: GG(:)
+   INTEGER,INTENT(IN)          :: ish,jsh,ksh,ngi,ngj,ngk,li,lj,lk
+   INTEGER,INTENT(IN)          :: mini,maxi,minj,maxj,mink,maxk
+   REAL(KIND=dp),INTENT(IN)    :: CCORD(:,:),exi(ngi),exj(ngj),exk(ngk)
+   REAL(KIND=dp),INTENT(IN)    :: DFRI(:,:,:),DFAO(:,:,:)
+   REAL(KIND=dp),INTENT(INOUT) :: DK(:,:),DB(:)
+   
+! Local variables: scratch arrays for the lower-level subroutines
+ 
+   REAL(KIND=dp),PARAMETER   :: rln10=2.30258D+00
+   REAL(KIND=dp)             :: G2(2730),G3(10290)
+   REAL(KIND=dp)             :: Cab(3,0:6),P(3),PAV(3),CPV(3)
+   REAL(KIND=dp)             :: A1(3,13),B1(13),C1(13),A2(3,13),B2(13)
+   REAL(KIND=dp)             :: F00(13),U(13),W(13),Rab2,RR,VAL,VAL1
+   REAL(KIND=dp)             :: ai,aj,ak,ab,expB,tmp1,tmp2,tmp3,rho,xx,tol
+   INTEGER                   :: LLI(3,28),LLJ(3,28),LLK(3,28)
+   INTEGER                   :: Ni,Nj,Nk,nroots,i,j,k,ij,ig,jg,kg,icount
+ 
+   common/root/xx,U,W,nroots
+!$omp threadprivate( /root/ )
+
+   tol = TEN*rln10
+   Ni  = maxi-mini+1
+   Nj  = maxj-minj+1
+   Nk  = maxk-mink+1
+!------------------------------------------------------------------------
+! Compute raw 3c-2e integrals (IJ|Kaux) by Gauss-Rys method
+! exi,exj,exk    : Gaussian exponents 
+! li,lj,lk       : anglar momenta of shells i,j,k
+! ngi,ngj,ngk    : number of primitive gaussians in shells i,j,k 
+! mini,minj,mink : start location for components of ang. momenta li,lj,lk
+! maxi,maxj,maxk : end   location for components of ang. momenta li,lj,lk   
+!------------------------------------------------------------------------
+   call RICC_vzero(1,Ni*Nj*Nk,GG)
+ 
+   nroots = (li+lj+lk)/2+1
+
+   Rab2 = ZERO
+   Cab  = ZERO
+   do i=1,3
+      VAL  = CCORD(i,1)-CCORD(i,2)
+      Rab2 = Rab2+VAL*VAL
+      do j = 0,lj
+         Cab(i,j) = VAL**j
+      end do
+   end do
+ 
+   LLI = ZERO
+   LLJ = ZERO
+   LLK = ZERO
+   call RICC_dzero(1,Lnbasri,1,ngk,DK)
+   call RICC_vzero(1,Lnbasao*Lnbasao,DB)
+
+   do i=mini,maxi
+      icount = i-mini+1
+      LLI(1,icount) = lx(i)
+      LLI(2,icount) = ly(i)
+      LLI(3,icount) = lz(i)
+   end do
+   do j=minj,maxj
+      icount = j-minj+1
+      LLJ(1,icount) = lx(j)
+      LLJ(2,icount) = ly(j)
+      LLJ(3,icount) = lz(j)
+   end do
+   do k=mink,maxk
+      icount = k-mink+1
+      LLK(1,icount) = lx(k)
+      LLK(2,icount) = ly(k)
+      LLK(3,icount) = lz(k)
+   end do
+ 
+! Density factor for k primitive, use precomputed DFRI
+! Multiply by exponent**(-1) for that primitive.
+ 
+   do kg=1,ngk
+      do k=1,Nk
+         DK(k,kg) = DFRI(ksh,kg,k)/exk(kg)
+      end do
+   end do
+ 
+! Loops over shell primitives begin.
+
+   loop_i_primitive: do ig=1,ngi
+          ai    = exi(ig)
+          tmp1  = ai*CCORD(1,1)
+          tmp2  = ai*CCORD(2,1)
+          tmp3  = ai*CCORD(3,1)
+
+   loop_j_primitive: do jg=1,ngj
+          aj     = exj(jg)
+          ab     = ai+aj
+          VAL    = aj*ai*Rab2/ab
+          if(VAL .GT. tol) CYCLE
+          expB   = exp(-VAL)
+          P(1)   = (tmp1+aj*CCORD(1,2))/ab
+          P(2)   = (tmp2+aj*CCORD(2,2))/ab
+          P(3)   = (tmp3+aj*CCORD(3,2))/ab
+          PAV(1) = P(1)-CCORD(1,1)
+          PAV(2) = P(2)-CCORD(2,1)
+          PAV(3) = P(3)-CCORD(3,1)
+          CPV(1) = CCORD(1,3)-P(1)
+          CPV(2) = CCORD(2,3)-P(2)
+          CPV(3) = CCORD(3,3)-P(3)
+          RR     = CPV(1)*CPV(1)+CPV(2)*CPV(2)+CPV(3)*CPV(3)
+ 
+! Density factor for the ij pair: use DFAO
+ 
+          ij = 0
+          do i=1,Ni
+             VAL1 = DFAO(ish,ig,i)*expB/ab
+             do j=1,Nj
+                ij = ij+1
+                DB(ij) = VAL1*DFAO(jsh,jg,j)
+             end do
+          end do
+ 
+   loop_k_primitive: do kg=1,ngk
+          ak = exk(kg)
+ 
+! Roots and weights for quadrature: Use routines from ryspol.src.
+! Get U and W arrays as output via the common block 'ROOT'.
+ 
+          rho = ab*ak/(ab+ak)
+          xx  = rho*RR
+          SELECT CASE(nroots)
+              CASE(:3)
+                  call RT123
+              CASE(4)
+                  call ROOT4 
+              CASE(5)
+                  call ROOT5
+              CASE(6:)  
+                  call ROOT6
+          END SELECT
+ 
+! Form 3D-integrals: Standard routines from riints.src
+ 
+          call xyz3c2e(U,W,PAV,CPV,G2,A1,B1,C1,A2,B2,F00,                 &
+                       ab,ak,li+lj,lk,nroots)
+          call xyzhrr3c2e(G2,Cab,G3,li,lj,lk,li+lj,nroots)
+
+! Form 3C-2E integrals (IJ|Kaux): Standard routine from riints.src
+ 
+          call form3c2ep(G3,DB,DK(:,kg),GG,LLI,LLJ,LLK,li,lj,lk,          &
+                         Ni,Nj,Nk,nroots)
+ 
+
+   end do loop_k_primitive
+   end do loop_j_primitive
+   end do loop_i_primitive
+ 
+   END SUBROUTINE RICC_gen3c2eri
+
+   SUBROUTINE RICC_get_XBChunk(locsph,kshstrt,kshend,kbasstrt,kbasend)
+
+   INTEGER,INTENT(IN)  :: kshstrt,kshend,locsph(:)
+   INTEGER,INTENT(OUT) :: kbasstrt,kbasend
+   INTEGER             :: ksh,kcount,Nk,Langk
+
+                  kbasstrt = kauxlo(kshstrt)
+   if(iauxbf.EQ.1)kbasstrt = locsph(kshstrt)
+
+   kcount = 0
+   do ksh=kshstrt,kshend
+      Langk = kauxty(ksh)-1
+      Nk    = kauxmx(ksh)-kauxmi(ksh)+1
+      SELECT CASE(iauxbf)
+          CASE(0)
+            kcount = kcount + Nk
+          CASE(1)
+            !L function => 1 sphr. harmonic instead of 3.
+            if(Langk.EQ.1 .AND. Nk.EQ.4)then
+               kcount = kcount + 1
+            else
+               kcount = kcount + 2*Langk+1
+            end if
+      END SELECT
+   end do
+   kbasend = kbasstrt+kcount-1
+
+   END SUBROUTINE RICC_get_XBChunk
+   
+ END MODULE RICC_ints

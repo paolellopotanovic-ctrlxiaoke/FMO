@@ -1,0 +1,1583 @@
+module ccsd3a_reorder_mod
+  implicit none
+  public
+contains
+!*MODULE CCSD3A DECK REORDER*
+!> @brief Multi-dimensional transpositions
+!>
+!> @author Jun Shen
+!> - April, 2018
+!>
+!> @param M* starting index (per dimension)
+!> @param N* ending index (per dimension)
+!> @param K* starting index (per dimension)
+!> @param L* ending index (per dimension)
+!> @param A,B,C,... double precision array
+  subroutine reorder12(M1,N1,M2,N2,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: L2,K1,K2,N1,N2,M1,L1,M2
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      B(I1,I2)=A(I1,I2)
+    endforall
+!
+  endsubroutine reorder12
+!
+  subroutine reorder21(M1,N1,M2,N2,K2,L2,K1,L1,A,B)
+!
+    integer,intent(in)    :: L2,K2,K1,N1,N2,M1,L1,M2
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2)
+    real(8),intent(out)   :: B(K2+1:L2,K1+1:L1)
+!
+    integer :: I1,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2)
+      B(I2,I1)=A(I1,I2)
+    endforall
+!
+  endsubroutine reorder21
+!
+  subroutine reorder123(M1,N1,M2,N2,M3,N3,K1,L1,K2,L2,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,L2,K1,K2,N1,N2,M1,M3,L1,L3,M2,K3
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I1,I3,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      B(I1,I2,I3)=A(I1,I2,I3)
+    endforall
+!
+  endsubroutine reorder123
+!
+  subroutine reorder132(M1,N1,M2,N2,M3,N3,K1,L1,K3,L3,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,N1,N2,M1,M3,L1,L3,M2,K3
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3)
+    real(8),intent(out)   :: B(K1+1:L1,K3+1:L3,K2+1:L2)
+!
+    integer :: I1,I3,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      B(I1,I3,I2)=A(I1,I2,I3)
+    endforall
+!
+  endsubroutine reorder132
+!
+  subroutine reorder213(M1,N1,M2,N2,M3,N3,K2,L2,K1,L1,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,N1,N2,M1,M3,L1,L3,M2,K3
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3)
+    real(8),intent(out)   :: B(K2+1:L2,K1+1:L1,K3+1:L3)
+!
+    integer :: I1,I3,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      B(I2,I1,I3)=A(I1,I2,I3)
+    endforall
+!
+  endsubroutine reorder213
+!
+  subroutine reorder231(M1,N1,M2,N2,M3,N3,K2,L2,K3,L3,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,N1,N2,M1,M3,L1,L3,M2,K3
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3)
+    real(8),intent(out)   :: B(K2+1:L2,K3+1:L3,K1+1:L1)
+!
+    integer :: I1,I3,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      B(I2,I3,I1)=A(I1,I2,I3)
+    endforall
+!
+  endsubroutine reorder231
+!
+  subroutine reorder312(M1,N1,M2,N2,M3,N3,K3,L3,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,N1,N2,M1,M3,L1,L3,M2,K3
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3)
+    real(8),intent(out)   :: B(K3+1:L3,K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I3,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      B(I3,I1,I2)=A(I1,I2,I3)
+    endforall
+!
+  endsubroutine reorder312
+!
+  subroutine reorder321(M1,N1,M2,N2,M3,N3,K3,L3,K2,L2,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,N1,N2,M1,M3,L1,L3,M2,K3
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3)
+    real(8),intent(out)   :: B(K3+1:L3,K2+1:L2,K1+1:L1)
+!
+    integer :: I1,I3,I2
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3)
+      B(I3,I2,I1)=A(I1,I2,I3)
+    endforall
+!
+  endsubroutine reorder321
+!
+  subroutine reorder1234(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,L2,K1,K2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I1,I2,I3,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder1234
+!
+  subroutine reorder1243(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K4,L4,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,L2,K1,K2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K4+1:L4,K3+1:L3)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I1,I2,I4,I3)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder1243
+!
+  subroutine reorder1324(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K3,L3,K2,L2,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I1,I3,I2,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder1324
+!
+  subroutine reorder1342(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K3,L3,K4,L4,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K3+1:L3,K4+1:L4,K2+1:L2)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I1,I3,I4,I2)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder1342
+!
+  subroutine reorder1423(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K4,L4,K2,L2,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K4+1:L4,K2+1:L2,K3+1:L3)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I1,I4,I2,I3)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder1423
+!
+  subroutine reorder1432(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K4,L4,K3,L3,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K4+1:L4,K3+1:L3,K2+1:L2)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I1,I4,I3,I2)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder1432
+!
+  subroutine reorder2134(M1,N1,M2,N2,M3,N3,M4,N4,K2,L2,K1,L1,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I2,I1,I3,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder2134
+!
+  subroutine reorder2314(M1,N1,M2,N2,M3,N3,M4,N4,K2,L2,K3,L3,K1,L1,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I2,I3,I1,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder2314
+!
+  subroutine reorder2341(M1,N1,M2,N2,M3,N3,M4,N4,K2,L2,K3,L3,K4,L4,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K2+1:L2,K3+1:L3,K4+1:L4,K1+1:L1)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I2,I3,I4,I1)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder2341
+!
+  subroutine reorder2413(M1,N1,M2,N2,M3,N3,M4,N4,K2,L2,K4,L4,K1,L1,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K2+1:L2,K4+1:L4,K1+1:L1,K3+1:L3)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I2,I4,I1,I3)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder2413
+!
+  subroutine reorder2431(M1,N1,M2,N2,M3,N3,M4,N4,K2,L2,K4,L4,K3,L3,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K2+1:L2,K4+1:L4,K3+1:L3,K1+1:L1)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I2,I4,I3,I1)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder2431
+!
+  subroutine reorder3124(M1,N1,M2,N2,M3,N3,M4,N4,K3,L3,K1,L1,K2,L2,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I3,I1,I2,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder3124
+!
+  subroutine reorder3142(M1,N1,M2,N2,M3,N3,M4,N4,K3,L3,K1,L1,K4,L4,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K3+1:L3,K1+1:L1,K4+1:L4,K2+1:L2)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I3,I1,I4,I2)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder3142
+!
+  subroutine reorder3214(M1,N1,M2,N2,M3,N3,M4,N4,K3,L3,K2,L2,K1,L1,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K3+1:L3,K2+1:L2,K1+1:L1,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I3,I2,I1,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder3214
+!
+  subroutine reorder3241(M1,N1,M2,N2,M3,N3,M4,N4,K3,L3,K2,L2,K4,L4,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K3+1:L3,K2+1:L2,K4+1:L4,K1+1:L1)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I3,I2,I4,I1)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder3241
+!
+  subroutine reorder3412(M1,N1,M2,N2,M3,N3,M4,N4,K3,L3,K4,L4,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K3+1:L3,K4+1:L4,K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I3,I4,I1,I2)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder3412
+!
+  subroutine reorder3421(M1,N1,M2,N2,M3,N3,M4,N4,K3,L3,K4,L4,K2,L2,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K3+1:L3,K4+1:L4,K2+1:L2,K1+1:L1)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I3,I4,I2,I1)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder3421
+!
+  subroutine reorder4123(M1,N1,M2,N2,M3,N3,M4,N4,K4,L4,K1,L1,K2,L2,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I4,I1,I2,I3)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder4123
+!
+  subroutine reorder4132(M1,N1,M2,N2,M3,N3,M4,N4,K4,L4,K1,L1,K3,L3,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K4+1:L4,K1+1:L1,K3+1:L3,K2+1:L2)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I4,I1,I3,I2)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder4132
+!
+  subroutine reorder4213(M1,N1,M2,N2,M3,N3,M4,N4,K4,L4,K2,L2,K1,L1,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K4+1:L4,K2+1:L2,K1+1:L1,K3+1:L3)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I4,I2,I1,I3)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder4213
+!
+  subroutine reorder4231(M1,N1,M2,N2,M3,N3,M4,N4,K4,L4,K2,L2,K3,L3,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K4+1:L4,K2+1:L2,K3+1:L3,K1+1:L1)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I4,I2,I3,I1)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder4231
+!
+  subroutine reorder4312(M1,N1,M2,N2,M3,N3,M4,N4,K4,L4,K3,L3,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K1,K2,L2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K4+1:L4,K3+1:L3,K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I4,I3,I1,I2)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder4312
+!
+  subroutine reorder4321(M1,N1,M2,N2,M3,N3,M4,N4,K4,L4,K3,L3,K2,L2,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K4+1:L4,K3+1:L3,K2+1:L2,K1+1:L1)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I4,I3,I2,I1)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder4321
+!
+  subroutine reorder12345(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder12345
+!
+  subroutine reorder13245(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K1,L1,K3,L3,K2,L2,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I1,I3,I2,I4,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder13245
+!
+  subroutine reorder21345(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K2,L2,K1,L1,K3,L3,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I2,I1,I3,I4,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder21345
+!
+  subroutine reorder23145(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K2,L2,K3,L3,K1,L1,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I2,I3,I1,I4,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder23145
+!
+  subroutine reorder31245(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K3,L3,K1,L1,K2,L2,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I3,I1,I2,I4,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder31245
+!
+  subroutine reorder41235(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K1,L1,K2,L2,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I1,I2,I3,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder41235
+!
+  subroutine reorder41325(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K1,L1,K3,L3,K2,L2,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K1+1:L1,K3+1:L3,K2+1:L2,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I1,I3,I2,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder41325
+!
+  subroutine reorder42135(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K2,L2,K1,L1,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K2+1:L2,K1+1:L1,K3+1:L3,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I2,I1,I3,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder42135
+!
+  subroutine reorder42315(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K2,L2,K3,L3,K1,L1,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K2+1:L2,K3+1:L3,K1+1:L1,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I2,I3,I1,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder42315
+!
+  subroutine reorder43125(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K3,L3,K1,L1,K2,L2,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K3+1:L3,K1+1:L1,K2+1:L2,K5+1:L5)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I3,I1,I2,I5)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder43125
+!
+  subroutine reorder45123(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K5,L5,K1,L1,K2,L2,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I5,I1,I2,I3)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder45123
+!
+  subroutine reorder45132(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K5,L5,K1,L1,K3,L3,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K1+1:L1,K3+1:L3,K2+1:L2)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I5,I1,I3,I2)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder45132
+!
+  subroutine reorder45213(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K5,L5,K2,L2,K1,L1,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K2+1:L2,K1+1:L1,K3+1:L3)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I5,I2,I1,I3)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder45213
+!
+  subroutine reorder45231(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K5,L5,K2,L2,K3,L3,K1,L1,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K2+1:L2,K3+1:L3,K1+1:L1)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I5,I2,I3,I1)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder45231
+!
+  subroutine reorder45312(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K4,L4,K5,L5,K3,L3,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K3+1:L3,K1+1:L1,K2+1:L2)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I4,I5,I3,I1,I2)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder45312
+!
+  subroutine reorder51234(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K5,L5,K1,L1,K2,L2,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K5+1:L5,K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I5,I1,I2,I3,I4)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder51234
+!
+  subroutine reorder51324(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K5,L5,K1,L1,K3,L3,K2,L2,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K5+1:L5,K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I5,I1,I3,I2,I4)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder51324
+!
+  subroutine reorder52134(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K5,L5,K2,L2,K1,L1,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K5+1:L5,K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I5,I2,I1,I3,I4)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder52134
+!
+  subroutine reorder52314(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K5,L5,K2,L2,K3,L3,K1,L1,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K5+1:L5,K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I5,I2,I3,I1,I4)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder52314
+!
+  subroutine reorder53124(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,K5,L5,K3,L3,K1,L1,K2,L2,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K5,M2,K4,K1,L3,K3,N4,M4,L4,N2,M1,M3,L2,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5)
+    real(8),intent(out)   :: B(K5+1:L5,K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4)
+!
+    integer :: I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5)
+      B(I5,I3,I1,I2,I4)=A(I1,I2,I3,I4,I5)
+    endforall
+!
+  endsubroutine reorder53124
+!
+  subroutine reorder123456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder123456
+!
+  subroutine reorder132456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K1,L1,K3,L3,K2,L2,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I1,I3,I2,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder132456
+!
+  subroutine reorder213456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K2,L2,K1,L1,K3,L3,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I2,I1,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder213456
+!
+  subroutine reorder231456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K2,L2,K3,L3,K1,L1,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I2,I3,I1,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder231456
+!
+  subroutine reorder312456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K1,L1,K2,L2,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I1,I2,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder312456
+!
+  subroutine reorder412356(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K1,L1,K2,L2,K3,L3,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I1,I2,I3,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder412356
+!
+  subroutine reorder413256(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K1,L1,K3,L3,K2,L2,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K1+1:L1,K3+1:L3,K2+1:L2,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I1,I3,I2,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder413256
+!
+  subroutine reorder421356(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K2,L2,K1,L1,K3,L3,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K2+1:L2,K1+1:L1,K3+1:L3,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I2,I1,I3,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder421356
+!
+  subroutine reorder423156(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K2,L2,K3,L3,K1,L1,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K2+1:L2,K3+1:L3,K1+1:L1,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I2,I3,I1,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder423156
+!
+  subroutine reorder431256(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K3,L3,K1,L1,K2,L2,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K3+1:L3,K1+1:L1,K2+1:L2,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I3,I1,I2,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder431256
+!
+  subroutine reorder451236(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K5,L5,K1,L1,K2,L2,K3,L3,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K1+1:L1,K2+1:L2,K3+1:L3,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I5,I1,I2,I3,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder451236
+!
+  subroutine reorder451326(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K5,L5,K1,L1,K3,L3,K2,L2,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K1+1:L1,K3+1:L3,K2+1:L2,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I5,I1,I3,I2,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder451326
+!
+  subroutine reorder452136(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K5,L5,K2,L2,K1,L1,K3,L3,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K2+1:L2,K1+1:L1,K3+1:L3,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I5,I2,I1,I3,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder452136
+!
+  subroutine reorder452316(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K5,L5,K2,L2,K3,L3,K1,L1,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K2+1:L2,K3+1:L3,K1+1:L1,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I5,I2,I3,I1,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder452316
+!
+  subroutine reorder453126(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K5,L5,K3,L3,K1,L1,K2,L2,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K5+1:L5,K3+1:L3,K1+1:L1,K2+1:L2,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I5,I3,I1,I2,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder453126
+!
+  subroutine reorder461235(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K6,L6,K1,L1,K2,L2,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K6+1:L6,K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I6,I1,I2,I3,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder461235
+!
+  subroutine reorder461325(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K6,L6,K1,L1,K3,L3,K2,L2,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K6+1:L6,K1+1:L1,K3+1:L3,K2+1:L2,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I6,I1,I3,I2,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder461325
+!
+  subroutine reorder462135(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K6,L6,K2,L2,K1,L1,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K6+1:L6,K2+1:L2,K1+1:L1,K3+1:L3,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I6,I2,I1,I3,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder462135
+!
+  subroutine reorder462315(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K6,L6,K2,L2,K3,L3,K1,L1,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K6+1:L6,K2+1:L2,K3+1:L3,K1+1:L1,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I6,I2,I3,I1,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder462315
+!
+  subroutine reorder463125(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K4,L4,K6,L6,K3,L3,K1,L1,K2,L2,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K4+1:L4,K6+1:L6,K3+1:L3,K1+1:L1,K2+1:L2,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I4,I6,I3,I1,I2,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder463125
+!
+  subroutine reorder512346(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K1,L1,K2,L2,K3,L3,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I1,I2,I3,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder512346
+!
+  subroutine reorder513246(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K1,L1,K3,L3,K2,L2,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I1,I3,I2,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder513246
+!
+  subroutine reorder516234(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K1,L1,K6,L6,K2,L2,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K1+1:L1,K6+1:L6,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I1,I6,I2,I3,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder516234
+!
+  subroutine reorder521346(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K2,L2,K1,L1,K3,L3,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I2,I1,I3,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder521346
+!
+  subroutine reorder523146(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K2,L2,K3,L3,K1,L1,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I2,I3,I1,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder523146
+!
+  subroutine reorder531246(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K3,L3,K1,L1,K2,L2,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I3,I1,I2,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder531246
+!
+  subroutine reorder561234(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K1,L1,K2,L2,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I1,I2,I3,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder561234
+!
+  subroutine reorder561324(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K1,L1,K3,L3,K2,L2,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I1,I3,I2,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder561324
+!
+  subroutine reorder562134(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K2,L2,K1,L1,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I2,I1,I3,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder562134
+!
+  subroutine reorder562314(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K2,L2,K3,L3,K1,L1,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I2,I3,I1,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder562314
+!
+  subroutine reorder563124(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K3,L3,K1,L1,K2,L2,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I3,I1,I2,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder563124
+!
+  subroutine reorder612345(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I1,I2,I3,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder612345
+!
+  subroutine reorder613245(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K1,L1,K3,L3,K2,L2,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K1+1:L1,K3+1:L3,K2+1:L2,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I1,I3,I2,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder613245
+!
+  subroutine reorder621345(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K2,L2,K1,L1,K3,L3,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K2+1:L2,K1+1:L1,K3+1:L3,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I2,I1,I3,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder621345
+!
+  subroutine reorder623145(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K2,L2,K3,L3,K1,L1,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K2+1:L2,K3+1:L3,K1+1:L1,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I2,I3,I1,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder623145
+!
+  subroutine reorder631245(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K3,L3,K1,L1,K2,L2,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K3+1:L3,K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I3,I1,I2,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder631245
+!
+  subroutine reorder651234(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K5,L5,K1,L1,K2,L2,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K5+1:L5,K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I5,I1,I2,I3,I4)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder651234
+!
+  subroutine VtoHR12(M1,N1,M2,N2,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: L2,K1,K2,N1,N2,M1,L1,M2
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2)
+!
+    integer :: I1,I2
+!
+    forall(I1=M1+1:N1,I2=M2+1:N2)
+      B(I1,I2)=A(I1,I2)
+    endforall
+!
+  endsubroutine VtoHR12
+!
+  subroutine VtoHR1234(M1,N1,M2,N2,M3,N3,M4,N4,K1,L1,K2,L2,K3,L3,K4,L4,A,B)
+!
+    integer,intent(in)    :: N3,L2,K1,K2,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=M1+1:N1,I2=M2+1:N2,I3=M3+1:N3,I4=M4+1:N4)
+      B(I1,I2,I3,I4)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine VtoHR1234
+!
+  subroutine reorder2143(M1,N1,M2,N2,M3,N3,M4,N4,K2,L2,K1,L1,K4,L4,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,L2,K2,K1,M4,L4,N1,N2,M1,M3,L1,L3,M2,K4,K3,N4
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4)
+    real(8),intent(out)   :: B(K2+1:L2,K1+1:L1,K4+1:L4,K3+1:L3)
+!
+    integer :: I1,I3,I2,I4
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4)
+      B(I2,I1,I4,I3)=A(I1,I2,I3,I4)
+    endforall
+!
+  endsubroutine reorder2143
+!
+  subroutine VtoHR123456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K1,L1,K2,L2,K3,L3,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K1+1:L1,K2+1:L2,K3+1:L3,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=M1+1:N1,I2=M2+1:N2,I3=M3+1:N3,I4=M4+1:N4,I5=M5+1:N5,I6=M6+1:N6)
+      B(I1,I2,I3,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine VtoHR123456
+!
+  subroutine reorder142356(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K1,L1,K4,L4,K2,L2,K3,L3,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K1+1:L1,K4+1:L4,K2+1:L2,K3+1:L3,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I1,I4,I2,I3,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder142356
+!
+  subroutine reorder241356(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K2,L2,K4,L4,K1,L1,K3,L3,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K2+1:L2,K4+1:L4,K1+1:L1,K3+1:L3,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I2,I4,I1,I3,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder241356
+!
+  subroutine reorder321456(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K2,L2,K1,L1,K4,L4,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K2+1:L2,K1+1:L1,K4+1:L4,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I2,I1,I4,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder321456
+!
+  subroutine reorder341256(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K4,L4,K1,L1,K2,L2,K5,L5,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K4+1:L4,K1+1:L1,K2+1:L2,K5+1:L5,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I4,I1,I2,I5,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder341256
+!
+  subroutine reorder351246(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K5,L5,K1,L1,K2,L2,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K5+1:L5,K1+1:L1,K2+1:L2,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I5,I1,I2,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder351246
+!
+  subroutine reorder352146(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K5,L5,K2,L2,K1,L1,K4,L4,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K5+1:L5,K2+1:L2,K1+1:L1,K4+1:L4,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I5,I2,I1,I4,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder352146
+!
+  subroutine reorder361245(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K6,L6,K1,L1,K2,L2,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K6+1:L6,K1+1:L1,K2+1:L2,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I6,I1,I2,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder361245
+!
+  subroutine reorder362145(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K3,L3,K6,L6,K2,L2,K1,L1,K4,L4,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K3+1:L3,K6+1:L6,K2+1:L2,K1+1:L1,K4+1:L4,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I3,I6,I2,I1,I4,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder362145
+!
+  subroutine reorder514236(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K1,L1,K4,L4,K2,L2,K3,L3,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K1+1:L1,K4+1:L4,K2+1:L2,K3+1:L3,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I1,I4,I2,I3,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder514236
+!
+  subroutine reorder524136(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K2,L2,K4,L4,K1,L1,K3,L3,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K2+1:L2,K4+1:L4,K1+1:L1,K3+1:L3,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I2,I4,I1,I3,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder524136
+!
+  subroutine reorder534126(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K3,L3,K4,L4,K1,L1,K2,L2,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K3+1:L3,K4+1:L4,K1+1:L1,K2+1:L2,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I3,I4,I1,I2,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder534126
+!
+  subroutine reorder541236(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K4,L4,K1,L1,K2,L2,K3,L3,K6,L6,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3,K6+1:L6)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I4,I1,I2,I3,I6)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder541236
+!
+  subroutine reorder561423(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K1,L1,K4,L4,K2,L2,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K1+1:L1,K4+1:L4,K2+1:L2,K3+1:L3)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I1,I4,I2,I3)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder561423
+!
+  subroutine reorder562413(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K2,L2,K4,L4,K1,L1,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K2+1:L2,K4+1:L4,K1+1:L1,K3+1:L3)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I2,I4,I1,I3)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder562413
+!
+  subroutine reorder563412(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K3,L3,K4,L4,K1,L1,K2,L2,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K3+1:L3,K4+1:L4,K1+1:L1,K2+1:L2)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I3,I4,I1,I2)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder563412
+!
+  subroutine reorder564123(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K5,L5,K6,L6,K4,L4,K1,L1,K2,L2,K3,L3,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K5+1:L5,K6+1:L6,K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I5,I6,I4,I1,I2,I3)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder564123
+!
+  subroutine reorder614235(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K1,L1,K4,L4,K2,L2,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K1+1:L1,K4+1:L4,K2+1:L2,K3+1:L3,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I1,I4,I2,I3,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder614235
+!
+  subroutine reorder624135(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K2,L2,K4,L4,K1,L1,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K2+1:L2,K4+1:L4,K1+1:L1,K3+1:L3,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I2,I4,I1,I3,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder624135
+!
+  subroutine reorder634125(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K3,L3,K4,L4,K1,L1,K2,L2,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K3+1:L3,K4+1:L4,K1+1:L1,K2+1:L2,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I3,I4,I1,I2,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder634125
+!
+  subroutine reorder641235(M1,N1,M2,N2,M3,N3,M4,N4,M5,N5,M6,N6,K6,L6,K4,L4,K1,L1,K2,L2,K3,L3,K5,L5,A,B)
+!
+    integer,intent(in)    :: N3,K2,K6,K5,M2,K4,K1,L3,M6,K3,N4,M4,L4,N2,M1,M3,L6,L2,N6,N1,L5,L1,N5,M5
+    real(8),intent(in)    :: A(M1+1:N1,M2+1:N2,M3+1:N3,M4+1:N4,M5+1:N5,M6+1:N6)
+    real(8),intent(out)   :: B(K6+1:L6,K4+1:L4,K1+1:L1,K2+1:L2,K3+1:L3,K5+1:L5)
+!
+    integer :: I6,I2,I4,I1,I3,I5
+!
+    forall(I1=K1+1:L1,I2=K2+1:L2,I3=K3+1:L3,I4=K4+1:L4,I5=K5+1:L5,I6=K6+1:L6)
+      B(I6,I4,I1,I2,I3,I5)=A(I1,I2,I3,I4,I5,I6)
+    endforall
+!
+  endsubroutine reorder641235
+endmodule ccsd3a_reorder_mod

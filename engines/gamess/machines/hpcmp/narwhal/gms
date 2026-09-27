@@ -1,0 +1,408 @@
+#!/bin/tcsh
+#
+# if you want to debug this file then pass "-x" to line 1
+#
+set SCHED=PBS
+#
+#    ===== next section parses arguments
+#
+#    anything not recognized is taken as the input file name.
+#
+while ($#argv > 0)
+   set val=$argv[1]
+   shift
+   switch ($val)
+      case -y:
+        set OVERWRITE=true
+        breaksw
+      case -aprun:
+        set GMS_LAUNCHER=aprun
+        breaksw
+      case -mpiexec:
+        set GMS_LAUNCHER=mpiexec
+        breaksw
+      case -mpi:
+        set TARGET=mpi
+        breaksw
+      case -mixed:
+        set TARGET=mixed
+        breaksw
+      case -ga:
+        set TARGET=ga
+        breaksw
+      case -sockets:
+        set TARGET=sockets
+        breaksw
+      case -hpe-cray-ex:
+        set TARGET=hpe-cray-ex
+        breaksw
+      case -hpe-cray-cs:
+        set TARGET=hpe-cray-cs
+        breaksw
+      case -cray-xt:
+        set TARGET=cray-xt
+        breaksw
+      case -cray-xc:
+        set TARGET=cray-xc
+        breaksw
+      case -a:
+        set ACCOUNT=$argv[1]
+        shift
+        breaksw
+      case -q:
+        set PARTITION=$argv[1]
+        shift
+        breaksw
+      case -l:
+        set LOGFILE=$argv[1]
+        shift
+        breaksw
+      case -p:
+        set NCPUS=$argv[1]
+        shift
+        breaksw
+      case -w:
+        set WALL=$argv[1]
+        shift
+        breaksw
+      case -exclusive:
+        set EXCLUSIVE=true
+        breaksw
+      case -ppn:
+        set PPN=$argv[1]
+        shift
+        breaksw
+      case -ccmem:
+        set CCMEM=$argv[1]
+        shift
+        breaksw
+#            next two specify GAMESS binary's "version number" and pathname
+      case -v:
+        set VERNO=$argv[1]
+        shift
+        breaksw
+      case -exepath:
+        set XPATH=$argv[1]
+        shift
+        breaksw
+      case -restart:
+        set RESTARTPATH=$argv[1]
+        shift
+        breaksw
+#             next four are special file saving/reuse options.
+      case -b:
+        set EXTBAS=$argv[1]
+        shift
+        breaksw
+      default:
+        if ($?JOB == 1) then
+           echo You\'ve given too many input file names, $JOB and $val.
+           exit 4
+        else
+           set JOB=$val
+           if ($JOB =~ *.inp) set JOB=$JOB:r
+           set inputfileabsolutepath=`readlink -f $JOB.inp`
+           set JOB=$inputfileabsolutepath
+           set JOB=$JOB:r
+        endif
+        breaksw
+   endsw
+end
+#
+#     Global Arrays usage by GAMESS+LIBCCHEM requires running one MPI
+#     process per node: parallelism inside node is always by threads.
+#
+if ($?JOB == 0)          set JOB=help
+if ($?ACCOUNT == 0)      set ACCOUNT=XXXXXXXXXXXXXXXXXXXXX
+if ($?VERNO == 0)        set VERNO=00
+if ($?LOGFILE == 0)      set LOGFILE=default
+if ($?XPATH == 0)        set XPATH=`pwd`
+if ($?RESTARTPATH == 0)  set RESTARTPATH=$HOME/restart
+if ($?NCPUS == 0)        set NCPUS=1
+if ($?WALL == 0)         set WALL=default
+if ($?EXCLUSIVE == 0)    set EXCLUSIVE=false
+if ($?TESTJOB == 0)      set TESTJOB=false
+if ($?PPN == 0)          set PPN=$NCPUS
+if ($?EXTBAS == 0)       set EXTBAS=/dev/null
+if ($?CCMEM == 0)        set CCMEM=0
+if ($?PARTITION == 0)    set PARTITION=background
+if ($?TARGET == 0)       set TARGET=hpe-cray-ex
+if ($?GMS_LAUNCHER == 0) set GMS_LAUNCHER=aprun
+if ($?OVERWRITE == 0)    set OVERWRITE=false
+
+set OLDJOB=$JOB
+set LONGJOBNAME=`echo $OLDJOB | sed "s/\//_/g"`
+set NEWJOB=`echo $JOB | rev | cut -d'/' -f 1 | rev`
+set JOB=$NEWJOB
+#
+#    ===== next section provides some help screens, which exit.
+#
+if ($JOB == help) then
+   
+   tput clear
+
+cat <<EOF
+
+ ::::::::      :::     ::::    ::::  :::::::::: ::::::::   ::::::::  
+:+:    :+:   :+: :+:   +:+:+: :+:+:+ :+:       :+:    :+: :+:    :+: 
++:+         +:+   +:+  +:+ +:+:+ +:+ +:+       +:+        +:+        
+:#:        +#++:++#++: +#+  +:+  +#+ +#++:++#  +#++:++#++ +#++:++#++ 
++#+   +#+# +#+     +#+ +#+       +#+ +#+              +#+        +#+ 
+#+#    #+# #+#     #+# #+#       #+# #+#       #+#    #+# #+#    #+# 
+ ########  ###     ### ###       ### ########## ########   ########  
+
+EOF
+   echo "The syntax to execute GAMESS is"
+   echo " "
+   echo "   gms.interactive [-l logfile] [-p CPUS] [-w dd:hh:mm:ss] [input]"
+   echo " "
+   echo "   -a        account for resource charging"
+   echo "   -l        gives the log file name"
+   echo "   -p X      will run X GAMESS compute processes"
+   echo "   -ppn Y    run only Y GAMESS compute processes per node"
+   echo "   -exepath  full absolute path to the folder containing GAMESS executable"
+   echo "             and rungms-dev script"
+   echo "   -restart  full absolute path to the restart folder"
+   echo "   -q        partition name passed to --partition, e.g. k20"
+   echo "             ------------------------------------------------"
+   echo "             queue names - max cpus - max wall time (HH:MM:SS)"
+   echo "             ------------------------------------------------"
+   echo "             standard      16,384     168:00:00"
+   echo "             frontier      36,720     168:00:00"
+   echo "             background    16,384     120:00:00"
+   echo "             debug         16,384      00:30:00"
+   echo " "
+   echo "   -w        wall clock time, as dd:hh:mm:ss (default=24:00:00=24 hrs)"
+   echo "   -y        overwrite any existing log file"
+   echo " "
+   echo "   -hpe-cray-ex  use hpe-cray-ex target in rungms-dev (default)"
+   echo "   -hpe-cray-cs  use hpe-cray-cs target in rungms-dev"
+   echo "   -mpi      use mpi target in rungms-dev"
+   echo "   -sockets  use sockets target in rungms-dev"
+   echo "   -mixed    use mixed target in rungms-dev"
+   echo " "
+   echo "   -aprun    use aprun to launch GAMESS executable (default)"
+   echo "   -mpiexec  use mpiexec to launch GAMESS executable"
+   echo " "
+   echo " The default GAMESS path is:"
+   echo "    $XPATH"
+   echo " "
+   exit
+endif
+#
+#    ===== next section selects scheduler and cluster independent options
+#
+#  we must have a name for the output from the run:
+#
+if ($LOGFILE == default) then
+   set LOGFILE=$JOB.log
+   echo -n "output file name? [$LOGFILE] "
+   set LOGFILE=`pwd`/$JOB.log
+   set ans=$<
+   if (null$ans != null) set LOGFILE=$ans
+else
+   if ($LOGFILE =~ $JOB*) set LOGFILE=`pwd`/$LOGFILE
+endif
+#
+if (-e $LOGFILE) then
+   if ($OVERWRITE == false) then
+     echo -n "$LOGFILE already exists.  OK to delete the old one? [y] "
+     set ans=$<
+     if (null$ans == null) set ans=y
+     if ($ans == y) then
+       rm $LOGFILE
+     else
+       echo "Exiting, so you can think about your old log file's value."
+       exit
+     endif
+   else
+     echo "OVERWRITE MODE! Removing existing log file $LOGFILE"
+     rm $LOGFILE
+   endif
+endif
+#
+#  we must know how many cores (NCPUS) to run on:
+#
+if ($NCPUS == 0) then
+   echo -n "number of cores to use ? [$NCPUS] "
+   set ans=$<
+   if (null$ans != null) set NCPUS=$ans
+endif
+#
+if ($NCPUS < $PPN) then
+   set NNODES=1
+else
+#
+#     jobs running more than one node come here, to ensure the
+#     the core count is rounded down to multiple of PPN.
+#        gms -p 50 -ppn 6   will produce NCPUS=48, NNODES=8, PPN=6
+#
+   @ xx = $NCPUS / $PPN
+   @ yy = $PPN * $xx
+   set NCPUS=$yy
+   set NNODES=$xx
+endif
+
+@ zz = $PPN * 2
+set PPN2 = $zz
+
+if ($TARGET == ga) set PPN2 = $PPN
+
+unset xx
+unset yy
+unset zz
+#
+#  we must know the wall clock time limit:
+#
+if ($WALL == default) then
+   set WALL=24:00:00
+   if ($PARTITION == debug) set WALL=00:30:00
+   if ($PARTITION == standard) set WALL=168:00:00
+   if ($PARTITION == frontier) set WALL=168:00:00
+   if ($PARTITION == background) set WALL=120:00:00
+endif
+#
+set UNIQUE_NAME=`date | tr -s ' ' | sed 's/ /_/g' | sed 's/:/_/g'`
+set UNIQUE_NAME=_"$UNIQUE_NAME"
+#
+#    ===== next section selects scheduler and cluster dependent options
+#
+if ($SCHED == SLURM) then
+    if ($NCPUS < $PPN) set PPN=$NCPUS
+endif
+#
+set USERSCR=$RESTARTPATH/$JOB/$UNIQUE_NAME
+if (-d $USERSCR) then
+else
+  echo An empty $USERSCR directory is being created for you...
+  mkdir -p $USERSCR
+  if (-d $USERSCR) then
+    echo "This directory will receive .dat, .trj, .rst supplemental outputs."
+    sleep 1
+  else
+    echo "Problem creating $USERSCR, no job can be submitted."
+    exit
+  endif
+endif
+echo Checking for existence of various files
+#
+#    ===== next section tests existence of various files
+#
+#    next directory on head node is the usual place to leave all
+#    supplemental ASCII outputs, such as PUNCH or TRAJECT files.
+#
+#    MWS had to change this to avoid head node NFS issues.
+#
+#    we should make sure the input exists, and that we don't
+#    destroy any files from previous runs that might be useful.
+#
+set nerr=0
+#
+if (-e $OLDJOB.inp) then
+else
+   echo I could not find $JOB.inp in your current directory.
+   exit 1
+endif
+#
+
+echo $USERSCR
+
+if (-e $USERSCR/$JOB.dat) then
+   echo You presently have a PUNCH file named $USERSCR/$JOB.dat,
+   rm -rf $USERSCR/$JOB.dat
+endif
+#
+if (-e $USERSCR/$JOB.trj) then
+   echo You presently have a TRAJECT file named $USERSCR/$JOB.trj,
+   rm -rf $USERSCR/$JOB.trj
+endif
+#
+if (-e  $USERSCR/$JOB.rst) then
+   echo You presently have a RESTART file named $USERSCR/$JOB.rst,
+   rm -rf $USERSCR/$JOB.rst
+endif
+#
+if (-e $USERSCR/$JOB.efp) then
+   echo You presently have a MAKEFP file named $USERSCR/$JOB.efp,
+   rm -rf $USERSCR/$JOB.efp
+endif
+#
+#    ===== next section prepares the job script
+#
+cp $XPATH/rungms-dev $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+#
+#    special option to execute test version, rather than production code
+#
+if ($XPATH != none) then
+   sed -e \\+currentdir=\`pwd\`+s++currentdir=$XPATH+ \
+      $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script > $USERSCR/$JOB.mung
+   mv $USERSCR/$JOB.mung $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+endif
+#
+#    special option to hack in the desired node memory for LIBCCHEM,
+#    this option is irrelevant to a normal GAMESS binary.
+#
+if ($CCMEM != 0) then
+   sed -e /memory=6g/s//memory=$CCMEM/ \
+      $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script > $USERSCR/$JOB.mung
+   mv $USERSCR/$JOB.mung $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+endif
+#
+#    special option to read user-specified external basis set library
+#
+if ($EXTBAS != /dev/null) then
+   if (-e $EXTBAS) then
+      sed -e \\+EXTBAS\ /dev/null+s++EXTBAS\ $EXTBAS+ \
+         $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script > $USERSCR/$JOB.mung
+      mv $USERSCR/$JOB.mung $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   else
+      echo Your external basis set file $EXTBAS does not exist.
+      echo Please provide the correct fully qualified path name to this file.
+      exit 8
+   endif
+endif
+#
+#   ===== extra option
+#
+set EXTRAOPTIONS=""
+if ($ACCOUNT != none) set EXTRAOPTIONS="$EXTRAOPTIONS -A $ACCOUNT"
+if ($EXCLUSIVE == true) set EXTRAOPTIONS="$EXTRAOPTIONS -l place=scatter:excl"
+if ($PARTITION != none) set EXTRAOPTIONS="$EXTRAOPTIONS -q $PARTITION"
+#
+#
+#    ===== last section actually submits the run
+#
+echo Submitting GAMESS job $JOB.inp using $NCPUS cores...
+set FIRST=`echo $JOB | cut -b 1-1`
+set FIRST=`echo $FIRST | tr '0-9' '[Q*]'`
+set JOBNAME=$FIRST`echo $JOB | cut -b 2-15`
+#
+set PBS_RESOURCES_1=":ncpus=$PPN"
+set PBS_RESOURCES_2=":mpiprocs=$NCPUS"
+set PBS_RESOURCES_2=":mpiprocs=$PPN"
+set PBS_RESOURCES=$PBS_RESOURCES_1$PBS_RESOURCES_2
+#
+if ($SCHED == PBS) then
+   sed -i "s|#OVERRIDE GMSPATH|set GMSPATH=$XPATH|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE USERSCR|set USERSCR=$USERSCR|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE INPUT|set INPUT=$OLDJOB\.inp|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE VERNO|set VERNO=$VERNO|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE NCPUS|set NCPUS=$NCPUS|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE PPN|set PPN=$PPN|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE NNODES|set NNODES=$NNODES|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   sed -i "s|#OVERRIDE TARGET|set TARGET=$TARGET\nset GMS_LAUNCHER=$GMS_LAUNCHER|g" $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   chmod 755 $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script
+   #
+   echo "#\!/bin/csh"                         > $USERSCR/$LONGJOBNAME$UNIQUE_NAME.pbsjob
+   echo "$USERSCR/$LONGJOBNAME$UNIQUE_NAME.script >& $LOGFILE"   >> $USERSCR/$LONGJOBNAME$UNIQUE_NAME.pbsjob
+   #
+   set echo
+   qsub -m n -o /dev/null -j oe -r n -N $JOBNAME \
+        -l select=$NNODES"$PBS_RESOURCES",walltime=$WALL $EXTRAOPTIONS \
+        $USERSCR/$LONGJOBNAME$UNIQUE_NAME.pbsjob
+   unset echo
+   echo Please do not erase $USERSCR/$LONGJOBNAME$UNIQUE_NAME.script until after the PBS job ends.
+   sleep 2
+endif
+#
+exit

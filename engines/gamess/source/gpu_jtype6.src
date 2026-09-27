@@ -1,0 +1,1195 @@
+! GENERATE all 6 jtypes for rotSP
+module mod_jtype6
+implicit none
+contains
+      SUBROUTINE GPU_GENR70_jtype6(QQ4,INEW,JNEW,KNEW,LNEW,&
+      CO,KSTART,KNG,EX,CS,CP,CMAX,&
+      RFINC,FGRID,XGRID,RMR,gpople,&
+      EI1,EI2,CUX,RXINC,TMAX)
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+      !use comm_INTAC2, only: EI1,EI2,CUX
+      !use comm_FMTTBL, only: RXINC,TMAX
+      IMPLICIT NONE
+  integer, parameter :: NTX=4,NPF=450,NGRD=7,NPX=1000,MXQT=16,NORD=4
+  double precision :: FGRID(0:NTX,0:NPF,0:NGRD), XGRID(0:NTX,0:NPX)
+  double precision :: RFINC(0:NGRD), RMR(MXQT)
+  double precision :: EX(MXGTOT), CS(MXGTOT), CP(MXGTOT)
+  integer :: KSTART(MXSH),KNG(MXSH)
+  DOUBLE PRECISION :: GPOPLE(256)
+  double precision :: cmax(mxgtot) 
+
+  double precision, intent(in) :: CO(MXSH,3)
+  double precision, intent(in) :: qq4
+  integer, intent(in) :: INEW,JNEW,KNEW,LNEW
+  double precision, intent(in) :: EI1,EI2,CUX,RXINC,TMAX
+!     ==================================================================
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION, PARAMETER :: PT5 =0.5D+00
+      DOUBLE PRECISION, PARAMETER :: PT7 =0.7D+00
+      DOUBLE PRECISION, PARAMETER :: PT9 =0.9D+00
+      DOUBLE PRECISION, PARAMETER :: ONE =1.0D+00
+      DOUBLE PRECISION, PARAMETER :: F03 =3.0D+00
+      DOUBLE PRECISION, PARAMETER :: F04=4.0D+00
+      DOUBLE PRECISION, PARAMETER :: F06 =6.0D+00
+      DOUBLE PRECISION, PARAMETER :: ACYCUT=1.0D-10
+      DOUBLE PRECISION, PARAMETER :: TENM12=1.0D-12
+      DOUBLE PRECISION, PARAMETER :: PI4 =0.78539816339744831D+00
+      DOUBLE PRECISION, PARAMETER :: PITO52=34.986836655249726D+00
+      !double precision,parameter :: RXINC= 2.7689158581207256E+01
+      !double precision, parameter :: TMAX= 2.50E+01
+!     ==================================================================
+  integer :: ii,ij,jj, I,J,K,L, N, ismlq, ismlp
+  integer :: ISML,IP,M
+  double precision :: E12,E34,R12Y12,R34Y34,R34,RCD,SING,COSG,TMP,TMP1
+                
+  double precision :: WORK(15),FWRK(6),FCC(4), FQD(0:4),FQD5(9)
+  double precision :: RD0(5,5),RD1(3,40),RD2(6,56),RD3(10,52),RD4(15)
+  double precision :: R12,RAB, TXM(8),D00P(4)
+  double precision :: P12(3,3),P34(3,3),P(3,3),T(3), AQC(9)
+  integer :: NST(4),NEND(4)
+!     ==================================================================
+!$omp declare target
+      gpople= zero
+      RD0= zero
+      RD1= zero
+      RD2= zero
+      RD3= zero
+      RD4=zero
+
+! NUMBERS OF GAUSSIAN FUNCTIONS IN SHELLS INEW JNEW KNEW AND LNEW
+! STARTING LOCATIONS OF INEW JNEW KNEW AND LNEW IN LIST OF GAUSSIAN FUNCTIONS
+      NST(1)=KSTART(INEW)
+      NST(2)=KSTART(JNEW)
+      NST(3)=KSTART(KNEW)
+      NST(4)=KSTART(LNEW)
+      NEND(1)=KNG(INEW)+KSTART(INEW)-1
+      NEND(2)=KNG(JNEW)+KSTART(JNEW)-1
+      NEND(3)=KNG(KNEW)+KSTART(KNEW)-1
+      NEND(4)=KNG(LNEW)+KSTART(LNEW)-1
+! COORDINATES OF ATOMS ASSOCIATED WITH SHELLS INEW JNEW KNEW AND LNEW
+      R12= ZERO
+      R34= ZERO
+      DO N=1,3
+         P12(N,1)= CO(INEW,N)
+         P12(N,2)= CO(JNEW,N)
+         P12(N,3)= P12(N,2)-P12(N,1)
+      R12= R12+P12(N,3)*P12(N,3)
+         P34(N,1)= CO(KNEW,N)
+         P34(N,2)= CO(LNEW,N)
+         P34(N,3)= P34(N,2)-P34(N,1)
+      R34= R34+P34(N,3)*P34(N,3)
+      ENDDO
+! FIND DIRECTION COSINES OF PENULTIMATE AXES FROM COORDINATES OF AB
+! P(1,1),P(1,2),... ARE DIRECTION COSINES OF AXES AT P.  Z-AXIS ALONG AB
+! T(1),T(2),T(3)... ARE DIRECTION COSINES OF AXES AT Q.  Z-AXIS ALONG CD
+
+! FIND DIRECTION COSINES OF AB AND CD. THESE ARE LOCAL Z-AXES.
+! IF INDETERMINATE TAKE ALONG SPACE Z-AXIS
+
+! initialization
+      AQC = ZERO
+      P(1,3)= ZERO
+      P(2,3)= ZERO
+      P(3,3)= ONE
+      RAB= ZERO
+      IF(R12.NE.ZERO) THEN
+         RAB= SQRT(R12)
+         TMP= ONE/RAB
+         P(1,3)= P12(1,3)*TMP
+         P(2,3)= P12(2,3)*TMP
+         P(3,3)= P12(3,3)*TMP
+      ENDIF
+
+      T(1)= ZERO
+      T(2)= ZERO
+      T(3)= ONE
+      RCD= ZERO
+      IF(R34.NE.ZERO) THEN
+         RCD= SQRT(R34)
+         TMP= ONE/RCD
+         T(1)= P34(1,3)*TMP
+         T(2)= P34(2,3)*TMP
+         T(3)= P34(3,3)*TMP
+      ENDIF
+! FIND LOCAL Y-AXIS AS COMMON PERPENDICULAR TO AB AND CD
+! IF INDETERMINATE TAKE PERPENDICULAR TO AB AND SPACE Z-AXIS
+! IF STILL INDETERMINATE TAKE PERPENDICULAR TO AB AND SPACE X-AXIS
+      COSG= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+      COSG= MIN( ONE,COSG)
+      COSG= MAX(-ONE,COSG)
+! MODIFIED ROTATION TESTING.
+! THIS FIX CURES THE SMALL ANGLE PROBLEM.
+      P(1,2)= T(3)*P(2,3)-T(2)*P(3,3)
+      P(2,2)= T(1)*P(3,3)-T(3)*P(1,3)
+      P(3,2)= T(2)*P(1,3)-T(1)*P(2,3)
+      IF( ABS(COSG).GT.PT9) THEN
+         SING= SQRT(P(1,2)*P(1,2)+P(2,2)*P(2,2)+P(3,2)*P(3,2))
+      ELSE
+         SING= SQRT(ONE-COSG*COSG)
+      ENDIF
+
+      IF( ABS(COSG).LE.PT9 .OR. SING.GE.TENM12) THEN
+         TMP= ONE/SING
+         P(1,2)= P(1,2)*TMP
+         P(2,2)= P(2,2)*TMP
+         P(3,2)= P(3,2)*TMP
+      ELSE
+         I=3
+         IF( ABS(P(1,3)).LE.PT7) I=1
+         TMP = P(I,3)*P(I,3)
+         TMP = MIN( ONE,TMP)
+         TMP = SQRT(ONE-TMP)
+         IF(TMP.NE.ZERO) TMP= ONE/TMP
+         IF( ABS(P(1,3)).LE.PT7) THEN
+            P(1,2)= ZERO
+            P(2,2)= P(3,3)*TMP
+            P(3,2)=-P(2,3)*TMP
+         ELSE
+            P(1,2)= P(2,3)*TMP
+            P(2,2)=-P(1,3)*TMP
+            P(3,2)= ZERO
+         ENDIF
+      ENDIF
+! FIND DIRECTION COSINES OF LOCAL X-AXES
+
+      P(1,1)= P(2,2)*P(3,3)-P(3,2)*P(2,3)
+      P(2,1)= P(3,2)*P(1,3)-P(1,2)*P(3,3)
+      P(3,1)= P(1,2)*P(2,3)-P(2,2)*P(1,3)
+
+! FIND COORDINATES OF C RELATIVE TO LOCAL AXES AT A
+      T(1)= P34(1,1)-P12(1,1)
+      T(2)= P34(2,1)-P12(2,1)
+      T(3)= P34(3,1)-P12(3,1)
+      AQC( 1) = T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+      AQC( 2) = T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+      AQC( 3) = T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+! SET AQC(2)= 0  IF CLOSE
+   
+      IF( ABS(AQC(2)).LE.ACYCUT) THEN
+         AQC(2) = ZERO
+         AQC(4)= ZERO
+      ELSE
+         AQC(4)= AQC(2)*AQC(2)
+      ENDIF
+   
+! DIRECTION COSINES OF CD LOCAL AXES WITH RESPECT TO AB LOCAL AXES
+! (COSG,0,-SING)  (0,1,0)  (SING,0,COSG)
+
+      AQC( 5)= RCD*SING
+      AQC( 6)= RCD*COSG
+   
+!JMS  NOW, THE TRANSPOSE OF P TO BE USED FOR COMPUTATIONAL EFFICIENCY
+      DO J=1,2
+         DO I=J+1,3
+            TMP= P(I,J)
+            P(I,J)= P(J,I)
+            P(J,I)= TMP
+         ENDDO
+      ENDDO
+
+!------------------------  BEGIN genr70_pJ6  ------------------------------
+ WORK=zero
+ ii_ic: DO II=NST(1),NEND(1)
+ jj_ic:  DO JJ=NST(2),NEND(2)
+            TXM(1)= EX(II)+EX(JJ)
+            TXM(2)= ONE/TXM(1)
+            TXM(3)= EX(JJ)*RAB*TXM(2)
+            TXM(4)= TXM(3)-RAB
+            R12Y12= R12*EX(II)*EX(JJ)*TXM(2)
+            IF(R12Y12.GT.CUX) THEN
+               CYCLE jj_ic
+            ENDIF
+            ISMLP=0
+            E12= TXM(2)* EXP(-R12Y12)
+            TXM(2)= TXM(2)*PT5
+            TMP= E12*CMAX(II)*CMAX(JJ)
+            IF(TMP.LE.EI1) ISMLP=1
+            IF(TMP.LE.EI2) CYCLE jj_ic
+            E12= PITO52*E12
+   
+! FOR TYPES 0000,0001,0011 ONLY D00P NEEDED
+   
+            D00P(1)= E12*CS(II)*CS(JJ)
+         !select case(jtype)
+         !case(1,2,3)
+         !   D00P(1)= ONE
+         !   D00P(2)= ONE
+         !   D00P(3)= ONE
+         !   D00P(4)= E12*CS(II)*CS(JJ)
+         !case(4,5)
+         !   D00P(2)= ONE
+         !   D00P(3)= ONE
+         !   D00P(4)= E12*CS(II)*CP(JJ)
+         !   IF(D00P(4).NE.ZERO) D00P(1)=D00P(1)/D00P(4)
+         !case(6)
+            D00P(2)= E12*CS(II)*CP(JJ)
+            D00P(3)= E12*CP(II)*CS(JJ)
+            D00P(4)= E12*CP(II)*CP(JJ)
+            IF(D00P(4).NE.ZERO) THEN
+               TMP = ONE/D00P(4)
+               D00P(1)= D00P(1)*TMP
+               D00P(2)= D00P(2)*TMP
+               D00P(3)= D00P(3)*TMP
+            ENDIF
+         !end select
+!------------------------   END genr70_pJ6  ------------------------------
+!------------------------  BEGIN genr70_qJ6  ------------------------------
+ ki_ic: DO K=NST(3),NEND(3)
+ li_ic:  DO L=NST(4),NEND(4)
+            TXM(5)= EX(K)+EX(L)
+            TXM(6)= ONE/TXM(5)
+            TXM(7)= EX(K)*TXM(6)
+            TXM(8)= ONE-TXM(7)
+            R34Y34= R34*TXM(7)*EX(L)
+            E34= TXM(6)* EXP(-R34Y34)
+            TMP= E34*CMAX(K)*QQ4*CMAX(L)
+
+            IF(R34Y34.GT.CUX) cycle ! L-LOOP
+            IF(TMP.LE.EI2) cycle ! L-LOOP
+            ISMLQ= 0
+            IF(TMP.LE.EI1) ISMLQ= 1
+         ISML= ISMLQ+ISMLP
+         IF(ISML.GE.2) cycle ! I-loop
+
+! CQX = COMPONENT OF CQ ALONG PENULTIMATE X-AXIS
+! CQZ = COMPONENT OF CQ ALONG PENULTIMATE Z-AXIS
+            !CQ = RCD*TXM(8)
+            !CQX= RCD*TXM(8)*SING
+            !CQZ= RCD*TXM(8)*COSG
+
+! FIND COORDINATES OF Q RELATIVE TO AXES AT A
+! QPR IS PERPENDICULAR FROM Q TO AB
+            AQC(7)= AQC(1)+RCD*TXM(8)*SING
+            AQC(8)=AQC(7)*AQC(7)
+            AQC(9)=AQC(7)*AQC(2)
+            !AQZ= AQC(3)+CQZ
+            !QPS= AQC(8)+AQC(4)
+
+            FQD(:)=ZERO
+            FQD5=ZERO
+            !FQD0=ZERO
+            !FQD1=ZERO
+            !FQD2=ZERO
+            !FQD3=ZERO
+            !FQD4=ZERO
+   
+!------------------------  BEGIN TGPU_INTJ6  ------------------------------
+      !DO I=1,NEND(1)NEND(2)
+         !ISML= ISMLQ+ISMLP
+         !IF(ISML.GE.2) cycle ! I-loop
+         WORK(1)= D00P(4)
+         FWRK(1)= ONE/(TXM(1)+TXM(5))
+         FWRK(2)= TXM(3)-AQC(3)-RCD*TXM(8)*COSG
+         FWRK(3)= FWRK(2)*FWRK(2)
+         FWRK(4)= TXM(1)*TXM(5)*FWRK(1)
+
+         FWRK(5)=(FWRK(3)+AQC(8)+AQC(4))*FWRK(4)
+         FWRK(4)= FWRK(4)+FWRK(4)
+         N=4
+         IF(FWRK(5).LE.TMAX) THEN
+!     FM(T) EVALUATION...DOWNWARD RECURSION FOR JTYPE.GE.5
+            FWRK(6)= FWRK(5)*RFINC(N)
+            IP= NINT(FWRK(6))
+            WORK(2)=    FGRID(4,IP,N) *FWRK(6)
+            WORK(2)=(WORK(2)+FGRID(3,IP,N))*FWRK(6)
+            WORK(2)=(WORK(2)+FGRID(2,IP,N))*FWRK(6)
+            WORK(2)=(WORK(2)+FGRID(1,IP,N))*FWRK(6)
+            WORK(2)= WORK(2)+FGRID(0,IP,N)
+            FWRK(6)= FWRK(5)*RXINC
+            IP= NINT(FWRK(6))
+            WORK(3)=    XGRID(4,IP) *FWRK(6)
+            WORK(3)=(WORK(3)+XGRID(3,IP))*FWRK(6)
+            WORK(3)=(WORK(3)+XGRID(2,IP))*FWRK(6)
+            WORK(3)=(WORK(3)+XGRID(1,IP))*FWRK(6)
+            WORK(3)= WORK(3)+XGRID(0,IP)
+
+            FQD(N)= WORK(2)
+            WORK(4)= FWRK(5)+FWRK(5)
+            DO M=N,1,-1
+               FQD(M-1)=(WORK(4)*FQD(M)+WORK(3))*RMR(M)
+            END DO
+
+            WORK(7)= WORK(1)*SQRT(FWRK(1))
+            DO M=0,N
+               FQD(M)= FQD(M)*WORK(7)
+               WORK(7)= WORK(7)*FWRK(4)
+            ENDDO
+         ELSE
+            WORK(3)= ONE/FWRK(5)
+            FQD(0)= WORK(1)*SQRT(PI4*WORK(3)*FWRK(1))
+            WORK(5)= FWRK(4)*WORK(3)
+            WORK(7)= PT5*WORK(5)
+            DO M=1,N
+               FQD(M)= FQD(M-1)*WORK(7)
+               WORK(7)= WORK(7)+WORK(5)
+            ENDDO
+         ENDIF
+
+         FWRK(4)= FWRK(2)*FWRK(3)
+         FWRK(1)=one
+         FWRK(5)=FWRK(4)*FWRK(2)
+         FQD5(1)= D00P(1)
+         FQD5(2)= TXM(4)*D00P(2)
+         FQD5(3)= TXM(3)*D00P(3)
+         FQD5(4)= TXM(4)*TXM(3)
+         FQD5(5)= TXM(2)
+         FQD5(6)= TXM(2)*D00P(2)
+         FQD5(7)= TXM(2)*D00P(3)
+         FQD5(8)= TXM(2)*TXM(4)
+         FQD5(9)= TXM(2)*TXM(2)
+
+!------------------------   END TGPU_INTJ6  ------------------------------
+!------------------------  BEGIN TGPU_INTK6  ------------------------------
+      WORK(9)=E34*CP(K)*QQ4*CP(L)
+      WORK(1)= TXM(6) *0.5D+00
+      FCC(1)= WORK(1)*WORK(1)*WORK(9)
+   
+      WORK(2)=-TXM(7)     *E34*CS(K)*QQ4*CP(L) 
+      WORK(3)= TXM(8)     *E34*CP(K)*QQ4*CS(L) 
+      WORK(4)=-TXM(7) *TXM(8)*WORK(9) 
+      WORK(5)= WORK(1)    *WORK(9) 
+      WORK(6)= WORK(1)    *E34*CS(K)*QQ4*CP(L) 
+      WORK(7)= WORK(1)    *E34*CP(K)*QQ4*CS(L) 
+      WORK(8)=-WORK(1)*TXM(7)*WORK(9) 
+      WORK(9)= WORK(1)*TXM(8)*WORK(9) 
+
+      WORK(1)=          E34*CS(K)*QQ4*CS(L)
+   
+      DO J= 1, 5
+         DO I= 1, 5
+            RD0(I,J)= RD0(I,J)+FQD(0)*FQD5(J)*WORK(I)
+         ENDDO
+      ENDDO
+   
+         FCC(2)=-AQC(7)
+         FCC(3)=-AQC(2)
+         FCC(4)= FWRK(2)
+      DO I= 1, 4
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(1)*FCC(2)*WORK(I+ 5)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(1)*FCC(3)*WORK(I+ 5)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(1)*FCC(4)*WORK(I+ 5)
+      ENDDO
+      DO I= 5, 8
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(2)*FCC(2)*WORK(I+ 1)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(2)*FCC(3)*WORK(I+ 1)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(2)*FCC(4)*WORK(I+ 1)
+      ENDDO
+      DO I= 9,12
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(3)*FCC(2)*WORK(I- 3)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(3)*FCC(3)*WORK(I- 3)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(3)*FCC(4)*WORK(I- 3)
+      ENDDO
+      DO I=13,16
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(4)*FCC(2)*WORK(I- 7)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(4)*FCC(3)*WORK(I- 7)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(4)*FCC(4)*WORK(I- 7)
+      ENDDO
+      DO I=17,20
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(5)*FCC(2)*WORK(I-11)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(5)*FCC(3)*WORK(I-11)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(5)*FCC(4)*WORK(I-11)
+      ENDDO
+      DO I=21,25
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(6)*FCC(2)*WORK(I-20)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(6)*FCC(3)*WORK(I-20)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(6)*FCC(4)*WORK(I-20)
+      ENDDO
+      DO I=26,30
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(7)*FCC(2)*WORK(I-25)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(7)*FCC(3)*WORK(I-25)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(7)*FCC(4)*WORK(I-25)
+      ENDDO
+      DO I=31,35
+         RD1(1,I)= RD1(1,I)+FQD(1)*FQD5(8)*FCC(2)*WORK(I-30)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FQD5(8)*FCC(3)*WORK(I-30)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FQD5(8)*FCC(4)*WORK(I-30)
+      ENDDO
+
+         !FCC(4)= FQD1(5)*RAB +FQD1(8)
+         FCC(4)= FQD(1)*FQD5(5)*RAB +FQD(1)*FQD5(8)
+         FCC(2)=-FCC(4)*AQC(7)
+         FCC(3)=-FCC(4)*AQC(2)
+         FCC(4)= FCC(4)*FWRK(2)
+      DO I=36,40
+         RD1(1,I)= RD1(1,I)+FCC(2)*WORK(I-35)
+         RD1(2,I)= RD1(2,I)+FCC(3)*WORK(I-35)
+         RD1(3,I)= RD1(3,I)+FCC(4)*WORK(I-35)
+      ENDDO
+   
+         FCC(2)=  FCC(1)*AQC(9) 
+         FCC(3)= -FCC(1)*AQC(7)
+         FCC(4)= -FCC(1)*AQC(2)
+
+      DO I= 1, 5
+         TMP1=FQD(2)*FQD5(I)
+         RD2(1,I)= RD2(1,I)+(TMP1*AQC(8)  -FQD(1)*FQD5(I))*FCC(1)
+         RD2(2,I)= RD2(2,I)+(TMP1*AQC(4)-FQD(1)*FQD5(I))*FCC(1)
+         RD2(3,I)= RD2(3,I)+(TMP1*FWRK(3) -FQD(1)*FQD5(I))*FCC(1)
+         RD2(4,I)= RD2(4,I)+ TMP1                  *FCC(2)
+         RD2(5,I)= RD2(5,I)+ TMP1*FWRK(2)          *FCC(3)
+         RD2(6,I)= RD2(6,I)+ TMP1*FWRK(2)          *FCC(4)
+      ENDDO
+      IJ=6
+      DO J=6,8
+         TMP1=FQD(2)*FQD5(J)
+         DO I=6,9
+            RD2(1,IJ)= RD2(1,IJ)+(TMP1*AQC(8)   -FQD(1)*FQD5(J))*WORK(I)
+            RD2(2,IJ)= RD2(2,IJ)+(TMP1*AQC(4) -FQD(1)*FQD5(J))*WORK(I)
+            RD2(3,IJ)= RD2(3,IJ)+(TMP1*FWRK(3)  -FQD(1)*FQD5(J))*WORK(I)
+            RD2(4,IJ)= RD2(4,IJ)+(TMP1*AQC(9)           )*WORK(I)
+            RD2(5,IJ)= RD2(5,IJ)-(TMP1*FWRK(2)*AQC(7)   )*WORK(I)
+            RD2(6,IJ)= RD2(6,IJ)-(TMP1*FWRK(2)*AQC(2) )*WORK(I)
+         IJ=IJ+1
+         ENDDO
+      ENDDO
+
+       TMP1=FQD(1)*FQD5(5)*RAB +FQD(1)*FQD5(8)
+       TMP=FQD(2)*FQD5(5)*RAB +FQD(2)*FQD5(8)
+       DO I=18,21
+        RD2(1,I)= RD2(1,I) +(TMP*AQC(8)      -TMP1)*WORK(I-12)
+        RD2(2,I)= RD2(2,I) +(TMP*AQC(4)    -TMP1)*WORK(I-12)
+        RD2(3,I)= RD2(3,I) +(TMP*FWRK(3)     -TMP1)*WORK(I-12)
+        RD2(4,I)= RD2(4,I) +(TMP*AQC(9)           )*WORK(I-12)
+        RD2(5,I)= RD2(5,I) -(TMP*FWRK(2)*AQC(7)   )*WORK(I-12)
+        RD2(6,I)= RD2(6,I) -(TMP*FWRK(2)*AQC(2) )*WORK(I-12)
+       ENDDO
+
+       TMP1=FQD(1)*FQD5(9)
+       TMP=FQD(2)*FQD5(9)
+       DO I=22,26
+            RD2(1,I)= RD2(1,I)+(TMP*AQC(8)   -TMP1)*WORK(I-21)
+            RD2(2,I)= RD2(2,I)+(TMP*AQC(4) -TMP1)*WORK(I-21)
+            RD2(3,I)= RD2(3,I)+(TMP*FWRK(3)  -TMP1)*WORK(I-21)
+            RD2(4,I)= RD2(4,I)+(TMP*AQC(9)           )*WORK(I-21)
+            RD2(5,I)= RD2(5,I)-(TMP*FWRK(2)*AQC(7)   )*WORK(I-21)
+            RD2(6,I)= RD2(6,I)-(TMP*FWRK(2)*AQC(2) )*WORK(I-21)
+       ENDDO
+   
+      !FQD2(5)= FQD2(5)*RAB +FQD2(8)
+      !FQD3(1)= FQD3(1)*RAB +FQD3(4)
+      TMP1= FQD(2)*FQD5(5)*RAB +FQD(2)*FQD5(8)
+      TMP= FQD(3)*FQD5(5)*RAB +FQD(3)*FQD5(8)
+      !FCC(2)=  FCC(1)*AQC(9) 
+      !FCC(3)= -FCC(1)*AQC(7)
+      !FCC(4)= -FCC(1)*AQC(2)
+         RD3( 1,1)= RD3( 1,1)+(TMP*AQC(8)    -TMP1*F03        )*FCC(3)    
+         RD3( 2,1)= RD3( 2,1)+(TMP*AQC(8)    -TMP1            )*FCC(4)
+         RD3( 3,1)= RD3( 3,1)+(TMP*AQC(8)    -TMP1            )*FCC(1)*FWRK(2)
+         RD3( 4,1)= RD3( 4,1)+(TMP*AQC(4)  -TMP1            )*FCC(3)
+         RD3( 5,1)= RD3( 5,1)+ TMP*FWRK(2)                     *FCC(2)
+         RD3( 6,1)= RD3( 6,1)+(TMP*FWRK(3)   -TMP1            )*FCC(3)
+         RD3( 7,1)= RD3( 7,1)+(TMP*AQC(4)  -TMP1*F03        )*FCC(4)
+         RD3( 8,1)= RD3( 8,1)+(TMP*AQC(4)  -TMP1            )*FCC(1)*FWRK(2)
+         RD3( 9,1)= RD3( 9,1)+(TMP*FWRK(3)   -TMP1            )*FCC(4)
+         RD3(10,1)= RD3(10,1)+(TMP*FWRK(4)   -TMP1*FWRK(2)*F03)*FCC(1)
+
+      DO I= 2, 4
+         TMP1=FQD(2)*FQD5(I+4)
+         TMP=FQD(3)*FQD5(I+4)
+         RD3( 1,I)= RD3( 1,I)+(TMP*AQC(8)    -TMP1*F03        )*FCC(3)    
+         RD3( 2,I)= RD3( 2,I)+(TMP*AQC(8)    -TMP1            )*FCC(4)
+         RD3( 3,I)= RD3( 3,I)+(TMP*AQC(8)    -TMP1            )*FCC(1)*FWRK(2)
+         RD3( 4,I)= RD3( 4,I)+(TMP*AQC(4)  -TMP1            )*FCC(3)
+         RD3( 5,I)= RD3( 5,I)+ TMP*FWRK(2)                     *FCC(2)
+         RD3( 6,I)= RD3( 6,I)+(TMP*FWRK(3)   -TMP1            )*FCC(3)
+         RD3( 7,I)= RD3( 7,I)+(TMP*AQC(4)  -TMP1*F03        )*FCC(4)
+         RD3( 8,I)= RD3( 8,I)+(TMP*AQC(4)  -TMP1            )*FCC(1)*FWRK(2)
+         RD3( 9,I)= RD3( 9,I)+(TMP*FWRK(3)   -TMP1            )*FCC(4)
+         RD3(10,I)= RD3(10,I)+(TMP*FWRK(4)   -TMP1*FWRK(2)*F03)*FCC(1)
+      ENDDO
+      TMP1=FQD(2)*FQD5(9)
+      TMP=FQD(3)*FQD5(9)
+      DO I= 5, 8
+            RD3( 1,I)= RD3( 1,I)-(TMP*AQC(8)   -TMP1*F03)*AQC(7)  *WORK(I+ 1)
+            RD3( 2,I)= RD3( 2,I)-(TMP*AQC(8)   -TMP1    )*AQC(2)*WORK(I+ 1)
+            RD3( 3,I)= RD3( 3,I)+(TMP*AQC(8)   -TMP1    )*FWRK(2) *WORK(I+ 1)
+            RD3( 4,I)= RD3( 4,I)-(TMP*AQC(4)   -TMP1    )*AQC(7)  *WORK(I+ 1)
+            RD3( 5,I)= RD3( 5,I)+ TMP*FWRK(2)        *AQC(9)  *WORK(I+ 1)
+            RD3( 6,I)= RD3( 6,I)-(TMP*FWRK(3)  -TMP1    )*AQC(7)  *WORK(I+ 1)
+            RD3( 7,I)= RD3( 7,I)-(TMP*AQC(4)   -TMP1*F03)*AQC(2)*WORK(I+ 1)
+            RD3( 8,I)= RD3( 8,I)+(TMP*AQC(4)   -TMP1    )*FWRK(2) *WORK(I+ 1)
+            RD3( 9,I)= RD3( 9,I)-(TMP*FWRK(3)  -TMP1    )*AQC(2)*WORK(I+ 1)
+            RD3(10,I)= RD3(10,I)+(TMP*FWRK(4)  -TMP1*FWRK(2)*F03) *WORK(I+ 1)
+      ENDDO
+
+      AQC(9)= AQC(8)*AQC(8)
+      AQC(7)= AQC(4)*AQC(4)
+
+      WORK(1)= FQD(4)*FQD5(9)
+      WORK(2)=FQD(2)*FQD5(9)
+      WORK(3)=FQD(3)*FQD5(9)
+   
+      RD4( 1)= RD4( 1)+(WORK(1)*AQC(9)          -WORK(3)*F06*AQC(8)  +WORK(2)*F03)*FCC(1)
+      RD4( 2)= RD4( 2)+(WORK(1)*AQC(8)          -WORK(3)*F03                     )*FCC(2)
+      RD4( 3)= RD4( 3)+(WORK(1)*FWRK(2)*AQC(8)  -WORK(3)*FWRK(2)*F03             )*FCC(3)
+      RD4( 4)= RD4( 4)+(WORK(1)*AQC(8)*AQC(4) -WORK(3)*(AQC(8)+AQC(4)) +WORK(2)    )*FCC(1)
+      RD4( 5)= RD4( 5)+(WORK(1)*FWRK(2)*AQC(8)  -WORK(3)*FWRK(2)                 )*FCC(4)
+      RD4( 6)= RD4( 6)+(WORK(1)*FWRK(3)*AQC(8)  -WORK(3)*AQC(8)      -WORK(3)*FWRK(3)+WORK(2))*FCC(1)
+      RD4( 7)= RD4( 7)+(WORK(1)*AQC(4)        -WORK(3)*F03          )*FCC(2)
+      RD4( 8)= RD4( 8)+(WORK(1)*FWRK(2)*AQC(4)-WORK(3)*FWRK(2)              )*FCC(3)
+      RD4( 9)= RD4( 9)+(WORK(1)*FWRK(3)         -WORK(3)              )*FCC(2)
+      RD4(10)= RD4(10)+(WORK(1)*FWRK(4)         -WORK(3)*FWRK(2)*F03          )*FCC(3)
+      RD4(11)= RD4(11)+(WORK(1)*AQC(7)          -WORK(3)*F06*AQC(4) +WORK(2)*F03          )*FCC(1)
+      RD4(12)= RD4(12)+(WORK(1)*FWRK(2)*AQC(4)-WORK(3)*FWRK(2)*F03          )*FCC(4)
+      RD4(13)= RD4(13)+(WORK(1)*FWRK(3)*AQC(4)-WORK(3)*AQC(4)     -WORK(3)*FWRK(3)+WORK(2))*FCC(1)
+      RD4(14)= RD4(14)+(WORK(1)*FWRK(4)         -WORK(3)*FWRK(2)*F03          )*FCC(4)
+      RD4(15)= RD4(15)+(WORK(1)*FWRK(5)         -WORK(3)*FWRK(3)*F06  +WORK(2)*F03)*FCC(1)
+   
+!------------------------   END TGPU_INTK6  ------------------------------
+
+         ENDDO li_ic
+      ENDDO ki_ic
+         ENDDO jj_ic
+      ENDDO ii_ic
+!------------------------   END genr70_qJ6  ------------------------------
+! sum integral TGPU_MCDV6
+! sum integral TGPU_MCDV6
+! GPOPLE(I,J,K,L) to 1D --> i + 4*(j-1) + 16*(k-1) + 64*(l-1)
+!   L-loop=1
+            GPOPLE(1)=+( RD0(1,1))
+            GPOPLE(2)=+( RD1(1,1))+( RD0(2,1))*AQC( 5)
+            GPOPLE(3)=+( RD1(2,1))
+            GPOPLE(4)=+( RD1(3,1))+( RD0(2,1))*AQC( 6)
+   
+! J= 2
+            IJ= 4 
+            GPOPLE(1+IJ)=+( RD1(1,2))+( RD0(3,1))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD2(1,1))+( RD0(5,1))       &
+                         +( RD1(1,3))*AQC( 5) &
+                         +( RD1(1,4))*AQC( 5) &
+                         +( RD0(4,1))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD2(4,1))+( RD1(2,4))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD2(5,1))+( RD1(3,4))*AQC( 5) &
+                         +( RD1(1,3))*AQC( 6) &
+                         +( RD0(4,1))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ= 8 
+            GPOPLE(1+IJ)=+( RD1(2,2))
+            GPOPLE(2+IJ)=+( RD2(4,1))+( RD1(2,3))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD2(2,1))+( RD0(5,1))
+            GPOPLE(4+IJ)=+( RD2(6,1))+( RD1(2,3))*AQC( 6)
+   
+! J= 4
+            IJ= 12
+            GPOPLE(1+IJ)=+( RD1(3,2))+( RD0(3,1))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD2(5,1))+( RD1(1,4))*AQC( 6) &
+                         +( RD1(3,3))*AQC( 5) &
+                         +( RD0(4,1))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD2(6,1))+( RD1(2,4))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD2(3,1))+( RD0(5,1))       &
+                         +( RD1(3,3))*AQC( 6) &
+                         +( RD1(3,4))*AQC( 6) &
+                         +( RD0(4,1))*AQC( 6)*AQC( 6)
+   
+            IJ= 16 
+            GPOPLE(1+IJ)=+(-RD1(1,21))
+            GPOPLE(2+IJ)=+(-RD2(1,6))+(-RD1(1,22))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD2(4,6))
+            GPOPLE(4+IJ)=+(-RD2(5,6))+(-RD1(1,22))*AQC( 6)
+   
+! J= 2
+            IJ= 4+16 
+            GPOPLE(1+IJ)=+(-RD2(1,7))+(-RD1(1,23))*AQC( 5)
+            GPOPLE(2+IJ)=+(-RD3(1,2))+(-RD1(1,25))       &
+                         +(-RD2(1,8))*AQC( 5) &
+                         +(-RD2(1,9))*AQC( 5) &
+                         +(-RD1(1,24))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(2,2))+(-RD2(4,9))*AQC( 5)
+            GPOPLE(4+IJ)=+(-RD3(3,2))+(-RD2(5,9))*AQC( 5) &
+                         +(-RD2(1,8))*AQC( 6) &
+                         +(-RD1(1,24))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+16 
+            GPOPLE(1+IJ)=+(-RD2(4,7))
+            GPOPLE(2+IJ)=+(-RD3(2,2))+(-RD2(4,8))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(4,2))+(-RD1(1,25))
+            GPOPLE(4+IJ)=+(-RD3(5,2))+(-RD2(4,8))*AQC( 6)
+   
+! J= 4
+            IJ= 12+16 
+            GPOPLE(1+IJ)=+(-RD2(5,7))+(-RD1(1,23))*AQC( 6)
+            GPOPLE(2+IJ)=+(-RD3(3,2))+(-RD2(1,9))*AQC( 6) &
+                         +(-RD2(5,8))*AQC( 5) &
+                         +(-RD1(1,24))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(5,2))+(-RD2(4,9))*AQC( 6)
+            GPOPLE(4+IJ)=+(-RD3(6,2))+(-RD1(1,25))       &
+                         +(-RD2(5,8))*AQC( 6) &
+                         +(-RD2(5,9))*AQC( 6) &
+                         +(-RD1(1,24))*AQC( 6)*AQC( 6)
+   
+            IJ= 32 
+            GPOPLE(1+IJ)=+(-RD1(2,21))
+            GPOPLE(2+IJ)=+(-RD2(4,6))+(-RD1(2,22))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD2(2,6))
+            GPOPLE(4+IJ)=+(-RD2(6,6))+(-RD1(2,22))*AQC( 6)
+   
+! J= 2
+            IJ= 4+32 
+            GPOPLE(1+IJ)=+(-RD2(4,7))+(-RD1(2,23))*AQC( 5)
+            GPOPLE(2+IJ)=+(-RD3(2,2))+(-RD1(2,25))       &
+                         +(-RD2(4,8))*AQC( 5) &
+                         +(-RD2(4,9))*AQC( 5) &
+                         +(-RD1(2,24))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(4,2))+(-RD2(2,9))*AQC( 5)
+            GPOPLE(4+IJ)=+(-RD3(5,2))+(-RD2(6,9))*AQC( 5) &
+                         +(-RD2(4,8))*AQC( 6) &
+                         +(-RD1(2,24))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+32 
+            GPOPLE(1+IJ)=+(-RD2(2,7))
+            GPOPLE(2+IJ)=+(-RD3(4,2))+(-RD2(2,8))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(7,2))+(-RD1(2,25))
+            GPOPLE(4+IJ)=+(-RD3(8,2))+(-RD2(2,8))*AQC( 6)
+   
+! J= 4
+            IJ= 12+32 
+            GPOPLE(1+IJ)=+(-RD2(6,7))+(-RD1(2,23))*AQC( 6)
+            GPOPLE(2+IJ)=+(-RD3(5,2))+(-RD2(4,9))*AQC( 6) &
+                         +(-RD2(6,8))*AQC( 5) &
+                         +(-RD1(2,24))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(8,2))+(-RD2(2,9))*AQC( 6)
+            GPOPLE(4+IJ)=+(-RD3(9,2))+(-RD1(2,25))       &
+                         +(-RD2(6,8))*AQC( 6) &
+                         +(-RD2(6,9))*AQC( 6) &
+                         +(-RD1(2,24))*AQC( 6)*AQC( 6)
+   
+            IJ= 48 
+            GPOPLE(1+IJ)=+(-RD1(3,21)+RD0(1,2))
+            GPOPLE(2+IJ)=+(-RD2(5,6)+RD1(1,5))+(-RD1(3,22)+RD0(2,2))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD2(6,6)+RD1(2,5))
+            GPOPLE(4+IJ)=+(-RD2(3,6)+RD1(3,5))+(-RD1(3,22)+RD0(2,2))*AQC( 6)
+   
+! J= 2
+            IJ= 4+48 
+            GPOPLE(1+IJ)=+(-RD2(5,7)+RD1(1,6))+(-RD1(3,23)+RD0(3,2))*AQC( 5)
+            GPOPLE(2+IJ)=+(-RD3( 3,2)+RD2(1,2))+(-RD1(3,25)+RD0(5,2))       &
+                         +(-RD2(5,8)+RD1(1,7))*AQC( 5) &
+                         +(-RD2(5,9)+RD1(1,8))*AQC( 5) &
+                         +(-RD1(3,24)+RD0(4,2))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 5,2)+RD2(4,2))+(-RD2(6,9)+RD1(2,8))*AQC( 5)
+            GPOPLE(4+IJ)=+(-RD3( 6,2)+RD2(5,2))+(-RD2(3,9)+RD1(3,8))*AQC( 5) &
+                         +(-RD2(5,8)+RD1(1,7))*AQC( 6) &
+                         +(-RD1(3,24)+RD0(4,2))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+48 
+            GPOPLE(1+IJ)=+(-RD2(6,7)+RD1(2,6))
+            GPOPLE(2+IJ)=+(-RD3( 5,2)+RD2(4,2))+(-RD2(6,8)+RD1(2,7))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 8,2)+RD2(2,2))+(-RD1(3,25)+RD0(5,2))
+            GPOPLE(4+IJ)=+(-RD3( 9,2)+RD2(6,2))+(-RD2(6,8)+RD1(2,7))*AQC( 6)
+   
+! J= 4
+            IJ= 12+48 
+            GPOPLE(1+IJ)=+(-RD2(3,7)+RD1(3,6))+(-RD1(3,23)+RD0(3,2))*AQC( 6)
+            GPOPLE(2+IJ)=+(-RD3( 6,2)+RD2(5,2))+(-RD2(5,9)+RD1(1,8))*AQC( 6) &
+                         +(-RD2(3,8)+RD1(3,7))*AQC( 5) &
+                         +(-RD1(3,24)+RD0(4,2))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 9,2)+RD2(6,2))+(-RD2(6,9)+RD1(2,8))*AQC( 6)
+            GPOPLE(4+IJ)=+(-RD3(10,2)+RD2(3,2))+(-RD1(3,25)+RD0(5,2))       &
+                         +(-RD2(3,8)+RD1(3,7))*AQC( 6) &
+                         +(-RD2(3,9)+RD1(3,8))*AQC( 6) &
+                         +(-RD1(3,24)+RD0(4,2))*AQC( 6)*AQC( 6)
+   
+!   L-loop=2
+            IJ=  + 64
+            GPOPLE(1+IJ)=+(-RD1(1,26))
+            GPOPLE(2+IJ)=+(-RD2(1,10))+(-RD1(1,27))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD2(4,10))
+            GPOPLE(4+IJ)=+(-RD2(5,10))+(-RD1(1,27))*AQC( 6)
+   
+! J= 2
+            IJ= 4 + 64
+            GPOPLE(1+IJ)=+(-RD2(1,11))+(-RD1(1,28))*AQC( 5)
+            GPOPLE(2+IJ)=+(-RD3(1,3))+(-RD1(1,30))       &
+                         +(-RD2(1,12))*AQC( 5) &
+                         +(-RD2(1,13))*AQC( 5) &
+                         +(-RD1(1,29))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(2,3))+(-RD2(4,13))*AQC( 5)
+            GPOPLE(4+IJ)=+(-RD3(3,3))+(-RD2(5,13))*AQC( 5) &
+                         +(-RD2(1,12))*AQC( 6) &
+                         +(-RD1(1,29))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8 + 64
+            GPOPLE(1+IJ)=+(-RD2(4,11))
+            GPOPLE(2+IJ)=+(-RD3(2,3))+(-RD2(4,12))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(4,3))+(-RD1(1,30))
+            GPOPLE(4+IJ)=+(-RD3(5,3))+(-RD2(4,12))*AQC( 6)
+   
+! J= 4
+            IJ= 12 + 64
+            GPOPLE(1+IJ)=+(-RD2(5,11))+(-RD1(1,28))*AQC( 6)
+            GPOPLE(2+IJ)=+(-RD3(3,3))+(-RD2(1,13))*AQC( 6) &
+                         +(-RD2(5,12))*AQC( 5) &
+                         +(-RD1(1,29))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3(5,3))+(-RD2(4,13))*AQC( 6)
+            GPOPLE(4+IJ)=+(-RD3(6,3))+(-RD1(1,30))       &
+                         +(-RD2(5,12))*AQC( 6) &
+                         +(-RD2(5,13))*AQC( 6) &
+                         +(-RD1(1,29))*AQC( 6)*AQC( 6)
+   
+            IJ= 16 + 64
+            GPOPLE(1+IJ)=+( RD2(1,22)+RD0(1,5))
+            GPOPLE(2+IJ)=+( RD3(1,5)+RD1(1,17))+( RD2(1,23)+RD0(2,5))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(2,5)+RD1(2,17))
+            GPOPLE(4+IJ)=+( RD3(3,5)+RD1(3,17))+( RD2(1,23)+RD0(2,5))*AQC( 6)
+   
+! J= 2
+            IJ= 4+16 + 64
+            GPOPLE(1+IJ)=+( RD3(1,6)+RD1(1,18))+( RD2(1,24)+RD0(3,5))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4( 1)+RD2(1,5))+( RD2(1,26)+RD0(5,5))       &
+                         +( RD3(1,7)+RD1(1,19))*AQC( 5) &
+                         +( RD3(1,8)+RD1(1,20))*AQC( 5) &
+                         +( RD2(1,25)+RD0(4,5))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 2)+RD2(4,5))+( RD3(2,8)+RD1(2,20))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4( 3)+RD2(5,5))+( RD3(3,8)+RD1(3,20))*AQC( 5) &
+                         +( RD3(1,7)+RD1(1,19))*AQC( 6) &
+                         +( RD2(1,25)+RD0(4,5))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+16 + 64
+            GPOPLE(1+IJ)=+( RD3(2,6)+RD1(2,18))
+            GPOPLE(2+IJ)=+( RD4( 2)+RD2(4,5))+( RD3(2,7)+RD1(2,19))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 4)+RD2(2,5))+( RD2(1,26)+RD0(5,5))
+            GPOPLE(4+IJ)=+( RD4( 5)+RD2(6,5))+( RD3(2,7)+RD1(2,19))*AQC( 6)
+   
+! J= 4
+            IJ= 12+16 + 64
+            GPOPLE(1+IJ)=+( RD3(3,6)+RD1(3,18))+( RD2(1,24)+RD0(3,5))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4( 3)+RD2(5,5))+( RD3(1,8)+RD1(1,20))*AQC( 6) &
+                         +( RD3(3,7)+RD1(3,19))*AQC( 5) &
+                         +( RD2(1,25)+RD0(4,5))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 5)+RD2(6,5))+( RD3(2,8)+RD1(2,20))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4( 6)+RD2(3,5))+( RD2(1,26)+RD0(5,5))       &
+                         +( RD3(3,7)+RD1(3,19))*AQC( 6) &
+                         +( RD3(3,8)+RD1(3,20))*AQC( 6) &
+                         +( RD2(1,25)+RD0(4,5))*AQC( 6)*AQC( 6)
+   
+            IJ= 32 + 64
+            GPOPLE(1+IJ)=+( RD2(4,22))
+            GPOPLE(2+IJ)=+( RD3(2,5))+( RD2(4,23))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(4,5))
+            GPOPLE(4+IJ)=+( RD3(5,5))+( RD2(4,23))*AQC( 6)
+   
+! J= 2
+            IJ= 4+32 + 64
+            GPOPLE(1+IJ)=+( RD3(2,6))+( RD2(4,24))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4(2))+( RD2(4,26))       &
+                         +( RD3(2,7))*AQC( 5) &
+                         +( RD3(2,8))*AQC( 5) &
+                         +( RD2(4,25))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(4))+( RD3(4,8))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4(5))+( RD3(5,8))*AQC( 5) &
+                         +( RD3(2,7))*AQC( 6) &
+                         +( RD2(4,25))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+32 + 64
+            GPOPLE(1+IJ)=+( RD3(4,6))
+            GPOPLE(2+IJ)=+( RD4(4))+( RD3(4,7))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(7))+( RD2(4,26))
+            GPOPLE(4+IJ)=+( RD4(8))+( RD3(4,7))*AQC( 6)
+   
+! J= 4
+            IJ= 12+32 + 64
+            GPOPLE(1+IJ)=+( RD3(5,6))+( RD2(4,24))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4(5))+( RD3(2,8))*AQC( 6) &
+                         +( RD3(5,7))*AQC( 5) &
+                         +( RD2(4,25))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(8))+( RD3(4,8))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4(9))+( RD2(4,26))       &
+                         +( RD3(5,7))*AQC( 6) &
+                         +( RD3(5,8))*AQC( 6) &
+                         +( RD2(4,25))*AQC( 6)*AQC( 6)
+   
+            IJ= 48 + 64
+            GPOPLE(1+IJ)=+( RD2(5,22)-RD1(1,31))
+            GPOPLE(2+IJ)=+( RD3(3,5)-RD2(1,14))+( RD2(5,23)-RD1(1,32))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(5,5)-RD2(4,14))
+            GPOPLE(4+IJ)=+( RD3(6,5)-RD2(5,14))+( RD2(5,23)-RD1(1,32))*AQC( 6)
+   
+! J= 2
+            IJ= 4+48 + 64
+            GPOPLE(1+IJ)=+( RD3(3,6)-RD2(1,15))+( RD2(5,24)-RD1(1,33))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4( 3)-RD3(1,4))+( RD2(5,26)-RD1(1,35))       &
+                         +( RD3(3,7)-RD2(1,16))*AQC( 5) &
+                         +( RD3(3,8)-RD2(1,17))*AQC( 5) &
+                         +( RD2(5,25)-RD1(1,34))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 5)-RD3(2,4))+( RD3(5,8)-RD2(4,17))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4( 6)-RD3(3,4))+( RD3(6,8)-RD2(5,17))*AQC( 5) &
+                         +( RD3(3,7)-RD2(1,16))*AQC( 6) &
+                         +( RD2(5,25)-RD1(1,34))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+48 + 64
+            GPOPLE(1+IJ)=+( RD3(5,6)-RD2(4,15))
+            GPOPLE(2+IJ)=+( RD4( 5)-RD3(2,4))+( RD3(5,7)-RD2(4,16))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 8)-RD3(4,4))+( RD2(5,26)-RD1(1,35))
+            GPOPLE(4+IJ)=+( RD4( 9)-RD3(5,4))+( RD3(5,7)-RD2(4,16))*AQC( 6)
+   
+! J= 4
+            IJ= 12+48 + 64
+            GPOPLE(1+IJ)=+( RD3(6,6)-RD2(5,15))+( RD2(5,24)-RD1(1,33))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4( 6)-RD3(3,4))+( RD3(3,8)-RD2(1,17))*AQC( 6) &
+                         +( RD3(6,7)-RD2(5,16))*AQC( 5) &
+                         +( RD2(5,25)-RD1(1,34))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 9)-RD3(5,4))+( RD3(5,8)-RD2(4,17))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4(10)-RD3(6,4))+( RD2(5,26)-RD1(1,35))       &
+                         +( RD3(6,7)-RD2(5,16))*AQC( 6) &
+                         +( RD3(6,8)-RD2(5,17))*AQC( 6) &
+                         +( RD2(5,25)-RD1(1,34))*AQC( 6)*AQC( 6)
+   
+!   L-loop=3
+            IJ=  + 128
+            GPOPLE(1+IJ)=+(-RD1(2,26))
+            GPOPLE(2+IJ)=+(-RD2(4,10))+(-RD1(2,27))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD2(2,10))
+            GPOPLE(4+IJ)=+(-RD2(6,10))+(-RD1(2,27))*AQC( 6)
+   
+! J= 2
+            IJ= 4 + 128
+            GPOPLE(1+IJ)=+(-RD2(4,11))+(-RD1(2,28))*AQC( 5)
+            GPOPLE(2+IJ)=+(-RD3( 2,3))+(-RD1(2,30))       &
+                         +(-RD2(4,12))*AQC( 5) &
+                         +(-RD2(4,13))*AQC( 5) &
+                         +(-RD1(2,29))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 4,3))+(-RD2(2,13))*AQC( 5)
+            GPOPLE(4+IJ)=+(-RD3( 5,3))+(-RD2(6,13))*AQC( 5) &
+                         +(-RD2(4,12))*AQC( 6) &
+                         +(-RD1(2,29))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8 + 128
+            GPOPLE(1+IJ)=+(-RD2(2,11))
+            GPOPLE(2+IJ)=+(-RD3( 4,3))+(-RD2(2,12))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 7,3))+(-RD1(2,30))
+            GPOPLE(4+IJ)=+(-RD3( 8,3))+(-RD2(2,12))*AQC( 6)
+   
+! J= 4
+            IJ= 12 + 128
+            GPOPLE(1+IJ)=+(-RD2(6,11))+(-RD1(2,28))*AQC( 6)
+            GPOPLE(2+IJ)=+(-RD3( 5,3))+(-RD2(4,13))*AQC( 6) &
+                         +(-RD2(6,12))*AQC( 5) &
+                         +(-RD1(2,29))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 8,3))+(-RD2(2,13))*AQC( 6)
+            GPOPLE(4+IJ)=+(-RD3( 9,3))+(-RD1(2,30))       &
+                         +(-RD2(6,12))*AQC( 6) &
+                         +(-RD2(6,13))*AQC( 6) &
+                         +(-RD1(2,29))*AQC( 6)*AQC( 6)
+   
+!note:   
+!!     next statements commented because GPOPLE(I,J,2,3)
+!!     will be obtained at the end from  GPOPLE(I,J,3,2)
+   
+            IJ= 32 + 128
+            GPOPLE(1+IJ)=+( RD2(2,22)+RD0(1,5))
+            GPOPLE(2+IJ)=+( RD3(4,5)+RD1(1,17))+( RD2(2,23)+RD0(2,5))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(7,5)+RD1(2,17))
+            GPOPLE(4+IJ)=+( RD3(8,5)+RD1(3,17))+( RD2(2,23)+RD0(2,5))*AQC( 6)
+   
+! J= 2
+            IJ= 4+32 + 128
+            GPOPLE(1+IJ)=+( RD3(4,6)+RD1(1,18))+( RD2(2,24)+RD0(3,5))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4( 4)+RD2(1,5))+( RD2(2,26)+RD0(5,5))       &
+                         +( RD3(4,7)+RD1(1,19))*AQC( 5) &
+                         +( RD3(4,8)+RD1(1,20))*AQC( 5) &
+                         +( RD2(2,25)+RD0(4,5))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 7)+RD2(4,5))+( RD3(7,8)+RD1(2,20))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4( 8)+RD2(5,5))+( RD3(8,8)+RD1(3,20))*AQC( 5) &
+                         +( RD3(4,7)+RD1(1,19))*AQC( 6) &
+                         +( RD2(2,25)+RD0(4,5))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+32 + 128
+            GPOPLE(1+IJ)=+( RD3(7,6)+RD1(2,18))
+            GPOPLE(2+IJ)=+( RD4( 7)+RD2(4,5))+( RD3(7,7)+RD1(2,19))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(11)+RD2(2,5))+( RD2(2,26)+RD0(5,5))
+            GPOPLE(4+IJ)=+( RD4(12)+RD2(6,5))+( RD3(7,7)+RD1(2,19))*AQC( 6)
+   
+! J= 4
+            IJ= 12+32 + 128
+            GPOPLE(1+IJ)=+( RD3(8,6)+RD1(3,18))+( RD2(2,24)+RD0(3,5))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4( 8)+RD2(5,5))+( RD3(4,8)+RD1(1,20))*AQC( 6) &
+                         +( RD3(8,7)+RD1(3,19))*AQC( 5) &
+                         +( RD2(2,25)+RD0(4,5))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(12)+RD2(6,5))+( RD3(7,8)+RD1(2,20))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4(13)+RD2(3,5))+( RD2(2,26)+RD0(5,5))       &
+                         +( RD3(8,7)+RD1(3,19))*AQC( 6) &
+                         +( RD3(8,8)+RD1(3,20))*AQC( 6) &
+                         +( RD2(2,25)+RD0(4,5))*AQC( 6)*AQC( 6)
+   
+            IJ= 48 + 128
+            GPOPLE(1+IJ)=+( RD2(6,22)-RD1(2,31))
+            GPOPLE(2+IJ)=+( RD3(5,5)-RD2(4,14))+( RD2(6,23)-RD1(2,32))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(8,5)-RD2(2,14))
+            GPOPLE(4+IJ)=+( RD3(9,5)-RD2(6,14))+( RD2(6,23)-RD1(2,32))*AQC( 6)
+   
+! J= 2
+            IJ= 4+48 + 128
+            GPOPLE(1+IJ)=+( RD3(5,6)-RD2(4,15))+( RD2(6,24)-RD1(2,33))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4( 5)-RD3(2,4))+( RD2(6,26)-RD1(2,35))       &
+                         +( RD3(5,7)-RD2(4,16))*AQC( 5) &
+                         +( RD3(5,8)-RD2(4,17))*AQC( 5) &
+                         +( RD2(6,25)-RD1(2,34))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 8)-RD3(4,4))+( RD3(8,8)-RD2(2,17))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4( 9)-RD3(5,4))+( RD3(9,8)-RD2(6,17))*AQC( 5) &
+                         +( RD3(5,7)-RD2(4,16))*AQC( 6) &
+                         +( RD2(6,25)-RD1(2,34))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+48 + 128
+            GPOPLE(1+IJ)=+( RD3(8,6)-RD2(2,15))
+            GPOPLE(2+IJ)=+( RD4( 8)-RD3(4,4))+( RD3(8,7)-RD2(2,16))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(12)-RD3(7,4))+( RD2(6,26)-RD1(2,35))
+            GPOPLE(4+IJ)=+( RD4(13)-RD3(8,4))+( RD3(8,7)-RD2(2,16))*AQC( 6)
+   
+! J= 4
+            IJ= 12+48 + 128
+            GPOPLE(1+IJ)=+( RD3(9,6)-RD2(6,15))+( RD2(6,24)-RD1(2,33))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4( 9)-RD3(5,4))+( RD3(5,8)-RD2(4,17))*AQC( 6) &
+                         +( RD3(9,7)-RD2(6,16))*AQC( 5) &
+                         +( RD2(6,25)-RD1(2,34))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(13)-RD3(8,4))+( RD3(8,8)-RD2(2,17))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4(14)-RD3(9,4))+( RD2(6,26)-RD1(2,35))       &
+                         +( RD3(9,7)-RD2(6,16))*AQC( 6) &
+                         +( RD3(9,8)-RD2(6,17))*AQC( 6) &
+                         +( RD2(6,25)-RD1(2,34))*AQC( 6)*AQC( 6)
+   
+!   L-loop=4
+            IJ=  + 192
+            GPOPLE(1+IJ)=+(-RD1(3,26)+RD0(1,3))
+            GPOPLE(2+IJ)=+(-RD2(5,10)+RD1(1, 9))+(-RD1(3,27)+RD0(2,3))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD2(6,10)+RD1(2, 9))
+            GPOPLE(4+IJ)=+(-RD2(3,10)+RD1(3, 9))+(-RD1(3,27)+RD0(2,3))*AQC( 6)
+   
+! J= 2
+            IJ= 4 + 192
+            GPOPLE(1+IJ)=+(-RD2(5,11)+RD1(1,10))+(-RD1(3,28)+RD0(3,3))*AQC( 5)
+            GPOPLE(2+IJ)=+(-RD3( 3,3)+RD2(1,3))+(-RD1(3,30)+RD0(5,3))       &
+                         +(-RD2(5,12)+RD1(1,11))*AQC( 5) &
+                         +(-RD2(5,13)+RD1(1,12))*AQC( 5) &
+                         +(-RD1(3,29)+RD0(4,3))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 5,3)+RD2(4,3))+(-RD2(6,13)+RD1(2,12))*AQC( 5)
+            GPOPLE(4+IJ)=+(-RD3( 6,3)+RD2(5,3))+(-RD2(3,13)+RD1(3,12))*AQC( 5) &
+                         +(-RD2(5,12)+RD1(1,11))*AQC( 6) &
+                         +(-RD1(3,29)+RD0(4,3))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8 + 192
+            GPOPLE(1+IJ)=+(-RD2(6,11)+RD1(2,10))
+            GPOPLE(2+IJ)=+(-RD3( 5,3)+RD2(4,3))+(-RD2(6,12)+RD1(2,11))*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 8,3)+RD2(2,3))+(-RD1(3,30)+RD0(5,3))
+            GPOPLE(4+IJ)=+(-RD3( 9,3)+RD2(6,3))+(-RD2(6,12)+RD1(2,11))*AQC( 6)
+   
+! J= 4
+            IJ= 12 + 192
+            GPOPLE(1+IJ)=+(-RD2(3,11)+RD1(3,10))+(-RD1(3,28)+RD0(3,3))*AQC( 6)
+            GPOPLE(2+IJ)=+(-RD3( 6,3)+RD2(5,3))+(-RD2(5,13)+RD1(1,12))*AQC( 6) &
+                         +(-RD2(3,12)+RD1(3,11))*AQC( 5) &
+                         +(-RD1(3,29)+RD0(4,3))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(-RD3( 9,3)+RD2(6,3))+(-RD2(6,13)+RD1(2,12))*AQC( 6)
+            GPOPLE(4+IJ)=+(-RD3(10,3)+RD2(3,3))+(-RD1(3,30)+RD0(5,3))       &
+                         +(-RD2(3,12)+RD1(3,11))*AQC( 6) &
+                         +(-RD2(3,13)+RD1(3,12))*AQC( 6) &
+                         +(-RD1(3,29)+RD0(4,3))*AQC( 6)*AQC( 6)
+   
+            IJ= 16 + 192
+            GPOPLE(1+IJ)=+( RD2(5,22)-RD1(1,36))
+            GPOPLE(2+IJ)=+( RD3(3,5)-RD2(1,18))+( RD2(5,23)-RD1(1,37))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(5,5)-RD2(4,18))
+            GPOPLE(4+IJ)=+( RD3(6,5)-RD2(5,18))+( RD2(5,23)-RD1(1,37))*AQC( 6)
+   
+! J= 2
+            IJ= 4+16 + 192
+            GPOPLE(1+IJ)=+( RD3(3,6)-RD2(1,19))+( RD2(5,24)-RD1(1,38))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4( 3)-RD3(1,1))+( RD2(5,26)-RD1(1,40))       &
+                         +( RD3(3,7)-RD2(1,20))*AQC( 5) &
+                         +( RD3(3,8)-RD2(1,21))*AQC( 5) &
+                         +( RD2(5,25)-RD1(1,39))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 5)-RD3(2,1))+( RD3(5,8)-RD2(4,21))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4( 6)-RD3(3,1))+( RD3(6,8)-RD2(5,21))*AQC( 5) &
+                         +( RD3(3,7)-RD2(1,20))*AQC( 6) &
+                         +( RD2(5,25)-RD1(1,39))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+16 + 192
+            GPOPLE(1+IJ)=+( RD3(5,6)-RD2(4,19))
+            GPOPLE(2+IJ)=+( RD4( 5)-RD3(2,1))+( RD3(5,7)-RD2(4,20))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 8)-RD3(4,1))+( RD2(5,26)-RD1(1,40))
+            GPOPLE(4+IJ)=+( RD4( 9)-RD3(5,1))+( RD3(5,7)-RD2(4,20))*AQC( 6)
+   
+! J= 4
+            IJ= 12+16 + 192
+            GPOPLE(1+IJ)=+( RD3(6,6)-RD2(5,19))+( RD2(5,24)-RD1(1,38))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4( 6)-RD3(3,1))+( RD3(3,8)-RD2(1,21))*AQC( 6) &
+                         +( RD3(6,7)-RD2(5,20))*AQC( 5) &
+                         +( RD2(5,25)-RD1(1,39))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 9)-RD3(5,1))+( RD3(5,8)-RD2(4,21))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4(10)-RD3(6,1))+( RD2(5,26)-RD1(1,40))       &
+                         +( RD3(6,7)-RD2(5,20))*AQC( 6) &
+                         +( RD3(6,8)-RD2(5,21))*AQC( 6) &
+                         +( RD2(5,25)-RD1(1,39))*AQC( 6)*AQC( 6)
+   
+            IJ= 32 + 192
+            GPOPLE(1+IJ)=+( RD2(6,22)-RD1(2,36))
+            GPOPLE(2+IJ)=+( RD3(5,5)-RD2(4,18))+( RD2(6,23)-RD1(2,37))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD3(8,5)-RD2(2,18))
+            GPOPLE(4+IJ)=+( RD3(9,5)-RD2(6,18))+( RD2(6,23)-RD1(2,37))*AQC( 6)
+   
+! J= 2
+            IJ= 4+32 + 192
+            GPOPLE(1+IJ)=+( RD3(5,6)-RD2(4,19))+( RD2(6,24)-RD1(2,38))*AQC( 5)
+            GPOPLE(2+IJ)=+( RD4( 5)-RD3(2,1))+( RD2(6,26)-RD1(2,40))       &
+                         +( RD3(5,7)-RD2(4,20))*AQC( 5) &
+                         +( RD3(5,8)-RD2(4,21))*AQC( 5) &
+                         +( RD2(6,25)-RD1(2,39))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4( 8)-RD3(4,1))+( RD3(8,8)-RD2(2,21))*AQC( 5)
+            GPOPLE(4+IJ)=+( RD4( 9)-RD3(5,1))+( RD3(9,8)-RD2(6,21))*AQC( 5) &
+                         +( RD3(5,7)-RD2(4,20))*AQC( 6) &
+                         +( RD2(6,25)-RD1(2,39))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+32 + 192
+            GPOPLE(1+IJ)=+( RD3(8,6)-RD2(2,19))
+            GPOPLE(2+IJ)=+( RD4( 8)-RD3(4,1))+( RD3(8,7)-RD2(2,20))*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(12)-RD3(7,1))+( RD2(6,26)-RD1(2,40))
+            GPOPLE(4+IJ)=+( RD4(13)-RD3(8,1))+( RD3(8,7)-RD2(2,20))*AQC( 6)
+   
+! J= 4
+            IJ= 12+32 + 192
+            GPOPLE(1+IJ)=+( RD3(9,6)-RD2(6,19))+( RD2(6,24)-RD1(2,38))*AQC( 6)
+            GPOPLE(2+IJ)=+( RD4( 9)-RD3(5,1))+( RD3(5,8)-RD2(4,21))*AQC( 6) &
+                         +( RD3(9,7)-RD2(6,20))*AQC( 5) &
+                         +( RD2(6,25)-RD1(2,39))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+( RD4(13)-RD3(8,1))+( RD3(8,8)-RD2(2,21))*AQC( 6)
+            GPOPLE(4+IJ)=+( RD4(14)-RD3(9,1))+( RD2(6,26)-RD1(2,40))       &
+                         +( RD3(9,7)-RD2(6,20))*AQC( 6) &
+                         +( RD3(9,8)-RD2(6,21))*AQC( 6) &
+                         +( RD2(6,25)-RD1(2,39))*AQC( 6)*AQC( 6)
+   
+            IJ= 48 + 192
+            GPOPLE(1+IJ)=+RD2(3,22)-RD1(3,31)-RD1(3,36)+RD0(1,4)+RD0(1,5)
+            GPOPLE(2+IJ)=+RD3( 6,5)-RD2(5,14)-RD2(5,18)+RD1(1,13)+RD1(1,17) &
+                        +(RD2(3,23)-RD1(3,32)-RD1(3,37)+RD0(2,4)+RD0(2,5))*AQC( 5)
+            GPOPLE(3+IJ)=+RD3( 9,5)-RD2(6,14)-RD2(6,18)+RD1(2,13)+RD1(2,17) 
+            GPOPLE(4+IJ)=+RD3(10,5)-RD2(3,14)-RD2(3,18)+RD1(3,13)+RD1(3,17) &
+                        +(RD2(3,23)-RD1(3,32)-RD1(3,37)+RD0(2,4)+RD0(2,5))*AQC( 6)
+   
+! J= 2
+            IJ= 4+48 + 192
+            GPOPLE(1+IJ)=+RD3( 6,6)-RD2(5,15)-RD2(5,19)+RD1(1,14)+RD1(1,18) &
+                        +(RD2(3,24)-RD1(3,33)-RD1(3,38)+RD0(3,4)+RD0(3,5))*AQC( 5)
+            GPOPLE(2+IJ)=+RD4( 6)-RD3( 3,1)-RD3( 3,4)+RD2(1,4)+RD2(1,5) &
+                         +RD2(3,26)-RD1(3,35)-RD1(3,40)+RD0(5,4)+RD0(5,5)       &
+                         +(RD3( 6,7)-RD2(5,16)-RD2(5,20)+RD1(1,15)+RD1(1,19))*AQC( 5) &
+                         +(RD3( 6,8)-RD2(5,17)-RD2(5,21)+RD1(1,16)+RD1(1,20))*AQC( 5) &
+                         +(RD2(3,25)-RD1(3,34)-RD1(3,39)+RD0(4,4)+RD0(4,5))*AQC( 5)*AQC( 5)
+            GPOPLE(3+IJ)=+RD4( 9)-RD3( 5,1)-RD3( 5,4)+RD2(4,4)+RD2(4,5) &
+                        +(RD3( 9,8)-RD2(6,17)-RD2(6,21)+RD1(2,16)+RD1(2,20))*AQC( 5)
+            GPOPLE(4+IJ)=+(RD4(10)-RD3( 6,1)-RD3( 6,4)+RD2(5,4)+RD2(5,5)) &
+                         +(RD3(10,8)-RD2(3,17)-RD2(3,21)+RD1(3,16)+RD1(3,20))*AQC( 5) &
+                         +(RD3( 6,7)-RD2(5,16)-RD2(5,20)+RD1(1,15)+RD1(1,19))*AQC( 6) &
+                         +(RD2(3,25)-RD1(3,34)-RD1(3,39)+RD0(4,4)+RD0(4,5))*AQC( 5)*AQC( 6)
+   
+! J= 3
+            IJ=8+48 + 192
+            GPOPLE(1+IJ)=+(RD3( 9,6)-RD2(6,15)-RD2(6,19)+RD1(2,14)+RD1(2,18)) 
+            GPOPLE(2+IJ)=+(RD4( 9)-RD3( 5,1)-RD3( 5,4)+RD2(4,4)+RD2(4,5)) &
+                         +(RD3(9,7)-RD2(6,16)-RD2(6,20)+RD1(2,15)+RD1(2,19))*AQC( 5)
+            GPOPLE(3+IJ)=+(RD4(13)-RD3( 8,1)-RD3( 8,4)+RD2(2,4)+RD2(2,5)) &
+                         +(RD2(3,26)-RD1(3,35)-RD1(3,40)+RD0(5,4)+RD0(5,5))
+            GPOPLE(4+IJ)=+(RD4(14)-RD3( 9,1)-RD3( 9,4)+RD2(6,4)+RD2(6,5)) &
+                         +(RD3(9,7)-RD2(6,16)-RD2(6,20)+RD1(2,15)+RD1(2,19))*AQC( 6)
+   
+! J= 4
+            IJ= 12+48 + 192
+            GPOPLE(1+IJ)=+(RD3(10,6)-RD2(3,15)-RD2(3,19)+RD1(3,14)+RD1(3,18)) &
+                         +(RD2(3,24)-RD1(3,33)-RD1(3,38)+RD0(3,4)+RD0(3,5))*AQC( 6)
+            GPOPLE(2+IJ)=+(RD4(10)-RD3( 6,1)-RD3( 6,4)+RD2(5,4)+RD2(5,5)) &
+                         +(RD3( 6,8)-RD2(5,17)-RD2(5,21)+RD1(1,16)+RD1(1,20))*AQC( 6) &
+                         +(RD3(10,7)-RD2(3,16)-RD2(3,20)+RD1(3,15)+RD1(3,19))*AQC( 5) &
+                         +(RD2(3,25)-RD1(3,34)-RD1(3,39)+RD0(4,4)+RD0(4,5))*AQC( 6)*AQC( 5)
+            GPOPLE(3+IJ)=+(RD4(14)-RD3( 9,1)-RD3( 9,4)+RD2(6,4)+RD2(6,5)) &
+                         +(RD3( 9,8)-RD2(6,17)-RD2(6,21)+RD1(2,16)+RD1(2,20))*AQC( 6)
+            GPOPLE(4+IJ)=+(RD4(15)-RD3(10,1)-RD3(10,4)+RD2(3,4)+RD2(3,5)) &
+                         +(RD2(3,26)-RD1(3,35)-RD1(3,40)+RD0(5,4)+RD0(5,5))       &
+                         +(RD3(10,7)-RD2(3,16)-RD2(3,20)+RD1(3,15)+RD1(3,19))*AQC( 6) &
+                         +(RD3(10,8)-RD2(3,17)-RD2(3,21)+RD1(3,16)+RD1(3,20))*AQC( 6) &
+                         +(RD2(3,25)-RD1(3,34)-RD1(3,39)+RD0(4,4)+RD0(4,5))*AQC( 6)*AQC( 6)
+   
+   
+      !IF(.NOT.LSYM06) GOTO 060
+! I=1-4, J=1-4:  IJ= 16*(K-1) + 64*(L-1)
+      DO J=1,4
+         DO I=1,4
+            IJ= I + 4*(J-1)
+            GPOPLE(IJ+144)= GPOPLE(IJ+96)
+         ENDDO
+      ENDDO
+   
+! sum integral TGPU_R30S1S_J6
+! GPOPLE(I,J,K,L) to 1D --> i + 4*(j-1) + 16*(k-1) + 64*(l-1)
+                   !T(IFT-1)= GPOPLE(I,J,K,IFT)
+         DO K=1,4
+            DO J=1,4
+               DO I=1,4
+                  IJ= I+ 4*(J-1)+ 16*(K-1)
+                  T(1)= GPOPLE(IJ+ 64)
+                  T(2)= GPOPLE(IJ+128)
+                  T(3)= GPOPLE(IJ+192)
+                  GPOPLE(IJ+ 64)= T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+                  GPOPLE(IJ+128)= T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+                  GPOPLE(IJ+192)= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+               ENDDO
+            ENDDO
+         ENDDO
+         DO L=1,4
+            DO J=1,4
+               DO I=1,4
+                  IJ= I +4*(J-1) +64*(L-1)
+                  T(1)=GPOPLE(IJ+16) 
+                  T(2)=GPOPLE(IJ+32) 
+                  T(3)=GPOPLE(IJ+48) 
+
+                  GPOPLE(IJ+16)= T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+                  GPOPLE(IJ+32)= T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+                  GPOPLE(IJ+48)= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+               ENDDO
+            ENDDO
+         ENDDO
+         DO L=1,4
+            DO K=1,4
+               DO I=1,4
+                  IJ= I +16*(K-1) +64*(L-1)
+                  T(1)=GPOPLE(IJ+ 4)
+                  T(2)=GPOPLE(IJ+ 8)
+                  T(3)=GPOPLE(IJ+12)
+
+                  GPOPLE(IJ+ 4)= T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+                  GPOPLE(IJ+ 8)= T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+                  GPOPLE(IJ+12)= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+               ENDDO
+            ENDDO
+         ENDDO
+         DO L=1,4
+            DO K=1,4
+               DO J=1,4
+                   IJ=  4*(J-1) +16*(K-1) +64*(L-1)
+                  T(1)=GPOPLE(2+IJ)
+                  T(2)=GPOPLE(3+IJ)
+                  T(3)=GPOPLE(4+IJ)
+
+                  GPOPLE(2+IJ)= T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+                  GPOPLE(3+IJ)= T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+                  GPOPLE(4+IJ)= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+               ENDDO
+            ENDDO
+         ENDDO
+
+!--------------------------- END sum the integral  ------------------------------   
+      RETURN
+      END
+ end module mod_jtype6

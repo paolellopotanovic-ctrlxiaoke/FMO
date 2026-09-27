@@ -1,0 +1,1110 @@
+!> @author  Vladimir Mironov
+!
+!> @brief This module contains code to compute 1-electron integrals
+!>  derivatives. Based on `grd1.src` code.
+!
+!> @note all subroutines in this file uses SP-free basis set which can
+!>  be prepared simply with call to `SPLIT_SP_BASIS` from `MOD_NOSP_BASIS` module
+!>  All low-level 1e-integral subroutines were moved to `MOD_1E_PRIMITIVES` module
+!
+!  REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!
+MODULE omp_grd1
+    USE prec, ONLY: fp
+
+    USE mod_nosp_basis, ONLY: basis_set, nosp_basis, &
+        !split_sp_basis, &
+        bas_norm_matrix, bas_denorm_matrix
+    USE mod_1e_primitives, ONLY: &
+        comp_coulomb_der1, comp_coulomb_helfeyder1, comp_kinetic_der1, &
+        density_unordered, density_ordered
+
+    USE mod_shell_tools, ONLY: &
+        shell_t, shpair_t
+
+    USE mod_gauss_hermite, ONLY: prepQuadGaussHermite
+    USE mx_limits, ONLY: MXSH, MXGTOT, MXATM, MXAO, MAXDEN, MXABC
+
+    IMPLICIT NONE
+
+    INTEGER, PARAMETER :: MXCHRM = 1
+
+    REAL(KIND=fp), PARAMETER :: RLN10 = 2.30258D+00             !< \f$ ln(10) \f$
+    REAL(KIND=fp), PARAMETER :: PI    = 3.14159265358979324_fp  !< \f$ \Pi \f$ constant
+    REAL(KIND=fp), PARAMETER :: TWOPI = 6.28318530717958648_fp  !< \f$ 2\cdot\Pi \f$ constant
+    REAL(KIND=fp), PARAMETER :: PI212 = 1.12837916709551257_fp  !< \f$ 2\cdot\Pi^{-1/2} \f$
+
+    REAL(KIND=fp), PARAMETER :: &
+        DEBUG  = transfer('DEBUG   ',1.0_fp), &
+        GRD1   = transfer('GRD1    ',1.0_fp), &
+        RESC   = transfer('RESC    ',1.0_fp), &
+        ANESC  = transfer('NESC    ',1.0_fp)
+
+    PRIVATE
+    PUBLIC omp_tvder
+    PUBLIC omp_extder
+    PUBLIC omp_helfey
+    PUBLIC omp_felecq
+
+CONTAINS
+
+!-------------------------------------------------------------------------------
+
+!> @brief Compute kinetic energy derivative contribution to gradient
+!
+!> @author Vladimir Mironov
+!
+!   REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!>
+!> @param[in,out]   denab   density matrix in packed format, remains unchanged on return
+!> @param[in,out]   de      nuclear gradient
+!> @param[in]       l2      dimension of density matrix array
+ SUBROUTINE omp_tder(denab, de, l2)
+
+    REAL(KIND=fp), INTENT(INOUT) :: denab(:), de(:,:)
+    INTEGER, INTENT(IN) :: l2
+
+    COMMON /FMCOM / x(1)
+      REAL(KIND=fp) :: x
+
+    COMMON /OUTPUT/ nprint,itol,icut,normf,normp,nopk
+      INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+    COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+      INTEGER :: me,master,nproc,ibtyp,iptim
+      LOGICAL :: goparr,dskwrk,maswrk
+
+    INTEGER :: &
+        next, mine, &
+        ii, jj
+
+    REAL(KIND=fp) :: tol
+
+    REAL(KIND=fp) :: de_atom(3)
+
+    REAL(KIND=fp) :: dij(225)
+    LOGICAL :: norm, nxt
+
+    TYPE(shell_t) :: shi, shj
+    TYPE(shpair_t) :: cntp
+
+    INTEGER :: l1
+
+    !if (maswrk) write(iw,*) "OMP 1E KINETIC GRD"
+
+    tol = RLN10*itol
+    norm = normf /= 1 .OR. normp /= 1
+
+    CALL prepQuadGaussHermite
+!    CALL split_sp_basis
+
+    IF (norm) THEN
+        l1 = floor(sqrt(2.0*l2))
+        CALL bas_norm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+!   Initialize parallel
+    nxt = ibtyp==1
+    next = -1
+    mine = -1
+
+!$omp parallel &
+!$omp   private( &
+!$omp       ii, jj, &
+!$omp       mine, next, &
+!$omp       shi, shj, cntp, &
+!$omp       dij, de_atom &
+!$omp   )
+
+    CALL cntp%alloc
+
+!$omp do schedule(dynamic)
+!   I shell
+    DO ii = 1, nosp_basis%nshell
+
+!!       Go parallel!
+!        IF (nxt .AND. goparr) THEN
+!           mine = mine + 1
+!           IF (mine>next) CALL ddi_dlbnext(next)
+!           IF (next/=mine) CYCLE
+!        END IF
+
+        de_atom(:) = 0.0
+
+        CALL shi%fetch_by_id(ii)
+
+!       J shell
+        DO jj = 1, nosp_basis%nshell
+
+!           Go parallel!
+            IF ((.NOT.nxt) .AND. goparr) THEN
+                IF (mod(jj,nproc)/=me) CYCLE
+            END IF
+
+            CALL shj%fetch_by_id(jj)
+
+            CALL cntp%shell_pair(shi, shj, tol, dup=.false.)
+            IF (cntp%numpairs==0) CYCLE
+
+            CALL density_unordered(shi, shj, dij, denab)
+
+            CALL comp_kinetic_der1(cntp, dij, de_atom)
+        END DO
+
+        ! Update gradient
+        de(1:3,shi%atid) = de(1:3,shi%atid) + de_atom(1:3)
+
+    END DO
+!$omp end do
+!   End of shell loops
+!$omp end parallel
+
+    IF (goparr.AND.nxt) CALL ddi_dlbreset
+
+    IF (norm) THEN
+        CALL bas_denorm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+!> @brief Basis function derivative contributions to gradient
+!> @details Compute derivative integrals of type <ii'|h|jj> = <ii'|t+v|jj>
+!> @note No relativistic methods available
+!
+!> @author Vladimir Mironov
+!
+!   REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!>
+!> @param[in,out]   denab   density matrix in packed format, remains unchanged on return
+!> @param[in]       l2      dimension of density matrix array
+ SUBROUTINE omp_tvder(denab, l2)
+
+    REAL(KIND=fp), INTENT(INOUT) :: denab(:)
+    INTEGER, INTENT(IN) :: l2
+
+    COMMON /FMCOM / x(1)
+      REAL(KIND=fp) :: x
+
+    COMMON /GRAD  / de(3,MXATM)
+        REAL(KIND=fp) :: de
+!$omp threadprivate(/GRAD  /)
+
+    COMMON /INFOA / nat,ich,mul,num,nqmt,ne,na,nb, &
+                    zan(mxatm),c(3,mxatm),ian(mxatm)
+      INTEGER :: nat,ich,mul,num,nqmt,ne,na,nb,ian
+      REAL(KIND=fp) :: zan,c
+
+    COMMON /IOFILE/ ir,iw,ip,ijk,ipk,idaf,nav,ioda(950)
+      INTEGER :: ir,iw,ip,ijk,ipk,idaf,nav,ioda
+
+    COMMON /OUTPUT/ nprint,itol,icut,normf,normp,nopk
+      INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+    COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+      INTEGER :: me,master,nproc,ibtyp,iptim
+      LOGICAL :: goparr,dskwrk,maswrk
+
+    COMMON /RUNOPT/ runtyp,exetyp,nevals,nglevl,nhlevl
+      REAL(KIND=fp) :: runtyp,exetyp
+      INTEGER :: nevals,nglevl,nhlevl
+
+    COMMON /ROOT  / xx,u(13),w(13),nroots
+      REAL(KIND=fp) :: xx,u,w
+      INTEGER :: nroots
+!$omp threadprivate(/ROOT  /)
+
+      COMMON /WFNOPT/ scftyp,vbtyp,dftype,tddftyp,cityp,cctyp, &
+                      mplevl,mpctyp
+        REAL(KIND=fp) :: scftyp,vbtyp,dftype,tddftyp,cityp,cctyp
+        INTEGER :: mplevl,mpctyp
+
+    INTEGER :: &
+        next, mine, &
+        ii, jj, ic
+
+    REAL(KIND=fp) :: tol
+
+    REAL(KIND=fp) :: de1(3)
+    REAL(KIND=fp), ALLOCATABLE :: de_priv(:,:)
+
+    REAL(KIND=fp) :: dij(225), dernuc(3)
+    LOGICAL :: out, dbg, norm, nxt
+
+    TYPE(shell_t) :: shi, shj
+    TYPE(shpair_t) :: cntp
+
+    INTEGER :: l1
+
+    dbg = (exetyp==DEBUG) .AND. maswrk
+    out = (exetyp==DEBUG .OR. exetyp==GRD1 .OR. nprint==-3)
+
+    IF (dbg) WRITE(iw,'(/10X,38(1H-)/10X,"GRADIENT INCLUDING AO DERIVATIVE TERMS"/10X,38(1H-))')
+
+    !IF (maswrk) write(iw,*) "OMP 1E GRD (TVDER)", nosp_basis%nshell, nat
+
+    CALL prepQuadGaussHermite
+!    CALL split_sp_basis
+
+    tol = RLN10*itol
+    norm = normf /= 1 .OR. normp /= 1
+
+    IF (norm) THEN
+        l1 = floor(sqrt(2.0*l2))
+        CALL bas_norm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+!   temporary storage for 1e gradient
+    ALLOCATE(de_priv(3,nat))
+    de_priv(:,:) = 0.0
+
+!   Initialize parallel
+    nxt = ibtyp==1
+    next = -1
+    mine = -1
+
+!$omp parallel &
+!$omp   private( &
+!$omp       ii, jj, ic, &
+!$omp       mine, next, &
+!$omp       shi, shj, cntp, &
+!$omp       dij, dernuc, &
+!$omp       de1 &
+!$omp   ) &
+!$omp   reduction(+:de_priv)
+
+    CALL cntp%alloc
+
+!$omp do schedule(dynamic)
+!   I shell
+    DO ii = 1, nosp_basis%nshell
+
+!!       Go parallel!
+!        IF (nxt .AND. goparr) THEN
+!           mine = mine + 1
+!           IF (mine>next) CALL ddi_dlbnext(next)
+!           IF (next/=mine) CYCLE
+!        END IF
+
+        CALL shi%fetch_by_id(ii)
+        de1 = 0.0
+
+!       J shell
+        DO jj = 1, nosp_basis%nshell
+
+!           Go parallel!
+            !IF ((.NOT.nxt) .AND. goparr) THEN
+            IF (goparr) THEN
+                IF (mod(jj,nproc)/=me) CYCLE
+            END IF
+
+            CALL shj%fetch_by_id(jj)
+
+            nroots = (shi%ang+shj%ang-1)/2 + 1
+
+            CALL cntp%shell_pair(shi, shj, tol, dup=.false.)
+            IF (cntp%numpairs==0) CYCLE
+
+            CALL density_unordered(shi, shj, dij, denab)
+
+!           Kinetic energy derivative
+            CALL comp_kinetic_der1(cntp, dij, de1)
+
+!           Nuclear attraction derivative
+            DO ic = 1, nat
+                CALL comp_coulomb_der1(cntp, c(:,ic), -zan(ic), dij, dernuc)
+                de1 = de1 + dernuc(1:3)
+            END DO
+!           End of primitive loops
+
+#ifdef DEBUG
+            IF (dbg) THEN
+               WRITE(iw,'(1X,"TVDER: SHELLS II,JJ=",2I5)') ii,jj
+               CALL egout(de,nat)
+            END IF
+#endif
+
+        END DO
+
+        de_priv(1:3,shi%atid) = de_priv(1:3,shi%atid) + de1(1:3)
+
+    END DO
+!$omp end do
+!   End of shell loops
+!$omp end parallel
+
+    de(1:3,1:nat) = de(1:3,1:nat) + de_priv(1:3,1:nat)
+    DEALLOCATE(de_priv)
+
+    IF (out) THEN
+        IF (goparr) CALL ddi_gsumf(1503,de,3*nat)
+        IF (maswrk) THEN
+           WRITE(iw,'(/10X,38(1H-)/10X,"GRADIENT INCLUDING AO DERIVATIVE TERMS"/10X,38(1H-))')
+           CALL egout(de,nat)
+        END IF
+        IF (goparr) de(1:3,1:nat) = de(1:3,1:nat)/nproc
+!       Will only print partial contributions in parallel.
+    END IF
+
+    IF (goparr.AND.nxt) CALL ddi_dlbreset
+
+    IF (norm) THEN
+        CALL bas_denorm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+!*MODULE OMP_EXTDER *DECK ESVDER
+!> @brief Basis function derivative contributions to gradient from external (FMO, QM/MM) charges
+!> @details Compute derivative integrals of type <ii'|h|jj> = <ii'|t+v|jj>
+!> @note No relativistic methods available
+!
+!> @author Vladimir Mironov
+!
+!   REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!>
+!> @param[in,out]   denab   density matrix in packed format, remains unchanged on return
+!> @param[in]       l2      dimension of density matrix array
+ SUBROUTINE omp_extder(denab, l2)
+    REAL(KIND=fp), INTENT(INOUT) :: denab(:)
+    INTEGER, INTENT(IN) :: l2
+
+    COMMON /CHMGMS/ xchm(MXCHRM),ychm(MXCHRM),zchm(MXCHRM), &
+                    dxelmm(MXCHRM),dyelmm(MXCHRM),dzelmm(MXCHRM), &
+                    qchm(MXCHRM),nchmat,kchrmm
+        REAL(KIND=fp) :: xchm,ychm,zchm,dxelmm,dyelmm,dzelmm,qchm
+        INTEGER :: nchmat,kchrmm
+
+    COMMON /FMCOM / x(1)
+      REAL(KIND=fp) :: x
+
+    COMMON /FMOINF/ nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+      INTEGER :: nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+
+    COMMON /FMOPMD/ fmobox(3),mdwpbc,nimgcell,imglvl, &
+                    ltrvec,lfmogctr,lfmoctmp,lindatmd,lwrkdsav,lindxiu, &
+                    ipbcfst
+        REAL(KIND=fp) :: fmobox
+        INTEGER :: mdwpbc,nimgcell,imglvl,ltrvec,lfmogctr,lfmoctmp, &
+            lindatmd,lwrkdsav,lindxiu,ipbcfst
+
+    COMMON /FMOPNT/ lichfg,lmulfg,lidmrec,lfrgnam,llayfrg,lindat, &
+                    lncbs,lfmozan,lfmoc,lfmomas,lizbas,liaglob,libdgh, &
+                    liabdfg,ljabdfg,lncao,lidxcao,liaprjo,ljaprjo, &
+                    lcoreao,locccor,lshiftb,liodfmo,lfmoda,lfmodb, &
+                    lfmoespa,lfmoespb,llocfmo,lscffrg,lfmoscf,lrij, &
+                    lpopmul,lpopmat,lialoc,lindbd,liatfrg,lindfrg, &
+                    lindgfrg,lnatfrg,lnat0frg,lianfrg,lzanfrg,lcfrg, &
+                    llibish,llibnsh,llibng,lindatg,lfmobuf(3),lfmode, &
+                    lnumfrg,lloctat,liaoglob,lloadm,lfmoge,ldgrid, &
+                    liodcfmo,ljob2grp,lfmopg,lemocdr,luntxyz,luntrot, &
+                    lstonep,lmapsu,lfrgmul,lclmo,lialmo,lindlmo, &
+                    latclmo,llmobdf,lfgflmo,lnfglmo,llfglmo,lpfglmo, &
+                    lpopdmat,lidmpnt,liddpnt,livmpnt,liactfg,lcrfrg, &
+                    lzlmfrgv,lylmfrgv,lndtfrg,lf_mm,lg_mm,lmaxl30, &
+                    libuffg,lindatp,lsmon,lsdim,ledimfed,lexcit3d, &
+                    lifgfret
+      INTEGER :: lichfg,lmulfg,lidmrec,lfrgnam,llayfrg,lindat, &
+          lncbs,lfmozan,lfmoc,lfmomas,lizbas,liaglob,libdgh, &
+          liabdfg,ljabdfg,lncao,lidxcao,liaprjo,ljaprjo, &
+          lcoreao,locccor,lshiftb,liodfmo,lfmoda,lfmodb, &
+          lfmoespa,lfmoespb,llocfmo,lscffrg,lfmoscf,lrij, &
+          lpopmul,lpopmat,lialoc,lindbd,liatfrg,lindfrg, &
+          lindgfrg,lnatfrg,lnat0frg,lianfrg,lzanfrg,lcfrg, &
+          llibish,llibnsh,llibng,lindatg,lfmobuf,lfmode, &
+          lnumfrg,lloctat,liaoglob,lloadm,lfmoge,ldgrid, &
+          liodcfmo,ljob2grp,lfmopg,lemocdr,luntxyz,luntrot, &
+          lstonep,lmapsu,lfrgmul,lclmo,lialmo,lindlmo, &
+          latclmo,llmobdf,lfgflmo,lnfglmo,llfglmo,lpfglmo, &
+          lpopdmat,lidmpnt,liddpnt,livmpnt,liactfg,lcrfrg, &
+          lzlmfrgv,lylmfrgv,lndtfrg,lf_mm,lg_mm,lmaxl30, &
+          libuffg,lindatp,lsmon,lsdim,ledimfed,lexcit3d, &
+          lifgfret
+
+    COMMON /FMORUN/ espscf,e0scf(2),emp2s,idafmo,icurfg,jcurfg,kcurfg, &
+                    icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+                    moncor,needr,modrst,norbproj,nunesp,iskipesp, &
+                    iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo, &
+                    iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo(2)
+      REAL(KIND=fp) :: espscf,e0scf,emp2s
+      INTEGER :: idafmo,icurfg,jcurfg,kcurfg, &
+          icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+          moncor,needr,modrst,norbproj,nunesp,iskipesp, &
+          iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo, &
+          iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo
+
+    COMMON /FMOOPT/ espsca(9),respap(2),resppc(2),resdim,restri(4), &
+                    rcorsd,respct,convfg,cnvdmp,coroff,rflmo(4), &
+                    orshft,orshft2,cnvafo,ascreen(4),ixesp,mxitfg, &
+                    nguess,nbsse,modorb,modpar,irststp,irstlay,nprfmo, &
+                    nfmopal,modprp,maxl1c,ipieda,modgrd,modesp,ivmul, &
+                    modlmo,nopden,mofock,modfd,modfmm,ncentm,ndualb, &
+                    ngab,modpan
+      REAL(KIND=fp) :: espsca,respap,resppc,resdim,restri, &
+          rcorsd,respct,convfg,cnvdmp,coroff,rflmo, &
+          orshft,orshft2,cnvafo,ascreen
+      INTEGER :: ixesp,mxitfg,nguess,nbsse,modorb,modpar,irststp,irstlay,&
+          nprfmo,nfmopal,modprp,maxl1c,ipieda,modgrd,modesp,ivmul, &
+          modlmo,nopden,mofock,modfd,modfmm,ncentm,ndualb,ngab,modpan
+
+    COMMON /GRAD  / de(3,MXATM)
+        REAL(KIND=fp) :: de
+!$omp threadprivate(/GRAD  /)
+
+    COMMON /INFOA / nat,ich,mul,num,nqmt,ne,na,nb, &
+                    zan(mxatm),c(3,mxatm),ian(mxatm)
+      INTEGER :: nat,ich,mul,num,nqmt,ne,na,nb,ian
+      REAL(KIND=fp) :: zan,c
+
+    COMMON /IOFILE/ ir,iw,ip,ijk,ipk,idaf,nav,ioda(950)
+      INTEGER :: ir,iw,ip,ijk,ipk,idaf,nav,ioda
+
+    COMMON /MCPFMO/ imcpfmo,lfzcor,lifmptyp,lifmptyp2,lmcpsw, &
+                    lizcor2,imp0,jmp0,icorsh0,igtf0,iecpfmo
+        INTEGER :: imcpfmo,lfzcor,lifmptyp,lifmptyp2,lmcpsw, &
+            lizcor2,imp0,jmp0,icorsh0,igtf0,iecpfmo
+
+    COMMON /OUTPUT/ nprint,itol,icut,normf,normp,nopk
+      INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+    COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+      INTEGER :: me,master,nproc,ibtyp,iptim
+      LOGICAL :: goparr,dskwrk,maswrk
+
+    COMMON /RUNOPT/ runtyp,exetyp,nevals,nglevl,nhlevl
+      REAL(KIND=fp) :: runtyp,exetyp
+      INTEGER :: nevals,nglevl,nhlevl
+
+    COMMON /ROOT  / xx,u(13),w(13),nroots
+      REAL(KIND=fp) :: xx,u,w
+      INTEGER :: nroots
+!$omp threadprivate(/ROOT  /)
+
+      COMMON /WFNOPT/ scftyp,vbtyp,dftype,tddftyp,cityp,cctyp, &
+                      mplevl,mpctyp
+        REAL(KIND=fp) :: scftyp,vbtyp,dftype,tddftyp,cityp,cctyp
+        INTEGER :: mplevl,mpctyp
+
+    COMMON /ISEPS / iseps, useps
+        LOGICAL :: iseps, useps
+    COMMON /COSDAT/ se2,secorr,qvcosmo,elast,emp2cos,emp2last, &
+                    cosvol,cossar,ediel,eoc1,deoc_rs,sumqsc, &
+                    sumqscold,zsum,zsum2,zsum3,fepsi,rds,disex2, &
+                    epsi,cosrad,disex,outchg,ediel_save, &
+                    maxnps,icorr,itrip,nqs,mp2trip,mp2iter, &
+                    icfreq,nspa,nsph,npsd,nps,nps2,nden,npspher, &
+                    cosbug,coswrt,dcosmo,prfcnd,ioutch
+        REAL(KIND=fp) :: se2,secorr,qvcosmo,elast,emp2cos,emp2last, &
+            cosvol,cossar,ediel,eoc1,deoc_rs,sumqsc, &
+            sumqscold,zsum,zsum2,zsum3,fepsi,rds,disex2, &
+            epsi,cosrad,disex,outchg,ediel_save
+        INTEGER :: maxnps,icorr,itrip,nqs,mp2trip,mp2iter, &
+            icfreq,nspa,nsph,npsd,nps,nps2,nden,npspher
+        LOGICAL :: cosbug,coswrt,dcosmo,prfcnd,ioutch
+
+    COMMON /COSVCE/ qscnet(MXABC),corzan(3,MXABC), &
+                    qden(MAXDEN),qscnet_save(MXABC),iatsp(MXABC+1)
+        REAL(KIND=fp) :: qscnet,corzan,qden,qscnet_save
+        INTEGER :: iatsp
+
+    INTEGER :: &
+        iaz, ifmoat, next, mine, &
+        nqmmatm, ii, jj, ic, nextat, jc, icell
+
+    REAL(KIND=fp) :: tol, dum, znuc
+
+    INTEGER :: loadfm, last, lgeom, needmm, nfg2, lfmodei, ltmp, ioff
+
+    REAL(KIND=fp) :: de1(3), de2(3)
+
+    REAL(KIND=fp) :: dij(225), dernuc(3), cxyz(3)
+    LOGICAL :: out, dbg, norm, nxt, esd, is_charmm, is_qmmm
+
+    TYPE(shell_t) :: shi, shj
+    TYPE(shpair_t) :: cntp
+
+    REAL(KIND=fp), ALLOCATABLE :: de_priv(:,:)
+    INTEGER :: l1
+
+    dbg = (exetyp==DEBUG) .AND. maswrk
+    out = (exetyp==DEBUG .OR. exetyp==GRD1 .OR. nprint==-3)
+
+    IF (dbg) WRITE(iw,'(/10X,38(1H-)/10X,"GRADIENT INCLUDING AO DERIVATIVE TERMS"/10X,38(1H-))')
+
+    CALL prepQuadGaussHermite
+!    CALL split_sp_basis
+
+    tol = RLN10*itol
+    norm = normf /= 1 .OR. normp /= 1
+
+    nqmmatm = 0
+!   QM/MM was effectively disabled in the original code
+    IF (nfg/=0) CALL getmmchg(nqmmatm,dum)
+
+    is_charmm = nchmat/=0
+    esd = nfg/=0 .AND. ifmostp==2 .AND. mplevl==0 .AND. resdim/=0 .AND. iand(ixesp,32)==0
+    is_qmmm = nqmmatm/=0
+
+    IF (.NOT.(is_charmm.OR.esd.OR.is_qmmm.OR.iseps)) RETURN
+
+    IF (is_charmm.AND.esd) THEN
+        WRITE(*,*) 'FMO and CHARMM are mutually exclusive!'
+        CALL abrt
+    END IF
+
+    !IF (maswrk) write(iw,'(A,5I10)') "OMP 1E GRD (EXTERNAL CHARGES)", nosp_basis%nshell, natfmo, nps, nchmat, nqmmatm
+
+    IF (norm) THEN
+        l1 = floor(sqrt(2.0*l2))
+        CALL bas_norm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+!   `D*ELMM` contains contribution to the forces on the
+!   external charges which are due to QM molecule.
+    IF (is_charmm) THEN
+        dxelmm(1:nchmat) = 0.0
+        dyelmm(1:nchmat) = 0.0
+        dzelmm(1:nchmat) = 0.0
+    END IF
+
+    nextat = 0
+    IF (esd) THEN
+        nextat = natfmo
+        IF (mdwpbc/=0.AND.ipbcfst/=1) nextat = natfmo*(1+nimgcell)
+    END IF
+
+    IF (is_qmmm) THEN
+        CALL valfm(loadfm)
+        lgeom  = loadfm + 1
+        last   = lgeom  + nqmmatm * 4
+        needmm = last   - loadfm - 1
+        CALL getfm(needmm)
+        CALL getmmchg(nqmmatm,x(lgeom))
+    END IF
+
+    nfg2 = (nfg*nfg-nfg)/2
+    lfmodei = lfmode+3*natfmo
+    IF (nfg/=0.AND.nbody>2) lfmodei = lfmode+3*natfmo*2
+
+!   temporary storage for 1e gradient
+    ALLOCATE(de_priv(3,nat))
+    de_priv(:,:) = 0.0
+
+!   Initialize parallel
+    nxt = ibtyp==1
+    next = -1
+    mine = -1
+
+!$omp parallel &
+!$omp   private( &
+!$omp       ii, jj, ic, icell, jc, ioff, ltmp, &
+!$omp       mine, next, &
+!$omp       shi, shj, cntp, &
+!$omp       dij, dernuc, &
+!$omp       znuc, cxyz, &
+!$omp       iaz, ifmoat, de1, de2 &
+!$omp   ) &
+!$omp   reduction(+:de_priv)
+
+    CALL cntp%alloc
+!   I shell
+    DO ii = 1, nosp_basis%nshell
+
+!       Go parallel!
+        !IF (nxt .AND. goparr) THEN
+        !   mine = mine + 1
+        !   IF (mine>next) CALL ddi_dlbnext(next)
+        !   IF (next/=mine) CYCLE
+        !END IF
+
+        CALL shi%fetch_by_id(ii)
+        de1(:) = 0.0
+        de2(:) = 0.0
+        IF (esd) ifmoat = transfer(x(liaglob+shi%atid-1),1)
+
+!       J shell
+        DO jj = 1, nosp_basis%nshell
+
+!           Go parallel!
+            !IF ((.NOT.nxt) .AND. goparr) THEN
+            IF (goparr) THEN
+                IF (mod(jj,nproc)/=me) CYCLE
+            END IF
+
+            CALL shj%fetch_by_id(jj)
+
+            CALL cntp%shell_pair(shi, shj, tol, dup=.false.)
+            IF (cntp%numpairs==0) CYCLE
+
+            CALL density_unordered(shi, shj, dij, denab)
+
+            nroots = (shi%ang+shj%ang-1)/2 + 1
+
+!           External charges (COSMO)
+            IF (iseps) THEN
+!$omp do schedule(dynamic,4)
+                DO ic = 1, nps
+                    iaz = iatsp(ic)
+                    IF (shi%atid==iaz) CYCLE
+                    znuc = -qscnet(ic)
+                    cxyz = corzan(1:3,ic)
+                    CALL comp_coulomb_der1(cntp, cxyz, znuc, dij, dernuc)
+                    de1 = de1 + dernuc(1:3)
+                    de_priv(1:3,iaz) = de_priv(1:3,iaz) - dernuc(1:3)
+                END DO
+!$omp end do nowait
+            END IF
+
+!           External charges (FMO-ESD)
+            IF (esd) THEN
+                DO icell = 1, nextat, natfmo
+!$omp do schedule(dynamic,4)
+                    DO ic = icell, icell+nextat-1
+                        CALL esdderz(nfg2,ic,x(llayfrg),x(lindat),x(liabdfg), &
+                             x(ljabdfg),x(lindbd),x(lfmozan),x(lfmoc), &
+                             x(lfzcor),x(liactfg),x(lndtfrg), &
+                             znuc,cxyz(1),cxyz(2),cxyz(3), &
+                             x(luntxyz),natfmo+nbdfg)
+                        IF (abs(znuc)<1.0e-8) CYCLE
+!                       The charge is of course either 0 or not, not merely close to 0.
+
+!                       For ESD the variables are set above in ESDDERZ.
+                        CALL comp_coulomb_der1(cntp, cxyz, znuc, dij, dernuc)
+
+!                       Save HELFEY gradient terms to 2nd body arrays
+                        !ioff = lfmodei+(ifmoat-1)*3
+                        !x(ioff:ioff+2) = x(ioff:ioff+2) + dernuc(1:3)
+                        de2 = de2 + dernuc
+
+!                       Save TVDER gradient terms to 2nd body arrays
+                        !!$omp critical
+                        ioff = lfmodei+(ic-1)*3
+                        IF (mdwpbc/=0) THEN
+                            jc = modulo(ic-1,natfmo)+1
+                            ioff = lfmode+3*natfmo+(jc-1)*3
+                        END IF
+                        x(ioff:ioff+2) = x(ioff:ioff+2) - dernuc(1:3)
+                        !!$omp end critical
+                    END DO
+!$omp end do
+                END DO
+            END IF
+
+!           External charges (CHARMM)
+            IF (is_charmm) THEN
+!$omp do schedule(dynamic,4)
+                DO ic = 1, nchmat
+                    znuc = -qchm(ic)
+                    cxyz(1) = xchm(ic)
+                    cxyz(2) = ychm(ic)
+                    cxyz(3) = zchm(ic)
+
+                    CALL comp_coulomb_der1(cntp, cxyz, znuc, dij, dernuc)
+
+                    de1 = de1 + dernuc(1:3)
+!                   CHARMM code below needs the force, not the gradient?
+                    dxelmm(ic) = dxelmm(ic) + dernuc(1)
+                    dyelmm(ic) = dyelmm(ic) + dernuc(2)
+                    dzelmm(ic) = dzelmm(ic) + dernuc(3)
+                END DO
+!$omp end do nowait
+            END IF
+
+!           External charges (QM/MM)
+!           The following block of code is essentially dead
+            IF (is_qmmm) THEN
+!$omp do schedule(dynamic,4)
+                DO ic = 1, nqmmatm
+                    ltmp = lgeom + (ic-1)*4
+                    cxyz   = x(ltmp:ltmp+2)
+                    znuc =-x(ltmp+3)
+
+                    CALL comp_coulomb_der1(cntp, cxyz, znuc, dij, dernuc)
+
+                    de1 = de1 + dernuc(1:3)
+                    !Missing in the original code: add gradient contribution to MM atoms?
+                    ! de_mm = de_mm - dernuc(1:3)
+                END DO
+!$omp end do nowait
+            END IF
+
+
+        END DO
+
+        de_priv(1:3,shi%atid) = de_priv(1:3,shi%atid) + de1(1:3)
+        IF (esd) THEN
+            !$omp critical
+            ioff = lfmodei+(ifmoat-1)*3
+            x(ioff:ioff+2) = x(ioff:ioff+2) + de2(1:3)
+            !$omp end critical
+        END IF
+    END DO
+!   End of shell loops
+
+!$omp end parallel
+
+    de(1:3,1:nat) = de(1:3,1:nat) + de_priv(1:3,1:nat)
+    DEALLOCATE(de_priv)
+
+    IF (out) THEN
+        IF (goparr) CALL ddi_gsumf(1503,de,3*nat)
+        IF (maswrk) THEN
+           WRITE(iw,'(/10X,38(1H-)/10X,"GRADIENT INCLUDING AO DERIVATIVE TERMS"/10X,38(1H-))')
+           CALL egout(de,nat)
+        END IF
+        IF (goparr) de(1:3,1:nat) = de(1:3,1:nat)/nproc
+!       Will only print partial contributions in parallel.
+        IF (esd) THEN
+           IF (maswrk) WRITE(iw,'(/10X,36(1H-)/10X,"ONE-ELECTRON ESD GRADIENT",/10X,36(1H-))')
+           CALL egout(x(lfmode+3*natfmo),natfmo)
+        END IF
+    END IF
+
+    IF (nqmmatm/=0) CALL retfm(needmm)
+    IF (goparr.AND.nxt) CALL ddi_dlbreset
+
+    IF (norm) THEN
+        CALL bas_denorm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+!*MODULE OMP_FMOGRD1 *DECK OMP_EXTHELFEY
+!> @brief Hellmann-Feynman force
+!> @details Compute derivative contributions due to the Hamiltonian
+!>   operator change w.r.t. shifts of nuclei. The contribution
+!>   of the form <i|T'+V'|j> is evaluated by Gauss-Rys quadrature.
+!>   This version handles spdfg and L shells.
+!> @note No relativistic methods available
+!
+!> @author Vladimir Mironov
+!
+!   REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!>
+!> @param[in,out]   denab   density matrix in packed format, remains unchanged on return
+!> @param[in]       l2      dimension of density matrix array
+ SUBROUTINE omp_helfey(denab,l2)
+
+    USE omp_lib, ONLY: omp_get_max_threads
+    INTEGER, PARAMETER :: mxchrm = 1
+
+    REAL(KIND=fp), PARAMETER :: &
+        DBUGME = transfer('HELFEY  ',1.0_fp)
+
+    REAL(KIND=fp), INTENT(INOUT) :: denab(:)
+    INTEGER, INTENT(IN) :: l2
+
+    COMMON /FMCOM / x(1)
+      REAL(KIND=fp) :: x
+
+    COMMON /GRAD  / de(3,MXATM)
+        REAL(KIND=fp) :: de
+!$omp threadprivate(/GRAD  /)
+
+    COMMON /INFOA / nat,ich,mul,num,nqmt,ne,na,nb, &
+                    zan(mxatm),c(3,mxatm),ian(mxatm)
+      INTEGER :: nat,ich,mul,num,nqmt,ne,na,nb,ian
+      REAL(KIND=fp) :: zan,c
+
+    COMMON /IOFILE/ ir,iw,ip,ijk,ipk,idaf,nav,ioda(950)
+      INTEGER :: ir,iw,ip,ijk,ipk,idaf,nav,ioda
+
+    COMMON /OUTPUT/ nprint,itol,icut,normf,normp,nopk
+      INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+    COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+      INTEGER :: me,master,nproc,ibtyp,iptim
+      LOGICAL :: goparr,dskwrk,maswrk
+
+    COMMON /RUNOPT/ runtyp,exetyp,nevals,nglevl,nhlevl
+      REAL(KIND=fp) :: runtyp,exetyp
+      INTEGER :: nevals,nglevl,nhlevl
+
+    COMMON /ROOT  / xx,u(13),w(13),nroots
+      REAL(KIND=fp) :: xx,u,w
+      INTEGER :: nroots
+!$omp threadprivate(/ROOT  /)
+
+    INTEGER :: &
+        next, mine, &
+        ii, jj, ic, max_threads
+
+    REAL(KIND=fp) :: tol
+
+    REAL(KIND=fp) :: dij(225), dernuc(3)
+    LOGICAL :: out, dbg, norm, nxt
+
+    TYPE(shell_t) :: shi, shj
+    TYPE(shpair_t) :: cntp
+
+    REAL(KIND=fp), ALLOCATABLE :: de_shar(:,:)
+    INTEGER :: l1
+
+    dbg = (exetyp==DEBUG .OR. exetyp==DBUGME) .AND. maswrk
+    out = (exetyp==DEBUG .OR. exetyp==DBUGME .OR. exetyp==GRD1 .OR. nprint==-3)
+
+    IF (dbg) WRITE(iw,'(/10X,22("-")/10X,"HELLMANN-FEYNMAN FORCE"/10X,22("-"))')
+
+    !IF (maswrk) write(iw,*) "OMP HELFEY"
+
+    CALL prepQuadGaussHermite
+!    CALL split_sp_basis
+
+    tol = RLN10*itol
+    norm = normf /= 1 .OR. normp /= 1
+
+    IF (norm) THEN
+        l1 = floor(sqrt(2.0*l2))
+        CALL bas_norm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+!   temporary storage for 1e gradient
+    ALLOCATE(de_shar(3,nat))
+    de_shar(:,:) = 0.0
+
+!   Initialize parallel
+    nxt = ibtyp==1
+    next = -1
+    mine = -1
+
+    max_threads = omp_get_max_threads()
+
+!$omp parallel &
+!$omp   num_threads(min(max_threads, nat)) &
+!$omp   private( &
+!$omp       ii, jj, ic, &
+!$omp       mine, next, &
+!$omp       shi, shj, cntp, &
+!$omp       dij, dernuc &
+!$omp   )
+
+    CALL cntp%alloc
+
+!   I shell
+    DO ii = 1, nosp_basis%nshell
+
+        CALL shi%fetch_by_id(ii)
+
+!       J shell
+        DO jj = 1, ii
+
+!           Go parallel!
+            IF (goparr) THEN
+                IF (mod(jj,nproc)/=me) CYCLE
+            END IF
+
+            CALL shj%fetch_by_id(jj)
+
+            CALL cntp%shell_pair(shi, shj, tol)
+            IF (cntp%numpairs==0) CYCLE
+
+            nroots = (shi%ang+shj%ang-1)/2 + 1
+
+            CALL density_ordered(shi, shj, dij, denab)
+
+!           Hellmann-Feynman term
+!ZCZ        HelFey terms for FMO ESP used to be calculated in ES1DER
+!ZCZ        in the new version, however, HELFEY terms are calculated here
+!ZCZ        besides, ESD fraction is calculated here utilizing FMOATFRG
+!$omp do schedule(dynamic)
+atoms:      DO ic = 1, nat
+
+                CALL comp_coulomb_helfeyder1(cntp, c(:,ic), -zan(ic), dij, dernuc)
+
+                de_shar(:,ic) = de_shar(:,ic)  + dernuc(:3)
+
+            END DO atoms
+!$omp end do
+
+#ifdef DEBUG
+            IF (dbg) THEN
+               WRITE(iw,'(1X,"HELFEY: SHELLS II,JJ=",2I5)') ii,jj
+               CALL egout(de,nat)
+            END IF
+#endif
+
+        END DO
+    END DO
+!   End of shell loops
+!$omp end parallel
+
+    de(:,1:nat) = de(:,1:nat) + de_shar(:3,1:nat)
+
+    IF (out) THEN
+        IF (goparr) CALL ddi_gsumf(1503,de,3*nat)
+        IF (maswrk) THEN
+           WRITE(iw,'(/10X,22(1H-)/10X,"HELLMANN-FEYNMAN FORCE"/10X,22(1H-))')
+           CALL egout(de,nat)
+        END IF
+        IF (goparr) de(:,1:nat) = de(:,1:nat)/nproc
+
+    END IF
+
+    IF (goparr.AND.nxt) CALL ddi_dlbreset
+
+    IF (norm) THEN
+        CALL bas_denorm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+    DEALLOCATE(de_shar)
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+!> @brief Basis function derivative contributions to gradient from external PCM charges
+!> @details Compute derivative integrals of type <ii'|h|jj> = <ii'|t+v|jj>
+!> @note No relativistic methods available
+!
+!> @author Vladimir Mironov
+!
+!   REVISION HISTORY:
+!> @date _Sep, 2018_ Initial release
+!>
+!> @param[in,out]   denab   density matrix in packed format, remains unchanged on return
+!> @param[in]       l2      dimension of density matrix array
+ SUBROUTINE omp_felecq(denab, chgs, feq, l2, xcts, ycts, zcts, tol, scrthr, norm, doscr)
+
+    REAL(KIND=fp), INTENT(INOUT) :: denab(:)
+    REAL(KIND=fp), INTENT(OUT) :: feq(:,:,:)
+    REAL(KIND=fp), INTENT(IN) :: chgs(:), xcts(:), ycts(:), zcts(:)
+    INTEGER, INTENT(IN) :: l2
+    LOGICAL, INTENT(IN) :: norm, doscr
+    REAL(KIND=fp), INTENT(IN) :: tol, scrthr
+
+    COMMON /INFOA / nat,ich,mul,num,nqmt,ne,na,nb, &
+                    zan(mxatm),c(3,mxatm),ian(mxatm)
+      INTEGER :: nat,ich,mul,num,nqmt,ne,na,nb,ian
+      REAL(KIND=fp) :: zan,c
+
+    COMMON /IOFILE/ ir,iw,ip,ijk,ipk,idaf,nav,ioda(950)
+      INTEGER :: ir,iw,ip,ijk,ipk,idaf,nav,ioda
+
+    COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+      INTEGER :: me,master,nproc,ibtyp,iptim
+      LOGICAL :: goparr,dskwrk,maswrk
+
+    COMMON /ROOT  / xx,u(13),w(13),nroots
+      REAL(KIND=fp) :: xx,u,w
+      INTEGER :: nroots
+!$omp threadprivate(/ROOT  /)
+
+    COMMON /PCMDIM/ mxsp,mxts,mempcm1,mempcm2,nts
+      INTEGER :: mxsp,mxts,mempcm1,mempcm2,nts
+
+    COMMON /PCMPAR/ ipcm,nft26,nft27,ikrep,ief,ip_f,nfmopcm,ihet
+      INTEGER :: ipcm,nft26,nft27,ikrep,ief,ip_f,nfmopcm,ihet
+
+    INTEGER :: iat, next, mine, ii, jj, ic, jc
+
+    REAL(KIND=fp) :: znuc
+
+    REAL(KIND=fp) :: dij(225), dernuc(3), cxyz(3)
+    LOGICAL :: nxt
+
+    TYPE(shell_t) :: shi, shj
+    TYPE(shpair_t) :: cntp
+
+    INTEGER :: l1
+
+    CALL prepQuadGaussHermite
+!    CALL split_sp_basis
+
+    !IF (maswrk) write(iw,'(A,5I10)') "OMP 1E GRD (EXTERNAL CHARGES)"
+
+    IF (norm) THEN
+        l1 = floor(sqrt(2.0*l2))
+        CALL bas_norm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+    CALL VCLR(FEQ,1,3*NAT*NTS)
+
+!   Initialize parallel
+    nxt = ibtyp==1
+
+!$omp parallel &
+!$omp   private( &
+!$omp       ii, jj, ic, jc, &
+!$omp       mine, next, &
+!$omp       shi, shj, cntp, &
+!$omp       dij, dernuc, &
+!$omp       znuc, cxyz, &
+!$omp       iat &
+!$omp   )
+    next = -1
+    mine = -1
+
+    CALL cntp%alloc
+!   I shell
+    DO ii = 1, nosp_basis%nshell
+
+!       Go parallel!
+        IF (nxt .AND. goparr) THEN
+           mine = mine + 1
+           IF (mine>next) CALL ddi_dlbnext(next)
+           IF (next/=mine) CYCLE
+        END IF
+
+        CALL shi%fetch_by_id(ii)
+        iat = shi%atid
+
+!       J shell
+        DO jj = 1, nosp_basis%nshell
+
+!           Go parallel!
+            IF (goparr.and..not.nxt) THEN
+                IF (mod(jj,nproc)/=me) CYCLE
+            END IF
+
+            CALL shj%fetch_by_id(jj)
+
+            CALL cntp%shell_pair(shi, shj, tol, dup=.false.)
+            IF (cntp%numpairs==0) CYCLE
+
+            CALL density_unordered(shi, shj, dij, denab)
+
+            nroots = (shi%ang+shj%ang-1)/2 + 1
+
+!           External charges (PCM)
+!$omp do schedule(dynamic,4)
+            DO ic = 1, nts
+                znuc = -chgs(ic)
+                cxyz(1) = xcts(ic)
+                cxyz(2) = ycts(ic)
+                cxyz(3) = zcts(ic)
+                IF ( doscr &
+                    .AND. (znuc**2 < scrthr**2 * sum((cxyz-shi%r)**2)) ) CYCLE
+                CALL comp_coulomb_der1(cntp, cxyz, znuc, dij, dernuc)
+                feq(1:3,iat,ic) = feq(1:3,iat,ic) + dernuc(1:3)
+            END DO
+!$omp end do nowait
+
+        END DO
+
+    END DO
+!   End of shell loops
+
+!$omp end parallel
+
+    IF (goparr) THEN
+       IF (nxt) CALL ddi_dlbreset
+       CALL ddi_gsumf(2450,feq,3*nat*nts)
+    END IF
+
+    IF (norm) THEN
+        CALL bas_denorm_matrix(denab, nosp_basis%bfnrm, l1)
+    END IF
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+END MODULE

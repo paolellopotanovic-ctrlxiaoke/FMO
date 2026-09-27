@@ -1,0 +1,69 @@
+! RI-CCSD(T) energy for the pi-stacked uracil dimer from 
+! S66 benchmark set using the cc-pVDZ and aug-cc-pVTZ-RI 
+! basis sets.
+!
+! (Please always run an EXETYP=CHECK job to get a detailed
+!  information about MWORDS, MEMDDI in $SYSTEM and IOSIZE in
+!  $CCINP. This is strongly recommended.)
+!
+!    ------------------------------------------------
+!             SUMMARY OF ENERGY CALCULATIONS
+!    ------------------------------------------------
+!     COUPLED-CLUSTER METHOD             CCSD(T)
+!     REFERENCE STATE ENERGY        -825.0123338600
+!     MP2 CORRELATION ENERGY          -2.3898179489
+!     CCSD CORRELATION ENERGY         -2.4433261208
+!     CCSD(T) CORRELATION ENERGY      -2.5388137419
+!    ------------------------------------------------
+!     TOTAL RI-MP2 ENERGY           -827.4021518088
+!     TOTAL RI-CCSD ENERGY          -827.4556599808
+!     TOTAL RI-CCSD(T) ENERGY       -827.5511476018
+!    ------------------------------------------------
+!
+! This job used 4 MPI ranks on 4 compute nodes and 24 OpenMP
+! threads associated with each MPI rank. The calculation took
+! ~36 minutes of wall time (12 minutes to complete CCSD 
+! iterations and 24 minutes to complete the (T) correction).
+! Test case generated on September 3, 2020.
+!
+ $CONTRL ISPHER=1 MULT=1 ICHARG=0 SCFTYP=RHF 
+         CCTYP=CCSD(T) RUNTYP=ENERGY $END
+ $BASIS GBASIS=CCD $END
+ $GUESS GUESS=HUCKEL $END
+ $SCF DIRSCF=.TRUE. $END
+ $INTGRL INTOMP=1 $END
+ $CCINP MAXCC=100 ICONV=7 CCERI=RI $END
+
+ $RICC CABNAM=ACCT EXTCAB=.FALSE. USEDM3=.FALSE. 
+                                  USEDM4=.TRUE. $END
+
+ $SYSTEM PARALL=.TRUE. TIMLIM=100 MWORDS=1200 $END
+ $DATA
+ Pi-stacked Uracil dimer (S66) cc-pVDZ/aug-cc-pVTZ-RI basis
+C1
+ N   7.0   1.376901114   0.839747467   0.734624939                              
+ H   1.0   1.051812405   1.386223848   1.523355628                              
+ C   6.0   1.308982712   1.457529813  -0.520654996                              
+ O   8.0   0.920561362   2.611077765  -0.625976731                              
+ N   7.0   2.011422932  -1.213208303  -0.098071819                              
+ H   1.0   1.727285511   0.990842685  -2.611995560                              
+ C   6.0   2.025736871  -0.697171229  -1.364397399                              
+ H   1.0   2.297516982  -1.391060038  -2.145645314                              
+ C   6.0   1.714512349   0.591937798  -1.612487223                              
+ H   1.0   2.129454216  -2.201520905   0.056829125                              
+ C   6.0   1.645945031  -0.485205977   1.018718301                              
+ O   8.0   1.561116018  -0.971816376   2.129809048                              
+ N   7.0  -1.355460893  -0.836045936   0.734624939                              
+ H   1.0  -1.030372184  -1.382522317   1.523355628                              
+ C   6.0  -1.287542491  -1.453828282  -0.520654996                              
+ O   8.0  -0.899121141  -2.607376234  -0.625976731                              
+ N   7.0  -1.989982711   1.216909834  -0.098071819                              
+ H   1.0  -1.705845290  -0.987141154  -2.611995560                              
+ C   6.0  -2.004296650   0.700872760  -1.364397399                              
+ H   1.0  -2.276076761   1.394761569  -2.145645314                              
+ C   6.0  -1.693072128  -0.588236267  -1.612487223                              
+ H   1.0  -2.108013995   2.205222436   0.056829125                              
+ C   6.0  -1.624504810   0.488907508   1.018718301                              
+ O   8.0  -1.539675797   0.975517907   2.129809048                              
+ $END                                                                           
+!TRAVIS-CI LARGE

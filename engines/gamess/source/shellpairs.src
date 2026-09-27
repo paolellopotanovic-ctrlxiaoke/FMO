@@ -1,0 +1,935 @@
+module shellpairs
+
+   use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      ! pp pairs
+   double precision,allocatable :: &
+               pp_PAV_PRE(:,:), &
+               pp_P_PRE(:,:), &
+               pp_DUM0_PRE(:), &
+               pp_DUM_PRE(:), &
+               pp_AB_PRE(:), &
+               pp_VAL_PRE(:,:)
+   integer,allocatable :: LOCpp(:)
+   integer :: N_pp_PRE
+
+   ! sp pairs
+   double precision,allocatable :: &
+               sp_PAV_PRE(:,:), &
+               sp_P_PRE(:,:), &
+               sp_DUM0_PRE(:), &
+               sp_DUM_PRE(:), &
+               sp_AB_PRE(:), &
+               sp_VAL_PRE(:,:)
+   integer,allocatable :: LOCsp(:)
+   integer :: N_sp_PRE
+
+   ! ss pairs
+   double precision,allocatable :: &
+               ss_PAV_PRE(:,:), &
+               ss_P_PRE(:,:), &
+               ss_DUM0_PRE(:), &
+               ss_DUM_PRE(:), &
+               ss_AB_PRE(:), &
+               ss_VAL_PRE(:,:)
+   integer,allocatable :: LOCss(:)
+   integer :: N_ss_PRE
+
+   ! sd pairs
+   double precision,allocatable :: &
+               sd_PAV_PRE(:,:), &
+               sd_P_PRE(:,:), &
+               sd_DUM0_PRE(:), &
+               sd_DUM_PRE(:), &
+               sd_AB_PRE(:), &
+               sd_VAL_PRE(:,:)
+   integer,allocatable :: LOCsd(:)
+   integer :: N_sd_PRE
+
+   ! pd pairs
+   double precision,allocatable :: &
+               pd_PAV_PRE(:,:), &
+               pd_P_PRE(:,:), &
+               pd_DUM0_PRE(:), &
+               pd_DUM_PRE(:), &
+               pd_AB_PRE(:), &
+               pd_VAL_PRE(:,:)
+   integer,allocatable :: LOCpd(:)
+   integer :: N_pd_PRE
+
+
+! dd pairs
+   double precision,allocatable :: &
+               dd_PAV_PRE(:,:), &
+               dd_P_PRE(:,:), &
+               dd_DUM0_PRE(:), &
+               dd_DUM_PRE(:), &
+               dd_AB_PRE(:), &
+               dd_VAL_PRE(:,:)
+   integer,allocatable :: LOCdd(:)
+   integer :: N_dd_PRE
+
+
+contains
+
+   SUBROUTINE deallocateShellpairs()
+      IF(ALLOCATED(LOCss)) DEALLOCATE(LOCss)
+      IF(ALLOCATED(ss_VAL_PRE)) DEALLOCATE(ss_VAL_PRE)
+      IF(ALLOCATED(ss_AB_PRE)) DEALLOCATE(ss_AB_PRE)
+      IF(ALLOCATED(ss_PAV_PRE)) DEALLOCATE(ss_PAV_PRE)
+      IF(ALLOCATED(ss_P_PRE)) DEALLOCATE(ss_P_PRE)
+      IF(ALLOCATED(ss_DUM_PRE)) DEALLOCATE(ss_DUM_PRE)
+      IF(ALLOCATED(ss_DUM0_PRE)) DEALLOCATE(ss_DUM0_PRE)
+      IF(ALLOCATED(LOCsp)) DEALLOCATE(LOCsp)
+      IF(ALLOCATED(sp_VAL_PRE)) DEALLOCATE(sp_VAL_PRE)
+      IF(ALLOCATED(sp_AB_PRE)) DEALLOCATE(sp_AB_PRE)
+      IF(ALLOCATED(sp_PAV_PRE)) DEALLOCATE(sp_PAV_PRE)
+      IF(ALLOCATED(sp_P_PRE)) DEALLOCATE(sp_P_PRE)
+      IF(ALLOCATED(sp_DUM_PRE)) DEALLOCATE(sp_DUM_PRE)
+      IF(ALLOCATED(sp_DUM0_PRE)) DEALLOCATE(sp_DUM0_PRE)
+      IF(ALLOCATED(LOCsd)) DEALLOCATE(LOCsd)
+      IF(ALLOCATED(sd_VAL_PRE)) DEALLOCATE(sd_VAL_PRE)
+      IF(ALLOCATED(sd_AB_PRE)) DEALLOCATE(sd_AB_PRE)
+      IF(ALLOCATED(sd_PAV_PRE)) DEALLOCATE(sd_PAV_PRE)
+      IF(ALLOCATED(sd_P_PRE)) DEALLOCATE(sd_P_PRE)
+      IF(ALLOCATED(sd_DUM_PRE)) DEALLOCATE(sd_DUM_PRE)
+      IF(ALLOCATED(sd_DUM0_PRE)) DEALLOCATE(sd_DUM0_PRE)
+      IF(ALLOCATED(LOCpp)) DEALLOCATE(LOCpp)
+      IF(ALLOCATED(pp_VAL_PRE)) DEALLOCATE(pp_VAL_PRE)
+      IF(ALLOCATED(pp_AB_PRE)) DEALLOCATE(pp_AB_PRE)
+      IF(ALLOCATED(pp_PAV_PRE)) DEALLOCATE(pp_PAV_PRE)
+      IF(ALLOCATED(pp_P_PRE)) DEALLOCATE(pp_P_PRE)
+      IF(ALLOCATED(pp_DUM_PRE)) DEALLOCATE(pp_DUM_PRE)
+      IF(ALLOCATED(pp_DUM0_PRE)) DEALLOCATE(pp_DUM0_PRE)
+      IF(ALLOCATED(LOCpd)) DEALLOCATE(LOCpd)
+      IF(ALLOCATED(pd_VAL_PRE)) DEALLOCATE(pd_VAL_PRE)
+      IF(ALLOCATED(pd_AB_PRE)) DEALLOCATE(pd_AB_PRE)
+      IF(ALLOCATED(pd_PAV_PRE)) DEALLOCATE(pd_PAV_PRE)
+      IF(ALLOCATED(pd_P_PRE)) DEALLOCATE(pd_P_PRE)
+      IF(ALLOCATED(pd_DUM_PRE)) DEALLOCATE(pd_DUM_PRE)
+      IF(ALLOCATED(pd_DUM0_PRE)) DEALLOCATE(pd_DUM0_PRE)
+      IF(ALLOCATED(LOCdd)) DEALLOCATE(LOCdd)
+      IF(ALLOCATED(dd_VAL_PRE)) DEALLOCATE(dd_VAL_PRE)
+      IF(ALLOCATED(dd_AB_PRE)) DEALLOCATE(dd_AB_PRE)
+      IF(ALLOCATED(dd_PAV_PRE)) DEALLOCATE(dd_PAV_PRE)
+      IF(ALLOCATED(dd_P_PRE)) DEALLOCATE(dd_P_PRE)
+      IF(ALLOCATED(dd_DUM_PRE)) DEALLOCATE(dd_DUM_PRE)
+      IF(ALLOCATED(dd_DUM0_PRE)) DEALLOCATE(dd_DUM0_PRE)
+   END SUBROUTINE deallocateShellpairs
+
+   SUBROUTINE PP_PRE_deallocate_arrays()
+      DEALLOCATE(pp_PAV_PRE)
+      DEALLOCATE(pp_P_PRE)
+      DEALLOCATE(pp_DUM0_PRE)
+      DEALLOCATE(pp_DUM_PRE)
+      DEALLOCATE(pp_AB_PRE)
+      DEALLOCATE(pp_VAL_PRE)
+      DEALLOCATE(LOCpp)
+   END SUBROUTINE PP_PRE_deallocate_arrays
+
+
+
+
+SUBROUTINE SS_PRE &
+(NSHELL,MXEX,EX,KMIN,KSTART, &
+KLOC,KATOM,C,KTYPE,KNG,KMAX)
+
+use omp_lib
+
+use gpuGlobalRimp2Eng,only: one,eight
+use gpuGlobalRimp2Eng,only: MXATM
+use shellProcessing,only: I_S_SHL,N_S_SHL
+
+implicit none
+
+double precision,intent(IN) :: EX(MXEX),C(3,MXATM)      
+integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+          KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+integer,intent(in) :: NSHELL,MXEX
+
+
+double precision :: TMP(3),VAL(3),P(3),PAV(3),CC(3,3)
+double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+double precision :: DUM,DUM0,DUM2
+integer :: ISH,IAT,NI,MINI,NGI, &
+LI,LOCI,I1,ILOC,IG, &
+JSH,JAT,NJ,MINJ, &
+NGJ,LJ,LOCJ,J1,JLOC,JG
+integer :: III,JJJ,II,JJ
+
+
+INTEGER :: iijj,JI,iijj_tmp
+
+
+   ! ~~~ Start ~~~
+IF(ALLOCATED(LOCss)) DEALLOCATE(LOCss)
+ALLOCATE(LOCss(N_S_SHL*(N_S_SHL+1)/2+1))
+LOCss(1)=0
+DO ii=1,N_S_SHL
+DO jj=1,ii
+iijj = jj + ii*(ii-1)/2
+ish = I_S_SHL(ii)
+jsh = I_S_SHL(jj)
+NGI = KNG(ish)
+NGJ = KNG(jsh)
+LOCss(iijj+1) = LOCss(iijj) + NGI*NGJ
+ENDDO
+ENDDO
+N_ss_PRE = LOCss(N_S_SHL*(N_S_SHL+1)/2+1)
+
+! ALLOCATE(RR_PRE(N_ss_PRE))
+IF(ALLOCATED(ss_VAL_PRE)) DEALLOCATE(ss_VAL_PRE)
+ALLOCATE(ss_VAL_PRE(3,N_S_SHL*(N_S_SHL+1)/2))
+
+IF(ALLOCATED(ss_AB_PRE)) DEALLOCATE(ss_AB_PRE)
+ALLOCATE(ss_AB_PRE(N_ss_PRE))
+
+IF(ALLOCATED(ss_PAV_PRE)) DEALLOCATE(ss_PAV_PRE)
+ALLOCATE(ss_PAV_PRE(3,N_ss_PRE))
+
+IF(ALLOCATED(ss_P_PRE)) DEALLOCATE(ss_P_PRE)
+ALLOCATE(ss_P_PRE(3,N_ss_PRE))
+
+IF(ALLOCATED(ss_DUM_PRE)) DEALLOCATE(ss_DUM_PRE)
+ALLOCATE(ss_DUM_PRE(N_ss_PRE))
+
+IF(ALLOCATED(ss_DUM0_PRE)) DEALLOCATE(ss_DUM0_PRE)
+ALLOCATE(ss_DUM0_PRE(N_ss_PRE))
+
+!$omp parallel do default(none) &
+!$omp shared(I_S_SHL,SS_DUM_PRE,KATOM,KNG,KSTART,SS_VAL_PRE) &
+!$omp shared(LOCSS,SS_AB_PRE,SS_P_PRE,SS_DUM0_PRE,N_S_SHL,C,EX) &
+!$omp private(III,JJJ,IIJJ,JSH,CC,JAT,NGJ,J1,VAL,RAB2,JI) &
+!$omp private(TMP,AIRAB,AJ,AB,ABINV,DUM,ISH,IAT,NGI,I1,AI,EXPB,P,DUM0)
+
+DO iijj_tmp = 0, N_S_SHL*(N_S_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+
+   ISH = I_S_SHL(III)
+   JSH = I_S_SHL(JJJ)
+
+   IAT = KATOM(ISH)
+   CC(1,1) = C(1,IAT)
+   CC(2,1) = C(2,IAT)
+   CC(3,1) = C(3,IAT)
+   NGI   = KNG(ISH)
+   I1    = KSTART(ISH)
+
+   JAT = KATOM(JSH)
+   CC(1,2) = C(1,JAT)
+   CC(2,2) = C(2,JAT)
+   CC(3,2) = C(3,JAT)
+   NGJ   = KNG(JSH)
+   J1    = KSTART(JSH)
+
+   VAL(1:3) = CC(1:3,1)-CC(1:3,2)
+ss_VAL_PRE(1:3,iijj) = VAL(1:3)
+   RAB2 = VAL(1)*VAL(1) + VAL(2)*VAL(2) + VAL(3)*VAL(3)
+
+   JI = 0
+   ! PRIMITIVE IN I-SHELL
+   DO IG = 1, NGI
+      AI = EX(I1+IG-1)
+      TMP(1:3) = AI*CC(1:3,1)
+      AIRAB = AI*RAB2
+      
+      ! PRIMITIVE IN J-SHELL
+      DO JG = 1, NGJ
+         JI = JI + 1
+         AJ = EX(J1+JG-1)
+         AB = AI+AJ
+      ss_AB_PRE(LOCss(iijj)+JI) = AB
+         ABINV = one/AB
+         DUM = AJ*ABINV*AIRAB
+      ss_DUM_PRE(LOCss(iijj)+JI) = DUM
+         EXPB = EXP(-DUM)
+         P(1:3) = (TMP(1:3)+AJ*CC(1:3,2))*ABINV
+      ss_P_PRE(1:3,LOCss(iijj)+JI) = P(1:3)  
+         DUM0 = ABINV*EXPB
+      ss_DUM0_PRE(LOCss(iijj)+JI) = DUM0
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE
+
+
+SUBROUTINE SP_PRE &
+    (NSHELL,MXEX,EX,KMIN,KSTART, &
+     KLOC,KATOM,C,KTYPE,KNG,KMAX)
+
+use omp_lib
+
+use gpuGlobalRimp2Eng,only: MXATM
+use shellProcessing,only: I_S_SHL,I_P_SHL,N_S_SHL,N_P_SHL
+
+implicit none
+
+double precision,intent(IN) :: EX(MXEX),C(3,MXATM)      
+integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+integer,intent(in) :: NSHELL,MXEX
+
+
+double precision :: TMP(3),VAL(3),P(3),PAV(3),CC(3,3)
+double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+double precision :: DUM,DUM0,DUM2
+integer :: ISH,IAT,NI,MINI,NGI, &
+     LI,LOCI,I1,ILOC,IG, &
+     JSH,JAT,NJ,MINJ, &
+     NGJ,LJ,LOCJ,J1,JLOC,JG
+integer :: III,JJJ,II,JJ
+
+INTEGER :: iijj,JI,iijj_tmp
+
+IF (ALLOCATED(LOCsp)) DEALLOCATE(LOCsp)
+ALLOCATE(LOCsp(N_S_SHL*N_P_SHL+1))
+LOCsp(1)=0
+DO ii=1,N_S_SHL
+DO jj=1,N_P_SHL
+   iijj = (II-1) * N_P_SHL + JJ
+   ish = I_S_SHL(ii)
+   jsh = I_P_SHL(jj)
+   NGI = KNG(ish)
+   NGJ = KNG(jsh)
+   LOCsp(iijj+1) = LOCsp(iijj) + NGI*NGJ
+ENDDO
+ENDDO
+N_sp_PRE = LOCsp(N_S_SHL*N_P_SHL+1)
+
+IF (ALLOCATED(sp_VAL_PRE)) DEALLOCATE(sp_VAL_PRE)
+ALLOCATE(sp_VAL_PRE(3,N_S_SHL*N_P_SHL))
+
+IF (ALLOCATED(sp_AB_PRE)) DEALLOCATE(sp_AB_PRE)
+ALLOCATE(sp_AB_PRE(N_sp_PRE))
+
+IF (ALLOCATED(sp_PAV_PRE)) DEALLOCATE(sp_PAV_PRE)
+ALLOCATE(sp_PAV_PRE(3,N_sp_PRE))
+
+IF (ALLOCATED(sp_P_PRE)) DEALLOCATE(sp_P_PRE)
+ALLOCATE(sp_P_PRE(3,N_sp_PRE))
+
+IF (ALLOCATED(sp_DUM_PRE)) DEALLOCATE(sp_DUM_PRE)
+ALLOCATE(sp_DUM_PRE(N_sp_PRE))
+
+IF (ALLOCATED(sp_DUM0_PRE)) DEALLOCATE(sp_DUM0_PRE)
+ALLOCATE(sp_DUM0_PRE(N_sp_PRE))
+
+!$omp parallel do collapse(2) default(none) &
+!$omp shared(I_S_SHL,I_P_SHL,KATOM,KNG,KSTART,SP_VAL_PRE,EX,LOCSP,SP_DUM_PRE) &
+!$omp shared(SP_PAV_PRE,SP_DUM0_PRE,N_P_SHL,N_S_SHL,SP_P_PRE,C,SP_AB_PRE,KMIN) &
+!$omp private(IIJJ,CC,JAT,NGJ,J1,VAL,RAB2,JI,TMP,AIRAB,AJ,AB,ABINV,DUM,EXPB) &
+!$omp private(ISH,JSH,IAT,NGI,I1,MINJ,AI,P,PAV,DUM0)
+
+DO III =1, N_S_SHL
+DO JJJ = 1,N_P_SHL
+   ISH = I_S_SHL(III)
+   JSH = I_P_SHL(JJJ)
+
+   iijj = (III-1) * N_P_SHL + JJJ
+
+   IAT = KATOM(ISH)
+   CC(1,1) = C(1,IAT)
+   CC(2,1) = C(2,IAT)
+   CC(3,1) = C(3,IAT)
+   NGI   = KNG(ISH)
+   I1    = KSTART(ISH)
+
+   JAT = KATOM(JSH)
+   CC(1,2) = C(1,JAT)
+   CC(2,2) = C(2,JAT)
+   CC(3,2) = C(3,JAT)
+   MINJ  = KMIN(JSH)
+   NGJ   = KNG(JSH)
+   J1    = KSTART(JSH)
+
+   VAL(1:3) = CC(1:3,1)-CC(1:3,2)
+sp_VAL_PRE(1:3,iijj) = VAL(1:3)
+
+   RAB2 = VAL(1)*VAL(1) + VAL(2)*VAL(2) + VAL(3)*VAL(3)
+
+   JI = 0
+
+   ! PRIMITIVE IN I-SHELL
+   DO IG = 1, NGI
+      AI = EX(I1+IG-1)
+      TMP(1:3) = AI*CC(1:3,1)
+      AIRAB = AI*RAB2
+      
+      ! PRIMITIVE IN J-SHELL
+      DO JG = 1, NGJ
+         JI = JI+1
+         AJ = EX(J1+JG-1)
+         AB = AI+AJ
+      sp_AB_PRE(LOCsp(iijj)+JI) = AB
+         ABINV = 1.0D00/AB
+         DUM = AJ*ABINV*AIRAB
+      sp_DUM_PRE(LOCsp(iijj)+JI) = DUM
+
+         EXPB = EXP(-DUM)
+
+         P(1:3) = (TMP(1:3)+AJ*CC(1:3,2))*ABINV
+      sp_P_PRE(1:3,LOCsp(iijj)+JI) = P(1:3)
+
+         PAV(1:3) = P(1:3)-CC(1:3,1)
+      sp_PAV_PRE(1:3,LOCsp(iijj)+JI) = PAV(1:3)
+
+         DUM0 = ABINV*EXPB
+      sp_DUM0_PRE(LOCsp(iijj)+JI) = DUM0
+      ENDDO
+   ENDDO
+
+ENDDO
+ENDDO
+
+!$omp end parallel do
+
+END SUBROUTINE SP_PRE
+
+
+
+SUBROUTINE SD_PRE &
+    (NSHELL,MXEX,EX,KMIN,KSTART, &
+     KLOC,KATOM,C,KTYPE,KNG,KMAX)
+
+use omp_lib
+
+use gpuGlobalRimp2Eng,only: MXATM
+use shellProcessing,only: I_S_SHL,I_D_SHL,N_S_SHL,N_D_SHL
+
+implicit none
+
+double precision,intent(IN) :: EX(MXEX),C(3,MXATM)      
+integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+integer,intent(in) :: NSHELL,MXEX
+
+
+double precision :: TMP(3),VAL(3),P(3),PAV(3),CC(3,3)
+double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+double precision :: DUM,DUM0,DUM2
+integer :: ISH,IAT,NI,MINI,NGI, &
+     LI,LOCI,I1,ILOC,IG, &
+     JSH,JAT,NJ,MINJ, &
+     NGJ,LJ,LOCJ,J1,JLOC,JG
+integer :: III,JJJ,II,JJ
+
+INTEGER :: iijj,JI,iijj_tmp
+
+
+IF (ALLOCATED(LOCsd)) DEALLOCATE(LOCsd)
+ALLOCATE(LOCsd(N_S_SHL*N_D_SHL+1))
+LOCsd(1)=0
+DO ii=1,N_S_SHL
+DO jj=1,N_D_SHL
+   iijj = (II-1) * N_D_SHL + JJ
+   ish = I_S_SHL(ii)
+   jsh = I_D_SHL(jj)
+   NGI = KNG(ish)
+   NGJ = KNG(jsh)
+   LOCsd(iijj+1) = LOCsd(iijj) + NGI*NGJ
+ENDDO
+ENDDO
+N_sd_PRE = LOCsd(N_S_SHL*N_D_SHL+1)
+
+! ALLOCATE(RR_PRE(N_sd_PRE))
+IF (ALLOCATED(sd_VAL_PRE)) DEALLOCATE(sd_VAL_PRE)
+ALLOCATE(sd_VAL_PRE(3,N_S_SHL*N_D_SHL))
+
+IF (ALLOCATED(sd_AB_PRE)) DEALLOCATE(sd_AB_PRE)
+ALLOCATE(sd_AB_PRE(N_sd_PRE))
+
+IF (ALLOCATED(sd_PAV_PRE)) DEALLOCATE(sd_PAV_PRE)
+ALLOCATE(sd_PAV_PRE(3,N_sd_PRE))
+
+IF (ALLOCATED(sd_P_PRE)) DEALLOCATE(sd_P_PRE)
+ALLOCATE(sd_P_PRE(3,N_sd_PRE))
+
+IF (ALLOCATED(sd_DUM_PRE)) DEALLOCATE(sd_DUM_PRE)
+ALLOCATE(sd_DUM_PRE(N_sd_PRE))
+
+IF (ALLOCATED(sd_DUM0_PRE)) DEALLOCATE(sd_DUM0_PRE)
+ALLOCATE(sd_DUM0_PRE(N_sd_PRE))
+
+!$omp parallel do collapse(2) default(none) &
+!$omp shared(I_S_SHL,I_D_SHL,KATOM,C,KNG,KSTART,KLOC,SD_VAL_PRE,sd_AB_PRE,KMIN) &
+!$omp shared(EX,LOCSD,SD_DUM_PRE,SD_P_PRE,SD_PAV_PRE,SD_DUM0_PRE,N_D_SHL,N_S_SHL) &
+!$omp private(IIJJ,CC,JAT,NGJ,J1,VAL,RAB2,JI,TMP,AIRAB,AJ,AB,ABINV,DUM,EXPB) &
+!$omp private(ISH,JSH,IAT,NGI,I1,MINJ,AI,P,PAV,DUM0)
+
+DO III =1, N_S_SHL
+DO JJJ = 1,N_D_SHL
+   ISH = I_S_SHL(III)
+   JSH = I_D_SHL(JJJ)
+
+   iijj = (III-1) * N_D_SHL + JJJ
+   
+   IAT = KATOM(ISH)
+   CC(1,1) = C(1,IAT)
+   CC(2,1) = C(2,IAT)
+   CC(3,1) = C(3,IAT)
+   NGI   = KNG(ISH)
+   I1    = KSTART(ISH)
+
+   JAT = KATOM(JSH)
+   CC(1,2) = C(1,JAT)
+   CC(2,2) = C(2,JAT)
+   CC(3,2) = C(3,JAT)
+   NGJ   = KNG(JSH)
+   J1    = KSTART(JSH)
+   
+
+   VAL(1:3) = CC(1:3,1)-CC(1:3,2)
+sd_VAL_PRE(1:3,iijj) = VAL(1:3)
+
+   RAB2 = VAL(1)*VAL(1) + VAL(2)*VAL(2) + VAL(3)*VAL(3)
+
+   JI=0
+   ! PRIMITIVE IN I-SHELL
+   DO IG = 1, NGI
+      AI = EX(I1+IG-1)
+      TMP(1:3) = AI*CC(1:3,1)
+      AIRAB = AI*RAB2
+      
+      ! PRIMITIVE IN J-SHELL
+      DO JG = 1, NGJ
+      JI = JI + 1
+         AJ = EX(J1+JG-1)
+         AB = AI+AJ
+      sd_AB_PRE(LOCsd(iijj)+JI) = AB
+         ABINV = one/AB
+         DUM = AJ*ABINV*AIRAB
+      sd_DUM_PRE(LOCsd(iijj)+JI) = DUM
+         EXPB = EXP(-DUM)
+         P(1:3) = (TMP(1:3)+AJ*CC(1:3,2))*ABINV
+      sd_P_PRE(1:3,LOCsd(iijj)+JI) = P(1:3)
+         PAV(1:3) = P(1:3)-CC(1:3,1)
+      sd_PAV_PRE(1:3,LOCsd(iijj)+JI) = PAV(1:3)
+         DUM0 = ABINV*EXPB
+      sd_DUM0_PRE(LOCsd(iijj)+JI) = DUM0
+      ENDDO
+   ENDDO
+ENDDO
+ENDDO
+
+END SUBROUTINE SD_PRE
+
+
+
+SUBROUTINE PP_PRE &
+ (NSHELL,MXEX,EX,KMIN,KSTART, &
+  KLOC,KATOM,C,KTYPE,KNG,KMAX)
+
+use omp_lib
+
+use gpuGlobalRimp2Eng,only: one,eight
+use gpuGlobalRimp2Eng,only: MXATM
+use shellProcessing,only: I_P_SHL,N_P_SHL
+
+implicit none
+
+double precision,intent(IN) :: EX(MXEX),C(3,MXATM)      
+integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+             KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+integer,intent(in) :: NSHELL,MXEX
+
+
+double precision :: TMP(3),VAL(3),P(3),PAV(3),CC(3,3)
+double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+double precision :: DUM,DUM0,DUM2
+integer :: ISH,IAT,NI,MINI,NGI, &
+  LI,LOCI,I1,ILOC,IG, &
+  JSH,JAT,NJ,MINJ, &
+  NGJ,LJ,LOCJ,J1,JLOC,JG
+integer :: III,JJJ,II,JJ
+
+
+INTEGER :: iijj,JI,iijj_tmp
+
+
+      ! ~~~ Start ~~~
+
+IF (ALLOCATED(LOCpp)) DEALLOCATE(LOCpp)
+ALLOCATE(LOCpp(N_P_SHL*(N_P_SHL+1)/2+1))
+LOCpp(1)=0
+DO ii=1,N_P_SHL
+DO jj=1,ii
+   iijj = jj + ii*(ii-1)/2
+   ish = I_P_SHL(ii)
+   jsh = I_P_SHL(jj)
+   NGI = KNG(ish)
+   NGJ = KNG(jsh)
+   LOCpp(iijj+1) = LOCpp(iijj) + NGI*NGJ
+ENDDO
+ENDDO
+N_pp_PRE = LOCpp(N_P_SHL*(N_P_SHL+1)/2+1)
+
+! ALLOCATE(RR_PRE(N_pp_PRE))
+IF (ALLOCATED(pp_VAL_PRE)) DEALLOCATE(pp_VAL_PRE)
+ALLOCATE(pp_VAL_PRE(3,N_P_SHL*(N_P_SHL+1)/2))
+
+IF (ALLOCATED(pp_AB_PRE)) DEALLOCATE(pp_AB_PRE)
+ALLOCATE(pp_AB_PRE(N_pp_PRE))
+
+IF (ALLOCATED(pp_PAV_PRE)) DEALLOCATE(pp_PAV_PRE)
+ALLOCATE(pp_PAV_PRE(3,N_pp_PRE))
+
+IF (ALLOCATED(pp_P_PRE)) DEALLOCATE(pp_P_PRE)
+ALLOCATE(pp_P_PRE(3,N_pp_PRE))
+
+IF (ALLOCATED(pp_DUM_PRE)) DEALLOCATE(pp_DUM_PRE)
+ALLOCATE(pp_DUM_PRE(N_pp_PRE))
+
+IF (ALLOCATED(pp_DUM0_PRE)) DEALLOCATE(pp_DUM0_PRE)
+ALLOCATE(pp_DUM0_PRE(N_pp_PRE))
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_P_SHL,KATOM,C,KNG,KSTART,PP_VAL_PRE,EX,LOCPP) &
+!$omp shared(PP_DUM_PRE,PP_P_PRE,PP_PAV_PRE,PP_DUM0_PRE,N_P_SHL,PP_AB_PRE) &
+!$omp private(III,JJJ,IIJJ,CC,JAT,NGJ,J1,VAL,RAB2,JI,TMP,AIRAB) &
+!$omp private(ISH,JSH,IAT,NGI,I1,AI,P,PAV,DUM0,AJ,AB,ABINV,DUM,EXPB)
+
+! DO III =1, N_P_SHL
+!    DO JJJ = 1,III
+
+
+DO iijj_tmp = 0, N_P_SHL*(N_P_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+
+   iijj =  iijj_tmp + 1
+
+   ISH = I_P_SHL(III)
+   JSH = I_P_SHL(JJJ)
+
+   IAT = KATOM(ISH)
+   CC(1,1) = C(1,IAT)
+   CC(2,1) = C(2,IAT)
+   CC(3,1) = C(3,IAT)
+   NGI   = KNG(ISH)
+   I1    = KSTART(ISH)
+
+   JAT = KATOM(JSH)
+   CC(1,2) = C(1,JAT)
+   CC(2,2) = C(2,JAT)
+   CC(3,2) = C(3,JAT)
+   NGJ   = KNG(JSH)
+   J1    = KSTART(JSH)
+
+   VAL(1:3) = CC(1:3,1)-CC(1:3,2)
+   pp_VAL_PRE(1:3,iijj) = VAL(1:3)
+
+   RAB2 = VAL(1)*VAL(1) + VAL(2)*VAL(2) + VAL(3)*VAL(3)
+
+   JI=0 
+   ! PRIMITIVE IN I-SHELL
+   DO IG = 1, NGI
+      AI = EX(I1+IG-1)
+      TMP(1:3) = AI*CC(1:3,1)
+      AIRAB = AI*RAB2
+      
+      ! PRIMITIVE IN J-SHELL
+      DO JG = 1, NGJ
+         JI=JI+1
+         AJ = EX(J1+JG-1)
+         AB = AI+AJ
+      pp_AB_PRE(LOCpp(iijj)+JI) = AB
+         ABINV = 1.0D00/AB
+         DUM = AJ*ABINV*AIRAB
+      pp_DUM_PRE(LOCpp(iijj)+JI) = DUM
+         EXPB = EXP(-DUM)
+         P(1:3) = (TMP(1:3)+AJ*CC(1:3,2))*ABINV
+      pp_P_PRE(1:3,LOCpp(iijj)+JI) = P(1:3)  
+         PAV(1:3) = P(1:3)-CC(1:3,1)
+      pp_PAV_PRE(1:3,LOCpp(iijj)+JI) = PAV(1:3)
+         DUM0 = ABINV*EXPB
+      pp_DUM0_PRE(LOCpp(iijj)+JI) = DUM0
+
+      ENDDO
+   ENDDO
+ENDDO
+!$omp end parallel do
+
+END SUBROUTINE PP_PRE
+
+
+
+SUBROUTINE PD_PRE &
+(NSHELL,MXEX,EX,KMIN,KSTART, &
+KLOC,KATOM,C,KTYPE,KNG,KMAX)
+
+use omp_lib
+
+use gpuGlobalRimp2Eng,only: MXATM
+use shellProcessing,only: I_P_SHL,I_D_SHL,N_P_SHL,N_D_SHL
+
+implicit none
+
+double precision,intent(IN) :: EX(MXEX),C(3,MXATM)      
+integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+          KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+integer,intent(in) :: NSHELL,MXEX
+
+
+double precision :: TMP(3),VAL(3),P(3),PAV(3),CC(3,3)
+double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+double precision :: DUM,DUM0,DUM2
+integer :: ISH,IAT,NI,MINI,NGI, &
+LI,LOCI,I1,ILOC,IG, &
+JSH,JAT,NJ,MINJ, &
+NGJ,LJ,LOCJ,J1,JLOC,JG
+integer :: III,JJJ,II,JJ
+
+INTEGER :: iijj,JI,iijj_tmp
+
+
+IF (ALLOCATED(LOCpd)) DEALLOCATE(LOCpd)
+ALLOCATE(LOCpd(N_P_SHL*N_D_SHL+1))
+LOCpd(1)=0
+DO ii=1,N_P_SHL
+DO jj=1,N_D_SHL
+   iijj = (II-1) * N_D_SHL + JJ
+   ish = I_P_SHL(ii)
+   jsh = I_D_SHL(jj)
+   NGI = KNG(ish)
+   NGJ = KNG(jsh)
+   LOCpd(iijj+1) = LOCpd(iijj) + NGI*NGJ
+ENDDO
+ENDDO
+N_pd_PRE = LOCpd(N_P_SHL*N_D_SHL+1)
+
+IF (ALLOCATED(pd_VAL_PRE)) DEALLOCATE(pd_VAL_PRE)
+ALLOCATE(pd_VAL_PRE(3,N_P_SHL*N_D_SHL))
+
+IF (ALLOCATED(pd_AB_PRE)) DEALLOCATE(pd_AB_PRE)
+ALLOCATE(pd_AB_PRE(N_pd_PRE))
+
+IF (ALLOCATED(pd_PAV_PRE)) DEALLOCATE(pd_PAV_PRE)
+ALLOCATE(pd_PAV_PRE(3,N_pd_PRE))
+
+IF (ALLOCATED(pd_P_PRE)) DEALLOCATE(pd_P_PRE)
+ALLOCATE(pd_P_PRE(3,N_pd_PRE))
+
+IF (ALLOCATED(pd_DUM_PRE)) DEALLOCATE(pd_DUM_PRE)
+ALLOCATE(pd_DUM_PRE(N_pd_PRE))
+
+IF (ALLOCATED(pd_DUM0_PRE)) DEALLOCATE(pd_DUM0_PRE)
+ALLOCATE(pd_DUM0_PRE(N_pd_PRE))
+
+!$omp parallel do default(none) &
+!$omp shared(I_P_SHL,I_D_SHL,KATOM,C,KNG,KSTART,PD_VAL_PRE,EX,LOCPD,pd_AB_PRE) &
+!$omp shared(PD_DUM_PRE,PD_P_PRE,PD_PAV_PRE,PD_DUM0_PRE,N_P_SHL,N_D_SHL) &
+!$omp private(III,JJJ,IIJJ,CC,JAT,NGJ,J1,VAL,RAB2,JI,TMP,AIRAB) &
+!$omp private(ISH,JSH,IAT,NGI,I1,AI,P,PAV,DUM0,AJ,AB,ABINV,DUM,EXPB)
+
+DO iijj = 1, N_P_SHL*N_D_SHL
+
+   III = (iijj-1)/N_D_SHL + 1
+   JJJ = mod(iijj-1,N_D_SHL) + 1
+   ISH = I_P_SHL(III)
+   JSH = I_D_SHL(JJJ)
+   
+   IAT = KATOM(ISH)
+   CC(1,1) = C(1,IAT)
+   CC(2,1) = C(2,IAT)
+   CC(3,1) = C(3,IAT)
+   NGI   = KNG(ISH)
+   I1    = KSTART(ISH)
+
+   JAT = KATOM(JSH)
+   CC(1,2) = C(1,JAT)
+   CC(2,2) = C(2,JAT)
+   CC(3,2) = C(3,JAT)
+   NGJ   = KNG(JSH)
+   J1    = KSTART(JSH)
+
+   VAL(1:3) = CC(1:3,1)-CC(1:3,2)
+pd_VAL_PRE(1:3,iijj) = VAL(1:3)
+
+   RAB2 = VAL(1)*VAL(1) + VAL(2)*VAL(2) + VAL(3)*VAL(3)
+
+   JI=0
+   ! PRIMITIVE IN I-SHELL
+   DO IG = 1, NGI
+      AI = EX(I1+IG-1)
+      TMP(1:3) = AI*CC(1:3,1)
+      AIRAB = AI*RAB2
+      ! PRIMITIVE IN J-SHELL
+      DO JG = 1, NGJ
+   JI=JI+1
+         AJ = EX(J1+JG-1)
+         AB = AI+AJ
+   pd_AB_PRE(LOCpd(iijj)+JI) = AB
+         ABINV = one/AB
+         DUM = AJ*ABINV*AIRAB
+   pd_DUM_PRE(LOCpd(iijj)+JI) = DUM
+         EXPB = EXP(-DUM)
+         P(1:3) = (TMP(1:3)+AJ*CC(1:3,2))*ABINV
+   pd_P_PRE(1:3,LOCpd(iijj)+JI) = P(1:3)
+         PAV(1:3) = P(1:3)-CC(1:3,1)
+   pd_PAV_PRE(1:3,LOCpd(iijj)+JI) = PAV(1:3)
+         DUM0 = ABINV*EXPB
+   pd_DUM0_PRE(LOCpd(iijj)+JI) = DUM0
+      ENDDO
+   ENDDO
+ENDDO
+!$omp end parallel do
+
+END SUBROUTINE PD_PRE
+
+
+
+
+SUBROUTINE DD_PRE &
+(NSHELL,MXEX,EX,KMIN,KSTART, &
+KLOC,KATOM,C,KTYPE,KNG,KMAX)
+
+use omp_lib
+
+use gpuGlobalRimp2Eng,only: one,eight
+use gpuGlobalRimp2Eng,only: MXATM
+use shellProcessing,only: I_D_SHL,N_D_SHL
+
+implicit none
+
+double precision,intent(IN) :: EX(MXEX),C(3,MXATM)      
+integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+       KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+integer,intent(in) :: NSHELL,MXEX
+
+
+double precision :: TMP(3),VAL(3),P(3),PAV(3),CC(3,3)
+double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+double precision :: DUM,DUM0,DUM2
+integer :: ISH,IAT,NI,MINI,NGI, &
+LI,LOCI,I1,ILOC,IG, &
+JSH,JAT,NJ,MINJ, &
+NGJ,LJ,LOCJ,J1,JLOC,JG
+integer :: III,JJJ,II,JJ
+
+INTEGER :: iijj,JI,iijj_tmp
+
+
+! ~~~ Start ~~~
+IF (ALLOCATED(LOCdd)) DEALLOCATE(LOCdd)
+ALLOCATE(LOCdd(N_D_SHL*(N_D_SHL+1)/2+1))
+LOCdd(1)=0
+DO ii=1,N_D_SHL
+DO jj=1,ii
+iijj = jj + ii*(ii-1)/2
+ish = I_D_SHL(ii)
+jsh = I_D_SHL(jj)
+NGI = KNG(ish)
+NGJ = KNG(jsh)
+LOCdd(iijj+1) = LOCdd(iijj) + NGI*NGJ
+ENDDO
+ENDDO
+N_dd_PRE = LOCdd(N_D_SHL*(N_D_SHL+1)/2+1)
+
+! ALLOCATE(RR_PRE(N_dd_PRE))
+IF (ALLOCATED(dd_VAL_PRE)) DEALLOCATE(dd_VAL_PRE)
+ALLOCATE(dd_VAL_PRE(3,N_D_SHL*(N_D_SHL+1)/2))
+
+IF (ALLOCATED(dd_AB_PRE)) DEALLOCATE(dd_AB_PRE)
+ALLOCATE(dd_AB_PRE(N_dd_PRE))
+
+IF (ALLOCATED(dd_PAV_PRE)) DEALLOCATE(dd_PAV_PRE)
+ALLOCATE(dd_PAV_PRE(3,N_dd_PRE))
+
+IF (ALLOCATED(dd_P_PRE)) DEALLOCATE(dd_P_PRE)
+ALLOCATE(dd_P_PRE(3,N_dd_PRE))
+
+IF (ALLOCATED(dd_DUM_PRE)) DEALLOCATE(dd_DUM_PRE)
+ALLOCATE(dd_DUM_PRE(N_dd_PRE))
+
+IF (ALLOCATED(dd_DUM0_PRE)) DEALLOCATE(dd_DUM0_PRE)
+ALLOCATE(dd_DUM0_PRE(N_dd_PRE))
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_D_SHL,KATOM,C,KSTART,KNG,KLOC,LOCJ,DD_VAL_PRE,EX,dd_AB_PRE) &
+!$omp shared(LOCDD,DD_DUM_PRE,DD_P_PRE,DD_PAV_PRE,DD_DUM0_PRE,N_D_SHL) &
+!$omp private(III,JJJ,IIJJ,CC,JAT,NGJ,J1,VAL,RAB2,JI,TMP,AIRAB) &
+!$omp private(ISH,JSH,IAT,NGI,I1,AI,P,PAV,DUM0,AJ,AB,ABINV,DUM,EXPB)
+
+! DO ISH = 1,NSHELL
+!    DO JSH = 1,ISH
+DO iijj_tmp = 0, N_D_SHL*(N_D_SHL+1)/2-1
+
+III = (1 + sqrt(one+eight*iijj_tmp))/2
+JJJ = iijj_tmp - III*(III-1)/2 + 1
+iijj =  iijj_tmp + 1
+
+ISH = I_D_SHL(III)
+JSH = I_D_SHL(JJJ)
+
+   IAT = KATOM(ISH)
+   CC(1,1) = C(1,IAT)
+   CC(2,1) = C(2,IAT)
+   CC(3,1) = C(3,IAT)
+   I1    = KSTART(ISH)
+   NGI   = KNG(ISH)
+
+   JAT = KATOM(JSH)
+   CC(1,2) = C(1,JAT)
+   CC(2,2) = C(2,JAT)
+   CC(3,2) = C(3,JAT)
+   J1    = KSTART(JSH)
+   NGJ   = KNG(JSH)
+
+   VAL(1:3) = CC(1:3,1)-CC(1:3,2)
+dd_VAL_PRE(1:3,iijj) = VAL(1:3)
+
+   RAB2 = VAL(1)*VAL(1) + VAL(2)*VAL(2) + VAL(3)*VAL(3)
+
+   JI=0
+   ! PRIMITIVE IN I-SHELL
+   DO IG = 1, NGI
+      AI = EX(I1+IG-1)
+      TMP(1:3) = AI*CC(1:3,1)
+      AIRAB = AI*RAB2
+      
+      ! PRIMITIVE IN J-SHELL
+      DO JG = 1, NGJ
+         JI = JI + 1
+         AJ = EX(J1+JG-1)
+         AB = AI+AJ
+      dd_AB_PRE(LOCdd(iijj)+JI) = AB
+         ABINV = one/AB
+         DUM = AJ*ABINV*AIRAB
+      dd_DUM_PRE(LOCdd(iijj)+JI) = DUM
+         EXPB = EXP(-DUM)
+         P(1:3) = (TMP(1:3)+AJ*CC(1:3,2))*ABINV
+      dd_P_PRE(1:3,LOCdd(iijj)+JI) = P(1:3)  
+         PAV(1:3) = P(1:3)-CC(1:3,1)
+      dd_PAV_PRE(1:3,LOCdd(iijj)+JI) = PAV(1:3)
+         DUM0 = ABINV*EXPB
+      dd_DUM0_PRE(LOCdd(iijj)+JI) = DUM0
+      ENDDO
+   ENDDO
+ENDDO
+!$omp end parallel do
+END SUBROUTINE DD_PRE
+
+
+
+   SUBROUTINE sp_PRE_deallocate_arrays()
+      DEALLOCATE(sp_PAV_PRE)
+      DEALLOCATE(sp_P_PRE)
+      DEALLOCATE(sp_DUM0_PRE)
+      DEALLOCATE(sp_DUM_PRE)
+      DEALLOCATE(sp_AB_PRE)
+      DEALLOCATE(sp_VAL_PRE)
+      DEALLOCATE(LOCsp)
+   END SUBROUTINE sp_PRE_deallocate_arrays
+
+
+
+
+end module shellpairs

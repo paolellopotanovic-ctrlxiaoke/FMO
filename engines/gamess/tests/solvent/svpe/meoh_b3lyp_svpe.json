@@ -1,0 +1,84 @@
+{
+  "name": "meoh_b3lyp_svpe.log",
+  "validation": [
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "2.417018",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "SVP",
+      "name": "EGAS - SVP",
+      "value": "-115.65822031",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "EINT - SVP",
+      "value": "-115.65692317",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DINT - SVP",
+      "value": "0.00129714",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SVP",
+      "name": "DGRXN - SVP",
+      "value": "-0.01061776",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CAVITY SURFACE AREA - SS(V)PE",
+      "value": "258.46854",
+      "type": "float",
+      "precision": 5,
+      "tolerance": 0.005
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CAVITY VOLUME - SS(V)PE",
+      "value": "362.80477",
+      "type": "float",
+      "precision": 5,
+      "tolerance": 0.005
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "TOT SURFACE POLARIZATION CHARGE - SS(V)PE",
+      "value": "-0.14500300",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "SS(V)PE",
+      "name": "CHARGE PENETRATION - SS(V)PE",
+      "value": "-0.14687739",
+      "type": "float",
+      "precision": 8,
+      "tolerance": 4.9999999999999996e-06
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

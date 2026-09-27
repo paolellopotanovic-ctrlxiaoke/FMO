@@ -1,0 +1,17 @@
+ $contrl scftyp=rhf runtyp=makefp ispher=1  $end
+ $system mwords=500 $end
+ $basis  gbasis=n311 ngauss=6 ndfunc=3 nffunc=1 npfunc=2
+         diffsp=.t. diffs=.t. $end
+ $DAMP IFTTYP=3 $END
+ $MAKEFP FRAG=MeOH molpol=.f. disp7=.t. disp8=.t. aniso8=.f. $END
+ $SCF dirscf=.f. $end
+ $data
+ title
+ C1
+ O      8          0.9170907676   0.1991681924  -0.6894207466
+ H      1          1.4188857984   0.1346408861  -1.4843050578
+ C      6          1.5511502505  -0.4941537832   0.3501817527
+ H      1          0.9321296423  -0.3843207792   1.2297568389
+ H      1          1.6499607154  -1.5535043056   0.1268745583
+ H      1          2.5349503586  -0.0851801217   0.5663553683
+ $end

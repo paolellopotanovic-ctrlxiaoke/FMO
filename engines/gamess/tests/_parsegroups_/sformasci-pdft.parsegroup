@@ -1,0 +1,21 @@
+{
+  "parse_header" : "SF-ORMAS-PDFT ENERGY COMPONENTS",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)TOTAL SF-ORMAS-LIKE ENERGY =.*$",
+     "parse_name"   : "TOTAL SF-ORMAS-LIKE",
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_multiple_instances" : 5,
+     "parse_multiple_label" : "OUTPUT ORDER"
+   },
+   {
+     "regex_string" : "^(\\s*)STATE(\\s*)[0-9]+(\\s*)TOTAL SF-ORMAS-PDFT ENERGY =.*$",
+     "parse_name"   : "TOTAL SF-ORMAS-PDFT",
+     "parse_value_index" : 0,
+     "parse_line_offset" : 0,
+     "parse_multiple_instances" : 5,
+     "parse_multiple_label" : "OUTPUT ORDER"
+   }
+  ]
+}

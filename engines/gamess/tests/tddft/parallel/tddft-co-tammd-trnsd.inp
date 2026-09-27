@@ -1,0 +1,48 @@
+!    Tamm/Dancoff gradient test
+!
+!  Adapted from 'tddft-co-tammd.inp' by Christian Friedl in 2019 to show
+!  the TRNSD flag for TDDFT property calulations. All properties that are
+!  calculated using the transition density are printed directly after the
+!  stance:
+!
+!  PROPERTIES FOR THE PBE0     DFT FUNCTIONAL
+!   USING THE TRANSITION DENSITY BETWEEN
+!   THE GROUND STATE AND EXCITED STATE    1
+!
+!  The value of the transition dipole moment is the same
+!  when calculated using the TDDFT module:
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  0  A1        -113.1873774650    0.000
+!  1  E         -112.8754647808    8.488    -0.6752  0.2480 -0.0000    0.1076
+!
+!  and when calculated using the PROPERTY module:
+!
+!        DX          DY          DZ         /D/  (DEBYE)
+!  -1.716282    0.630479   -0.000000    1.828422
+!
+!  A comparison of the values requires a conversion from A.U to Debye.
+!
+!  We can also check, that all calculations which are made after
+!  processing the transition densitiy still yield the same results.
+!  Most prominent is the nuclear gradient of the excited state energy.
+!
+!  RMS GRADIENT =    0.084169928
+!
+ $contrl scftyp=rhf dfttyp=pbe0 tddft=excite runtyp=gradient $end
+ $system timlim=10 mwords=7 $end
+ $tddft  nstate=3 mult=1 iroot=1 tammd=.t.
+         tdprp=.t. trnsd=.t. $end
+ $guess  guess=huckel $end
+ $basis  gbasis=N31 ngauss=6 diffsp=.T. ndfunc=1 $end
+ $data
+CO...excitation to the three lowest singlet states
+Cnv 4
+
+C    6.0   0.0   0.0   0.0
+O    8.0   0.0   0.0   1.1497297
+ $end
+
+! TRAVIS-CI SMALL
+

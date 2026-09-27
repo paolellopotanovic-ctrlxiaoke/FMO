@@ -1,0 +1,45 @@
+!   (HF)5 1e- and 2e- IOTC energy
+!   direct SCF method (DIRSCF=.T.) can be adopted.
+!   RHF/SPKrDZC (Sapporo relativistic core/valence basis set)
+!   The basis has 120 contracted and 245 uncontracted AOs, containing up to d function.
+!
+!   final energy:
+!   direct SCF calculation
+!     the 1e- and 2e-LUT-IOTC (relwfn=lutiotc2, dirscf=.t.) run is
+!        FINAL RHF ENERGY IS     -500.5283045777 AFTER  10 ITERATIONS
+!   disk-based calculation
+!     the 1e- and 2e-LUT-IOTC (relwfn=lutiotc2, dirscf=.f.) run is
+!        FINAL RHF ENERGY IS     -500.5283045712 AFTER  10 ITERATIONS 
+!
+!   CPU time for all processes
+!   direct SCF calculation
+!     1e- and 2e-LUT-IOTC (relwfn=lutiotc2, dirscf=.t.): 11.80 [second]
+!   disk-based calculation
+!     1e- and 2e-LUT-IOTC (relwfn=lutiotc2, dirscf=.f.):  1.60 [second]
+!   on 1core of Intel(R) Xeon(R) Gold 5222 CPU @ 3.80GHz (17 April 2023)
+!
+!
+ $contrl runtyp=energy scftyp=rhf relwfn=lutiotc2
+         icharg=0 mult=1 ispher=1 $end
+ $system mwords=5 $end
+ $scf    dirscf=.t. $end
+ $guess  guess=huckel $end
+ $basis  gbasis=spkrdzc $end
+ $data
+test zigzag hexamer (HF)5
+C1
+F        9.0   0.000   0.000   0.000
+F        9.0   2.165   1.250   0.000
+F        9.0   4.330   0.000   0.000
+F        9.0   6.495   1.250   0.000
+F        9.0   8.660   0.000   0.000
+H        1.0  -0.840   0.485   0.000
+H        1.0   1.325   0.765   0.000
+H        1.0   3.490   0.485   0.000
+H        1.0   5.655   0.765   0.000
+H        1.0   7.820   0.485   0.000
+ $end 
+
+
+
+

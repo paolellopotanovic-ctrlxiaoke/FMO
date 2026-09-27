@@ -1,0 +1,21 @@
+{
+  "cohort": "Boltz2 Table 12 four-target FMO subset reconstructed from Chen/Ross structures",
+  "n_compounds": 87,
+  "counts": {
+    "CDK2": 16,
+    "JNK1": 21,
+    "P38": 34,
+    "TYK2": 16
+  },
+  "construction": "unique RDKit canonical isomeric SMILES; JNK1 alternate flip records collapsed",
+  "input_sha256": {
+    "cdk2_ligands.sdf": "06f3e239c52531d34405162cf6f68b5bc6de864fee7e73b27bf9b9887b48e040",
+    "jnk1_manual_flips_ligands.sdf": "880876d2494cc6f9d5851273e74935e7caa16c8892eeb4e4ceac444eae22a677",
+    "p38_ligands.sdf": "db90aa5812f46b9a73e7f2e71d0bb44b7c23d830a3a40dfca3f12a31bff0ea58",
+    "tyk2_ligands.sdf": "8cc5b64c524cc70b70a0075d68d9ea65a4a32e0e50fb88bd9f6678466b6b8a0b",
+    "cdk2_protein.pdb": "55be5cb91426420f7e55f0d4ba0dd6187130ba93378f7c7b542481e94f0ab23c",
+    "jnk1_manual_flips_protein.pdb": "44f374dfc9284cf1a7c132ccf4129d4b5c47687e9b8b90202a06ba5e68ea4c60",
+    "p38_protein.pdb": "3f8cec9dd6ae8879ff260b4ce100a69138f2edc64c9ee47b089269908244b3b8",
+    "tyk2_protein.pdb": "48f74bbee93e858b1af628edb4620ec12061f51dc0f93850346c68d0626f6a52"
+  }
+}

@@ -1,0 +1,487 @@
+MODULE omp_pcm
+
+    USE prec, ONLY: fp
+#ifdef GAMESS_NO_NORM2_INTRINSIC_PROVIDED
+    USE norm2_module, only: norm2
+#endif
+    IMPLICIT NONE
+
+    REAL(KIND=fp), PARAMETER :: &
+        FPI = 12.56637061_fp, &
+        DINVFPI = 1/FPI, &
+        ZERO = 0.0_fp, &
+        TOANGS = 0.52917724924_fp, &
+        ANTOAU = 1.0_fp/TOANGS
+
+    PRIVATE
+    PUBLIC omp_ascpot
+
+CONTAINS
+
+!-------------------------------------------------------------------------------
+
+!> @brief Charge-charge interaction via region scheme
+ SUBROUTINE omp_ascpot(istep,qin,pot,rmul,tmp,xcts,ycts,zcts,as,xe,ye,ze,re,isphe,list)
+
+    INTEGER, INTENT(IN) :: istep, isphe(*), list(*)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:), rmul(:,:), tmp(:,:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN) :: qin(:), xcts(:), ycts(:), zcts(:)
+    REAL(KIND=fp), INTENT(IN) :: as(*),xe(*),ye(*),ze(*),re(*)
+
+    COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+         INTEGER :: me,master,nproc,ibtyp,iptim
+         LOGICAL :: goparr,dskwrk,maswrk
+
+    COMMON /PCMDIM/ mxsp,mxts,mempcm1,mempcm2,nts
+       INTEGER :: mxsp, mxts, mempcm1, mempcm2, nts
+
+    COMMON /PCMITR/ rcut(2),thres,ipcmit,imul,mxdiis,nreg,mxitr1,mxitr2,modpap
+       REAL(KIND=fp) :: rcut,thres
+       INTEGER :: ipcmit,imul,mxdiis,nreg,mxitr1,mxitr2,modpap
+
+!    LOGICAL :: nxt
+    REAL(KIND=fp) :: r1, r2, rij, ei(3), ej(3)
+    INTEGER :: i, j, k, its
+    INTEGER :: listi, listip, listj, listjp
+!    INTEGER :: ipcount, next
+
+!   Clean pot array
+    pot(:) = ZERO
+
+!   Calculate region multipoles
+    CALL regmul(rmul,qin,tmp,xcts,ycts,zcts,xe,ye,ze,isphe,list)
+
+    IF (istep/=1) THEN
+        DO its = 1, nts
+            k = isphe(its)
+            tmp(its,1) = (xcts(its)-xe(k))/re(k)
+            tmp(its,2) = (ycts(its)-ye(k))/re(k)
+            tmp(its,3) = (zcts(its)-ze(k))/re(k)
+        END DO
+    END IF
+
+!    nxt = ibtyp==1
+!    next  = -1
+!    ipcount = -1
+
+    r1 = (rcut(1)*antoau)**2
+    r2 = (rcut(2)*antoau)**2
+
+!   CALL cpu_time(t0)
+
+!$omp parallel &
+!$omp   private( &
+!$omp       i, j, &
+!$omp       listi, listj, listip, listjp, &
+!$omp       ei, ej, rij  &
+!$omp   )
+
+!$omp do schedule(dynamic)
+    DO i = 1, nreg
+
+        listi  = list(i)
+        listip = list(i+1)-1
+
+        ei(1) = xe(isphe(listi))
+        ei(2) = ye(isphe(listi))
+        ei(3) = ze(isphe(listi))
+
+!       No I,J permutation symmetry is used in the loops. Should it be
+!       possible to halve work here?
+        DO j = 1, nreg
+            IF (goparr) THEN
+                IF (mod(j,nproc)/=me) CYCLE
+            END IF
+
+            IF (i==j) THEN ! Compute interaction of region internal charges
+                CALL ascpot_intrareg(istep, pot, xcts, ycts, zcts, qin, tmp, listi, listip)
+
+            ELSE ! Region-region interaction
+
+                listj  = list(j)
+                listjp = list(j+1)-1
+
+                ej(1) = xe(isphe(listj))
+                ej(2) = ye(isphe(listj))
+                ej(3) = ze(isphe(listj))
+
+                rij = sum((ei-ej)**2)
+
+                IF (rij<r1) THEN
+                    CALL ascpot_interreg_exact(istep, pot, xcts, ycts, zcts, qin, tmp, &
+                        listi, listip, listj, listjp)
+                ELSE IF (imul>0) THEN
+                    CALL ascpot_interreg_mult(istep, pot, xcts, ycts, zcts, tmp, &
+                        ej, rij<r2, rmul(:,j), imul, listi, listip)
+                END IF
+
+            END IF
+
+        END DO
+    END DO
+!$omp end do
+
+!$omp end parallel
+
+    IF (goparr) THEN
+!       IF (nxt) CALL ddi_dlbreset
+        CALL ddi_gsumf(2470,pot,nts)
+    END IF
+
+!   Surface area weighting (only for step 2)
+    IF (istep==2) THEN
+        pot(1:nts) = -as(1:nts)*DINVFPI*pot(1:nts) !!!!!!!!
+    END IF
+!   call cpu_time(tf)
+!   write(6,*) 'wwwttotal',tf-t0,istep
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_intrareg(istep, pot, xcts, ycts, zcts, qin, tmp, li0, li1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), qin(:), tmp(:,:)
+    INTEGER, INTENT(IN)                      :: istep, li0, li1
+
+!   Self-region interaction (within region)
+    IF (istep==1) THEN
+        CALL ascpot_intrareg1(pot, xcts, ycts, zcts, qin, li0, li1)
+    ELSE
+        CALL ascpot_intrareg2(pot, xcts, ycts, zcts, qin, tmp, li0, li1)
+    END IF
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_interreg_exact(istep, pot, xcts, ycts, zcts, qin, tmp, li0, li1, lj0, lj1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), qin(:), tmp(:,:)
+    INTEGER, INTENT(IN)                      :: istep, li0, li1, lj0, lj1
+
+!   Region-region full interaction (near range)
+    IF (istep==1) THEN
+        CALL ascpot_exact1(pot, xcts, ycts, zcts, qin, li0, li1, lj0, lj1)
+    ELSE
+        CALL ascpot_exact2(pot, xcts, ycts, zcts, qin, tmp, li0, li1, lj0, lj1)
+    END IF
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_interreg_mult(istep, pot, xcts, ycts, zcts, tmp, ej, do_dq, rmul, imul, li0, li1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), tmp(:,:)
+    REAL(KIND=fp), INTENT(IN)                :: ej(3), rmul(10)
+    INTEGER, INTENT(IN)                      :: istep, imul, li0, li1
+    LOGICAL, INTENT(IN)                      :: do_dq
+
+!   Region-region multipole interaction (middle and long range)
+    IF (istep==1) THEN
+       CALL ascpot_interreg1(pot, xcts, ycts, zcts, ej, do_dq, rmul, imul, li0, li1)
+    ELSE
+        CALL ascpot_interreg2(pot, xcts, ycts, zcts, tmp, ej, do_dq, rmul, imul, li0, li1)
+    END IF
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_interreg1(pot, xcts, ycts, zcts, ej, do_dq, rmul, imul, li0, li1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:)
+    REAL(KIND=fp), INTENT(IN)                :: ej(3), rmul(10)
+    LOGICAL, INTENT(IN)                      :: do_dq
+    INTEGER, INTENT(IN)                      :: imul, li0, li1
+
+    REAL(KIND=fp) :: dinvr, poti
+    REAL(KIND=fp) :: xyzd(3)
+    INTEGER :: ii
+
+    DO ii = li0, li1
+        xyzd(1) = xcts(ii)-ej(1)
+        xyzd(2) = ycts(ii)-ej(2)
+        xyzd(3) = zcts(ii)-ej(3)
+
+        dinvr = 1/norm2(xyzd)
+        poti = ZERO
+
+!       Charge - region monopole
+        poti = poti+rmul(1)*dinvr
+        IF (do_dq) THEN
+!           Charge - region dipole
+            IF (imul>=2) poti = poti + (dinvr**3)*sum(rmul(2:4)*xyzd)
+
+!           Charge - region quadrupole
+            IF (imul>=3) poti = poti + ascpot_qdp1(rmul(5:10),dinvr,xyzd)
+        END IF
+
+        pot(ii) = pot(ii) + poti
+
+    END DO
+
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_interreg2(pot, xcts, ycts, zcts, tmp, ej, do_dq, rmul, imul, li0, li1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), tmp(:,:)
+    REAL(KIND=fp), INTENT(IN)                :: ej(3), rmul(10)
+    LOGICAL, INTENT(IN)                      :: do_dq
+    INTEGER, INTENT(IN)                      :: imul, li0, li1
+
+    REAL(KIND=fp) :: scal, dinvr, poti
+    REAL(KIND=fp) :: xyzd(3)
+    INTEGER :: ii
+
+    DO ii = li0, li1
+        xyzd(1) = xcts(ii)-ej(1)
+        xyzd(2) = ycts(ii)-ej(2)
+        xyzd(3) = zcts(ii)-ej(3)
+
+        dinvr = 1/norm2(xyzd)
+        poti = ZERO
+
+        scal = sum(xyzd*tmp(ii,1:3))
+        poti = poti - rmul(1)*scal*dinvr**3
+        IF (do_dq) THEN
+!           Charge - region dipole
+            IF (imul>=2) poti = poti + ascpot_dip2(rmul(2:4), dinvr, scal, xyzd, tmp(ii,1:3))
+
+!           Charge - region quadrupole
+            IF (imul>=3) poti = poti + ascpot_qdp2(rmul(5:10), dinvr, scal, xyzd, tmp(ii,1:3))
+        END IF
+
+        pot(ii) = pot(ii) + poti
+
+    END DO
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_intrareg1(pot, xcts, ycts, zcts, qin, li0, li1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), qin(:)
+    INTEGER, INTENT(IN)                      :: li0, li1
+    REAL(KIND=fp) :: rjkm1
+    REAL(KIND=fp) :: xyzd(3)
+    INTEGER :: j, k
+
+    DO j = li0, li1
+        DO k = j+1, li1
+            xyzd(1) = xcts(j) - xcts(k)
+            xyzd(2) = ycts(j) - ycts(k)
+            xyzd(3) = zcts(j) - zcts(k)
+
+            rjkm1 = norm2(xyzd)
+            pot(j) = pot(j) + qin(k)/rjkm1
+            pot(k) = pot(k) + qin(j)/rjkm1
+        END DO
+    END DO
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_intrareg2(pot, xcts, ycts, zcts, qin, tmp, li0, li1)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), qin(:), tmp(:,:)
+    INTEGER, INTENT(IN)                      :: li0, li1
+    REAL(KIND=fp) :: rjkm1, scalj, scalk
+    REAL(KIND=fp) :: xyzd(3)
+    INTEGER :: j, k
+
+    DO j = li0, li1
+        DO k = j+1, li1
+            xyzd(1) = xcts(j) - xcts(k)
+            xyzd(2) = ycts(j) - ycts(k)
+            xyzd(3) = zcts(j) - zcts(k)
+
+            rjkm1 = norm2(xyzd)
+
+            scalj = sum(xyzd*tmp(j,1:3))
+            scalk = sum(xyzd*tmp(k,1:3))
+
+            pot(j) = pot(j) - qin(k)*scalj/rjkm1**3
+            pot(k) = pot(k) + qin(j)*scalk/rjkm1**3
+        END DO
+    END DO
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_exact1(pot, xcts, ycts, zcts, qin, li0, li1, lj0, lj1)
+!dir$ attributes inline :: ascpot_exact1
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), qin(:)
+    INTEGER, INTENT(IN)                      :: li0, li1, lj0, lj1
+
+    REAL(KIND=fp) :: rjkm1
+    REAL(KIND=fp) :: poti
+    REAL(KIND=fp) :: xyzd(3)
+    INTEGER :: ii, kk
+
+    DO ii = li0, li1
+        poti = ZERO
+        DO kk = lj0, lj1
+            xyzd(1) = xcts(ii) - xcts(kk)
+            xyzd(2) = ycts(ii) - ycts(kk)
+            xyzd(3) = zcts(ii) - zcts(kk)
+
+            rjkm1 = norm2(xyzd)
+
+            poti = poti + qin(kk)/rjkm1
+        END DO
+        pot(ii) = pot(ii) + poti
+    END DO
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ SUBROUTINE ascpot_exact2(pot, xcts, ycts, zcts, qin, tmp, li0, li1, lj0, lj1)
+!dir$ attributes inline :: ascpot_exact2
+    REAL(KIND=fp), CONTIGUOUS, INTENT(INOUT) :: pot(:)
+    REAL(KIND=fp), CONTIGUOUS, INTENT(IN)    :: xcts(:), ycts(:), zcts(:), qin(:), tmp(:,:)
+    INTEGER, INTENT(IN)                      :: li0, li1, lj0, lj1
+
+    REAL(KIND=fp) :: rjkm1, scal, poti, xyzd(3)
+    INTEGER :: ii, kk
+
+    DO ii = li0, li1
+        poti = ZERO
+        DO kk = lj0, lj1
+            xyzd(1) = xcts(ii) - xcts(kk)
+            xyzd(2) = ycts(ii) - ycts(kk)
+            xyzd(3) = zcts(ii) - zcts(kk)
+
+            rjkm1 = norm2(xyzd)
+            scal = sum(xyzd*tmp(ii,1:3))
+
+            poti = poti - qin(kk)*scal/rjkm1**3
+        END DO
+        pot(ii) = pot(ii) + poti
+    END DO
+ END SUBROUTINE
+
+!-------------------------------------------------------------------------------
+
+ FUNCTION ascpot_qdp1(rqdp,dinvr,xyzd) RESULT(pot)
+!dir$ attributes inline :: ascpot_qdp1
+    REAL(KIND=fp) :: pot
+    REAL(KIND=fp), INTENT(IN) :: rqdp(6), xyzd(3), dinvr
+    REAL(KIND=fp) :: p1, p2
+
+    p1 = ( rqdp(1)*xyzd(1)**2 + &
+           rqdp(4)*xyzd(2)**2 + &
+           rqdp(6)*xyzd(3)**2 )/6
+
+    p2 = ( rqdp(2)*xyzd(1)*xyzd(2) + &
+           rqdp(3)*xyzd(1)*xyzd(3) + &
+           rqdp(5)*xyzd(2)*xyzd(3) )/3
+
+    pot = dinvr**5 * (p1 + p2)
+ END FUNCTION
+
+ FUNCTION ascpot_dip2(rdip, dinvr, scal, xyzd, tmp) RESULT(pot)
+!dir$ attributes inline :: ascpot_dip2
+    REAL(KIND=fp) :: pot
+    REAL(KIND=fp), INTENT(IN) :: rdip(3), xyzd(3), tmp(3)
+    REAL(KIND=fp), INTENT(IN) :: dinvr, scal
+    REAL(KIND=fp) :: scal1, scal2
+
+    scal1 = sum(rdip*xyzd)
+    scal2 = sum(rdip*tmp)
+    pot = -(3*scal1*scal*dinvr**2 - 2*scal2)*dinvr**3
+ END FUNCTION
+
+ FUNCTION ascpot_qdp2(rqdp, dinvr, scal, xyzd, tmp) RESULT(pot)
+!dir$ attributes inline :: ascpot_qdp2
+    REAL(KIND=fp) :: pot
+    REAL(KIND=fp), INTENT(IN) :: rqdp(6), xyzd(3), tmp(3)
+    REAL(KIND=fp), INTENT(IN) :: dinvr, scal
+    REAL(KIND=fp) :: eq(3)
+
+    eq(1) = sum(rqdp(1:3)*xyzd)
+
+    eq(2) = rqdp(2) * xyzd(1) + &
+            rqdp(4) * xyzd(2) + &
+            rqdp(5) * xyzd(3)
+
+    eq(3) = rqdp(3) * xyzd(1) + &
+            rqdp(5) * xyzd(2) + &
+            rqdp(6) * xyzd(3)
+
+    pot = -(2.5*scal*dinvr**2 + sum(eq*tmp)) * dinvr**5
+ END FUNCTION
+
+!-------------------------------------------------------------------------------
+
+!> @brief Region multipoles up to quadrupoles
+ SUBROUTINE regmul2(rmul,qin,tmp,xcts,ycts,zcts,xe,ye,ze,isphe,list)
+
+    IMPLICIT NONE
+    REAL(KIND=fp), PARAMETER :: THIRD = 1.0_fp/3.0_fp
+
+    REAL(KIND=fp) :: rmul(10,mxsp), tmp(nts,3), qin(nts), xcts(*),ycts(*), &
+              zcts(*), xe(*), ye(*), ze(*)
+    INTEGER :: isphe(*), list(*)
+
+    COMMON /PCMDIM/ mxsp,mxts,mempcm1,mempcm2,nts
+       INTEGER :: mxsp, mxts, mempcm1, mempcm2, nts
+
+    COMMON /PCMITR/ rcut(2),thres,ipcmit,imul,mxdiis,nreg,mxitr1,mxitr2,modpap
+       REAL(KIND=fp) :: rcut,thres
+       INTEGER :: ipcmit,imul,mxdiis,nreg,mxitr1,mxitr2,modpap
+
+    INTEGER :: its, i, j, l, i0, i1
+!    REAL(KIND=fp) :: xx, xy, xz, yy, yz, zz, r2
+    REAL(KIND=fp) :: r2
+
+    IF (imul<=0) RETURN
+
+    rmul = 0.0
+
+    DO i = 1, nreg
+       rmul(1,i) = sum( qin(list(i):list(i+1)-1) )
+    END DO
+
+    IF (imul==1) RETURN
+
+!   Distances relatives to the region center
+    DO its = 1, nts
+       l = isphe(its)
+       tmp(its,1) = xcts(its) - xe(l)
+       tmp(its,2) = ycts(its) - ye(l)
+       tmp(its,3) = zcts(its) - ze(l)
+    END DO
+
+!   Dipoles
+    DO i = 1, nreg
+       i0 = list(i)
+       i1 = list(i+1)-1
+       rmul(2,i) = sum(qin(i0:i1)*tmp(i0:i1,1)) !dx
+       rmul(3,i) = sum(qin(i0:i1)*tmp(i0:i1,2)) !dy
+       rmul(4,i) = sum(qin(i0:i1)*tmp(i0:i1,3)) !dz
+    END DO
+
+    IF (imul==2) RETURN
+
+!   Quadrupoles
+    DO i = 1, nreg
+       rmul(5:10,i) = ZERO
+       DO j = list(i), list(i+1)-1
+          r2 = sum(tmp(j,:)**2)*THIRD
+          rmul( 5,i) = rmul( 5,i) + qin(j) * ( tmp(j,1)*tmp(j,1)-r2 )  !qxx
+          rmul( 6,i) = rmul( 6,i) + qin(j) * ( tmp(j,1)*tmp(j,2)    )  !qxy
+          rmul( 7,i) = rmul( 7,i) + qin(j) * ( tmp(j,1)*tmp(j,3)    )  !qxz
+          rmul( 8,i) = rmul( 8,i) + qin(j) * ( tmp(j,2)*tmp(j,2)-r2 )  !qyy
+          rmul( 9,i) = rmul( 9,i) + qin(j) * ( tmp(j,2)*tmp(j,3)    )  !qyz
+          rmul(10,i) = rmul(10,i) + qin(j) * ( tmp(j,3)*tmp(j,3)-r2 )  !qzz
+       END DO
+       rmul(5:10,i) = rmul(5:10,i) * 3.0_fp
+    END DO
+
+ END SUBROUTINE
+
+END MODULE

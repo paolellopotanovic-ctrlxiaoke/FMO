@@ -1,0 +1,137 @@
+#define __PRINT_ESS 0
+MODULE gpu_ompmod_tdhf_apb
+    USE omp_lib
+    USE prec, ONLY: fp
+    IMPLICIT NONE
+    PRIVATE
+    PUBLIC gpu_TWOEI_CPHFDYN_APB_omp
+CONTAINS
+
+!*MODULE OMPMOD   *DECK OMPMOD_TWOEI_JK
+  SUBROUTINE gpu_TWOEI_CPHFDYN_APB_omp(SCHWRZ,NINTN,L1,L2,XINTS,&
+             NSH2,MAXG,IA,DA,FA,DSH,NXYZ,cutoff, oflag, &
+             len1,len2,len3,len4,cmax)
+      use comm_NSHEL_sp, only: KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP,CD,NSHELL
+      USE comm_FMTTBL, only: RFINC,FGRID,XGRID,RMR,RXINC,TMAX
+      use comm_B_1, only: CO
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use DATA_IDPOP, only: IDPOP
+      use mod_shell_index
+      use gpu_ompmod, only: gpu_shell_index_SPshell,gpu_shell_index_Dshell
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+ use mod_xint_scrn, only : nbraJ01,nbraJ02,nbraJ03,nbraJ04,nbraJ05,nbraJ06, &
+     nketJ02,nketJ03,nketJ05, xintBJ01,xintBJ02,xintBJ03,xintBJ04,xintBJ05,xintBJ06, &
+     xintKJ02,xintKJ03,xintKJ05
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    LOGICAL, INTENT(IN) :: schwrz,oflag
+    INTEGER, INTENT(IN) ::l1, l2, nsh2, nxyz, maxg, &
+      len1,len2,len3,len4, ia(l1)
+    double precision, INTENT(IN) :: cutoff, cmax(mxgtot)
+    double precision, INTENT(IN) :: da(l2*nxyz), &
+      xints(nsh2), dsh(nsh2)
+    double precision, INTENT(INOUT) :: FA(l2*nxyz)
+      integer, intent(inout) :: NINTN
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    INTEGER :: lstri,lstrj,lstrk,lstrl
+    double precision :: qq4
+    INTEGER :: num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll, jork, shlmxang, i
+    double precision :: tim, tim0, tim1, tim2, tim3, tim4
+
+    integer :: maxthreads,nteams,limitthread
+    double precision :: ntotalmem, nshare, nprv
+
+    integer :: IJ,IK,IL,KL,JK,JL,nskip, ijij,klkl, mine, next
+    double precision :: denmax,test
+
+    integer*4 :: devid
+
+!
+!   --- Initialization of variables ---
+!
+      NEXT = -1
+      MINE = -1
+    tim = zero
+    nintn   = 0
+    nskip=0
+    qq4 = one
+    !norgp = 0
+
+
+#if defined(SETDEVICEID)
+    devid=me
+    devid=mod(devid,omp_get_num_devices())
+    call omp_set_default_device(devid)
+#endif
+
+    nteams=2560
+    limitthread=256
+
+#if __PRINT_ESS==1
+    tim0     = omp_get_wtime()
+#endif
+  call gpu_shell_index_SPshell(schwrz,l1,l2,nsh2,ia,cutoff,xints,dsh)
+
+  call  gpu_scrn_xint_j01(cutoff)
+  call  gpu_scrn_xint_j02(cutoff)
+  call  gpu_scrn_xint_j03(cutoff)
+  call  gpu_scrn_xint_j04(cutoff)
+  call  gpu_scrn_xint_j05(cutoff)
+  call  gpu_scrn_xint_j06(cutoff)
+
+!$omp target data map(to:IA,DA) &
+!$omp map(to:KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp map(to:RFINC,FGRID,XGRID,RMR,CMAX,CO) &
+!$omp map(to:I_S_SHL,I_P_SHL) &
+!$omp map(to:nbraJ01,xintBJ01,nbraJ02,xintBJ02,nketJ02,xintKJ02) &
+!$omp map(to:nbraJ03,xintBJ03,nketJ03,xintKJ03,nbraJ04,xintBJ04) &
+!$omp map(to:nbraJ05,xintBJ05,nketJ05,xintKJ05,nbraJ06,xintBJ06) &
+!$omp map(tofrom:FA)
+
+  call gpu_tdhf_apb_j01_SSSS(l1,l2,ia,da,FA,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,nxyz,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+  call gpu_tdhf_apb_j02_PSSS(l1,l2,ia,da,FA,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,nxyz,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+  call gpu_tdhf_apb_j03_PPSS(l1,l2,ia,da,FA,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,nxyz,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+  call gpu_tdhf_apb_j04_PSPS(l1,l2,ia,da,FA,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,nxyz,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+  call gpu_tdhf_apb_j05_PPPS(l1,l2,ia,da,FA,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,nxyz,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+  call gpu_tdhf_apb_j06_PPPP(l1,l2,ia,da,FA,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,nxyz,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+!$omp target update from(FA)
+!$omp end target data
+
+       deallocate(I_S_SHL,I_P_SHL) 
+       deallocate(xintsSS,xintsSP,xintsPP)
+    call release_gpu_gpu_ompmod_1d_twoei_jk()
+
+#if __PRINT_ESS==1
+    tim0 = omp_get_wtime() - tim0
+  if(maswrk) write(iw,900) 'gpu time tdhf_apb (s)=', tim0
+#endif
+  900 format(A,F10.2)
+  END SUBROUTINE gpu_TWOEI_CPHFDYN_APB_omp
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+END MODULE gpu_ompmod_tdhf_apb

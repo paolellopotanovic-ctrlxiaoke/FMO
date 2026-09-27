@@ -1,0 +1,12 @@
+ $contrl scftyp=rhf dfttyp=M05-2X tddft=excite runtyp=energy $end
+ $system timlim=10 mwords=7 $end
+ $tddft  nstate=3 mult=1 iroot=1 $end
+ $guess  guess=huckel $end
+ $basis  gbasis=N31 ngauss=6 $end
+ $data
+CO...excitation to the three lowest singlet states
+Cnv 4
+
+C    6.0   0.0   0.0   0.0
+O    8.0   0.0   0.0   1.1497297
+ $end

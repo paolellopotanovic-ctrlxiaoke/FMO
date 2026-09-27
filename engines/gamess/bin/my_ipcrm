@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+#
+# my_ipcrm
+#
+if(defined $ENV{'SLURM_JOB_USER'}) {
+    $user = $ENV{'SLURM_JOB_USER'};
+} else {
+    $user = $ENV{'USER'};
+}
+
+@shm = `ipcs -m | grep $user`;
+
+foreach(@shm) {
+   chop;
+   ($addr,$shmid,$user,$perm,$size,$other)=split(" ",$_);
+   print "Deleting shmid=$shmid.\n";
+   `ipcrm -m $shmid`;
+}
+
+@sem = `ipcs -s | grep $user`;
+
+foreach(@sem) {
+   chop;
+   ($addr,$semid,$user,$perm,$size)=split(" ",$_);
+   print "Deleting semid=$semid.\n";
+   `ipcrm -s $semid`;
+}
+

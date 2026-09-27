@@ -1,0 +1,330 @@
+module mod_dirfck_cphf
+implicit none
+contains
+      SUBROUTINE GPU_GENR70_dirfck_cphf(ISHELL,JSHELL,KSHELL,LSHELL, &
+      LPOPI,LPOPJ,LPOPK,LPOPL,IA,DA,FA,HFSCAL,CSCALT,CUTOFF,L1,L2,&
+      GPOPLE,KLOC,KMIN,KMAX,NXYZ)
+! insert
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+      IMPLICIT NONE
+  integer :: KLOC(MXSH), KMIN(MXSH), KMAX(MXSH),NSHELL
+  DOUBLE PRECISION :: GPOPLE(256)
+!     ==================================================================
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION, PARAMETER :: F04=4.0D+00, PT5=0.5D+00
+!     ==================================================================
+      integer, intent(in) :: ISHELL,JSHELL,KSHELL,LSHELL
+      integer, intent(in) :: L1, L2,IA(L1), NXYZ
+      double precision, intent(in) :: DA(:)
+      double precision, intent(in) :: HFSCAL,CSCALT,CUTOFF
+      double precision, intent(inout) :: FA(:)
+      LOGICAL :: IANDJ,KANDL,SAME
+      integer :: MAXJ2, NIJ, JJ,KK,LL, I2,J2,K2,LL2, I1,J1,K1,LL1, &
+                 MAXLL2, NKL, II2,JJ2,KK2, IK,IL,JK,JL, ITMP, &
+                 I,J,K,L, LOCI,LOCJ,LOCK,LOCL, IP, KL
+      integer :: I_INDEX, IJ_INDEX,IJK_INDEX, IJKL_INDEX
+      double precision :: VAL, VAL1,VAL4
+
+      INTEGER :: mini,maxi,minj,maxj,mink,maxk,minl,maxl, &
+                 ii,ij,ijk,ijkl,ijp,ijkp,ijklp, ixyz
+      integer :: LPOPI,LPOPJ,LPOPK,LPOPL
+!     ==================================================================
+!$omp declare target
+! BEGIN DIRFCK
+      SAME  = ishell.EQ.kshell.AND.jshell.EQ.lshell
+      IANDJ = ishell.eq.jshell
+      KANDL = kshell.eq.lshell
+
+      MINI = KMIN(ishell)
+      MINJ = KMIN(jshell)
+      MINK = KMIN(kshell)
+      MINL = KMIN(lshell)
+      MAXI = KMAX(ishell)
+      MAXJ = KMAX(jshell)
+      MAXK = KMAX(kshell)
+      MAXL = KMAX(lshell)
+      LOCI = KLOC(ishell)-MINI
+      LOCJ = KLOC(jshell)-MINJ
+      LOCK = KLOC(kshell)-MINK
+      LOCL = KLOC(lshell)-MINL
+
+      NIJ = 0
+      MAXJ2 = MAXJ
+      I_INDEX = 1
+      DO I = MINI,MAXI
+      ip = (i-1)*lpopi + 1
+         IF (IANDJ) MAXJ2 = I
+
+         I1 = I+LOCI
+         DO J = MINJ,MAXJ2
+         ijp = (j-1)*lpopj + ip
+            NIJ = NIJ+1
+            MAXLL2 = MAXL
+
+            J1 = J+LOCJ
+            I2 = I1
+            J2 = J1
+            IF (I1.LT.J1) THEN ! SORT <IJ|
+               I2 = J1
+               J2 = I1
+            ENDIF
+
+            NKL = NIJ
+            DO K =  MINK,MAXK
+               ijkp = (k-1)*lpopk + ijp
+               IF (KANDL) MAXLL2 = K
+
+               K1 = K + LOCK
+
+               IF(SAME) THEN ! ACCOUNT FOR NON-UNIQUE PERMUTATIONS
+                  ITMP = MIN(MAXLL2-MINL+1,NKL)
+                  IF (ITMP.EQ.0) GOTO 340
+                  MAXLL2 = MINL + ITMP - 1
+                  NKL = NKL - ITMP
+               ENDIF
+
+               DO L=MINL,MAXLL2
+               ijklp = (l-1)*lpopl + ijkp
+
+                  VAL = GPOPLE(ijklp)
+                  IF(ABS(VAL).LT.CUTOFF) CYCLE 
+
+                  LL1 = L + LOCL
+                  K2 = K1
+                  LL2 = LL1
+
+                  IF (K2.LT.LL2) THEN ! SORT |KL>
+                     K2 = LL1
+                     LL2 = K1
+                  ENDIF
+
+                  II = I2
+                  JJ = J2
+                  KK = K2
+                  LL = LL2
+
+                  IF (II.LT.KK) THEN ! SORT <IJ|KL>
+                     II = K2
+                     JJ = LL2
+                     KK = I2
+                     LL = J2
+                  ELSE IF (II.EQ.KK.AND.JJ.LT.LL) THEN ! SORT <IJ|IL>
+                     JJ = LL2
+                     LL = J2
+                  ENDIF
+
+                  II2 = IA(II)
+                  JJ2 = IA(JJ)
+                  KK2 = IA(KK)
+
+                  IJ = II2 + JJ
+                  IK = II2 + KK
+                  IL = II2 + LL
+                  JK = JJ2 + KK
+                  JL = JJ2 + LL
+                  KL = KK2 + LL
+                  IF (JJ.LT.KK) JK = KK2 + JJ
+                  IF (JJ.LT.LL) JL = IA(LL) + JJ
+!
+!       ACCOUNT FOR IDENTICAL PERMUTATIONS.
+!
+                  IF(II.EQ.JJ) VAL = VAL*PT5
+                  IF(KK.EQ.LL) VAL = VAL*PT5
+                  IF(II.EQ.KK.AND.JJ.EQ.LL) VAL = VAL*PT5
+                  VAL1 = VAL
+                  VAL4 = VAL*F04
+!
+                  IJ = (IJ-1)*NXYZ+1
+                  KL = (KL-1)*NXYZ+1
+                  IK = (IK-1)*NXYZ+1
+                  IL = (IL-1)*NXYZ+1
+                  JK = (JK-1)*NXYZ+1
+                  JL = (JL-1)*NXYZ+1
+                  DO IXYZ=0,NXYZ-1
+!$omp atomic update
+                    FA(IXYZ+IJ) = FA(IXYZ+IJ) + VAL4*DA(IXYZ+KL)
+!$omp atomic update
+                    FA(IXYZ+KL) = FA(IXYZ+KL) + VAL4*DA(IXYZ+IJ)
+!$omp atomic update
+                    FA(IXYZ+IK) = FA(IXYZ+IK) - VAL1*DA(IXYZ+JL)
+!$omp atomic update
+                    FA(IXYZ+JL) = FA(IXYZ+JL) - VAL1*DA(IXYZ+IK)
+!$omp atomic update
+                    FA(IXYZ+IL) = FA(IXYZ+IL) - VAL1*DA(IXYZ+JK)
+!$omp atomic update
+                    FA(IXYZ+JK) = FA(IXYZ+JK) - VAL1*DA(IXYZ+IL)
+                  ENDDO
+            ENDDO
+         ENDDO
+ 340     CONTINUE
+      ENDDO
+   ENDDO
+!
+      RETURN
+      END
+      SUBROUTINE GPU_GENR03_dirfck_cphf(ISHELL,JSHELL,KSHELL,LSHELL, &
+      IA,DA,FA,HFSCAL,CSCALT,CUTOFF,L1,L2,F,KLOC,KMIN,KMAX,IB,IDPOP,NXYZ)
+      
+! insert
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+      IMPLICIT NONE
+  integer :: KLOC(MXSH), KMIN(MXSH), KMAX(MXSH),NSHELL
+  double precision :: F(1296)
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION, PARAMETER :: F04=4.0D+00, PT5=0.5D+00
+!     ==================================================================
+      INTEGER, intent(in) :: IDPOP(4,10), IB(4,3)
+
+      integer, intent(in) :: ishell,jshell,kshell,lshell
+      integer, intent(in) :: L1, L2,IA(L1), NXYZ
+      double precision, intent(in) :: DA(:)
+      double precision, intent(in) :: HFSCAL,CSCALT,CUTOFF
+      double precision, intent(inout) :: FA(:)
+      integer :: LOCI,LOCJ,LOCK,LOCL
+      integer :: MAXJ2, NIJ, JJ,KK,LL, J2,K2,LL2, J1,K1,LL1, &
+                 MAXLL2, NKL, II2,JJ2,KK2, IK,IL,JK,JL, ITMP,KL,&
+                 I1,I2,IJ, II
+      integer :: I_INDEX, IJ_INDEX,IJK_INDEX, IJKL_INDEX
+      double precision :: VAL, VAL1,VAL4
+
+      INTEGER :: mini,maxi,minj,maxj,mink,maxk,minl,maxl,ijn,kln, &
+      jmax,lmax,ihondo,irotax,ijklhondo,ijklrotax, &
+      ijhondo, ijrotax, ijkhondo, ijkrotax, I,J,K,L, ixyz
+      LOGICAL ::iandj,kandl,same
+!     ==================================================================
+!$omp declare target
+! BEGIN DIRFCK
+      SAME  = ishell.EQ.kshell.AND.jshell.EQ.lshell
+      IANDJ = ishell.eq.jshell
+      KANDL = kshell.eq.lshell
+
+      MINI = KMIN(ishell)
+      MINJ = KMIN(jshell)
+      MINK = KMIN(kshell)
+      MINL = KMIN(lshell)
+      MAXI = KMAX(ishell)
+      MAXJ = KMAX(jshell)
+      MAXK = KMAX(kshell)
+      MAXL = KMAX(lshell)
+      LOCI = KLOC(ishell)-MINI
+      LOCJ = KLOC(jshell)-MINJ
+      LOCK = KLOC(kshell)-MINK
+      LOCL = KLOC(lshell)-MINL
+
+      NIJ = 0
+      MAXJ2 = MAXJ
+      DO I = MINI,MAXI
+         IF (IANDJ) MAXJ2 = I
+
+         I1 = I+LOCI
+
+
+         DO J = MINJ,MAXJ2
+            NIJ = NIJ+1
+            MAXLL2 = MAXL
+
+            J1 = J+LOCJ
+            I2 = I1
+            J2 = J1
+            IF (I1.LT.J1) THEN ! SORT <IJ|
+               I2 = J1
+               J2 = I1
+            ENDIF
+
+            NKL = NIJ
+            DO K =  MINK,MAXK
+               IF (KANDL) MAXLL2 = K
+
+               K1 = K + LOCK
+
+               IF(SAME) THEN ! ACCOUNT FOR NON-UNIQUE PERMUTATIONS
+                  ITMP = MIN(MAXLL2-MINL+1,NKL)
+                  IF (ITMP.EQ.0) GOTO 340
+                  MAXLL2 = MINL + ITMP - 1
+                  NKL = NKL - ITMP
+               ENDIF
+               DO L=MINL,MAXLL2
+      irotax = idpop(ib(1,1),i)  + 1
+        ijrotax = idpop(ib(2,1),j)  + irotax
+          ijkrotax = idpop(ib(3,1),k)  + ijrotax
+            ijklrotax = idpop(ib(4,1),l)  + ijkrotax
+
+                  VAL = F(ijklrotax)
+                  IF(ABS(VAL).LT.CUTOFF) CYCLE 
+
+                  LL1 = L + LOCL
+                  K2 = K1
+                  LL2 = LL1
+
+                  IF (K2.LT.LL2) THEN ! SORT |KL>
+                     K2 = LL1
+                     LL2 = K1
+                  ENDIF
+
+                  II = I2
+                  JJ = J2
+                  KK = K2
+                  LL = LL2
+
+                  IF (II.LT.KK) THEN ! SORT <IJ|KL>
+                     II = K2
+                     JJ = LL2
+                     KK = I2
+                     LL = J2
+                  ELSE IF (II.EQ.KK.AND.JJ.LT.LL) THEN ! SORT <IJ|IL>
+                     JJ = LL2
+                     LL = J2
+                  ENDIF
+
+                  II2 = IA(II)
+                  JJ2 = IA(JJ)
+                  KK2 = IA(KK)
+
+                  IJ = II2 + JJ
+                  IK = II2 + KK
+                  IL = II2 + LL
+                  JK = JJ2 + KK
+                  JL = JJ2 + LL
+                  KL = KK2 + LL
+                  IF (JJ.LT.KK) JK = KK2 + JJ
+                  IF (JJ.LT.LL) JL = IA(LL) + JJ
+!
+!       ACCOUNT FOR IDENTICAL PERMUTATIONS.
+!
+                  IF(II.EQ.JJ) VAL = VAL*PT5
+                  IF(KK.EQ.LL) VAL = VAL*PT5
+                  IF(II.EQ.KK.AND.JJ.EQ.LL) VAL = VAL*PT5
+
+                  VAL1 = VAL
+                  VAL4 = VAL*F04
+!
+                  IJ = (IJ-1)*NXYZ+1
+                  KL = (KL-1)*NXYZ+1
+                  IK = (IK-1)*NXYZ+1
+                  IL = (IL-1)*NXYZ+1
+                  JK = (JK-1)*NXYZ+1
+                  JL = (JL-1)*NXYZ+1
+                  DO IXYZ=0,NXYZ-1
+!$omp atomic update
+                    FA(IXYZ+IJ) = FA(IXYZ+IJ) + VAL4*DA(IXYZ+KL)
+!$omp atomic update
+                    FA(IXYZ+KL) = FA(IXYZ+KL) + VAL4*DA(IXYZ+IJ)
+!$omp atomic update
+                    FA(IXYZ+IK) = FA(IXYZ+IK) - VAL1*DA(IXYZ+JL)
+!$omp atomic update
+                    FA(IXYZ+JL) = FA(IXYZ+JL) - VAL1*DA(IXYZ+IK)
+!$omp atomic update
+                    FA(IXYZ+IL) = FA(IXYZ+IL) - VAL1*DA(IXYZ+JK)
+!$omp atomic update
+                    FA(IXYZ+JK) = FA(IXYZ+JK) - VAL1*DA(IXYZ+IL)
+                  ENDDO
+
+            ENDDO
+         ENDDO
+ 340     CONTINUE
+      ENDDO
+   ENDDO
+!
+      RETURN
+      END
+END module mod_dirfck_cphf

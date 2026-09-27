@@ -1,0 +1,432 @@
+! GENERATE all 6 jtypes for rotSP
+module mod_jtype3
+implicit none
+contains
+      SUBROUTINE GPU_GENR70_jtype3(QQ4,INEW,JNEW,KNEW,LNEW,&
+      CO,KSTART,KNG,EX,CS,CP,CMAX,&
+      RFINC,FGRID,XGRID,RMR,gpople,&
+      EI1,EI2,CUX,RXINC,TMAX)
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+      !use comm_INTAC2, only: EI1,EI2,CUX
+      !use comm_FMTTBL, only: RXINC,TMAX
+      IMPLICIT NONE
+  integer, parameter :: NTX=4,NPF=450,NGRD=7,NPX=1000,MXQT=16,NORD=4
+  double precision :: FGRID(0:NTX,0:NPF,0:NGRD), XGRID(0:NTX,0:NPX)
+  double precision :: RFINC(0:NGRD), RMR(MXQT)
+  double precision :: EX(MXGTOT), CS(MXGTOT), CP(MXGTOT)
+  integer :: KSTART(MXSH),KNG(MXSH)
+  DOUBLE PRECISION :: GPOPLE(256)
+  double precision :: cmax(mxgtot) 
+
+  double precision, intent(in) :: CO(MXSH,3)
+  double precision, intent(in) :: qq4
+  integer, intent(in) :: INEW,JNEW,KNEW,LNEW
+  double precision, intent(in) :: EI1,EI2,CUX,RXINC,TMAX
+!     ==================================================================
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION, PARAMETER :: PT5 =0.5D+00
+      DOUBLE PRECISION, PARAMETER :: PT7 =0.7D+00
+      DOUBLE PRECISION, PARAMETER :: PT9 =0.9D+00
+      DOUBLE PRECISION, PARAMETER :: ONE =1.0D+00
+      DOUBLE PRECISION, PARAMETER :: F03 =3.0D+00
+      DOUBLE PRECISION, PARAMETER :: F04=4.0D+00
+      DOUBLE PRECISION, PARAMETER :: F06 =6.0D+00
+      DOUBLE PRECISION, PARAMETER :: ACYCUT=1.0D-10
+      DOUBLE PRECISION, PARAMETER :: TENM12=1.0D-12
+      DOUBLE PRECISION, PARAMETER :: PI4 =0.78539816339744831D+00
+      DOUBLE PRECISION, PARAMETER :: PITO52=34.986836655249726D+00
+      !double precision,parameter :: RXINC= 2.7689158581207256E+01
+      !double precision, parameter :: TMAX= 2.50E+01
+!     ==================================================================
+  integer :: ii,ij,jj, I,J,K,L, N, ismlq, ismlp
+  integer :: ISML,IP,M
+  double precision :: E12,E34,R12Y12,R34Y34,R34,RCD,SING,COSG, &
+       TMP,TMP1,R12,RAB
+  double precision :: WORK(9),FWRK(6),FCC(4), FQD(0:2), TXM(8)
+  double precision :: RD0(5),RD1(3,4),RD2(6)
+  double precision :: P12(3,3),P34(3,3),P(3,3),T(3), AQC(9)
+  integer :: NST(4),NEND(4)
+!     ==================================================================
+!$omp declare target
+      gpople(1:16)= zero
+      RD0= zero
+      RD1= zero
+      RD2= zero
+
+! NUMBERS OF GAUSSIAN FUNCTIONS IN SHELLS INEW JNEW KNEW AND LNEW
+! STARTING LOCATIONS OF INEW JNEW KNEW AND LNEW IN LIST OF GAUSSIAN FUNCTIONS
+      NST(1)=KSTART(INEW)
+      NST(2)=KSTART(JNEW)
+      NST(3)=KSTART(KNEW)
+      NST(4)=KSTART(LNEW)
+      NEND(1)=KNG(INEW)+KSTART(INEW)-1
+      NEND(2)=KNG(JNEW)+KSTART(JNEW)-1
+      NEND(3)=KNG(KNEW)+KSTART(KNEW)-1
+      NEND(4)=KNG(LNEW)+KSTART(LNEW)-1
+! COORDINATES OF ATOMS ASSOCIATED WITH SHELLS INEW JNEW KNEW AND LNEW
+      R12= ZERO
+      R34= ZERO
+      DO N=1,3
+         P12(N,1)= CO(INEW,N)
+         P12(N,2)= CO(JNEW,N)
+         P12(N,3)= P12(N,2)-P12(N,1)
+      R12= R12+P12(N,3)*P12(N,3)
+         P34(N,1)= CO(KNEW,N)
+         P34(N,2)= CO(LNEW,N)
+         P34(N,3)= P34(N,2)-P34(N,1)
+      R34= R34+P34(N,3)*P34(N,3)
+      ENDDO
+! FIND DIRECTION COSINES OF PENULTIMATE AXES FROM COORDINATES OF AB
+! P(1,1),P(1,2),... ARE DIRECTION COSINES OF AXES AT P.  Z-AXIS ALONG AB
+! T(1),T(2),T(3)... ARE DIRECTION COSINES OF AXES AT Q.  Z-AXIS ALONG CD
+
+! FIND DIRECTION COSINES OF AB AND CD. THESE ARE LOCAL Z-AXES.
+! IF INDETERMINATE TAKE ALONG SPACE Z-AXIS
+
+! initialization
+      AQC = ZERO
+      P(1,3)= ZERO
+      P(2,3)= ZERO
+      P(3,3)= ONE
+      RAB= ZERO
+      IF(R12.NE.ZERO) THEN
+         RAB= SQRT(R12)
+         TMP= ONE/RAB
+         P(1,3)= P12(1,3)*TMP
+         P(2,3)= P12(2,3)*TMP
+         P(3,3)= P12(3,3)*TMP
+      ENDIF
+
+      T(1)= ZERO
+      T(2)= ZERO
+      T(3)= ONE
+      RCD= ZERO
+      IF(R34.NE.ZERO) THEN
+         RCD= SQRT(R34)
+         TMP= ONE/RCD
+         T(1)= P34(1,3)*TMP
+         T(2)= P34(2,3)*TMP
+         T(3)= P34(3,3)*TMP
+      ENDIF
+! FIND LOCAL Y-AXIS AS COMMON PERPENDICULAR TO AB AND CD
+! IF INDETERMINATE TAKE PERPENDICULAR TO AB AND SPACE Z-AXIS
+! IF STILL INDETERMINATE TAKE PERPENDICULAR TO AB AND SPACE X-AXIS
+      COSG= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+      COSG= MIN( ONE,COSG)
+      COSG= MAX(-ONE,COSG)
+! MODIFIED ROTATION TESTING.
+! THIS FIX CURES THE SMALL ANGLE PROBLEM.
+      P(1,2)= T(3)*P(2,3)-T(2)*P(3,3)
+      P(2,2)= T(1)*P(3,3)-T(3)*P(1,3)
+      P(3,2)= T(2)*P(1,3)-T(1)*P(2,3)
+      IF( ABS(COSG).GT.PT9) THEN
+         SING= SQRT(P(1,2)*P(1,2)+P(2,2)*P(2,2)+P(3,2)*P(3,2))
+      ELSE
+         SING= SQRT(ONE-COSG*COSG)
+      ENDIF
+
+      IF( ABS(COSG).LE.PT9 .OR. SING.GE.TENM12) THEN
+         TMP= ONE/SING
+         P(1,2)= P(1,2)*TMP
+         P(2,2)= P(2,2)*TMP
+         P(3,2)= P(3,2)*TMP
+      ELSE
+         I=3
+         IF( ABS(P(1,3)).LE.PT7) I=1
+         TMP = P(I,3)*P(I,3)
+         TMP = MIN( ONE,TMP)
+         TMP = SQRT(ONE-TMP)
+         IF(TMP.NE.ZERO) TMP= ONE/TMP
+         IF( ABS(P(1,3)).LE.PT7) THEN
+            P(1,2)= ZERO
+            P(2,2)= P(3,3)*TMP
+            P(3,2)=-P(2,3)*TMP
+         ELSE
+            P(1,2)= P(2,3)*TMP
+            P(2,2)=-P(1,3)*TMP
+            P(3,2)= ZERO
+         ENDIF
+      ENDIF
+! FIND DIRECTION COSINES OF LOCAL X-AXES
+
+      P(1,1)= P(2,2)*P(3,3)-P(3,2)*P(2,3)
+      P(2,1)= P(3,2)*P(1,3)-P(1,2)*P(3,3)
+      P(3,1)= P(1,2)*P(2,3)-P(2,2)*P(1,3)
+
+! FIND COORDINATES OF C RELATIVE TO LOCAL AXES AT A
+      T(1)= P34(1,1)-P12(1,1)
+      T(2)= P34(2,1)-P12(2,1)
+      T(3)= P34(3,1)-P12(3,1)
+      AQC( 1) = T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+      AQC( 2) = T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+      AQC( 3) = T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+! SET AQC(2)= 0  IF CLOSE
+   
+      IF( ABS(AQC(2)).LE.ACYCUT) THEN
+         AQC(2) = ZERO
+         AQC(4)= ZERO
+      ELSE
+         AQC(4)= AQC(2)*AQC(2)
+      ENDIF
+   
+! DIRECTION COSINES OF CD LOCAL AXES WITH RESPECT TO AB LOCAL AXES
+! (COSG,0,-SING)  (0,1,0)  (SING,0,COSG)
+
+      AQC( 5)= RCD*SING
+      AQC( 6)= RCD*COSG
+   
+!JMS  NOW, THE TRANSPOSE OF P TO BE USED FOR COMPUTATIONAL EFFICIENCY
+      DO J=1,2
+         DO I=J+1,3
+            TMP= P(I,J)
+            P(I,J)= P(J,I)
+            P(J,I)= TMP
+         ENDDO
+      ENDDO
+
+!------------------------  BEGIN genr70_pJ6  ------------------------------
+ ii_ic: DO II=NST(1),NEND(1)
+ jj_ic:  DO JJ=NST(2),NEND(2)
+            TXM(1)= EX(II)+EX(JJ)
+            TXM(2)= ONE/TXM(1)
+            TXM(3)= EX(JJ)*RAB*TXM(2)
+            TXM(4)= TXM(3)-RAB
+            R12Y12= R12*EX(II)*EX(JJ)*TXM(2)
+            IF(R12Y12.GT.CUX) THEN
+               CYCLE jj_ic
+            ENDIF
+            ISMLP=0
+            E12= TXM(2)* EXP(-R12Y12)
+            TXM(2)= TXM(2)*PT5
+            TMP= E12*CMAX(II)*CMAX(JJ)
+            IF(TMP.LE.EI1) ISMLP=1
+            IF(TMP.LE.EI2) CYCLE jj_ic
+            E12= PITO52*E12
+   
+! FOR TYPES 0000,0001,0011 ONLY D00P NEEDED
+   
+         !   D00P(1)= E12*CS(II)*CS(JJ)
+         !select case(jtype)
+         !case(1,2,3)
+         !   D00P(1)= ONE
+         !   D00P(2)= ONE
+         !   D00P(3)= ONE
+         !   D00P(4)= E12*CS(II)*CS(JJ)
+         !case(4,5)
+         !   D00P(2)= ONE
+         !   D00P(3)= ONE
+         !   D00P(4)= E12*CS(II)*CP(JJ)
+         !   IF(D00P(4).NE.ZERO) D00P(1)=D00P(1)/D00P(4)
+         !case(6)
+         !   D00P(2)= E12*CS(II)*CP(JJ)
+         !   D00P(3)= E12*CP(II)*CS(JJ)
+         !   D00P(4)= E12*CP(II)*CP(JJ)
+         !   IF(D00P(4).NE.ZERO) THEN
+         !      TMP = ONE/D00P(4)
+         !      D00P(1)= D00P(1)*TMP
+         !      D00P(2)= D00P(2)*TMP
+         !      D00P(3)= D00P(3)*TMP
+         !   ENDIF
+         !end select
+!------------------------   END genr70_pJ6  ------------------------------
+!------------------------  BEGIN genr70_qJ6  ------------------------------
+ ki_ic: DO K=NST(3),NEND(3)
+ li_ic:  DO L=NST(4),NEND(4)
+            TXM(5)= EX(K)+EX(L)
+            TXM(6)= ONE/TXM(5)
+            TXM(7)= EX(K)*TXM(6)
+            TXM(8)= ONE-TXM(7)
+            R34Y34= R34*TXM(7)*EX(L)
+            E34= TXM(6)* EXP(-R34Y34)
+            TMP= E34*CMAX(K)*QQ4*CMAX(L)
+
+            IF(R34Y34.GT.CUX) cycle ! L-LOOP
+            IF(TMP.LE.EI2) cycle ! L-LOOP
+            ISMLQ= 0
+            IF(TMP.LE.EI1) ISMLQ= 1
+         ISML= ISMLQ+ISMLP
+         IF(ISML.GE.2) cycle ! I-loop
+
+! CQX = COMPONENT OF CQ ALONG PENULTIMATE X-AXIS
+! CQZ = COMPONENT OF CQ ALONG PENULTIMATE Z-AXIS
+            !CQ = RCD*TXM(8)
+            !CQX= RCD*TXM(8)*SING
+            !CQZ= RCD*TXM(8)*COSG
+
+! FIND COORDINATES OF Q RELATIVE TO AXES AT A
+! QPR IS PERPENDICULAR FROM Q TO AB
+            AQC(7)= AQC(1)+RCD*TXM(8)*SING
+            AQC(8)=AQC(7)*AQC(7)
+            AQC(9)=AQC(7)*AQC(2)
+            !AQZ= AQC(3)+CQZ
+            !QPS= AQC(8)+AQC(4)
+
+            FQD(:)=ZERO
+   
+!------------------------  BEGIN TGPU_INTJ6  ------------------------------
+         WORK(1)= E12*CS(II)*CS(JJ)
+         FWRK(1)= ONE/(TXM(1)+TXM(5))
+         FWRK(2)= TXM(3)-AQC(3)-RCD*TXM(8)*COSG
+         FWRK(3)= FWRK(2)*FWRK(2)
+         FWRK(4)= TXM(1)*TXM(5)*FWRK(1)
+
+         FWRK(5)=(FWRK(3)+AQC(8)+AQC(4))*FWRK(4)
+         FWRK(4)= FWRK(4)+FWRK(4)
+         N=2
+         IF(FWRK(5).LE.TMAX) THEN
+!     FM(T) EVALUATION...DOWNWARD RECURSION FOR JTYPE.GE.5
+            FWRK(6)= FWRK(5)*RFINC(N)
+            IP= NINT(FWRK(6))
+            WORK(2)=    FGRID(4,IP,N) *FWRK(6)
+            WORK(2)=(WORK(2)+FGRID(3,IP,N))*FWRK(6)
+            WORK(2)=(WORK(2)+FGRID(2,IP,N))*FWRK(6)
+            WORK(2)=(WORK(2)+FGRID(1,IP,N))*FWRK(6)
+            WORK(2)= WORK(2)+FGRID(0,IP,N)
+            FWRK(6)= FWRK(5)*RXINC
+            IP= NINT(FWRK(6))
+            WORK(3)=    XGRID(4,IP) *FWRK(6)
+            WORK(3)=(WORK(3)+XGRID(3,IP))*FWRK(6)
+            WORK(3)=(WORK(3)+XGRID(2,IP))*FWRK(6)
+            WORK(3)=(WORK(3)+XGRID(1,IP))*FWRK(6)
+            WORK(3)= WORK(3)+XGRID(0,IP)
+
+            FQD(2)= WORK(2)
+            WORK(4)= FWRK(5)+FWRK(5)
+               FQD(1)=(WORK(4)*FQD(2)+WORK(3))*RMR(2)
+               FQD(0)=(WORK(4)*FQD(1)+WORK(3))*RMR(1)
+
+            WORK(7)= WORK(1)*SQRT(FWRK(1))
+               FQD(0)= FQD(0)*WORK(7)
+               WORK(7)= WORK(7)*FWRK(4)
+
+               FQD(1)= FQD(1)*WORK(7)
+               WORK(7)= WORK(7)*FWRK(4)
+
+               FQD(2)= FQD(2)*WORK(7)
+               WORK(7)= WORK(7)*FWRK(4)
+         ELSE
+            WORK(3)= ONE/FWRK(5)
+            FQD(0)= WORK(1)*SQRT(PI4*WORK(3)*FWRK(1))
+            WORK(5)= FWRK(4)*WORK(3)
+            WORK(7)= PT5*WORK(5)
+               FQD(1)= FQD(0)*WORK(7)
+               WORK(7)= WORK(7)+WORK(5)
+
+               FQD(2)= FQD(1)*WORK(7)
+               WORK(7)= WORK(7)+WORK(5)
+         ENDIF
+
+!------------------------   END TGPU_INTJ6  ------------------------------
+!------------------------  BEGIN TGPU_INTK6  ------------------------------
+      WORK(9)=E34*CP(K)*QQ4*CP(L)
+      WORK(1)= TXM(6) *0.5D+00
+      FCC(1)= WORK(1)*WORK(1)*WORK(9)
+   
+      WORK(2)=-TXM(7)     *E34*CS(K)*QQ4*CP(L) 
+      WORK(3)= TXM(8)     *E34*CP(K)*QQ4*CS(L) 
+      WORK(4)=-TXM(7) *TXM(8)*WORK(9) 
+      WORK(5)= WORK(1)    *WORK(9) 
+      WORK(6)= WORK(1)    *E34*CS(K)*QQ4*CP(L) 
+      WORK(7)= WORK(1)    *E34*CP(K)*QQ4*CS(L) 
+      WORK(8)=-WORK(1)*TXM(7)*WORK(9) 
+      WORK(9)= WORK(1)*TXM(8)*WORK(9) 
+
+      WORK(1)=          E34*CS(K)*QQ4*CS(L)
+   
+            RD0(1)= RD0(1)+FQD(0)*WORK(1)
+            RD0(2)= RD0(2)+FQD(0)*WORK(2)
+            RD0(3)= RD0(3)+FQD(0)*WORK(3)
+            RD0(4)= RD0(4)+FQD(0)*WORK(4)
+            RD0(5)= RD0(5)+FQD(0)*WORK(5)
+   
+         FCC(2)=-AQC(7)
+         FCC(3)=-AQC(2)
+         FCC(4)= FWRK(2)
+      DO I= 1, 4
+         RD1(1,I)= RD1(1,I)+FQD(1)*FCC(2)*WORK(I+ 5)
+         RD1(2,I)= RD1(2,I)+FQD(1)*FCC(3)*WORK(I+ 5)
+         RD1(3,I)= RD1(3,I)+FQD(1)*FCC(4)*WORK(I+ 5)
+      ENDDO
+   
+         FCC(2)=  FCC(1)*AQC(9) 
+         FCC(3)= -FCC(1)*AQC(7)
+         FCC(4)= -FCC(1)*AQC(2)
+
+         RD2(1)= RD2(1)+(FQD(2)*AQC(8)  -FQD(1))*FCC(1)
+         RD2(2)= RD2(2)+(FQD(2)*AQC(4)-FQD(1))*FCC(1)
+         RD2(3)= RD2(3)+(FQD(2)*FWRK(3) -FQD(1))*FCC(1)
+         RD2(4)= RD2(4)+ FQD(2)                 *FCC(2)
+         RD2(5)= RD2(5)+ FQD(2)*FWRK(2)         *FCC(3)
+         RD2(6)= RD2(6)+ FQD(2)*FWRK(2)         *FCC(4)
+   
+!------------------------   END TGPU_INTK6  ------------------------------
+
+         ENDDO li_ic
+      ENDDO ki_ic
+         ENDDO jj_ic
+      ENDDO ii_ic
+!------------------------   END genr70_qJ6  ------------------------------
+! sum integral TGPU_MCDV6
+! GPOPLE(I,J,K,L) to 1D --> i + 4*(j-1) + 16*(k-1) + 64*(l-1)
+!   L-loop=1
+            GPOPLE(1)=+( RD0(1))
+            GPOPLE(2)=+( RD1(1,1))+( RD0(2))*AQC(5)
+            GPOPLE(3)=+( RD1(2,1))
+            GPOPLE(4)=+( RD1(3,1))+( RD0(2))*AQC(6)
+   
+! J= 2
+            IJ= 4 
+            GPOPLE(1+IJ)=+( RD1(1,2))+( RD0(3))*AQC(5)
+            GPOPLE(2+IJ)=+( RD2(1  ))+( RD0(5))       &
+                         +( RD1(1,3))*AQC(5) &
+                         +( RD1(1,4))*AQC(5) &
+                         +( RD0(4))*AQC(5)*AQC(5)
+            GPOPLE(3+IJ)=+( RD2(4  ))+( RD1(2,4))*AQC(5)
+            GPOPLE(4+IJ)=+( RD2(5  ))+( RD1(3,4))*AQC(5) &
+                         +( RD1(1,3))*AQC(6) &
+                         +( RD0(4))*AQC(5)*AQC(6)
+   
+! J= 3
+            IJ= 8 
+            GPOPLE(1+IJ)=+( RD1(2,2))
+            GPOPLE(2+IJ)=+( RD2(4  ))+( RD1(2,3))*AQC(5)
+            GPOPLE(3+IJ)=+( RD2(2  ))+( RD0(5))
+            GPOPLE(4+IJ)=+( RD2(6  ))+( RD1(2,3))*AQC(6)
+   
+! J= 4
+            IJ= 12
+            GPOPLE(1+IJ)=+( RD1(3,2))+( RD0(3))*AQC(6)
+            GPOPLE(2+IJ)=+( RD2(5  ))+( RD1(1,4))*AQC(6) &
+                         +( RD1(3,3))*AQC(5) &
+                         +( RD0(4))*AQC(6)*AQC(5)
+            GPOPLE(3+IJ)=+( RD2(6  ))+( RD1(2,4))*AQC(6)
+            GPOPLE(4+IJ)=+( RD2(3  ))+( RD0(5))       &
+                         +( RD1(3,3))*AQC(6) &
+                         +( RD1(3,4))*AQC(6) &
+                         +( RD0(4))*AQC(6)*AQC(6)
+   
+! sum integral TGPU_R30S1S_J6
+! GPOPLE(I,J,K,L) to 1D --> i + 4*(j-1) + 16*(k-1) + 64*(l-1)
+         DO I=1,4
+            T(1)= GPOPLE(I+4 )
+            T(2)= GPOPLE(I+8 )
+            T(3)= GPOPLE(I+12)
+            GPOPLE(I+4 )= T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+            GPOPLE(I+8 )= T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+            GPOPLE(I+12)= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+         ENDDO
+         DO J=1,4
+            IJ=(J-1)*4
+            T(1)= GPOPLE(2+IJ)
+            T(2)= GPOPLE(3+IJ)
+            T(3)= GPOPLE(4+IJ)
+            GPOPLE(2+IJ)= T(1)*P(1,1)+T(2)*P(2,1)+T(3)*P(3,1)
+            GPOPLE(3+IJ)= T(1)*P(1,2)+T(2)*P(2,2)+T(3)*P(3,2)
+            GPOPLE(4+IJ)= T(1)*P(1,3)+T(2)*P(2,3)+T(3)*P(3,3)
+         ENDDO
+
+
+!--------------------------- END sum the integral  ------------------------------   
+      RETURN
+      END
+ end module mod_jtype3

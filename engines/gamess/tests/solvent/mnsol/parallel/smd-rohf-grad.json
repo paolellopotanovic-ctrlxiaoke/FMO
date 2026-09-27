@@ -1,0 +1,100 @@
+{
+  "name": "smd-rohf-grad.log",
+  "validation": [
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-149.6896982108",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "GRADIENT",
+      "name": "MAXIMUM GRADIENT",
+      "value": "0.050430227",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 5e-05
+    },
+    {
+      "header": "GRADIENT",
+      "name": "RMS GRADIENT",
+      "value": "0.029115905",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 5e-05
+    },
+    {
+      "header": "SPIN",
+      "name": "S-SQUARED",
+      "value": "0.750",
+      "type": "float",
+      "precision": 3,
+      "tolerance": 0.5
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "0.000000",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "SMD",
+      "name": "INTERNAL ENERGY IN GAS - SMD",
+      "value": "-149.5531568711",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SMD",
+      "name": "INTERNAL ENERGY IN SOLVENT - SMD",
+      "value": "-149.6906428162",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SMD",
+      "name": "DELTA INTERNAL ENERGY - SMD",
+      "value": "-0.1374859451",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SMD",
+      "name": "TOTAL ENERGY IN SOLVENT - SMD",
+      "value": "0.0009446054",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SMD",
+      "name": "ELECTROSTATIC INTERACTION - SMD",
+      "value": "-149.6896982108",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SMD",
+      "name": "TOTAL FREE ENERGY IN SOLVENT - SMD",
+      "value": "-86.27",
+      "type": "float",
+      "precision": 2,
+      "tolerance": 5.0
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

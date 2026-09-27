@@ -1,0 +1,2056 @@
+#define __TIMING 0 
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP
+!>  @brief   OpenMP versions of QM-EFP2 Exchange Repulsion (exrep)
+!>           Fock matrix calculation routines are collected.
+!>           They are called explicitly from corresponding routines from eftei.src module,
+!>           namely EFP2EI_MODE1,EFP2EI_MODE2,EFP2EI_MODE3 and EXCHNG_EF, 
+!>           using conditional OpenMP compiling. They are never
+!>           called if compiler doesn't support OpenMP or -openmp/-fopenmp/-qopenmp flag
+!>           is not set at compile time for the all files.
+!>  @details A lot of the work on thread-safety is done by small script "addomp.sh" which
+!>           is located in ../tools directory. It sets <threadprivate> attribute
+!>           for sensitive common blocks throughout all files in GAMESS source directory.
+!>  @author  Peng Xu and Tosaporn Sattasathuchana
+!>  @date    Sep, 2019 
+
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+MODULE efteiomp 
+
+    USE omp_lib
+    USE prec, ONLY: fp
+
+    USE mx_limits
+    USE ompmod,ONLY: ompmod_shellquart
+ 
+    USE comm_EFPBAS
+    USE comm_FRGINF
+    USE comm_FRGTYP
+
+    IMPLICIT NONE
+
+    PRIVATE
+    PUBLIC &
+        efp2ei_omp_jk_mode1, &
+        efp2ei_omp_jk_mode2, &
+        efp2ei_omp_jk_mode3, &
+        efp2ei_omp_kl_mode1, &
+        efp2ei_omp_exchng   
+
+    CHARACTER(LEN=*), PARAMETER :: &
+        dbgfmt1 = '(/2x,&
+                    &"Thread | Number of |",19X,"Timing",&
+                    &/1x," number | quartets  |  Integrals |   F update  ",&
+                    &"|   Schwartz  |    Total    |")', &
+        dbgfmt2 = '(i5,4x,"|",i10," |",4(f9.2," s | "))', &
+
+        dbgfmt_exch ='(1X,"SCHWARZ INEQUALITY OVERHEAD:",I10," INTEGRALS, &
+                  &T=",F12.2)'
+
+    INTEGER, PARAMETER :: &
+        angm(0:6) = (/4,4,6,10,15,21,28/)
+
+    REAL(KIND=fp), PARAMETER :: &
+        zero=0.0_fp, one=1.0_fp
+
+    INTERFACE
+        REAL(KIND=fp) FUNCTION schwdn(dsh,ish,jsh,ksh,lsh,ia)
+            USE prec
+            INTEGER, INTENT(IN) :: ish, jsh, ksh, lsh, ia(*)
+            REAL(KIND=fp), INTENT(IN) :: dsh(*)
+        END FUNCTION
+    END INTERFACE
+
+CONTAINS
+
+!*MODULE EFTEIOMP   *DECK EFP2EI_OMP_JK_MODE1
+!
+!>    @brief   Threaded version of Mode 1 of QM-EFP2 exrep 
+!>             two-electron integral calculation routine. 
+!>             Load balance of OpenMP code
+!>             is done over J and K shell indices,
+!>             MPI load balance - over I index.
+!>             Related input file option:
+!>             `$INTGRL INTOMP=1 $END`
+!>
+!>    @details Calculates two-electron contribution to the Fock
+!>             matrix. Based on `EFP2EI_MODE1` subroutine from `eftei.src`
+!>
+!>    @author  Peng Xu and Tosaporn Sattasathuchana
+!
+!     REVISION HISTORY:
+!>    @date  Sep, 2019
+!
+!     PARAMETERS:
+!
+!>    @param[in]     typscf    hollerith, the kind of SCF (=RHF,UHF, etc.)
+!>    @param[in]     schwrz    determines whether to use integral screening
+!>    @param[out]    nint      number of calculated ERIs
+!>    @param[out]    nschwz    number of ERIs that were screened out
+!>    @param[in]     L1        size of index array
+!>    @param[in]     L2a       size of Fock and density matrices (alpha)
+!>    @param[in]     L2b       size of Fock and density matrices (beta)
+!>    @param[in]     xints(:)  array of exchange integrals
+!>    @param[in]     nsh2      size of `xints(:)` array
+!>    @param[in]     maxg      size of temporary array for Rys code
+!>    @param[in]     ia(:)     index array, contains "triangular numbers"
+!>    @param[in,out] da(:)     density matrix for alpha electrons
+!>    @param[in,out] fa(:)     Fock matrix for alpha electrons
+!>    @param[in,out] db(:)     density matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in,out] fb(:)     Fock matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in]     dsh       density matrix packed in shells
+!>                                 for screening purposes
+!>    @param[in]     nflmat    when >1 selects CPHF calculation
+!>    @param[in]     nshell    number of shells
+!>    @param[in]     ktype(:)  array of shell types according to their
+!>                                 angular momentum
+!>    @param[in]     cutoff    cutoff for integral screening
+!>    @param[in]     oflag     logical parameter for debug timing output
+  SUBROUTINE efp2ei_omp_jk_mode1(typscf,schwrz,nint,nschwz, &
+                                 L1,L2a,L2b,xints,nsh2,maxg, &
+                                 ia,da,fa,db,fb,dsh,nflmat, &
+                                 nshell,ktype,cutoff,oflag)
+
+    LOGICAL, INTENT(IN) :: schwrz
+
+    INTEGER, INTENT(OUT) :: nint, nschwz
+
+    INTEGER, INTENT(IN) :: &
+      L1, L2a, L2b, nsh2, nshell, nflmat, maxg, &
+      ia(l1),ktype(mxsh)
+
+!   typscf is an 8-byte hollerith constant
+    REAL(KIND=8), INTENT(IN) :: typscf
+
+    REAL(KIND=fp), INTENT(IN) :: &
+      cutoff, xints(nsh2), dsh(nsh2)
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      da(l2a), db(l2b)
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      fa(l2a), fb(l2b)
+
+    LOGICAL, INTENT(IN) ::  oflag
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    COMMON /fmcom / xx(1)
+        REAL(KIND=fp), TARGET :: xx
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+!   Common blocks /MAXC  /, /SHLNOS/ and /GOUT/ contain
+!   both global (cmax(:),qq4,norgp) and thread-local
+!   data (the rest). Set them threadprivate and copyin
+!   global data later in $omp parallel section.
+
+!$omp threadprivate(/shlnos/,/maxc  /,/gout  /,/nlrcf /,/dftpar/)
+
+    INTEGER :: &
+      next, num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll, ijij, klkl, jork, ijmax, klmax 
+
+    LOGICAL :: &
+      schskp, dirscf
+
+    REAL(KIND=fp) :: &
+      denmax, tim, tim0, tim1, tim2, tim3, tim4, test
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+      ddij_t, ghondo_t
+
+    INTEGER :: IDUMMY
+    REAL(KIND=fp) :: DUMMY 
+!
+!   --- Initialization of variables ---
+!
+
+    tim = zero
+    CALL tsecnd(tim)
+
+    nint   = 0
+    nschwz = 0
+    schskp = .FALSE.
+    denmax = zero
+    dirscf = .TRUE.
+    DUMMY=0.0D+00
+    IDUMMY = 0
+    fb=0
+
+
+!   no symmetry supported yet
+    qq4 = 1
+    norgp = 0
+
+
+#if __TIMING==1
+!   text for timing output
+    IF (oflag) WRITE(iw,dbgfmt1)
+#endif
+!
+!   --- Initiate OpenMP parallel ---
+!
+!   early thread invocation decrease OpenMP lib overhead
+!
+!$omp parallel                                        &
+!$omp   private(ithread, thr_nshq, ii,jj,kk,ll,       &
+!$omp           jork, ijij, klkl, test,               &
+!$omp           tim, tim0, tim1, tim2, tim3, tim4,    &
+!$omp           ddij_t, ghondo_t)                     &
+!$omp   firstprivate(denmax, schskp)                  &
+!$omp   shared(ia,da,l1,l2a,l2b,num_threads,          &
+!$omp          next, maxg, xx,                        &
+!$omp          cutoff, dirscf, xints, dsh, nflmat,    &
+!$omp          typscf,schwrz,oflag,dummy,idummy)      &
+!$omp   reduction(+:fa,nint,nschwz)                &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+!   allocate temporary memory for integrals
+    ALLOCATE(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+
+!
+!   --- Variable initialization for OpenMP ---
+!
+
+    num_threads = omp_get_num_threads()
+
+!   reset all info stats
+    ithread  = omp_get_thread_num()
+    thr_nshq = 0
+#if __TIMING==1
+    tim1     = zero
+    tim2     = zero
+    tim3     = zero
+    tim4     = zero
+!   main timer initialization
+    tim0     = omp_get_wtime()
+#endif
+
+!   go over shells from largest value (nshell)
+!   to 0 for better load balance
+    ii = nshell + 1
+ic: DO
+!   --- MPI load balance ---
+        IF (ibtyp.eq.1) THEN
+!           dynamic load balance
+!$omp barrier
+!$omp master
+            CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+            ii = nshell - next
+            IF (ii.LE.0) EXIT ic
+        ELSE
+!           static load balance
+            ii = ii - 1
+            IF (ii.LE.0) EXIT ic
+            IF (MOD(ii,nproc).NE.me) CYCLE ic
+        END IF
+!
+!   --- Begin OpenMP integral calculation ---
+!
+!   Use conventional (instead of triple-sort)
+!   shell order for better load balance and for
+!   further vectorization
+!$omp do schedule(dynamic,1) collapse(2)
+
+        DO jj = 1,ii
+            DO kk = 1,ii
+
+            IF (ii.NE.kk) THEN
+                jork=kk
+            ELSE
+                jork=jj
+            END IF
+
+                DO ll = 1,jork
+!                   Schwartz screening:
+#if __TIMING==1
+                    tim1 = omp_get_wtime()
+#endif
+                    IF (schwrz) THEN
+                        ijij = (ii*ii-ii)/2 + jj
+                        klkl = (kk*kk-kk)/2 + ll
+                        test = xints(ijij)*xints(klkl)
+                        IF (dirscf) THEN
+                            denmax = schwdn(dsh,ii,jj,kk,ll,ia)
+                            test = test*denmax
+                        END IF
+                        schskp = test.LT.cutoff
+                    END IF
+
+#if __TIMING==1
+                    tim2 = tim2 + omp_get_wtime() - tim1
+#endif
+                    IF(.NOT.schskp) THEN
+
+                        call ompmod_shellquart(ii,jj,kk,ll,ghondo_t,ddij_t)
+#if __TIMING==1
+                        tim3 = tim3 + omp_get_wtime() - tim1
+#endif
+                        thr_nshq = thr_nshq + 1
+!
+!                  ---  Fock matrix update ---
+!
+                     CALL DIRFCK_EFP(TYPSCF,IA,da,fa,GHONDO_t,L1,NINT, &
+                           DUMMY,DUMMY,DUMMY,DUMMY,DUMMY,IDUMMY,IDUMMY,1)
+#if __TIMING==1
+                        tim4 = tim4 + omp_get_wtime() - tim1
+#endif
+                    ELSE
+                        nschwz = nschwz + 1
+                    END IF
+                END DO
+            END DO
+        END DO
+!$omp end do nowait
+    END DO ic
+!$omp barrier
+
+#if __TIMING==1
+    tim0 = omp_get_wtime() - tim0
+!   debug timing output
+    IF (oflag) THEN
+!$omp do ordered
+        DO ii = 0, num_threads-1
+!$omp ordered
+            WRITE(iw,dbgfmt2) ithread,thr_nshq,tim3-tim2,tim4-tim3,tim2,tim0
+!$omp end ordered
+        END DO
+!$omp end do
+    END IF
+#endif
+
+!   deallocate temporary memory for integrals
+    DEALLOCATE(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+    CALL ddi_dlbreset
+
+  END SUBROUTINE efp2ei_omp_jk_mode1 
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK EFP2EI_OMP_JK_mode2
+!
+!>    @brief   Threaded version of Mode 2 of QM-EFP2 exrep 
+!>             two-electron integral calculation routine. 
+!>             Load balance of OpenMP code
+!>             is done over J and K shell indices,
+!>             MPI load balance - over I index.
+!>             Related input file option:
+!>             `$INTGRL INTOMP=1 $END`
+!>
+!>    @details Calculates two-electron contribution to the Fock
+!>             matrix. Based on `EFP2EI_MODE2` subroutine from `eftei.src`
+!>
+!>    @author  Peng Xu and Tosaporn Sattasathuchana
+!
+!     REVISION HISTORY:
+!>    @date  Sep, 2019
+!
+!     PARAMETERS:
+!
+!>    @param[in]     typscf    hollerith, the kind of SCF (=RHF,UHF, etc.)
+!>    @param[in]     schwrz    determines whether to use integral screening
+!>    @param[out]    nint      number of calculated ERIs
+!>    @param[out]    nschwz    number of ERIs that were screened out
+!>    @param[in]     l1        size of index array
+!>    @param[in]     l2a       size of Fock and density matrices (alpha)
+!>    @param[in]     l2b       size of Fock and density matrices (beta)
+!>    @param[in]     xints(:)  array of exchange integrals
+!>    @param[in]     nsh2      size of `xints(:)` array
+!>    @param[in]     maxg      size of temporary array for Rys code
+!>    @param[in]     ia(:)     index array, contains "triangular numbers"
+!>    @param[in,out] da(:)     density matrix for alpha electrons
+!>    @param[in,out] fa(:)     Fock matrix for alpha electrons
+!>    @param[in,out] db(:)     density matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in,out] fb(:)     Fock matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in]     nflmat    when >1 selects CPHF calculation
+!>    @param[in]     nshell    number of shells
+!>    @param[in]     ktype(:)  array of shell types according to their
+!>                                 angular momentum
+!>    @param[in]     cutoff    cutoff for integral screening
+!>    @param[in]     oflag     logical parameter for debug timing output
+!>    @param[in]     jm        counter of EFP type 
+!>    @param[in]     ishlef    counter of EFP shell
+!>    @param[in]     jnat      counter of EFP atoms
+!>    @param[in]     mxbf      maximum of basis function of EFP
+!>    @param[in]     nshelt    total number of EFP shells
+!>    @param[in]     dprime    density from EFP LMO
+!>    @param[in]     vao2      ERI Fock contribution 
+!>    @param[in]     xintb     array of exchange integrals containing EFP 
+  SUBROUTINE efp2ei_omp_jk_mode2(typscf,schwrz,nint,nschwz, &
+                             l1,l2a,l2b,nsh2,maxg,    &
+                             ia,da,fa,db,fb,nflmat,         &
+                             nshell, ktype, cutoff, oflag,  &
+                             jm,ishlef,jnat,mxbf,nshelt,    &
+                             dprime,vao2,xintb)
+
+    LOGICAL, INTENT(IN) ::  schwrz
+
+    INTEGER, INTENT(OUT) :: &
+      nint, nschwz
+
+    INTEGER, INTENT(IN) :: &
+      l1, l2a, l2b, nsh2, nshell, nflmat, maxg, &
+      ia(l1),ktype(mxsh),&
+      JM,ISHLEF,JNAT,mxbf,nshelt
+    INTEGER :: MODE
+
+!   typscf is an 8-byte hollerith constant
+    REAL(KIND=8), INTENT(IN) :: typscf
+
+    REAL(KIND=fp), INTENT(IN) :: &
+      cutoff 
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      da(l2a), db(l2b),dprime(mxbf,mxbf),xintb(nshelt,nshell)
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      fa(l2a), fb(l2b),&
+      vao2(l1,l1)
+
+    LOGICAL, INTENT(IN) :: &
+        oflag
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    COMMON /fmcom / xx(1)
+        REAL(KIND=fp), TARGET :: xx
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+!   Common blocks /MAXC  /, /SHLNOS/ and /GOUT/ contain
+!   both global (cmax(:),qq4,norgp) and thread-local
+!   data (the rest). Set them threadprivate and copyin
+!   global data later in $omp parallel section.
+
+!$omp threadprivate(/shlnos/,/maxc  /,/gout  /,/nlrcf /,/dftpar/)
+
+    INTEGER :: &
+      next, num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll 
+
+    LOGICAL :: &
+      schskp, dirscf
+
+    REAL(KIND=fp) :: &
+      denmax, tim, tim0, tim1, tim2, tim3, tim4, test
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+      ddij_t, ghondo_t
+
+    INTEGER :: IDUMMY
+    REAL(KIND=fp) :: DUMMY 
+!
+!   --- Initialization of variables ---
+!
+
+    tim = zero
+    CALL tsecnd(tim)
+
+    nint   = 0
+    nschwz = 0
+    schskp = .FALSE.
+    denmax = zero
+    dirscf = .TRUE.
+    DUMMY=0.0D+00
+    IDUMMY = 0
+   
+    MODE = 2
+
+!   no symmetry supported yet
+    qq4 = 1
+    norgp = 0
+
+
+#if __TIMING==1
+!   text for timing output
+    IF (oflag) WRITE(iw,dbgfmt1)
+#endif
+!
+!   --- Initiate OpenMP parallel ---
+!
+!   early thread invocation decrease OpenMP lib overhead
+!
+!$omp parallel                                      &
+!$omp   private(ithread,thr_nshq,ii,jj,kk,ll,test,  &
+!$omp           tim,tim0,tim1,tim2,tim3,tim4,       &
+!$omp           ddij_t,ghondo_t )                   &
+!$omp   firstprivate(denmax, schskp)                &
+!$omp   shared(ia,dprime,l1,l2a,l2b,num_threads,    &
+!$omp          next, maxg, xx,                      &
+!$omp          cutoff, dirscf, xintb, nflmat,       &
+!$omp          typscf,schwrz,oflag,dummy,idummy)    &
+!$omp   reduction(+:vao2,fb,nint,nschwz)            &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+!   allocate temporary memory for integrals
+    ALLOCATE(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+!
+!   --- Variable initialization for OpenMP ---
+!
+
+    num_threads = omp_get_num_threads()
+
+!   reset all info stats
+    ithread  = omp_get_thread_num()
+    thr_nshq = 0
+#if __TIMING==1
+    tim1     = zero
+    tim2     = zero
+    tim3     = zero
+    tim4     = zero
+!   main timer initialization
+    tim0     = omp_get_wtime()
+#endif
+
+!   go over shells from largest value (nshell)
+!   to 0 for better load balance
+
+    ii = nshlef(JM) + 1
+
+ic: DO
+!   --- MPI load balance ---
+        IF (ibtyp.eq.1) THEN
+!           dynamic load balance
+!$omp barrier
+!$omp master
+            CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+            ii = nshlef(JM) - next
+            IF (ii.LE.0) EXIT ic
+        ELSE
+!           static load balance
+            ii = ii - 1
+            IF (ii.LE.0) EXIT ic
+            IF (MOD(ii,nproc).NE.me) CYCLE ic
+        END IF
+!
+!   --- Begin OpenMP integral calculation ---
+!
+!   Use conventional (instead of triple-sort)
+!   shell order for better load balance and for
+!   further vectorization
+!$omp do schedule(dynamic,1) collapse(2)
+        DO jj = 1,nshell
+            Do kk = 1, nshlef(JM)
+                DO ll = 1, nshell
+!                   Schwartz screening:
+#if __TIMING==1
+                    tim1 = omp_get_wtime()
+#endif
+                    IF (schwrz) THEN
+                        test = xintb(ii+ISHLEF,jj)*xintb(kk+ISHLEF,ll)
+                        schskp = test.LT.cutoff
+                    END IF
+
+#if __TIMING==1
+                    tim2 = tim2 + omp_get_wtime() - tim1
+#endif
+                    IF(.NOT.schskp) THEN
+
+                       CALL shellquart_efp_omp(ii,jj,kk,ll,ghondo_t,ddij_t,&                    
+                                               JM,JNAT,MODE)                                    
+
+#if __TIMING==1
+                        tim3 = tim3 + omp_get_wtime() - tim1
+#endif
+                        thr_nshq = thr_nshq + 1
+!
+!                  ---  Fock matrix update ---
+!
+                     CALL DIRFCK_EFP(TYPSCF,IA,da,fa,GHONDO_t,L1,NINT, &
+                    DUMMY,dprime,DUMMY,vao2,DUMMY,mxbf,JM,2)
+#if __TIMING==1
+                        tim4 = tim4 + omp_get_wtime() - tim1
+#endif
+                    ELSE
+                        nschwz = nschwz + 1
+                    END IF
+                END DO
+            END DO
+        END DO
+!$omp end do nowait
+    END DO ic
+!$omp barrier
+
+#if __TIMING==1
+    tim0 = omp_get_wtime() - tim0
+!   debug timing output
+    IF (oflag) THEN
+!$omp do ordered
+        DO ii = 0, num_threads-1
+!$omp ordered
+            WRITE(iw,dbgfmt2) ithread,thr_nshq,tim3-tim2,tim4-tim3,tim2,tim0
+!$omp end ordered
+        END DO
+!$omp end do
+    END IF
+#endif
+
+!   deallocate temporary memory for integrals
+    DEALLOCATE(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+    CALL ddi_dlbreset
+
+  END SUBROUTINE efp2ei_omp_jk_mode2
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK EFP2EI_OMP_JK_mode3
+!
+!>    @brief   Threaded version of Mode 3 of QM-EFP2 exrep 
+!>             two-electron integral calculation routine. 
+!>             Load balance of OpenMP code
+!>             is done over J and K shell indices,
+!>             MPI load balance - over I index.
+!>             Related input file option:
+!>             `$INTGRL INTOMP=1 $END`
+!>
+!>    @details Calculates two-electron contribution to the Fock
+!>             matrix. Based on `EFP2EI_MODE3` subroutine from `eftei.src`
+!>
+!>    @author  Peng Xu and Tosaporn Sattasathuchana
+!
+!     REVISION HISTORY:
+!>    @date  Sep, 2019
+!
+!     PARAMETERS:
+!
+!>    @param[in]     typscf    hollerith, the kind of SCF (=RHF,UHF, etc.)
+!>    @param[in]     schwrz    determines whether to use integral screening
+!>    @param[out]    nint      number of calculated ERIs
+!>    @param[out]    nschwz    number of ERIs that were screened out
+!>    @param[in]     l1        size of index array
+!>    @param[in]     l2a       size of Fock and density matrices (alpha)
+!>    @param[in]     l2b       size of Fock and density matrices (beta)
+!>    @param[in]     xints(:)  array of exchange integrals
+!>    @param[in]     nsh2      size of `xints(:)` array
+!>    @param[in]     maxg      size of temporary array for Rys code
+!>    @param[in]     ia(:)     index array, contains "triangular numbers"
+!>    @param[in,out] da(:)     density matrix for alpha electrons
+!>    @param[in,out] fa(:)     Fock matrix for alpha electrons
+!>    @param[in,out] db(:)     density matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in,out] fb(:)     Fock matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in]     nflmat    when >1 selects CPHF calculation
+!>    @param[in]     nshell    number of shells
+!>    @param[in]     ktype(:)  array of shell types according to their
+!>                                 angular momentum
+!>    @param[in]     cutoff    cutoff for integral screening
+!>    @param[in]     oflag     logical parameter for debug timing output
+!>    @param[in]     jm        counter of EFP type 
+!>    @param[in]     ishlef    counter of EFP shell
+!>    @param[in]     jnat      counter of EFP atoms
+!>    @param[in]     mxbf      maximum of basis function of EFP
+!>    @param[in]     nshelt    total number of EFP shells
+!>    @param[in]     dqm       QM density
+!>    @param[in]     vao       TEI FOCK CONTRIBUTION, details below
+!>    @param[in]     vao2      TEI FOCK CONTRIBUTION, details below
+!>    @param[in]     sstar     backtransformation of SAB in AO basis 
+!>    @param[in]     xintasq   square array of QM exchange integrals 
+!>    @param[in]     xintb     array of exchange integrals containing EFP
+  SUBROUTINE efp2ei_omp_jk_mode3(typscf,schwrz,nint,nschwz, &
+                             l1,l2a,l2b,xints, &
+                             nsh2,maxg, &
+                             ia,da,fa,db,fb,nflmat, &
+                             nshell, ktype, cutoff, oflag, &
+                             jm,ishlef,jnat,mxbf,nshelt,&
+                             dqm,vao,vao2,sstar,xintasq,xintb)
+
+    LOGICAL, INTENT(IN) :: &
+      schwrz
+
+    INTEGER, INTENT(OUT) :: &
+      nint, nschwz
+
+    INTEGER, INTENT(IN) :: &
+      l1, l2a, l2b, nsh2, nshell, nflmat, maxg, &
+      ia(l1),ktype(mxsh),&
+      JM,ISHLEF,JNAT,mxbf,nshelt
+    INTEGER :: MODE
+
+!   typscf is an 8-byte hollerith constant
+    REAL(KIND=8), INTENT(IN) :: &
+        typscf
+
+    REAL(KIND=fp), INTENT(IN) :: &
+      cutoff, &
+      xints(nsh2) 
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      da(l2a), db(l2b),dqm(l1,l1),sstar(l1,mxbf),&
+      xintasq(nshell,nshell),xintb(nshelt,nshell)
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      fa(l2a), fb(l2b),&
+      vao(mxbf,l1),vao2(l1,l1)
+
+    LOGICAL, INTENT(IN) :: &
+        oflag
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    COMMON /fmcom / xx(1)
+        REAL(KIND=fp), TARGET :: xx
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+    COMMON /shlexc/ norgsh(3),norgsp(3),iexch,nangm,ngth(4)
+        INTEGER :: norgsh,norgsp,iexch,nangm,ngth
+!   Common blocks /MAXC  /, /SHLNOS/ and /GOUT/ contain
+!   both global (cmax(:),qq4,norgp) and thread-local
+!   data (the rest). Set them threadprivate and copyin
+!   global data later in $omp parallel section.
+
+!$omp threadprivate(/shlnos/,/maxc  /,/gout  /,/nlrcf /,/dftpar/)
+                                                       
+
+    INTEGER :: &
+      next, num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll
+
+    LOGICAL :: &
+      schskp, dirscf
+
+    REAL(KIND=fp) :: &
+      denmax, tim, tim0, tim1, tim2, tim3, tim4, test
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+      ddij_t, ghondo_t
+
+    INTEGER :: IDUMMY
+    REAL(KIND=fp) :: DUMMY 
+   
+    iexch = 1
+!
+!   --- Initialization of variables ---
+!
+
+    tim = zero
+    CALL tsecnd(tim)
+
+    nint   = 0
+    nschwz = 0
+    schskp = .FALSE.
+    denmax = zero
+    dirscf = .TRUE.
+    DUMMY=0.0D+00
+    IDUMMY = 0
+    MODE = 3
+!   no symmetry supported yet
+    qq4 = 1
+    norgp = 0
+
+
+#if __TIMING==1
+!   text for timing output
+    IF (oflag) WRITE(iw,dbgfmt1)
+#endif
+!
+!   --- Initiate OpenMP parallel ---
+!
+!   early thread invocation decrease OpenMP lib overhead
+!$omp parallel                                      &
+!$omp   private(ithread, thr_nshq, ii,              &
+!$omp     jj,kk,ll, test,                           &
+!$omp     tim, tim0, tim1, tim2, tim3, tim4,        &
+!$omp     ddij_t, ghondo_t)                         &
+!$omp   firstprivate(denmax, schskp)                &
+!$omp   shared(ia,dqm,sstar,l1,l2a,l2b,num_threads, &
+!$omp     next, maxg, xx,                           &
+!$omp     cutoff, dirscf,xintasq, xintb, nflmat,    &
+!$omp     typscf,schwrz,oflag,mxbf,dummy,idummy)    &
+!$omp   reduction(+:vao,vao2,nint,nschwz)           &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+!   allocate temporary memory for integrals
+    ALLOCATE(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+
+!
+!   --- Variable initialization for OpenMP ---
+!
+
+    num_threads = omp_get_num_threads()
+
+!   reset all info stats
+    ithread  = omp_get_thread_num()
+    thr_nshq = 0
+#if __TIMING==1
+    tim1     = zero
+    tim2     = zero
+    tim3     = zero
+    tim4     = zero
+!   main timer initialization
+    tim0     = omp_get_wtime()
+#endif
+
+!   go over shells from largest value (nshell)
+!   to 0 for better load balance
+!
+    ii = nshlef(JM) + 1
+
+ic: DO 
+!   --- MPI load balance ---
+        IF (ibtyp.eq.1) THEN
+!           dynamic load balance
+!$omp barrier
+!$omp master
+            CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+            ii = nshlef(JM) - next
+            IF (ii.LE.0) EXIT ic
+        ELSE
+!           static load balance
+            ii = ii - 1
+            IF (ii.LE.0) EXIT ic
+            IF (MOD(ii,nproc).NE.me) CYCLE ic
+        END IF
+!
+!   --- Begin OpenMP integral calculation ---
+!
+!   Use conventional (instead of triple-sort)
+!   shell order for better load balance and for
+!   further vectorization
+!$omp do schedule(dynamic,1) collapse(2)
+        DO jj = 1,nshell
+           Do kk = 1,nshell
+              DO ll = 1,kk 
+!                Schwartz screening:
+#if __TIMING==1
+                 tim1 = omp_get_wtime()
+#endif
+                 IF (schwrz) THEN
+                     test = xintb(ii+ISHLEF,jj)*xintasq(kk,ll)
+                     schskp = test.LT.cutoff
+                 END IF
+
+#if __TIMING==1
+                 tim2 = tim2 + omp_get_wtime() - tim1
+#endif
+                 IF(.NOT.schskp) THEN
+
+                    CALL shellquart_efp_omp(ii,jj,kk,ll,ghondo_t,ddij_t,&                                                         
+                                            JM,JNAT,MODE)                                                                         
+#if __TIMING==1
+                    tim3 = tim3 + omp_get_wtime() - tim1
+#endif
+                    thr_nshq = thr_nshq + 1
+!
+!                  ---  Fock matrix update ---
+!
+                     CALL DIRFCK_EFP(TYPSCF,IA,da,fa,GHONDO_t,L1,NINT, &
+                                     DQM,DUMMY,vao,vao2,sstar,mxbf,JM,3)
+
+#if __TIMING==1
+                     tim4 = tim4 + omp_get_wtime() - tim1
+#endif
+                 ELSE
+                    nschwz = nschwz + 1
+                END IF
+              END DO
+           END DO
+        END DO
+!---PX
+!$omp end do nowait
+!---END PX
+    END DO ic
+!----PX
+!$omp barrier
+!----END PX
+
+#if __TIMING==1
+    tim0 = omp_get_wtime() - tim0
+!   debug timing output
+    IF (oflag) THEN
+!$omp do ordered
+        DO ii = 0, num_threads-1
+!$omp ordered
+            WRITE(iw,dbgfmt2) ithread,thr_nshq,tim3-tim2,tim4-tim3,tim2,tim0
+!$omp end ordered
+        END DO
+!$omp end do
+    END IF
+
+
+#endif
+
+!   deallocate temporary memory for integrals
+    DEALLOCATE(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+    CALL ddi_dlbreset
+
+  END SUBROUTINE efp2ei_omp_jk_mode3
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK EFP2EI_OMP_KL_MODE1 
+!
+!>    @brief   Threaded version of Mode 1 of QM-EFP2 exrep 
+!>             two-electron integral calculation routine. 
+!>             For closed shell only.
+!>             OpenMP parallelization over K and L shell indices,
+!>             MPI -  over I and J indices.
+!>             Related input file options:
+!>             `$INTGRL INTOMP=2 $END`
+!>
+!>    @details Calculates two-electron contribution to the Fock
+!>             matrix. Based on `EFP2EI_MODE1` subroutine from `eftei.src`
+!>
+!>    @author  Peng Xu and Tosaporn Sattasathuchana
+!
+!     REVISION HISTORY:
+!>    @date  Sep, 2019
+!
+!     PARAMETERS:
+!
+!>    @param[in]     typscf    hollerith, the kind of SCF (=RHF,UHF, etc.)
+!>    @param[in]     schwrz    determines whether to use integral screening
+!>    @param[out]    nint      number of calculated ERIs
+!>    @param[out]    nschwz    number of ERIs that were screened out
+!>    @param[in]     l1        size of index array
+!>    @param[in]     l2a       size of Fock and density matrices (alpha)
+!>    @param[in]     l2b       size of Fock and density matrices (beta)
+!>    @param[in]     xints(:)  array of exchange integrals
+!>    @param[in]     nsh2      size of `xints(:)` array
+!>    @param[in]     maxg      size of temporary array for Rys code
+!>    @param[in]     ia(:)     index array, contains "triangular numbers"
+!>    @param[in,out] da(:)     density matrix for alpha electrons
+!>    @param[in,out] fa(:)     Fock matrix for alpha electrons
+!>    @param[in,out] db(:)     density matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in,out] fb(:)     Fock matrix for beta electrons,
+!>                                 used in open-shell calculations only
+!>    @param[in]     dsh       density matrix packed in shells
+!>                                 for screening purposes
+!>    @param[in]     nflmat    when >1 selects CPHF calculation
+!>    @param[in]     nshell    number of shells
+!>    @param[in]     ktype(:)  array of shell types according to their
+!>                                 angular momentum
+!>    @param[in]     cutoff    cutoff for integral screening
+!>    @param[in]     oflag     logical parameter for debug timing output
+  SUBROUTINE efp2ei_omp_kl_mode1(typscf,schwrz,nint,nschwz, &
+                             l1,l2a,l2b,xints, &
+                             nsh2,maxg, &
+                             ia,da,fa,db,fb,dsh,nflmat, &
+                             nshell, ktype, cutoff, oflag)
+
+    LOGICAL, INTENT(IN) :: &
+      schwrz
+
+    INTEGER, INTENT(OUT) :: &
+      nint, nschwz
+
+    INTEGER, INTENT(IN) :: &
+      l1, l2a, l2b, nsh2, nshell, nflmat, maxg, &
+      ia(l1),ktype(mxsh)
+
+!   typscf is an 8-byte hollerith constant
+    REAL(KIND=8), INTENT(IN) :: &
+        typscf
+
+    REAL(KIND=fp), INTENT(IN) :: &
+      cutoff, &
+      xints(nsh2), dsh(nsh2)
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      da(l2a), db(l2b)
+
+    REAL(KIND=fp), INTENT(INOUT) :: &
+      fa(l2a), fb(l2b)
+    LOGICAL, INTENT(IN) :: &
+        oflag
+!
+!
+!
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    COMMON /fmcom / xx(1)
+        REAL(KIND=fp), TARGET :: xx
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+!   Common blocks /MAXC  /, /SHLNOS/ and /GOUT/ contain
+!   both global (cmax(:),qq4,norgp) and thread-local
+!   data (the rest). Set them threadprivate and copyin
+!   global data later in $omp parallel section.
+
+!$omp threadprivate(/shlnos/,/maxc  /,/gout  /,/nlrcf /,/dftpar/)
+
+    INTEGER :: &
+      next, num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll, ijij, klkl, jork, ijmax, klmax
+
+    LOGICAL :: &
+      schskp, dirscf
+
+    REAL(KIND=fp) :: &
+      denmax, tim, tim0, tim1, tim2, tim3, tim4, test
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+      ddij_t, ghondo_t
+
+    INTEGER :: IDUMMY
+    REAL(KIND=fp) :: DUMMY
+!
+!   --- Initialization of variables ---
+!
+
+    tim = zero
+    CALL tsecnd(tim)
+
+    nint   = 0
+    nschwz = 0
+    schskp = .FALSE.
+    denmax = zero
+    dirscf = .TRUE.
+    DUMMY=0.0D+00
+    IDUMMY = 0
+    fb=0
+
+!   no symmetry supported yet
+    qq4 = 1
+    norgp = 0
+
+
+#if __TIMING==1
+!   text for debut output
+
+    IF (oflag) WRITE(iw,dbgfmt1)
+#endif
+!
+!   --- Initiate OpenMP parallel ---
+!
+!   early thread invocation decrease OpenMP lib overhead
+!
+!$omp parallel                                  &
+!$omp   private(ithread, thr_nshq,              &
+!$omp     kk,ll,jork, klkl, test,               &
+!$omp     ijij, ii, jj, ijmax, klmax,           &
+!$omp     tim, tim0, tim1, tim2, tim3, tim4,    &
+!$omp     ddij_t, ghondo_t )                    &
+!$omp   firstprivate(denmax, schskp)            &
+!$omp   shared(ia,da,l1,l2a,l2b,num_threads,    &
+!$omp     next, maxg, xx,                       &
+!$omp     cutoff, dirscf, xints, dsh, nflmat,   &
+!$omp     typscf,schwrz,oflag,dummy,idummy)     &
+!$omp   reduction(+:fa,fb,nint,nschwz)          &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+
+!
+!   --- variable initialization for OpenMP ---
+!
+
+    num_threads = omp_get_num_threads()
+
+!   reset all info stats
+    ithread  = omp_get_thread_num()
+    thr_nshq = 0
+#if __TIMING==1
+    tim1     = zero
+    tim2     = zero
+    tim3     = zero
+    tim4     = zero
+!   main timer initialization
+    tim0     = omp_get_wtime()
+#endif
+
+
+!   allocate temporary memory for integrals
+    allocate(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+
+    ijmax = nshell*(nshell+1)/2
+!   go over shells from largest value (nshell)
+!   to 1 for better load balance
+    ijij = ijmax + 1
+ijc:DO
+!   --- MPI load balance ---
+        IF (ibtyp.eq.1) THEN
+!           Dynamic load balance
+!$omp barrier
+!$omp master
+            CALL ddi_dlbnext(next)
+!$omp flush (next)
+!$omp end master
+!$omp barrier
+            ijij = ijmax - next
+            IF (ijij.LE.0) EXIT ijc
+        ELSE
+!           Static load balance
+            ijij = ijij - 1
+            IF (ijij.LE.0) EXIT ijc
+            IF (MOD(ijij,nproc).NE.me) CYCLE ijc
+        END IF
+
+        ii = ceiling((sqrt(8.0*ijij+1)-1)/2)
+        jj = ijij - ii*(ii-1)/2
+
+        klmax = ii*(ii+1)/2
+
+!   --- Begin OpenMP integral calculation ---
+
+!$omp do schedule(dynamic,1)
+klc:    DO klkl = 1, klmax
+
+            kk = ceiling((sqrt(8.0*klkl+1)-1)/2)
+            ll = klkl - kk*(kk-1)/2
+
+            IF (ii.EQ.kk.AND.ll.GT.jj) CYCLE klc
+
+!           Schwartz screening:
+#if __TIMING==1
+            tim1 = omp_get_wtime()
+#endif
+            IF (schwrz) THEN
+                test = xints(ijij)*xints(klkl)
+                IF (dirscf) THEN
+                    denmax = schwdn(dsh,ii,jj,kk,ll,ia)
+                    test = test*denmax
+                END IF
+                schskp = test.LT.cutoff
+            END IF
+
+#if __TIMING==1
+            tim2 = tim2 + omp_get_wtime() - tim1
+#endif
+
+            IF(.NOT.schskp) THEN
+
+                    CALL ompmod_shellquart(ii,jj,kk,ll,ghondo_t,ddij_t)
+                    thr_nshq = thr_nshq + 1
+
+#if __TIMING==1
+                    tim3 = tim3 + omp_get_wtime() - tim1
+#endif
+!          ---  Fock matrix update ---
+
+                     CALL DIRFCK_EFP(TYPSCF,IA,da,fa,GHONDO_t,L1,NINT, &
+                    DUMMY,DUMMY,DUMMY,DUMMY,DUMMY,IDUMMY,IDUMMY,1)
+!-----END PX
+#if __TIMING==1
+                    tim4 = tim4 + omp_get_wtime() - tim1
+#endif
+
+            ELSE
+                nschwz = nschwz + 1
+            END IF
+        END DO klc
+!$omp end do nowait
+    END DO ijc
+!$omp barrier
+
+#if __TIMING==1
+    tim0 = omp_get_wtime() - tim0
+
+!   debug timing output
+    IF (oflag) THEN
+!$omp do ordered
+        DO ii = 0, num_threads-1
+!$omp ordered
+            WRITE(iw,dbgfmt2) ithread,thr_nshq,tim3-tim2,tim4-tim3,tim2,tim0
+!$omp end ordered
+        END DO
+!$omp end do
+    END IF
+#endif
+
+!   deallocate temporary memory for integrals
+    deallocate(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+    CALL ddi_dlbreset
+
+  END SUBROUTINE efp2ei_omp_kl_mode1 
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK efp2ei_omp_exchng 
+!
+!>    @brief   Calculates integrals for Schwartz screening purposes.
+!>             Threaded version of EXCHNG_EF routine
+!>
+!>    @details Calculates exhcange ERIs \f$ (i,j|i,j) \f$.
+!>             (i = EFP, j = QM)
+!>             Largest ERI in shell pair is stored in
+!>             array `xints(:)` to be used later for screening.
+!>             Based on `EXCHNG_EF` subroutine from `eftei.src`
+!>             OpenMP algorithm is turned on by default when `INTOMP`
+!>             option of the `$INTGRL` group in the input file
+!>             is nonzero.
+!>
+!>    @author  Peng Xu and Tosaporn Sattasathuchana
+!
+!     REVISION HISTORY:
+!>    @date  Sep, 2019
+!
+!     PARAMETERS:
+!
+!>    @param[out] xints(:) array to store max exchange
+!>                         integrals over shells
+!>    @param[in]  nshelt   total number of EFP shells
+!>    @param[in]  nshell   number of QM shell
+!>    @param[in]  maxg     dimension of temporary array for
+!>                         Rys integral code
+!>    @param[in]  inttyp   selects ERI scheme
+  SUBROUTINE efp2ei_omp_exchng(xints,maxg,nshelt,inttyp)
+
+    INTEGER, INTENT(IN) :: nshelt,inttyp
+    INTEGER :: ISHLEF,JAO,JM,JNAT,MJ,LMAX2,MODE
+
+    REAL(KIND=fp), INTENT(OUT) :: &
+!        xints(nsh2)
+        xints(nshelt,nshell)
+
+    INTEGER, INTENT(IN) :: &
+        maxg 
+
+    COMMON /intac2/ ei1,ei2,cux
+        REAL(KIND=fp) :: ei1,ei2,cux
+
+    COMMON /flips / ib(4,3)
+        INTEGER :: ib
+
+    COMMON /fmoinf/ nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+        INTEGER :: nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+
+    COMMON /fmorun/ espscf,e0scf(2),emp2s,idafmo,icurfg,jcurfg,kcurfg, &
+                    icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+                    moncor,needr,modrst,norbproj,nunesp,iskipesp,      &
+                    iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo,       &
+                    iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo(2)
+        REAL(KIND=fp) :: espscf,e0scf,emp2s
+        INTEGER :: idafmo,icurfg,jcurfg,kcurfg, &
+                   icurlay,icurunt,nat1e,ncursh,ngau,icurpop,ifmostp, &
+                   moncor,needr,modrst,norbproj,nunesp,iskipesp,      &
+                   iesdppc,idoprop,mp2run,icurit,idmfmo,iddfmo,       &
+                   iddcur,nddleft,ivmfmo,nzmtfmo,ifmobas,itmfmo
+
+    COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    COMMON /elgidx/ lcut
+        LOGICAL :: lcut
+
+    COMMON /nshel / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),       &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),       &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh),    &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+
+    COMMON /output/ nprint,itol,icut,normf,normp,nopk
+        INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    COMMON /shlexc/ norgsh(3),norgsp(3),iexch,nangm,ngth(4)
+        INTEGER :: norgsh,norgsp,iexch,nangm,ngth
+
+    COMMON /shlg70/ ish,jsh,ksh,lsh,ijklxx(4)
+        INTEGER :: ish,jsh,ksh,lsh,ijklxx
+
+    COMMON /shlnos/ qq4,lit,ljt,lkt,llt,loci,locj,lock,locl,           &
+                    mini,minj,mink,minl,maxi,maxj,maxk,maxl,           &
+                    nij,ij,kl,ijkl
+        INTEGER :: lit,ljt,lkt,llt,loci,locj,lock,locl, &
+                   mini,minj,mink,minl,maxi,maxj,maxk,maxl, &
+                   nij,ij,kl,ijkl
+        REAL(KIND=fp) :: qq4
+
+    COMMON /maxc  / cmax(mxgtot),cmaxa(mxgsh),cmaxb(mxgsh), &
+                    cmaxc(mxgsh),cmaxd(mxgsh),ismlp(mxg2),ismlq
+        REAL(KIND=fp) :: cmax,cmaxa,cmaxb,cmaxc,cmaxd
+        INTEGER :: ismlp,ismlq
+
+    COMMON /nlrcf / lrint
+        LOGICAL :: lrint
+
+    COMMON /dftpar/ dfttyp(20),exena,exenb,exenc, &
+                    idft34,nauxfun,nauxshl
+        REAL(KIND=fp) :: dfttyp,exena,exenb,exenc
+        INTEGER :: idft34,nauxfun,nauxshl
+
+    COMMON /shlt  / tol,cutoff,icount,out
+        REAL(KIND=fp) :: tol, cutoff
+        INTEGER :: icount
+        LOGICAL :: out
+
+    COMMON /fmcom / xx(1)
+        REAL(KIND=fp), TARGET :: xx
+
+!$omp threadprivate(/flips /,/gout  /,/shlnos/,/shlg70/, &
+!$omp               /maxc  /,/nlrcf /,/dftpar/)
+
+    REAL(KIND=fp) :: &
+        tim, tim0, texch, tolsv, ei1sv, ei2sv, cuxsv, vmax
+
+    REAL(KIND=fp),DIMENSION(:),ALLOCATABLE :: &
+        ddij_t, ghondo_t
+
+    LOGICAL :: &
+        pople,some,iandj,saveint, doesp
+
+    INTEGER :: &
+        ithread, num_threads, lmax, nint, ijij, ii, jj, ish2
+
+    doesp=nfg.NE.0.AND.ncursh.NE.0
+    IF (goparr.OR.doesp) xints(:,:)=0.0_fp
+
+    some = nprint.NE.-5 .AND. maswrk
+    saveint=nfg.EQ.0.OR.ncursh.EQ.0.OR.ifmostp.EQ.6
+
+    IF (some) THEN
+        tim = zero
+        CALL tsecnd(tim)
+        tim0 = tim
+    ENDIF
+
+    MODE = 2
+    LMAX=0
+    DO MJ = 1,NFRG
+    JM = ISET(MJ)
+    CALL BASEFP(LMAX2,JM)
+    IF (LMAX2 .GT. LMAX) LMAX=LMAX2
+    END DO
+    nangm = angm(lmax)
+    ngth(4) = 1
+    ngth(3) = ngth(4) * nangm
+    ngth(2) = ngth(3) * nangm
+    ngth(1) = ngth(2) * nangm
+
+!   The idea is to do even small integrals, below the usual
+!   cutoff threshholds, by resetting tolerances tightly.
+
+    tolsv = tol
+    tol = 75.0d+00
+
+    ei1sv = ei1
+    ei2sv = ei2
+    cuxsv = cux
+    ei1 = 1.0d-17
+    ei2 = 1.0d-17
+    cux = 50.0d+00
+
+    iexch = 1
+    norgp = 0
+    qq4   = one
+    nint  = 0
+
+    norgsh(1:3) = 0
+    norgsp(1:3) = 0
+
+    ijij = 0
+
+
+!$omp parallel                                      &
+!$omp   private(ii,jj,jao,jnat,ishlef,jm,vmax,      &
+!$omp     pople,ithread,ghondo_t,ddij_t)            &
+!$omp   shared(doesp,ncursh,num_threads,ktype,      &
+!$omp          ktypef)&
+!$omp   reduction(+:nint)                           &
+!$omp   copyin(cmax,qq4,norgp,lrint,/dftpar/)
+
+
+    ithread = omp_get_thread_num()
+
+    allocate(ddij_t(mxang2*mxg2),ghondo_t(maxg))
+
+    JAO  = 0
+    JNAT = 0
+    ISHLEF = 0
+
+    DO 1000 MJ = 1,NFRG
+    JM = ISET(MJ)
+ic:    DO II = 1,NSHLEF(JM)
+          ish = ii
+!   ----- go parallel! -----
+!
+        IF (goparr) THEN
+            IF (mod(ish,nproc).NE.me) CYCLE ic
+!            IF (mod(ii,nproc).NE.me) CYCLE ic
+        END IF
+!
+!$omp do schedule(dynamic,1)
+jc:     DO JJ = 1,NSHELL
+           jsh = jj
+
+!           use Pople code for any pure SP integral blocks,
+!           use HONDO Rys polynomial code for other blocks
+
+            pople = inttyp.LT.2.AND.max(ktypef(ish,JM),ktype(jsh)).LE.2
+            IF (pople) THEN
+                ksh=ish
+                lsh=jsh
+                gpople(1:256)=0.0_fp
+                CALL genr70_qmefp(JM,JNAT,MODE)
+            ELSE
+        
+! cannot use zqoutefp !?
+                ghondo_t(:) = zero
+
+                CALL efp2ei_omp_rysint(ii,jj,ii,jj,ghondo_t,ddij_t,&                                                              
+                                             JM,JNAT,ktype,ktypef,MODE)                                                           
+            END IF
+
+! -----     pick out largest exchange integral for this block -----
+            IF (pople) THEN
+                vmax = maxval(abs(gpople(1:256)))
+                nint = nint+count(abs(gpople(1:256)).gt.zero)
+            ELSE
+                vmax = maxval(abs(ghondo_t))
+                nint = nint+count(abs(ghondo_t).gt.zero)
+            END IF
+
+            xints(ISH+ISHLEF,JSH) = sqrt(vmax)
+        END DO jc
+!$omp end do nowait
+    END DO ic
+      JAO = JAO + NUMEF(JM)
+      JNAT = JNAT + NATEF(JM)
+      ISHLEF = ISHLEF + NSHLEF(JM)
+ 1000 CONTINUE
+
+!   deallocate temporary memory for integrals
+    deallocate(ddij_t,ghondo_t)
+
+!$omp end parallel
+
+
+! ----- sum up partial contributions if parallel -----
+
+    IF (goparr) THEN
+        CALL ddi_sync(1052)
+        CALL ddi_gsumf(1050,xints,nshelt*nshell)
+        CALL ddi_gsumi(1051,nint ,1)
+    END IF
+!
+!    IF (out) THEN
+!        WRITE(iw,*) 'MAX EXCHANGE INTEGRAL IN SHELL'
+!        CALL prtri(xints,nshell)
+!    END IF
+!
+    IF (some) THEN
+        CALL tsecnd(tim)
+        texch = tim-tim0
+!        WRITE(iw,dbgfmt_exch) nint,texch
+    ENDIF
+!
+    tol = tolsv
+    ei1 = ei1sv
+    ei2 = ei2sv
+    cux = cuxsv
+
+  END SUBROUTINE efp2ei_omp_exchng
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK efp2ei_omp_RYSINT
+!>    @brief   Rys quadrature ERI calculation
+!>
+!>    @details Calculates QM-EFP2 two-electron integrals, 
+!>             mode 2 (2 EFP centers, 2 QM centers) and
+!>             mode 3 (1 EFP center, 3 QM centers) over
+!>             shell quartet \f$ (ii,jj|kk,ll) \f$ using Rys quadrature
+!>             code of GAMESS (`SHELLS, IJPRIM, GENRAL` and `S0000`
+!>             routines). Based on `SHELLQUART_EFP` routine from `eftei.src`
+!>             Supports S, P, D, F, G, H and I shells.
+!>
+!>    @author  Peng Xu and Tosaporn Sattasathuchana
+!
+!     REVISION HISTORY:
+!>    @date  Jan, 2020
+!
+!     PARAMETERS:
+!
+!>    @param[in]     ii        first shell index from EFP
+!>    @param[in]     jj        second shell index from QM
+!>    @param[in]     kk        third shell index from EFP
+!>    @param[in]     ll        fourth shell index from QM
+!>    @param[in]     ktype(:)  array of shell types from QM according
+!>                                 to their angular momentum
+!>    @param[in]     ktypef(:,:)  array of shell types from EFP  according
+!>                                 to their angular momentum
+!>    @param[out]    ghondo(:) array of integrals over shell quartet
+!>    @param[in]     ddij(:)   temporary array for ingeral normalization
+!>    @param[in]     JM        index for the type of EFP potentials  
+!>    @param[in]     JNAT      counter for number of EFP atoms
+!>    @param[in]     MODE      mode of QM-EFP ERI (see details)
+
+  SUBROUTINE efp2ei_omp_rysint(ii,jj,kk,ll,ghondo,ddij,JM,JNAT,&
+                               ktype,ktypef,MODE)
+    INTEGER, INTENT(IN) :: &
+      ii,jj,kk,ll,ktype(mxsh),JM,JNAT,ktypef(MXSHEF,MXDFG),MODE
+
+    REAL(KIND=fp),INTENT(INOUT),ALLOCATABLE :: &
+      ghondo(:)
+
+    REAL(KIND=fp),INTENT(INOUT) :: &
+      ddij(:)
+
+    INTEGER :: &
+      lqsum,KTYPII,KTYPJJ,KTYPKK,KTYPLL
+
+      KTYPII = ktypef(ii,JM)
+      KTYPJJ = ktype(jj)
+      KTYPKK = ktype(kk)
+      IF(MODE.EQ.2) KTYPKK = ktypef(kk,JM)
+      KTYPLL = ktype(ll)
+
+!   fill indices for Rys quadrature
+    CALL shellsefp(MODE,1,ii,jj,kk,ll,JM,JNAT)
+    CALL shellsefp(MODE,2,ii,jj,kk,ll,JM,JNAT)
+    CALL ijprimefp(ddij)
+
+    call zqoutefp(MODE,ghondo)
+
+    lqsum = ktypII + ktypjj +     &
+            ktypkk + ktypll - 4
+
+!   calculate integrals
+    IF (lqsum.EQ.0) THEN
+      CALL s0000(ghondo,ddij)
+    ELSE
+      CALL genral(ghondo,ddij)
+    END IF
+
+  END SUBROUTINE efp2ei_omp_rysint
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK efp2ei_omp_RAXINTSP
+
+
+
+       SUBROUTINE efp2ei_omp_raxintsp(ish,jsh,ksh,lsh,ghondo,&
+                  kminii,kmaxii,kminjj,kmaxjj,&
+                  kminkk,kmaxkk,kminll,kmaxll,JM,JNAT,MODE)
+
+     USE MX_LIMITS,ONLY:MXDFG,MXFGPT,MXSHEF,MXGEFP,MXFRG,MXDPPT,mxsh,&
+          mxgtot,mxgsh,mxg2
+     USE comm_EFPBAS
+
+     INTEGER, INTENT(IN) :: &
+      ish,jsh,ksh,lsh
+
+     INTEGER, INTENT(IN) :: kminii,kmaxii,kminjj,kmaxjj,&
+      kminkk,kmaxkk,kminll,kmaxll,JM,JNAT,MODE
+
+     REAL(KIND=fp),INTENT(INOUT),ALLOCATABLE :: &
+      ghondo(:)
+
+     COMMON /gout  / gpople(768),norgp
+        REAL(KIND=fp) :: gpople
+        INTEGER :: norgp
+
+     COMMON /popout/ lpopi,lpopj,lpopk,lpopl
+        INTEGER :: lpopi,lpopj,lpopk,lpopl
+
+     COMMON /shlg70/ ipl,jpl,kpl,lpl,inew,jnew,knew,lnew
+        INTEGER :: ipl,jpl,kpl,lpl,inew,jnew,knew,lnew
+
+     COMMON /eridat/ len1,len2,len3,len4
+        INTEGER :: len1,len2,len3,len4
+
+     COMMON /eriout/ inw,jnw,knw,lnw,lstri,lstrj,lstrk,lstrl
+        INTEGER :: inw,jnw,knw,lnw,lstri,lstrj,lstrk,lstrl
+
+! required for thread-safety:
+!$omp threadprivate(/gout  /,/popout/,/shlg70/,/eriout/)
+
+     COMMON /nshel / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),    &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),    &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh), &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+
+     INTEGER :: &
+      mini,maxi,minj,maxj,mink,maxk,minl,maxl, &
+      ii,i,ij,ijk,ijkl,ip,ijp,ijkp,ijklp,j,k,l
+
+
+      IPL = ISH
+      JPL = JSH
+      KPL = KSH
+      LPL = LSH
+      INW = ISH
+      JNW = JSH
+      KNW = KSH
+      LNW = LSH
+
+      CALL GENR70_QMEFP(JM,JNAT,MODE)
+
+      MINI = KMINII 
+      MAXI = KMAXII
+      MINJ = KMINJJ
+      MAXJ = KMAXJJ
+      MINK = KMINKK 
+      MAXK = KMAXKK
+      MINL = KMINLL
+      MAXL = KMAXLL
+
+      II = 1
+      DO I = MINI, MAXI
+        IP = (I-1)*LPOPI + 1
+        IJ  = II
+        DO J = MINJ, MAXJ
+          IJP = (J-1)*LPOPJ + IP
+          IJK  = IJ
+          DO K = MINK, MAXK
+            IJKP = (K-1)*LPOPK + IJP
+            IJKL  = IJK
+            DO L = MINL, MAXL
+              IJKLP = (L-1)*LPOPL + IJKP
+              GHONDO(IJKL) = GPOPLE(IJKLP)
+              IJKL = IJKL  + LEN1
+            END DO
+            IJK  = IJK  + LEN2
+          END DO
+          IJ  = IJ  + LEN3
+        END DO
+        II = II + LEN4
+      END DO
+      LSTRI = LEN4
+      LSTRJ = LEN3
+      LSTRK = LEN2
+      LSTRL = LEN1
+
+      END SUBROUTINE efp2ei_omp_raxintsp
+
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+!*MODULE EFTEIOMP   *DECK efp2ei_omp_RAXINTSPD
+
+
+
+       SUBROUTINE efp2ei_omp_raxintspd(ish,jsh,ksh,lsh,ghondo,&
+                  kminii,kmaxii,kminjj,kmaxjj,&
+                  kminkk,kmaxkk,kminll,kmaxll,&
+                  ktypkk,ktypll,JM,JNAT,MODE)
+
+     USE MX_LIMITS,ONLY:MXDFG,MXFGPT,MXSHEF,MXGEFP,MXFRG,MXDPPT,mxsh,&
+          mxgtot,mxgsh,mxg2
+     USE comm_EFPBAS
+
+     INTEGER, INTENT(IN) :: &
+      ish,jsh,ksh,lsh
+
+     INTEGER, INTENT(IN) :: kminii,kmaxii,kminjj,kmaxjj,&
+      kminkk,kmaxkk,kminll,kmaxll,ktypkk,ktypll,JM,JNAT,MODE
+
+     REAL(KIND=fp),INTENT(INOUT),ALLOCATABLE :: &
+      ghondo(:)
+
+     COMMON /flips / ib(4,3)
+        INTEGER :: ib
+
+     COMMON /shlg70/ ipl,jpl,kpl,lpl,inew,jnew,knew,lnew
+        INTEGER :: ipl,jpl,kpl,lpl,inew,jnew,knew,lnew
+
+     COMMON /eridat/ len1,len2,len3,len4
+        INTEGER :: len1,len2,len3,len4
+
+     COMMON /eriout/ inw,jnw,knw,lnw,lstri,lstrj,lstrk,lstrl
+        INTEGER :: inw,jnw,knw,lnw,lstri,lstrj,lstrk,lstrl
+
+! required for thread-safety:
+!$omp threadprivate(/flips /,/eriout/,/shlg70/)
+
+     COMMON /nshel / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),    &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),    &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh), &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+
+     COMMON /output/ nprint,itol,icut,normf,normp,nopk
+        INTEGER :: nprint,itol,icut,normf,normp,nopk
+
+     COMMON /SHLEXC/ NORGSH(3),NORGSP(3),IEXCH,NANGM,NGTH(4)
+        INTEGER :: norgsh,norgsp,iexch,nangm,ngth
+      REAL(KIND=fp) :: &
+      grotspd(1296)
+
+     LOGICAL :: &
+      iandj,kandl,same
+
+     INTEGER :: &
+      mini,maxi,minj,maxj,mink,maxk,minl,maxl, &
+      i,j,k,l,ijn,kln, &
+      ibb, jbb, kbb, lbb, jmax, lmax, &
+      ihondo,irotax,ijklhondo,ijklrotax, &
+      ijhondo, ijrotax, ijkhondo, ijkrotax, &
+      idpop(4,10)
+
+
+     DATA idpop /0,0,0,0,216,36,6,1,432,72,12,2,648,108,18,3, &
+                0,0,0,0,216,36,6,1,432,72,12,2,648,108,18,3, &
+                864,144,24,4,1080,180,30,5/
+
+
+        IPL = ISH
+        JPL = JSH
+        KPL = KSH
+        LPL = LSH
+
+        INW = ISH
+        JNW = JSH
+        KNW = KSH
+        LNW = LSH
+
+        LSTRI = NGTH(1)
+        LSTRJ = NGTH(2)
+        LSTRK = NGTH(3)
+        LSTRL = NGTH(4)
+
+        IF((MODE.EQ.3).AND.(KTYPKK.LT.KTYPLL)) THEN
+          KPL = LSH
+          LPL = KSH
+          KNW = LSH
+          LNW = KSH
+
+          LSTRK = NGTH(4)
+          LSTRL = NGTH(3)
+
+        ENDIF
+
+        CALL GENR03_QMEFP(GROTSPD,JM,JNAT,MODE)
+
+        KANDL = .FALSE.
+        IF(MODE.EQ.3) KANDL = KSH.EQ.LSH
+
+        IBB = IB(1,1)
+        JBB = IB(2,1)
+        KBB = IB(3,1)
+        LBB = IB(4,1)
+
+        MINI = KMINII
+        MAXI = KMAXII
+        MINJ = KMINJJ
+        MAXJ = KMAXJJ
+        MINK = KMINKK
+        MAXK = KMAXKK
+        MINL = KMINLL
+        MAXL = KMAXLL
+        IF((MODE.EQ.3).AND.(KTYPKK.LT.KTYPLL)) THEN
+        MINK = KMINLL
+        MAXK = KMAXLL
+        MINL = KMINKK
+        MAXL = KMAXKK
+        ENDIF
+
+        IJN = 0
+        JMAX = MAXJ
+
+        DO I = MINI, MAXI
+          IHONDO = (I-MINI)*LSTRI + 1
+          IROTAX = IDPOP(IBB,I)  + 1
+
+          DO J = MINJ, JMAX
+            IJHONDO = (J-MINJ)*LSTRJ + IHONDO
+            IJROTAX = IDPOP(JBB,J)  + IROTAX
+            IJN = IJN+1
+            LMAX=MAXL
+            KLN=0
+
+            DO K = MINK, MAXK
+              IJKHONDO = (K-MINK)*LSTRK + IJHONDO
+              IJKROTAX = IDPOP(KBB,K)  + IJROTAX
+              IF(KANDL) LMAX=K
+
+              DO L = MINL, LMAX
+                KLN = KLN+1
+                IJKLHONDO = (L-MINL)*LSTRL + IJKHONDO
+                IJKLROTAX = IDPOP(LBB,L)  + IJKROTAX
+                GHONDO(IJKLHONDO) = GROTSPD(IJKLROTAX)
+
+              END DO ! L loop
+            END DO ! K loop 
+          END DO ! J loop
+        END DO ! I loop
+
+       END SUBROUTINE efp2ei_omp_raxintspd
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+
+  SUBROUTINE shellquart_efp_omp(ii,jj,kk,ll,ghondo,ddij,JM,JNAT,MODE)
+
+      USE MX_LIMITS,ONLY:MXDFG,MXFGPT,MXSHEF,MXGEFP,MXFRG,MXDPPT,mxsh,&
+          mxgtot,mxgsh,mxg2
+      USE comm_EFPBAS
+
+    INTEGER, INTENT(IN) :: ii, jj, kk, ll
+    INTEGER, INTENT(IN) :: JM, JNAT, MODE
+    REAL(KIND=fp), ALLOCATABLE, INTENT(INOUT) :: ghondo(:), ddij(:)
+
+    COMMON /nshel / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),    &
+                    cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),    &
+                    kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh), &
+                    kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+        REAL(KIND=fp) :: ex,cs,cp,cd,cf,cg,ch,ci
+        INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+
+    COMMON /INTFIL/ NINTMX,NHEX,NTUPL,PACK2E,INTTYP,IGRDTYP
+        INTEGER :: nintmx,nhex,ntupl,inttyp,igrdtyp
+        LOGICAL :: pack2e
+
+    INTEGER :: shlmxang, shlsumang, shltotcon
+    LOGICAL :: lshell
+    INTEGER :: ktypii, ktypjj, ktypkk, ktypll,&
+               kminii, kminjj, kminkk, kminll,&
+               kmaxii, kmaxjj, kmaxkk, kmaxll,&
+               kngii,  kngjj,  kngkk,  kngll
+    LOGICAL :: rotsp,rotspd,ericqt
+
+      ROTSP  = .false.
+      ROTSPD = .false.
+      ERICQT = .false.
+
+      KTYPII = KTYPEF(II,JM)
+      KMINII = KMINEF(II,JM)
+      KMAXII = KMAXEF(II,JM)
+      KNGII  = KNGEF(II,JM)
+
+      KTYPJJ = KTYPE(JJ)
+      KMINJJ = KMIN(JJ)
+      KMAXJJ = KMAX(JJ)
+      KNGJJ  = KNG(JJ)
+
+      IF(MODE.EQ.2) THEN
+      KTYPKK = KTYPEF(KK,JM)
+      KMINKK = KMINEF(KK,JM)
+      KMAXKK = KMAXEF(KK,JM)
+      KNGKK  = KNGEF(KK,JM)
+      ELSE
+      KTYPKK = KTYPE(KK)
+      KMINKK = KMIN(KK)
+      KMAXKK = KMAX(KK)
+      KNGKK  = KNG(KK)
+      ENDIF
+
+      KTYPLL = KTYPE(LL)
+      KMINLL = KMIN(LL)
+      KMAXLL = KMAX(LL)
+      KNGLL  = KNG(LL)
+
+    shlmxang  = max(ktypii, ktypjj, ktypkk, ktypll)
+
+    shlsumang = ktypii + ktypjj + ktypkk + ktypll - 4
+
+    shltotcon = kngii*kngjj*kngkk*kngll
+
+    lshell = (kmaxii-kminii)==3 .OR. &
+             (kmaxjj-kminjj)==3 .OR. &
+             (kmaxkk-kminkk)==3 .OR. &
+             (kmaxll-kminll)==3
+    
+    if(shlmxang<=2) ROTSP = .true.
+    if(shltotcon/=1) then
+       if(shlmxang==3) then
+          ROTSPD = .true.
+       elseif(shlsumang<=5.AND..NOT.lshell.AND.shlmxang<=5) then
+          ERICQT = .true.
+       endif
+    endif 
+
+!        INPUT OVERRIDES
+!
+    IF(INTTYP.EQ.1) ERICQT = .FALSE.
+    IF(INTTYP.GE.2) ROTSP  = .FALSE.
+    IF(INTTYP.GE.2) ROTSPD = .FALSE.
+    IF(INTTYP.EQ.3) ERICQT = .FALSE.
+
+!    IF (shlmxang<=2) THEN
+    IF(ROTSP) THEN
+        CALL efp2ei_omp_raxintsp(ii, jj, kk, ll, ghondo,&
+             kminii, kmaxii, kminjj, kmaxjj,&
+             kminkk, kmaxkk, kminll, kmaxll, JM, JNAT, MODE)
+    ELSE
+        IF (shltotcon/=1) THEN
+!            IF (shlmxang==3) THEN
+            IF (ROTSPD) THEN
+                CALL efp2ei_omp_raxintspd(ii, jj, kk, ll, ghondo,&
+                     kminii, kmaxii, kminjj, kmaxjj,&
+                     kminkk, kmaxkk, kminll, kmaxll,&
+                     ktypkk, ktypll, JM, JNAT, MODE)
+
+!            ELSE IF (shlsumang<=5.AND..NOT.lshell.AND.shlmxang<=5) THEN
+            ELSE IF (ERICQT) THEN
+                CALL eric_qmefp_ts(ii, jj, kk, ll, ghondo,&
+                                   JM, JNAT, MODE)
+
+            ELSE
+                CALL efp2ei_omp_rysint(ii, jj, kk, ll, ghondo, ddij,&
+                     JM,JNAT,ktype,ktypef,MODE)
+            END IF
+        ELSE
+            CALL efp2ei_omp_rysint(ii, jj, kk, ll, ghondo, ddij,&
+                 JM,JNAT,ktype,ktypef,MODE)
+        END IF
+    END IF
+
+  END SUBROUTINE shellquart_efp_omp 
+
+  END MODULE efteiomp
+

@@ -1,0 +1,25 @@
+!
+! Phenoxyl radical.
+! Hybrid density functional test. Open shell system.
+!
+! Method: RO-B3LYP/6-31G*
+! Final energy:
+!   FINAL RO-B3LYP ENERGY IS     -112.6910114297
+!
+ $CONTRL
+  SCFTYP=rohf
+  dfttyp=b3lyp
+  RUNTYP=Energy
+  icharg=1 mult=2
+  maxit=50 nprint=4
+ $END
+ $SYSTEM TIMLIM=5 MEMORY=10000000 $END
+ $SCF    DIRSCF=.TRUE. CONV=1.0d-7 FDIFF=.false. $END
+ $BASIS  GBASIS=n31 NGAUSS=6 npfunc=1 $END
+ $GUESS  GUESS=HUCKEL $END
+ $DATA
+Cation of carbon monooxide
+C1
+CARBON      6.0      0.0   0.0   0.0
+OXYGEN      8.0      0.0   0.0   1.128
+ $END

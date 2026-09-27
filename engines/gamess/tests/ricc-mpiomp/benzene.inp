@@ -1,0 +1,46 @@
+! RI-CCSD(T) energy for benzene molecule using the cc-pVDZ
+! and aug-cc-pVTZ-RI basis sets.
+!
+! (Please always run an EXETYP=CHECK job to get a detailed
+!  information about MWORDS, MEMDDI in $SYSTEM and IOSIZE in
+!  $CCINP. This is strongly recommended.)
+!
+!    ------------------------------------------------
+!             SUMMARY OF ENERGY CALCULATIONS
+!    ------------------------------------------------
+!     COUPLED-CLUSTER METHOD             CCSD(T)
+!     REFERENCE STATE ENERGY        -230.7220136419
+!     MP2 CORRELATION ENERGY          -0.7807177525
+!     CCSD CORRELATION ENERGY         -0.8202349648
+!     CCSD(T) CORRELATION ENERGY      -0.8556253924
+!    ------------------------------------------------
+!     TOTAL RI-MP2 ENERGY           -231.5027313943
+!     TOTAL RI-CCSD ENERGY          -231.5422486066
+!     TOTAL RI-CCSD(T) ENERGY       -231.5776390343
+!    ------------------------------------------------
+!
+! This job ran in serial, i.e., with 1 MPI rank and 1 OpenMP 
+! thread and took ~5 minutes of wall time on a 2.40 GHz Intel 
+! Xeon CPU.
+! Test case generated on September 3, 2020.
+!
+ $CONTRL ISPHER=1 MULT=1 ICHARG=0 SCFTYP=RHF 
+         CCTYP=CCSD(T) RUNTYP=ENERGY $END
+ $BASIS GBASIS=CCD $END
+ $GUESS GUESS=HUCKEL $END
+ $SCF DIRSCF=.TRUE. $END
+ $INTGRL INTOMP=1 $END
+ $CCINP MAXCC=100 ICONV=7 CCERI=RI $END
+
+ $RICC CABNAM=ACCT EXTCAB=.FALSE. USEDM3=.FALSE. 
+                                  USEDM4=.TRUE. $END
+
+ $SYSTEM PARALL=.TRUE. TIMLIM=100 MWORDS=65 $END
+ $DATA
+ Benzene molecule, cc-pVDZ/aug-cc-pVTZ-RI basis sets
+DNH 6
+
+C    6.0  0.0000000000  1.3882822686  0.0000000000
+H    1.0  0.0000000000  2.4617106305  0.0000000000
+ $END
+!TRAVIS-CI LARGE

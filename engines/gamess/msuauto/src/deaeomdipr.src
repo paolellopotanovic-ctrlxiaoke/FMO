@@ -1,0 +1,1219 @@
+C*MODULE DEAEOMDIP DECK EOMDIP*_R OR DEAEOM*_R
+C> @brief Updates R
+C>
+C> @author Jun Shen
+C>
+C> @param IO output file unit number
+C> @param IR .R file unit number
+C> @param IHR .HR file unit number
+C> @param IR0 .R0 file unit number
+C> @param IR1 .R1 file unit number
+C> @param LLL number size of the DEA/DIP vector
+C> @param ITER number of iteration
+C> @param ITEOM diagonal space of HBar
+C> @param RES RESIDUE
+C> @param WI EIGENVALUE OF H*R
+C> @param ECOR DEA/DIP excitation energy
+C> @param HAHH One-body Hamiltonian alpha HH array
+C> @param HAPP One-body Hamiltonian alpha PP array
+C> @param HBHH One-body Hamiltonian beta HH array
+C> @param HBPP One-body Hamiltonian beta PP array
+C> @param IROOT index of excited states to be calculated
+C> @param R* new R
+C> @param RR* residue R
+C>
+       SUBROUTINE EOMDIP2_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K0A2B,K1A3B,K1B3C,
+     & N0,N1,N2,N3,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+!      WRITE(IR1,REC=IROOT)R
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL,R)
+C
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL EOMDIP2_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K0A2B),R(K1A3B),R(K1B3C),
+     & R0(K0A2B),R0(K1A3B),R0(K1B3C))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & EOMDIP2_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R0A2B,R1A3B,R1B3C,
+     & RR0A2B,RR1A3B,RR1B3C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R0A2B(N0+1:N2,N0+1:N1)
+       real*8 R1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 R1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8 RR0A2B(N0+1:N2,N0+1:N1)
+       real*8 RR1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 RR1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+C
+!0A2B
+       DO I=N0+1,N1;DO J=N0+1,N2
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)
+        R0A2B(J,I)=RR0A2B(J,I)/PP
+       ENDDO;ENDDO
+!1A3B
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2
+       IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)-HAPP(A,A)
+        R1A3B(A,K,J,I)=RR1A3B(A,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!1B3C
+       DO I=N0+1,N1;DO J=N0+1,N2;DO K=N0+1,N2
+       IF(J.EQ.K)CYCLE
+       DO A=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)+HBHH(K,K)-HBPP(A,A)
+        R1B3C(A,K,J,I)=RR1B3C(A,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE EOMDIP3A_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K0A2B,K1A3B,K1B3C,K2A4B,K2A4B1,K2B4C,K2B4C1,K2B4C2,K2C4D,K2C4D1,
+     & N0,N1,N2,N3,M1,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+!      WRITE(IR1,REC=IROOT)R
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL,R)
+C
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL EOMDIP3A_R_UPDATE(N0,N1,N2,N3,M1,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K0A2B),R(K1A3B),R(K1B3C),R(K2A4B),R(K2A4B1),
+     & R(K2B4C),R(K2B4C1),R(K2B4C2),R(K2C4D),R(K2C4D1),
+     & R0(K0A2B),R0(K1A3B),R0(K1B3C),R0(K2A4B),R0(K2A4B1),
+     & R0(K2B4C),R0(K2B4C1),R0(K2B4C2),R0(K2C4D),R0(K2C4D1))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & EOMDIP3A_R_UPDATE(N0,N1,N2,N3,M1,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R0A2B,R1A3B,R1B3C,R2A4B,R2A4B1,
+     & R2B4C,R2B4C1,R2B4C2,R2C4D,R2C4D1,
+     & RR0A2B,RR1A3B,RR1B3C,RR2A4B,RR2A4B1,
+     & RR2B4C,RR2B4C1,RR2B4C2,RR2C4D,RR2C4D1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R0A2B(N0+1:N2,N0+1:N1)
+       real*8 R1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 R1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8
+     *R2A4B(N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,M1+1:N1,M1+1:N1)
+       real*8
+     *R2A4B1(N1+1:N3,N1+1:N3,M1+1:N2,N0+1:M1,N0+1:M1,M1+1:N1)
+       real*8
+     *R2B4C(N2+1:N3,N1+1:N3,N0+1:N2,M1+1:N2,N0+1:N1,M1+1:N1)
+       real*8
+     *R2B4C1(N2+1:N3,N1+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,M1+1:N1)
+       real*8
+     *R2B4C2(N2+1:N3,N1+1:N3,M1+1:N2,M1+1:N2,N0+1:M1,N0+1:M1)
+       real*8
+     *R2C4D(N2+1:N3,N2+1:N3,N0+1:N2,M1+1:N2,M1+1:N2,N0+1:N1)
+       real*8
+     *R2C4D1(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1,M1+1:N2,M1+1:N1)
+       real*8 RR0A2B(N0+1:N2,N0+1:N1)
+       real*8 RR1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 RR1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8
+     *RR2A4B(N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,M1+1:N1,M1+1:N1)
+       real*8
+     *RR2A4B1(N1+1:N3,N1+1:N3,M1+1:N2,N0+1:M1,N0+1:M1,M1+1:N1)
+       real*8
+     *RR2B4C(N2+1:N3,N1+1:N3,N0+1:N2,M1+1:N2,N0+1:N1,M1+1:N1)
+       real*8
+     *RR2B4C1(N2+1:N3,N1+1:N3,N0+1:M1,N0+1:M1,M1+1:N1,M1+1:N1)
+       real*8
+     *RR2B4C2(N2+1:N3,N1+1:N3,M1+1:N2,M1+1:N2,N0+1:M1,N0+1:M1)
+       real*8
+     *RR2C4D(N2+1:N3,N2+1:N3,N0+1:N2,M1+1:N2,M1+1:N2,N0+1:N1)
+       real*8
+     *RR2C4D1(N2+1:N3,N2+1:N3,N0+1:M1,N0+1:M1,M1+1:N2,M1+1:N1)
+C
+!0A2B
+       DO I=N0+1,N1;DO J=N0+1,N2
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)
+        R0A2B(J,I)=RR0A2B(J,I)/PP
+       ENDDO;ENDDO
+!1A3B
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2
+       IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)-HAPP(A,A)
+        R1A3B(A,K,J,I)=RR1A3B(A,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!1B3C
+       DO I=N0+1,N1;DO J=N0+1,N2;DO K=N0+1,N2
+       IF(J.EQ.K)CYCLE
+       DO A=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)+HBHH(K,K)-HBPP(A,A)
+        R1B3C(A,K,J,I)=RR1B3C(A,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!2A4B
+       DO I=M1+1,N1;DO J=M1+1,N1;DO K=N0+1,N1;DO L=N0+1,N2
+       IF(I.EQ.J.OR.J.EQ.K.OR.K.EQ.I)CYCLE
+       DO A=N1+1,N3;DO B=N1+1,N3
+       IF(A.EQ.B)CYCLE
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HAHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HAPP(B,B)
+        R2A4B(B,A,L,K,J,I)=RR2A4B(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2A4B1
+       DO I=M1+1,N1;DO J=N0+1,M1;DO K=N0+1,M1;DO L=M1+1,N2
+       IF(J.EQ.K)CYCLE
+       DO A=N1+1,N3;DO B=N1+1,N3
+       IF(A.EQ.B)CYCLE
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HAHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HAPP(B,B)
+        R2A4B1(B,A,L,K,J,I)=RR2A4B1(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2B4C
+       DO I=M1+1,N1;DO J=N0+1,N1;DO K=M1+1,N2;DO L=N0+1,N2
+       IF(I.EQ.J.OR.K.EQ.L)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HBPP(B,B)
+        R2B4C(B,A,L,K,J,I)=RR2B4C(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2B4C1
+       DO I=M1+1,N1;DO J=M1+1,N1;DO K=N0+1,M1;DO L=N0+1,M1
+       IF(I.EQ.J.OR.K.EQ.L)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HBPP(B,B)
+        R2B4C1(B,A,L,K,J,I)=RR2B4C1(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2B4C2
+       DO I=N0+1,M1;DO J=N0+1,M1;DO K=M1+1,N2;DO L=M1+1,N2
+       IF(I.EQ.J.OR.K.EQ.L)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HBPP(B,B)
+        R2B4C2(B,A,L,K,J,I)=RR2B4C2(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2C4D
+       DO I=N0+1,N1;DO J=M1+1,N2;DO K=M1+1,N2;DO L=N0+1,N2
+       IF(J.EQ.K.OR.K.EQ.L.OR.L.EQ.J)CYCLE
+       DO A=N2+1,N3;DO B=N2+1,N3
+       IF(A.EQ.B)CYCLE
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HBPP(A,A)-HBPP(B,B)
+        R2C4D(B,A,L,K,J,I)=RR2C4D(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2C4D1
+       DO I=M1+1,N1;DO J=M1+1,N2;DO K=N0+1,M1;DO L=N0+1,M1
+       IF(K.EQ.L)CYCLE
+       DO A=N2+1,N3;DO B=N2+1,N3
+       IF(A.EQ.B)CYCLE
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HBPP(A,A)-HBPP(B,B)
+        R2C4D1(B,A,L,K,J,I)=RR2C4D1(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE EOMDIP3_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K0A2B,K1A3B,K1B3C,K2A4B,K2B4C,K2C4D,
+     & N0,N1,N2,N3,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+!      WRITE(IR1,REC=IROOT)R
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL,R)
+C
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL EOMDIP3_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K0A2B),R(K1A3B),R(K1B3C),R(K2A4B),R(K2B4C),R(K2C4D),
+     & R0(K0A2B),R0(K1A3B),R0(K1B3C),R0(K2A4B),R0(K2B4C),R0(K2C4D))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & EOMDIP3_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R0A2B,R1A3B,R1B3C,R2A4B,R2B4C,R2C4D,
+     & RR0A2B,RR1A3B,RR1B3C,RR2A4B,RR2B4C,RR2C4D)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R0A2B(N0+1:N2,N0+1:N1)
+       real*8 R1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 R1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8
+     *R2A4B(N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8
+     *R2B4C(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8
+     *R2C4D(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8 RR0A2B(N0+1:N2,N0+1:N1)
+       real*8 RR1A3B(N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8 RR1B3C(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N1)
+       real*8
+     *RR2A4B(N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8
+     *RR2B4C(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N2,N0+1:N1,N0+1:N1)
+       real*8
+     *RR2C4D(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N1)
+C
+!0A2B
+       DO I=N0+1,N1;DO J=N0+1,N2
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)
+        R0A2B(J,I)=RR0A2B(J,I)/PP
+       ENDDO;ENDDO
+!1A3B
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2
+       IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)-HAPP(A,A)
+        R1A3B(A,K,J,I)=RR1A3B(A,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!1B3C
+       DO I=N0+1,N1;DO J=N0+1,N2;DO K=N0+1,N2
+       IF(J.EQ.K)CYCLE
+       DO A=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)+HBHH(K,K)-HBPP(A,A)
+        R1B3C(A,K,J,I)=RR1B3C(A,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!2A4B
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N1;DO L=N0+1,N2
+       IF(I.EQ.J.OR.J.EQ.K.OR.K.EQ.I)CYCLE
+       DO A=N1+1,N3;DO B=N1+1,N3
+       IF(A.EQ.B)CYCLE
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HAHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HAPP(B,B)
+        R2A4B(B,A,L,K,J,I)=RR2A4B(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2B4C
+       DO I=N0+1,N1;DO J=N0+1,N1;DO K=N0+1,N2;DO L=N0+1,N2
+       IF(I.EQ.J.OR.K.EQ.L)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR+HAHH(I,I)+HAHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HAPP(A,A)-HBPP(B,B)
+        R2B4C(B,A,L,K,J,I)=RR2B4C(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!2C4D
+       DO I=N0+1,N1;DO J=N0+1,N2;DO K=N0+1,N2;DO L=N0+1,N2
+       IF(J.EQ.K.OR.K.EQ.L.OR.L.EQ.J)CYCLE
+       DO A=N2+1,N3;DO B=N2+1,N3
+       IF(A.EQ.B)CYCLE
+        PP=ECOR+HAHH(I,I)+HBHH(J,J)+HBHH(K,K)+HBHH(L,L)
+     &         -HBPP(A,A)-HBPP(B,B)
+        R2C4D(B,A,L,K,J,I)=RR2C4D(B,A,L,K,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM2A_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K2B0A,K3B1A,K3B1A1,K3C1B,K3C1B1,
+     & N0,N1,N2,N3,M2,K3C1B0,LLL0,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:),RR(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+       DEALLOCATE(R0)
+C
+       ALLOCATE(R0(LLL0),SOURCE=0.0D0)
+       CALL DEAEOM2A_WRITE_R(N0,N1,N2,N3,M2,
+     & R0(K2B0A),R0(K3B1A),R0(K3C1B0),
+     & R(K2B0A),R(K3B1A),R(K3B1A1),R(K3C1B),R(K3C1B1))
+       PP=0.0D0
+       DO I=1,LLL0
+        PP=PP+R0(I)*R0(I)
+       ENDDO
+       R0=R0/DSQRT(PP)
+!      WRITE(IR1,REC=IROOT)R0
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL0,R0)
+       DEALLOCATE(R0)
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL DEAEOM2A_R_UPDATE(N0,N1,N2,N3,M2,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K2B0A),R(K3B1A),R(K3B1A1),R(K3C1B),R(K3C1B1),
+     & R0(K2B0A),R0(K3B1A),R0(K3B1A1),R0(K3C1B),R0(K3C1B1))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & DEAEOM2A_R_UPDATE(N0,N1,N2,N3,M2,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R2B0A,R3B1A,R3B1A1,R3C1B,R3C1B1,
+     & RR2B0A,RR3B1A,RR3B1A1,RR3C1B,RR3C1B1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 R3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 R3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 RR3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 RR3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+C
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)
+        R2B0A(B,A)=RR2B0A(B,A)/PP
+       ENDDO;ENDDO
+C
+       DO I=N0+1,N1;DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A1(C,B,A,I)=RR3B1A1(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B1(C,B,A,I)=RR3C1B1(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM2_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K2B0A,K3B1A,K3C1B,
+     & N0,N1,N2,N3,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+!      WRITE(IR1,REC=IROOT)R
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL,R)
+C
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL DEAEOM2_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K2B0A),R(K3B1A),R(K3C1B),
+     & R0(K2B0A),R0(K3B1A),R0(K3C1B))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & DEAEOM2_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R2B0A,R3B1A,R3C1B,
+     & RR2B0A,RR3B1A,RR3C1B)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+C
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)
+        R2B0A(B,A)=RR2B0A(B,A)/PP
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,N3;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM3A_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K2B0A,K3B1A,K3B1A1,K3C1B,K3C1B1,
+     & K4B2A,K4B2A1,K4C2B,K4C2B1,K4C2B2,K4D2C,K4D2C1,
+     & N0,N1,N2,N3,M2,K3C1B0,LLL0,LLL1,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:),RR(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+       DEALLOCATE(R0)
+C
+       ALLOCATE(R0(LLL1),SOURCE=0.0D0)
+       CALL DEAEOM3A_WRITE_R(N0,N1,N2,N3,M2,K3B1A-1,LLL1-LLL0,
+     & R0(K2B0A),R0(K3B1A),R0(K3C1B0),R0(LLL0+1),
+     & R(K2B0A),R(K3B1A),R(K3B1A1),R(K3C1B),R(K3C1B1),R(K4B2A))
+       PP=0.0D0
+       DO I=1,LLL1
+        PP=PP+R0(I)*R0(I)
+       ENDDO
+       R0=R0/DSQRT(PP)
+!      WRITE(IR1,REC=IROOT)R0
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL1,R0)
+       DEALLOCATE(R0)
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL DEAEOM3A_R_UPDATE(N0,N1,N2,N3,M2,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K2B0A),R(K3B1A),R(K3B1A1),R(K3C1B),R(K3C1B1),R(K4B2A),
+     & R(K4B2A1),R(K4C2B),R(K4C2B1),R(K4C2B2),R(K4D2C),R(K4D2C1),
+     & R0(K2B0A),R0(K3B1A),R0(K3B1A1),R0(K3C1B),R0(K3C1B1),R0(K4B2A),
+     & R0(K4B2A1),R0(K4C2B),R0(K4C2B1),R0(K4C2B2),R0(K4D2C),R0(K4D2C1))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & DEAEOM3A_R_UPDATE(N0,N1,N2,N3,M2,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R2B0A,R3B1A,R3B1A1,R3C1B,R3C1B1,
+     & R4B2A,R4B2A1,R4C2B,R4C2B1,R4C2B2,R4D2C,R4D2C1,
+     & RR2B0A,RR3B1A,RR3B1A1,RR3C1B,RR3C1B1,
+     & RR4B2A,RR4B2A1,RR4C2B,RR4C2B1,RR4C2B2,RR4D2C,RR4D2C1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 R3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 R3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+       real*8
+     *R4B2A(N2+1:N3,N1+1:N3,N1+1:M2,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *R4B2A1(N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *R4C2B(N2+1:N3,N2+1:M2,N1+1:N3,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *R4C2B1(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *R4C2B2(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     *R4D2C(N2+1:N3,N2+1:M2,N2+1:M2,N1+1:N3,N0+1:N2,N0+1:N2)
+       real*8
+     *R4D2C1(M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N2,N0+1:N2)
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 RR3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 RR3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+       real*8
+     *RR4B2A(N2+1:N3,N1+1:N3,N1+1:M2,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *RR4B2A1(N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *RR4C2B(N2+1:N3,N2+1:M2,N1+1:N3,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4C2B1(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4C2B2(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4D2C(N2+1:N3,N2+1:M2,N2+1:M2,N1+1:N3,N0+1:N2,N0+1:N2)
+       real*8
+     *RR4D2C1(M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N2,N0+1:N2)
+C
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)
+        R2B0A(B,A)=RR2B0A(B,A)/PP
+       ENDDO;ENDDO
+C
+       DO I=N0+1,N1;DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A1(C,B,A,I)=RR3B1A1(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B1(C,B,A,I)=RR3C1B1(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!4B2A
+       DO I=N0+1,N1;DO J=N0+1,N1
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,M2;DO B=N1+1,M2;DO C=N1+1,N3;DO D=N2+1,N3
+        IF(A.EQ.B.OR.B.EQ.C.OR.C.EQ.A)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HAPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HAHH(J,J)
+        R4B2A(D,C,B,A,J,I)=RR4B2A(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4B2A1
+       DO I=N0+1,N1;DO J=N0+1,N1
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3;DO D=N2+1,M2
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HAPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HAHH(J,J)
+        R4B2A1(D,C,B,A,J,I)=RR4B2A1(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4C2B
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,M2;DO D=N2+1,N3
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B(D,C,B,A,J,I)=RR4C2B(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4C2B1
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=N1+1,M2;DO B=N1+1,M2;DO C=M2+1,N3;DO D=M2+1,N3
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B1(D,C,B,A,J,I)=RR4C2B1(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4C2B2
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2;DO D=N2+1,M2
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B2(D,C,B,A,J,I)=RR4C2B2(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4D2C
+       DO I=N0+1,N2;DO J=N0+1,N2
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,M2;DO D=N2+1,N3
+        IF(B.EQ.C.OR.C.EQ.D.OR.D.EQ.B)CYCLE
+        PP=ECOR-HBPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4D2C(D,C,B,A,J,I)=RR4D2C(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4D2C1
+       DO I=N0+1,N2;DO J=N0+1,N2
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,M2;DO B=N2+1,M2;DO C=M2+1,N3;DO D=M2+1,N3
+        IF(C.EQ.D)CYCLE
+        PP=ECOR-HBPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4D2C1(D,C,B,A,J,I)=RR4D2C1(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM3B_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K2B0A,K3B1A,K3C1B,K4B2A,K4B2A1,K4C2B,K4C2B1,K4C2B2,K4D2C,K4D2C1,
+     & N0,N1,N2,N3,M2,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+!      WRITE(IR1,REC=IROOT)R
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL,R)
+C
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL DEAEOM3B_R_UPDATE(N0,N1,N2,N3,M2,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K2B0A),R(K3B1A),R(K3C1B),R(K4B2A),R(K4B2A1),
+     & R(K4C2B),R(K4C2B1),R(K4C2B2),R(K4D2C),R(K4D2C1),
+     & R0(K2B0A),R0(K3B1A),R0(K3C1B),R0(K4B2A),R0(K4B2A1),
+     & R0(K4C2B),R0(K4C2B1),R0(K4C2B2),R0(K4D2C),R0(K4D2C1))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & DEAEOM3B_R_UPDATE(N0,N1,N2,N3,M2,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R2B0A,R3B1A,R3C1B,R4B2A,R4B2A1,R4C2B,R4C2B1,R4C2B2,R4D2C,R4D2C1,
+     & RR2B0A,RR3B1A,RR3C1B,RR4B2A,RR4B2A1,RR4C2B,RR4C2B1,RR4C2B2,
+     & RR4D2C,RR4D2C1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+       real*8
+     *R4B2A(N2+1:N3,N1+1:N3,N1+1:M2,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *R4B2A1(N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *R4C2B(N2+1:N3,N2+1:M2,N1+1:N3,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *R4C2B1(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *R4C2B2(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     *R4D2C(N2+1:N3,N2+1:M2,N2+1:M2,N1+1:N3,N0+1:N2,N0+1:N2)
+       real*8
+     *R4D2C1(M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N2,N0+1:N2)
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+       real*8
+     *RR4B2A(N2+1:N3,N1+1:N3,N1+1:M2,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *RR4B2A1(N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     *RR4C2B(N2+1:N3,N2+1:M2,N1+1:N3,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4C2B1(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4C2B2(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4D2C(N2+1:N3,N2+1:M2,N2+1:M2,N1+1:N3,N0+1:N2,N0+1:N2)
+       real*8
+     *RR4D2C1(M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N2,N0+1:N2)
+C
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)
+        R2B0A(B,A)=RR2B0A(B,A)/PP
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,N3;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+!4B2A
+       DO I=N0+1,N1;DO J=N0+1,N1
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,M2;DO B=N1+1,M2;DO C=N1+1,N3;DO D=N2+1,N3
+        IF(A.EQ.B.OR.B.EQ.C.OR.C.EQ.A)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HAPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HAHH(J,J)
+        R4B2A(D,C,B,A,J,I)=RR4B2A(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4B2A1
+       DO I=N0+1,N1;DO J=N0+1,N1
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,M2;DO B=M2+1,N3;DO C=M2+1,N3;DO D=N2+1,M2
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HAPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HAHH(J,J)
+        R4B2A1(D,C,B,A,J,I)=RR4B2A1(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4C2B
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=N1+1,M2;DO B=N1+1,N3;DO C=N2+1,M2;DO D=N2+1,N3
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B(D,C,B,A,J,I)=RR4C2B(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4C2B1
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=N1+1,M2;DO B=N1+1,M2;DO C=M2+1,N3;DO D=M2+1,N3
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B1(D,C,B,A,J,I)=RR4C2B1(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4C2B2
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=M2+1,N3;DO B=M2+1,N3;DO C=N2+1,M2;DO D=N2+1,M2
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B2(D,C,B,A,J,I)=RR4C2B2(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4D2C
+       DO I=N0+1,N2;DO J=N0+1,N2
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,M2;DO C=N2+1,M2;DO D=N2+1,N3
+       IF(B.EQ.C.OR.C.EQ.D.OR.D.EQ.B)CYCLE
+        PP=ECOR-HBPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4D2C(D,C,B,A,J,I)=RR4D2C(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+!4D2C1
+       DO I=N0+1,N2;DO J=N0+1,N2
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,M2;DO B=N2+1,M2;DO C=M2+1,N3;DO D=M2+1,N3
+        IF(C.EQ.D)CYCLE
+        PP=ECOR-HBPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4D2C1(D,C,B,A,J,I)=RR4D2C1(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END
+C
+       SUBROUTINE DEAEOM3_R(IO,IHR,IR,IR1,LLL,ITER,ITEOM,RES,WI,ECOR,
+     & K2B0A,K3B1A,K3C1B,K4B2A,K4C2B,K4D2C,
+     & N0,N1,N2,N3,
+     & HAHH,HAPP,HBHH,HBPP,IROOT)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,RES,ECOR
+       real*8,ALLOCATABLE:: HR(:),R(:),R0(:)
+       real*8,ALLOCATABLE:: WR(:),WORK(:)
+       real*8,ALLOCATABLE:: VR(:,:),VL(:,:)
+       real*8 WI(ITEOM)
+       CHARACTER*1 JOBVL,JOBVR
+C
+       ALLOCATE(R0(LLL),SOURCE=0.0D0)
+       ALLOCATE(R(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IR,REC=I)R0
+        CALL DEAEOM_READ(IR,I,LLL,R0)
+        DO J=1,LLL
+         R(J)=R(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+!      WRITE(IR1,REC=IROOT)R
+       CALL DEAEOM_WRITE(IR1,IROOT,LLL,R)
+C
+       ALLOCATE(HR(LLL),SOURCE=0.0D0)
+       DO I=1,ITER
+!       READ(IHR,REC=I)R0
+        CALL DEAEOM_READ(IHR,I,LLL,R0)
+        DO J=1,LLL
+         HR(J)=HR(J)+R0(J)*WI(I)
+        ENDDO
+       ENDDO
+C
+       R0=0.0D0
+       R0=HR-ECOR*R
+       DEALLOCATE(HR)
+C
+       R=0.0D0
+       CALL DEAEOM3_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R(K2B0A),R(K3B1A),R(K3C1B),R(K4B2A),R(K4C2B),R(K4D2C),
+     & R0(K2B0A),R0(K3B1A),R0(K3C1B),R0(K4B2A),R0(K4C2B),R0(K4D2C))
+       DEALLOCATE(R0)
+!      WRITE(IR,REC=ITER+1)R
+       CALL DEAEOM_WRITE(IR,ITER+1,LLL,R)
+C
+       RES=0.0D0
+       DO I=1,LLL
+        RES=RES+R(I)*R(I)
+       ENDDO
+       RES=DSQRT(RES)
+       DEALLOCATE(R)
+       END
+C
+       SUBROUTINE
+     & DEAEOM3_R_UPDATE(N0,N1,N2,N3,ECOR,HAHH,HAPP,HBHH,HBPP,
+     & R2B0A,R3B1A,R3C1B,R4B2A,R4C2B,R4D2C,
+     & RR2B0A,RR3B1A,RR3C1B,RR4B2A,RR4C2B,RR4D2C)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+C
+       INTEGER A,B,C,D
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 PP,ECOR
+       real*8 R2B0A(N2+1:N3,N1+1:N3)
+       real*8 R3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 R3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+       real*8
+     *R4B2A(N2+1:N3,N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8
+     *R4C2B(N2+1:N3,N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     *R4D2C(N2+1:N3,N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N2)
+       real*8 RR2B0A(N2+1:N3,N1+1:N3)
+       real*8 RR3B1A(N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 RR3C1B(N2+1:N3,N2+1:N3,N1+1:N3,N0+1:N2)
+       real*8
+     *RR4B2A(N2+1:N3,N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8
+     *RR4C2B(N2+1:N3,N2+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     *RR4D2C(N2+1:N3,N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N2,N0+1:N2)
+C
+       DO A=N1+1,N3;DO B=N2+1,N3
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)
+        R2B0A(B,A)=RR2B0A(B,A)/PP
+       ENDDO;ENDDO
+       DO I=N0+1,N1;DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3
+        IF(A.EQ.B)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HBPP(C,C)+HAHH(I,I)
+        R3B1A(C,B,A,I)=RR3B1A(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N2;DO A=N1+1,N3;DO B=N2+1,N3;DO C=N2+1,N3
+        IF(B.EQ.C)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)+HBHH(I,I)
+        R3C1B(C,B,A,I)=RR3C1B(C,B,A,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO J=N0+1,N1
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3;DO B=N1+1,N3;DO C=N1+1,N3;DO D=N2+1,N3
+        IF(A.EQ.B.OR.B.EQ.C.OR.C.EQ.A)CYCLE
+        PP=ECOR-HAPP(A,A)-HAPP(B,B)-HAPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HAHH(J,J)
+        R4B2A(D,C,B,A,J,I)=RR4B2A(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+       DO I=N0+1,N1;DO J=N0+1,N2
+       DO A=N1+1,N3;DO B=N1+1,N3;DO C=N2+1,N3;DO D=N2+1,N3
+        IF(A.EQ.B.OR.C.EQ.D)CYCLE
+        PP=ECOR-HAPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4C2B(D,C,B,A,J,I)=RR4C2B(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+      DO I=N0+1,N2;DO J=N0+1,N2
+        IF(I.EQ.J)CYCLE
+       DO A=N1+1,N3;DO B=N2+1,N3;DO C=N2+1,N3;DO D=N2+1,N3
+       IF(B.EQ.C.OR.C.EQ.D.OR.D.EQ.B)CYCLE
+        PP=ECOR-HBPP(A,A)-HBPP(B,B)-HBPP(C,C)-HBPP(D,D)
+     &         +HAHH(I,I)+HBHH(J,J)
+        R4D2C(D,C,B,A,J,I)=RR4D2C(D,C,B,A,J,I)/PP
+       ENDDO;ENDDO;ENDDO;ENDDO;ENDDO;ENDDO
+C
+       END

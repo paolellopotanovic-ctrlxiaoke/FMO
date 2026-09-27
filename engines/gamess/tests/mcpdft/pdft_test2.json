@@ -1,0 +1,156 @@
+{
+  "name": "pdft_test2.log",
+  "validation": [
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "WAVEFUNCTION NORMALIZATION",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "1.0000000000"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "ONE ELECTRON ENERGY",
+      "type": "float",
+      "tolerance": 7.5e-07,
+      "value": "-65.1689056678"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "TWO ELECTRON ENERGY",
+      "type": "float",
+      "tolerance": 7.5e-07,
+      "value": "25.3521884935"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "NUCLEAR REPULSION ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "6.9266471528"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "TOTAL ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "-38.8991124679"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "NUCLEUS-NUCLEUS POTENTIAL ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "6.9266471528"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "ELECTRON-ELECTRON POTENTIAL ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "19.3431570088"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "NUCLEUS-ELECTRON POTENTIAL ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "-104.5488071755"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "TOTAL POTENTIAL ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "-78.2790030139"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "TOTAL KINETIC ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "39.3798905460"
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "precision": 10,
+      "name": "VIRIAL RATIO (V/T)",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "1.9877912795"
+    },
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "precision": 10,
+      "name": "FINAL SCF ENERGY",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "-38.8991124679"
+    },
+    {
+      "header": "STATE ENERGIES",
+      "precision": 10,
+      "name": "ENERGY : STATE -2",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "-38.8609085421"
+    },
+    {
+      "header": "STATE ENERGIES",
+      "precision": 10,
+      "name": "ENERGY : STATE -1",
+      "type": "float",
+      "tolerance": 5e-08,
+      "value": "-38.8991124679"
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "precision": 6,
+      "name": "DIPOLE MOMENT",
+      "type": "float",
+      "tolerance": 0.0005,
+      "value": "1.873503"
+    },
+    {
+      "header": "MC-PDFT ENERGY COMPONENTS",
+      "name": "TOTAL CASSCF-LIKE : OUTPUT ORDER 1",
+      "value": "-32.8900700215",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-07
+    },
+    {
+      "header": "MC-PDFT ENERGY COMPONENTS",
+      "name": "PAIR-DENSITY FUNCTIONAL : OUTPUT ORDER 1",
+      "value": "-6.2021277217",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-07
+    },
+    {
+      "header": "MC-PDFT ENERGY COMPONENTS",
+      "name": "TOTAL MC-PDFT : OUTPUT ORDER 1",
+      "value": "-39.0921976185",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-07
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "0.0",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

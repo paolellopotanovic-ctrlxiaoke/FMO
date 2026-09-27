@@ -1,0 +1,63 @@
+{
+  "parse_header" : "COUPLED-CLUSTER : OPEN-SHELL CC(t;3)",
+  "parse_group" : [
+   {
+     "regex_string" : "^ MAIN RESULTS: CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "GROUND-STATE CC(t;3),A ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 2,
+     "parse_instance" : -1,
+     "parse_value_index" : -1,
+     "parse_required" : true
+   },
+   {
+     "regex_string" : "^ MAIN RESULTS: CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "GROUND-STATE CC(t;3),B ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 3,
+     "parse_instance" : -1,
+     "parse_value_index" : -1
+   },
+   {
+     "regex_string" : "^ MAIN RESULTS: CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "GROUND-STATE CC(t;3),C ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 4,
+     "parse_instance" : -1,
+     "parse_value_index" : -1
+   },
+   {
+     "regex_string" : "^ MAIN RESULTS: CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "GROUND-STATE CC(t;3),D ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 5,
+     "parse_instance" : -1,
+     "parse_value_index" : -1
+   },
+   {
+     "regex_string" : "^(\\s*)SUMMARY OF CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "CCSDt     ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 1,
+     "parse_instance" : -1,
+     "parse_value_index" : 0,
+     "parse_required" : true
+   },
+   {
+     "regex_string" : "^(\\s*)SUMMARY OF CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "CC(t;3),A ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 2,
+     "parse_instance" : -1,
+     "parse_value_index" : 0
+   },
+   {
+     "regex_string" : "^(\\s*)SUMMARY OF CC\\(t;3\\) CALCULATIONS.*$",
+     "parse_name"   : "CC(t;3)   ENERGY",
+     "parse_type" : "float",
+     "parse_line_offset" : 3,
+     "parse_instance" : -1,
+     "parse_value_index" : 0
+   }
+  ]
+}

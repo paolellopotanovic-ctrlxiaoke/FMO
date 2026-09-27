@@ -1,0 +1,88 @@
+! EFMO EXAM 04
+!    DMSO trimer...illustration of EFMO method on clusters.
+!
+!    Modified to test adding WHERE=COMASS in the $elmom
+!    group. This makes the center of mass the point the multipole
+!    moments are computed around (which also affects the
+!    localization sums) does not affect the results.
+!
+!    nprint=-5 was also added in $control to check that it 
+!    doesn't affect result.
+!
+!    To check, the first three values for POINT are:
+!
+!  POINT   1           X           Y           Z (BOHR)    CHARGE
+!                  2.045603    3.876448   -0.954772        0.00 (A.U.)
+!  POINT   1           X           Y           Z (BOHR)    CHARGE
+!                  2.045603    3.876448   -0.954772        0.00 (A.U.)
+!  POINT   1           X           Y           Z (BOHR)    CHARGE
+!                  2.045603    3.876448   -0.954772        0.00 (A.U.)
+!
+!     The first two localization sums should be:
+!
+!          THE INITIAL LOCALIZATION SUM IS   2207.093872 DEBYE**2
+!            THE FINAL LOCALIZATION SUM IS   2831.288831 DEBYE**2
+!          THE INITIAL LOCALIZATION SUM IS   4354.739198 DEBYE**2
+!            THE FINAL LOCALIZATION SUM IS   4978.935785 DEBYE**2
+!
+!    But note that the chemically important values is the difference
+!    between the initial and final localization sums, not
+!    the absolute values.
+!
+!    The energy is:
+!    Total energy of the molecule: Euncorr(2)=        -1654.472962637
+!
+ $CONTRL SCFTYP=RHF RUNTYP=energy $END
+ $control nprint=-5 $end
+ $elmom where=comass $end
+ $BASIS  GBASIS=N31 NGAUSS=6 ndfunc=1 npfunc=1 $END
+ $BASIS diffs=.t. diffsp=.t. nffunc=0 $end
+ $BASIS  nffunc=0 $end
+ $local maxloc=2000 $end
+ $scf dirscf=.t. fdiff=.f. $end
+ $system mwords=40 $end
+ $FMO
+     modefm(1)=8,24,1,0,1 iefmo=1 MODGRD=33 resdim=0.3
+     NFRAG=3
+     INDAT(1)= 0,1,-10, 0, 11, -20, 0, 21, -30, 0
+ $END
+ $DATA 
+H2O+H2O+H2O
+C1
+O   8
+S   16
+C   6
+H   1
+ $END
+ $FMOXYZ 
+O     8.0     1.42956     0.34930     0.00000
+S    16.0     0.14295    -0.40358     0.00000
+C     6.0    -0.87310     0.21779    -1.34083
+C     6.0    -0.87310     0.21779     1.34083
+H     1.0    -1.03162     1.27761    -1.18211
+H     1.0    -1.03162     1.27761     1.18211
+H     1.0    -0.36670     0.06672    -2.28466
+H     1.0    -0.36670     0.06672     2.28466
+H     1.0    -1.81747    -0.30769    -1.39928
+H     1.0    -1.81747    -0.30769     1.39928
+O     8.0     3.42956     2.34930     2.00000
+S    16.0     2.14295     1.59642     2.00000
+C     6.0     1.12690     2.21779     0.65917
+C     6.0     1.12690     2.21779     3.34083
+H     1.0     0.96838     3.27761     0.81789
+H     1.0     0.96838     3.27761     3.18211
+H     1.0     1.63330     2.06672    -0.28466
+H     1.0     1.63330     2.06672     4.28466
+H     1.0     0.18253     1.69231     0.60072
+H     1.0     0.18253     1.69231     3.39928
+O     8.0     2.67702     4.50328    -3.51573
+S    16.0     1.39042     3.75039    -3.51573
+C     6.0     0.37437     4.37177    -4.85656
+C     6.0     0.37437     4.37177    -2.17490
+H     1.0     0.21584     5.43159    -4.69785
+H     1.0     0.21584     5.43159    -2.33362
+H     1.0     0.88077     4.22070    -5.80040
+H     1.0     0.88077     4.22070    -1.23107
+H     1.0    -0.57000     3.84629    -4.91501
+H     1.0    -0.57000     3.84629    -2.11646
+ $END

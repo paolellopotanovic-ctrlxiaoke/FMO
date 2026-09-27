@@ -1,0 +1,30 @@
+ ! Test of G3MP2Large basis set for 4th-row atoms (4ra); 
+ !
+ ! Single point RHF energies, using icharg=0,1, or 2 to 
+ ! obtain an easily-converged closed shell configuration.
+ !
+ !  K (+1)  FINAL RHF ENERGY IS     -599.0114337689 AFTER   7 ITERATIONS
+ !  Ca( 0)  FINAL RHF ENERGY IS     -676.7517081258 AFTER  10 ITERATIONS
+ !  Ga(+1)  FINAL RHF ENERGY IS    -1922.9965745892 AFTER   9 ITERATIONS
+ !  Ge(+2)  FINAL RHF ENERGY IS    -2074.4689373160 AFTER   8 ITERATIONS
+ !  As(+1)  FINAL RHF ENERGY IS    -2233.7568518766 AFTER  10 ITERATIONS
+ !  Se(+2)  FINAL RHF ENERGY IS    -2398.6435082204 AFTER  10 ITERATIONS
+ !  Br(+1)  FINAL RHF ENERGY IS    -2571.8967008714 AFTER   9 ITERATIONS
+ !  Kr( 0)  FINAL RHF ENERGY IS    -2751.9869800420 AFTER   9 ITERATIONS
+
+ $CONTRL SCFTYP=rhf RUNTYP=energy $end
+ $contrl icharg=1 maxit=200 ISPHER=1 icut=11 $END
+ !
+ *** $contrl exetyp=check $end
+ $SYSTEM mwords=90 $end
+ !
+ $basis gbasis=g3l $end
+ !
+ $scf fdiff=.f. conv=1.0d-06 $end
+ $SCF damp=.t. dirscf=.t. diis=.f. soscf=.t. $end
+ !
+ $DATA 
+  4th row atoms
+ C1
+ 4RA  19.0  0.0  0.0  0.0
+ $end

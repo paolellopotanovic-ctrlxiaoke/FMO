@@ -1,0 +1,38 @@
+!   This is an example of analytic computation of non-resonance Raman
+!   spectra using DFTB3 and the ARAMAN=.TRUE. option in $DFTB. The
+!   algorithm employes Wigner's 2n+1 rule, instead of solving second-order
+!   coupled-perturbed equations.
+!
+!   This input file should give an total energy of -4.0715925760 hartree,
+!   and the residual gradient vector should be nearly zero (optimized
+!   with OPTTOL=1.0D-09, although such a tight convergence is not usually
+!   necessary). In addition, the non-translational and non-rotational
+!   vibrational modes should give the following properties.
+!
+! MODE FREQ(CM**-1)  SYMMETRY  RED. MASS  IR INTENS.  RAMAN ACT.  DEPOLARIZ.
+!    7    1381.330    A        1.083948    2.316102   12.874323    0.669685
+!    8    3662.418    A        1.043984    1.808952   51.940013    0.142206
+!    9    3930.384    A        1.087718    1.892256   38.945175    0.750000
+!
+!   One can also obtain polarizabilities and hyperpolarizabilities
+!   automatically. This calculation does not require much effort, so they
+!   are always computed when ARAMAN=.TRUE. Most values are zero, but
+!   We should get the following non-zero values for polarzability: 
+! POLARIZABILITY      XX  =        5.0665690181
+! POLARIZABILITY      YY  =        2.8355878150
+!   and for hyperpolarizabilities:
+! HYPER-POLARIZABILITY FOR Y-X-X =             -4.9706321678
+! HYPER-POLARIZABILITY FOR Y-Y-Y =             -1.3548083169
+!
+ $CONTRL SCFTYP=RHF RUNTYP=RAMAN NPRINT=-5 MAXIT=200 $END
+ $SYSTEM MWORDS=100 MODIO=31 $END
+ $BASIS  GBASIS=DFTB $END
+ $SCF    CONV=1.0D-12 $END
+ $DFTB   NDFTB=3 DAMPXH=.T. ARAMAN=.TRUE. CPCONV=1.0D-09 PARAM=3OB-3-1 $END
+ $DATA
+H2O
+C1
+ O           8.0  -0.0000000000  -0.3858761007   0.0000000000
+ H           1.0   0.7862801564   0.1597660363   0.0000000000
+ H           1.0  -0.7862801564   0.1597660363   0.0000000000
+ $END

@@ -1,0 +1,40 @@
+!   (HCl)3 1e- and 2e- IOTC energy by picture change corrected (PCC) DFT
+!   RHF/SPKrDZC (Sapporo relativistic core/valence basis set)
+!   The basis has 102 contracted and 246 uncontracted AOs, containing up to d function.
+!
+!   final energy:
+!   the 1e- and 2e-IOTC w/ PCC (relwfn=iotc2e, pccdft=.t.) run is
+!      FINAL R-B3LYP ENERGY IS    -1385.9547430527 AFTER  18 ITERATIONS
+!   the 1e- and 2e-LUT-IOTC w/ PCC (relwfn=lutiotc2, pccdft=.t.) run is
+!      FINAL R-B3LYP ENERGY IS    -1385.9547062434 AFTER  18 ITERATIONS
+!   the 1e- and 2e-IOTC w/o PCC (relwfn=iotc2e, pccdft=.f.) run is
+!      FINAL R-B3LYP ENERGY IS    -1385.9547430527 AFTER  18 ITERATIONS
+!   and 1e- and 2e-LUT-IOTC w/o PCC (relwfn=lutiotc2, pccdft=.f.) run is
+!      FINAL R-B3LYP ENERGY IS    -1386.0441957506 AFTER  18 ITERATIONS
+!
+!   CPU time for all processes
+!      1e- and 2e-IOTC w/ PCC (relwfn=iotc2e, pccdft=.t.)       : 223.05  [second]
+!      1e- and 2e-LUT-IOTC w/ PCC (relwfn=lutiotc2, pccdft=.t.) :  59.507 [second]
+!      1e- and 2e-IOTC w/o PCC (relwfn=iotc2e, pccdft=.f.)      : 156.458 [second]
+!      1e- and 2e-LUT-IOTC w/o PCC (relwfn=lutiotc2, pccdft=.f.):  11.351 [second]
+!   on 1core of Intel(R) Xeon(R) Gold 5122 CPU @ 3.60GHz (25 May 2022)
+!
+!
+ $contrl runtyp=energy scftyp=rhf dfttyp=b3lyp relwfn=iotc2e icharg=0 
+         mult=1 maxit=200 ispher=1 $end
+ $relwfn pccdft=.f. $end
+ $system mwords=1600 $end
+ $scf    dirscf=.f. $end
+ $guess  guess=huckel $end
+ $basis  gbasis=spkrdzc $end
+ $data
+test on (HCl)3
+C1
+H      1.0            0.07702673    5.05924763    0.00000000
+H      1.0           -0.41183870    2.04121672    0.00000000
+H      1.0           -0.10104935   -1.00031415    0.00000000
+Cl    17.0            0.71739220    3.87078978    0.00000000
+Cl    17.0           -1.12089065    0.89241503    0.00000000
+Cl    17.0            0.53931612   -2.18877200    0.00000000
+ $end
+

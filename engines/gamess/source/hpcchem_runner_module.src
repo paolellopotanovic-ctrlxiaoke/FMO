@@ -1,0 +1,399 @@
+
+module SCFRunner_Module
+  use, intrinsic :: ISO_C_Binding, only: C_int, C_ptr, C_NULL_ptr, C_int64_t, c_double, c_f_pointer, c_loc, c_bool
+  use Molecule_Module
+  implicit none
+  private
+  type, bind(C) :: SCFRunner_type
+    type(C_ptr) :: object = C_NULL_ptr
+  end type SCFRunner_type
+
+  type, bind(c) :: double_wrappper
+        integer(c_int) :: count
+        type(c_ptr) :: values
+  end type double_wrappper
+  
+  type scf_runner_results
+    REAL(c_double), POINTER :: molecular_orbital_energies(:), molecular_orbital_coefficients(:), &
+      fock_matrix(:), density_matrix(:), overlap_matrix(:), fock_gafo_matrix(:)   
+    double precision :: energy 
+  end type scf_runner_results
+
+
+
+  interface
+     function C_SCFRunner__new () result(this) bind(C,name="SCFRunner__new")
+      import
+      type(C_ptr) :: this
+    end function C_SCFRunner__new
+
+    subroutine C_SCFRunner__delete (this) bind(C,name="SCFRunner__delete")
+      import
+      type(C_ptr), value :: this
+    end subroutine C_SCFRunner__delete
+
+    subroutine C_SCFRunner__set_molecule (this, molecule) bind(C,name="SCFRunner__set_molecule")
+      import
+      type(C_ptr), value :: this
+      type(C_ptr), value :: molecule
+    end subroutine C_SCFRunner__set_molecule
+    
+    subroutine C_SCFRunner__set_convergence_parameters(this, max_iterations, energy_convergence_threshold, dynamic_threshold, overlap_threshold, ndiis) bind(C,name="SCFRunner__set_convergence_parameters")
+      import
+      type(C_ptr), value :: this
+      integer(c_int64_t), value :: max_iterations
+      integer(c_int64_t), value :: ndiis
+      real(c_double), value :: energy_convergence_threshold, dynamic_threshold, overlap_threshold
+    end subroutine C_SCFRunner__set_convergence_parameters
+
+    subroutine C_SCFRunner__set_gafo_parameters (this,gafo_mo_coefficients, number_of_occupied_frozen_orbitals, number_of_frozen_orbitals, orbital_shift) bind(C,name="SCFRunner__set_gafo_parameters")
+      import
+      type(C_ptr), value :: this
+      type(c_ptr), value :: gafo_mo_coefficients
+      integer(C_int64_t), value :: number_of_occupied_frozen_orbitals
+      integer(C_int64_t), value :: number_of_frozen_orbitals
+      real(C_double), value :: orbital_shift
+    end subroutine C_SCFRunner__set_gafo_parameters
+
+    subroutine C_SCFRunner__run_scf (this, density_matrix, mpi_comm_ptr) bind(C,name="SCFRunner__run_scf")
+      import
+      type(C_ptr), value :: this
+      type(c_ptr), value :: density_matrix
+      type(c_ptr), value, intent(in) :: mpi_comm_ptr
+    end subroutine C_SCFRunner__run_scf
+
+    subroutine C_SCFRunner__run_fock_build (this, density_matrix, fock_matrix, do_tdhf_digestion, mpi_comm_ptr) bind(C,name="SCFRunner__do_fock_build")
+      import
+      type(C_ptr), value :: this
+      type(c_ptr), value :: density_matrix
+      type(c_ptr), value :: fock_matrix
+      type(c_ptr), value, intent(in) :: mpi_comm_ptr
+      logical(c_bool), value :: do_tdhf_digestion
+    end subroutine C_SCFRunner__run_fock_build
+    
+    subroutine C_SCFRunner__set_print_mode (this, print_mode) bind(C,name="SCFRunner__set_print_mode")
+      import
+      type(C_ptr), value :: this
+      integer(C_int64_t), value :: print_mode
+    end subroutine C_SCFRunner__set_print_mode
+
+    function C_SCFRunner__get_energy (this) result(energy) bind(C,name="SCFRunner__get_energy")
+      import
+      double precision :: energy
+      type(C_ptr), value :: this
+    end function C_SCFRunner__get_energy
+
+    function C_SCFRunner__get_molecule_natoms (this) result(natoms) bind(C,name="SCFRunner__get_molecule_natoms")
+      import
+      integer(C_int64_t) :: natoms
+      type(C_ptr), value :: this
+    end function C_SCFRunner__get_molecule_natoms
+
+    subroutine C_Create__vectors(this, molecule, number_of_shells, exponents, coefficients, &
+      atoms_in_shell, gaussians_in_shell, type_of_shell) &
+      bind(C,name="BasisSet__create_vectors")
+      import 
+      type(C_ptr) :: this 
+      type(C_ptr), value :: molecule
+      integer(C_int64_t), value :: number_of_shells
+      type(C_ptr), value :: exponents
+      type(C_ptr), value :: coefficients 
+      type(C_ptr), value :: atoms_in_shell 
+      type(C_ptr), value :: gaussians_in_shell 
+      type(C_ptr), value :: type_of_shell  
+    end subroutine C_Create__vectors
+    
+
+    subroutine C_Create__basis_set(this, &
+      exponents, coefficients,&
+      atoms_in_shell, gaussians_in_shell, type_of_shell,&
+      number_of_shells_in_atom) &
+      bind(C,name="SCFRunner_create_basis_set")
+     import 
+     type(C_ptr), value :: this 
+     type(C_ptr), value :: exponents
+     type(C_ptr), value :: coefficients 
+     type(C_ptr), value :: atoms_in_shell 
+     type(C_ptr), value :: gaussians_in_shell 
+     type(C_ptr), value :: type_of_shell  
+      type(c_ptr), value :: number_of_shells_in_atom
+   end subroutine C_Create__basis_set
+
+
+  subroutine C_SCFRunner__get_fock_matrix (this, fock_matrix_double_wrapper)  bind(C,name="SCFRunner__get_fock_matrix")
+    import
+    type(C_ptr), value :: this
+    type(double_wrappper) :: fock_matrix_double_wrapper
+  end subroutine C_SCFRunner__get_fock_matrix
+
+  subroutine C_SCFRunner__get_fock_gafo_matrix (this, fock_gafo_matrix_double_wrapper)  bind(C,name="SCFRunner__get_fock_gafo_matrix")
+    import
+    type(C_ptr), value :: this
+    type(double_wrappper) :: fock_gafo_matrix_double_wrapper
+  end subroutine C_SCFRunner__get_fock_gafo_matrix
+
+  subroutine C_SCFRunner__get_overlap_matrix (this, overlap_matrix_double_wrapper)  bind(C,name="SCFRunner__get_overlap_matrix")
+    import
+    type(C_ptr), value :: this
+    type(double_wrappper) :: overlap_matrix_double_wrapper
+  end subroutine C_SCFRunner__get_overlap_matrix
+
+  subroutine C_SCFRunner__get_mo_coeff_matrix (this, mo_coeff_double_wrapper)  bind(C,name="SCFRunner__get_mo_coeff")
+    import
+    type(C_ptr), value :: this
+    type(double_wrappper) :: mo_coeff_double_wrapper
+  end subroutine C_SCFRunner__get_mo_coeff_matrix
+
+  subroutine C_SCFRunner__get_density_matrix (this, density_double_wrapper)  bind(C,name="SCFRunner__get_density_matrix")
+    import
+    type(C_ptr), value :: this
+    type(double_wrappper) :: density_double_wrapper
+  end subroutine C_SCFRunner__get_density_matrix
+  
+  subroutine C_SCFRunner__get_mo_energies_matrix (this, mo_energies_double_wrapper)  bind(C,name="SCFRunner__get_mo_energies_matrix")
+    import
+    type(C_ptr), value :: this
+    type(double_wrappper) :: mo_energies_double_wrapper
+  end subroutine C_SCFRunner__get_mo_energies_matrix
+  
+  end interface 
+
+  interface new_SCFRunner
+    module procedure SCFRunner__new
+  end interface new_SCFRunner
+
+  interface delete_SCFRunner
+    module procedure SCFRunner__delete
+  end interface delete_SCFRunner
+
+  interface set_molecule_SCFRunner
+    module procedure SCFRunner__set_molecule
+  end interface set_molecule_SCFRunner
+    
+  interface set_convergence_parameters_SCFRunner
+    module procedure SCFRunner__set_convergence_parameters
+  end interface set_convergence_parameters_SCFRunner
+    
+  interface set_gafo_parameters_SCFRunner
+    module procedure SCFRunner__set_gafo_parameters
+  end interface set_gafo_parameters_SCFRunner
+
+  interface run_SCFRunner
+    module procedure SCFRunner__run
+  end interface run_SCFRunner
+
+  interface run_Fockbuild
+    module procedure SCFRunner__run_fock_build
+  end interface run_Fockbuild
+  
+  interface set_print_mode_SCFRunner
+    module procedure SCFRunner__set_print_mode
+  end interface set_print_mode_SCFRunner
+
+  interface get_energy_SCFRunner
+    module procedure SCFRunner__get_energy
+  end interface get_energy_SCFRunner
+
+
+  interface create_basis_set
+    module procedure SCFRunner__create_basis_set
+  end interface create_basis_set
+
+interface get_molecule_natoms
+  module procedure SCFRunner__get_molecule_natoms
+end interface get_molecule_natoms
+
+
+interface get_fock_matrix_SCFRunner
+  module procedure SCFRunner__get_fock_matrix
+end interface get_fock_matrix_SCFRunner
+
+interface get_overlap_matrix_SCFRunner
+  module procedure SCFRunner__get_overlap_matrix
+end interface get_overlap_matrix_SCFRunner
+
+interface get_fock_gafo_matrix_SCFRunner
+  module procedure SCFRunner__get_fock_gafo_matrix
+end interface get_fock_gafo_matrix_SCFRunner
+
+interface get_mo_coeff_SCFRunner
+  module procedure SCFRunner__get_mo_coeff_matrix
+end interface get_mo_coeff_SCFRunner
+
+interface get_density_matrix_SCFRunner
+  module procedure SCFRunner__get_density_matrix
+end interface get_density_matrix_SCFRunner
+
+interface get_mo_energies_matrix_SCFRunner
+  module procedure SCFRunner__get_mo_energies_matrix
+end interface get_mo_energies_matrix_SCFRunner
+
+  public :: new_SCFRunner, delete_SCFRunner, set_molecule_SCFRunner, &
+            &set_gafo_parameters_SCFRunner, run_SCFRunner,run_Fockbuild,&
+            &get_energy_SCFRunner, SCFRunner_type, get_molecule_natoms,&
+            &create_basis_set, get_fock_matrix_SCFRunner, double_wrappper,&
+            &get_mo_coeff_SCFRunner,  get_density_matrix_SCFRunner, &
+            &get_mo_energies_matrix_SCFRunner, scf_runner_results, &
+            &SCFRunner__get_results, SCFRunner__get_overlap_matrix, &
+            &SCFRunner__get_fock_gafo_matrix, SCFRunner__get_fock_build_results, &
+            &set_convergence_parameters_SCFRunner, set_print_mode_SCFRunner
+            
+contains
+  subroutine SCFRunner__new(this)
+    type(SCFRunner_type), intent(out) :: this
+    this%object = C_SCFRunner__new()
+  end subroutine SCFRunner__new
+
+  subroutine SCFRunner__delete(this)
+    type(SCFRunner_type), intent(inout) :: this
+    call C_SCFRunner__delete(this%object)
+    this%object = C_NULL_ptr
+  end subroutine SCFRunner__delete
+
+  subroutine SCFRunner__run(this, density_matrix, mpi_comm)
+    type(SCFRunner_type), intent(inout) :: this
+    integer(C_int64_t), intent(in), target :: mpi_comm
+    double precision, target::  density_matrix(*) 
+    call C_SCFRunner__run_scf(this%object, c_loc(density_matrix), c_loc(mpi_comm))
+  end subroutine SCFRunner__run
+
+  subroutine SCFRunner__run_fock_build(this, density_matrix, fock_matrix, do_tdhf_digestion, mpi_comm)
+    type(SCFRunner_type), intent(inout) :: this
+    double precision, target::  density_matrix(*),fock_matrix(*) 
+    integer(C_int64_t), intent(in), target :: mpi_comm
+    logical(c_bool), value :: do_tdhf_digestion
+    call C_SCFRunner__run_fock_build(this%object, c_loc(density_matrix), c_loc(fock_matrix), do_tdhf_digestion, c_loc(mpi_comm))
+  end subroutine SCFRunner__run_fock_build
+
+ subroutine SCFRunner__set_print_mode(this, print_mode)
+    type(SCFRunner_type), intent(inout) :: this
+    integer(C_int64_t), value ::  print_mode
+    call C_SCFRunner__set_print_mode(this%object, print_mode)
+  end subroutine SCFRunner__set_print_mode
+
+  subroutine SCFRunner__set_molecule(this, molecule)
+    type(SCFRunner_type), intent(inout) :: this
+    type(Molecule_type) :: molecule
+    call C_SCFRunner__set_molecule(this%object, molecule%object)
+  end subroutine SCFRunner__set_molecule
+  
+  subroutine SCFRunner__set_convergence_parameters(this, max_iterations, energy_convergence_threshold, dynamic_threshold, overlap_threshold, ndiis)
+      type(SCFRunner_type), intent(inout) :: this
+      integer(c_int64_t), value :: max_iterations
+      integer(c_int64_t), value :: ndiis
+      real(c_double), value :: energy_convergence_threshold, dynamic_threshold, overlap_threshold
+    call C_SCFRunner__set_convergence_parameters(this%object, max_iterations, energy_convergence_threshold, dynamic_threshold, overlap_threshold, ndiis)
+  end subroutine SCFRunner__set_convergence_parameters
+  
+  subroutine SCFRunner__set_gafo_parameters(this, gafo_mo_coefficients, number_of_occupied_frozen_orbitals, number_of_frozen_orbitals, orbital_shift)
+    type(SCFRunner_type), intent(inout) :: this
+    double precision, target ::  gafo_mo_coefficients(*)
+    integer(c_int64_t), value :: number_of_occupied_frozen_orbitals
+    integer(c_int64_t), value :: number_of_frozen_orbitals
+    real(c_double), value :: orbital_shift
+    call C_SCFRunner__set_gafo_parameters(this%object, c_loc(gafo_mo_coefficients), &
+        number_of_occupied_frozen_orbitals, number_of_frozen_orbitals, orbital_shift)
+
+  end subroutine SCFRunner__set_gafo_parameters
+  
+  function SCFRunner__get_energy(this) result(energy)
+    type(SCFRunner_type), intent(in) :: this
+    double precision :: energy
+    energy = C_SCFRunner__get_energy(this%object)
+  end function SCFRunner__get_energy
+  
+  subroutine SCFRunner__create_basis_set(this, &
+    exponents, coefficients, atoms_in_shell, &
+     gaussians_in_shell, type_of_shell, number_of_shells_in_atom)
+      type(SCFRunner_type), intent(inout) :: this 
+      real(c_double), target :: exponents(:), coefficients(:)
+      integer(c_int64_t), target :: atoms_in_shell(:) ,gaussians_in_shell(:) ,type_of_shell(:), number_of_shells_in_atom(:)
+
+      call C_Create__basis_set(this%object, c_loc(exponents), c_loc(coefficients),  c_loc(atoms_in_shell), c_loc(gaussians_in_shell), c_loc(type_of_shell), c_loc(number_of_shells_in_atom))
+
+    end subroutine SCFRunner__create_basis_set
+
+
+  function SCFRunner__get_molecule_natoms (this) result(natoms)
+    integer(C_int64_t) :: natoms
+    type(SCFRunner_type), value :: this
+    natoms = C_SCFRunner__get_molecule_natoms(this%object)
+  end function SCFRunner__get_molecule_natoms
+  
+  subroutine SCFRunner__get_fock_matrix (this, fortran_values)
+      type(double_wrappper) :: fock_matrix_double_wrapper
+      type(SCFRunner_type), value :: this
+      REAL(c_double), POINTER :: fortran_values(:)
+      integer number_of_values
+      call C_SCFRunner__get_fock_matrix(this%object, fock_matrix_double_wrapper)
+      call c_f_pointer(fock_matrix_double_wrapper%values, fortran_values, (/ number_of_values /))
+  end subroutine SCFRunner__get_fock_matrix
+
+  subroutine SCFRunner__get_fock_gafo_matrix (this, fortran_values)
+      type(double_wrappper) :: fock_gafo_matrix_double_wrapper
+      type(SCFRunner_type), value :: this
+      REAL(c_double), POINTER :: fortran_values(:)
+      integer number_of_values
+      call C_SCFRunner__get_fock_gafo_matrix(this%object, fock_gafo_matrix_double_wrapper)
+      call c_f_pointer(fock_gafo_matrix_double_wrapper%values, fortran_values, (/ number_of_values /))
+  end subroutine SCFRunner__get_fock_gafo_matrix
+
+  subroutine SCFRunner__get_overlap_matrix (this, fortran_values)
+      type(double_wrappper) :: overlap_matrix_double_wrapper
+      type(SCFRunner_type), value :: this
+      REAL(c_double), POINTER :: fortran_values(:)
+      integer number_of_values
+      call C_SCFRunner__get_overlap_matrix(this%object, overlap_matrix_double_wrapper)
+      call c_f_pointer(overlap_matrix_double_wrapper%values, fortran_values, (/ number_of_values /))
+  end subroutine SCFRunner__get_overlap_matrix
+
+  subroutine SCFRunner__get_mo_coeff_matrix (this, fortran_values)
+      type(SCFRunner_type), value :: this
+      type(double_wrappper) :: mo_coeff_matrix_double_wrapper
+      REAL(c_double), POINTER :: fortran_values(:)
+      integer number_of_values
+      call C_SCFRunner__get_mo_coeff_matrix(this%object, mo_coeff_matrix_double_wrapper)
+      call c_f_pointer(mo_coeff_matrix_double_wrapper%values, fortran_values, (/ mo_coeff_matrix_double_wrapper%count /))
+  end subroutine SCFRunner__get_mo_coeff_matrix
+
+  subroutine SCFRunner__get_density_matrix (this, fortran_values)
+      type(SCFRunner_type), value :: this
+      type(double_wrappper) :: density_matrix_double_wrapper
+      REAL(c_double), POINTER :: fortran_values(:)
+      integer number_of_values
+      call C_SCFRunner__get_density_matrix(this%object, density_matrix_double_wrapper)
+      call c_f_pointer(density_matrix_double_wrapper%values, fortran_values, (/ density_matrix_double_wrapper%count /))
+  end subroutine SCFRunner__get_density_matrix
+
+  subroutine SCFRunner__get_mo_energies_matrix (this, fortran_values)
+      type(SCFRunner_type), value :: this
+      type(double_wrappper) :: mo_energies_matrix_double_wrapper
+      REAL(c_double), POINTER :: fortran_values(:)
+      integer number_of_values
+      call C_SCFRunner__get_mo_energies_matrix(this%object, mo_energies_matrix_double_wrapper)
+      call c_f_pointer(mo_energies_matrix_double_wrapper%values, fortran_values, (/ mo_energies_matrix_double_wrapper%count /))
+  end subroutine SCFRunner__get_mo_energies_matrix
+
+  function SCFRunner__get_results(this) result(results)
+    type(SCFRunner_type), value :: this
+    type(scf_runner_results):: results 
+    
+    call SCFRunner__get_mo_coeff_matrix(this, results%molecular_orbital_coefficients)
+    call SCFRunner__get_mo_energies_matrix(this, results%molecular_orbital_energies)
+    call SCFRunner__get_density_matrix(this, results%density_matrix)
+    call SCFRunner__get_fock_matrix(this, results%fock_matrix)
+    call SCFRunner__get_fock_gafo_matrix(this, results%fock_gafo_matrix)
+    call SCFRunner__get_overlap_matrix(this, results%overlap_matrix)
+    results%energy = SCFRunner__get_energy(this)
+  end function  SCFRunner__get_results
+
+  function SCFRunner__get_fock_build_results(this) result(results)
+    type(SCFRunner_type), value :: this
+    type(scf_runner_results):: results 
+    
+    !call SCFRunner__get_density_matrix(this, results%density_matrix)
+    call SCFRunner__get_fock_matrix(this, results%fock_matrix)
+
+  end function  SCFRunner__get_fock_build_results
+
+end module SCFRunner_Module

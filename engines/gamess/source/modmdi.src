@@ -1,0 +1,337 @@
+! MODULE modmdi
+!>    @author  Taylor Barnes (MolSSI)
+!
+!>    @brief   Implementation of an MDI interface in GAMESS
+!
+!>    @detail  Includes initialization and server code
+!
+!     REVISION HISTORY:
+!>    @date Aug, 2021 - Initial release
+!
+!>    @param   USE_MDI - Flag whether this is an MDI run
+MODULE modmdi
+    use, intrinsic::iso_c_binding, only : C_NULL_PTR, C_PTR, C_INT
+
+    IMPLICIT NONE
+
+    CHARACTER(len=:), ALLOCATABLE :: MDI_OPTIONS
+
+    ! Flag whether to use MDI
+    LOGICAL :: USE_MDI = .FALSE.
+
+    ! Flag whether the latest energy evaluation is still valid
+    LOGICAL :: energy_current = .FALSE.
+
+    ! Flag whether the latest force evaluation is still valid
+    LOGICAL :: forces_current = .FALSE.
+
+    ! Maximum length of the MDI options
+    INTEGER, PARAMETER :: MDI_OPTIONS_LEN = 1024
+
+    ! MDI communicator for inter-code communication
+    INTEGER(C_INT) :: mdi_comm
+
+    PRIVATE
+    PUBLIC :: USE_MDI, MDI_RUN
+
+CONTAINS
+
+!*MODULE MODMDI  *DECK MDI_READ_OPTIONS
+!>    @brief   Read options used to initialze MDI
+!>    @detail
+!          Check for the GAMESS_MDI_OPTIONS environment variable.
+!          If this variable is not set, or if it is empty, no MDI calculation is performed.
+!          The GAMESS_MDI_OPTIONS environment variable is set by the rungms script,
+!          if the rungms script is launched with a -mdi command-line argument.
+!>    @author Taylor A. Barnes
+!>    @date   Aug, 2021 - Initial release
+!
+    subroutine MDI_READ_OPTIONS()
+        ! Variables for getting the command-line options
+        INTEGER :: istatus
+
+        ALLOCATE(character(len=MDI_OPTIONS_LEN) :: mdi_options)
+
+        call GET_ENVIRONMENT_VARIABLE("GAMESS_MDI_OPTIONS",mdi_options, STATUS=istatus)
+
+        ! Return if GAMESS_MDI_OPTIONS is not set
+        IF ( istatus .ne. 0 ) THEN
+            DEALLOCATE( mdi_options )
+            RETURN
+        END IF
+
+        ! Return if GAMESS_MDI_OPTIONS is empty
+        IF ( TRIM(mdi_options) .eq. "" ) THEN
+            DEALLOCATE( mdi_options )
+            RETURN
+        END IF
+
+        USE_MDI = .TRUE.
+
+    end subroutine MDI_READ_OPTIONS
+
+!*MODULE MODMDI  *DECK MDI_FINALIZE
+!>    @brief   Terminate an MDI run
+!>    @detail
+!          Deallocate any data that was allocated during an MDI calculation.
+!>    @author Taylor A. Barnes
+!>    @date   Aug, 2021 - Initial release
+!
+    subroutine MDI_FINALIZE()
+
+       DEALLOCATE( mdi_options )
+
+    end subroutine MDI_FINALIZE
+
+!*MODULE MODMDI  *DECK MDI_INITIALIZE
+!>    @brief   Initialize an MDI run
+!>    @detail
+!          Initialize the MDI library.
+!          Then, establish a connection with an external driver.
+!>    @author Taylor A. Barnes
+!>    @date   Aug, 2021 - Initial release
+!
+    subroutine MDI_INITIALIZE()
+        USE MDI, ONLY : MDI_Init, MDI_Accept_Communicator
+
+        ! Get parallelization information from the PAR common block
+        INTEGER :: ME, MASTER, NPROC, IBTYP, IPTIM
+        LOGICAL :: GOPARR, DSKWRK, MASWRK
+        COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+
+        INTEGER(C_INT) :: ierr
+
+        ! Initialize MDI
+        IF ( MASWRK ) THEN
+            CALL MDI_Init( mdi_options, ierr )
+            if ( ierr .ne. 0 ) CALL ABRT()
+        ENDIF
+
+        ! Accept a communicator
+        IF ( MASWRK ) THEN
+            CALL MDI_Accept_Communicator( mdi_comm, ierr )
+            if ( ierr .ne. 0 ) CALL ABRT()
+        ENDIF
+    end subroutine MDI_INITIALIZE
+
+!*MODULE MODMDI  *DECK MDI_RUN
+!>    @brief   Run as an MDI engine, if the -mdi command-line option is present
+!>    @detail
+!          Run an MDI calculation if the rungms script was launched with the -mdi option.
+!          If the rungms script was not launched with the -mdi option, this subroutine returns immediately.
+!          The subroutine listens for commands from an external driver, and responds to them appropriately.
+!          When the driver exits, this function returns and normal GAMESS program flow continues.
+!>    @author Taylor A. Barnes
+!>    @date   Aug, 2021 - Initial release
+!
+    subroutine MDI_RUN()
+        USE MDI, ONLY : MDI_COMMAND_LENGTH, MDI_DOUBLE, MDI_INT, &
+                        MDI_Recv_Command, MDI_Send, MDI_Recv
+        USE MX_LIMITS, ONLY : MXRT, MXATM, MXAO
+
+        CHARACTER(len=MDI_COMMAND_LENGTH) :: command
+        INTEGER(C_INT) :: msg_count, natoms, iatom, ierr
+        INTEGER(C_INT) :: dimensions(3)
+        DOUBLE PRECISION, ALLOCATABLE :: coords(:)
+        INTEGER(C_INT), ALLOCATABLE :: elements(:)
+
+        ! PAR declarations
+        INTEGER :: ME, MASTER, NPROC, IBTYP, IPTIM
+        LOGICAL :: GOPARR, DSKWRK, MASWRK
+
+        ! ENRGYS declarations
+        DOUBLE PRECISION :: ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2, &
+                            VNE,VEE,VTOT,TKIN,ESTATE,STATN,EDFT,EDISP
+
+        ! FUNCT declarations
+        DOUBLE PRECISION :: E,EG
+
+        ! INFOA declarations
+        INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB
+        DOUBLE PRECISION :: ZAN,C,IAN
+
+        ! RUNLAB declarations
+        DOUBLE PRECISION :: TITLE, A, B, BFLAB
+
+        ! IOFILE declarations
+        INTEGER :: IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA
+
+        COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+        COMMON /ENRGYS/ ENUCR,EELCT,ETOT,SZ,SZZ,ECORE,ESCF,EERD,E1,E2, &
+                        VNE,VEE,VTOT,TKIN,ESTATE(MXRT),STATN,EDFT(3),EDISP
+        COMMON /FUNCT / E,EG(3*MXATM)
+        COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB, &
+                        ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+        COMMON /RUNLAB/ TITLE(10),A(MXATM),B(MXATM),BFLAB(MXAO)
+        COMMON /IOFILE/ IR,IW,IP,IJK,IJKT,IDAF,NAV,IODA(950)
+
+        CALL MDI_READ_OPTIONS()
+
+        IF ( .not. USE_MDI ) RETURN
+
+        CALL MDI_INITIALIZE()
+
+        ! Allocate arrays for storing message data
+        ALLOCATE( coords(3*NAT), elements(NAT) )
+
+        ! Main MDI loop
+        mdi_loop: DO
+
+            ! Receive a command from the driver
+            IF ( MASWRK ) THEN
+                CALL MDI_Recv_Command( command, mdi_comm, ierr )
+                if ( ierr .ne. 0 ) CALL ABRT()
+                WRITE(IW,*)'MDI received command: ',command
+            ENDIF
+            CALL DDI_BCAST(2201,'I',command,MDI_COMMAND_LENGTH,MASTER)
+
+            ! Respond to the recieved command
+            SELECT CASE ( trim( command ) )
+
+                CASE( "EXIT" )
+
+                    RETURN
+
+                CASE( "<ENERGY" )
+
+                    IF ( .not. energy_current ) THEN
+                        CALL BRNCHX('ENERGY  ')
+                        energy_current = .TRUE.
+                    ENDIF
+                    msg_count = 1
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( ETOT, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<KE" )
+
+                    IF ( .not. energy_current ) THEN
+                        CALL BRNCHX('ENERGY  ')
+                        energy_current = .TRUE.
+                    ENDIF
+                    msg_count = 1
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( TKIN, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<KE_ELEC" )
+
+                    IF ( .not. energy_current ) THEN
+                        CALL BRNCHX('ENERGY  ')
+                        energy_current = .TRUE.
+                    ENDIF
+                    msg_count = 1
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( TKIN, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<PE" )
+
+                    IF ( .not. energy_current ) THEN
+                        CALL BRNCHX('ENERGY  ')
+                        energy_current = .TRUE.
+                    ENDIF
+                    msg_count = 1
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( VTOT, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<NATOMS" )
+
+                    msg_count = 1
+                    IF ( MASWRK ) THEN
+                        natoms = NAT
+                        CALL MDI_Send( natoms, msg_count, MDI_INT, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<DIMENSIONS" )
+
+                    msg_count = 3
+                    IF ( MASWRK ) THEN
+                        dimensions = 1
+                        CALL MDI_Send( dimensions, msg_count, MDI_INT, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<COORDS" )
+
+                    msg_count = 3 * NAT
+                    DO iatom = 1, NAT
+                       coords( 3*(iatom-1) + 1 ) = C(1,iatom)
+                       coords( 3*(iatom-1) + 2 ) = C(2,iatom)
+                       coords( 3*(iatom-1) + 3 ) = C(3,iatom)
+                    END DO
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( coords, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( ">COORDS" )
+
+                    msg_count = 3 * NAT
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Recv( coords, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+                    CALL DDI_BCAST(2201, 'F', coords, 3*NAT, MASTER)
+                    DO iatom = 1, NAT
+                       C(1,iatom) = coords( 3*(iatom-1) + 1 )
+                       C(2,iatom) = coords( 3*(iatom-1) + 2 )
+                       C(3,iatom) = coords( 3*(iatom-1) + 3 )
+                    END DO
+                    energy_current = .FALSE.
+                    forces_current = .FALSE.
+
+                CASE( "<CHARGES" )
+
+                    msg_count = NAT
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( ZAN, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<ELEMENTS" )
+
+                    msg_count = NAT
+                    IF ( MASWRK ) THEN
+                        DO iatom = 1, NAT
+                            elements(iatom) = NINT( ZAN(iatom) )
+                        END DO
+                        CALL MDI_Send( elements, msg_count, MDI_INT, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE( "<FORCES" )
+
+                    IF ( .not. forces_current ) THEN
+                        CALL BRNCHX('GRADIENT')
+                        energy_current = .TRUE.
+                        forces_current = .TRUE.
+                    ENDIF
+
+                    msg_count = 3 * NAT
+                    IF ( MASWRK ) THEN
+                        CALL MDI_Send( EG, msg_count, MDI_DOUBLE, mdi_comm, ierr )
+                        if ( ierr .ne. 0 ) CALL ABRT()
+                    ENDIF
+
+                CASE DEFAULT
+
+                    CALL ABRT()
+
+            END SELECT
+
+        END DO mdi_loop
+
+        DEALLOCATE( coords, elements )
+
+        CALL MDI_FINALIZE()
+
+    end subroutine MDI_RUN
+
+END MODULE modmdi

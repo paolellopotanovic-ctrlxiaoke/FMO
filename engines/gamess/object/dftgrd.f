@@ -1,0 +1,12766 @@
+c 17 Oct 19 - DGF - add in-core F22
+c 22 Oct 14 - DGF - pad common blocks
+C xx Oct 13 - AP  - NEW SOLVDISP ENTRY FOR SVP's CMIRS1.0 DISPERSION
+C 19 DEC 12 - JI  - Add h/i functionality. Modified routines are:
+C                   DFTAO,DFTGAO,DFTG2AO,DMATD,GRDDFT,GRDGAO,GRDGGAO,
+C                   INPBAS,DEREXC
+C 18 Oct 12 - MWS - allow ghost atom grids for DFT counterpoise
+C 28 DEC 11 - DGF - ALLOW TO CONTROL GRID FILE USAGE IN DFT
+C 11 AUG 11 - NM  - GRDDFT: UWGTGRAD ENTRY POINT ADDED
+C 15 APR 11 - YI  - CHANGES FOR LOCAL RESPONSE DISPERSION METHOD
+C 15 APR 11 - MK  - ACCELERATE DC-DFT GRID EVALUATION
+C 15 APR 11 - DGF - GRDDFT,PRUNEOCT: FIX DLB PARALLELISM IN SG1/JANSSEN
+C 12 DEC 10 - MWS - OCT: SIMPLIFY STORAGE SPECIFICATION
+C 23 JUN 10 - MK  - SG1/JANSSEN FIX NUMBER OF GRID POINTS IN PARALLEL
+C 25 MAR 10 - MK,MWS  - DMATD,DEREXC: DC-UHF, SECRET BRAGG INPUT
+C 14 OCT 09 - FZ  - GRDDFT: PROVIDE PRINTABLE FUNCTIONAL FOR DFTTYP=NONE
+C 14 AUG 09 - KAN - COULOMB ATTENUATED METHODS (CAM) FOR DFT & TDDFT
+C 22 MAY 09 - STB - ADDED JANSSEN PRUNED GRIDS TO DFT PROCEDURES
+C 22 MAY 09 - HPTI- DFTGDV: OPTIMIZED MEMORY-STRIDE ACCESS FOR META-GGA
+C                   GRDDFT: CHANGES TO ALLOW SLB PARALLELIZATION
+C  1 MAY 09 - PFS - CHANGES FOR LMOEDA METHOD
+C 20 NOV 08 - MK  - CHANGES TO ADD THE DIVIDE-AND-CONQUER METHOD
+C 23 OCT 08 - SS  - SYNCRONIZE THE DFTEXC COMMON
+C 18 JUL 08 - TK  - PRINT RADIAL OVERLAP FOR LARGEST/SMALLEST GTO ZETA'S
+C 11 APR 08 - HPTI - IMPLEMENT LEBEDEV AND SG1 ANGULAR GRIDS
+C  4 MAR 08 - SS  - META-GGA CONTRIBUTIONS TO FOCK AND NUCLEAR GRADIENTS
+C  4 MAR 08 - MWS - STOP REPEATED FUNCTIONAL PRINTING, EXETYP=CHECK
+C 20 AUG 07 - MC  - MODIFICATION FOR TDDFT GRADIENT CALCULATION
+C  6 NOV 06 - MC  - ADD GRDCALC,GRDWT,GRDRD,GRDGAO,DCHXYZ,CHIXYZ: TDDFT
+C 14 NOV 05 - DGF - PAD COMMON BLOCK SCFOPT
+C 19 SEP 05 - GDF - PAD SHLNRM COMMON FOR H AND I FUNCTIONS
+C  5 JUL 05 - MWS - SELECT NEW ATOM,BASIS,EFP,PCM,DAF DIMENSIONS
+C 13 FEB 05 - MWS - PAD COMMON BLOCK NSHEL
+C 16 JAN 04 - DGF - NEW DFT GRADIENT THRESHOLDS
+C  9 DEC 03 - MWS - SYNCH COMMON BLOCK RUNOPT
+C 26 MAR 02 - DGF - ATMVEC: FIX FOR DUMMY ATOMS
+C 24 JAN 02 - RMO - GRDPT,
+C  5 DEC 01 - DGF - FIX FOR CASE OF NO BETA ELECTRONS
+C 25 JUN 01 - MWS - ALTER COMMON BLOCK SCFOPT AND WFNOPT
+C 13 JUN 01 - DGF,MK ADD WEIGHT DERIVATIVES TO COMPLETE THE DFT GRADIENT
+C 30 APR 01 - TT,SY,MK,DGF IMPLEMENT GRID-BASED DFT
+C
+C     POSSIBLE OPTIMIZATION: SOME ARRAYS LIKE ATMXVEC ARE ADDRESSED
+C                            AS COLUMNS RATHER THAN ROWS.
+C
+C*MODULE DFTGRD  *DECK ATMVEC
+C>    @brief Calculates atomic distance and vectors
+C>
+C>    @details THIS ROUTINE CALCULATES THE ATOMIC DISTANCE AND ATOMIC VECTORS FOR
+C>    USE IN THE BECKE'S FUZZY CELL METHOD.
+C>
+      SUBROUTINE ATMVEC(ATMXVEC,ATMYVEC,ATMZVEC,RIJ)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+C
+      DIMENSION ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *          RIJ(NAT,NAT)
+C
+      DO 10 IATM=1,NAT
+         XCNTR=C(1,IATM)
+         YCNTR=C(2,IATM)
+         ZCNTR=C(3,IATM)
+         ATMXVEC(IATM,IATM)=ZERO
+         ATMYVEC(IATM,IATM)=ZERO
+         ATMZVEC(IATM,IATM)=ZERO
+         RIJ(IATM,IATM)=ZERO
+         DO 20 JATM=1,IATM-1
+            ATMXVEC(IATM,JATM)= XCNTR-C(1,JATM)
+            ATMYVEC(IATM,JATM)= YCNTR-C(2,JATM)
+            ATMZVEC(IATM,JATM)= ZCNTR-C(3,JATM)
+            ATMXVEC(JATM,IATM)=-ATMXVEC(IATM,JATM)
+            ATMYVEC(JATM,IATM)=-ATMYVEC(IATM,JATM)
+            ATMZVEC(JATM,IATM)=-ATMZVEC(IATM,JATM)
+            RIJ(IATM,JATM)=SQRT(
+     *            ATMXVEC(IATM,JATM)*ATMXVEC(IATM,JATM)
+     *           +ATMYVEC(IATM,JATM)*ATMYVEC(IATM,JATM)
+     *           +ATMZVEC(IATM,JATM)*ATMZVEC(IATM,JATM))
+            RIJ(JATM,IATM)=RIJ(IATM,JATM)
+ 20      CONTINUE
+ 10   CONTINUE
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTAO
+C
+C>    @brief Computes values of all AOs for a grid point
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians
+C
+      SUBROUTINE DFTAO(IJX,IJY,IJZ,VALMOA,ANGXVL,ANGYVL,ANGZVL,CL,EXPS,
+     *                 RSQRD,NAT,L1)
+      use mx_limits, only: mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (RLN10=2.30258D+00)
+C
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /SHLNRM/ PNRM(84)
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+C
+      DIMENSION VALMOA(*),EXPS(*),ANGXVL(NAT,*),ANGYVL(NAT,*),
+     *          ANGZVL(NAT,*),CL(*),RSQRD(NAT)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+C
+      TOL = RLN10*ITOL/TWO
+C
+C     ITOL SETS THRESHOLD FOR INTEGRALS. HERE IT IS APPLIED TO
+C     WAVEFUNCTION, THUS IT IS HALVED. IT IS FOUND THAT THIS IS A
+C     RATHER CONSERVATIVE SETTING AND ONE GETS ABOUT 11 SIG. FIGURES
+C     OF ACCURACY IN THE TOTAL ENERGY WITH THE DEFAULT ITOL=20.
+C     SEE DFTGAO AND DFTG2AO.
+C
+      IFCT=0
+      CALL VCLR(VALMOA,1,L1)
+      DO 40 ISHELL = 1, NSHELL
+         IATM = KATOM(ISHELL)
+C***********************************************************************
+C     ANGULAR INTERMEDIATES FOR THE DENSITY AND GRADIENT
+C***********************************************************************
+         K1 = KSTART(ISHELL)
+         K2 = K1 + KNG(ISHELL) - 1
+         MINI=KMIN(ISHELL)
+         MAXI=KMAX(ISHELL)
+         LOCI = KLOC(ISHELL)-MINI
+         LOCI0= KLOC(ISHELL)
+         DO 60 IMOMFCT = K1, K2
+            IFCT=IFCT+1
+            DUM=EX(IMOMFCT)*RSQRD(IATM)
+            IF(DUM.GT.TOL) GOTO 60
+            VEXP=EXP(-DUM)
+            EXPS(IFCT)=VEXP
+C           SAVE EXP FOR THE GRADIENT
+            CC=CL(IMOMFCT)
+            LOCI1=LOCI0
+            IF(MINI.EQ.1) THEN
+C
+C           SPECIAL FAST CODE FOR S FUNCTIONS (INCLUDING L SHELLS)
+C
+               VALMOA(LOCI1)=VALMOA(LOCI1)+CC*VEXP
+C              FOR L-SHELLS
+               LOCI1=LOCI1+1
+               CC=CP(IMOMFCT)
+            ENDIF
+            IF(MAXI.EQ.4) THEN
+C
+C           SPECIAL FAST CODE FOR P FUNCTIONS (INCLUDING L SHELLS)
+C
+               VALMOA(LOCI1  )=VALMOA(LOCI1  )+CC*VEXP*ANGXVL(IATM,3)
+               VALMOA(LOCI1+1)=VALMOA(LOCI1+1)+CC*VEXP*ANGYVL(IATM,3)
+               VALMOA(LOCI1+2)=VALMOA(LOCI1+2)+CC*VEXP*ANGZVL(IATM,3)
+               LOCI1=LOCI1+3
+            ENDIF
+            IF(LOCI1.NE.LOCI0) GOTO 60
+C
+C           GENERAL CODE (WORKS FOR S,P,L FUNCTIONS AS WELL)
+C           TO USE FOR L-FUNCTIONS, UNCOMMENT THE "C     L-SHELL" LINE
+C
+            DO 50 ITYP = MINI,MAXI
+               IX=IJX(ITYP)-1
+               IY=IJY(ITYP)-1
+               IZ=IJZ(ITYP)-1
+C
+C              COMPUTE AO VALUE AT A GRID POINT
+C
+               DUM=CC*PNRM(ITYP)*VEXP
+               VALMOA(LOCI+ITYP)=VALMOA(LOCI+ITYP)+ANGXVL(IATM,IX+2)*
+     *            ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+2)*DUM
+C              UNCOMMENT FOR L-SHELL
+C              IF(ITYP.EQ.1) CC=CP(IMOMFCT)
+C              THIS IS THE DREADED L-SHELL CASE, FOR S-SHELLS THE LOOP
+C              IS OVER, OTHERWISE USE P COEFFICIENT IN THE FOLLOWING
+ 50         CONTINUE
+ 60      CONTINUE
+ 40   CONTINUE
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTGAO
+C>    @brief Computes values of gradient at grid point
+C>
+C>    @details THIS ROUTINE COMPUTES VALUES OF GRADIENT (DERIVATIVE BY THE
+C>    ELECTRON COORDINATE) OF ALL AOS FOR A GRID POINT.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians
+C
+      SUBROUTINE DFTGAO(IJX,IJY,IJZ,GVALAX,GVALAY,GVALAZ,ANGXVL,ANGYVL,
+     *                  ANGZVL,CL,EXPS,RSQRD,NAT,L1)
+      use mx_limits, only: mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (RLN10=2.30258D+00)
+C
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /SHLNRM/ PNRM(84)
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+C
+      DIMENSION GVALAX(L1),GVALAY(L1),GVALAZ(L1),ANGXVL(NAT,*),
+     *          ANGYVL(NAT,*),ANGZVL(NAT,*),CL(*),RSQRD(NAT),EXPS(*)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+
+C
+      TOL = RLN10*ITOL/TWO
+C     THE SAME AS IN DFTAO.
+C
+      IFCT=0
+      CALL VCLR(GVALAX,1,L1)
+      CALL VCLR(GVALAY,1,L1)
+      CALL VCLR(GVALAZ,1,L1)
+      DO 40 ISHELL = 1, NSHELL
+         IATM = KATOM(ISHELL)
+C***********************************************************************
+C     ANGULAR INTERMEDIATES FOR THE DENSITY AND GRADIENT
+C***********************************************************************
+         K1 = KSTART(ISHELL)
+         K2 = K1 + KNG(ISHELL) - 1
+         MINI=KMIN(ISHELL)
+         MAXI=KMAX(ISHELL)
+         LOCI = KLOC(ISHELL)-MINI
+         LOCI0= KLOC(ISHELL)
+         DO 60 IMOMFCT = K1, K2
+            IFCT=IFCT+1
+            TWOALP = EX(IMOMFCT)*TWO
+            DUM=EX(IMOMFCT)*RSQRD(IATM)
+            IF(DUM.GT.TOL) GOTO 60
+C           VEXP=EXP(-DUM)
+            VEXP=EXPS(IFCT)
+            CC=CL(IMOMFCT)
+            LOCI1=LOCI0
+            IF(MINI.EQ.1) THEN
+C
+C           SPECIAL FAST CODE FOR S FUNCTIONS (INCLUDING L SHELLS)
+C
+              DUM=CC*VEXP*TWOALP
+              GVALAX(LOCI1)=GVALAX(LOCI1)-DUM*ANGXVL(IATM,3)
+              GVALAY(LOCI1)=GVALAY(LOCI1)-DUM*ANGYVL(IATM,3)
+              GVALAZ(LOCI1)=GVALAZ(LOCI1)-DUM*ANGZVL(IATM,3)
+C             FOR L-SHELLS
+              LOCI1=LOCI1+1
+              CC=CP(IMOMFCT)
+            ENDIF
+            IF(MAXI.EQ.4) THEN
+C
+C           SPECIAL FAST CODE FOR P FUNCTIONS (INCLUDING L SHELLS)
+C
+               DUM=CC*TWOALP*VEXP
+               DUM1=CC*VEXP
+               XY=DUM*ANGXVL(IATM,3)*ANGYVL(IATM,3)
+               XZ=DUM*ANGXVL(IATM,3)*ANGZVL(IATM,3)
+               YZ=DUM*ANGYVL(IATM,3)*ANGZVL(IATM,3)
+               GVALAX(LOCI1)=GVALAX(LOCI1)+DUM1-DUM*ANGXVL(IATM,4)
+               GVALAY(LOCI1)=GVALAY(LOCI1)-XY
+               GVALAZ(LOCI1)=GVALAZ(LOCI1)-XZ
+               LOCI1=LOCI1+1
+               GVALAX(LOCI1)=GVALAX(LOCI1)-XY
+               GVALAY(LOCI1)=GVALAY(LOCI1)+DUM1-DUM*ANGYVL(IATM,4)
+               GVALAZ(LOCI1)=GVALAZ(LOCI1)-YZ
+               LOCI1=LOCI1+1
+               GVALAX(LOCI1)=GVALAX(LOCI1)-XZ
+               GVALAY(LOCI1)=GVALAY(LOCI1)-YZ
+               GVALAZ(LOCI1)=GVALAZ(LOCI1)+DUM1-DUM*ANGZVL(IATM,4)
+               LOCI1=LOCI1+1
+            ENDIF
+            IF(LOCI1.NE.LOCI0) GOTO 60
+C
+C           GENERAL CODE (WORKS FOR S,P,L FUNCTIONS AS WELL)
+C           TO USE FOR L-FUNCTIONS, UNCOMMENT THE "C     L-SHELL" LINE
+C
+            DO 50 ITYP = MINI,MAXI
+               IX=IJX(ITYP)-1
+               IY=IJY(ITYP)-1
+               IZ=IJZ(ITYP)-1
+               DUM=CC*PNRM(ITYP)*VEXP
+C
+C              COMPUTE GRADIENT AO VALUE AT A GRID POINT
+C              GRADIENT IS BY THE ELECTRON (NOT NUCLEAR) COORDINATES
+C
+               ANGYZVL=ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+2)
+               ANGZXVL=ANGZVL(IATM,IZ+2)*ANGXVL(IATM,IX+2)
+               ANGXYVL=ANGXVL(IATM,IX+2)*ANGYVL(IATM,IY+2)
+C***********************************************************************
+C     GRADIENT MINUS ONE COMPONENT
+C***********************************************************************
+               ANGXM= IX*ANGXVL(IATM,IX+1)*ANGYZVL
+               ANGYM= IY*ANGYVL(IATM,IY+1)*ANGZXVL
+               ANGZM= IZ*ANGZVL(IATM,IZ+1)*ANGXYVL
+C***********************************************************************
+C     GRADIENT PLUS ONE COMPONENT
+C***********************************************************************
+               ANGXP= ANGXVL(IATM,IX+3)*ANGYZVL
+               ANGYP= ANGYVL(IATM,IY+3)*ANGZXVL
+               ANGZP= ANGZVL(IATM,IZ+3)*ANGXYVL
+C
+               LOCI0=LOCI+ITYP
+               GVALAX(LOCI0) = GVALAX(LOCI0)+DUM*(ANGXM-TWOALP*ANGXP)
+               GVALAY(LOCI0) = GVALAY(LOCI0)+DUM*(ANGYM-TWOALP*ANGYP)
+               GVALAZ(LOCI0) = GVALAZ(LOCI0)+DUM*(ANGZM-TWOALP*ANGZP)
+C              UNCOMMENT FOR L-SHELLS
+C              IF(ITYP.EQ.1) CC=CP(IMOMFCT)
+C              THIS IS THE DREADED L-SHELL CASE, FOR S-SHELLS THE LOOP
+C              IS OVER, OTHERWISE USE P COEFFICIENT IN THE FOLLOWING.
+ 50         CONTINUE
+ 60      CONTINUE
+ 40   CONTINUE
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTG2AO
+C>    @brief Computes second derivatives of basis function
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians
+C
+      SUBROUTINE DFTG2AO(IJX,IJY,IJZ,G2AOXX,G2AOYY,G2AOZZ,G2AOXY,G2AOYZ,
+     *                 G2AOXZ,ANGXVL,ANGYVL,ANGZVL,CL,EXPS,RSQRD,NAT,L1)
+      use mx_limits, only: mxsh,mxgtot
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (THREE=3.0D+00)
+      PARAMETER (RLN10=2.30258D+00)
+C
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /SHLNRM/ PNRM(84)
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+C
+      DIMENSION CL(*),RSQRD(NAT),G2AOXX(*),G2AOYY(*),G2AOZZ(*),
+     *          G2AOXY(*),G2AOYZ(*),G2AOXZ(*),EXPS(*),
+     *          ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+C
+      TOL = RLN10*ITOL/TWO
+C     THE SAME AS IN DFTAO.
+C
+      IFCT=0
+      CALL VCLR(G2AOXX,1,L1)
+      CALL VCLR(G2AOYY,1,L1)
+      CALL VCLR(G2AOZZ,1,L1)
+      CALL VCLR(G2AOXY,1,L1)
+      CALL VCLR(G2AOYZ,1,L1)
+      CALL VCLR(G2AOXZ,1,L1)
+      DO 40 ISHELL = 1, NSHELL
+         IATM = KATOM(ISHELL)
+C
+C     ANGULAR INTERMEDIATES FOR THE DENSITY AND GRADIENT
+C
+         K1 = KSTART(ISHELL)
+         K2 = K1 + KNG(ISHELL) - 1
+         MINI=KMIN(ISHELL)
+         MAXI=KMAX(ISHELL)
+         LOCI = KLOC(ISHELL)-MINI
+         LOCI0= KLOC(ISHELL)
+         DO 60 IMOMFCT = K1, K2
+           IFCT=IFCT+1
+           TWOALP = EX(IMOMFCT)*TWO
+           DUM=EX(IMOMFCT)*RSQRD(IATM)
+           IF(DUM.GT.TOL) GOTO 60
+           VEXP=EXPS(IFCT)
+           CC=CL(IMOMFCT)
+           LOCI1=LOCI0
+           IF(MINI.EQ.1) THEN
+C
+C     SPECIAL FAST CODE FOR S FUNCTIONS (INCLUDING L SHELLS)
+C
+             DUM=CC*VEXP*TWOALP
+C
+             XY=DUM*ANGXVL(IATM,3)*ANGYVL(IATM,3)
+             XZ=DUM*ANGXVL(IATM,3)*ANGZVL(IATM,3)
+             YZ=DUM*ANGYVL(IATM,3)*ANGZVL(IATM,3)
+C
+             G2AOXX(LOCI1)=G2AOXX(LOCI1)-DUM*(ONE-TWOALP*ANGXVL(IATM,4))
+             G2AOYY(LOCI1)=G2AOYY(LOCI1)-DUM*(ONE-TWOALP*ANGYVL(IATM,4))
+             G2AOZZ(LOCI1)=G2AOZZ(LOCI1)-DUM*(ONE-TWOALP*ANGZVL(IATM,4))
+             G2AOXY(LOCI1)=G2AOXY(LOCI1)+XY*TWOALP
+             G2AOYZ(LOCI1)=G2AOYZ(LOCI1)+YZ*TWOALP
+             G2AOXZ(LOCI1)=G2AOXZ(LOCI1)+XZ*TWOALP
+C
+C     FOR L-SHELLS
+C
+             LOCI1=LOCI1+1
+             CC=CP(IMOMFCT)
+           ENDIF
+           IF(MAXI.EQ.4) THEN
+C
+C     SPECIAL FAST CODE FOR P FUNCTIONS (INCLUDING L SHELLS)
+C
+             DUM=CC*TWOALP*VEXP
+             DUMX=ONE-TWOALP*ANGXVL(IATM,4)
+             DUMY=ONE-TWOALP*ANGYVL(IATM,4)
+             DUMZ=ONE-TWOALP*ANGZVL(IATM,4)
+             DUMXYZ=TWOALP*DUM*ANGXVL(IATM,3)*ANGYVL(IATM,3)*
+     *                         ANGZVL(IATM,3)
+             TWOALP2=TWOALP*TWOALP
+C
+C     PX
+C     ----
+             G2AOXX(LOCI1)=G2AOXX(LOCI1)
+     >                 -DUM*(THREE*ANGXVL(IATM,3)-TWOALP*ANGXVL(IATM,5))
+             G2AOYY(LOCI1)=G2AOYY(LOCI1)-DUM*DUMY*ANGXVL(IATM,3)
+             G2AOZZ(LOCI1)=G2AOZZ(LOCI1)-DUM*DUMZ*ANGXVL(IATM,3)
+C
+             G2AOXY(LOCI1)=G2AOXY(LOCI1)-DUM*DUMX*ANGYVL(IATM,3)
+             G2AOYZ(LOCI1)=G2AOYZ(LOCI1)+DUMXYZ
+             G2AOXZ(LOCI1)=G2AOXZ(LOCI1)-DUM*DUMX*ANGZVL(IATM,3)
+             LOCI1=LOCI1+1
+C
+C     PY
+C     ----
+             G2AOXX(LOCI1)=G2AOXX(LOCI1)-DUM*DUMX*ANGYVL(IATM,3)
+             G2AOYY(LOCI1)=G2AOYY(LOCI1)
+     >                 -DUM*(THREE*ANGYVL(IATM,3)-TWOALP*ANGYVL(IATM,5))
+             G2AOZZ(LOCI1)=G2AOZZ(LOCI1)-DUM*DUMZ*ANGYVL(IATM,3)
+C
+             G2AOXY(LOCI1)=G2AOXY(LOCI1)-DUM*DUMY*ANGXVL(IATM,3)
+             G2AOYZ(LOCI1)=G2AOYZ(LOCI1)-DUM*DUMY*ANGZVL(IATM,3)
+             G2AOXZ(LOCI1)=G2AOXZ(LOCI1)+DUMXYZ
+             LOCI1=LOCI1+1
+C
+C     PZ
+C     ----
+             G2AOXX(LOCI1)=G2AOXX(LOCI1)-DUM*DUMX*ANGZVL(IATM,3)
+             G2AOYY(LOCI1)=G2AOYY(LOCI1)-DUM*DUMY*ANGZVL(IATM,3)
+             G2AOZZ(LOCI1)=G2AOZZ(LOCI1)
+     >                 -DUM*(THREE*ANGZVL(IATM,3)-TWOALP*ANGZVL(IATM,5))
+C
+             G2AOXY(LOCI1)=G2AOXY(LOCI1)+DUMXYZ
+             G2AOYZ(LOCI1)=G2AOYZ(LOCI1)-DUM*DUMZ*ANGYVL(IATM,3)
+             G2AOXZ(LOCI1)=G2AOXZ(LOCI1)-DUM*DUMZ*ANGXVL(IATM,3)
+             LOCI1=LOCI1+1
+C
+           ENDIF
+           IF(LOCI1.NE.LOCI0) GOTO 60
+C
+C     GENERAL CODE (WORKS FOR S,P,L FUNCTIONS AS WELL)
+C     TO USE FOR L-FUNCTIONS, UNCOMMENT THE "C     L-SHELL" LINE
+C
+           DO 50 ITYP = MINI,MAXI
+             IX=IJX(ITYP)-1
+             IY=IJY(ITYP)-1
+             IZ=IJZ(ITYP)-1
+             DUM=CC*PNRM(ITYP)*VEXP
+C
+C            COMPUTE 2ND DERIVATIVE OF AO VALUE AT A GRID POINT
+C            GRADIENT IS BY THE ELECTRON (NOT NUCLEAR) COORDINATES
+C
+             ANGYZVL=ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+2)
+             ANGZXVL=ANGZVL(IATM,IZ+2)*ANGXVL(IATM,IX+2)
+             ANGXYVL=ANGXVL(IATM,IX+2)*ANGYVL(IATM,IY+2)
+C
+C     GRADIENT MINUS TWO COMPONENT
+C     ---------------------------
+             ANGXMM= IX*(IX-1)*ANGXVL(IATM,IX)*ANGYZVL
+             ANGYMM= IY*(IY-1)*ANGYVL(IATM,IY)*ANGZXVL
+             ANGZMM= IZ*(IZ-1)*ANGZVL(IATM,IZ)*ANGXYVL
+             ANGXYM= IX*IY*ANGXVL(IATM,IX+1)
+     >                    *ANGYVL(IATM,IY+1)*ANGZVL(IATM,IZ+2)
+             ANGXZM= IX*IZ*ANGXVL(IATM,IX+1)
+     >                    *ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+1)
+             ANGYZM= IY*IZ*ANGXVL(IATM,IX+2)
+     >                    *ANGYVL(IATM,IY+1)*ANGZVL(IATM,IZ+1)
+C
+C     GRADIENT PLUS TWO COMPONENT
+C     --------------------------
+           ANGXPP= ANGXVL(IATM,IX+4)*ANGYZVL
+           ANGYPP= ANGYVL(IATM,IY+4)*ANGZXVL
+           ANGZPP= ANGZVL(IATM,IZ+4)*ANGXYVL
+           ANGXYP= ANGXVL(IATM,IX+3)*ANGYVL(IATM,IY+3)*ANGZVL(IATM,IZ+2)
+           ANGXZP= ANGXVL(IATM,IX+3)*ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+3)
+           ANGYZP= ANGXVL(IATM,IX+2)*ANGYVL(IATM,IY+3)*ANGZVL(IATM,IZ+3)
+C
+C     OTHERS
+C     ------
+          ANGXY=IY*ANGXVL(IATM,IX+3)*ANGYVL(IATM,IY+1)*ANGZVL(IATM,IZ+2)
+          ANGYX=IX*ANGXVL(IATM,IX+1)*ANGYVL(IATM,IY+3)*ANGZVL(IATM,IZ+2)
+          ANGXZ=IZ*ANGXVL(IATM,IX+3)*ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+1)
+          ANGZX=IX*ANGXVL(IATM,IX+1)*ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+3)
+          ANGYZ=IZ*ANGXVL(IATM,IX+2)*ANGYVL(IATM,IY+3)*ANGZVL(IATM,IZ+1)
+          ANGZY=IY*ANGXVL(IATM,IX+2)*ANGYVL(IATM,IY+1)*ANGZVL(IATM,IZ+3)
+C
+C
+          ANGDEN=ANGXVL(IATM,IX+2)*ANGYVL(IATM,IY+2)*ANGZVL(IATM,IZ+2)
+C
+          TWOALP2= TWOALP * TWOALP
+C
+          LOCI0=LOCI+ITYP
+          G2AOXX(LOCI0)=G2AOXX(LOCI0)+DUM*(ANGXMM-TWOALP*(IX*2+1)*ANGDEN
+     *                                   + TWOALP2*ANGXPP)
+          G2AOYY(LOCI0)=G2AOYY(LOCI0)+DUM*(ANGYMM-TWOALP*(IY*2+1)*ANGDEN
+     >                                   + TWOALP2*ANGYPP)
+          G2AOZZ(LOCI0)=G2AOZZ(LOCI0)+DUM*(ANGZMM-TWOALP*(IZ*2+1)*ANGDEN
+     >                                   + TWOALP2*ANGZPP)
+          G2AOXY(LOCI0)=G2AOXY(LOCI0)+DUM*(ANGXYM-TWOALP*(ANGXY+ANGYX)
+     >                                   + TWOALP2*ANGXYP)
+          G2AOYZ(LOCI0)=G2AOYZ(LOCI0)+DUM*(ANGYZM-TWOALP*(ANGYZ+ANGZY)
+     >                                   + TWOALP2*ANGYZP)
+          G2AOXZ(LOCI0)=G2AOXZ(LOCI0)+DUM*(ANGXZM-TWOALP*(ANGXZ+ANGZX)
+     >                                   + TWOALP2*ANGXZP)
+C
+C          L-SHELL
+C          IF(ITYP.EQ.1) CC=CP(IMOMFCT)
+C          THIS IS THE DREADED L-SHELL CASE, FOR S-SHELLS THE LOOP IS
+C          OVER AND OTHERWISE USE THE P COEFFICIENT IN THE FOLLOWING.
+ 50        CONTINUE
+ 60      CONTINUE
+ 40   CONTINUE
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTFOCK
+C>    @brief Adds DFT exchange/correlation to Fock Matrix (alpha and beta)
+C>
+C>    @date   Oct, 2021 -- add REKS22 flag
+C>    @author Michael Filatov
+C>
+C>    @date   Apr, 2022 -- Remove GOTO's
+C>    @author Igor S. Gerasimov
+C>
+      SUBROUTINE DFTFOCK(NEEDGR,UROHF,FTOTWT,DUMA,DUMB,DUMAX,DUMAY,
+     *                   DUMAZ,DUMBX,DUMBY,DUMBZ,VALGA,VALGB,AOX,GAOX,
+     *                   GAOY,GAOZ,FA,FB,CUTOFF,L1,DMGGA,DMGGB,REKS22)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL REKS22
+      LOGICAL UROHF,NEEDGR
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (ZERO=0.0D+00)
+      DIMENSION AOX(*),GAOX(*),GAOY(*),GAOZ(*),FA(*),FB(*),VALGA(*),
+     *          VALGB(*)
+C
+      IF(.NOT.NEEDGR) THEN
+        IND=1
+        DO I=1,L1
+          FFA=FTOTWT*DUMA*AOX(I)
+          IF(UROHF .OR. REKS22) THEN
+            FFB=FTOTWT*DUMB*AOX(I)
+            IF(ABS(FFA)+ABS(FFB).LT.CUTOFF*TWO) THEN
+              IND=IND+I
+            ELSE
+              DO J=1,I
+                FA(IND)=FA(IND)+FFA*AOX(J)
+                FB(IND)=FB(IND)+FFB*AOX(J)
+                IND=IND+1
+              ENDDO
+            ENDIF
+C           CALL DAXPY(I,FFA,AOX,1,FA(IND),1)
+C           CALL DAXPY(I,FFB,AOX,1,FB(IND),1)
+C           IND=IND+I
+          ELSE
+            IF(ABS(FFA).LT.CUTOFF) THEN
+              IND=IND+I
+            ELSE
+              DO J=1,I
+                FA(IND)=FA(IND)+FFA*AOX(J)
+                IND=IND+1
+              ENDDO
+            ENDIF
+          ENDIF
+        ENDDO
+      ELSE
+C       META-GGA BELONGS HERE FOR THE -ELSE- CASE
+        IND=1
+        AOMAX=ZERO
+        AMAXVAL=ZERO
+        BMAXVAL=ZERO
+        DO I=1,L1
+          VALGA(I)=(DUMA/TWO*AOX(I)+DUMAX*GAOX(I)+DUMAY*GAOY(I)+
+     *              DUMAZ*GAOZ(I))*FTOTWT
+          C1=AOX(I)
+          C2A=VALGA(I)
+          AOMAX=MAX(AOMAX,ABS(C1))
+          AMAXVAL=MAX(AMAXVAL,ABS(C2A))
+          IF(UROHF .OR. REKS22) THEN
+           VALGB(I)=(DUMB/TWO*AOX(I)+DUMBX*GAOX(I)+DUMBY*GAOY(I)
+     *              +DUMBZ*GAOZ(I))*FTOTWT
+            C2B=VALGB(I)
+            BMAXVAL=MAX(BMAXVAL,ABS(C2B))
+            IF(ABS(C1*(AMAXVAL+BMAXVAL))+(ABS(C2A)+ABS(C2B))*AOMAX.LT.
+     *         CUTOFF*TWO) THEN
+              IND=IND+I
+            ELSE
+              DO J=1,I
+                FA(IND)=FA(IND)+C1*VALGA(J)+C2A*AOX(J)
+     >                 +DMGGA*(GAOX(I)*GAOX(J)
+     >                        +GAOY(I)*GAOY(J)
+     >                        +GAOZ(I)*GAOZ(J))*FTOTWT
+                FB(IND)=FB(IND)+C1*VALGB(J)+C2B*AOX(J)
+     >                 +DMGGB*(GAOX(I)*GAOX(J)
+     >                        +GAOY(I)*GAOY(J)
+     >                        +GAOZ(I)*GAOZ(J))*FTOTWT
+                  IND=IND+1
+            ENDDO
+            ENDIF
+          ELSE
+            IF(ABS(C1*AMAXVAL)+ABS(C2A*AOMAX).LT.CUTOFF) THEN
+              IND=IND+I
+            ELSE
+              DO J=1,I
+                FA(IND)=FA(IND)+C1*VALGA(J)+C2A*AOX(J)
+     >                 +DMGGA*(GAOX(I)*GAOX(J)
+     >                        +GAOY(I)*GAOY(J)
+     >                        +GAOZ(I)*GAOZ(J))*FTOTWT
+                IND=IND+1
+              ENDDO
+            ENDIF
+          ENDIF
+        ENDDO
+      ENDIF
+      RETURN
+C
+C     THE NON META-GGA CASE DOES NOT NEED TO BE CAPTURED WITH AN -IF-
+C     STATEMENT SINCE THE META-GGA VARIABLES THAT PARTICIPATE IN THE
+C     FOCK BUILD HAS BEEN INITIALIZED TO ZERO (-DMCA-,-DMCB-).
+C
+      END
+C*MODULE DFTGRD  *DECK DMATD
+C>    @brief Integration of <I|V|A>
+C>
+C>    @details THIS ROUTINE DOES A NUMERICAL INTEGRATION TO YIELD THE <I|V|A>
+C>     MATRIX WHERE V=D_E(XC)/D_RHO.  IN C1 SYMMETRY FOR NOW.
+C>     THE RADIAL QUADRATURE FORMULA IS TAKEN FROM
+C>     P.M.W.GILL, B.G.JOHNSON, J.A.POPLE AND M.J.FRISCH,
+C>     CHEM. PHYS. LETT. 197, 499 (1992).
+C>     THE ANGULAR QUADRATURE FORMULA IS TAKEN FROM V.I.LEBEDEV,
+C>     ZH. VYCHISL. MAT. FIZ. 15, 48 (1975) AND 16, 293 (1976),
+C>     (ENGLISH TRANSLATION IN U.S.S.R. COMPUT. MATH AND MATH PHYS).
+C>     EXCHANGE AND CORRELATION ENERGY CONTRIBUTION DUE TO INTEGRATION
+C>     OVER GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians
+C
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support
+C
+      SUBROUTINE DMATD(TOTWT,IIFACT,NAPTS,COEFFA,COEFFB,IANGN,IFACTR,
+     *                 VMOA,DVMOXA,DVMOYA,DVMOZA,VALGA,VMOB,DVMOXB,
+     *                 DVMOYB,DVMOZB,VALGB,FA,FB,IUNIQ,EEXC,TOTELE,NANG,
+     *                 PTRAD,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                 ANGXVL,ANGYVL,ANGZVL,RSQRD,PCOEFF,EXPS,
+     *                 AOX,GAOX,GAOY,GAOZ,NLCT,NELM,IJX,IJY,IJZ,L1,
+     *                 NEEDGR,UROHF,REKS22,TOTKIN,ATMPOL,ATPPOL,EFPOL,
+     *                 WTAB,DRSPH,MAXL,MAXM,NFREQ)
+      USE comm_REKSCM, ONLY: NMICRO, MTTYP, WPPS, WOSS, G1, DNR, DNS,
+     * DELTA, FR, FS
+      USE metaGGA, ONLY: NEEDTAU
+      USE funclib, ONLY: FUNCL, FUNFL
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp,mxrt,mxao,mxnoro
+      use comm_RDM_MCPDFT, only: ld1a,lxt4,nactive,nnz
+C
+      USE mod_dft_gridint, ONLY: dmatd_blk
+      USE params, ONLY: dft_bfc_algo
+      USE modmcpdft
+      USE mod_sformas, only: mulsfci, sfoci
+      use libxc, only: use_libxc, libxc_calc
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+C#include "rdm_info.fh"
+      LOGICAL UROHF,OUT,NEEDGR,GOPARR,DSKWRK,MASWRK,DLB,SG1
+clsh
+      LOGICAL REKS22
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (HALF=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (THRSRHO=1.0D-15,THRSPI=1.0D-15)
+      PARAMETER (THRSRHO2=1.0D-15,THRSRHO3=0.9D0,THRSRHO4=1.15D0)
+      PARAMETER (AB1=-4.756065601D+2,BB1=-3.794733192D+2,
+     *           CB1=-8.538149682D+1)
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      COMMON /FMCOM / X(1)
+      COMMON /DNSAO / IDENAO
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /LMOEDA/ GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+clsh
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+C
+      DIMENSION IUNIQ(*)
+      DIMENSION NLCT(*),NELM(*)
+      DIMENSION TOTWT(NAT,*),COEFFA(L1,*),COEFFB(L1,*),VMOA(L1),
+     *          DVMOXA(L1),DVMOYA(L1),DVMOZA(L1),VMOB(L1),DVMOXB(L1),
+     *          DVMOYB(L1),DVMOZB(L1),VALGA(L1),VALGB(L1)
+      DIMENSION NAPTS(NAT),IANGN(NAT,2,*),IIFACT(NAT),IFACTR(NAT)
+      DIMENSION FA(*),FB(*),AOX(L1),GAOX(L1),GAOY(L1),GAOZ(L1),
+     *          PTRAD(*),XDAT(MAXANG,NAT,*),YDAT(MAXANG,NAT,*),
+     *          ZDAT(MAXANG,NAT,*),RSQRD(*),PCOEFF(*),
+     *          ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *          ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*),EXPS(*)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+      DATA DEBUG/8HDEBUG   /, DFTGRD/8HDERDFT  /
+C
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+      DIMENSION WTAB(NAT,NAT,*),ATMPOL(NAT,MAXL,MAXM,MAXM,NFREQ),
+     *          ATPPOL(NAT,NAT,NFREQ),EFPOL(NAT),DRSPH(3,MAXL,MAXM)
+      iTri(i,j) = Max(i,j)*(Max(i,j)-1)/2 + Min(i,j)
+C-END
+C
+C     IDENAO=0 MEANS REGULAR DFT
+C     IDENAO=1 MEANS DIVIDE AND CONQUER DFT
+C
+c MV
+      IF (.NOT.dolrd .AND. dft_bfc_algo.GE.0 .AND. idenao.EQ.0) THEN
+c       New XC integration algorithm
+        CALL dmatd_blk(coeffa,coeffb,fa,fb,
+     *              eexc,totele,totkin,
+     *              atmxvec,atmyvec,atmzvec,
+     *              nang,l1,needgr,urohf)
+        RETURN
+      END IF
+c /MV
+C
+C     Loop over atoms
+      DO 30 NCNTR = 1, NAT
+C
+      INC0=IUNIQ(NCNTR)
+      IF(INC0.EQ.0) GOTO 30
+
+      OUT = EXETYP.EQ.DFTGRD  .OR.  EXETYP.EQ.DEBUG
+      EXEC = ZERO
+      ECORL1 = ZERO
+      TOTGRADX = ZERO
+      TOTGRADY = ZERO
+      TOTGRADZ = ZERO
+C                 LDA WILL NOT ASSIGN ANY VALUES TO DENSITY GRADIENTS
+      GRDAA = ZERO
+      GRDBB = ZERO
+      GRDAB = ZERO
+      NOA = NA
+      NOB = NB
+      NPT = NRAD*MAXANG
+C
+C     SET CUT-OFFS FOR THE DENSITY RCUTOFF AND WEIGHT WCUTOFF
+C     RCUTOFF IS SET TO DEPEND UPON SCF DENSITY CONV. AND THE GRID SIZE
+C     WCUTOFF IS A CELL VOLUME AND WE SET IT TO A FIXED VALUE.
+C     MOST CELLS HAVE LARGE VOLUME (ABOUT 97% HAVE VOLUME .GT. 1E-14)
+C
+      DFTTHRS=DFTTHR
+      IF(DFTTHR.EQ.ZERO) DFTTHR=1.0D-04/(NPT*NAT)
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+      CCUTOFF=1.0D-03/(NPT*NAT)
+      IF(DFTTHR.LT.1.1D-15) THEN
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+      IF(MCPDFTRUN) then
+         DFTTHR =1.0D-15
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+C
+      IF (MCPDFTRUN .and. SFOCI) THEN  
+         UROHF = .FALSE.
+      END IF
+C
+C
+C     ANGXVL=X**I, ANGYVL=Y**J, ANGZVL=Z**K, FOR NEEDED VALUES OF I,J,K
+C     WHERE (X,Y,Z) IS THE CENTRE OF A DFT GRID POINT RI
+C     MINUS AN ATOMIC CENTRE RA: XYZ= (RI - RA)
+C
+      CALL VCLR(ANGXVL(1,1),1,NAT)
+      CALL VCLR(ANGYVL(1,1),1,NAT)
+      CALL VCLR(ANGZVL(1,1),1,NAT)
+      CALL DACOPY(NAT,ONE,ANGXVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGYVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGZVL(1,2),1)
+C
+      RAD = BRAGGRAD(NCNTR)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+C     NAPTS   + (NAT-1)/NWDVAR+1
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+C STB MODIFIED FOR PRUNING
+      IGRID = 1
+      DO 20 IRADPT = 1, NRAD
+C
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.(PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD)) THEN
+           IGRID = IGRID + 1
+        ENDIF
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+C         STB - FOR NOW THIS SHOULD BE OK AS I USED THE MAX ANGULAR
+C               POINTS SO AS TO SIMPLIFY
+          IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) THEN
+                CALL DDI_DLBNEXT(NEXT)
+              ENDIF
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          IF(ABS(FTOTWT).LT.WCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+            ANGXVL(IATM,3)=XCDNT
+            ANGYVL(IATM,3)=YCDNT
+            ANGZVL(IATM,3)=ZCDNT
+            DO 35 IANG=3,NANG
+               ANGXVL(IATM,IANG+1)=ANGXVL(IATM,IANG)*XCDNT
+               ANGYVL(IATM,IANG+1)=ANGYVL(IATM,IANG)*YCDNT
+               ANGZVL(IATM,IANG+1)=ANGZVL(IATM,IANG)*ZCDNT
+ 35         CONTINUE
+  610     CONTINUE
+          CALL DFTAO(IJX,IJY,IJZ,AOX,ANGXVL,ANGYVL,ANGZVL,PCOEFF,EXPS,
+     *               RSQRD,NAT,L1)
+C***********************************************************************
+C     FORM DENSITY AT THIS POINT
+C***********************************************************************
+          IF(IDENAO.EQ.0) THEN
+             CALL DFTTRFA(UROHF,L1,NOA+1,COEFFA,COEFFB,AOX,VMOA,VMOB,
+     *                    CCUTOFF)
+             IF(.NOT.REKS22) THEN
+                NINACT=NNZ-NACTIVE
+                IF(MCPDFTRUN) THEN
+                   CALL DFTTRFA(UROHF,L1,NNZ,COEFFA,COEFFB,AOX,VMOA,
+     *                          VMOB,CCUTOFF)
+C
+                   IJ=0.0D0
+                   ROA=DDOT(NINACT,VMOA,1,VMOA,1)
+                   IF(NACTIVE.GT.0.0D0) THEN
+                      DO I=1, NACTIVE
+                      DO J=1,I
+                         IF(I.EQ.J) FACT12=0.5D0
+                         IF(I.NE.J) FACT12=1.0D0
+                         IJ=IJ+1
+                         ROA=ROA+X(LD1A-1+IJ)*VMOA(NINACT+i)
+     *                                *VMOA(NINACT+j)*FACT12
+                      ENDDO
+                      ENDDO
+                   ENDIF
+                ELSE
+                   ROA=DDOT(NOA,VMOA,1,VMOA,1)
+                ENDIF
+                IF((UROHF) .AND. (.NOT.MCPDFTRUN)) THEN
+                   ROB=DDOT(NOB,VMOB,1,VMOB,1)
+                ELSE
+                   ROB=ROA
+                ENDIF
+C                IF(ROA.LT.ZERO) write(*,*) 'NEGative Density!'
+C                IF(ROB.LT.ZERO) write(*,*) 'NEGative Density!'
+             ELSE
+                IF(MTTYP.EQ.1) THEN
+                   ROA=DDOT(NOA,VMOA,1,VMOA,1)
+                   ROB=ROA
+                ELSE IF(MTTYP.EQ.2) THEN
+                   ROA=DDOT(NOA-1,VMOA,1,VMOA,1)
+                   ROA=ROA+VMOA(NOA+1)*VMOA(NOA+1)
+                   ROB=ROA
+                ELSE IF(MTTYP.EQ.3) THEN
+                   ROA=DDOT(NOA,VMOA,1,VMOA,1)
+                   ROB=DDOT(NOA-1,VMOA,1,VMOA,1)
+                   ROB=ROB+VMOA(NOA+1)*VMOA(NOA+1)
+                ELSE IF(MTTYP.EQ.4) THEN
+                   ROA=DDOT(NOA+1,VMOA,1,VMOA,1)
+                   ROB=DDOT(NOA-1,VMOA,1,VMOA,1)
+c             write(iw,'(a,3i5)') 'mttyp', mttyp,noa+1,noa-1
+                ENDIF
+             ENDIF
+c             write(iw,'(a25,7f10.5)') 'roa,rob', ROA,ROB
+          ELSE
+             CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,AOX,VMOA,VMOB,CCUTOFF,
+     *                     NLCT,NELM)
+             ROA=DDOT(L1,AOX,1,VMOA,1)
+             IF(UROHF) THEN
+                ROB=DDOT(L1,AOX,1,VMOB,1)
+             ELSE
+                ROA=ROA*HALF
+                ROB=ROA
+             END IF
+C
+C            FOR SOME REASON, DENSITY MIGHT BE NEGATIVE... (MK)
+             IF(ROA.LT.ZERO) ROA=ZERO
+             IF(ROB.LT.ZERO) ROB=ZERO
+          END IF
+C          write(*,*) ROA,ROB
+          IF(ABS(ROA+ROB).LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          IF(NEEDGR) THEN
+C***********************************************************************
+C     FORM DENSITY GRADIENT AT THIS POINT
+C***********************************************************************
+            CALL DFTGAO(IJX,IJY,IJZ,GAOX,GAOY,GAOZ,ANGXVL,ANGYVL,ANGZVL,
+     *                  PCOEFF,EXPS,RSQRD,NAT,L1)
+            IF(IDENAO.EQ.0) THEN
+              CALL DFTTRFG(UROHF,L1,NOA+1,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+     *                     DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+     *                     CCUTOFF)
+clsh
+              IF(.NOT.REKS22) THEN
+                 IF(MCPDFTRUN) THEN
+                  CALL DFTTRFG(UROHF,L1,L1,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+     *                         DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,
+     *                         DVMOZB,CCUTOFF)
+C                  MCPDFTRUN=.false.
+C  goto 444
+                  GRADXA=DDOT(NINACT,VMOA,1,DVMOXA,1)*TWO
+                  GRADYA=DDOT(NINACT,VMOA,1,DVMOYA,1)*TWO
+                  GRADZA=DDOT(NINACT,VMOA,1,DVMOZA,1)*TWO
+                  IF(NACTIVE.GT.0) THEN
+                    DO I=1, NACTIVE
+                    DO J=1,I
+                      FACT12 = 1.0d0
+                      IF(I.EQ.J)FACT12=0.5D0
+                      IJ=iTri(i,j)
+                      GRADXA=GRADXA+X(LD1A-1+IJ)*FACT12*
+     *                       (VMOA(NINACT+i)*DVMOXA(NINACT+j)
+     *                       + VMOA(NINACT+j)*DVMOXA(NINACT+i))
+                      GRADYA=GRADYA+X(LD1A-1+IJ)*FACT12*
+     *                       (VMOA(NINACT+i)*DVMOYA(NINACT+j)
+     *                       + VMOA(NINACT+j)*DVMOYA(NINACT+i))
+                      GRADZA=GRADZA+X(LD1A-1+IJ)*FACT12*
+     *                       (VMOA(NINACT+i)*DVMOZA(NINACT+j)
+     *                       + VMOA(NINACT+j)*DVMOZA(NINACT+i))
+                    ENDDO
+                    ENDDO
+                  ENDIF
+                 ELSE
+  444  continue
+                  GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+                  GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+                  GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+                 ENDIF
+                 IF(UROHF) THEN
+                   GRADXB=TWO*DDOT(NOB,VMOB,1,DVMOXB,1)
+                   GRADYB=TWO*DDOT(NOB,VMOB,1,DVMOYB,1)
+                   GRADZB=TWO*DDOT(NOB,VMOB,1,DVMOZB,1)
+                 ELSE
+                   GRADXB=GRADXA
+                   GRADYB=GRADYA
+                   GRADZB=GRADZA
+                 ENDIF
+              ELSE
+                 IF(MTTYP.EQ.1) THEN
+                    GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+                    GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+                    GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+                    GRADXB=GRADXA
+                    GRADYB=GRADYA
+                    GRADZB=GRADZA
+                 ELSE IF(MTTYP.EQ.2) THEN
+                    GRADXA=TWO*DDOT(NOA-1,VMOA,1,DVMOXA,1)
+                    GRADYA=TWO*DDOT(NOA-1,VMOA,1,DVMOYA,1)
+                    GRADZA=TWO*DDOT(NOA-1,VMOA,1,DVMOZA,1)
+                    GRADXA=GRADXA+TWO*VMOA(NOA+1)*DVMOXA(NOA+1)
+                    GRADYA=GRADYA+TWO*VMOA(NOA+1)*DVMOYA(NOA+1)
+                    GRADZA=GRADZA+TWO*VMOA(NOA+1)*DVMOZA(NOA+1)
+                    GRADXB=GRADXA
+                    GRADYB=GRADYA
+                    GRADZB=GRADZA
+                 ELSE IF(MTTYP.EQ.3) THEN
+                    GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+                    GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+                    GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+                    GRADXB=TWO*DDOT(NOA-1,VMOA,1,DVMOXA,1)
+                    GRADYB=TWO*DDOT(NOA-1,VMOA,1,DVMOYA,1)
+                    GRADZB=TWO*DDOT(NOA-1,VMOA,1,DVMOZA,1)
+                    GRADXB=GRADXB+TWO*VMOA(NOA+1)*DVMOXA(NOA+1)
+                    GRADYB=GRADYB+TWO*VMOA(NOA+1)*DVMOYA(NOA+1)
+                    GRADZB=GRADZB+TWO*VMOA(NOA+1)*DVMOZA(NOA+1)
+                 ELSE IF(MTTYP.EQ.4) THEN
+                    GRADXA=TWO*DDOT(NOA+1,VMOA,1,DVMOXA,1)
+                    GRADYA=TWO*DDOT(NOA+1,VMOA,1,DVMOYA,1)
+                    GRADZA=TWO*DDOT(NOA+1,VMOA,1,DVMOZA,1)
+                    GRADXB=TWO*DDOT(NOA-1,VMOA,1,DVMOXA,1)
+                    GRADYB=TWO*DDOT(NOA-1,VMOA,1,DVMOYA,1)
+                    GRADZB=TWO*DDOT(NOA-1,VMOA,1,DVMOZA,1)
+                 ENDIF
+              ENDIF
+c              write(iw,'(a,7f10.5)') 'GRAD(X,Y,Z)A,GRAD(X,Y,Z)B',
+c     *          GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB
+            ELSE
+               GRADXA=DDOT(L1,GAOX,1,VMOA,1)
+               GRADYA=DDOT(L1,GAOY,1,VMOA,1)
+               GRADZA=DDOT(L1,GAOZ,1,VMOA,1)
+               IF(UROHF) THEN
+                  GRADXA=GRADXA*TWO
+                  GRADYA=GRADYA*TWO
+                  GRADZA=GRADZA*TWO
+                  GRADXB=DDOT(L1,GAOX,1,VMOB,1)*TWO
+                  GRADYB=DDOT(L1,GAOY,1,VMOB,1)*TWO
+                  GRADZB=DDOT(L1,GAOZ,1,VMOB,1)*TWO
+               ELSE
+                  GRADXB=GRADXA
+                  GRADYB=GRADYA
+                  GRADZB=GRADZA
+               END IF
+            END IF
+
+C Andrew - here we need to perform the translation for PDFT
+C First step - calculate the on-top pair density
+C  Return "ONTOP", "ONTOPX", "ONTOPY", "ONTOPZ" I guess.
+C  
+C  It looks like DFTTRFG is the subroutine that calculates the gradients
+C  for the MOs (needed for building the on-top gradients needed for ft-
+C  class functionals.
+C
+C  The subroutine DFTTRFA calculates the MOs at the grid point.
+
+C           goto 457
+C          mcpdftrun=.false.
+          IF (.NOT.MCPDFTRUN) GOTO 457
+           CALL GONTOP(VMOA,VMOB,DVMOXA,DVMOXB,DVMOYA,DVMOYB,DVMOZA,
+     *                DVMOZB,ONTOP,ONTOPX,ONTOPY,ONTOPZ,NACTIVE)
+
+          TOTELEA = TOTELEA + FTOTWT*ROA
+          TOTELEB = TOTELEB + FTOTWT*ROA
+C Second - Translate the density/derivatives
+           DTOT = ROA + ROB !Total denisty
+           GRADX = GRADXA + GRADXB
+           GRADY = GRADYA + GRADYB
+           GRADZ = GRADZA + GRADZB
+           RATIO = 0.0D0
+           if ((DTOT.gt.THRSRHO).and.(ONTOP.ge.THRSRHO)) then 
+             RATIO = 4.0D0*ONTOP/(DTOT**2.0D0)
+C             write(*,*) "ratio", ratio,4.0d0*ontop,DTOT**2d0
+           endif
+C           goto 457
+
+C Translation for t-GGA functionals:
+        IF (.NOT.F_FLAG) THEN
+           IF((1.0D0-RATIO).gt.THRSRHO) THEN
+             ZETA = SQRT(1.0D0-RATIO)
+             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+           ELSE
+             ZETA = 0.0D0
+             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+           ENDIF
+        ELSE
+cPS           goto 457
+
+C Translation for ft-GGA functionals:
+           IF((1.0D0-RATIO).gt.THRSRHO.AND.(RATIO.LT.THRSRHO3)) THEN
+             ZETA = SQRT(1.0D0-RATIO)
+             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+     *               + RATIO*GRADX/(2.0D0*ZETA)
+     *               - ONTOPX/(DTOT*ZETA)
+             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+     *               + RATIO*GRADY/(2.0D0*ZETA)
+     *               - ONTOPY/(DTOT*ZETA)
+             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+     *               + RATIO*GRADZ/(2.0D0*ZETA)
+     *               - ONTOPZ/(DTOT*ZETA)
+             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+     *               - RATIO*GRADX/(2.0D0*ZETA)
+     *               + ONTOPX/(DTOT*ZETA)
+             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+     *               - RATIO*GRADY/(2.0D0*ZETA)
+     *               + ONTOPY/(DTOT*ZETA)
+             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+     *               - RATIO*GRADZ/(2.0D0*ZETA)
+     *               + ONTOPZ/(DTOT*ZETA)
+           ELSE IF((RATIO.GE.THRSRHO3).AND.(RATIO.LE.THRSRHO4)) THEN
+             ZETA = (AB1*(RATIO-1.15D0)**5.0D0) 
+     *       + (BB1*(RATIO-1.15D0)**4.0D0) + (CB1*(RATIO-1.15D0)**3.0D0)
+
+             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+
+             GRADXA = (1.0D0+ZETA)*GRADX/2.0D0
+     *       + (AB1*(RATIO-1.15D0)**4.0D0)
+     *       * ((10.0D0*ONTOPX/DTOT) - (5.0D0 * RATIO * GRADX))
+     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+     *       * ((8.0D0*ONTOPX/DTOT) - (4.0D0 * RATIO * GRADX))
+     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+     *       * ((6.0D0*ONTOPX/DTOT) - (3.0D0 * RATIO * GRADX))
+             GRADYA = (1.0D0+ZETA)*GRADY/2.0D0
+     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+     *       * ((10.0D0*ONTOPY/DTOT) - (5.0D0 * RATIO * GRADY))
+     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+     *       * ((8.0D0*ONTOPY/DTOT) - (4.0D0 * RATIO * GRADY))
+     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+     *       * ((6.0D0*ONTOPY/DTOT) - (3.0D0 * RATIO * GRADY))
+             GRADZA = (1.0D0+ZETA)*GRADZ/2.0D0
+     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+     *       * ((10.0D0*ONTOPZ/DTOT) - (5.0D0 * RATIO * GRADZ))
+     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+     *       * ((8.0D0*ONTOPZ/DTOT) - (4.0D0 * RATIO * GRADZ))
+     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+     *       * ((6.0D0*ONTOPZ/DTOT) - (3.0D0 * RATIO * GRADZ))
+             GRADXB = (1.0D0-ZETA)*GRADX/2.0D0
+     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+     *       * ((-10.0D0*ONTOPX/DTOT) + (5.0D0 * RATIO * GRADX))
+     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+     *       * ((-8.0D0*ONTOPX/DTOT) + (4.0D0 * RATIO * GRADX))
+     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+     *       * ((-6.0D0*ONTOPX/DTOT) + (3.0D0 * RATIO * GRADX))
+             GRADYB = (1.0D0-ZETA)*GRADY/2.0D0
+     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+     *       * ((-10.0D0*ONTOPY/DTOT) + (5.0D0 * RATIO * GRADY))
+     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+     *       * ((-8.0D0*ONTOPY/DTOT) + (4.0D0 * RATIO * GRADY))
+     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+     *       * ((-6.0D0*ONTOPY/DTOT) + (3.0D0 * RATIO * GRADY))
+             GRADZB = (1.0D0-ZETA)*GRADZ/2.0D0
+     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+     *       * ((-10.0D0*ONTOPZ/DTOT) + (5.0D0 * RATIO * GRADZ))
+     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+     *       * ((-8.0D0*ONTOPZ/DTOT) + (4.0D0 * RATIO * GRADZ))
+     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+     *       * ((-6.0D0*ONTOPZ/DTOT) + (3.0D0 * RATIO * GRADZ))
+           ELSE IF(RATIO.GT.THRSRHO4) THEN
+             ZETA = 0.0d0
+             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+           ENDIF
+       ENDIF
+  457      continue         
+             
+C***********************************************************************
+C      FORM GRADIENT INVARIANT (GRAD DOT GRAD)
+C***********************************************************************
+            GRDAA  = GRADXA*GRADXA+GRADYA*GRADYA+GRADZA*GRADZA
+            GRDBB  = GRADXB*GRADXB+GRADYB*GRADYB+GRADZB*GRADZB
+            GRDAB  = GRADXA*GRADXB+GRADYA*GRADYB+GRADZA*GRADZB
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              IF(IDENAO.EQ.0) THEN
+clsh
+                 IF(.NOT.REKS22) THEN
+                    TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                    TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                    TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                    IF(UROHF) THEN
+                      TAUXB =DDOT(NOB,DVMOXB,1,DVMOXB,1)
+                      TAUYB =DDOT(NOB,DVMOYB,1,DVMOYB,1)
+                      TAUZB =DDOT(NOB,DVMOZB,1,DVMOZB,1)
+                    ELSE
+                      TAUXB =TAUXA
+                      TAUYB =TAUYA
+                      TAUZB =TAUZA
+                    ENDIF
+                 ELSE
+                    IF(MTTYP.EQ.1) THEN
+                       TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                       TAUXB =TAUXA
+                       TAUYB =TAUYA
+                       TAUZB =TAUZA
+                    ELSE IF(MTTYP.EQ.2) THEN
+                       TAUXA =DDOT(NOA-1,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA-1,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA-1,DVMOZA,1,DVMOZA,1)
+                       TAUXA =TAUXA+DVMOXA(NOA+1)*DVMOXA(NOA+1)
+                       TAUYA =TAUYA+DVMOYA(NOA+1)*DVMOYA(NOA+1)
+                       TAUZA =TAUZA+DVMOZA(NOA+1)*DVMOZA(NOA+1)
+                       TAUXB =TAUXA
+                       TAUYB =TAUYA
+                       TAUZB =TAUZA
+                    ELSE IF(MTTYP.EQ.3) THEN
+                       TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                       TAUXB =DDOT(NOA-1,DVMOXA,1,DVMOXA,1)
+                       TAUYB =DDOT(NOA-1,DVMOYA,1,DVMOYA,1)
+                       TAUZB =DDOT(NOA-1,DVMOZA,1,DVMOZA,1)
+                       TAUXB =TAUXB+DVMOXA(NOA+1)*DVMOXA(NOA+1)
+                       TAUYB =TAUYB+DVMOYA(NOA+1)*DVMOYA(NOA+1)
+                       TAUZB =TAUZB+DVMOZA(NOA+1)*DVMOZA(NOA+1)
+                    ELSE IF(MTTYP.EQ.4) THEN
+                       TAUXA =DDOT(NOA+1,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA+1,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA+1,DVMOZA,1,DVMOZA,1)
+                       TAUXB =DDOT(NOA-1,DVMOXA,1,DVMOXA,1)
+                       TAUYB =DDOT(NOA-1,DVMOYA,1,DVMOYA,1)
+                       TAUZB =DDOT(NOA-1,DVMOZA,1,DVMOZA,1)
+                    ENDIF
+                 ENDIF
+c              write(iw,'(a,7f10.5)') 'TAU(X,Y,Z)A,TAU(X,Y,Z)B',
+c     *          TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB
+
+              ELSE
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOX,DVMOXA,DVMOXB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOY,DVMOYA,DVMOYB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOZ,DVMOZA,DVMOZB,
+     *                        CCUTOFF,NLCT,NELM)
+                TAUXA=DDOT(L1,GAOX,1,DVMOXA,1)
+                TAUYA=DDOT(L1,GAOY,1,DVMOYA,1)
+                TAUZA=DDOT(L1,GAOZ,1,DVMOZA,1)
+                IF(UROHF) THEN
+                  TAUXB=DDOT(L1,GAOX,1,DVMOXB,1)
+                  TAUYB=DDOT(L1,GAOY,1,DVMOYB,1)
+                  TAUZB=DDOT(L1,GAOZ,1,DVMOZB,1)
+                ELSE
+                  TAUXA =TAUXA*HALF
+                  TAUYA =TAUYA*HALF
+                  TAUZA =TAUZA*HALF
+                  TAUXB =TAUXA
+                  TAUYB =TAUYA
+                  TAUZB =TAUZA
+                ENDIF
+              ENDIF
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ELSE
+C
+C     THIS ELSE CASE WILL ALLOW USERS TO PRINT OUT THE TOTAL KINETIC
+C     ENERGY DENSITY FOR LDA TYPE FUNCTIONALS.
+C     KEEP IN MIND THAT IF THE FUNCTIONAL DOES NOT CONTAIN A TAU
+C     DEPENDENCE THEN ONE CAN NOT EXPECT THE TOTAL KINETIC ENERGY
+C     DENSITY TO BE EXACTLY EQUAL TO THE EXPECTATION VALUE OF THE
+C     KINETIC ENERGY OPERATOR.
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              CALL DFTGAO(IJX,IJY,IJZ,GAOX,GAOY,GAOZ,ANGXVL,ANGYVL,
+     *                    ANGZVL,PCOEFF,EXPS,RSQRD,NAT,L1)
+              IF(IDENAO.EQ.0) THEN
+                CALL DFTTRFG(UROHF,L1,NOA+1,COEFFA,COEFFB,
+     *                       GAOX,GAOY,GAOZ,DVMOXA,DVMOYA,
+     *                       DVMOZA,DVMOXB,DVMOYB,DVMOZB,CCUTOFF)
+                 IF(.NOT.REKS22) THEN
+                    TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                    TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                    TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                    IF(UROHF) THEN
+                      TAUXB =DDOT(NOB,DVMOXB,1,DVMOXB,1)
+                      TAUYB =DDOT(NOB,DVMOYB,1,DVMOYB,1)
+                      TAUZB =DDOT(NOB,DVMOZB,1,DVMOZB,1)
+                    ELSE
+                      TAUXB =TAUXA
+                      TAUYB =TAUYA
+                      TAUZB =TAUZA
+                    ENDIF
+                 ELSE
+                    IF(MTTYP.EQ.1) THEN
+                       TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                       TAUXB =TAUXA
+                       TAUYB =TAUYA
+                       TAUZB =TAUZA
+                    ELSE IF(MTTYP.EQ.2) THEN
+                       TAUXA =DDOT(NOA-1,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA-1,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA-1,DVMOZA,1,DVMOZA,1)
+                       TAUXA =TAUXA+DVMOXA(NOA+1)*DVMOXA(NOA+1)
+                       TAUYA =TAUYA+DVMOYA(NOA+1)*DVMOYA(NOA+1)
+                       TAUZA =TAUZA+DVMOZA(NOA+1)*DVMOZA(NOA+1)
+                       TAUXB =TAUXA
+                       TAUYB =TAUYA
+                       TAUZB =TAUZA
+                    ELSE IF(MTTYP.EQ.3) THEN
+                       TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                       TAUXB =DDOT(NOA-1,DVMOXA,1,DVMOXA,1)
+                       TAUYB =DDOT(NOA-1,DVMOYA,1,DVMOYA,1)
+                       TAUZB =DDOT(NOA-1,DVMOZA,1,DVMOZA,1)
+                       TAUXB =TAUXB+DVMOXA(NOA+1)*DVMOXA(NOA+1)
+                       TAUYB =TAUYB+DVMOYA(NOA+1)*DVMOYA(NOA+1)
+                       TAUZB =TAUZB+DVMOZA(NOA+1)*DVMOZA(NOA+1)
+                    ELSE IF(MTTYP.EQ.4) THEN
+                       TAUXA =DDOT(NOA+1,DVMOXA,1,DVMOXA,1)
+                       TAUYA =DDOT(NOA+1,DVMOYA,1,DVMOYA,1)
+                       TAUZA =DDOT(NOA+1,DVMOZA,1,DVMOZA,1)
+                       TAUXB =DDOT(NOA-1,DVMOXA,1,DVMOXA,1)
+                       TAUYB =DDOT(NOA-1,DVMOYA,1,DVMOYA,1)
+                       TAUZB =DDOT(NOA-1,DVMOZA,1,DVMOZA,1)
+                    ENDIF
+                 ENDIF
+              ELSE
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOX,DVMOXA,DVMOXB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOY,DVMOYA,DVMOYB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOZ,DVMOZA,DVMOZB,
+     *                        CCUTOFF,NLCT,NELM)
+                TAUXA=DDOT(L1,GAOX,1,DVMOXA,1)
+                TAUYA=DDOT(L1,GAOY,1,DVMOYA,1)
+                TAUZA=DDOT(L1,GAOZ,1,DVMOZA,1)
+                IF(UROHF) THEN
+                  TAUXB=DDOT(L1,GAOX,1,DVMOXB,1)
+                  TAUYB=DDOT(L1,GAOY,1,DVMOYB,1)
+                  TAUZB=DDOT(L1,GAOZ,1,DVMOZB,1)
+                ELSE
+                  TAUXA =TAUXA*HALF
+                  TAUYA =TAUYA*HALF
+                  TAUZA =TAUZA*HALF
+                  TAUXB =TAUXA
+                  TAUYB =TAUYA
+                  TAUZB =TAUZA
+                ENDIF
+              ENDIF
+C             THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCT.
+C             SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C             WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ENDIF
+C***********************************************************************
+C     THE EXCHANGE-CORRELATION FUNCTIONAL CALCULATION
+C***********************************************************************
+          VXCA1=ZERO
+          VXCB1=ZERO
+          DUMAX=ZERO
+          DUMAY=ZERO
+          DUMAZ=ZERO
+          DUMBX=ZERO
+          DUMBY=ZERO
+          DUMBZ=ZERO
+          XALPHA=ZERO
+          XGRD=ZERO
+          ECF=ZERO
+C
+C         STORES THE DERIVATIVE OF THE FUNCTIONAL WITH RESPECT TO THE
+C         KINETIC ENERGY DENSITY.
+C         ALPHA SPIN
+          DMGGA=ZERO
+          DMGA =ZERO
+C         BETA SPIN
+          DMGGB=ZERO
+          DMGB =ZERO
+          IF(ROA+ROB.le.1.0D-15) THEN
+            XALPHA = 0.0d0
+            XGRD = 0.0d0
+            ECF = 0.0d0
+          ELSE IF(use_libxc) THEN
+            CALL libxc_calc(FTOTWT,
+     >                      ROA,ROB,
+     >                      GRDAA, GRDAB, GRDBB,
+     >                      GRADXA,GRADYA,GRADZA,
+     >                      GRADXB,GRADYB,GRADZB,
+     >                      TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,
+     >                      XALPHA,XGRD,ECF,
+     >                      VXCA1,VXCB1,
+     >                      DUMAX,DUMAY,DUMAZ,
+     >                      DUMBX,DUMBY,DUMBZ,
+     >                      DMGGA, DMGGB)
+          ELSE IF(FUNCL) THEN
+            CALL CCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE IF(FUNFL) THEN
+            CALL FCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE
+            CALL CALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                   GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                   XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                   VXCB1,DUMBX,DUMBY,DUMBZ,ECF,
+     >                   TAUXA,TAUYA,TAUZA,DMGGA,
+     >                   TAUXB,TAUYB,TAUZB,DMGGB)
+          END IF
+ 451      CONTINUE
+          DUMA = VXCA1
+          DUMB = VXCB1
+C
+          DMGA = DMGGA
+          DMGB = DMGGB
+C
+          EXEC1= XALPHA + XGRD + ECF
+          EXEC = EXEC + EXEC1
+          ECORL1= ECORL1 + ECF
+
+          IF(NOB.EQ.0) THEN
+             DUMB=ZERO
+             GRADXB=ZERO
+             GRADYB=ZERO
+             GRADZB=ZERO
+          ENDIF
+C
+C Andrew - I think we can calculate the potentials here.  We need the VXCA1
+C and VXCB1, which I think are the dF/drho terms.  We also need the weights,
+C MOs, on-top, and DTOT.
+C
+C***********************************************************************
+C      CONSTRUCT FOCK MATRIX
+C***********************************************************************
+          CALL DFTFOCK(NEEDGR,UROHF,FTOTWT,DUMA,DUMB,DUMAX,DUMAY,DUMAZ,
+     *                 DUMBX,DUMBY,DUMBZ,VALGA,VALGB,AOX,GAOX,GAOY,GAOZ,
+     *                 FA,FB,DFTTHR,L1,DMGA,DMGB,REKS22)
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          debcou = debcou + 1
+          TOTELEAt = TOTELEAt + FTOTWT*ROA
+          TOTELEBt = TOTELEBt + FTOTWT*ROB
+          TOTELE  =  TOTELE+FTOTWT*(ROA+ROB)
+          TOTGRADX=TOTGRADX+FTOTWT*GRDAA
+          TOTGRADY=TOTGRADY+FTOTWT*GRDBB
+          TOTGRADZ=TOTGRADZ+FTOTWT*GRDAB
+C
+          IF (DOLRD) THEN
+            CALL LRDPOL(ATMPOL,ATPPOL,EFPOL,FTOTWT,WTAB,FACT,
+     *                  NCNTR,IPTME,ROA,ROB,GRDAA,GRDBB,GRDAB,DRSPH,
+     *                  XD,YD,ZD,MAXL,MAXM,NFREQ)
+          END IF
+C
+   10   CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+   20 CONTINUE
+C
+C     ----- NEXT ATOM -----
+C
+c      MCPDFTRUN=.TRUE.
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      EEXC = EEXC+EXEC
+      ECORL= ECORL+ECORL1
+      DFTTHR=DFTTHRS
+      IF (OUT) WRITE(IW,9999) NCNTR,EEXC,TOTELE,TOTKIN
+   30 CONTINUE
+      RETURN
+C
+ 9999 FORMAT(/5X,'ATM',I8,' EXC=',F20.10,5X,'TOTELE=',F20.10,'TOTKIN=',
+     >        F20.10)
+      END
+C*MODULE DFTGRD  *DECK GLGQUD
+C>    @brief Calculates the on-top pair-density and its gradients
+C
+      SUBROUTINE GONTOP(VMOA,VMOB,DVMOXA,DVMOXB,DVMOYA,DVMOYB,
+     * DVMOZA, DVMOZB, P2ONTOP,DVP2ONTOPX,DVP2ONTOPY,DVP2ONTOPZ,L1)
+      use mx_limits, only: mxatm,mxrt,mxao,mxnoro
+      use comm_RDM_MCPDFT, only: ld1a,lxt4,nactive,nnz
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+C  Use mcpdft module to get 1 and 2-rdms **
+C
+      COMMON /DETWFN/ WSTATE(MXRT),SPINS(MXRT),CRIT,PRTTOL,S,SZ,
+     *                GRPDET,STSYM,GLIST,DWPARM,
+     *                NFLGDM(MXRT),IWTS(MXRT),NCORSV,NCOR,NACT,NORB,
+     *                NA,NB,K,KST,IROOT,IPURES,MAXW1,NITER,MAXP,NCI,
+     *                IGPDET,KSTSYM,NFTGCI,IDWEIGH,
+     *                fstate(mxrt),ifts(mxrt)
+C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,MA,MB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER nat,ich,mul,num,nqmt,ne,na,nb,ian
+      DOUBLE PRECISION zan,c
+      COMMON /FMCOM / X(1)
+      DOUBLE PRECISION RhoI,DVRhoIx,DVRhoIy
+      DOUBLE PRECISION DVRhoIz,RhoA
+      DIMENSION vmoa(l1), vmob(l1), dvmoxa(l1),dvmoya(l1),dvmoza(l1) 
+C
+C  NEED functional type
+C
+      iTri(i,j) = Max(i,j)*(Max(i,j)-1)/2 + Min(i,j)
+      M1 = NACT
+      M2 = (M1*M1+M1)/2  
+      L0 = NQMT
+      L2 = (L1*L1+L1)/2
+      L3 = L1*L1
+      NSYM = 2**IGPDET
+      NTOT = NACT + NCORSV
+      p2ontop=0.0d0
+      dvp2ontopx=0.0d0
+      dvp2ontopy=0.0d0
+      dvp2ontopz=0.0d0
+      dvrhoix=0.0d0
+      dvrhoiy=0.0d0
+      dvrhoiz=0.0d0
+      dvrhoAx=0.0d0
+      dvrhoAy=0.0d0
+      dvrhoAz=0.0d0
+      ninact=ncorsv
+C
+C           Inactive-Inactive Part
+C
+      RhoI = 0.0d0
+      if (Ninact.ne.0) Then 
+       Do i=1, ncorsv
+         RhoI =RhoI + vmoa(i)*vmoa(i)
+        
+             DVRhoIx=DVRhoIx + 2.0d0*vmoa(i)*dvmoxa(i)
+             DVRhoIy=DVRhoIy + 2.0d0*vmoa(i)*dvmoya(i)
+             DVRhoIz=DVRhoIz + 2.0d0*vmoa(i)*dvmoza(i)
+        
+       Enddo
+        p2ontop = p2ontop + RhoI*RhoI
+             dvp2ontopx = dvp2ontopx+2.0d0*RhoI*DVRhoIx
+             dvp2ontopy = dvp2ontopy+2.0d0*RhoI*DVRhoIy
+             dvp2ontopz = dvp2ontopz+2.0d0*RhoI*DVRhoIz
+      Endif
+C
+C           Active-Inactive Part
+C
+      RhoA = 0.0d0
+      If (ninact.ne.0.and.nact.ne.0) Then
+          ij=0
+        Do i=1, nact
+           i_ = i + ninact
+          do j=1, i
+           j_ = j + ninact
+           ij = iTri(i,j)
+           FACT = 2.0d0
+           if(i.eq.j) FACT=1.0d0
+           RhoA = RhoA +  X(LD1A-1+ij)*vmoa(i_)*vmoa(j_)*FACT
+            DVRhoAx=DVRhoAx + FACT*X(LD1A-1+ij)*
+     *                 (dvmoxa(i_)*vmoa(j_)+dvmoxa(j_)*vmoa(i_))
+            DVRhoAy=DVRhoAy + FACT*X(LD1A-1+ij)*
+     *                 (dvmoya(i_)*vmoa(j_)+dvmoya(j_)*vmoa(i_))
+            DVRhoAz=DVRhoAz + FACT*X(LD1A-1+ij)*
+     *                 (dvmoza(i_)*vmoa(j_)+dvmoza(j_)*vmoa(i_))
+          Enddo
+        Enddo
+           p2ontop = p2ontop + RhoA * RhoI
+            dvp2ontopx = dvp2ontopx+ 
+     *                     DVRhoIx*RhoA + DVRhoAx*RhoI
+            dvp2ontopy = dvp2ontopy+
+     *                     DVRhoIy*RhoA + DVRhoAy*RhoI
+            dvp2ontopz = dvp2ontopz+
+     *                     DVRhoIz*RhoA + DVRhoAz*RhoI
+      Endif
+C
+C          Active-Active part:
+C
+      If (Nact.ne.0) then
+         ijkl=0
+        do i_=1,NACT
+           i=i_+ninact
+         do j_=1,i_
+           j=j_+ninact
+          ij=iTri(i_,j_)
+          do k_ =1,i_
+           kindex=k_+ninact
+           if(i_.eq.k_) then
+             lmax=j_
+           else
+             lmax=k_
+           endif
+           do l_=1, lmax
+            l=l_+ninact
+            kl=iTri(k_,l_)
+            ijkl=iTri(ij,kl)
+            fact=0.5d0
+            if(ij.ne.kl) Fact=fact*2.0d0
+            if(i_.ne.j_) Fact=fact*2.0d0
+            if(k_.ne.l_) Fact=fact*2.0d0
+           p2ontop = p2ontop + fact*X(LXT4-1+ijkl)*vmoa(i)*vmoa(j)
+     &                              *vmoa(kindex)*vmoa(l) 
+C
+             dvp2ontopx= dvp2ontopx+fact*X(LXT4-1+ijkl)*(
+     &                    dvmoxa(i)*vmoa(j)*vmoa(kindex)*vmoa(l)+
+     &                    vmoa(i)*dvmoxa(j)*vmoa(kindex)*vmoa(l)+
+     &                    vmoa(i)*vmoa(j)*dvmoxa(kindex)*vmoa(l)+
+     &                    vmoa(i)*vmoa(j)*vmoa(kindex)*dvmoxa(l)
+     &                     )
+C          
+             dvp2ontopy=dvp2ontopy+fact*X(LXT4-1+ijkl)*(
+     &                    dvmoya(i)*vmoa(j)*vmoa(kindex)*vmoa(l)+
+     &                    vmoa(i)*dvmoya(j)*vmoa(kindex)*vmoa(l)+
+     &                    vmoa(i)*vmoa(j)*dvmoya(kindex)*vmoa(l)+
+     &                    vmoa(i)*vmoa(j)*vmoa(kindex)*dvmoya(l)
+     &                     )
+C
+             dvp2ontopz=dvp2ontopz+fact*X(LXT4-1+ijkl)*(
+     &                    dvmoza(i)*vmoa(j)*vmoa(kindex)*vmoa(l)+
+     &                    vmoa(i)*dvmoza(j)*vmoa(kindex)*vmoa(l)+
+     &                    vmoa(i)*vmoa(j)*dvmoza(kindex)*vmoa(l)+
+     &                    vmoa(i)*vmoa(j)*vmoa(kindex)*dvmoza(l)
+     &                     )
+           Enddo
+          Enddo
+         Enddo
+        Enddo
+       Endif
+726    CONTINUE
+       RETURN
+       END
+C*MODULE DFTGRD  *DECK GLGQUD
+C>    @brief Calculates the Gauss-Legendre quadrature
+C
+      SUBROUTINE GLGQUD(X1,X2,X,W,N)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      PARAMETER (EPS =3.0D-14)
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE =1.0D+00)
+      PARAMETER (TWO =2.0D+00)
+      PARAMETER (FOUR=4.0D+00)
+      PARAMETER (PT5 =0.5D+00)
+      PARAMETER (PI = 3.141592653589793238D+00)
+      DIMENSION X(*),W(*)
+C
+C      PI=FOUR*ATAN(ONE)
+      NR=(N+1)/2
+      XM=PT5*(X2+X1)
+      XL=PT5*(X2-X1)
+      PIN=(PI/TWO)/(2*N+1)
+      DO I=1,NR
+         Z=COS(PIN*(4*I-1))
+    1    CONTINUE
+            P1=ONE
+            P2=ZERO
+            DO J=1,N
+               P3=P2
+               P2=P1
+               P1=((J+J-1)*Z*P2-(J-1)*P3)/J
+            ENDDO
+            PP=N*(Z*P1-P2)/(Z*Z-ONE)
+            Z1=Z
+            Z =Z1-P1/PP
+            IF(ABS(Z-Z1).GT.EPS) GO TO 1
+         X(    I)=XM+XL*Z
+         X(N+1-I)=XM-XL*Z
+         W(    I)=TWO*XL/((ONE-Z*Z)*PP*PP)
+         W(N+1-I)=W(I)
+      ENDDO
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK SET_PRUNED
+C> @brief   Sets up grid parameters for pruned grids
+C> @param[in] atRadii      array of atomic radii, e.g. Bragg-Slater ones
+C> @param[in] atomTypes    array of atomic numbers, which define atomic types
+C> @param[in] radPrune     array of radii when angular grid swith occures
+C> @param[in] angGrids     array of angular grid sizes
+C> @param[in] numRad       number of radial grid points
+C> @param[in] numGrids     number of various angular grids
+C> @param[in] mxAng        maximum angular grid size
+C> @param[in] numAtomTypes number of atom types with different pruning
+C> @author Vladimir Mironov
+      SUBROUTINE SET_PRUNED(atRadii, atomTypes, radPrune, angGrids,
+     *                      numRad, numGrids, mxAng, numAtomTyps)
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION atRadii(*)
+      INTEGER atomTypes(2,numAtomTyps)
+      DOUBLE PRECISION radPrune(numGrids,numAtomTyps)
+      INTEGER angGrids(numGrids)
+      INTEGER numRad, numGrids, mxAng, numAtomTyps
+C
+      DOUBLE PRECISION ZERO, EPS1, EPS2
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (EPS1=1.0D-03)
+      PARAMETER (EPS2=1.0D-05)
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      DOUBLE PRECISION dftthr,dftgthr,swoff,sw0,bslrd
+      INTEGER ndftfg,nrad,nthe,nphi,nrad0,nthe0,nphi0,
+     *           nangpt,nangpt0,jans
+      LOGICAL sg1
+      COMMON /DFLEB/  NLEB(MXGRID),NLEB0(MXGRID)
+      INTEGER nleb, nleb0
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION prunerads, pruneatoms
+      INTEGER iprunecuts,ntotgridpoints,ngrids,maxang,ngridtyps
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER nat,ich,mul,num,nqmt,ne,na,nb,ian
+      DOUBLE PRECISION zan,c
+      COMMON /ZANDAT/ ZANINP(MXATM)
+      DOUBLE PRECISION zaninp
+      COMMON /FMOINF/ NFG,NLAYER,NATFMO,NBDFG,NAOTYP,NBODY,NSEGM
+      INTEGER nfg,nlayer,natfmo,nbdfg,naotyp,nbody,nsegm
+C
+      INTEGER i, igrid, itype, iatm, nucz
+      DOUBLE PRECISION znuc
+C
+      nrad = numRad
+      ngrids = numGrids
+      maxang = mxAng
+      ngridtyps = numAtomTyps
+C
+      DO i = 1, 137
+         bslrd(i) = atRadii(i)
+      END DO
+C
+C     Define the angular grids available
+      DO igrid = 1, ngrids
+         nleb(igrid) = angGrids(igrid)
+      END DO
+C
+C     Fill in some generic data
+      DO itype = 1, ngridtyps
+         pruneatoms(1,itype) = atomTypes(1,itype)
+         pruneatoms(2,itype) = atomTypes(2,itype)
+         DO igrid = 1, ngrids
+            prunerads(igrid,itype) = radPrune(igrid,itype)
+         END DO
+         DO igrid = ngrids+1, MXGRIDTYP
+             prunerads(igrid,itype) = radPrune(ngrids,itype)
+         END DO
+      END DO
+C
+C     Define which set of radii to measure the atom by
+      DO iatm = 1, nat
+         znuc = abs(zaninp(iatm))
+         nucz = int(znuc + EPS1)
+C        Sparkles/bond functions to be ignored:
+         IF (ABS(znuc-nucz).GT.EPS2) znuc = ZERO
+         IF (nfg.NE.0) znuc = ian(iatm)
+C
+         DO itype = 1, ngridtyps
+            IF ((znuc.GE.pruneatoms(1,itype)).AND.
+     *          (znuc.LE.pruneatoms(2,itype))) THEN
+               iprunecuts(iatm) = itype
+               EXIT! itype loop
+            END IF
+         END DO
+C
+      END DO
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK SET_SG1
+C>    @brief   Sets up grid parameters for SG1 grid type
+C> @param[in] atRadii  array of atomic radii, e.g. Bragg-Slater ones
+C> @author Vladimir Mironov
+      SUBROUTINE SET_SG1(atRadii)
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION atRadii(*)
+C
+      INTEGER numRad, numGrids, mxAng, numAtomTyps
+C
+C     These are the tabulated values for the SG-1 grid published
+C     in Gill et al., CPL,209, 506 (1993).
+C
+      INTEGER SG1ATOMS(2,4),SG1GRIDS(5)
+      DOUBLE PRECISION SG1RADS(5,4)
+C
+      DATA SG1ATOMS  / 1,2,  3,10,  11,18,  19,137/
+C
+      DATA SG1RADS  / 0.2500D0, 0.500D0, 1.0D00, 4.50D0, 9999999.9D0,
+     *                0.1667D0, 0.500D0, 0.90D0, 3.50D0, 9999999.9D0,
+     *                0.1000D0, 0.400D0, 0.80D0, 2.5D0,  9999999.9D0,
+     *         1.0E-30, 999999.9D0, 999999.9D0, 999999.9D0, 999999.9D0/
+C
+      DATA SG1GRIDS / 6, 38, 86, 194, 86 /
+C
+      numRad      = 50
+      numGrids    = 5
+      mxAng       = 194
+      numAtomTyps = 4
+C
+      CALL set_pruned(atRadii, SG1ATOMS, SG1RADS, SG1GRIDS,
+     *                numRad, numGrids, mxAng, numAtomTyps)
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK SET_JANS
+C> @brief   Sets up grid parameters for JANS grid type
+C> @param[in] atRadii  array of atomic radii, e.g. Bragg-Slater ones
+C> @param[in] jansTyp  type of JANS grid (1 or 2)
+C> @author Vladimir Mironov
+      SUBROUTINE SET_JANS(atRadii, jansTyp)
+      IMPLICIT NONE
+      DOUBLE PRECISION atRadii(*)
+      INTEGER jansTyp
+C
+      INTEGER numRad, numGrids, mxAng, numAtomTyps
+C
+C     These are the tabulated values for pruned grids developed
+C     by Curtis Janssen from Sandia National Labs, and derived
+c     from the MPQC code, freely available at http://www.mpqc.org
+C
+C     This is a first implementation of these grids, and GAMESS has
+c     a few limitations, so only a subset of these grids will be
+c     implemented here, with the full grids to be implemented in the
+c     future :
+c       1) Two of the grids will be implemented with 110 and 155 radial
+c          shells, which is the number of radial shells for second row
+c          atoms.
+c       2) The grids here slightly differ at the moment from the grids
+c          in mpqc as i am only using the maximum grid point set for
+c          each atom, to simplify things.
+c       3) Third row and beyond are not properly implemented at the
+c          moment, to implement this we need to let each atom have
+c          its own grid, which requires quite a rewrite of the code.
+C
+      DOUBLE PRECISION JANSRADS(5,4)
+      INTEGER JANSATOMS(2,4),JANSGRIDS(5,2)
+C
+      DATA JANSATOMS  / 1,2,  3,10,  11,18,  19,137/
+C
+      DATA JANSRADS / 0.2500D0, 0.500D0, 0.9D00, 4.50D0, 1.0D10,
+     *                0.1667D0, 0.500D0, 0.80D0, 3.50D0, 1.0D10,
+     *                0.1000D0, 0.400D0, 0.70D0, 2.5D0,  1.0D10,
+     *          1.0E-30, 1.0D10, 1.0D10, 1.0D10, 1.0D10/
+C
+      DATA JANSGRIDS / 6, 86,170,434,170,
+     *                86,194,590,974,590/
+C
+      IF (jansTyp.EQ.1) THEN
+         numRad   = 95
+         mxAng    = 434
+      ELSE IF (jansTyp.GE.2) THEN
+         numRad   = 155
+         mxAng    = 974
+      ELSE ! should never happen
+         WRITE(*,*) 'Unknown type of JANS grid:', jansTyp
+         WRITE(*,*) 'Aborting'
+         CALL ABRT
+      END IF
+C
+      numGrids = 5
+      numAtomTyps = 4
+C
+      CALL set_pruned(atRadii, JANSATOMS, JANSRADS, JANSGRIDS,
+     *                numRad, numGrids, mxAng, numAtomTyps)
+      RETURN
+      END
+       MODULE GRDDFT_SAVED
+C> @date December, 2021 Chinami Takashima
+C> - added the variables for picture change corrected DFT
+C>   by (LUT-)IOTC method
+
+         IMPLICIT NONE
+
+         INTEGER*8, SAVE :: ISTART,IPCOEFF,IEXPS,IWGHT,IXDAT,
+     *     IYDAT,IZDAT,ITXYZ, IUXYZ,ITWGHT,
+     *     IATMXVC,IATMYVC,IATMZVC,IRI,IRIJ,IWTINTR,IAOX,IGAOX,IGAOY,
+     *     IGAOZ,ITOTWT,IRSQRD,IAIJ,IGLROOT,IGLWGHT,IANGXV,IANGYV,IANGZV
+     *    ,IPTRAD,IWTRAD,IVMOA,IDVMOXA,IDVMOYA,IDVMOZA,IVALGA,IVMOB,
+     *     IDVMOXB,IDVMOYB,IDVMOZB,IVALGB,IFACTR,INATM,IFACT,NAPTS,
+     *     IANGN,INEQATM,INDEG,IUNIQUE
+
+         INTEGER*8, SAVE :: ISYMXY,ISYMXZ,ISYMYZ,ISYMRX,ISYMRY,ISYMRZ,
+     *     ISYMI,ISYMC1,NSYMAT,NANG,NDER,NDFTEN
+         INTEGER*8, SAVE :: INLCT,INELM
+         LOGICAL :: NEEDGR,UROHF
+         LOGICAL :: REKS22
+         INTEGER*8, SAVE :: IWTAB,IATMPOL,IATPPOL,IEFPOL,IDRSPH,
+     *     ISMATC,ISMATP,IWIGD,ICOEF6,ICOEF8,ICOEF10,IATMPE,LRDMEM
+         INTEGER*8, SAVE :: IVMOANUC,IVMOBNUC,IAOXNUC,IGAOXNUC,
+     *     IGAOYNUC,IGAOZNUC
+C
+C        FOR PICTURE CHANGE CORRECTED DFT
+         INTEGER*8, SAVE :: IRMOMG,IPIOMG,IB000,IB100,IB010,IB001,IB200,
+     *     IB110,IB101,IB020,IB011,IB002,IWORK1,IWORK2,IWORK3,IWORK4,
+     *     IWORK5,IWORK6,IWORK7,IRMB000,IRPB100,IRPB010,IRPB001,IRMB100,
+     *     IRMB010,IRMB001,IRPB200,IRPB110,IRPB101,IRPB020,IRPB011,
+     *     IRPB002,IRMMB000,IRMPB100,IRMPB010,IRMPB001,IRMMB100,
+     *     IRMMB010,IRMMB001,IRMPB200,IRMPB110,IRMPB101,IRMPB020,
+     *     IRMPB011,IRMPB002,IAO2PO,IWORK8
+C
+C        FOR UHF PICTURE CHANGE CORRECTED DFT
+         INTEGER*8, SAVE :: IRMMB000B,IRMPB100B,IRMPB010B,IRMPB001B,
+     *     IRMMB100B,IRMMB010B,IRMMB001B,IRMPB200B,IRMPB110B,IRMPB101B,
+     *     IRMPB020B,IRMPB011B,IRMPB002B,IWORK9
+C
+C        FOR PICTURE CHANGE CORRECTED DFT WITH LOCAL UNITARY
+C        TRANSFORMATION METHOD (S MEANS SUBSYSTEM)
+         INTEGER*8, SAVE :: IB000S,IB100S,IB010S,IB001S,IB200S,IB110S,
+     *     IB101S,IB020S,IB011S,IB002S,IMB000S,IMB100S,IMB010S,IMB001S,
+     *     IPB100S,IPB010S,IPB001S,IPB200S,IPB110S,IPB101S,IPB020S,
+     *     IPB011S,IPB002S
+       END MODULE
+
+C*MODULE DFTGRD  *DECK GRDDFT
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>     **1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C>
+C>    @date : December, 2021 - Chinami Takashima
+C>            added the pointers for memory allocation for
+C>            picture change corrected DFT by (LUT-)IOTC method
+C
+      SUBROUTINE GRDDFT(L2,LAST)
+      USE dftexc, ONLY: NEXFG, NCORFG
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp,mxneo
+      use GRDDFT_SAVED
+C
+      USE params, ONLY: rad_grid_type
+      use mod_lutiotc, ONLY: PCCDFT, RLUTPC
+C
+      LOGICAL DLB
+C
+      INTEGER, PARAMETER :: MAXL=3
+      INTEGER, PARAMETER :: MAXM=7
+      INTEGER, PARAMETER :: MAXS=9
+      INTEGER, PARAMETER :: NFREQ=12
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+C
+C        SET UP NAMELIST SIMULATION FOR UNDOCUMENTED $BRAGG INPUT GROUP
+      INTEGER, PARAMETER :: NNAM=1
+      DOUBLE PRECISION :: QNAM(NNAM),BRAGGWD
+      INTEGER :: KQNAM(NNAM)
+      DOUBLE PRECISION :: BRAGGINP(137)
+      DATA BRAGGWD/8HBRAGG   /
+      DATA  QNAM/8HBRAGG   /
+      DATA KQNAM/1373/
+      DATA RNONE/8HNONE    /
+C
+      LOGICAL :: SG1
+      INTEGER :: NDFTFG,NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT,NANGPT0,JANS
+      DOUBLE PRECISION :: DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+
+      INTEGER :: NLEB, NLEB0
+      COMMON /DFLEB/  NLEB(MXGRID),NLEB0(MXGRID)
+
+      INTEGER :: IPRUNECUTS,NTOTGRIDPOINTS,NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: PRUNERADS,PRUNEATOMS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+
+
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+
+      INTEGER :: NWDVAR,MAXFM,MAXSM,LIMFM,LIMSM
+      COMMON /MACHIN/ NWDVAR,MAXFM,MAXSM,LIMFM,LIMSM
+
+      LOGICAL :: GOPARR,DSKWRK,MASWRK
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+
+      INTEGER :: MPLEVL, MPCTYP
+      DOUBLE PRECISION :: SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+
+      DOUBLE PRECISION :: ZANINP
+      COMMON /ZANDAT/ ZANINP(MXATM)
+C
+      INTEGER :: IDENAO
+      COMMON /DNSAO / IDENAO
+C
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C
+      COMMON /NUCMOI/ NUNIQN,IUNIQN(MXNEO),IUNIQT(MXNEO),NQMNUC,
+     *                IQMNUC(MXNEO),IQNTYP(MXNEO),NUMNB,NUCST,NAUXNB,
+     *                IAUXNB(MXNEO),NUMULT,NNA,NNB,NTAUXB,IPRDEN
+C
+      DOUBLE PRECISION :: NEOSCF,NEOCI,NEODFT,YANGA,YANGB,YANGC
+      COMMON /NEOMTD/ NEOSCF,NEOCI,NEODFT,YANGA,YANGB,YANGC
+C
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+            
+      DIMENSION COEFFANUC(1),COEFFBNUC(1),DANUC(1)
+C
+      DOUBLE PRECISION :: GMSBSLRD(137)
+      DOUBLE PRECISION :: SG1BSLRD(137)
+      DOUBLE PRECISION :: TARADS(137)
+C
+      LOGICAL FIRST !LAURA
+      SAVE FIRST !LAURA
+      DATA FIRST/.TRUE./ 
+
+      DOUBLE PRECISION :: UHF,ROHF
+      DATA UHF,ROHF/8HUHF     ,8HROHF    /
+
+      DOUBLE PRECISION :: REKS
+      DATA REKS/8HREKS    /
+
+C***********************************************************************
+C     BRAGG-SLATER RADII FOR DETERMINING THE RELATIVE SIZE OF THE
+C     POLYHEDRA IN THE POLYATOMIC INTEGRATION SCHEME
+C***********************************************************************
+C     THESE NUMBERS CAN BE FOUND AT THE START OF CHAPTER 3 OF
+C         QUANTUM THEORY OF MOLECULES AND SOLIDS, VOLUME 2
+C                       J.C.SLATER
+C     EXCEPT THAT HYDROGEN IS CHANGED FROM 0.25 -> BOHR RADIUS,
+C     AND MISSING VALUES SUCH AS INERT GASSES ARE FILLED IN WITH
+C     REASONABLE LOOKING DATA (SOURCE UNKNOWN).  SLATER'S TABLE
+C     STOPS AT THE ELEMENT AMERICIUM, THE EXTENSION IS PROBABLY
+C     REASONABLE FOR ACTINIDES BUT NOT ALL THE WAY TO Z=137!
+C
+      DATA (GMSBSLRD(III),III=1,10)/
+     *          0.52917D+00, 0.31D+00,
+     *             1.45D+00, 1.05D+00,
+     *   0.85D+00, 0.70D+00, 0.65D+00, 0.60D+00, 0.50D+00, 0.38D+00/
+      DATA (GMSBSLRD(III),III=11,18)/
+     *             1.80D+00, 1.50D+00,
+     *   1.25D+00, 1.10D+00, 1.00D+00, 1.00D+00, 1.00D+00, 0.71D+00/
+      DATA (GMSBSLRD(III),III=19,36)/
+     *             2.20D+00, 1.80D+00,
+     *             1.60D+00, 1.40D+00, 1.35D+00, 1.40D+00, 1.40D+00,
+     *             1.40D+00, 1.35D+00, 1.35D+00, 1.35D+00, 1.35D+00,
+     *   1.30D+00, 1.25D+00, 1.15D+00, 1.15D+00, 1.15D+00, 0.88D+00/
+      DATA (GMSBSLRD(III),III=37,54)/
+     *             2.35D+00, 2.00D+00,
+     *             1.80D+00, 1.55D+00, 1.45D+00, 1.45D+00, 1.35D+00,
+     *             1.30D+00, 1.35D+00, 1.40D+00, 1.60D+00, 1.55D+00,
+     *   1.55D+00, 1.45D+00, 1.45D+00, 1.40D+00, 1.40D+00, 1.08D+00/
+      DATA (GMSBSLRD(III),III=55,86)/
+     *             2.60D+00, 2.15D+00,
+     *             1.95D+00, 1.85D+00, 1.85D+00, 1.85D+00, 1.85D+00,
+     *             1.85D+00, 1.85D+00, 1.80D+00, 1.75D+00, 1.75D+00,
+     *             1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *             1.55D+00, 1.45D+00, 1.35D+00, 1.35D+00, 1.30D+00,
+     *             1.35D+00, 1.35D+00, 1.35D+00, 1.50D+00,
+     *   1.90D+00, 1.80D+00, 1.60D+00, 1.90D+00, 1.27D+00, 1.20D+00/
+      DATA (GMSBSLRD(III),III=87,94)/
+     *             2.60D+00, 2.15D+00,
+     *             1.95D+00, 1.80D+00,
+     *             1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00/
+C        AND WE JUST FILL IN ALL THE OTHER ELEMENTS WITH A GUESS.
+      DATA (GMSBSLRD(III),III=95,137)/43*1.75D+00/
+C
+C     THESE ARE THE TABULATED VALUES FOR THE SG-1 GRID PUBLISHED
+C     IN GILL ET AL., CPL,209, 506 (1993).
+      DATA SG1BSLRD /0.52918D+00, 0.31126D+00, 1.62822D+00, 1.08550D+00,
+     *               0.81414D+00, 0.65131D+00, 0.54272D+00, 0.46520D+00,
+     *               0.40704D+00, 0.36185D+00, 2.16481D+00, 1.67109D+00,
+     *               1.36073D+00, 1.14763D+00, 0.99221D+00, 0.87388D+00,
+     *               0.78075D+00, 0.70555D+00, 2.20D+00,    1.80D+00,
+     *               1.60D+00, 1.40D+00, 1.35D+00, 1.40D+00, 1.40D+00,
+     *               1.40D+00, 1.35D+00, 1.35D+00, 1.35D+00, 1.35D+00,
+     *               1.30D+00, 1.25D+00, 1.15D+00, 1.15D+00, 1.15D+00,
+     *               0.88D+00, 2.35D+00, 2.00D+00, 1.80D+00, 1.55D+00,
+     *               1.45D+00, 1.45D+00, 1.35D+00, 1.30D+00, 1.35D+00,
+     *               1.40D+00, 1.60D+00, 1.55D+00, 1.55D+00, 1.45D+00,
+     *               1.45D+00, 1.40D+00, 1.40D+00, 1.08D+00, 2.60D+00,
+     *               2.15D+00, 1.95D+00, 1.85D+00, 1.85D+00, 1.85D+00,
+     *               1.85D+00, 1.85D+00, 1.85D+00, 1.80D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.55D+00, 1.45D+00, 1.35D+00, 1.35D+00,
+     *               1.30D+00, 1.35D+00, 1.35D+00, 1.35D+00, 1.50D+00,
+     *               1.90D+00, 1.80D+00, 1.60D+00, 1.90D+00, 1.27D+00,
+     *               1.20D+00, 2.60D+00, 2.15D+00, 1.95D+00, 1.80D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00, 1.75D+00,
+     *               1.75D+00, 1.75D+00/
+C
+C     THESE ARE THE TABULATED VALUES FOR TREUTLER-AHLRICHS GRID
+C     IN O.TREUTLER, R.AHLRICHS, JCP,102(1), 346 (1995).
+      DATA TARADS /0.8D+00, 0.9D+00,
+C
+     *               1.8D+00, 1.4D+00, 1.3D+00, 1.1D+00,
+     *               0.9D+00, 0.9D+00, 0.9D+00, 0.9D+00,
+C
+     *               1.4D+00, 1.3D+00, 1.3D+00, 1.2D+00,
+     *               1.1D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+C
+     *               1.5D+00, 1.4D+00,
+     *               1.3D+00, 1.2D+00, 1.2D+00, 1.2D+00, 1.2D+00,
+     *               1.2D+00, 1.2D+00, 1.1D+00, 1.1D+00, 1.1D+00,
+C
+     *               1.1D+00, 1.0D+00, 0.9D+00, 0.9D+00, 0.9D+00,
+     *               0.9D+00,
+C
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00, 1.0D+00,
+     *               1.0D+00/
+C
+C
+      UROHF = SCFTYP.EQ.UHF  .OR.  SCFTYP.EQ.ROHF .OR. SCFTYP.EQ.REKS
+      REKS22= SCFTYP.EQ.REKS
+C
+C     FOR SLATER EXHANGE AND LDA OR NO CORRELATION DO NOT NEED
+C     TO HANDLE THE GRADIENT TERMS
+C
+      NEEDGR=.NOT.(NEXFG.EQ.1.AND.(NCORFG.EQ.0.OR.NCORFG.EQ.1))
+C
+C     ===================
+C     GET GRID DFT MEMORY
+C     ===================
+C     IN THE FOLLOWING, ARRAYS ARE ALLOCATED AS NAT, WHEREAS SOME ARE
+C     IN FACT USED AS NSYMAT. THIS MAY SAVE MEMORY BUT REQUIRES SMALL
+C     CHANGES IN THE CODE.
+c
+c MV
+c     Note:
+c     OpenMP code mostly uses separate dynamically allocated memory.
+c     A lot of memory allocated below will be wasted, however, only
+c     the master thread owns it.
+c     This is done for the sake of compatibility with other GAMESS modules.
+c/MV
+C
+      DLB = IBTYP.EQ.1
+C
+      IF(SG1) THEN
+         CALL set_sg1(SG1BSLRD)
+      ELSE IF(JANS.GT.0) THEN
+         IF (JANS.GT.2) JANS = 2
+         CALL set_jans(SG1BSLRD,JANS)
+      ELSE
+C
+C            UNDOCUMENTED $BRAGG GROUP TO READ IN BRAGG/SLATER RADII.
+C
+         CALL NAMEIO(IR,JRET,BRAGGWD,NNAM,QNAM,KQNAM,
+     *               BRAGGINP,   0,0,0,
+     *   0,0,0,0,0,  0,0,0,0,0,  0,0,0,0,0,  0,0,0,0,0,
+     *   0,0,0,0,0,  0,0,0,0,0,  0,0,0,0,0,  0,0,0,0,0,
+     *   0,0,0,0,0,  0,0,0,0,0,  0,0,0,0,0,  0,0,0,0,0,
+     *   0,0,0,0,0,  0)
+         IF (JRET.EQ.2) THEN
+            IF(MASWRK) WRITE(IW,*) 'ERROR IN $BRAGG INPUT'
+            CALL ABRT
+         END IF
+         IF (JRET.EQ.0) THEN
+            DO I=1,137
+               IF(BRAGGINP(I).GT.ZERO) THEN
+                  GMSBSLRD(I) = BRAGGINP(I)
+                  SG1BSLRD(I) = BRAGGINP(I)
+               END IF
+            END DO
+         END IF
+C
+         NGRIDS = 1
+         IF(NLEB(1).EQ.0) THEN
+            DO I = 1,137
+               BSLRD(I) = GMSBSLRD(I)
+            ENDDO
+C        ELSE IF (rad_grid_type.EQ.1) THEN
+C           DO i = 1, 137
+C               IF (   i.EQ.3  .OR. i.EQ.4
+C    +            .OR. i.EQ.11 .OR. i.EQ.12
+C    +            .OR. i.EQ.19 .OR. i.EQ.20) THEN
+C                  bslrd(i) = 7.0d0
+C               ELSE !IF (i<30) THEN
+C                  bslrd(i) = 5.0d0
+C               END IF
+C           END DO
+C        For Chebyshev mapping TA radii seem to be better choice:
+CHMK     ELSE IF (rad_grid_type.EQ.1) THEN
+CHMK        DO i = 1, 137
+CHMK           BSLRD(i) = TARADS(i)
+CHMK        END DO
+         ELSE IF (rad_grid_type.EQ.2) THEN
+            DO i = 1, 137
+               BSLRD(i) = TARADS(i)
+            END DO
+         ELSE
+            DO I = 1,137
+               BSLRD(I) = SG1BSLRD(I)
+            ENDDO
+         ENDIF
+         IF(NLEB(1).EQ.0) THEN
+            NANGPT(1) = NTHE*NPHI
+            NANGPT0(1) = NTHE0*NPHI0
+         ELSE
+            NANGPT(1)  = NLEB(1)
+            NANGPT0(1) = NLEB0(1)
+         ENDIF
+         PRUNERADS(1,1) = 1.0D+30
+         DO IATM = 1,NAT
+            IPRUNECUTS(IATM) = 1
+         ENDDO
+         MAXANG = NANGPT(1)
+      ENDIF
+C
+C     TOTWT CANNOT BE DIVIDED FOR DYNAMIC LOAD BALANCING SINCE WEIGHTS
+C     WILL BE REQUIRED AT "RANDOM" (DDI ARRAYS MAY WORK).
+C
+      NPT = NRAD*MAXANG
+      NPTME=(NPT-1)/NPROC+1
+      IF(DLB) NPTME=NPT
+C
+      CALL BASCHK(MAXLL)
+      CALL DERCHK(NDER)
+      NANG=MAXLL+1+1
+C     1 FOR GRADIENT TERMS
+      NANG1=NANG+1+NDER
+C
+C     ----- FOR ROUTINE INPBAS -----
+C
+      IPCOEFF = 1
+      IEXPS   = IPCOEFF + MXGTOT
+      ISTART  = IEXPS   + MXGTOT
+C
+      INDEG   = ISTART
+      INEQATM = INDEG   + (NAT-1)/NWDVAR+1
+      IUNIQUE = INEQATM + (NAT*NAT-1)/NWDVAR+1
+      ISTART  = IUNIQUE + (NAT-1)/NWDVAR+1
+C
+C     ----- FOR ROUTINE GRDPT -----
+C
+C     SPECIAL MEMORY ALLOCATION FOR PRUNED GRIDS
+C
+      IF(NGRIDS.GT.1) THEN
+         IWGHT   = ISTART
+         IXDAT   = IWGHT + MAXANG*NAT*NGRIDS
+         IYDAT   = IXDAT + MAXANG*NAT*NGRIDS
+         IZDAT   = IYDAT + MAXANG*NAT*NGRIDS
+         IUXYZ   = IZDAT + MAXANG*NAT*NGRIDS
+         ITXYZ   = IUXYZ   + 3*MAXANG
+         ITWGHT  = ITXYZ   + 3*MAXANG
+         IATMXVC = ITWGHT  + MAXANG
+         IATMYVC = IATMXVC + NAT*NAT
+         IATMZVC = IATMYVC + NAT*NAT
+         IRI     = IATMZVC + NAT*NAT
+         IRIJ    = IRI     + NAT
+         IWTINTR = IRIJ    + NAT*NAT
+         IRSQRD  = IWTINTR + NAT
+         IAIJ    = IRSQRD  + NAT
+         IGLROOT = IAIJ    + NAT*NAT
+         IGLWGHT = IGLROOT + MAXANG
+         IPTRAD  = IGLWGHT + NTHE*NTHE
+         IWTRAD  = IPTRAD  + NRAD
+         IANGXV  = IWTRAD  + NRAD
+         IANGYV  = IANGXV  + NAT*NANG1
+         IANGZV  = IANGYV  + NAT*NANG1
+         IFACTR  = IANGZV  + NAT*NANG1
+         INATM   = IFACTR  + (NAT-1)/NWDVAR+1
+         IFACT   = INATM   + (NAT-1)/NWDVAR+1
+         NAPTS   = IFACT   + (NAT-1)/NWDVAR+1
+         IANGN   = NAPTS   + (NAT-1)/NWDVAR+1
+         LAST    = IANGN   + ((NAT*2-1)/NWDVAR+1)*NGRIDS
+C      WRITE(IW,"(A,6I10)")'MEMORY: ',IWGHT,IXDAT,IYDAT,IZDAT,IUXYZ,
+C     *                                  ITXYZ
+C      WRITE(IW,"(A,6I10)")'MEMORY: ',ITWGHT,IATMXVC,IATMYVC,IATMZVC
+C     *                                 ,IRI,IRIJ,IPTRAD
+      ELSE
+         IF(NLEB(1).NE.0) THEN
+            IWGHT   = ISTART
+            IXDAT   = IWGHT   + NANGPT(1)*NAT
+            IYDAT   = IXDAT   + NANGPT(1)*NAT
+            IZDAT   = IYDAT   + NANGPT(1)*NAT
+            IUXYZ   = IZDAT   + NANGPT(1)*NAT
+            ITXYZ   = IUXYZ   + 3*NANGPT(1)
+            ITWGHT  = ITXYZ   + 3*NANGPT(1)
+            IATMXVC = ITWGHT  + NANGPT(1)
+            IATMYVC = IATMXVC + NAT*NAT
+            IATMZVC = IATMYVC + NAT*NAT
+            IRI     = IATMZVC + NAT*NAT
+            IRIJ    = IRI     + NAT
+            IWTINTR = IRIJ    + NAT*NAT
+            IRSQRD  = IWTINTR + NAT
+            IAIJ    = IRSQRD  + NAT
+            IPTRAD  = IAIJ    + NAT*NAT
+            IWTRAD  = IPTRAD  + NRAD
+            IANGXV  = IWTRAD  + NRAD
+            IANGYV  = IANGXV  + NAT*NANG1
+            IANGZV  = IANGYV  + NAT*NANG1
+            IFACTR  = IANGZV  + NAT*NANG1
+            INATM   = IFACTR  + (NAT-1)/NWDVAR+1
+            IFACT   = INATM   + (NAT-1)/NWDVAR+1
+            NAPTS   = IFACT   + (NAT-1)/NWDVAR+1
+            IANGN   = NAPTS   + (NAT-1)/NWDVAR+1
+            LAST    = IANGN   + (NAT*2-1)/NWDVAR+1
+C
+         ELSE
+            IWGHT   = ISTART
+            IXDAT   = IWGHT   + NANGPT(1)*NAT
+            IYDAT  =  IXDAT   + NANGPT(1)*NAT
+            IZDAT   = IYDAT   + NANGPT(1)*NAT
+            IATMXVC = IZDAT   + NANGPT(1)*NAT
+            IATMYVC = IATMXVC + NAT*NAT
+            IATMZVC = IATMYVC + NAT*NAT
+            IRI     = IATMZVC + NAT*NAT
+            IRIJ    = IRI     + NAT
+            IWTINTR = IRIJ    + NAT*NAT
+            IRSQRD  = IWTINTR + NAT
+            IAIJ    = IRSQRD  + NAT
+            IGLROOT = IAIJ    + NAT*NAT
+            IGLWGHT = IGLROOT + NTHE*NTHE
+            IPTRAD  = IGLWGHT + NTHE*NTHE
+            IWTRAD  = IPTRAD  + NRAD
+            IANGXV  = IWTRAD  + NRAD
+            IANGYV  = IANGXV  + NAT*NANG1
+            IANGZV  = IANGYV  + NAT*NANG1
+            IFACTR  = IANGZV  + NAT*NANG1
+            INATM   = IFACTR  + (NAT-1)/NWDVAR+1
+            IFACT   = INATM   + (NAT-1)/NWDVAR+1
+            NAPTS   = IFACT   + (NAT-1)/NWDVAR+1
+            IANGN   = NAPTS   + (NAT-1)/NWDVAR+1
+            LAST    = IANGN   + (NAT*2-1)/NWDVAR+1
+         ENDIF
+      ENDIF
+C
+C     ----- FOR ROUTINE DMATD ------
+C
+      IVMOA  = LAST
+      IDVMOXA= IVMOA  + NUM
+      IDVMOYA= IDVMOXA+ NUM
+      IDVMOZA= IDVMOYA+ NUM
+      IVMOB  = IDVMOZA+ NUM
+      IDVMOXB= IVMOB  + NUM
+      IDVMOYB= IDVMOXB+ NUM
+      IDVMOZB= IDVMOYB+ NUM
+      IVALGA = IDVMOZB+ NUM
+      IVALGB = IVALGA + NUM
+      LAST   = IVALGB + NUM
+C
+      ITOTWT  = LAST
+      IAOX    = ITOTWT  + NAT*NPTME
+      IGAOX   = IAOX    + NUM
+      IGAOY   = IGAOX   + NUM
+      IGAOZ   = IGAOY   + NUM
+      LAST    = IGAOZ   + NUM
+C
+      INLCT   = LAST
+      INELM   = LAST
+      IF(IDENAO.NE.0) THEN
+        INELM = INLCT + NUM*NUM
+        LAST  = INELM + NUM*2
+      END IF
+C
+C     FOR LOCAL RESPONSE DISPERSION METHOD
+C
+      IF(LRDFLG) THEN
+         IWTAB   = LAST
+         IATMPOL = IWTAB   + NAT*NAT*NPTME
+         IATPPOL = IATMPOL + NAT*MAXL*MAXM*MAXM*NFREQ
+         IEFPOL  = IATPPOL + NAT*NAT*NFREQ
+         IDRSPH  = IEFPOL  + NAT
+         ISMATC  = IDRSPH  + 3*MAXL*MAXM
+         ISMATP  = ISMATC  + MAXS*MAXS
+         IWIGD   = ISMATP  + MAXS*MAXS
+         ICOEF6  = IWIGD   + MAXS
+         ICOEF8  = ICOEF6  + NAT*(NAT+1)/2
+         ICOEF10 = ICOEF8  + NAT*(NAT+1)/2
+         IATMPE  = ICOEF10 + NAT*(NAT+1)/2
+         LAST    = IATMPE  + NAT*(NAT+1)/2
+         LRDMEM  = LAST    - IATMPOL
+      ELSE
+         IWTAB   = LAST
+         IATMPOL = LAST
+         IATPPOL = LAST
+         IEFPOL  = LAST
+         IDRSPH  = LAST
+         ISMATC  = LAST
+         ISMATP  = LAST
+         IWIGD   = LAST
+         ICOEF6  = LAST
+         ICOEF8  = LAST
+         ICOEF10 = LAST
+         IATMPE  = LAST
+         LAST    = LAST
+         LRDMEM  = 0
+      END IF
+C
+C     ----- FOR PICTURE CHANGE CORRECTED DFT -----
+      IF(PCCDFT) THEN
+         IRMOMG   = LAST
+         IPIOMG   = IRMOMG + NUMU*NUM
+         IB000    = IPIOMG + NUMU*NUM
+         IB100    = IB000 + NUMU
+         IB010    = IB100 + NUMU
+         IB001    = IB010 + NUMU
+         IB200    = IB001 + NUMU
+         IB110    = IB200 + NUMU
+         IB101    = IB110 + NUMU
+         IB020    = IB101 + NUMU
+         IB011    = IB020 + NUMU
+         IB002    = IB011 + NUMU
+         IWORK1   = IB002 + NUMU
+         IWORK2   = IWORK1 + NUMU
+         IWORK3   = IWORK2 + NUMU
+         IWORK4   = IWORK3 + NUMU
+         IWORK5   = IWORK4 + NUMU
+         IWORK6   = IWORK5 + NUMU
+         IWORK7   = IWORK6 +NUMU
+         IRMB000  = IWORK7 + NUM
+         IRPB100  = IRMB000 + NUM
+         IRPB010  = IRPB100 + NUM
+         IRPB001  = IRPB010 + NUM
+         IRMB100  = IRPB001 + NUM
+         IRMB010  = IRMB100 + NUM
+         IRMB001  = IRMB010 + NUM
+         IRPB200  = IRMB001 + NUM
+         IRPB110  = IRPB200 + NUM
+         IRPB101  = IRPB110 + NUM
+         IRPB020  = IRPB101 + NUM
+         IRPB011  = IRPB020 + NUM
+         IRPB002  = IRPB011 + NUM
+         IRMMB000 = IRPB002 + NUM
+         IRMPB100 = IRMMB000 + NA
+         IRMPB010 = IRMPB100 + NA
+         IRMPB001 = IRMPB010 + NA
+         IRMMB100 = IRMPB001 + NA
+         IRMMB010 = IRMMB100 + NA
+         IRMMB001 = IRMMB010 + NA
+         IRMPB200 = IRMMB001 + NA
+         IRMPB110 = IRMPB200 + NA
+         IRMPB101 = IRMPB110 + NA
+         IRMPB020 = IRMPB101 + NA
+         IRMPB011 = IRMPB020 + NA
+         IRMPB002 = IRMPB011 + NA
+         IAO2PO   = IRMPB002 + NA
+         IWORK8   = IAO2PO + NUMU*NUM
+         LAST     = IWORK8 + NUMU*NUMU
+C
+         IF(UROHF) THEN
+            IRMMB000B = LAST
+            IRMPB100B = IRMMB000B + NB
+            IRMPB010B = IRMPB100B + NB
+            IRMPB001B = IRMPB010B + NB
+            IRMMB100B = IRMPB001B + NB
+            IRMMB010B = IRMMB100B + NB
+            IRMMB001B = IRMMB010B + NB
+            IRMPB200B = IRMMB001B + NB
+            IRMPB110B = IRMPB200B + NB
+            IRMPB101B = IRMPB110B + NB
+            IRMPB020B = IRMPB101B + NB
+            IRMPB011B = IRMPB020B + NB
+            IRMPB002B = IRMPB011B + NB
+            IWORK9    = IRMPB002B + NB
+            LAST      = IWORK9     + NUM
+         END IF
+C
+         IF(RLUTPC) THEN
+            IB000S  = LAST
+            IB100S  = IB000S + NUMU
+            IB010S  = IB100S + NUMU
+            IB001S  = IB010S + NUMU
+            IB200S  = IB001S + NUMU
+            IB110S  = IB200S + NUMU
+            IB101S  = IB110S + NUMU
+            IB020S  = IB101S + NUMU
+            IB011S  = IB020S + NUMU
+            IB002S  = IB011S + NUMU
+            IMB000S = IB002S + NUMU
+            IMB100S = IMB000S + NUM
+            IMB010S = IMB100S + NUM
+            IMB001S = IMB010S + NUM
+            IPB100S = IMB001S + NUM
+            IPB010S = IPB100S + NUM
+            IPB001S = IPB010S + NUM
+            IPB200S = IPB001S + NUM
+            IPB110S = IPB200S + NUM
+            IPB101S = IPB110S + NUM
+            IPB020S = IPB101S + NUM
+            IPB011S = IPB020S + NUM
+            IPB002S = IPB011S + NUM
+            LAST    = IPB002S + NUM
+         END IF
+      END IF
+C
+C     ----- FOR NEOGRDDFT -----
+      IF(NEODFT.NE.RNONE) THEN
+         IVMOANUC   = LAST
+         IVMOBNUC   = IVMOANUC   + NUMNB
+         IAOXNUC    = IVMOBNUC   + NUMNB
+         IGAOXNUC   = IAOXNUC    + NUMNB
+         IGAOYNUC   = IGAOXNUC   + NUMNB
+         IGAOZNUC   = IGAOYNUC   + NUMNB
+         LAST       = IGAOZNUC   + NUMNB 
+      END IF
+C
+      NDFTEN=LAST
+      RETURN
+
+      END SUBROUTINE GRDDFT
+C*MODULE DFTGRD  *DECK DFTSET 
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES 
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>     **2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C
+      SUBROUTINE DFTSET(X,NPRT,OPTGRD)
+      USE dftexc, ONLY: NEXFG
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      use GRDDFT_SAVED
+
+C
+      USE params, ONLY: rad_grid_type
+      USE mod_dft_fuzzycell, ONLY: comp_basis_mxdists
+      USE params, ONLY: dft_bfc_algo
+      USE mod_nosp_basis, ONLY: split_sp_basis, nosp_basis
+      USE mod_dft_molgrid, ONLY: find_neighbours, sync_slices,
+     *    init_slices, get_dft_grid_num_pts, export_dft_grid
+c
+      IMPLICIT NONE
+      INTEGER :: IXFTCH
+
+      CHARACTER*10 XCHNG,CRRN,PFCHR
+      CHARACTER*3 AGROUP
+C
+      LOGICAL DLB,SAVEGRID,SVDSKW,ABELPT
+C
+      LOGICAL FIRST  
+      SAVE FIRST  
+
+      INTEGER :: NCNTR,NCNX, I,NPT,NFTDFT, NPRT !LAURA
+      INTEGER :: IQ1,IQ2,IQ3,IQ4,IQ5,IQ6,IQ7,IQ8,NRADPTS
+      DOUBLE PRECISION :: DFTTHR0
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION, PARAMETER :: RLN10=2.30258D+00
+      DOUBLE PRECISION, PARAMETER :: RMLNHALF=0.693147
+C
+      LOGICAL DCFLG
+      INTEGER :: NDCPRT,NSUBS
+      DOUBLE PRECISION :: SUBTYP,BUFTYP,SUBLNG,BUFRAD
+      COMMON /DCOPT / SUBTYP,BUFTYP,SUBLNG,BUFRAD,NDCPRT,NSUBS,DCFLG
+C
+      INTEGER :: NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+    
+      LOGICAL :: SG1
+      INTEGER :: NDFTFG,NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,NANGPT,
+     *           NANGPT0,JANS
+      DOUBLE PRECISION :: DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+
+      INTEGER NLEB, NLEB0
+      COMMON /DFLEB/  NLEB(MXGRID),NLEB0(MXGRID)
+
+      INTEGER :: IPRUNECUTS,NTOTGRIDPOINTS,NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: PRUNERADS,PRUNEATOMS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+
+
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+
+      INTEGER :: KDIAG,ICORFL,IXDR,MODIO,mem10,lpnt10,mem10m
+      COMMON /MACHSW/ KDIAG,ICORFL,IXDR,MODIO,mem10,lpnt10,mem10m
+
+      LOGICAL OPTGRD,GOPARR,DSKWRK,MASWRK
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+      DOUBLE PRECISION X(1)
+C
+      DATA FIRST/.TRUE./
+C
+      CALL VCLR(X,1,NDFTEN)
+C
+C     GEOMETRY AND SYMMETRY SETTING.
+C
+      DLB = IBTYP.EQ.1
+C
+      IF (dft_bfc_algo.GE.0) THEN
+          CALL split_sp_basis
+          CALL comp_basis_mxdists(nosp_basis, RLN10*itol*0.5d0)
+      END IF
+C
+      NFTDFT=22
+      IF(OPTGRD) THEN
+C
+C       ISYMC1 WILL HAVE BEEN SET DURING A PRECEDING ENERGY CALCULATION
+C       FTNCHEK WILL GIVE A WARNING, DON'T ATTEMPT TO FIX IT!  IT IS OK.
+C
+        SAVEGRID=ISYMC1.EQ.1.AND.NDER.GT.0.AND.IAND(MODIO,8).EQ.0
+        IF(SAVEGRID) THEN
+          SVDSKW=DSKWRK
+          DSKWRK=.TRUE.
+          CALL SEQOPN(NFTDFT,'DFTGRID','UNKNOWN',.FALSE.,'UNFORMATTED')
+          READ(NFTDFT) (X(I),I=1,NDFTEN)
+          CALL SEQCLO(NFTDFT,'KEEP')
+          DSKWRK=SVDSKW
+          RETURN
+C         READ THE GRID AND RETURN
+        ENDIF
+      ENDIF
+C
+C     WRITE FUNCTIONAL NAME AND OTHER INFO, ON FIRST ENTRANCE
+C
+      NPT=NRAD*MAXANG
+      IF(FIRST  .AND.  NPRT.NE.0  .AND.  MASWRK) THEN
+        FIRST=.FALSE.
+        IF(NDFTFG.EQ.0) THEN
+           XCHNG='HFX       '
+           CRRN ='NONE      '
+        ELSE
+           CALL RNAMEXC(XCHNG,CRRN)
+        END IF
+        WRITE(IW,1010) XCHNG
+        WRITE(IW,1020) CRRN
+        IF (NEXFG.EQ.6) THEN
+          CALL REFPFREE (PFCHR)
+          WRITE(IW,1030) PFCHR
+        ENDIF
+        DFTTHR0=1.0D-03/(NPT*NAT)
+        IF(DFTTHR.NE.ZERO) DFTTHR0=DFTTHR
+        IF(DFTTHR0.LT.1.1D-15) THEN
+          WRITE(IW,1060)
+        ELSE
+          WRITE(IW,1040) DFTTHR0
+        ENDIF
+        IF(NGRIDS.EQ.1) THEN
+           IF(NRAD*NANGPT(1).NE.NRAD0*NANGPT0(1)) WRITE(IW,1050) SW0
+        ENDIF
+C          COARSE/FINE GRID WITCHING INTERCHANGES THESE TWO VARIABLES
+        NRADPTS=MAX(NRAD,NRAD0)
+        CALL CHKRGRID(NRADPTS)
+      ENDIF
+ 1010 FORMAT(/5X,'EXCHANGE FUNCTIONAL   =',A10)
+ 1020 FORMAT(5X, 'CORRELATION FUNCTIONAL=',A10)
+ 1030 FORMAT(5X, 'KINETIC FUNCTIONAL    =',A10)
+ 1040 FORMAT(5X, 'DFT THRESHOLD         =',E8.3)
+ 1050 FORMAT(5X, 'GRID CHANGE THRESHOLD =',E8.3)
+ 1060 FORMAT(5X, 'ALL DFT THRESHOLDS ARE TURNED OFF.')
+ 1070 FORMAT(5X, 'USING ',A3,' ABELIAN SUBGROUP FOR OCTANTS,',
+     *           ' AND FULL SYMMETRY FOR ATOMS.'/)
+ 1075 FORMAT(5X, 'USING FULL ABELIAN GROUP SYMMETRY',
+     *           ' FOR BOTH ATOMS AND OCTANTS.'/)
+ 1080 FORMAT(5X, 'USING FULL SYMMETRY FOR ATOMS,',
+     *           ' BUT NO OCTANT SYMMETRY,'/
+     *       5X, 'SINCE LEBEDEV ANGULAR GRIDS ARE BEING USED.'/)
+C
+C     ---------------------------------------------------------
+C           GET SYMMETRY AND INITIAL SYMMETRY INFORMATION
+C     ---------------------------------------------------------
+C
+      CALL INPINF(ISYMXY,ISYMXZ,ISYMYZ,ISYMRX,ISYMRY,ISYMRZ,ISYMI,
+     >            ISYMC1,AGROUP)
+C
+      IF(FIRST  .AND.  MASWRK  .AND.  NPRT.NE.0) THEN
+         IF(NLEB(1).NE.0   .OR.  SG1  .OR.  JANS.GT.0) THEN
+            WRITE(IW,1080)
+         ELSE
+            IF(AGROUP.NE.'C1'.AND.ABELPT()) THEN
+                WRITE(IW,1075)
+            ELSE
+                WRITE(IW,1070) AGROUP
+            END IF
+         END IF
+      END IF
+C
+C     THERE IS A SUBTLE DIFFERENCE BETWEEN RUNNING GRADIENT AND LOCAL
+C     FRAME, BOTH WITHOUT OCTANT SYMMETRY.
+C     FOR THE GRADIENT, WE GENERATE GRID WITH THE OCTANT SYMMETRY AND
+C     USE IT FOR THE ENERGY, BUT NOT FOR THE GRADIENT.
+C     FOR THE LOCAL FRAME RUNS, DO NOT USE THE OCTANT SYMMETRY.
+C     THIS IS WHY LOCFRAME IS PROVIDED AS AN ARGUMENT TO INPINF.
+C
+C     ------------------------------------------------
+C           SET UP PRIMITIVE COEFFICIENT VECTORS
+C     ------------------------------------------------
+C
+      CALL SETPNRM
+      CALL INPBAS(X(IPCOEFF))
+C
+C     --------------------------------------------------------------
+C                 THE SETUP OF THE FACTOR IFACTR
+C           FOR THE SYMMETRY-UNIQUE ATOM TO BE MULTIPLIED BY.
+C     --------------------------------------------------------------
+C
+      CALL SYMUNQ(X(IFACTR),X(INATM),NSYMAT,X(INDEG),X(INEQATM),
+     *            X(IUNIQUE))
+C
+      CALL ATMVEC(X(IATMXVC),X(IATMYVC),X(IATMZVC),X(IRIJ))
+C
+      CALL RADPT(X(IPTRAD),X(IWTRAD),NRAD)
+      IF(DLB) CALL VCLR(X(ITOTWT),1,NAT*NPT)
+      IF(DLB .AND. LRDFLG) THEN
+        CALL VCLR(X(IWTAB),1,NAT*NAT*NPT)
+      END IF
+c MV
+c     Precompute surface shifting parameters
+      CALL setaij(X(IAIJ), NAT)
+c
+      IF (dft_bfc_algo.GE.0.AND. .NOT.DOLRD.AND. .NOT.DCFLG) THEN
+c         Init storage for the grid
+          CALL init_slices(500*NAT,NAT,NPT)
+c         Find nearest neighbours for all atoms
+          CALL find_neighbours(x(IRIJ), NAT)
+      END IF
+c/MV
+C
+      DO NCNTR = 1, NAT
+C
+C     ---- DUMMY, GHOST AND SYMMETRY NON-UNIQUE ATOMS ARE SKEPT. ----
+C
+        IF (IXFTCH(X(IUNIQUE),NCNTR).EQ.0) CYCLE !GOTO 30
+C
+C     ------------------------------------------------
+C           DETERMINE WHICH QUADRANTS ARE UNIQUE
+C                 AND THE SYMMETRY FACTOR
+C              TO MULTIPLY FINAL INTEGRAL BY.
+C     ------------------------------------------------
+C
+        CALL SYMFCT(ISYMYZ,ISYMXZ,ISYMXY,ISYMRX,ISYMRY,
+     >              ISYMRZ,ISYMI,NCNTR,
+     >              IQ1,IQ2,IQ3,IQ4,IQ5,IQ6,IQ7,IQ8,
+     >              X(IFACT),ISYMC1)
+C
+C     ----------------------------------------------------
+C            DETERMINE THE GRID POINTS FOR NCNTR
+C                THE FUZZY CELL METHOD OF BECKE
+C           ( A.D.BECKE, J.CHEM.PHYS.,88,2547,1988).
+C     ----------------------------------------------------
+C         THERE ARE TWO TYPES OF GRIDS TO DEAL WITH
+C
+        NCNX = NCNTR
+        IF(NLEB(1).NE.0) THEN
+C          WRITE(IW,*) 'SETTING UP LEBEDEV GRID(S)'
+           CALL GENLEBPT(NCNX,X(IWGHT),X(IXDAT),X(IYDAT),X(IZDAT),
+     *          X(ITXYZ),X(IUXYZ),X(ITWGHT),
+     *          X(IATMXVC),X(IATMYVC),X(IATMZVC),
+     *          X(IRI),X(IRIJ),X(IWTINTR),
+     *          X(ITOTWT),X(IAIJ),
+     *          X(IANGN),X(NAPTS),X(IPTRAD),X(IWTRAD),
+     *          NRAD,NLEB,MAXANG,NGRIDS,X(IWTAB))
+        ELSE
+C          WRITE(IW,*) 'SETTING UP AN EM/POLAR COORD GRID'
+           CALL GRDPT(NCNX,X(IWGHT),X(IXDAT),X(IYDAT),X(IZDAT),
+     *          X(IATMXVC),X(IATMYVC),X(IATMZVC),X(IRI),X(IRIJ),
+     *          X(IWTINTR),X(ITOTWT),X(IAIJ),X(IGLROOT),X(IGLWGHT),
+     *          X(IANGN),X(IFACT),X(NAPTS),X(IPTRAD),X(IWTRAD),
+     *          IQ2,IQ3,IQ4,IQ5,IQ6,IQ7,MAXANG,NRAD,NTHE,NPHI,OPTGRD,
+     *          X(IWTAB))
+        END IF
+! 30   CONTINUE
+      END DO
+C
+      IF(GOPARR.AND.DLB) CALL DDI_GSUMF(2314,X(ITOTWT),NAT*NPT)
+      IF(GOPARR.AND.DLB.AND.LRDFLG) THEN
+        CALL DDI_GSUMF(2350,X(IWTAB),NAT*NAT*NPT)
+      END IF
+c MV
+      IF (dft_bfc_algo.GE.0.AND. .NOT.DOLRD.AND. .NOT.DCFLG) THEN
+c         Syncrhonize grid over processes
+          CALL sync_slices
+      END IF
+c /MV
+C
+C     POSSIBLY SAVE GRID FOR THE GRADIENT AND HOPEFULLY THE HESSIAN
+C     THE LATTER CONDITION SAVES SOME TIME BY NOT WRITING THE COARSER
+C     GRID TO DISK, SINCE WE SHALL LATER DEFINE A FINER GRID.
+C
+      SAVEGRID=ISYMC1.EQ.1.AND.NDER.GT.0.AND.IAND(MODIO,8).EQ.0.AND.
+     *         NRAD*NANGPT(1).GE.NRAD0*NANGPT0(1)
+      IF(SAVEGRID) THEN
+         SVDSKW=DSKWRK
+         DSKWRK=.TRUE.
+         CALL SEQOPN(NFTDFT,'DFTGRID','UNKNOWN',.FALSE.,'UNFORMATTED')
+         WRITE(NFTDFT) (X(I),I=1,NDFTEN)
+         CALL SEQCLO(NFTDFT,'KEEP')
+         DSKWRK=SVDSKW
+      ENDIF
+      RETURN
+      END 
+C*MODULE DFTGRD  *DECK DFTEXCOR
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>     **3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C>
+C>    @date : December, 2021 - Chinami Takashima
+C>            added options to calculate exchange-correlation term for
+C>            picture change corrected DFT by (LUT-)IOTC method
+C
+      SUBROUTINE DFTEXCOR(X,FA,FB,COEFFA,COEFFB,L1,L2,EEXC,TOTELE,
+     *                    TOTKIN)
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      use GRDDFT_SAVED
+      use mod_lutiotc, only: PCCDFT,RLUTPC,NKI,NBI,NNUMAO
+C
+      IMPLICIT NONE
+C
+C
+      INTEGER, PARAMETER :: MAXL=3
+      INTEGER, PARAMETER :: MAXM=7
+      INTEGER, PARAMETER :: MAXS=9
+      INTEGER, PARAMETER :: NFREQ=12
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION, PARAMETER :: ONE=1.0D+00
+      INTEGER :: I,NSUB,IC
+      INTEGER :: L1,L2
+      DOUBLE PRECISION :: EEXC, TOTELE, TOTKIN
+C
+      DOUBLE PRECISION :: ZAN,C,GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+      INTEGER :: NAT, ICH, MUL, NUM, NQMT, NE, NA, NB, IAN
+
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /LMOEDA/ GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+
+      INTEGER :: IR, IW, IP, IS, IPK, IDAF, NAV, IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+
+      LOGICAL GOPARR,DSKWRK,MASWRK
+      INTEGER :: ME, MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      LOGICAL DCFLG
+      DOUBLE PRECISION :: SUBTYP,BUFTYP,SUBLNG,BUFRAD
+      INTEGER :: NDCPRT,NSUBS,IDENAO
+      COMMON /DCOPT / SUBTYP,BUFTYP,SUBLNG,BUFRAD,NDCPRT,NSUBS,DCFLG
+      COMMON /DNSAO / IDENAO
+C
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+      INTEGER :: NSHL,NBSF,NNUM,NLOC,NUNV,NUNPV,ISUB
+      COMMON /SETATM/ NSHL(MXATM),NBSF(MXATM),NNUM(MXATM),NLOC(MXATM),
+     *                NUNV,NUNPV,ISUB
+
+C
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+
+      DOUBLE PRECISION :: X(*),FA(*),FB(*),COEFFA(*),COEFFB(*)
+C
+      INTEGER :: IJX(84),IJY(84),IJZ(84)
+C
+C***********************************************************************
+C     ANGULAR MOMENTUM FOR ATOMIC ORBITALS
+C***********************************************************************
+C
+C       DATA IJX    / 1, 2, 1, 1, 3, 1, 1, 2, 2, 1, ! S,       PX,      PY,      PZ,      DXX,     DYY,     DZZ,     DXY,     DXZ,     DYZ
+C      1              4, 1, 1, 3, 3, 2, 1, 2, 1, 2, ! FXXX,    FYYY,    FZZZ,    FXXY,    FXXZ,    FXYY,    FYYZ,    FXZZ,    FYZZ,    FXYZ
+C      2              5, 1, 1, 4, 4, 2, 1, 2, 1, 3, ! GXXXX,   GYYYY,   GZZZZ,   GXXXY,   GXXXZ,   GXYYY,   GYYYZ,   GXZZZ,   GYZZZ,   GXXYY
+C      3              3, 1, 3, 2, 2,                ! GXXZZ,   GYYZZ,   GXXYZ,   GXYYZ,   GXYZZ
+C      4              6, 1, 1, 5, 5, 2, 1, 2, 1, 4, ! HXXXXX,  HYYYYY,  HZZZZZ,  HXXXXY,  HXXXXZ,  HXYYYY,  HYYYYZ,  HXZZZZ,  HYZZZZ,  HXXXYY
+C      5              4, 3, 1, 3, 1, 4, 2, 2, 3, 3, ! HXXXZZ,  HXXYYY,  HYYYZZ,  HXXZZZ,  HYYZZZ,  HXXXYZ,  HXYYYZ,  HXYZZZ,  HXXYYZ,  HXXYZZ
+C      6              2,                            ! HXYYZZ
+C      7              7, 1, 1, 6, 6, 2, 1, 2, 1, 5, ! IXXXXXX, IYYYYYY, IZZZZZZ, IXXXXXY, IXXXXXZ, IXYYYYY, IYYYYYZ, IXZZZZZ, IYZZZZZ, IXXXXYY
+C      8              5, 3, 1, 3, 1, 5, 2, 2, 4, 4, ! IXXXXZZ, IXXYYYY, IYYYYZZ, IXXZZZZ, IYYZZZZ, IXXXXYZ, IXYYYYZ, IXYZZZZ, IXXXYYY, IXXXZZZ
+C      9              1, 4, 4, 3, 2, 3, 2, 3/       ! IYYYZZZ, IXXXYYZ, IXXXYZZ, IXXYYYZ, IXYYYZZ, IXXYZZZ, IXYYZZZ, IXXYYZZ
+C 
+C       DATA IJY    / 1, 1, 2, 1, 1, 3, 1, 2, 1, 2, ! S,       PX,      PY,      PZ,      DXX,     DYY,     DZZ,     DXY,     DXZ,     DYZ
+C      1              1, 4, 1, 2, 1, 3, 3, 1, 2, 2, ! FXXX,    FYYY,    FZZZ,    FXXY,    FXXZ,    FXYY,    FYYZ,    FXZZ,    FYZZ,    FXYZ
+C      2              1, 5, 1, 2, 1, 4, 4, 1, 2, 3, ! GXXXX,   GYYYY,   GZZZZ,   GXXXY,   GXXXZ,   GXYYY,   GYYYZ,   GXZZZ,   GYZZZ,   GXXYY
+C      3              1, 3, 2, 3, 2,                ! GXXZZ,   GYYZZ,   GXXYZ,   GXYYZ,   GXYZZ
+C      4              1, 6, 1, 2, 1, 5, 5, 1, 2, 3, ! HXXXXX,  HYYYYY,  HZZZZZ,  HXXXXY,  HXXXXZ,  HXYYYY,  HYYYYZ,  HXZZZZ,  HYZZZZ,  HXXXYY
+C      5              1, 4, 4, 1, 3, 2, 4, 2, 3, 2, ! HXXXZZ,  HXXYYY,  HYYYZZ,  HXXZZZ,  HYYZZZ,  HXXXYZ,  HXYYYZ,  HXYZZZ,  HXXYYZ,  HXXYZZ
+C      6              3,                            ! HXYYZZ
+C      7              1, 7, 1, 2, 1, 6, 6, 1, 2, 3, ! IXXXXXX, IYYYYYY, IZZZZZZ, IXXXXXY, IXXXXXZ, IXYYYYY, IYYYYYZ, IXZZZZZ, IYZZZZZ, IXXXXYY
+C      8              1, 5, 5, 1, 3, 2, 5, 2, 4, 1, ! IXXXXZZ, IXXYYYY, IYYYYZZ, IXXZZZZ, IYYZZZZ, IXXXXYZ, IXYYYYZ, IXYZZZZ, IXXXYYY, IXXXZZZ
+C      9              4, 3, 2, 4, 4, 2, 3, 3/       ! IYYYZZZ, IXXXYYZ, IXXXYZZ, IXXYYYZ, IXYYYZZ, IXXYZZZ, IXYYZZZ, IXXYYZZ
+C 
+C       DATA IJZ    / 1, 1, 1, 2, 1, 1, 3, 1, 2, 2, ! S,       PX,      PY,      PZ,      DXX,     DYY,     DZZ,     DXY,     DXZ,     DYZ
+C      1              1, 1, 4, 1, 2, 1, 2, 3, 3, 2, ! FXXX,    FYYY,    FZZZ,    FXXY,    FXXZ,    FXYY,    FYYZ,    FXZZ,    FYZZ,    FXYZ
+C      2              1, 1, 5, 1, 2, 1, 2, 4, 4, 1, ! GXXXX,   GYYYY,   GZZZZ,   GXXXY,   GXXXZ,   GXYYY,   GYYYZ,   GXZZZ,   GYZZZ,   GXXYY
+C      3              3, 3, 2, 2, 3,                ! GXXZZ,   GYYZZ,   GXXYZ,   GXYYZ,   GXYZZ
+C      4              1, 1, 6, 1, 2, 1, 2, 5, 5, 1, ! HXXXXX,  HYYYYY,  HZZZZZ,  HXXXXY,  HXXXXZ,  HXYYYY,  HYYYYZ,  HXZZZZ,  HYZZZZ,  HXXXYY
+C      5              3, 1, 3, 4, 4, 2, 2, 4, 2, 3, ! HXXXZZ,  HXXYYY,  HYYYZZ,  HXXZZZ,  HYYZZZ,  HXXXYZ,  HXYYYZ,  HXYZZZ,  HXXYYZ,  HXXYZZ
+C      6              3,                            ! HXYYZZ
+C      7              1, 1, 7, 1, 2, 1, 2, 6, 6, 1, ! IXXXXXX, IYYYYYY, IZZZZZZ, IXXXXXY, IXXXXXZ, IXYYYYY, IYYYYYZ, IXZZZZZ, IYZZZZZ, IXXXXYY
+C      8              3, 1, 3, 5, 5, 2, 2, 5, 1, 4, ! IXXXXZZ, IXXYYYY, IYYYYZZ, IXXZZZZ, IYYZZZZ, IXXXXYZ, IXYYYYZ, IXYZZZZ, IXXXYYY, IXXXZZZ
+C      9              4, 2, 3, 2, 3, 4, 4, 3/       ! IYYYZZZ, IXXXYYZ, IXXXYZZ, IXXYYYZ, IXYYYZZ, IXXYZZZ, IXYYZZZ, IXXYYZZ
+C
+C***********************************************************************
+C
+      DATA IJX    / 1, 2, 1, 1, 3, 1, 1, 2, 2, 1,
+     1              4, 1, 1, 3, 3, 2, 1, 2, 1, 2,
+     2              5, 1, 1, 4, 4, 2, 1, 2, 1, 3,
+     3              3, 1, 3, 2, 2,
+     4              6, 1, 1, 5, 5, 2, 1, 2, 1, 4,
+     5              4, 3, 1, 3, 1, 4, 2, 2, 3, 3,
+     6              2,
+     7              7, 1, 1, 6, 6, 2, 1, 2, 1, 5,
+     8              5, 3, 1, 3, 1, 5, 2, 2, 4, 4,
+     9              1, 4, 4, 3, 2, 3, 2, 3/
+
+      DATA IJY    / 1, 1, 2, 1, 1, 3, 1, 2, 1, 2,
+     1              1, 4, 1, 2, 1, 3, 3, 1, 2, 2,
+     2              1, 5, 1, 2, 1, 4, 4, 1, 2, 3,
+     3              1, 3, 2, 3, 2,
+     4              1, 6, 1, 2, 1, 5, 5, 1, 2, 3,
+     5              1, 4, 4, 1, 3, 2, 4, 2, 3, 2,
+     6              3,
+     7              1, 7, 1, 2, 1, 6, 6, 1, 2, 3,
+     8              1, 5, 5, 1, 3, 2, 5, 2, 4, 1,
+     9              4, 3, 2, 4, 4, 2, 3, 3/
+
+      DATA IJZ    / 1, 1, 1, 2, 1, 1, 3, 1, 2, 2,
+     1              1, 1, 4, 1, 2, 1, 2, 3, 3, 2,
+     2              1, 1, 5, 1, 2, 1, 2, 4, 4, 1,
+     3              3, 3, 2, 2, 3,
+     4              1, 1, 6, 1, 2, 1, 2, 5, 5, 1,
+     5              3, 1, 3, 4, 4, 2, 2, 4, 2, 3,
+     6              3,
+     7              1, 1, 7, 1, 2, 1, 2, 6, 6, 1,
+     8              3, 1, 3, 5, 5, 2, 2, 5, 1, 4,
+     9              4, 2, 3, 2, 3, 4, 4, 3/
+C
+C
+C     COMPUTE THE EXCHANGE-CORRELATION ENERGY FUNCTIONAL
+C
+      CALL VCLR(FA,1,L2)
+      IF (UROHF.OR.REKS22) CALL VCLR(FB,1,L2)
+C
+      IF(IDENAO.NE.0) THEN
+         IF(DCFLG) THEN
+            CALL DAREAD(IDAF,IODA,X(INLCT),L2,272,1)
+            CALL DFTNLC(X(INLCT),X(INELM),L1)
+         ELSE
+C           NLCT(1)=-1000 MEANS NON-DC CALCULATION
+            CALL IXSTOR(X(INLCT),1,-1000)
+C            IONE=-1
+C            CALL ICOPY(L2,IONE,0,X(INLCT),1)
+         END IF
+      END IF
+C
+C     ----- LOOP FOR ATOMS -----
+C
+      TOTELE = ZERO
+      TOTKIN = ZERO
+      EEXC   = ZERO
+      ECORL  = ZERO
+      IF(DOLRD) THEN
+        CALL VCLR(X(IATMPOL),1,LRDMEM)
+        IF (MASWRK) WRITE (IW,2000)
+      END IF
+C
+C     ----- FOR PICTURE CHANGE CORRECTED DFT -----
+      IF(PCCDFT) THEN
+C       GET IOTC TRANSFORMATION MATRIX
+        CALL DAREAD(IDAF,IODA,X(IAO2PO),NUMU*NUM,389,0)
+C        CALL DPRTMATL(X(IAO2PO),NUMU,NUM,NUMU,'AO2PO     ')
+        CALL SEQREW(NKI)
+        CALL SEQREW(NBI)
+        IF(RLUTPC) THEN
+          IC = 0
+          DO I = 1, NAT
+            NSUB = NNUM(I)*NNUM(I)
+            CALL SQREAD(NKI,X(IWORK8),NSUB)
+            CALL DGEMM('N','N',NNUM(I),NNUMAO(I),NNUM(I),ONE,X(IWORK8),
+     *                NNUM(I),X(IAO2PO+IC),NUMU,ZERO,X(IRMOMG+IC),NUMU)
+            CALL SQREAD(NBI,X(IWORK8),NSUB)
+            CALL DGEMM('N','N',NNUM(I),NNUMAO(I),NNUM(I),ONE,X(IWORK8),
+     *                NNUM(I),X(IAO2PO+IC),NUMU,ZERO,X(IPIOMG+IC),NUMU)
+            IC = IC + NUMU*NNUMAO(I) + NNUM(I)
+          END DO
+c          CALL DPRTMATL(X(IRMOMG),NUMU,NUM,NUMU,'KI        ')
+c          CALL DPRTMATL(X(IPIOMG),NUMU,NUM,NUMU,'BI        ')
+          CALL FLIPBASIS(17)
+        ELSE
+          CALL SQREAD(NKI,X(IWORK8),NUMU*NUMU)
+          CALL DGEMM('N','N',NUMU,NUM,NUMU,ONE,X(IWORK8),NUMU,X(IAO2PO),
+     *               NUMU,ZERO,X(IRMOMG),NUMU)
+          CALL SQREAD(NBI,X(IWORK8),NUMU*NUMU)
+          CALL DGEMM('N','N',NUMU,NUM,NUMU,ONE,X(IWORK8),NUMU,X(IAO2PO),
+     *               NUMU,ZERO,X(IPIOMG),NUMU)
+c          CALL DPRTMATL(X(IRMOMG),NUMU,NUM,NUMU,'KI        ')
+c          CALL DPRTMATL(X(IPIOMG),NUMU,NUM,NUMU,'BI        ')
+          CALL FLIPBASIS(17)
+          END IF
+      END IF
+C***********************************************************************
+C
+C     ----------------------------------------------------------------
+C            CALCULATE THE EXCHANGE-CORRELATION ENERGY FUNCTIONAL
+C     ----------------------------------------------------------------
+c MV
+c     Loop over atoms is now inside subroutine DMATD
+c
+C     ----- FOR PICTURE CHANGE CORRECTED DFT -----
+      IF(PCCDFT) THEN
+        IF(RLUTPC) THEN
+          IF(UROHF) THEN
+            CALL DMATD_LUTPCC_UHF(X(ITOTWT),X(IFACT),X(NAPTS),
+     *           COEFFA,COEFFB
+     *          ,X(IANGN),X(IFACTR),X(IVMOA),X(IDVMOXA),X(IDVMOYA),
+     *           X(IDVMOZA),X(IVALGA),X(IVMOB),X(IDVMOXB),X(IDVMOYB),
+     *           X(IDVMOZB),X(IVALGB),FA,FB,X(IUNIQUE),EEXC,TOTELE,NANG,
+     *           X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),X(IATMXVC),
+     *           X(IATMYVC),X(IATMZVC),X(IANGXV),X(IANGYV),X(IANGZV),
+     *           X(IRSQRD),X(IPCOEFF),X(IEXPS),X(IAOX),X(IGAOX),
+     *           X(IGAOY),X(IGAOZ),X(INLCT),X(INELM),IJX,IJY,IJZ,L1,
+     *           NEEDGR,UROHF,TOTKIN,
+     *           X(IATMPOL),X(IATPPOL),X(IEFPOL),X(IWTAB),
+     *           X(IDRSPH),MAXL,MAXM,NFREQ,
+     *           X(IRMOMG),X(IPIOMG),X(IB000),X(IB100),X(IB010),X(IB001)
+     *          ,X(IB200),X(IB110),X(IB101),X(IB020),X(IB011),X(IB002),
+     *           X(IWORK1),X(IWORK2),X(IWORK3),X(IWORK4),X(IWORK5),
+     *           X(IWORK6),X(IWORK7),
+     *           X(IRMB000),X(IRPB100),X(IRPB010),X(IRPB001),X(IRMB100),
+     *           X(IRMB010),X(IRMB001),X(IRPB200),X(IRPB110),X(IRPB101),
+     *           X(IRPB020),X(IRPB011),X(IRPB002),
+     *           X(IRMMB000),X(IRMPB100),X(IRMPB010),X(IRMPB001),
+     *           X(IRMMB100),X(IRMMB010),X(IRMMB001),X(IRMPB200),
+     *           X(IRMPB110),X(IRMPB101),X(IRMPB020),X(IRMPB011),
+     *           X(IRMPB002),
+     *           X(IRMMB000B),X(IRMPB100B),X(IRMPB010B),
+     *           X(IRMPB001B),X(IRMMB100B),X(IRMMB010B),X(IRMMB001B),
+     *           X(IRMPB200B),X(IRMPB110B),X(IRMPB101B),X(IRMPB020B),
+     *           X(IRMPB011B),X(IRMPB002B),X(IWORK9),
+     *           X(IB000S),X(IB100S),X(IB010S),X(IB001S),X(IB200S),
+     *           X(IB110S),X(IB101S),X(IB020S),X(IB011S),X(IB002S),
+     *           X(IMB000S),X(IMB100S),X(IMB010S),X(IMB001S),
+     *           X(IPB100S),X(IPB010S),X(IPB001S),X(IPB200S),
+     *           X(IPB110S),X(IPB101S),X(IPB020S),X(IPB011S),
+     *           X(IPB002S))
+            CALL FLIPBASIS(15)
+          ELSE
+            CALL DMATD_LUTPCC_RHF(X(ITOTWT),X(IFACT),X(NAPTS),
+     *           COEFFA,COEFFB
+     *          ,X(IANGN),X(IFACTR),X(IVMOA),X(IDVMOXA),X(IDVMOYA),
+     *           X(IDVMOZA),X(IVALGA),X(IVMOB),X(IDVMOXB),X(IDVMOYB),
+     *           X(IDVMOZB),X(IVALGB),FA,FB,X(IUNIQUE),EEXC,TOTELE,NANG,
+     *           X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),X(IATMXVC),
+     *           X(IATMYVC),X(IATMZVC),X(IANGXV),X(IANGYV),X(IANGZV),
+     *           X(IRSQRD),X(IPCOEFF),X(IEXPS),X(IAOX),X(IGAOX),
+     *           X(IGAOY),X(IGAOZ),X(INLCT),X(INELM),IJX,IJY,IJZ,L1,
+     *           NEEDGR,UROHF,TOTKIN,
+     *           X(IATMPOL),X(IATPPOL),X(IEFPOL),X(IWTAB),
+     *           X(IDRSPH),MAXL,MAXM,NFREQ,
+     *           X(IRMOMG),X(IPIOMG),X(IB000),X(IB100),X(IB010),X(IB001)
+     *          ,X(IB200),X(IB110),X(IB101),X(IB020),X(IB011),X(IB002),
+     *           X(IWORK1),X(IWORK2),X(IWORK3),X(IWORK4),X(IWORK5),
+     *           X(IWORK6),X(IWORK7),
+     *           X(IRMB000),X(IRPB100),X(IRPB010),X(IRPB001),X(IRMB100),
+     *           X(IRMB010),X(IRMB001),X(IRPB200),X(IRPB110),X(IRPB101),
+     *           X(IRPB020),X(IRPB011),X(IRPB002),
+     *           X(IRMMB000),X(IRMPB100),X(IRMPB010),X(IRMPB001),
+     *           X(IRMMB100),X(IRMMB010),X(IRMMB001),X(IRMPB200),
+     *           X(IRMPB110),X(IRMPB101),X(IRMPB020),X(IRMPB011),
+     *           X(IRMPB002),
+     *           X(IB000S),X(IB100S),X(IB010S),X(IB001S),X(IB200S),
+     *           X(IB110S),X(IB101S),X(IB020S),X(IB011S),X(IB002S),
+     *           X(IMB000S),X(IMB100S),X(IMB010S),X(IMB001S),
+     *           X(IPB100S),X(IPB010S),X(IPB001S),X(IPB200S),
+     *           X(IPB110S),X(IPB101S),X(IPB020S),X(IPB011S),
+     *           X(IPB002S))
+            CALL FLIPBASIS(15)
+
+          END IF
+        ELSE
+          IF(UROHF) THEN
+            CALL DMATD_PCC_UHF(X(ITOTWT),X(IFACT),X(NAPTS),COEFFA,COEFFB
+     *          ,X(IANGN),X(IFACTR),X(IVMOA),X(IDVMOXA),X(IDVMOYA),
+     *           X(IDVMOZA),X(IVALGA),X(IVMOB),X(IDVMOXB),X(IDVMOYB),
+     *           X(IDVMOZB),X(IVALGB),FA,FB,X(IUNIQUE),EEXC,TOTELE,NANG,
+     *           X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),X(IATMXVC),
+     *           X(IATMYVC),X(IATMZVC),X(IANGXV),X(IANGYV),X(IANGZV),
+     *           X(IRSQRD),X(IPCOEFF),X(IEXPS),X(IAOX),X(IGAOX),
+     *           X(IGAOY),X(IGAOZ),X(INLCT),X(INELM),IJX,IJY,IJZ,L1,
+     *           NEEDGR,UROHF,TOTKIN,
+     *           X(IATMPOL),X(IATPPOL),X(IEFPOL),X(IWTAB),
+     *           X(IDRSPH),MAXL,MAXM,NFREQ,
+     *           X(IRMOMG),X(IPIOMG),X(IB000),X(IB100),X(IB010),X(IB001)
+     *          ,X(IB200),X(IB110),X(IB101),X(IB020),X(IB011),X(IB002),
+     *           X(IWORK1),X(IWORK2),X(IWORK3),X(IWORK4),X(IWORK5),
+     *           X(IWORK6),X(IWORK7),
+     *           X(IRMB000),X(IRPB100),X(IRPB010),X(IRPB001),X(IRMB100),
+     *           X(IRMB010),X(IRMB001),X(IRPB200),X(IRPB110),X(IRPB101),
+     *           X(IRPB020),X(IRPB011),X(IRPB002),
+     *           X(IRMMB000),X(IRMPB100),X(IRMPB010),X(IRMPB001),
+     *           X(IRMMB100),X(IRMMB010),X(IRMMB001),X(IRMPB200),
+     *           X(IRMPB110),X(IRMPB101),X(IRMPB020),X(IRMPB011),
+     *           X(IRMPB002),
+     *           X(IRMMB000B),X(IRMPB100B),X(IRMPB010B),
+     *           X(IRMPB001B),X(IRMMB100B),X(IRMMB010B),X(IRMMB001B),
+     *           X(IRMPB200B),X(IRMPB110B),X(IRMPB101B),X(IRMPB020B),
+     *           X(IRMPB011B),X(IRMPB002B),X(IWORK9))
+            CALL FLIPBASIS(15)
+          ELSE
+            CALL DMATD_PCC_RHF(X(ITOTWT),X(IFACT),X(NAPTS),COEFFA,COEFFB
+     *          ,X(IANGN),X(IFACTR),X(IVMOA),X(IDVMOXA),X(IDVMOYA),
+     *           X(IDVMOZA),X(IVALGA),X(IVMOB),X(IDVMOXB),X(IDVMOYB),
+     *           X(IDVMOZB),X(IVALGB),FA,FB,X(IUNIQUE),EEXC,TOTELE,NANG,
+     *           X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),X(IATMXVC),
+     *           X(IATMYVC),X(IATMZVC),X(IANGXV),X(IANGYV),X(IANGZV),
+     *           X(IRSQRD),X(IPCOEFF),X(IEXPS),X(IAOX),X(IGAOX),
+     *           X(IGAOY),X(IGAOZ),X(INLCT),X(INELM),IJX,IJY,IJZ,L1,
+     *           NEEDGR,UROHF,TOTKIN,
+     *           X(IATMPOL),X(IATPPOL),X(IEFPOL),X(IWTAB),
+     *           X(IDRSPH),MAXL,MAXM,NFREQ,
+     *           X(IRMOMG),X(IPIOMG),X(IB000),X(IB100),X(IB010),X(IB001)
+     *          ,X(IB200),X(IB110),X(IB101),X(IB020),X(IB011),X(IB002),
+     *           X(IWORK1),X(IWORK2),X(IWORK3),X(IWORK4),X(IWORK5),
+     *           X(IWORK6),X(IWORK7),
+     *           X(IRMB000),X(IRPB100),X(IRPB010),X(IRPB001),X(IRMB100),
+     *           X(IRMB010),X(IRMB001),X(IRPB200),X(IRPB110),X(IRPB101),
+     *           X(IRPB020),X(IRPB011),X(IRPB002),
+     *           X(IRMMB000),X(IRMPB100),X(IRMPB010),X(IRMPB001),
+     *           X(IRMMB100),X(IRMMB010),X(IRMMB001),X(IRMPB200),
+     *           X(IRMPB110),X(IRMPB101),X(IRMPB020),X(IRMPB011),
+     *           X(IRMPB002))
+            CALL FLIPBASIS(15)
+          END IF
+        END IF
+      ELSE
+      CALL DMATD(X(ITOTWT),X(IFACT),X(NAPTS),COEFFA,COEFFB,X(IANGN),
+     *        X(IFACTR),X(IVMOA),X(IDVMOXA),X(IDVMOYA),
+     *        X(IDVMOZA),X(IVALGA),X(IVMOB),X(IDVMOXB),X(IDVMOYB),
+     *        X(IDVMOZB),X(IVALGB),FA,FB,X(IUNIQUE),EEXC,TOTELE,NANG,
+     *        X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),X(IATMXVC),
+     *        X(IATMYVC),X(IATMZVC),X(IANGXV),X(IANGYV),X(IANGZV),
+     *        X(IRSQRD),X(IPCOEFF),X(IEXPS),X(IAOX),X(IGAOX),
+     *        X(IGAOY),X(IGAOZ),X(INLCT),X(INELM),IJX,IJY,IJZ,L1,
+     *        NEEDGR,UROHF,REKS22,TOTKIN,
+     *        X(IATMPOL),X(IATPPOL),X(IEFPOL),X(IWTAB),
+     *        X(IDRSPH),MAXL,MAXM,NFREQ)
+      END IF
+c/MV
+C
+C     CALCULATE LRD ENERGY
+C
+      IF(DOLRD) THEN
+        IF (GOPARR) THEN
+          CALL DDI_GSUMF(2351,X(IATMPOL),NAT*MAXL*MAXM*MAXM*NFREQ)
+          CALL DDI_GSUMF(2352,X(IATPPOL),NAT*NAT*NFREQ)
+          CALL DDI_GSUMF(2353,X(IEFPOL),NAT)
+          CALL LRDENEG(X(IATMPOL),X(IEFPOL),
+     *                 X(ISMATC),X(ISMATP),X(IWIGD),
+     *                 X(ICOEF6),X(ICOEF8),X(ICOEF10),X(IATMPE),
+     *                 MAXL,MAXM,MAXS,NFREQ,ELRD6,ELRD8,ELRD10,
+     *                 X(IATMXVC),X(IATMYVC),X(IATMZVC),X(IRIJ))
+          IF (MLTINT)
+     *    CALL LRDMULT(X(IATPPOL),X(IEFPOL),NFREQ,EMULT,
+     *                 X(IATMXVC),X(IATMYVC),X(IATMZVC),X(IRIJ))
+        ELSE
+          CALL LRDENEG(X(IATMPOL),X(IEFPOL),
+     *                 X(ISMATC),X(ISMATP),X(IWIGD),
+     *                 X(ICOEF6),X(ICOEF8),X(ICOEF10),X(IATMPE),
+     *                 MAXL,MAXM,MAXS,NFREQ,ELRD6,ELRD8,ELRD10,
+     *                 X(IATMXVC),X(IATMYVC),X(IATMZVC),X(IRIJ))
+          IF (MLTINT)
+     *    CALL LRDMULT(X(IATPPOL),X(IEFPOL),NFREQ,EMULT,
+     *                 X(IATMXVC),X(IATMYVC),X(IATMZVC),X(IRIJ))
+        END IF
+      END IF
+C
+ 2000 FORMAT(10X,'--- CALCULATING LOCAL RESPONSE DISPERSION ENERGY ---')
+      RETURN
+      END 
+C*MODULE DFTGRD  *DECK SOLVDISP
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>     **4.   SOLUTE/SOLVENT DISPERSION ENERGY           (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C
+      SUBROUTINE SOLVDISP(X,COEFFA,COEFFB,L1,L2,TOTELE,EDISP)
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      use GRDDFT_SAVED
+C
+      IMPLICIT NONE
+      INTEGER :: L1, L2, IONE,NCNTR, INC0, NCNTRX, IXFTCH
+      DOUBLE PRECISION :: TOTELE, EDISP
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+C
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN, C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+
+      LOGICAL :: GOPARR,DSKWRK,MASWRK
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      LOGICAL :: DCFLG
+      INTEGER :: NDCPRT, NSUBS
+      DOUBLE PRECISION :: SUBTYP,BUFTYP,SUBLNG,BUFRAD
+      COMMON /DCOPT / SUBTYP,BUFTYP,SUBLNG,BUFRAD,NDCPRT,NSUBS,DCFLG
+
+      INTEGER :: IDENAO
+      COMMON /DNSAO / IDENAO
+C
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+      DOUBLE PRECISION :: X(1),COEFFA(1),COEFFB(1)
+C
+      INTEGER :: IJX(84),IJY(84),IJZ(84)
+C
+C***********************************************************************
+C     ANGULAR MOMENTUM FOR ATOMIC ORBITALS
+C***********************************************************************
+C
+      DATA IJX    / 1, 2, 1, 1, 3, 1, 1, 2, 2, 1,
+     1              4, 1, 1, 3, 3, 2, 1, 2, 1, 2,
+     2              5, 1, 1, 4, 4, 2, 1, 2, 1, 3,
+     3              3, 1, 3, 2, 2,
+     4              6, 1, 1, 5, 5, 2, 1, 2, 1, 4,
+     5              4, 3, 1, 3, 1, 4, 2, 2, 3, 3,
+     6              2,
+     7              7, 1, 1, 6, 6, 2, 1, 2, 1, 5,
+     8              5, 3, 1, 3, 1, 5, 2, 2, 4, 4,
+     9              1, 4, 4, 3, 2, 3, 2, 3/
+
+      DATA IJY    / 1, 1, 2, 1, 1, 3, 1, 2, 1, 2,
+     1              1, 4, 1, 2, 1, 3, 3, 1, 2, 2,
+     2              1, 5, 1, 2, 1, 4, 4, 1, 2, 3,
+     3              1, 3, 2, 3, 2,
+     4              1, 6, 1, 2, 1, 5, 5, 1, 2, 3,
+     5              1, 4, 4, 1, 3, 2, 4, 2, 3, 2,
+     6              3,
+     7              1, 7, 1, 2, 1, 6, 6, 1, 2, 3,
+     8              1, 5, 5, 1, 3, 2, 5, 2, 4, 1,
+     9              4, 3, 2, 4, 4, 2, 3, 3/
+
+      DATA IJZ    / 1, 1, 1, 2, 1, 1, 3, 1, 2, 2,
+     1              1, 1, 4, 1, 2, 1, 2, 3, 3, 2,
+     2              1, 1, 5, 1, 2, 1, 2, 4, 4, 1,
+     3              3, 3, 2, 2, 3,
+     4              1, 1, 6, 1, 2, 1, 2, 5, 5, 1,
+     5              3, 1, 3, 4, 4, 2, 2, 4, 2, 3,
+     6              3,
+     7              1, 1, 7, 1, 2, 1, 2, 6, 6, 1,
+     8              3, 1, 3, 5, 5, 2, 2, 5, 1, 4,
+     9              4, 2, 3, 2, 3, 4, 4, 3/
+C
+C
+C     THIS CODE IS USED FOR THE SOLUTE/SOLVENT DISPERSION ENERGY IN
+C     THE CMIRS VERSION OF THE SVP SOLVATION MODEL.
+C     SEE 2013 PREPRINT BY ANNA POMOGAEVA AND DAN CHIPMAN TITLED
+C     "HYDRATION ENERGY FROM A COMPOSITE METHOD FOR IMPLICIT
+C      REPRESENTATION OF SOLVENT" FOR DETAILS.
+C
+      IF(IDENAO.NE.0) THEN
+         IF(DCFLG) THEN
+            CALL DAREAD(IDAF,IODA,X(INLCT),L2,272,1)
+            CALL DFTNLC(X(INLCT),X(INELM),L1)
+         ELSE
+C           NLCT(1)=-1000 MEANS NON-DC CALCULATION
+            CALL IXSTOR(X(INLCT),1,-1000)
+C            IONE=-1
+C            CALL ICOPY(L2,IONE,0,X(INLCT),1)
+         END IF
+      END IF
+C
+C     ----- LOOP FOR ATOMS -----
+      TOTELE = ZERO
+      EDISP = ZERO
+      DO NCNTR = 1, NAT
+        INC0=IXFTCH(X(IUNIQUE),NCNTR)
+        IF(INC0.EQ.0) CYCLE 
+C
+        NCNTRX = NCNTR
+        CALL DISPERS(X(ITOTWT),X(IFACT),X(NAPTS),COEFFA,COEFFB,X(IANGN),
+     *             X(IFACTR),INC0,X(IVMOA),X(IVMOB),NCNTRX,TOTELE,NANG,
+     *             X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),X(IATMXVC),
+     *             X(IATMYVC),X(IATMZVC),X(IANGXV),X(IANGYV),X(IANGZV),
+     *             X(IRSQRD),X(IPCOEFF),X(IEXPS),X(IAOX),
+     *             X(INLCT),X(INELM),IJX,IJY,IJZ,L1,
+     *             UROHF,X(IWGHT),X(IGAOX),X(IGAOY),X(IGAOZ),
+     *             X(IDVMOXA),X(IDVMOYA),X(IDVMOZA),
+     *             X(IDVMOXB),X(IDVMOYB),X(IDVMOZB),
+     *             EDISP)
+C
+      END DO
+C      IF (MASWRK) WRITE (IW,*) 'EDISP= ',EDISP
+      RETURN
+C
+      END
+C*MODULE DFTGRD  *DECK DFTGRAD
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>     **5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C
+      SUBROUTINE DFTGRAD(X,G2AXX,G2AYY,G2AZZ,G2AXY,G2AYZ,G2AXZ,
+     *              COEFFA,COEFFB,DA,DB,DEDFT,UVEC,DWTINT,DWTTOT,DTOTWT,
+     *              L1,TOTELE,GRDOUT)
+      use GRDDFT_SAVED
+C
+      IMPLICIT NONE
+C
+      LOGICAL GRDOUT
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+      DOUBLE PRECISION :: TOTELE
+      INTEGER :: L1,LL2
+C
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+C
+      LOGICAL DCFLG
+      INTEGER :: NDCPRT,NSUBS,IDENAO
+      DOUBLE PRECISION :: SUBTYP,BUFTYP,SUBLNG,BUFRAD
+      COMMON /DCOPT / SUBTYP,BUFTYP,SUBLNG,BUFRAD,NDCPRT,NSUBS,DCFLG
+      COMMON /DNSAO / IDENAO
+C
+
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+      DOUBLE PRECISION :: X(1),DA(1),DB(1),COEFFA(1),COEFFB(1),
+     *          G2AXX(1),G2AYY(1),G2AZZ(1),G2AXY(1),G2AYZ(1),G2AXZ(1),
+     *          DEDFT(1),UVEC(1),DWTINT(1),DWTTOT(1),DTOTWT(1)
+
+C
+      INTEGER :: IJX(84),IJY(84),IJZ(84)
+C
+C***********************************************************************
+C     ANGULAR MOMENTUM FOR ATOMIC ORBITALS
+C***********************************************************************
+C
+      DATA IJX    / 1, 2, 1, 1, 3, 1, 1, 2, 2, 1,
+     1              4, 1, 1, 3, 3, 2, 1, 2, 1, 2,
+     2              5, 1, 1, 4, 4, 2, 1, 2, 1, 3,
+     3              3, 1, 3, 2, 2,
+     4              6, 1, 1, 5, 5, 2, 1, 2, 1, 4,
+     5              4, 3, 1, 3, 1, 4, 2, 2, 3, 3,
+     6              2,
+     7              7, 1, 1, 6, 6, 2, 1, 2, 1, 5,
+     8              5, 3, 1, 3, 1, 5, 2, 2, 4, 4,
+     9              1, 4, 4, 3, 2, 3, 2, 3/
+
+      DATA IJY    / 1, 1, 2, 1, 1, 3, 1, 2, 1, 2,
+     1              1, 4, 1, 2, 1, 3, 3, 1, 2, 2,
+     2              1, 5, 1, 2, 1, 4, 4, 1, 2, 3,
+     3              1, 3, 2, 3, 2,
+     4              1, 6, 1, 2, 1, 5, 5, 1, 2, 3,
+     5              1, 4, 4, 1, 3, 2, 4, 2, 3, 2,
+     6              3,
+     7              1, 7, 1, 2, 1, 6, 6, 1, 2, 3,
+     8              1, 5, 5, 1, 3, 2, 5, 2, 4, 1,
+     9              4, 3, 2, 4, 4, 2, 3, 3/
+
+      DATA IJZ    / 1, 1, 1, 2, 1, 1, 3, 1, 2, 2,
+     1              1, 1, 4, 1, 2, 1, 2, 3, 3, 2,
+     2              1, 1, 5, 1, 2, 1, 2, 4, 4, 1,
+     3              3, 3, 2, 2, 3,
+     4              1, 1, 6, 1, 2, 1, 2, 5, 5, 1,
+     5              3, 1, 3, 4, 4, 2, 2, 4, 2, 3,
+     6              3,
+     7              1, 1, 7, 1, 2, 1, 2, 6, 6, 1,
+     8              3, 1, 3, 5, 5, 2, 2, 5, 1, 4,
+     9              4, 2, 3, 2, 3, 4, 4, 3/
+C
+C
+C     DFT CONTRIBUTIONS TO THE NUCLEAR GRADIENT.
+C
+      LL2=L1*(L1+1)/2
+      IF(IDENAO.NE.0) THEN
+         IF(DCFLG) THEN
+            CALL DAREAD(IDAF,IODA,X(INLCT),LL2,272,1)
+            CALL DFTNLC(X(INLCT),X(INELM),L1)
+         ELSE
+C           NLCT(1)=-1000 MEANS NON-DC CALCULATION
+            CALL IXSTOR(X(INLCT),1,-1000)
+C            IONE=-1
+C            CALL ICOPY(LL2,IONE,0,X(INLCT),1)
+         END IF
+      END IF
+      TOTELE = ZERO
+      CALL DEREXC(X(ITOTWT),X(NAPTS),COEFFA,COEFFB,DA,DB,X(IANGN),
+     *            X(IFACTR),X(IUNIQUE),X(IVMOA),X(IDVMOXA),X(IDVMOYA),
+     *            X(IDVMOZA),X(IVMOB),X(IDVMOXB),X(IDVMOYB),X(IDVMOZB),
+     *            X(IWGHT),X(IRI),X(IRIJ),X(IWTINTR),X(IAIJ),X(IWTRAD),
+     *            L1,TOTELE,NANG+NDER,X(IPTRAD),X(IXDAT),
+     *            X(IYDAT),X(IZDAT),X(IATMXVC),X(IATMYVC),X(IATMZVC),
+     *            X(IANGXV),X(IANGYV),X(IANGZV),X(IRSQRD),
+     *            X(IPCOEFF),X(IEXPS),X(IAOX),X(IGAOX),X(IGAOY),
+     *            X(IGAOZ),G2AXX,G2AYY,G2AZZ,G2AXY,G2AYZ,G2AXZ,
+     *            X(INLCT),X(INELM),IJX,IJY,IJZ,NEEDGR,DEDFT,
+     *            UVEC,DWTINT,DWTTOT,DTOTWT,GRDOUT)
+C1193 FORMAT(/'TOTAL EXC ENERGY',F20.10,'TOTAL ELECTRON',F20.10)
+C
+      RETURN
+      END 
+C*MODULE DFTGRD  *DECK MGRDMNG
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>     **6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C
+      SUBROUTINE MGRDMNG(X,XYZGRD,XYZWGT,KCP,NPTGRD,ITYP)
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      use GRDDFT_SAVED
+C
+      USE params, ONLY: dft_bfc_algo
+      USE mod_dft_molgrid, ONLY: find_neighbours, sync_slices,
+     *    init_slices, get_dft_grid_num_pts, export_dft_grid
+
+      IMPLICIT NONE
+C
+      INTEGER :: IGPT,ITYP,NCNTR,INC0,IXFTCH,NPRCSV,NPTGRD
+      LOGICAL GPSAVE,DLB
+C
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN,NCNTR1
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      LOGICAL GOPARR,DSKWRK,MASWRK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+      DOUBLE PRECISION :: X(1)
+      DOUBLE PRECISION :: XYZGRD(3,*),XYZWGT(*)
+      INTEGER :: KCP(*)
+C
+C     USED BY TD-DFT, FOR EXCHANGE/CORRELATION.
+C     ITYP=0 COUNTS POINTS, SO STORAGE CAN BE ALLOCATED FOR THE
+C     ITYP=1 CALL WHICH WILL ACTUALLY SET GRID POINT/WEIGHT DATA.
+C
+      IF (dft_bfc_algo.GE.0) THEN
+        IF(ITYP.EQ.1) THEN
+          CALL export_dft_grid(XYZGRD, XYZWGT, KCP, NPTGRD)
+        ELSE
+          CALL get_dft_grid_num_pts(NPTGRD)
+        END IF
+        RETURN
+      END IF
+C     ----- LOOP FOR ATOMS -----
+C
+      DLB = IBTYP.EQ.1
+C
+      IGPT=0
+      DO NCNTR = 1, NAT
+        INC0=IXFTCH(X(IUNIQUE),NCNTR)
+        IF(INC0.EQ.0) CYCLE 
+C
+        NCNTR1=NCNTR
+        IF(ITYP.EQ.0) THEN
+           CALL GRDCNT(IGPT,X(ITOTWT),X(IFACT),X(NAPTS),X(IANGN),
+     *                 X(IFACTR),INC0,NCNTR1,X(IPTRAD))
+        ELSE
+C
+C              CANNOT PARALLELIZE GRDCALC WITHOUT REWRITE DUE TO CUTOFF
+C                 DLB RUNS IN SERIAL MODE, SLB RUNS IN PARALLEL.
+C
+           GPSAVE=GOPARR
+           NPRCSV=NPROC
+           IF(DLB) THEN
+              GOPARR=.FALSE.
+              NPROC=1
+           END IF
+           CALL GRDCALC(XYZGRD,XYZWGT,KCP,IGPT,X(ITOTWT),X(IFACT),
+     *                  X(NAPTS),X(IANGN),X(IFACTR),INC0,NCNTR1,
+     *                  X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT))
+           GOPARR=GPSAVE
+           NPROC =NPRCSV
+        ENDIF
+C
+      END DO
+C
+      IF(GOPARR) THEN
+C-MWS-IF(GOPARR  .AND.  .NOT.DLB) THEN
+         IF(ITYP.EQ.0) THEN
+            CALL DDI_GSUMI(2320,IGPT,1)
+C---     ELSE
+C---        CALL DDI_GSUMI(2321,IGPT,1)
+C---        CALL DDI_GSUMF(2322,XYZGRD,NPTGRD*3)
+C---        CALL DDI_GSUMF(2323,XYZWGT,NPTGRD)
+C---        CALL DDI_GSUMF(2324,KCP,NPTGRD)
+         END IF
+      END IF
+C
+      NPTGRD=IGPT
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK WGTGRAD
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>     **7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>       8.   *USED BY SFDFT, FOR NUCLEAR GRADIENTS      (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C
+      SUBROUTINE WGTGRAD(X,UVEC,DWTINT,DWTTOT,DTOTWT,TOTELE,DRHOI_,
+     *              GRDFUN,NPTGRD,IIGPT,EH)
+
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      use GRDDFT_SAVED
+C
+      IMPLICIT NONE
+C
+      INTEGER :: NPTGRD, IGPT, MODE, IIGPT, NPRCSV, NCNTR
+      INTEGER :: INC0, IXFTCH, NCNX
+      DOUBLE PRECISION :: TOTELE
+      DOUBLE PRECISION :: DRHOI_(NPTGRD,*),GRDFUN(*)
+      LOGICAL :: GPSAVE,DLB
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+C
+C
+      INTEGER ::  NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN, C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      LOGICAL :: GOPARR,DSKWRK,MASWRK
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+C
+C
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+      DOUBLE PRECISION :: X(1),UVEC(1),DWTINT(1),DWTTOT(1),
+     *                    DTOTWT(1),EH(1)
+
+C
+      DLB = IBTYP.EQ.1
+C
+C     ----- LOOP FOR ATOMS -----
+C
+      TOTELE = ZERO
+      IGPT   = 0
+C                    The IIGPT argument is an ugly way to pass MODE:
+C                    TDDFT gradients have initialized IIGPT=0, while
+C                    DFT hessian runs have passed MODE=1/2 for
+C                    first/second weight derivative as IIGPT.
+C                    Both kinds of runs return the number of grid
+C                    points that are evaluated as IIGPT.
+      MODE   = IIGPT
+C
+C                 DLB RUNS IN SERIAL MODE, SLB RUNS IN PARALLEL.
+C
+      GPSAVE=GOPARR
+      NPRCSV=NPROC
+      IF(DLB) THEN
+         GOPARR=.FALSE.
+         NPROC=1
+      END IF
+C
+      DO NCNTR = 1, NAT
+        INC0=IXFTCH(X(IUNIQUE),NCNTR)
+        IF (INC0.EQ.0) CYCLE 
+        NCNX = NCNTR
+
+        CALL DERWGT(X(ITOTWT),X(NAPTS),X(IANGN),X(IFACTR),INC0,X(IWGHT),
+     *              X(IRI),X(IRIJ),X(IWTINTR),X(IAIJ),X(IWTRAD),
+     *              NCNX,TOTELE,X(IPTRAD),X(IXDAT),X(IYDAT),X(IZDAT),
+     *              X(IATMXVC),X(IATMYVC),X(IATMZVC),
+     *              X(IRSQRD),UVEC,DWTINT,DWTTOT,DTOTWT,
+     *              DRHOI_,GRDFUN,NPTGRD,IGPT,EH,MODE)
+      END DO
+      IIGPT=IGPT
+C
+      GOPARR=GPSAVE
+      NPROC =NPRCSV
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK UWGTGRAD
+C>    @brief   Sets up grid for DFT
+C>
+C>    @details THIS PROGRAM UTILIZES AN ARBITRARY DENSITY TO CALCULATE
+C>             THE CORRELATION CORRECTION TO SCF WITH AN ARBITRARY
+C>             SET OF DENSITY FUNCTIONALS.
+C>     THIS ROUTINE IS ONE OF THE 8 PARTS FOR GRDDFT -
+C>       THEY USED TO BE ENTRY POINTS BUT ARE NOW SEPARATE SUBROUTINES
+C>       1. MEMORY ALLOCATION                            (GRDDFT)
+C>       2. GEOMETRY AND SYMMETRY SETTING                (DFTSET)
+C>       3. CALCULATING EXCHANGE CORRELATION ENERGY      (DFTEXCOR)
+C>       4.   *SOLUTE/SOLVENT DISPERSION ENERGY          (SOLVDISP)
+C>       5. CALCULATING EXCHANGE CORRELATION GRADIENT    (DFTGRAD)
+C>       6. TD-DFT EXCHANGE CORRELATION ENERGY           (MGRDMNG)
+C>       7. TD-DFT EXCHANGE CORRELATION GRADIENT         (WGTGRAD)
+C>     **8. USED BY SFDFT, FOR NUCLEAR GRADIENTS         (UWGTGRAD)
+C>
+C>    @author  Nevin Oliphant and Hideo Sekino, QTP, and modified by
+C>             Muneaki Kamiya, Takao Tsuneda, Susumu Yanagisawa,
+C>             Dmitri Fedorov at University of Tokyo.
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians and
+C>            also include h,i cartesian power data in associated DATA statments
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support; new radial grids; code cleanup; bug fixes
+C
+      SUBROUTINE UWGTGRAD(X,UVEC,DWTINT,DWTTOT,DTOTWT,TOTELE,DRHOI_,
+     *               GRDFUN,NPTGRD,IIGPT)
+
+      use mx_limits, only: mxatm,mxgtot,mxgrid,mxgridtyp
+      use GRDDFT_SAVED
+C
+      IMPLICIT NONE
+C
+      LOGICAL :: GPSAVE,DLB
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00
+
+      INTEGER :: NPTGRD, IIGPT, NCNTR,NPRCSV,IGPT,INC0,IXFTCH,NCNX
+      DOUBLE PRECISION :: DRHOI_(NPTGRD,*),GRDFUN(*)
+      DOUBLE PRECISION :: TOTELE
+C
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+
+      LOGICAL :: GOPARR,DSKWRK,MASWRK
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+
+C
+C         THE ADJUSTABLE ARRAYS IN THE NEXT STATEMENT ARE USED ONLY
+C         BY THE VARIOUS ENTRY POINTS, WHERE THEY ARE CALLING ARGS.
+      DOUBLE PRECISION :: X(1),FA(1),UVEC(1),DWTINT(1),
+     *                    DWTTOT(1),DTOTWT(1)
+C
+C
+C     USED BY SFDFT, FOR NUCLEAR GRADIENTS
+C
+      DLB = IBTYP.EQ.1
+C
+C     ----- LOOP FOR ATOMS -----
+C
+      TOTELE = ZERO
+      IGPT   = 0
+C
+C                 DLB RUNS IN SERIAL MODE, SLB RUNS IN PARALLEL.
+C
+      GPSAVE=GOPARR
+      NPRCSV=NPROC
+      IF(DLB) THEN
+         GOPARR=.FALSE.
+         NPROC=1
+      END IF
+C
+      DO NCNTR = 1, NAT
+        INC0=IXFTCH(X(IUNIQUE),NCNTR)
+        IF (INC0.EQ.0) CYCLE 
+        NCNX = NCNTR
+        CALL UDERWGT(X(ITOTWT),X(NAPTS),X(IANGN),X(IFACTR),INC0,
+     *               X(IWGHT),X(IRI),X(IRIJ),X(IWTINTR),X(IAIJ),
+     *               X(IWTRAD),NCNX,TOTELE,X(IPTRAD),X(IXDAT),X(IYDAT),
+     *               X(IZDAT),X(IATMXVC),X(IATMYVC),X(IATMZVC),
+     *               X(IRSQRD),UVEC,DWTINT,DWTTOT,DTOTWT,
+     *               DRHOI_,GRDFUN,NPTGRD,IGPT)
+      END DO
+      IIGPT=IGPT
+C
+      GOPARR=GPSAVE
+      NPROC =NPRCSV
+      RETURN
+C
+      END
+C*MODULE DFTGRD  *DECK CHKRGRID
+C>    @brief Check density of grid points
+C>
+C>    @details CHECK DENSITY OF RADIAL POINTS VERSUS BASIS SET'S EXPONENTS
+C>     A.A.JARECKI AND E.R.DAVIDSON, CHEM.PHYS.LETT. 300, 44-52(1999)
+C>     PRINT A WARNING, AS OPPOSED TO BOMBING THE JOB, IF THE
+C>     SELF-OVERLAP INTEGRAL'S ACCURACY IS LESS THAN 4 DIGITS.
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Support for any radial grid
+C
+      SUBROUTINE CHKRGRID(NRADPTS)
+      use mx_limits, only: mxgrid,mxatm
+      USE params, ONLY: rad_grid_type
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      LOGICAL SG1
+      CHARACTER*1 TYPES(0:6)
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /FMCOM / X(1)
+      DATA TYPES/'S','P','D','F','G','H','I'/
+      DATA ONE/1.0D+00/
+C
+      CALL VALFM(LOADFM)
+      IRADS  = LOADFM + 1
+      IWTS   = IRADS  + NRADPTS
+      LAST   = IWTS   + NRADPTS
+      NEED   = LAST - LOADFM - 1
+      CALL GETFM(NEED)
+C
+      CALL RADPT(X(IRADS),X(IWTS),NRADPTS)
+C
+      CALL SIFTZETA(ZMIN,IATMIN,LMNMIN,ZMAX,IATMAX,LMNMAX)
+      BRAGGMIN = BSLRD(IAN(IATMIN))
+      BRAGGMAX = BSLRD(IAN(IATMAX))
+C
+      IF (rad_grid_type.EQ.1) THEN
+          WRITE(IW,9001) NRADPTS
+      ELSE IF (rad_grid_type.EQ.2) THEN
+          WRITE(IW,9002) NRADPTS
+      ELSE
+          WRITE(IW,9000) NRADPTS
+      END IF
+      CALL EMOVLP(NRADPTS,X(IRADS),X(IWTS),LMNMIN,ZMIN,BRAGGMIN,SMIN)
+      WRITE(IW,9010) 'SMALLEST',ZMIN,TYPES(LMNMIN),IATMIN,SMIN
+      CALL EMOVLP(NRADPTS,X(IRADS),X(IWTS),LMNMAX,ZMAX,BRAGGMAX,SMAX)
+      WRITE(IW,9010) ' LARGEST',ZMAX,TYPES(LMNMAX),IATMAX,SMAX
+C
+      IF (rad_grid_type.EQ.0) THEN
+        NWARNMIN = 0
+        NWARNMAX = 0
+        IF(ABS(ONE-SMIN).GT.1.0D-04) NWARNMIN=NWARNMIN+1
+        IF(ABS(ONE-SMAX).GT.1.0D-04) NWARNMAX=NWARNMAX+1
+C
+        IF(NWARNMIN+NWARNMAX.GT.0) WRITE(IW,9011) NRADPTS
+        IF(NWARNMAX.GT.0)          WRITE(IW,9012) IATMAX,ZMAX
+        IF(NWARNMIN.GT.0)          WRITE(IW,9013) IATMIN,ZMIN
+      END IF
+C
+      CALL RETFM(NEED)
+      RETURN
+C
+ 9000 FORMAT(1X,'FOR AN EULER-MACLAURIN QUADRATURE USING',I4,
+     *   ' RADIAL POINTS:')
+ 9001 FORMAT(1X,'MURA-KNOWLES LOG-3 QUADRATURE USING',I4,
+     *   ' RADIAL POINTS')
+ 9002 FORMAT(1X,'TREUTLER-AHLRICHS GRID QUADRATURE USING',I4,
+     *   ' RADIAL POINTS')
+ 9010 FORMAT(1X,A,' GAUSSIAN PRIMITIVE EXPONENT=',F20.10,
+     *            ' OF TYPE -',A1,'-'/
+     *       1X,'ON ATOM NUMBER',I4,' HAS RADIAL NORMALIZATION=',F10.6)
+ 9011 FORMAT(/10X,50(1H*)/10X,'*',48X,'*'/
+     *       10X,'* WARNING: QUESTIONABLE SELECTION OF RADIAL GRID *'/
+     *       10X,'*',48X,'*'/10X,50(1H*)//
+     *       1X,'THIS RUN HAS REQUESTED NRAD=',I4,' IN $DFT OR $TDDFT')
+ 9012 FORMAT(1X,'ATOM=',I5,' HAS LARGE EXPONENT=',F30.15/
+     *       1X,'RECOMMEND NRAD ABOVE  50 FOR ZETA''S ABOVE 1E+4'/
+     *       1X,'RECOMMEND NRAD ABOVE  75 FOR ZETA''S ABOVE 1E+5'/
+     *       1X,'RECOMMEND NRAD ABOVE 125 FOR ZETA''S ABOVE 1E+6')
+ 9013 FORMAT(1X,'ATOM=',I5,' HAS SMALL EXPONENT=',F30.15/
+     *       1X,'RECOMMEND NRAD ABOVE  75 FOR ZETA''S BELOW 1E-3'/
+     *       1X,'RECOMMEND NRAD ABOVE 100 FOR ZETA''S BELOW 1E-4'/
+     *       1X,'RECOMMEND NRAD ABOVE 125 FOR ZETA''S BELOW 1E-5')
+      END
+C*MODULE DFTGRD  *DECK SIFTZETA
+C>    @brief Return atom(s) containing the largest and smallest exponents
+C>    that occur in Gaussian basis set
+C
+      SUBROUTINE SIFTZETA(ZMIN,IATMIN,LMNMIN,ZMAX,IATMAX,LMNMAX)
+      use mx_limits, only: mxsh,mxgtot
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+C
+      ZMIN = 1.0D+20
+      ZMAX = 0.0D+00
+C
+      IGMAX = 0
+      DO ISH=1,NSHELL
+         IAT = KATOM(ISH)
+         IGMIN=KSTART(ISH)
+         IGMAX=IGMIN+KNG(ISH)-1
+C            KTYPE=2 IS EITHER -P- OR -L-, JUST REPORT IT AS A -P-.
+         ITYPE=KTYPE(ISH)
+         DO IG=IGMIN,IGMAX
+            ZETA = EX(IG)
+            IF(ZETA.GT.ZMAX) THEN
+               IATMAX = IAT
+               ZMAX = ZETA
+               LMNMAX = ITYPE - 1
+            END IF
+            IF(ZETA.LT.ZMIN) THEN
+               IATMIN = IAT
+               ZMIN = ZETA
+               LMNMIN = ITYPE - 1
+            END IF
+         ENDDO
+      ENDDO
+      RETURN
+      END
+C
+C*MODULE DFTGRD  *DECK EMOVLP
+C>    @brief Check numerical radial grid quality
+C>     by computing basis function normalization
+C>    @date : March 2019 - Vladimir Mironov
+C>            Support for any radial grid
+      SUBROUTINE EMOVLP(NRAD,RADS,WTS,LMN,ZETA,BRAGG,S)
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      DIMENSION RADS(*), WTS(*)
+      ZERO = 0.0D+00
+      ONE  = 1.0D+00
+      TWO  = 2.0D+00
+      FOUR = 4.0D+00
+      PI = FOUR*ATAN(ONE)
+      IDF=1
+      DO I=0, LMN
+       IDF=IDF*(2*I+1)
+      ENDDO
+      GNORM = ZETA**(2*LMN+3)*TWO**(4*LMN+7)
+      GNORM = GNORM/(PI*IDF**2)
+      GNORM = GNORM**(0.25D+00)
+C
+      S = ZERO
+      DO I=1,NRAD
+C         X = I
+C         Y = NRAD+1-I
+C         R = (BRAGG*X*X)/(Y*Y)
+C         W = ((BRAGG**3)*TWO*(NRAD+1)*(X**5))/(Y**7)
+         r = bragg*rads(i)
+         w = (BRAGG**3)*wts(i)
+         GTO = GNORM*R**LMN*EXP(-ZETA*R*R)
+         S = S + W*(GTO*GTO)
+      ENDDO
+      END
+C*MODULE DFTGRD  *DECK GRDCNT
+C>    @brief Accumulates the grid weights (FTOTWT)
+C
+      SUBROUTINE GRDCNT(IGPT,TOTWT,IIFACT,NAPTS,IANGN,IFACTR,INC0,
+     *                 NCNTR,PTRAD)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK,DLB,SG1
+C
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION TOTWT(NAT,*),PTRAD(*)
+      DIMENSION NAPTS(NAT),IANGN(NAT,2,*),IIFACT(NAT),IFACTR(NAT)
+C
+      NPT=NRAD*MAXANG
+      RAD = BRAGGRAD(NCNTR)
+      WCUTOFF=1.0D-08/(NPT*NAT)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+C
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+      IGRID = 1
+      DO 20 IRADPT = 1, NRAD
+C
+         R1= RAD*PTRAD(IRADPT)
+         IF(R1.GE.PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD) THEN
+            IGRID = IGRID + 1
+         ENDIF
+C         WRITE(IW,'(A,I5,2F20.10,I5)')'RAD,PT,IGRID = ',IRADPT,RAD,
+C     *        PTRAD(IRADPT),IGRID
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+           IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+           IF(GOPARR) THEN
+              IF(DLB) THEN
+                 LOOP=LOOP+1
+                 ICHUNK=(LOOP-1)/MCHUNK
+                 IF(ICHUNK.GT.NEXT) THEN
+                    CALL DDI_DLBNEXT(NEXT)
+                 ENDIF
+                 IF(NEXT.NE.ICHUNK) GOTO 10
+              ELSE
+                 IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+              ENDIF
+           ENDIF
+           IPTME=(IPT-1)/NPROC+1
+           IF(DLB) IPTME=IPT
+C
+           FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+           IF(FTOTWT.LT.WCUTOFF) THEN
+              GOTO 10
+           ELSE
+              IGPT=IGPT+1
+           ENDIF
+C
+ 10     CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+ 20   CONTINUE
+C
+C     ----- NEXT ATOM -----
+C
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK GRDCALC
+C>    @brief  CALCULATES THE GRID POINTS AND WEIGHTS AND STORES THEM INTO
+C>     (XYZGRD, XYZWGT).
+C
+      SUBROUTINE GRDCALC(XYZGRD,XYZWGT,KCP,IGPT,TOTWT,IIFACT,NAPTS,
+     *                   IANGN,IFACTR,INC0,NCNTR,PTRAD,XDAT,YDAT,ZDAT)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL GOPARR,DSKWRK,MASWRK,DLB,SG1
+C
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      DIMENSION TOTWT(NAT,*)
+      DIMENSION NAPTS(NAT),IANGN(NAT,2,MXGRID),IIFACT(NAT),IFACTR(NAT)
+      DIMENSION PTRAD(*),XDAT(MAXANG,NAT,NGRIDS),
+     *          YDAT(MAXANG,NAT,NGRIDS),ZDAT(MAXANG,NAT,NGRIDS)
+      DIMENSION XYZGRD(3,*),XYZWGT(*),KCP(*)
+C
+      RAD = BRAGGRAD(NCNTR)
+      NPT=NRAD*MAXANG
+C
+      WCUTOFF=1.0D-08/(NPT*NAT)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+C
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+      IGRID=1
+      DO 20 IRADPT = 1, NRAD
+C
+         R1= RAD*PTRAD(IRADPT)
+         IF(R1.GE.PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD) THEN
+            IGRID = IGRID + 1
+         ENDIF
+C
+C     IF(IRADPT.EQ.1) WRITE(IW,2) IRADPT,RAD,PTRAD(IRADPT),IGRID
+C   2 FORMAT('GRDCALC: RAD,PT,IGRID = ',I5,2F15.10,I5)
+C
+         DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+            IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+            IF(GOPARR) THEN
+               IF(DLB) THEN
+                  LOOP=LOOP+1
+                  ICHUNK=(LOOP-1)/MCHUNK
+                  IF(ICHUNK.GT.NEXT) THEN
+                     CALL DDI_DLBNEXT(NEXT)
+                  ENDIF
+                  IF(NEXT.NE.ICHUNK) GOTO 10
+               ELSE
+                  IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+               ENDIF
+            ENDIF
+            IPTME=(IPT-1)/NPROC+1
+            IF(DLB) IPTME=IPT
+C
+            FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+            IF(FTOTWT.LT.WCUTOFF) THEN
+               GOTO 10
+            ELSE
+               IGPT=IGPT+1
+               XYZWGT(IGPT)=FTOTWT
+               KCP(IGPT)=NCNTR
+               XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+               YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+               ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+               XYZGRD(1,IGPT)=XD+C(1,NCNTR)
+               XYZGRD(2,IGPT)=YD+C(2,NCNTR)
+               XYZGRD(3,IGPT)=ZD+C(3,NCNTR)
+           ENDIF
+C
+ 10      CONTINUE
+ 20   CONTINUE
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DERWGT
+C>    @brief Clone of DMATD
+C>
+C>    @details THIS ROUTINE IS A CLONE OF DMATD,
+C>              SEE ADDITIONAL REFERENCES THERE.
+C>
+C>     HERE A CONTRIBUTION TO THE ENERGY GRADIENT DUE TO INTEGRATION
+C>     OVER GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>
+C>     CAN'T USE DLB PARALLELIZATION WITH THE COMMONLY USED APPROACH
+C>     BECAUSE THE VALUE OF IGPT IS USED TO ACCESS AN ARRAY.
+C>     CONSEQUENTLY, CALLS IN DLB RUNS SHOULD SET PARALLEL OFF.
+C>     HOWEVER, DLB LOGIC IS LEFT BELOW, IN CASE SOMEONE WANTS TO
+C>     COME BACK TO THIS POINT.  SLB DOES RUN IN PARALLEL.
+C
+      SUBROUTINE DERWGT(TOTWT,NAPTS,IANGN,IFACTR,
+     *                  INC0,WGHT,RI,RIJ,WTINTR,AIJ,WTRAD,
+     *                  NCNTR,TOTELE,PTRAD,XDAT,YDAT,ZDAT,
+     *                  ATMXVEC,ATMYVEC,ATMZVEC,RSQRD,
+     *                  UVEC,DWTINT,DWTTOT,DTOTWT,
+     *                  DRHOI_,GRDFUN,NPTGRD,IGPT,EH,MODE)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL GOPARR,DSKWRK,MASWRK,DLB,SG1
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+      DATA UHF/8HUHF     /
+C
+      DIMENSION DRHOI_(NPTGRD,*),GRDFUN(*)
+      DIMENSION TOTWT(NAT,*),NAPTS(NAT),IANGN(NAT,2,MXGRID),IFACTR(NAT)
+      DIMENSION PTRAD(*),XDAT(MAXANG,NAT,MXGRID),
+     *          YDAT(MAXANG,NAT,MXGRID),ZDAT(MAXANG,NAT,MXGRID),
+     *          RSQRD(*),
+     *          ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *          WGHT(MAXANG,NAT,MXGRID),RI(NAT),RIJ(NAT,NAT),
+     *          WTINTR(NAT), AIJ(NAT,NAT),WTRAD(*),UVEC(3,NAT),
+     *          DWTINT(3,NAT,NAT), DWTTOT(3,NAT),DTOTWT(*),EH(*)
+C
+      RAD = BRAGGRAD(NCNTR)
+      NPT=NRAD*MAXANG
+      CALL DERCHK(NDER)
+C
+      THRV1=ZERO
+      THRV2=1.0D+00
+      IF(DFTGTHR.GT.1.01D+00) THEN
+        THRV2=DFTGTHR
+      ELSE IF(DFTGTHR.LT.0.99D+00) THEN
+        THRV1=DFTGTHR
+      ENDIF
+      IF(DFTTHR.LT.1.1D-15.AND.DFTTHR.NE.ZERO) THRV1=1.0D-15
+C     WCUTOFF=3.0D-05/NPT/THRV2
+      RCUTOFF=1.0D-02/NPT/THRV2
+      IF(THRV1.NE.ZERO) THEN
+C        THRV1=1.0D-15
+C        WCUTOFF=THRV1
+         RCUTOFF=THRV1
+      ENDIF
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+C
+C      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+      FACT=IFACTR(INC0)
+C      FACT=1
+C
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      IGRID=1
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+      DO 20 IRADPT = 1, NRAD
+C
+        RADWT=RAD*RAD*RAD*WTRAD(IRADPT)
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD) THEN
+           IGRID = IGRID + 1
+        ENDIF
+C        WRITE(IW,'(A,I5,2F20.10,I5)')'RAD,PT,IGRID = ',IRADPT,RAD,
+C     *       PTRAD(IRADPT),IGRID
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+           IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          FTOTWT0=FTOTWT/FACT
+          IF(FTOTWT0.LT.WCUTOFF) THEN
+             GOTO 10
+          ELSE
+             IGPT=IGPT+1
+          ENDIF
+C
+C         THIS NEEDS TO BE INVERTED
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+C
+C           NORMALISE THE R(A) VECTOR, = R(I)-R(A)
+C
+            RI(IATM)=SQRT(RSQRD(IATM))
+            UVEC(1,IATM) = XCDNT / RI(IATM)
+            UVEC(2,IATM) = YCDNT / RI(IATM)
+            UVEC(3,IATM) = ZCDNT / RI(IATM)
+C
+  610     CONTINUE
+c
+          IRU    = 1
+          IF(SCFTYP.EQ.UHF) IRU = 5
+          IF(NDER.EQ.2) DENTOT= DRHOI_(IGPT,1)+DRHOI_(IGPT,IRU)
+          IF(NDER.NE.2) DENTOT= DRHOI_(IGPT,1)
+          IF(DENTOT.LT.RCUTOFF) THEN
+c         IF(DRHOI_(IGPT,1).LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+C         COMPUTE THE WEIGHT DERIVATIVE.
+C
+          WGHTNOW=WGHT(IANGPT,NCNTR,IGRID)
+          NITR=4
+          IF(NDER.NE.2.OR.MODE.NE.2) THEN
+             CALL GRDOCT(NAT,NITR,NCNTR,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                   RI,RIJ,AIJ,WGHTNOW,RADWT,WTINTR,UVEC,
+     *                   DWTINT,DWTTOT,DTOTWT)
+          ELSE IF(NDER.EQ.2.AND.MODE.EQ.2) THEN
+             CALL HSSOCT(NAT,NITR,NCNTR,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                   RI,RIJ,AIJ,WGHTNOW,RADWT,UVEC,DWTINT,
+     *                   DWTTOT,DTOTWT,DTOTWT(NAT*3+1))
+          ELSE
+             if(maswrk) write(6,990) NDER,MODE
+             CALL abrt
+          END IF
+C
+C         ADD THE WEIGHT DERIVATIVE CONTRIBUTION
+C
+C         NOT NECESSARY TO DO THE MULTIPLICATION
+C         MULTIPLY BY DSCALE TO DIVIDE BY THE NUMBER OF PROCESSORS
+C          ENER=GRDFUN(IGPT)*FACT*DSCALE
+C
+C         all modes place entry in gradient, and only that if MODE=0.
+C
+          ENER=GRDFUN(IGPT)*FACT
+          CALL DAXPY(3*NAT,ENER,DTOTWT,1,DE,1)
+C
+          IF(NDER.EQ.2.AND.MODE.EQ.2) THEN
+             NAT2 = (NAT*NAT + NAT) / 2
+             CALL DAXPY(9*NAT2,ENER,DTOTWT(NAT*3+1),1,EH,1)
+          ELSE IF(NDER.EQ.2.AND.MODE.EQ.1) THEN
+             NXYZ=NAT*3
+             CALL DCOPY(NXYZ,DTOTWT,1,GRDFUN(1+(IGPT-1)*NXYZ),1)
+          END IF
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          TOTELE=TOTELE+FTOTWT*TWO*DRHOI_(IGPT,1)
+C
+C     ----- END LOOP 10 OVER ANGULAR POINT -----
+C     ----- END LOOP 20 OVER RADIAL POINT -----
+C
+   10   CONTINUE
+   20 CONTINUE
+      RETURN
+C
+  990 FORMAT(1X,'DERWGT GRDOCT/HSSOCT CONFUSION: NDER=',I3,' MODE=',I3)
+      END
+C
+C*MODULE DFTGRD   *DECK UDERWGT
+C>    @brief Clone of DMATD
+C>
+C>    @details THIS ROUTINE IS A CLONE OF DMATD, SEE ADDITIONAL REFERENCES THERE.
+C>     HERE A CONTRIBUTION TO THE ENERGY GRADIENT DUE TO INTEGRATION OVER
+C>     GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>
+C>     CAN'T USE DLB PARALLELIZATION WITH THE COMMONLY USED APPROACH
+C>     BECAUSE THE VALUE OF IGPT IS USED TO ACCESS AN ARRAY.
+C>     CONSEQUENTLY, CALLS IN DLB RUNS SHOULD SET PARALLEL OFF.
+C>     HOWEVER, DLB LOGIC IS LEFT BELOW, IN CASE SOMEONE WANTS TO
+C>     COME BACK TO THIS POINT.  SLB DOES RUN IN PARALLEL.
+C
+      SUBROUTINE UDERWGT(TOTWT,NAPTS,IANGN,IFACTR,
+     *                   INC0,WGHT,RI,RIJ,WTINTR,AIJ,WTRAD,
+     *                   NCNTR,TOTELE,PTRAD,XDAT,YDAT,ZDAT,
+     *                   ATMXVEC,ATMYVEC,ATMZVEC,RSQRD,
+     *                   UVEC,DWTINT,DWTTOT,DTOTWT,
+     *                   DRHOI_,GRDFUN,NPTGRD,IGPT)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL GOPARR,DSKWRK,MASWRK,DLB,SG1
+      PARAMETER (ZERO=0.0D+00)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+C
+      DIMENSION DRHOI_(NPTGRD,4,2),GRDFUN(*)
+      DIMENSION TOTWT(NAT,*),NAPTS(NAT),IANGN(NAT,2,MXGRID),IFACTR(NAT)
+      DIMENSION PTRAD(*),XDAT(MAXANG,NAT,MXGRID),
+     *          YDAT(MAXANG,NAT,MXGRID),ZDAT(MAXANG,NAT,MXGRID),
+     *          RSQRD(*),
+     *          ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *          WGHT(MAXANG,NAT,MXGRID),RI(NAT),RIJ(NAT,NAT),
+     *          WTINTR(NAT), AIJ(NAT,NAT),WTRAD(*),UVEC(3,NAT),
+     *          DWTINT(3,NAT,NAT), DWTTOT(3,NAT),DTOTWT(3,NAT)
+C
+      RAD = BRAGGRAD(NCNTR)
+      NPT=NRAD*MAXANG
+C
+      THRV1=ZERO
+      THRV2=1.0D+00
+      IF(DFTGTHR.GT.1.01D+00) THEN
+        THRV2=DFTGTHR
+      ELSE IF(DFTGTHR.LT.0.99D+00) THEN
+        THRV1=DFTGTHR
+      ENDIF
+      IF(DFTTHR.LT.1.1D-15.AND.DFTTHR.NE.ZERO) THRV1=1.0D-15
+C     WCUTOFF=3.0D-05/NPT/THRV2
+      RCUTOFF=1.0D-02/NPT/THRV2
+      IF(THRV1.NE.ZERO) THEN
+C        THRV1=1.0D-15
+C        WCUTOFF=THRV1
+         RCUTOFF=THRV1
+      ENDIF
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+C
+C      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+      FACT=IFACTR(INC0)
+C      FACT=1
+C
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      IGRID=1
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NRAD*NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+      DO 20 IRADPT = 1, NRAD
+C
+        RADWT=RAD*RAD*RAD*WTRAD(IRADPT)
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD) THEN
+           IGRID = IGRID + 1
+        ENDIF
+C        WRITE(IW,'(A,I5,2F20.10,I5)')'RAD,PT,IGRID = ',IRADPT,RAD,
+C     *       PTRAD(IRADPT),IGRID
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+           IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          FTOTWT0=FTOTWT/FACT
+          IF(FTOTWT0.LT.WCUTOFF) THEN
+             GOTO 10
+          ELSE
+             IGPT=IGPT+1
+          ENDIF
+C
+C         THIS NEEDS TO BE INVERTED
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+C
+C           NORMALISE THE R(A) VECTOR, = R(I)-R(A)
+C
+            RI(IATM)=SQRT(RSQRD(IATM))
+            UVEC(1,IATM) = XCDNT / RI(IATM)
+            UVEC(2,IATM) = YCDNT / RI(IATM)
+            UVEC(3,IATM) = ZCDNT / RI(IATM)
+C
+  610     CONTINUE
+C
+          IF(DRHOI_(IGPT,1,1).LT.RCUTOFF .AND.
+     *       DRHOI_(IGPT,1,2).LT.RCUTOFF) GO TO 10
+C
+C         COMPUTE THE WEIGHT DERIVATIVE.
+C
+          WGHTNOW=WGHT(IANGPT,NCNTR,IGRID)
+          NITR=4
+          CALL GRDOCT(NAT,NITR,NCNTR,ATMXVEC,ATMYVEC,ATMZVEC,RI,RIJ,AIJ,
+     *          WGHTNOW,RADWT,WTINTR,UVEC,DWTINT,DWTTOT,DTOTWT)
+C
+C         ADD THE WEIGHT DERIVATIVE CONTRIBUTION
+C
+          ENER=GRDFUN(IGPT)*FACT
+          CALL DAXPY(3*NAT,ENER,DTOTWT,1,DE,1)
+C
+C     ----- THE TOTAL ELCTRON DENSITY -----
+C
+          TOTELE=TOTELE+FTOTWT*(DRHOI_(IGPT,1,1)+DRHOI_(IGPT,1,2))
+C
+C     ----- END LOOP 10 OVER ANGULAR POINT -----
+C     ----- END LOOP 20 OVER RADIAL POINT -----
+C
+   10   CONTINUE
+   20 CONTINUE
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK GRDWT
+C>    @brief Writes grid information to disk
+C
+      SUBROUTINE GRDWT(NFT,XYZ,WGT,IATM,NPT)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION XYZ(3,NPT),WGT(NPT),IATM(NPT)
+      LOGICAL GOPARR,DSKWRK,MASWRK,DSKSAV
+      COMMON /DFTF22/ MEM22,NPT22,LPNT22(3),NEED22
+      COMMON /FMCOM / X(1)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      IF(MEM22.NE.0) THEN
+c        write(6,*) '22: writing',NFT,NPT
+         IF(LPNT22(1).LT.0.OR.NFT.NE.22) CALL ABRTX("MEM22 err, GRDWT")
+c        internal error: memory not allocated or wrong file?!
+         NEED=NPT*4+NPT
+c        real*8 NPT*4 and int NPT
+         IF(NEED.GT.MEM22) THEN
+c           SLAVES MAY HAVE A DIFFERENT SIZE FROM MASTER?
+            WRITE(6,*) 'INCREASE MEM22 TO',NEED
+            CALL ABRT
+         ENDIF
+         CALL DCOPY(3*NPT,XYZ,1,X(LPNT22(1)),1)
+         CALL DCOPY(NPT,WGT,1,X(LPNT22(2)),1)
+         CALL ICOPY(NPT,IATM,1,X(LPNT22(3)),1)
+         NPT22=NPT
+      ELSE
+         DSKSAV=DSKWRK
+         DSKWRK=.TRUE.
+         CALL SEQOPN(NFT,'DFTGRID','UNKNOWN',.FALSE.,'UNFORMATTED')
+         WRITE(NFT) NPT
+         IF(NPT.GT.0) THEN
+            WRITE(NFT) XYZ
+            WRITE(NFT) WGT
+            WRITE(NFT) IATM
+         ENDIF
+         CALL SEQCLO(NFT,'KEEP')
+         DSKWRK=DSKSAV
+      ENDIF
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK GRDRD
+C>    @brief Reads grid information from disk
+C
+      SUBROUTINE GRDRD(NFT,XYZ,WGT,IATM,NPT,MODE)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION XYZ(3,*),WGT(*),IATM(*)
+      LOGICAL GOPARR,DSKWRK,MASWRK,DSKSAV
+      COMMON /DFTF22/ MEM22,NPT22,LPNT22(3),NEED22
+      COMMON /FMCOM / X(1)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      IF(MEM22.NE.0) THEN
+c        write(6,*) '22: reading',NFT,NPT22
+         IF(LPNT22(1).LT.0.OR.NFT.NE.22) CALL ABRTX("MEM22 err, GRDRD")
+c        internal error: memory not allocated or wrong file?!
+         NPT=NPT22
+         CALL DCOPY(3*NPT,X(LPNT22(1)),1,XYZ,1)
+         CALL DCOPY(NPT,X(LPNT22(2)),1,WGT,1)
+         IF(MODE.GT.0) CALL ICOPY(NPT,X(LPNT22(3)),1,IATM,1)
+      ELSE
+         DSKSAV=DSKWRK
+         DSKWRK=.TRUE.
+         CALL SEQOPN(NFT,'DFTGRID','UNKNOWN',.FALSE.,'UNFORMATTED')
+         READ(NFT) NPT
+         IF(NPT.GT.0) THEN
+            READ(NFT) (XYZ(1,IPT),XYZ(2,IPT),XYZ(3,IPT),IPT=1,NPT)
+            READ(NFT) (WGT(  IPT),IPT=1,NPT)
+            IF(MODE.GT.0) READ(NFT) (IATM( IPT),IPT=1,NPT)
+         ENDIF
+         CALL SEQCLO(NFT,'KEEP')
+         DSKWRK=DSKSAV
+      ENDIF
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK GRDGAO
+C
+C>    @brief : Determine gradient density
+C>
+C>    @date  : December 21, 2012 - Joe Ivanic
+C>             Modify to work with h,i functions in basis sets
+C
+      SUBROUTINE GRDGAO(IST,IEND,XYZGRD,XYZCHI,AOMAX,NDIM)
+      use mx_limits, only: mxatm,mxsh,mxgtot
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL NORM
+      LOGICAL DBUG
+      LOGICAL OUT
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      DIMENSION XYZGRD(3,*),XYZCHI(4,NDIM,*)
+      DIMENSION AOMAX(NDIM)
+      DIMENSION DI(28)
+      DIMENSION   XG(9),  YG(9),  ZG(9)
+      DIMENSION  DXG(7), DYG(7), DZG(7)
+      DIMENSION DDXG(7),DDYG(7),DDZG(7)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+      DATA ZERO  /0.0D+00/
+      DATA RLN10 /2.30258D+00/
+      DATA SQRT3 /1.73205080756888D+00/
+      DATA SQRT5 /2.23606797749979D+00/
+      DATA SQRT7 /2.64575131106459D+00/
+      DATA sqrt9 /3.0d+00/
+      DATA sqrt11 /3.3166247903553998d+00/
+C
+C***********************************************************************
+C     ANGULAR MOMENTUM FOR ATOMIC ORBITALS
+C***********************************************************************
+C
+      DATA IJX    / 1, 2, 1, 1, 3, 1, 1, 2, 2, 1,
+     1              4, 1, 1, 3, 3, 2, 1, 2, 1, 2,
+     2              5, 1, 1, 4, 4, 2, 1, 2, 1, 3,
+     3              3, 1, 3, 2, 2,
+     4              6, 1, 1, 5, 5, 2, 1, 2, 1, 4,
+     5              4, 3, 1, 3, 1, 4, 2, 2, 3, 3,
+     6              2,
+     7              7, 1, 1, 6, 6, 2, 1, 2, 1, 5,
+     8              5, 3, 1, 3, 1, 5, 2, 2, 4, 4,
+     9              1, 4, 4, 3, 2, 3, 2, 3/
+
+      DATA IJY    / 1, 1, 2, 1, 1, 3, 1, 2, 1, 2,
+     1              1, 4, 1, 2, 1, 3, 3, 1, 2, 2,
+     2              1, 5, 1, 2, 1, 4, 4, 1, 2, 3,
+     3              1, 3, 2, 3, 2,
+     4              1, 6, 1, 2, 1, 5, 5, 1, 2, 3,
+     5              1, 4, 4, 1, 3, 2, 4, 2, 3, 2,
+     6              3,
+     7              1, 7, 1, 2, 1, 6, 6, 1, 2, 3,
+     8              1, 5, 5, 1, 3, 2, 5, 2, 4, 1,
+     9              4, 3, 2, 4, 4, 2, 3, 3/
+
+      DATA IJZ    / 1, 1, 1, 2, 1, 1, 3, 1, 2, 2,
+     1              1, 1, 4, 1, 2, 1, 2, 3, 3, 2,
+     2              1, 1, 5, 1, 2, 1, 2, 4, 4, 1,
+     3              3, 3, 2, 2, 3,
+     4              1, 1, 6, 1, 2, 1, 2, 5, 5, 1,
+     5              3, 1, 3, 4, 4, 2, 2, 4, 2, 3,
+     6              3,
+     7              1, 1, 7, 1, 2, 1, 2, 6, 6, 1,
+     8              3, 1, 3, 5, 5, 2, 2, 5, 1, 4,
+     9              4, 2, 3, 2, 3, 4, 4, 3/
+C
+      DBUG=.FALSE.
+      OUT =.FALSE.
+      OUT =OUT.OR.DBUG
+      OUT =OUT.OR.NPRINT.EQ.6
+C
+      NDER=1
+C
+      TOL =RLN10*ITOL
+      NORM=NORMF.NE.1.OR.NORMP.NE.1
+C
+      IMAX=IEND-IST+1
+      DO IIPT=1,IMAX
+         DO ICHI=1,NUM
+            DO I=1,4
+               XYZCHI(I,ICHI,IIPT)=ZERO
+            ENDDO
+         END DO
+      END DO
+C
+C     ----- ISHELL -----
+C
+      DO 9000 II=1,NSHELL
+      I=KATOM(II)
+      XI=C(1,I)
+      YI=C(2,I)
+      ZI=C(3,I)
+      I1=KSTART(II)
+      I2=I1+KNG(II)-1
+      LIT=KTYPE(II)
+      MINI=KMIN(II)
+      MAXI=KMAX(II)
+      LOCI=KLOC(II)-MINI
+C
+C     ----- I PRIMITIVE -----
+C
+      DO 7000 IG=I1,I2
+      AI=EX(IG)
+      CSI=CS(IG)
+      CPI=CP(IG)
+      CDI=CD(IG)
+      CFI=CF(IG)
+      CGI=CG(IG)
+      CHI=CH(IG)
+      CII=CI(IG)
+C
+C     ----- DENSITY FACTOR -----
+C
+      INUM=0
+      DO I=MINI,MAXI
+C          continuation markers of 4,5 are h,i
+      GO TO (110,120,220,220,130,220,220,140,220,220,
+     1       150,220,220,160,220,220,220,220,220,170,
+     2       180,220,220,190,220,220,220,220,220,200,
+     3       220,220,210,220,220,
+     4       310,220,220,
+     4       320,220,220,220,220,220,
+     4       330,220,220,220,220,220,
+     4       340,220,220,
+     4       350,220,220,
+     5       410,220,220,
+     5       420,220,220,220,220,220,
+     5       430,220,220,220,220,220,
+     5       440,220,220,
+     5       450,220,220,
+     5       460,220,220,220,220,220,
+     5       470),I
+c
+  110 DUM1=CSI
+      GO TO 220
+  120 DUM1=CPI
+      GO TO 220
+  130 DUM1=CDI
+      GO TO 220
+  140 IF(NORM) DUM1=DUM1*SQRT3
+      GO TO 220
+  150 DUM1=CFI
+      GO TO 220
+  160 IF(NORM) DUM1=DUM1*SQRT5
+      GO TO 220
+  170 IF(NORM) DUM1=DUM1*SQRT3
+      GO TO 220
+  180 DUM1=CGI
+      GO TO 220
+  190 IF(NORM) DUM1=DUM1*SQRT7
+      GO TO 220
+  200 IF(NORM) DUM1=DUM1*SQRT5/SQRT3
+      GO TO 220
+  210 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 220
+c h
+  310 DUM1=CHI
+      GOTO 220
+  320 IF(NORM) DUM1=DUM1*SQRT9
+      GOTO 220
+  330 IF(NORM) DUM1=DUM1*SQRT7/SQRT3
+      GOTO 220
+  340 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 220
+  350 IF(NORM) DUM1=DUM1*SQRT5/SQRT3
+      GOTO 220
+c i
+  410 DUM1=CII
+      GOTO 220
+  420 IF(NORM) DUM1=DUM1*SQRT11
+      GOTO 220
+  430 IF(NORM) DUM1=DUM1*SQRT9/SQRT3
+      GOTO 220
+  440 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 220
+  450 IF(NORM) DUM1=DUM1*SQRT7/(SQRT3*SQRT5)
+      GOTO 220
+  460 IF(NORM) DUM1=DUM1*SQRT5
+      GOTO 220
+  470 IF(NORM) DUM1=DUM1*SQRT5/SQRT3
+  220 CONTINUE
+C
+         INUM=INUM+1
+         DI(INUM)=DUM1
+      ENDDO
+C
+C     ----- LOOP OVER POINTS TO BE EVALUATED -----
+C
+      DO IPT=IST,IEND
+      IIPT=IPT-IST+1
+         X0 = XYZGRD(1,IPT)
+         Y0 = XYZGRD(2,IPT)
+         Z0 = XYZGRD(3,IPT)
+C
+         DUM = AI*((X0-XI)**2+(Y0-YI)**2+(Z0-ZI)**2)
+         IF(DUM.LE.TOL) THEN
+            FAC = EXP(-DUM)
+C
+C     ----- BASIS FUNCTIONS VALUES -----
+C
+            DO I=1,LIT+NDER
+               CALL CHIXYZ(X0,Y0,Z0,XI,YI,ZI,I,XG(I),YG(I),ZG(I))
+            ENDDO
+            CALL DCHXYZ(AI,XG,YG,ZG,DXG,DYG,DZG,DDXG,DDYG,DDZG,
+     1                  DUM,DUM,DUM,LIT,NDER)
+            INUM=0
+            DO I=MINI,MAXI
+               IX=IJX(I)
+               IY=IJY(I)
+               IZ=IJZ(I)
+               INUM=INUM+1
+               BAS =FAC*DI(INUM)* XG(IX)* YG(IY)* ZG(IZ)
+               BASX=FAC*DI(INUM)*DXG(IX)* YG(IY)* ZG(IZ)
+               BASY=FAC*DI(INUM)* XG(IX)*DYG(IY)* ZG(IZ)
+               BASZ=FAC*DI(INUM)* XG(IX)* YG(IY)*DZG(IZ)
+               XYZCHI(1,LOCI+I,IIPT)=XYZCHI(1,LOCI+I,IIPT)+BAS
+               XYZCHI(2,LOCI+I,IIPT)=XYZCHI(2,LOCI+I,IIPT)+BASX
+               XYZCHI(3,LOCI+I,IIPT)=XYZCHI(3,LOCI+I,IIPT)+BASY
+               XYZCHI(4,LOCI+I,IIPT)=XYZCHI(4,LOCI+I,IIPT)+BASZ
+            ENDDO
+         ENDIF
+      ENDDO
+C
+ 7000 CONTINUE
+ 9000 CONTINUE
+C
+C     -- CLEAR
+      CALL VCLR(AOMAX,1,NDIM)
+C     -- GRID LOOP
+      DO 10 I=1,NDIM
+      DO 10 IPT=IST,IEND
+       IIPT=IPT-IST+1
+       DUM=ABS(XYZCHI(1,I,IIPT))
+       IF(DUM.GT.AOMAX(I)) AOMAX(I)=DUM
+   10 CONTINUE
+C     -- GRID LOOP END
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK GRDGGAO
+C
+C>    @brief : Determine gradient density
+C>
+C>    @date  : December 21, 2012 - Joe Ivanic
+C>             Modify to work with h,i functions in basis sets
+C
+      SUBROUTINE GRDGGAO(IST,IEND,XYZGRD,XYZCHI,AOMAX,NDIM)
+      use mx_limits, only: mxatm,mxsh,mxgtot
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL NORM
+      LOGICAL DBUG
+      LOGICAL OUT
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+      DIMENSION XYZGRD(3,*),XYZCHI(10,NDIM,*)
+      DIMENSION AOMAX(NDIM)
+      DIMENSION DI(28)
+      DIMENSION   XG(9),  YG(9),  ZG(9)
+      DIMENSION  DXG(7), DYG(7), DZG(7)
+      DIMENSION DDXG(7),DDYG(7),DDZG(7)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+C
+      DATA ZERO  /0.0D+00/
+      DATA RLN10 /2.30258D+00/
+      DATA SQRT3 /1.73205080756888D+00/
+      DATA SQRT5 /2.23606797749979D+00/
+      DATA SQRT7 /2.64575131106459D+00/
+      DATA sqrt9 /3.0d+00/
+      DATA sqrt11 /3.3166247903553998d+00/
+C
+      DATA IJX    / 1, 2, 1, 1, 3, 1, 1, 2, 2, 1,
+     1              4, 1, 1, 3, 3, 2, 1, 2, 1, 2,
+     2              5, 1, 1, 4, 4, 2, 1, 2, 1, 3,
+     3              3, 1, 3, 2, 2,
+     4              6, 1, 1, 5, 5, 2, 1, 2, 1, 4,
+     5              4, 3, 1, 3, 1, 4, 2, 2, 3, 3,
+     6              2,
+     7              7, 1, 1, 6, 6, 2, 1, 2, 1, 5,
+     8              5, 3, 1, 3, 1, 5, 2, 2, 4, 4,
+     9              1, 4, 4, 3, 2, 3, 2, 3/
+      DATA IJY    / 1, 1, 2, 1, 1, 3, 1, 2, 1, 2,
+     1              1, 4, 1, 2, 1, 3, 3, 1, 2, 2,
+     2              1, 5, 1, 2, 1, 4, 4, 1, 2, 3,
+     3              1, 3, 2, 3, 2,
+     4              1, 6, 1, 2, 1, 5, 5, 1, 2, 3,
+     5              1, 4, 4, 1, 3, 2, 4, 2, 3, 2,
+     6              3,
+     7              1, 7, 1, 2, 1, 6, 6, 1, 2, 3,
+     8              1, 5, 5, 1, 3, 2, 5, 2, 4, 1,
+     9              4, 3, 2, 4, 4, 2, 3, 3/
+      DATA IJZ    / 1, 1, 1, 2, 1, 1, 3, 1, 2, 2,
+     1              1, 1, 4, 1, 2, 1, 2, 3, 3, 2,
+     2              1, 1, 5, 1, 2, 1, 2, 4, 4, 1,
+     3              3, 3, 2, 2, 3,
+     4              1, 1, 6, 1, 2, 1, 2, 5, 5, 1,
+     5              3, 1, 3, 4, 4, 2, 2, 4, 2, 3,
+     6              3,
+     7              1, 1, 7, 1, 2, 1, 2, 6, 6, 1,
+     8              3, 1, 3, 5, 5, 2, 2, 5, 1, 4,
+     9              4, 2, 3, 2, 3, 4, 4, 3/
+C
+      DBUG=.FALSE.
+      OUT =.FALSE.
+      OUT =OUT.OR.DBUG
+      OUT =OUT.OR.NPRINT.EQ.6
+C
+      NDER=2
+C
+      TOL =RLN10*ITOL
+      NORM=NORMF.NE.1.OR.NORMP.NE.1
+C
+      IMAX=IEND-IST+1
+      DO IIPT=1,IMAX
+         DO ICHI=1,NUM
+            DO I=1,10
+               XYZCHI(I,ICHI,IIPT)=ZERO
+            ENDDO
+         ENDDO
+      ENDDO
+C
+C     ----- ISHELL -----
+C
+      DO 9000 II=1,NSHELL
+      I=KATOM(II)
+      XI=C(1,I)
+      YI=C(2,I)
+      ZI=C(3,I)
+      I1=KSTART(II)
+      I2=I1+KNG(II)-1
+      LIT=KTYPE(II)
+      MINI=KMIN(II)
+      MAXI=KMAX(II)
+      LOCI=KLOC(II)-MINI
+C
+C     ----- I PRIMITIVE -----
+C
+      DO 7000 IG=I1,I2
+      AI=EX(IG)
+      CSI=CS(IG)
+      CPI=CP(IG)
+      CDI=CD(IG)
+      CFI=CF(IG)
+      CGI=CG(IG)
+      CHI=CH(IG)
+      CII=CI(IG)
+C
+C     ----- DENSITY FACTOR -----
+C
+      INUM=0
+      DO I=MINI,MAXI
+C          continuation markers of 4,5 are h,i
+      GO TO (110,120,220,220,130,220,220,140,220,220,
+     1       150,220,220,160,220,220,220,220,220,170,
+     2       180,220,220,190,220,220,220,220,220,200,
+     3       220,220,210,220,220,
+     4       310,220,220,
+     4       320,220,220,220,220,220,
+     4       330,220,220,220,220,220,
+     4       340,220,220,
+     4       350,220,220,
+     5       410,220,220,
+     5       420,220,220,220,220,220,
+     5       430,220,220,220,220,220,
+     5       440,220,220,
+     5       450,220,220,
+     5       460,220,220,220,220,220,
+     5       470),I
+c
+  110 DUM1=CSI
+      GO TO 220
+  120 DUM1=CPI
+      GO TO 220
+  130 DUM1=CDI
+      GO TO 220
+  140 IF(NORM) DUM1=DUM1*SQRT3
+      GO TO 220
+  150 DUM1=CFI
+      GO TO 220
+  160 IF(NORM) DUM1=DUM1*SQRT5
+      GO TO 220
+  170 IF(NORM) DUM1=DUM1*SQRT3
+      GO TO 220
+  180 DUM1=CGI
+C
+      GO TO 220
+  190 IF(NORM) DUM1=DUM1*SQRT7
+      GO TO 220
+  200 IF(NORM) DUM1=DUM1*SQRT5/SQRT3
+      GO TO 220
+  210 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 220
+c h
+  310 DUM1=CHI
+      GOTO 220
+  320 IF(NORM) DUM1=DUM1*SQRT9
+      GOTO 220
+  330 IF(NORM) DUM1=DUM1*SQRT7/SQRT3
+      GOTO 220
+  340 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 220
+  350 IF(NORM) DUM1=DUM1*SQRT5/SQRT3
+      GOTO 220
+c i
+  410 DUM1=CII
+      GOTO 220
+  420 IF(NORM) DUM1=DUM1*SQRT11
+      GOTO 220
+  430 IF(NORM) DUM1=DUM1*SQRT9/SQRT3
+      GOTO 220
+  440 IF(NORM) DUM1=DUM1*SQRT3
+      GOTO 220
+  450 IF(NORM) DUM1=DUM1*SQRT7/(SQRT3*SQRT5)
+      GOTO 220
+  460 IF(NORM) DUM1=DUM1*SQRT5
+      GOTO 220
+  470 IF(NORM) DUM1=DUM1*SQRT5/SQRT3
+  220 CONTINUE
+C
+         INUM=INUM+1
+         DI(INUM)=DUM1
+      ENDDO
+C
+C     ----- LOOP OVER POINTS TO BE EVALUATED -----
+C
+      DO IPT=IST,IEND
+      IIPT=IPT-IST+1
+         X0 = XYZGRD(1,IPT)
+         Y0 = XYZGRD(2,IPT)
+         Z0 = XYZGRD(3,IPT)
+C
+         DUM = AI*((X0-XI)**2+(Y0-YI)**2+(Z0-ZI)**2)
+         IF(DUM.LE.TOL) THEN
+            FAC = EXP(-DUM)
+C
+C     ----- BASIS FUNCTIONS VALUES -----
+C
+            DO I=1,LIT+NDER
+               CALL CHIXYZ(X0,Y0,Z0,XI,YI,ZI,I,XG(I),YG(I),ZG(I))
+            ENDDO
+            CALL DCHXYZ(AI,XG,YG,ZG,DXG,DYG,DZG,DDXG,DDYG,DDZG,
+     1                  DUM,DUM,DUM,LIT,NDER)
+            INUM=0
+            DO I=MINI,MAXI
+               IX=IJX(I)
+               IY=IJY(I)
+               IZ=IJZ(I)
+               INUM=INUM+1
+               BAS  =FAC*DI(INUM)*  XG(IX)*  YG(IY)*  ZG(IZ)
+               BASX =FAC*DI(INUM)* DXG(IX)*  YG(IY)*  ZG(IZ)
+               BASY =FAC*DI(INUM)*  XG(IX)* DYG(IY)*  ZG(IZ)
+               BASZ =FAC*DI(INUM)*  XG(IX)*  YG(IY)* DZG(IZ)
+               BASXX=FAC*DI(INUM)*DDXG(IX)*  YG(IY)*  ZG(IZ)
+               BASYY=FAC*DI(INUM)*  XG(IX)*DDYG(IY)*  ZG(IZ)
+               BASZZ=FAC*DI(INUM)*  XG(IX)*  YG(IY)*DDZG(IZ)
+               BASXY=FAC*DI(INUM)* DXG(IX)* DYG(IY)*  ZG(IZ)
+               BASXZ=FAC*DI(INUM)* DXG(IX)*  YG(IY)* DZG(IZ)
+               BASYZ=FAC*DI(INUM)*  XG(IX)* DYG(IY)* DZG(IZ)
+               XYZCHI( 1,LOCI+I,IIPT)=XYZCHI( 1,LOCI+I,IIPT)+BAS
+               XYZCHI( 2,LOCI+I,IIPT)=XYZCHI( 2,LOCI+I,IIPT)+BASX
+               XYZCHI( 3,LOCI+I,IIPT)=XYZCHI( 3,LOCI+I,IIPT)+BASY
+               XYZCHI( 4,LOCI+I,IIPT)=XYZCHI( 4,LOCI+I,IIPT)+BASZ
+               XYZCHI( 5,LOCI+I,IIPT)=XYZCHI( 5,LOCI+I,IIPT)+BASXX
+               XYZCHI( 6,LOCI+I,IIPT)=XYZCHI( 6,LOCI+I,IIPT)+BASYY
+               XYZCHI( 7,LOCI+I,IIPT)=XYZCHI( 7,LOCI+I,IIPT)+BASZZ
+               XYZCHI( 8,LOCI+I,IIPT)=XYZCHI( 8,LOCI+I,IIPT)+BASXY
+               XYZCHI( 9,LOCI+I,IIPT)=XYZCHI( 9,LOCI+I,IIPT)+BASXZ
+               XYZCHI(10,LOCI+I,IIPT)=XYZCHI(10,LOCI+I,IIPT)+BASYZ
+            ENDDO
+         ENDIF
+      ENDDO
+C
+ 7000 CONTINUE
+ 9000 CONTINUE
+C
+C     -- CLEAR
+      CALL VCLR(AOMAX,1,NDIM)
+C     -- GRID LOOP
+      DO 10 I=1,NDIM
+      DO 10 IPT=IST,IEND
+       IIPT=IPT-IST+1
+       DUM=ABS(XYZCHI(1,I,IIPT))
+       IF(DUM.GT.AOMAX(I)) AOMAX(I)=DUM
+   10 CONTINUE
+C     -- GRID LOOP END
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DCHXYZ
+      SUBROUTINE DCHXYZ(A,XG,YG,ZG,DXG,DYG,DZG,DDXG,DDYG,DDZG,
+     1                  DDDXG,DDDYG,DDDZG,N,NDER)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION   XG(*),  YG(*),  ZG(*)
+      DIMENSION  DXG(*), DYG(*), DZG(*)
+      DIMENSION DDXG(*),DDYG(*),DDZG(*)
+      DIMENSION DDDXG(*),DDDYG(*),DDDZG(*)
+      DATA TWO   /2.0D+00/
+      DATA THREE /3.0D+00/
+      DATA FOUR  /4.0D+00/
+      A2=TWO*A
+      DXG(1)=-A2*XG(2)
+      DYG(1)=-A2*YG(2)
+      DZG(1)=-A2*ZG(2)
+      IF(N.GT.1) THEN
+         DO I=2,N
+            DXG(I)=(I-1)*XG(I-1)-A2*XG(I+1)
+            DYG(I)=(I-1)*YG(I-1)-A2*YG(I+1)
+            DZG(I)=(I-1)*ZG(I-1)-A2*ZG(I+1)
+         ENDDO
+      ENDIF
+      IF(NDER.GE.2) THEN
+         A4=FOUR*A*A
+         DDXG(1)=-A2*XG(1)+A4*XG(3)
+         DDYG(1)=-A2*YG(1)+A4*YG(3)
+         DDZG(1)=-A2*ZG(1)+A4*ZG(3)
+         IF(N.GT.1) THEN
+            DDXG(2)=-THREE*A2*XG(2)+A4*XG(4)
+            DDYG(2)=-THREE*A2*YG(2)+A4*YG(4)
+            DDZG(2)=-THREE*A2*ZG(2)+A4*ZG(4)
+            IF(N.GT.2) THEN
+               DO I=3,N
+                  DDXG(I)=((I-1)*(I-2))   *XG(I-2)
+     1                   -( I-1 + I   )*A2*XG(I  )
+     2                   +              A4*XG(I+2)
+                  DDYG(I)=((I-1)*(I-2))   *YG(I-2)
+     1                   -( I-1 + I   )*A2*YG(I  )
+     2                   +              A4*YG(I+2)
+                  DDZG(I)=((I-1)*(I-2))   *ZG(I-2)
+     1                   -( I-1 + I   )*A2*ZG(I  )
+     2                   +              A4*ZG(I+2)
+               ENDDO
+            ENDIF
+         ENDIF
+      ENDIF
+      IF(NDER.EQ.3) THEN
+       A8 = TWO*FOUR*A*A*A
+       DDDXG(1)=THREE*A4*XG(2)-A8*XG(4)
+       DDDYG(1)=THREE*A4*YG(2)-A8*YG(4)
+       DDDZG(1)=THREE*A4*ZG(2)-A8*ZG(4)
+       IF(N.GT.1) THEN
+        DDDXG(2)=TWO*THREE*(-A*XG(1)+A4*XG(3))-A8*XG(5)
+        DDDYG(2)=TWO*THREE*(-A*YG(1)+A4*YG(3))-A8*YG(5)
+        DDDZG(2)=TWO*THREE*(-A*ZG(1)+A4*ZG(3))-A8*ZG(5)
+        IF(N.GT.2) THEN
+         A3      =THREE*A*A
+         DDDXG(3)=FOUR*THREE*(-A2*XG(2)+A3*XG(4))-A8*XG(6)
+         DDDYG(3)=FOUR*THREE*(-A2*YG(2)+A3*YG(4))-A8*YG(6)
+         DDDZG(3)=FOUR*THREE*(-A2*ZG(2)+A3*ZG(4))-A8*ZG(6)
+         IF(N.GT.3) THEN
+          DO I=4,N
+           DDDXG(I)=(I-1)*(I-2)*(I-3)   *XG(I-3)
+     *             -THREE*A2*(I-1)*(I-1)*XG(I-1)
+     *             +THREE*A4*          I*XG(I+1)
+     *             -A8*                  XG(I+3)
+           DDDYG(I)=(I-1)*(I-2)*(I-3)   *YG(I-3)
+     *             -THREE*A2*(I-1)*(I-1)*YG(I-1)
+     *             +THREE*A4*          I*YG(I+1)
+     *             -A8*                  YG(I+3)
+           DDDZG(I)=(I-1)*(I-2)*(I-3)   *ZG(I-3)
+     *             -THREE*A2*(I-1)*(I-1)*ZG(I-1)
+     *             +THREE*A4*          I*ZG(I+1)
+     *             -A8*                  ZG(I+3)
+          END DO
+         END IF
+        END IF
+       END IF
+      ENDIF
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK CHIXYZ
+C>    @brief
+C>    @detail
+C>    @param  X0   (in)  X coordinate of grid point
+C>    @param  Y0   (in)  Y coordinate of grid point
+C>    @param  Z0   (in)  Z coordinate of grid point
+C>    @param  XI   (in)  X coordinate of atom center
+C>    @param  YI   (in)  Y coordinate of atom center
+C>    @param  ZI   (in)  Z coordinate of atom center
+C>    @param  NI   (in)
+C>    @param  XCHI (out)
+C>    @param  YCHI (out)
+C>    @param  ZCHI (out)
+      SUBROUTINE CHIXYZ(X0,Y0,Z0,XI,YI,ZI,NI,XCHI,YCHI,ZCHI)
+      IMPLICIT NONE
+      double precision, intent(in)  :: X0,Y0,Z0,XI,YI,ZI
+      integer         , intent(in)  :: NI
+      double precision, intent(out) :: XCHI,YCHI,ZCHI
+      double precision, parameter   :: ONE = 1.0D+00
+C
+      double precision              :: PTXI, PTYI, PTZI
+C
+      XCHI=ONE
+      YCHI=ONE
+      ZCHI=ONE
+      PTXI=X0-XI
+      PTYI=Y0-YI
+      PTZI=Z0-ZI
+      GO TO (7,6,5,4,3,2,1),NI
+    1 XCHI=XCHI*PTXI
+      YCHI=YCHI*PTYI
+      ZCHI=ZCHI*PTZI
+    2 XCHI=XCHI*PTXI
+      YCHI=YCHI*PTYI
+      ZCHI=ZCHI*PTZI
+    3 XCHI=XCHI*PTXI
+      YCHI=YCHI*PTYI
+      ZCHI=ZCHI*PTZI
+    4 XCHI=XCHI*PTXI
+      YCHI=YCHI*PTYI
+      ZCHI=ZCHI*PTZI
+    5 XCHI=XCHI*PTXI
+      YCHI=YCHI*PTYI
+      ZCHI=ZCHI*PTZI
+    6 XCHI=XCHI*PTXI
+      YCHI=YCHI*PTYI
+      ZCHI=ZCHI*PTZI
+    7 CONTINUE
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK GRDOCT
+C>    @brief Compute weight (cell volume) derivatives
+C>
+C>    @details THE FORMULAE AND NOTATION ARE TAKEN FROM
+C>     JOHNSON ET AL, JCP 98, 5612 (1993)
+C>
+C>     THE RESULS ARE PUT INTO DW.
+C>
+C>     THRESHOLDS FOR THE REMARK 62 IN THE ABOVE REFERENCE. IT
+C>     CORRESPONDS TO A*B/B, WHEN B IS ZERO. DIVISION BY B IS AVOIDED
+C>     FOR B LESS THAN THRETH (AND THUS ASSIGNING A THE VALUE OF ZERO).
+C>     THIS RELIES ON A BEING ZERO WHENEVER B IS ZERO, WHICH APPEARS TO
+C>     BE TRUE ALGEBRAICALLY. IF |A|>THRETH1, THEN THE CODE ABORTS.
+C>     IF IT IS FOUND THAT THIS HAPPENS, IT WOULD BE NECESSARY TO
+C>     CALCULATE A EXPLICITLY AND AVOID *B/B, WHICH, HOWEVER, IS A BIT
+C>     OF WORK.  (NOTE G4 BELOW IS NOT A, BUT A IS PROPORTIONAL TO G4)
+C
+      SUBROUTINE GRDOCT(NAT,NITR,NCNTR,ATMXVEC,ATMYVEC,ATMZVEC,RI,RIJ,
+     *                  AIJ,WGHT,RADWT,P,UVEC,DP,DZ,DW)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      DIMENSION ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *          RI(NAT),RIJ(NAT,NAT),P(NAT),AIJ(NAT,NAT),
+     *          UVEC(3,NAT),DMUJI(3),DP(3,NAT,NAT),DZ(3,NAT),DW(3,NAT)
+C
+      THRETH=1.0D-12
+      THRETH1=1.0D-08
+C
+      CALL DACOPY(NAT,ONE,P,1)
+      CALL VCLR(DP,1,3*NAT*NAT)
+      CALL VCLR(DZ,1,3*NAT)
+      CALL VCLR(DW,1,3*NAT)
+C
+C        LOOP JATM RUNS OVER THE DERIVATIVE COORDINATES B
+C        LOOP IATM RUNS OVER CENTRES A
+C
+         DO 611 JATM=1,NAT
+            IF (ABS(AIJ(1,JATM)+1.0D+00).LT.1.0D-05) THEN
+              P(JATM) = 0.0D+00
+              GOTO 611
+            ENDIF
+            DO 612 IATM=1,NAT
+               IF(IATM.EQ.JATM) GOTO 612
+               IF(ABS(AIJ(IATM,JATM)-1.0D+00).LT.1.0D-05) GOTO 612
+               RBA=RIJ(JATM,IATM)
+C
+C     COMPUTE HYPERBOLIC COORDINATES MU(B,A) (XMUJI)
+C     AND MU'(B,A)=MU(B,A)+A(B,A)*(1-MU(B,A)**2)
+C
+               ZMUJI=(RI(JATM)-RI(IATM))/RBA
+               XMUJI=ZMUJI+AIJ(IATM,JATM)*(ONE-ZMUJI*ZMUJI)
+C              XMUJI=ZMUJI
+C
+C     BECKE'S FUZZY CELL METHOD FOR MOLECULAR GRID QUADRATURE
+C       P1(MU)=P(MU)=3/2*MU-1/2*MU**3, PN(MU)=P(P{N-1}(MU))
+C       CUTIJ=S(MUJI)=1/2*(1-PN(MU))
+C
+               F4=XMUJI
+               G4=ONE
+C
+               DO K=1,NITR
+                  G4= G4*(ONE-F4*F4)
+                  F4= F4*(1.5D+00-0.5D+00*F4*F4)
+               END DO
+C
+C              COMPUTE S(MU(A,B)) AND S(MU(B,A))
+C
+               F2   = 0.5D+00*F4
+               CUTIJ= 0.5D+00+F2
+               CUTJI= 0.5D+00-F2
+               P(JATM)=P(JATM)*CUTJI
+C
+               IF(JATM.EQ.NCNTR) GOTO 612
+C
+C              THE CODE BELOW DOES NOT WORK FOR GRAD(B) X, FOR SOME X,
+C              IN CASE OF B==NCNTR, DUE TO A MORE COMPLEX DERIVATIVE,
+C              SO WE USE TRANSLATIONAL INVARIANCE INSTEAD
+C              (X IS MU(B,A), P(B), W(A)).
+C              THE LINES ASSIGNING ID WILL MAKE GRAD(B) MU(B,A) CORRECT
+C              EVEN FOR B==NCNTR (WHICH WE DO NOT NORMALLY NEED).
+C              GRAD(B) P(A) WILL HOWEVER STILL BE INCORRECT (B==NCNTR).
+C              IF(JATM.EQ.NCNTR) THEN
+C                 ID=IATM
+C              ELSE
+C                 ID=JATM
+C              ENDIF
+               ID=JATM
+C
+C              COMPUTE GRAD(B) MU'(B,A) = A * GRAD(B) MU(B,A)
+C                      A = 1-2*A(B,A)*MU(B,A)
+C
+               A=ONE-TWO*AIJ(IATM,JATM)*ZMUJI
+               B=ZMUJI/(RBA**2)
+               DMUJI(1)=A*(-UVEC(1,ID)/RBA-B*ATMXVEC(JATM,IATM))
+               DMUJI(2)=A*(-UVEC(2,ID)/RBA-B*ATMYVEC(JATM,IATM))
+               DMUJI(3)=A*(-UVEC(3,ID)/RBA-B*ATMZVEC(JATM,IATM))
+C              WRITE(6,*) 'MU=BA',XMUJI,'GRAD(B) MU(B,A)=',JATM,IATM,
+C    >                    DMUJI(1),DMUJI(2),DMUJI(3)
+C
+C              COMPUTE D S(MU(B,A))/D MU(B,A)
+C              THE COEFFICIENT IN DCOEFF=-1/2*(3/2)**NITR
+C
+               DCOEFF = -81.0D+00/32.0D+00*G4
+C              DCOEFF = -27.0D+00/16.0D+00*G4
+C
+C              COMPUTE 1/P(A)*GRAD(B) P(A) (DP(1,IATM,JATM))
+C
+               IF (ABS(CUTIJ).GT.THRETH) THEN
+                  DCUTIJ = DCOEFF/CUTIJ
+                  DP(1,IATM,JATM)= -DCUTIJ*DMUJI(1)
+                  DP(2,IATM,JATM)= -DCUTIJ*DMUJI(2)
+                  DP(3,IATM,JATM)= -DCUTIJ*DMUJI(3)
+              ELSE
+                 IF(ABS(G4).GT.THRETH1) THEN
+                    WRITE(6,*) 'G4',G4
+                    CALL ABRT
+                 ENDIF
+              ENDIF
+              IF (ABS(CUTJI).GT.THRETH) THEN
+                 DCUTJI = DCOEFF/CUTJI
+                 DP(1,JATM,JATM)=DP(1,JATM,JATM)+DCUTJI*DMUJI(1)
+                 DP(2,JATM,JATM)=DP(2,JATM,JATM)+DCUTJI*DMUJI(2)
+                 DP(3,JATM,JATM)=DP(3,JATM,JATM)+DCUTJI*DMUJI(3)
+              ELSE
+                 IF(ABS(G4).GT.THRETH1) THEN
+                    WRITE(6,*) 'G4',G4
+                    CALL ABRT
+                 ENDIF
+              ENDIF
+ 612       CONTINUE
+ 611    CONTINUE
+C
+C       COMPUTE Z (TOTAL WEIGHT)
+C
+        Z=ZERO
+        DO IATM=1,NAT
+          Z=Z+P(IATM)
+        ENDDO
+C       WRITE(6,*) '=Z',Z
+C       ATMWT=P(NCNTR)/Z
+        SPHWT=RADWT*WGHT
+C       TOTWT=ATMWT*SPHWT
+C       WRITE(6,*) 'W(A)',NCNTR,TOTWT
+C       DO IATM=1,NAT
+C         WRITE(6,*) 'P(A)',IATM,P(IATM)
+C          DO JATM=1,NAT
+C           WRITE(6,*) NCNTR,'=GRAD(B) P(A)',JATM,IATM,DP(1,IATM,JATM)
+C    *        *P(IATM),DP(2,IATM,JATM)*P(IATM),DP(3,IATM,JATM)*P(IATM)
+C         ENDDO
+C       ENDDO
+        WTC=P(NCNTR)/Z*SPHWT
+C       IF(ABS(WTC).GT.WDCUTOFF) THEN
+        DO 690 JATM=1,NAT
+           IF (JATM.EQ.NCNTR) GOTO 690
+C
+C          COMPUTE GRAD(B) Z (DZ(*,JATM))
+C
+           DO IATM=1,NAT
+              DZ(1,JATM)=DZ(1,JATM)+DP(1,IATM,JATM)*P(IATM)
+              DZ(2,JATM)=DZ(2,JATM)+DP(2,IATM,JATM)*P(IATM)
+              DZ(3,JATM)=DZ(3,JATM)+DP(3,IATM,JATM)*P(IATM)
+           ENDDO
+C          WRITE(6,*) '=GRAD(B) Z',JATM,DZ(1,JATM),DZ(2,JATM),
+C    *                 DZ(3,JATM)
+C
+C          COMPUTE GRAD(B) W(NCNTR) (DW(*,JATM))
+C          DERIVATIVE OF CELL VOLUMES
+C
+           DW(1,JATM)=WTC*(DP(1,NCNTR,JATM)-DZ(1,JATM)/Z)
+           DW(2,JATM)=WTC*(DP(2,NCNTR,JATM)-DZ(2,JATM)/Z)
+           DW(3,JATM)=WTC*(DP(3,NCNTR,JATM)-DZ(3,JATM)/Z)
+C          WRITE(6,*) '==GRAD(B) W(A)',JATM,NCNTR,DW(1,JATM),
+C    *                 DW(2,JATM),DW(3,JATM)
+           DW(1,NCNTR)=DW(1,NCNTR)-DW(1,JATM)
+           DW(2,NCNTR)=DW(2,NCNTR)-DW(2,JATM)
+           DW(3,NCNTR)=DW(3,NCNTR)-DW(3,JATM)
+ 690    CONTINUE
+C       ENDIF
+C       DO JATM=1,NAT
+C          WRITE(6,*) '==GRAD(B) W(A)',JATM,NCNTR,DW(1,JATM),
+C    *                 DW(2,JATM),DW(3,JATM)
+C       ENDDO
+C
+      RETURN
+      END
+C
+C*MODULE DFTGRD  *DECK GENLEBPT
+C> @brief Sets up spherical Lebedev grid for DFT calcuations
+C>
+C> @details This routine sets up the numerical lebedev based grid for
+C>  different abelian symmetries.
+C>  Can be used for pruned grids as well.
+C>  Currently implemented without octant symmetry
+C>  Euler-Maclaurin scheme, radial integration
+C>  Becke polyatomic scheme
+C>
+C> @author Vladimir Mironov
+C
+      SUBROUTINE GENLEBPT(NCNTR,WGHT,XDAT,YDAT,ZDAT,TXYZ,UXYZ,
+     *                    TWGHT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                    RI,RIJ,WTINTR,TOTWT,AIJ,
+     *                    IANGN,NAPTS,PTRAD,WTRAD,
+     *                    NRADPT,NLEBPT,MAXPTS,NUMGRIDS,WTAB)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+C
+      USE params, ONLY: rad_grid_type
+c      USE mx_limits, ONLY: MXATM, MXGRID, MXGRIDTYP
+      USE mod_dft_molgrid, ONLY: get_sorted_lebedev_pts
+      USE mod_grid_storage, ONLY: reset_leb_grid_stack,
+     *                            push_last_leb_grid
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION ONE, PI
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (PI = 3.141592653589793238D+00)
+C
+      COMMON /INFOA / nat,ich,mul,num,nqmt,ne,na,nb,
+     *                zan(MXATM),c(3,MXATM),ian(MXATM)
+      INTEGER nat,ich,mul,num,nqmt,ne,na,nb,ian
+      DOUBLE PRECISION zan,c
+C
+      DOUBLE PRECISION wght(maxpts,nat,*),
+     *   xdat(maxpts,nat,*), ydat(maxpts,nat,*), zdat(maxpts,nat,*),
+     *   txyz(maxpts*3), uxyz(3,maxpts), twght(maxpts),
+     *   atmxvec(nat,nat), atmyvec(nat,nat), atmzvec(nat,nat),
+     *   ri(nat), rij(nat,nat), wtintr(nat),
+     *   totwt(nat,*), aij(nat,nat),
+     *   ptrad(nradpt), wtrad(nradpt), wtab(nat,nat,*)
+      INTEGER iangn(nat,2,*), napts(nat), nlebpt(numgrids)
+      INTEGER nradpt, numgrids, ncntr, maxpts
+C
+      DOUBLE PRECISION braggrad
+      EXTERNAL braggrad
+C
+      INTEGER i, igrid, npoints, ideg
+      DOUBLE PRECISION rad
+      DOUBLE PRECISION BOHR
+      PARAMETER (BOHR=0.52917715D+00)
+C
+C     Set radial grid scaling using Bragg-Slater radii
+      rad = braggrad(ncntr)
+C
+      CALL reset_leb_grid_stack
+C
+C     Set angular Lebedev grid(s)
+      DO igrid = 1, numgrids
+C        Get the unit Lebedev sphere
+         npoints = nlebpt(igrid)
+         !CALL lebptw(txyz, uxyz, twght, npoints, maxpts, .false.)
+         CALL get_sorted_lebedev_pts(txyz, twght, npoints, maxpts)
+         CALL push_last_leb_grid
+         DO i = 1, npoints
+            xdat(i,ncntr,igrid) = txyz(i          )
+            ydat(i,ncntr,igrid) = txyz(i+  npoints)
+            zdat(i,ncntr,igrid) = txyz(i+2*npoints)
+C           Normalize weights
+            wght(i,ncntr,igrid) = 4.0d0*PI*twght(i)
+         END DO
+         iangn(ncntr,1,igrid) = 1
+         iangn(ncntr,2,igrid) = npoints
+      END DO
+      napts(ncntr) = maxpts
+C
+      CALL genmolgrid(nradpt,xdat,ydat,
+     *     zdat,atmxvec,atmyvec,atmzvec,ri,rij,nat,
+     *     aij,wtintr,totwt,wght,iangn,
+     *     maxpts,ncntr,rad,ptrad,wtrad,wtab)
+C
+      RETURN
+      END
+C
+C*MODULE DFTGRD  *DECK GRDPT
+C>    @brief Sets up numerical grid
+C>
+C>    @details THIS ROUTINE SETS UP THE NUMERICAL LEBEDEV BASED GRID FOR
+C>     DIFFERENT ABELIAN SYMMETRIES.
+C>     CURRENTLY IMPLEMENTED WITHOUT OCTANT SYMMETRY
+C>     EULER-MACLAURIN SCHEME, RADIAL INTEGRATION
+C>     GAUSS-MARKOV QUADRATURE, ANGULAR INTEGRATION
+C>     BECKE POLYATOMIC SCHEME
+C
+      SUBROUTINE GRDPT(NCNTR,WGHT,XDAT,YDAT,ZDAT,
+     *                 ATMXVEC,ATMYVEC,ATMZVEC,RI,RIJ,WTINTR,
+     *                 TOTWT,AIJ,GLROOT,GLWGHT,
+     *                 IANGN,IIFACT,NAPTS,PTRAD,WTRAD,
+     *                 IQ2,IQ3,IQ4,IQ5,IQ6,IQ7,
+     *                 MAXANG,NRADPT,NTHE,NPHI,OPTGRD,WTAB)
+      USE constants, ONLY: PI
+      USE dftexc, ONLY: QOP, NEXFG, NCORFG, NPFFG, NXCFG
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DOUBLE PRECISION wght(maxang,nat),xdat(maxang,nat),
+     *          ydat(maxang,nat),zdat(maxang,nat)
+C      DIMENSION WGHT(NTHE*NPHI,NAT),XDAT(NTHE*NPHI,NAT),
+C     >          YDAT(NTHE*NPHI,NAT),ZDAT(NTHE*NPHI,NAT)
+      DIMENSION ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     >          RI(NAT),RIJ(NAT,NAT),WTINTR(NAT),TOTWT(NAT,*),
+     >          AIJ(NAT,NAT),GLROOT(NTHE,NTHE),GLWGHT(NTHE,NTHE),
+     *          IANGN(NAT,2),IIFACT(NAT),NAPTS(NAT),
+     *          PTRAD(NRADPT),WTRAD(NRADPT),
+     *          WTAB(NAT,NAT,*)
+C
+      LOGICAL   OPTGRD,GOPARR,DSKWRK,MASWRK
+C
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (HALF=0.5D+00)
+C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+C
+      IFACT = IIFACT(NCNTR)
+C***********************************************************************
+C
+C     NUMBER OF RADIAL POINTS
+C
+C***********************************************************************
+  810 CONTINUE
+      ITMP=NRADPT
+C***********************************************************************
+C
+C     SET RADIAL GRID SCALING USING SLATERS RULES
+C
+C***********************************************************************
+      RAD = BRAGGRAD(NCNTR)
+C
+C***********************************************************************
+C
+C     WEIGHTS FOR THE ANGULAR QUADRATURE ON PRUNE GRID
+C
+C     GAUSS-LEGENDRE ROOTS AND WEIGHTS FOR THETA GRID
+C
+C***********************************************************************
+      DO ITHE=1,NTHE
+      CALL GLGQUD(-ONE,+ONE,GLROOT(1,ITHE),GLWGHT(1,ITHE),ITHE)
+      ENDDO
+      NTHE=MAX(NTHE,2)
+      IF(OPTGRD) IFACT=1
+      IF(IFACT.EQ.8)THEN
+        ITHEA=1
+        ITHEB=NTHE/2
+        IPHIA=1
+        IPHIB=NPHI/4
+        NAPTS(NCNTR)=(NTHE*NPHI)/8
+        LTHE=2
+        LPHI=4
+      ELSE IF(IFACT.EQ.4)THEN
+        IF(IQ2.EQ.1)THEN
+          ITHEA=1
+          ITHEB=NTHE
+          IPHIA=1
+          IPHIB=NPHI/4
+          NAPTS(NCNTR)=(NTHE*NPHI)/4
+          LTHE=1
+          LPHI=4
+        ELSE IF(IQ3.EQ.1)THEN
+          ITHEA=1
+          ITHEB=NTHE/2
+          IPHIA=1
+          IPHIA2=3*NPHI/4+1
+          IPHIB=NPHI/4
+          IPHIB2=NPHI
+          NAPTS(NCNTR)=(NTHE*NPHI)/4
+          LTHE=2
+          LPHI=4
+        ELSE IF(IQ5.EQ.1)THEN
+          ITHEA=1
+          ITHEB=NTHE/2
+          IPHIA=1
+          IPHIB=NPHI/2
+          NAPTS(NCNTR)=(NTHE*NPHI)/4
+          LTHE=2
+          LPHI=2
+        ENDIF
+      ELSE IF(IFACT.EQ.2)THEN
+        IF(IQ4.EQ.1)THEN
+          ITHEA=1
+          ITHEB=NTHE
+          IPHIA=1
+          IPHIA2=3*NPHI/4+1
+          IPHIB=NPHI/4
+          IPHIB2=NPHI
+          NAPTS(NCNTR)=(NTHE*NPHI)/2
+          LTHE=1
+          LPHI=4
+        ELSE IF(IQ6.EQ.1)THEN
+          ITHEA=1
+          ITHEB=NTHE
+          IPHIA=1
+          IPHIB=NPHI/2
+          NAPTS(NCNTR)=(NTHE*NPHI)/2
+          LTHE=1
+          LPHI=2
+        ELSE IF(IQ7.EQ.1)THEN
+          ITHEA=1
+          ITHEB=NTHE/2
+          IPHIA=1
+          IPHIB=NPHI
+          NAPTS(NCNTR)=(NTHE*NPHI)/2
+          LTHE=2
+          LPHI=1
+        ENDIF
+      ELSE
+C       IFACT=1
+        ITHEA=1
+        ITHEB=NTHE
+        IPHIA=1
+        IPHIB=NPHI
+        NAPTS(NCNTR)=NTHE*NPHI
+        LTHE=1
+        LPHI=1
+      ENDIF
+      IF(MOD(NTHE,LTHE).NE.0.OR.MOD(NPHI,LPHI).NE.0) THEN
+        IF(MASWRK) WRITE(IW,1000) LTHE,LPHI
+C     THIS IS A DOUBLE CHECK.
+C     NTHE AND NPHI MUST HAVE ALREADY BEEN ADJUSTED
+        CALL ABRT
+      ENDIF
+      DO ITHE=ITHEA,ITHEB
+        WTHE=GLWGHT(ITHE,NTHE)
+        COST=GLROOT(ITHE,NTHE)
+        SINT=SQRT(ONE-COST**2)
+        DO IPHI=IPHIA,IPHIB
+          I=(ITHE-ITHEA)*(IPHIB-IPHIA+1)+IPHI
+          DPHI=TWO*PI/NPHI
+          PHII=DPHI*(IPHI-HALF)
+          WPHI=DPHI
+          COSP=COS(PHII)
+          SINP=SIN(PHII)
+          XDAT(I,NCNTR) =SINT*COSP
+          YDAT(I,NCNTR) =SINT*SINP
+          ZDAT(I,NCNTR) =COST
+          WGHT(I,NCNTR) =WTHE*WPHI
+        ENDDO
+      ENDDO
+      LASTI = I
+C**********************************************************************
+C
+C     INTEGRATE OVER ONE OCTANT OF ANGULAR POINTS
+C
+C**********************************************************************
+      IANGN(NCNTR,1)=IPHIA
+      IANGN(NCNTR,2)=(ITHEB-ITHEA)*(IPHIB-IPHIA+1)+IPHIB
+C
+      CALL genmolgrid(ITMP,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *         RI,RIJ,NAT,AIJ,WTINTR,TOTWT,WGHT,IANGN,
+     *         NAPTS(NCNTR),NCNTR,RAD,PTRAD,WTRAD,WTAB)
+C
+C**********************************************************************
+C     EXTRA DO LOOP WITH REGARD TO IPHI
+C                         IN THE CASE OF CI, C2, AND C2H
+C**********************************************************************
+      IF((IFACT.EQ.4.AND.IQ3.EQ.1).OR.((IFACT.EQ.2.AND.IQ4.EQ.1))) THEN
+        GOTO 6050
+      ELSE
+        RETURN
+      ENDIF
+C
+ 6050 CONTINUE
+      DO ITHE=ITHEA,ITHEB
+        WTHE=GLWGHT(ITHE,NTHE)
+        COST=GLROOT(ITHE,NTHE)
+        SINT=SQRT(ONE-COST**2)
+        DO IPHI=IPHIA2,IPHIB2
+          I=(ITHE-ITHEA)*(IPHIB2-IPHIA2+1)+IPHI+LASTI-(IPHIA2-1)
+          DPHI=TWO*PI/NPHI
+          PHII=DPHI*(IPHI-HALF)
+          WPHI=DPHI
+          COSP=COS(PHII)
+          SINP=SIN(PHII)
+          XDAT(I,NCNTR) =SINT*COSP
+          YDAT(I,NCNTR) =SINT*SINP
+          ZDAT(I,NCNTR) =COST
+          WGHT(I,NCNTR) =WTHE*WPHI
+        ENDDO
+      ENDDO
+      IANGN(NCNTR,1)=LASTI+1
+      IANGN(NCNTR,2)=(ITHEB-ITHEA)*(IPHIB2-IPHIA2+1)+IPHIB2+LASTI
+     >    -(IPHIA2-1)
+C
+      CALL genmolgrid(ITMP,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *         RI,RIJ,NAT,AIJ,WTINTR,TOTWT,WGHT,IANGN,
+     *         NAPTS(NCNTR),NCNTR,RAD,PTRAD,WTRAD,WTAB)
+      IANGN(NCNTR,1)=1
+      RETURN
+ 1000 FORMAT(1X,'NTHE HAS TO BE A MULTIPLE OF ',I1,' AND NPHI OF ',I1/,
+     *       1X,'IF YOU MUST USE THIS GRID, SET $CONTRL NOSYM=1',/)
+      END
+C
+C*MODULE DFTGRD  *DECK SETAIJ
+C>    @brief Calculate surface shifting parameters
+C>    @author Vladimir Mironov
+C>    @date  : Jan, 2019
+C>    @param[out]  aij   surface shifting parameters
+C>    @param[in]   nat   number of atoms
+      SUBROUTINE setaij(aij, nat)
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DIMENSION aij(nat,*)
+C
+      PARAMETER (ONE = 1.0d+00)
+      PARAMETER (HALF = 0.5d+00)
+C
+      COMMON /RUNOPT/ runtyp,exetyp,nevals,nglevl,nhlevl
+      DATA CHECK/8HCHECK   /
+C
+      IF (exetyp.EQ.CHECK) THEN
+         CALL vclr(aij,1,nat*nat)
+         RETURN
+      END IF
+C
+      DO iatm = 1, nat
+         aij(iatm,iatm) = 0.0d+00
+         radi = braggrad(iatm)
+         IF (radi.LT.0.001d+00) THEN
+           aij(1,iatm) = -ONE
+           CYCLE
+         END IF
+C
+         DO jatm = 1, nat
+            IF (iatm.EQ.jatm) CYCLE
+            radj = braggrad(jatm)
+            IF (radj.LT.0.001d+00) THEN
+              aij(jatm,iatm) = ONE
+              CYCLE
+            END IF
+            chi  = radi/radj
+            chi2 = (chi-ONE)/(chi+ONE)
+            aij(jatm,iatm) = chi2/(chi2*chi2-ONE)
+            IF (aij(jatm,iatm).GT. HALF) aij(jatm,iatm) =  HALF
+            IF (aij(jatm,iatm).LT.-HALF) aij(jatm,iatm) = -HALF
+         END DO
+      END DO
+      END
+C
+C*MODULE DFTGRD  *DECK INPBAS
+C>    @brief Form a single primitive coefficient array
+C>
+C>    @details Use S and L-shells and treat P separately
+C>
+C>    @date  : December 21, 2012 - Joe Ivanic
+C>             Modify for h,i functions in basis sets
+C
+      SUBROUTINE INPBAS(PCOEFF)
+      use mx_limits, only: mxsh,mxgtot
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      COMMON /NEOSHL/ NGAUSS,NGAUSE,NGAUSN,NTSHEL,NNUCSH
+      COMMON /NEOJOB/ NEORUN,NELERM
+      DIMENSION PCOEFF(*)
+C
+      ITOTSHELL=NSHELL
+      IF(NEORUN.EQ.1) ITOTSHELL=NTSHEL
+      DO I = 1, ITOTSHELL
+        DO IK = KSTART(I),KSTART(I)+KNG(I)-1
+          IF(KTYPE(I).EQ.1) PCOEFF(IK)=CS(IK)
+          IF(KTYPE(I).EQ.2) PCOEFF(IK)=CP(IK)
+          IF(KTYPE(I).EQ.2.AND.KMIN(I).EQ.1) PCOEFF(IK)=CS(IK)
+          IF(KTYPE(I).EQ.3) PCOEFF(IK)=CD(IK)
+          IF(KTYPE(I).EQ.4) PCOEFF(IK)=CF(IK)
+          IF(KTYPE(I).EQ.5) PCOEFF(IK)=CG(IK)
+          IF(KTYPE(I).EQ.6) PCOEFF(IK)=CH(IK)
+          IF(KTYPE(I).EQ.7) PCOEFF(IK)=CI(IK)
+        ENDDO
+      ENDDO
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK INPINF
+C>    @brief Gets symmetry and initial symmetry information for
+C>    computational point group
+C>    @details NON-ABELIAN GROUPS ARE HANDLED AS THE HIGHEST ABELIAN SUBGROUPS
+C>     WHICH HAVE THE SAME MASTER FRAME. E.G. D3 -> C1, NOT C2.
+C>     PATHETIC AS IT IS, SOME NON-ABELIAN GROUPS ARE DEFILED TO C1.
+C>     CHECK IF THE USER TRIED TO FIDDLE WITH THE LOCAL FRAME.
+C>     IF THAT IS CORRECT THEN WE CANNOT USE OCTANT SYMMETRY SINCE
+C>     THEN IT MUST BE REDEFINED APPROPRIATELY (NOT IMPOSSIBLE THOUGH).
+C
+      SUBROUTINE INPINF(ISYMXY,ISYMXZ,ISYMYZ,ISYMRX,ISYMRY,
+     >                  ISYMRZ,ISYMI,ISYMC1,AGROUP)
+      use mx_limits, only: mxsh,mxatm,mxgrid
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DIMENSION GRP(19)
+C
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TM6=1.0D-06)
+C
+      LOGICAL ABEL,LOCFRAME,GOPARR,DSKWRK,MASWRK,SG1
+C
+      CHARACTER*3 AGROUP
+C
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /SYMMOL/ GROUP,COMPLEX,IGROUP,NAXIS,ILABMO,ABEL
+      COMMON /SYMTRY/ MAPSHL(MXSH,48),MAPCTR(MXATM,48),
+     >                T(432),INVT(48),NT
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFLEB / NLEB(MXGRID),NLEB0(MXGRID)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /FRAME / U1,U2,U3,V1,V2,V3,W1,W2,W3,X0,Y0,Z0
+C
+      DATA GRP /5HC1   ,5HCS   ,5HCI   ,5HCN   ,5HS2N  ,5HCNH  ,
+     >          5HCNV  ,5HDN   ,5HDNH  ,5HDND  ,5HCINFV,5HDINFH,5HT    ,
+     >          5HTH   ,5HTD   ,5HO    ,5HOH   ,5HI    ,5HIH   /
+C
+      IF(ABS(U1-ONE).LT.TM6.AND.ABS(U2).LT.TM6.AND.ABS(U3).LT.TM6.AND.
+     *   ABS(V1).LT.TM6.AND.ABS(V2-ONE).LT.TM6.AND.ABS(V3).LT.TM6.AND.
+     *   ABS(W1).LT.TM6.AND.ABS(W2).LT.TM6.AND.ABS(W3-ONE).LT.TM6) THEN
+         LOCFRAME=.FALSE.
+      ELSE
+         LOCFRAME=.TRUE.
+         IF(MASWRK) WRITE(IW,1010)
+      ENDIF
+C
+C     READ ATOMIC COORDINATES AS 'COORD'
+C
+      ISYMXY=0
+      ISYMXZ=0
+      ISYMYZ=0
+      ISYMRX=0
+      ISYMRY=0
+      ISYMRZ=0
+      ISYMI =0
+C
+C     ----- C1 SYMMETRY ; READ ONLY IIII -----
+C           CN  FOR ODD N
+C           CNV FOR ODD N
+C           DN  FOR ODD N
+C
+      ISYMC1=0
+      IF(SG1.OR.(JANS.GT.0).OR.NLEB(1).NE.0       .OR.
+     *    GROUP.EQ.GRP(1).OR.NT.EQ.1.OR.LOCFRAME  .OR.
+     *   (GROUP.EQ.GRP(4).AND.MOD(NAXIS,2).EQ.1)  .OR.
+     *   (GROUP.EQ.GRP(7).AND.MOD(NAXIS,2).EQ.1)  .OR.
+     *   (GROUP.EQ.GRP(8).AND.MOD(NAXIS,2).EQ.1)) THEN
+         AGROUP='C1'
+         ISYMC1=1
+         LTHE=1
+         LPHI=1
+C
+C     ISYMC1 IS USED ONLY FOR THE OCTANT SYMMETRY.
+C
+C     ----- D2H SYMMETRY -----
+C           DNH FOR EVEN N
+C           TH
+C           OH
+C
+      ELSEIF(GROUP.EQ.GRP(9).AND.NAXIS.EQ.2.OR.
+     *       GROUP.EQ.GRP(9).AND.MOD(NAXIS,2).EQ.0.OR.
+     *       GROUP.EQ.GRP(14).OR.
+     *       GROUP.EQ.GRP(17))THEN
+         AGROUP='D2H'
+         ISYMXY=1
+         ISYMXZ=1
+         ISYMYZ=1
+         ISYMRX=1
+         ISYMRY=1
+         ISYMRZ=1
+         ISYMI =1
+         LTHE=2
+         LPHI=4
+C
+C     ----- C2H SYMMETRY -----
+C           CNH FOR EVEN N
+C
+      ELSEIF(GROUP.EQ.GRP(6).AND.NAXIS.EQ.2.OR.
+     *       GROUP.EQ.GRP(6).AND.MOD(NAXIS,2).EQ.0) THEN
+         AGROUP='C2H'
+         ISYMXY=1
+         ISYMRZ=1
+         ISYMI =1
+         LTHE=2
+         LPHI=4
+C        SINCE PHI IS DIVIDED INTO 4 PARTS AND ONLY TWO ARE USED.
+C
+C     ----- C2V SYMMETRY ------
+C           CNV FOR EVEN N
+C
+      ELSEIF(GROUP.EQ.GRP(7).AND.NAXIS.EQ.2.OR.
+     *       GROUP.EQ.GRP(7).AND.MOD(NAXIS,2).EQ.0) THEN
+         AGROUP='C2V'
+         ISYMXZ=1
+         ISYMYZ=1
+         ISYMRZ=1
+         LTHE=1
+         LPHI=4
+C
+C     ----- D2 SYMMETRY -----
+C           DN FOR EVEN N
+C           D2D FOR EVEN N
+C           T
+C           TD
+C           O
+C
+      ELSEIF(GROUP.EQ.GRP(8).AND.NAXIS.EQ.2.OR.
+     *       GROUP.EQ.GRP(8).AND.MOD(NAXIS,2).EQ.0.OR.
+     *       GROUP.EQ.GRP(10).AND.MOD(NAXIS,2).EQ.0.OR.
+     *       GROUP.EQ.GRP(13).OR.
+     *       GROUP.EQ.GRP(15).OR.
+     *       GROUP.EQ.GRP(16))THEN
+         AGROUP='D2'
+         ISYMRX=1
+         ISYMRY=1
+         ISYMRZ=1
+         LTHE=2
+         LPHI=2
+C
+C     ----- C2 SYMMETRY -----
+C           CN FOR EVEN N
+C           S2N FOR EVEN N
+C
+      ELSEIF(GROUP.EQ.GRP(4).AND.NAXIS.EQ.2.OR.
+     *       GROUP.EQ.GRP(4).AND.MOD(NAXIS,2).EQ.0.OR.
+     *       GROUP.EQ.GRP(5).AND.MOD(NAXIS,2).EQ.0) THEN
+         AGROUP='C2'
+         ISYMRZ=1
+         LTHE=1
+         LPHI=2
+C
+C     ----- CI SYMMETRY -----
+C           S2N FOR ODD N
+C           DND FOR ODD N
+C
+      ELSEIF(GROUP.EQ.GRP(3).OR.
+     *       GROUP.EQ.GRP(5).AND.MOD(NAXIS,2).EQ.1.OR.
+     *       GROUP.EQ.GRP(10).AND.MOD(NAXIS,2).EQ.1) THEN
+         AGROUP='CI'
+         ISYMI =1
+         LTHE=1
+         LPHI=4
+C
+C     ----- CS SYMMETRY -----
+C           CNH FOR ODD N
+C           DNH FOR ODD N
+C
+      ELSEIF(GROUP.EQ.GRP(2).OR.
+     *       GROUP.EQ.GRP(6).AND.MOD(NAXIS,2).EQ.1.OR.
+     *       GROUP.EQ.GRP(9).AND.MOD(NAXIS,2).EQ.1) THEN
+         AGROUP='CS'
+         ISYMXY=1
+         LTHE=2
+         LPHI=1
+      ELSE
+        IF(MASWRK) WRITE(IW,1007) GROUP,NAXIS
+        CALL ABRT
+      ENDIF
+C     CHECK IF THE OCTANT SYMMETRY IS CONSISTENT WITH NTHE AND NPHI.
+C     THIS IS BECAUSE WE DIVIDE NTHE AND/OR NPHI BY 2 OR 4.
+      IF(MOD(NTHE,LTHE).NE.0.OR.MOD(NPHI,LPHI).NE.0.OR.
+     *   MOD(NTHE0,LTHE).NE.0.OR.MOD(NPHI0,LPHI).NE.0) THEN
+        IF(MASWRK) WRITE(IW,1000) LTHE,LPHI
+        ISYMC1=1
+      ENDIF
+      RETURN
+ 1000 FORMAT(1X,'FOR GREATER EFFICIENCY, NTHE HAS TO BE A MULTIPLE OF ',
+     *       I1,' AND NPHI OF ',I1/1X,'SIMILARLY, NTHE0 AND NPHI0.')
+ 1007 FORMAT(/'CANNOT USE POINT GROUP ',A8,I2)
+ 1010 FORMAT(//5X,'WARNING: LOCAL FRAME CHANGE IS DETECTED!',
+     *       /5X,'THIS IS LIKELY TO MAKE THE DFT CODE SLOWER.',/)
+      END
+C*MODULE DFTGRD  *DECK RADPT
+C>    @brief Determine the radial points and weights
+C>    @date : March 2019 - Vladimir Mironov
+C>            Introduce Mura-Knowles and Treutler-Ahlrichs grids
+C
+      SUBROUTINE RADPT(PTRAD,WTRAD,NRAD)
+      USE params, ONLY: rad_grid_type
+      USE mod_grid_storage, ONLY: save_rad_grid
+C
+      IMPLICIT NONE
+C
+      DIMENSION PTRAD(NRAD),WTRAD(NRAD)
+      DOUBLE PRECISION PTRAD,WTRAD
+      INTEGER NRAD
+C
+      DOUBLE PRECISION ONE, TWO
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C     Alpha0 is scaling factor needed for Log-3 type radial grid by Mura
+C     and Knowles:
+C     ri = -alpha*log(1-(xi)**3),
+C     wi = 3*alpha * (xi*ri)**2 * i/((nrad+1)*(1-xi**3))
+C     xi = i*(nrad+1)
+C     In the original paper authors suggest alpha=7.0 for 1st and 2nd groups
+C     of periodic table and alpha=5.0 otherwise. Here different value
+C     is used:
+C     alpha=alpha0*Rbs,
+C     where Rbs is Bragg-Slater radius. Similar approach is used in NWChem.
+C     Alpha0 value was selected using R-B3LYP energy calculations of few
+C     small orgnic molecules. It looks reasonable, but more benchmarks are
+C     needed to tune this parameter.
+C     Note, roots and weights for Log-3 quadrature will be
+C     scaled by Rbs and Rbs**3 respecitevely in subroutine 'OCT'.
+      DOUBLE PRECISION ALPHA0
+      PARAMETER (ALPHA0 = 3.95D+00)
+C      PARAMETER (ALPHA0 = 5.8D+00)
+C      PARAMETER (ALPHA0 = 7.9D+00)
+C     Instead of mapping equidistant grid,
+C     one may use Chebyshev roots and weights.
+C     However, the latter does not improve the results significantly.
+C     To use Chebyshev mapping uncomment CHMK blocks here
+C     and in subroutine DFTGRD.
+CHMK  PARAMETER (ALPHA0 = 1.0D+00)
+CHMK  DOUBLE PRECISION ALPHA1
+CHMK  PARAMETER (ALPHA1 = ALPHA0*0.5d0)
+C
+C     Next, parameters for Treutler-Ahlrichs grid. This grid is based on
+C     the following variable transformation:
+C     ri = R0/log(2) * (1+(xi))**ta_pow * log(2/(1-xi))
+C     to map interval (-1, +1) to (0, +inf). Chebyshev 2nd kind grid is
+C     used. R0 are per-atom scaling coefficients. They are specified
+C     in TARADS array in GRDDFT and substitute Bragg-Slater radii.
+C     Treutler-Ahlrichs grid parameters:
+      DOUBLE PRECISION LOG2M1, TA_POW, PI
+      PARAMETER (LOG2M1 = 1.0D0/log(2.0D0))
+      PARAMETER (TA_POW = 0.6D0)
+      PARAMETER (PI = 3.141592653589793238D+00)
+      DOUBLE PRECISION xtmp, xnp1, xi, den
+      DOUBLE PRECISION t0, t, y, dy, r, tpow, tlog, dr, w0, s
+      INTEGER i, irad
+C
+      IF (rad_grid_type.EQ.0) THEN
+C     Murray-Handy-Laming grid
+      XTMP=NRAD
+      XNP1=XTMP+ONE
+      DO 10 IRAD=1,NRAD
+         XI=IRAD
+C
+C     ----- DETERMINE RADIAL POINT -----
+C
+         PTRAD(IRAD)=(XI*XI)/((XNP1-XI)*(XNP1-XI))
+C
+C     ----- CALCULATE WEIGHT FOR RADIAL QUADRATURE -----
+C
+         DEN=(XNP1-XI)*(XNP1-XI)*(XNP1-XI)*(XNP1-XI)
+     >        *(XNP1-XI)*(XNP1-XI)*(XNP1-XI)
+         WTRAD(IRAD)=(TWO*XNP1*XI*XI*XI*XI*XI)/DEN
+C
+ 10   CONTINUE
+C
+C     Mura-Knowles Log-3 grid (Chebyshev 2nd kind grid mapping)
+CHMK  ELSE IF (rad_grid_type.EQ.1) THEN
+CHMK    t0 = PI/(nrad+1.0D0)
+CHMK    DO i = 1, nrad
+CHMK      t  =    cos(t0*(nrad-i+1)) ! to ensure ascending root order
+CHMK      w0 = t0*sin(t0*(nrad-i+1))*0.5d0
+CHMK      t  = (t+1.0)*0.5d0
+CHMK      y  = 1.0D0-t*t*t
+CHMK      dy = 3.0D0 * t*t
+CHMK      r  = -ALPHA1*log(y)
+CHMK      dr =  ALPHA1*dy/y
+CHMK      ptrad(i) = r
+CHMK      wtrad(i) = r*r * w0*dr
+CHMK    END DO
+C
+C     Mura-Knowles Log-3 grid (evently spaced grid mapping)
+      ELSE IF (rad_grid_type.EQ.1) THEN
+        t0 = 1.0D0/(nrad+1.0D0)
+        w0 = t0
+        DO i = 1, nrad
+          t  = i*t0
+          y  = 1.0D0-t*t*t
+          dy = 3.0D0 * t*t
+          r  = -ALPHA0*log(y)
+          dr =  ALPHA0*dy/y
+          ptrad(i) = r
+          wtrad(i) = r*r * w0*dr
+        END DO
+C
+C     Treutler-Ahlrichs grid (Chebyshev 2nd kind grid mapping)
+      ELSE IF (rad_grid_type.EQ.2) THEN
+        t0 = PI/(nrad+1.0D0)
+        DO i = 1, nrad
+          t  =    cos(t0*(nrad-i+1)) ! to ensure ascending root order
+          w0 = t0*sin(t0*(nrad-i+1))
+          tpow = (1.0d0+t)**TA_POW
+          tlog = log(2.0d0/(1.0d0-t))
+          r  = LOG2M1 * tpow * tlog
+          dr = LOG2M1 * (TA_POW * tpow*tlog/(1.0d0+t) + tpow/(1.0d0-t))
+          ptrad(i) = r
+          wtrad(i) = r*r * w0*dr
+        END DO
+C
+C     Treutler-Ahlrichs grid (evently spaced grid mapping)
+C     ELSE IF (rad_grid_type.EQ.2) THEN
+C       t0 = 2.0D0/(nrad+1.0D0)
+C       w0 = t0
+C       DO i = 1, nrad
+C         t = i*t0 - 1.0
+C         tpow = (1.0+t)**TA_POW
+C         tlog = log(2.0d0/(1.0d0-t))
+C         r  = LOG2M1 * tpow * tlog
+C         dr = LOG2M1*(TA_POW* tpow/(1.0+t)*tlog + tpow/(1.0-t))
+C         ptrad(i) = r
+C         wtrad(i) = r*r * w0*dr
+C       END DO
+C
+C     Unknown grid type
+      ELSE
+        WRITE(*,*) 'UNKNOWN RADIAL GRID TYPE =', rad_grid_type
+        CALL abrt
+      END IF
+C
+C     Fill in radial grid data to use new DFT code
+      CALL save_rad_grid(nrad, ptrad, wtrad)
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK SYMFCT
+C>    @brief THIS ROUTINE DETERMINES WHICH QUADRANTS TO INTEGRATE OVER AND THE
+C>     FACTOR TO MULTIPLY THE SYMMETRY INTEGRATION BY.
+C>    @details ATOMS THAT LIE IN SYMMETRY PLANES OR ARE ON THE SYMMETRY AXES
+C>     (IN THE ABELIAN SUBGROUP) CAN HAVE ONLY A FRACTION OF THE GRID PTS
+C>     EXPLICITLY COMPUTED AND THE REST DUPLICATED WITH SYMMETRY FACTORS.
+C>     THIS IS CALLED "OCTANT SYMMETRY" AND IS TREATED HERE.
+C>     ATOMS THAT ARE CONNECTED TO A SYMMETRY UNIQUE ATOM BY SYMMETRY
+C>     OPERATIONS (IN THE FULL GROUP) ARE ALSO NOT COMPUTED AND THE GRID
+C>     INTEGRATION OVER A SYMMETRY UNIQUE ATOM IS MULTIPLIED BY A FACTOR.
+C>     THIS IS HANDLED IN SYMUNQ.
+C
+
+      SUBROUTINE SYMFCT(ISYMYZ,ISYMXZ,ISYMXY,ISYMRX,ISYMRY,
+     >                  ISYMRZ,ISYMI,NCNTR,
+     >                  IQ1,IQ2,IQ3,IQ4,IQ5,IQ6,IQ7,IQ8,
+     >                  IFACT,ISYMC1)
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DIMENSION IFACT(NAT)
+C
+      PARAMETER (THRSH=1.0D-10)
+C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),COORD(3,MXATM),IAN(MXATM)
+C
+C     QUADRANTS ARE LABELED
+C     XYZ=1, XY(-Z)=2, X(-Y)Z=3, X(-Y)(-Z)=4
+C     (-X)YX=5, (-X)Y(-Z)=6, (-X)(-Y)Z=7, (-X)(-Y)(-Z)=8
+C
+C     DETERMINE WHICH SYMMETRY ELEMENTS APPLY TO SYMMETRY-UNIQUE
+C     ATOM NCNTR
+C
+      IYZ=ISYMYZ
+      IXZ=ISYMXZ
+      IXY=ISYMXY
+      IRX=ISYMRX
+      IRY=ISYMRY
+      IRZ=ISYMRZ
+      IMI=ISYMI
+C***********************************************************************
+C     C1 SYMMETRY
+C***********************************************************************
+      IF(ISYMC1.EQ.1) THEN
+        IFACT(NCNTR) = 1
+        GOTO 300
+      ENDIF
+C***********************************************************************
+C
+C     SET SYMMETRICAL FACTORS
+C
+C***********************************************************************
+      IF(ABS(COORD(1,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).GT.THRSH)THEN
+         ISYMYZ=0
+         ISYMXZ=0
+         ISYMXY=0
+         ISYMRX=0
+         ISYMRY=0
+         ISYMRZ=0
+         ISYMI=0
+C***********************************************************************
+      ELSE IF(ABS(COORD(1,NCNTR)).LE.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).GT.THRSH)THEN
+         ISYMXZ=0
+         ISYMXY=0
+         ISYMRX=0
+         ISYMRY=0
+         ISYMRZ=0
+         ISYMI=0
+C***********************************************************************
+      ELSE IF(ABS(COORD(1,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).LE.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).GT.THRSH)THEN
+         ISYMYZ=0
+         ISYMXY=0
+         ISYMRX=0
+         ISYMRY=0
+         ISYMRZ=0
+         ISYMI=0
+C***********************************************************************
+      ELSE IF(ABS(COORD(1,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).LE.THRSH)THEN
+         ISYMYZ=0
+         ISYMXZ=0
+         ISYMRX=0
+         ISYMRY=0
+         ISYMRZ=0
+         ISYMI=0
+C***********************************************************************
+      ELSE IF(ABS(COORD(1,NCNTR)).LE.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).LE.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).GT.THRSH)THEN
+         ISYMXY=0
+         ISYMRX=0
+         ISYMRY=0
+         ISYMI=0
+C***********************************************************************
+      ELSE IF(ABS(COORD(1,NCNTR)).LE.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).LE.THRSH)THEN
+         ISYMXZ=0
+         ISYMRX=0
+         ISYMRZ=0
+         ISYMI=0
+C***********************************************************************
+      ELSE IF(ABS(COORD(1,NCNTR)).GT.THRSH.AND.
+     >   ABS(COORD(2,NCNTR)).LE.THRSH.AND.
+     >   ABS(COORD(3,NCNTR)).LE.THRSH)THEN
+         ISYMYZ=0
+         ISYMRY=0
+         ISYMRZ=0
+         ISYMI=0
+      ENDIF
+C***********************************************************************
+C
+C     INITIAL SYMMETRY FACTOR
+C
+C***********************************************************************
+      IFACT(NCNTR)=1
+C***********************************************************************
+C
+C     DETERMINE WHICH QUADRANTS ARE EQUIVALENT
+C
+C***********************************************************************
+      IQ1=1
+      IQ2=1
+      IQ3=1
+      IQ4=1
+      IQ5=1
+      IQ6=1
+      IQ7=1
+      IQ8=1
+C***********************************************************************
+      IF(ISYMYZ.EQ.1.OR.ISYMRY.EQ.1.OR.ISYMRZ.EQ.1.OR.ISYMI.EQ.1)THEN
+         IQ5=0
+         IQ6=0
+         IQ7=0
+         IQ8=0
+         IF(ISYMXZ.EQ.1.OR.ISYMRX.EQ.1)THEN
+            IQ3=0
+            IQ4=0
+            IF(ISYMXY.EQ.1)THEN
+               IQ2=0
+               IFACT(NCNTR)=8
+               GOTO 300
+            ENDIF
+         IFACT(NCNTR)=4
+         GO TO 300
+         ENDIF
+         IF(ISYMXY.EQ.1)THEN
+            IQ2=0
+            IQ4=0
+            IFACT(NCNTR)=4
+            GOTO 300
+         ENDIF
+         IFACT(NCNTR)=2
+      ENDIF
+      IF(ISYMXZ.EQ.1.OR.ISYMRX.EQ.1)THEN
+            IQ3=0
+            IQ4=0
+            IQ7=0
+            IQ8=0
+            IF(ISYMXY.EQ.1)THEN
+               IQ2=0
+               IQ6=0
+               IFACT(NCNTR)=4
+               GOTO 300
+            ENDIF
+      IFACT(NCNTR)=2
+      GOTO 300
+      ENDIF
+      IF(ISYMXY.EQ.1)THEN
+         IQ2=0
+         IQ4=0
+         IQ6=0
+         IQ8=0
+         IFACT(NCNTR)=2
+      ENDIF
+  300 CONTINUE
+      ISYMYZ=IYZ
+      ISYMXZ=IXZ
+      ISYMXY=IXY
+      ISYMRX=IRX
+      ISYMRY=IRY
+      ISYMRZ=IRZ
+      ISYMI=IMI
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK SYMUNQ
+C>    @brief Sets up the factor for symmetry-unique atom to be multiplied by
+C
+      SUBROUTINE SYMUNQ(IFACTR,INATM,NSYMAT,NDEG,NEQATM,IUNIQUE)
+      use mx_limits, only: mxsh,mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+C
+      DIMENSION IFACTR(NAT),INATM(NAT),NDEG(NAT),NEQATM(NAT,NAT),
+     *          IUNIQUE(NAT)
+C
+      COMMON /FMOINF/ NFG,NLAYER,NATFMO,NBDFG,NAOTYP,NBODY,NSEGM
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /SYMTRY/ MAPSHL(MXSH,48),MAPCTR(MXATM,48),
+     *                T(432),INVT(48),NT
+      COMMON /ZANDAT/ ZANINP(MXATM)
+C
+C     DETERMINE SYMMETRY UNIQUE ATOMS AND SYMMETRY FACTORS
+C
+      IF (NT.EQ.1) THEN
+         TINY = 0.00001D+00
+         DO 5 I=1,NAT
+            IFACTR(I) =1
+            INATM(I)  =I
+            IUNIQUE(I)=I
+            ZNUC = ABS(ZANINP(I))
+            NUCZ = INT(ZNUC+0.001D+00)
+            IF(ABS(ZNUC-NUCZ).LT.TINY) THEN
+              INUC = NUCZ
+            ELSE
+              INUC = 0
+            END IF
+            IF(NFG.NE.0) INUC=IAN(I)
+            IF(INUC.EQ.0) IUNIQUE(I)=0
+ 5       CONTINUE
+         NSYMAT=NAT
+         RETURN
+      ENDIF
+C
+      NSYMAT=0
+      CALL VICLR(IFACTR,1,NAT)
+      CALL VICLR(INATM,1,NAT)
+      CALL VICLR(NDEG,1,NAT)
+      CALL VICLR(NEQATM,1,NAT*NAT)
+      CALL VICLR(IUNIQUE,1,NAT)
+      JATM=1
+ 10   CONTINUE
+      IF (JATM.GT.NAT) THEN
+         GOTO 90
+      ELSEIF (JATM.NE.1) THEN
+         DO 20 KATM=1,JATM-1
+            IF (NDEG(KATM).EQ.0) GOTO 20
+            DO 30 IDEG=1,NDEG(KATM)
+               IF (JATM.EQ.NEQATM(KATM,IDEG)) THEN
+                  JATM=JATM+1
+                  GOTO 10
+               ENDIF
+ 30         CONTINUE
+ 20      CONTINUE
+      ENDIF
+C
+      NSYMAT=NSYMAT+1
+      NDEG(JATM)=1
+      INATM(NSYMAT)=JATM
+C
+      DO 40 IOPER=1,NT-1
+         DO 50 JOPER=1,IOPER
+           IF (MAPCTR(JATM,JOPER).EQ.MAPCTR(JATM,IOPER+1)) GOTO 40
+ 50      CONTINUE
+         NEQATM(JATM,NDEG(JATM))=MAPCTR(JATM,IOPER+1)
+         NDEG(JATM)=NDEG(JATM)+1
+C
+ 40   CONTINUE
+      IFACTR(NSYMAT)=NDEG(JATM)
+C
+      JATM=JATM+1
+      GOTO 10
+C
+ 90   CONTINUE
+      TINY = 0.00001D+00
+      DO INC = 1, NSYMAT
+        IUNIQUE(INATM(INC))=INC
+        I=INATM(INC)
+C          sparkles and bond functions are to be ignored,
+C          as Bragg radii will be assigned as zero.
+        ZNUC = ABS(ZANINP(I))
+        NUCZ = INT(ZNUC+0.001D+00)
+        IF(ABS(ZNUC-NUCZ).LT.TINY) THEN
+          INUC = NUCZ
+        ELSE
+          INUC = 0
+        END IF
+        IF(NFG.NE.0) INUC=IAN(I)
+        IF(INUC.EQ.0) IUNIQUE(I)=0
+      ENDDO
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTTRFA
+      SUBROUTINE DFTTRFA(UROHF,L1,NA,CA,CB,AOX,MOXA,MOXB,TOL)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DOUBLE PRECISION MOXA,MOXB
+      LOGICAL UROHF
+      DIMENSION CA(L1,L1),CB(L1,L1),AOX(L1),MOXA(L1),MOXB(L1)
+C
+C     AO->MO TRANSFORMATION
+C     (FOR SPEED, RUN ONE RATHER THAN TWO LOOPS, SO ZERO EXTRA -MOXB-)
+C     ALL THIS CAN BE COMPRESSED INTO A SINGLE LINE:
+C     CALL MRARBR(AOX,1,1,L1,COEFFB,L1,NOB,VMOB,1)
+C
+      CALL VCLR(MOXA,1,NA)
+C
+      IF(UROHF) THEN
+        CALL VCLR(MOXB,1,NA)
+        DO I=1,L1
+          AO=AOX(I)
+          IF(ABS(AO).GT.TOL) THEN
+          DO J=1,NA
+            MOXA(J)=MOXA(J)+AO*CA(J,I)
+            MOXB(J)=MOXB(J)+AO*CB(J,I)
+          ENDDO
+          ENDIF
+        ENDDO
+      ELSE
+        DO I=1,L1
+          AO=AOX(I)
+          IF(ABS(AO).GT.TOL) THEN
+          DO J=1,NA
+            MOXA(J)=MOXA(J)+AO*CA(J,I)
+          ENDDO
+          ENDIF
+        ENDDO
+      ENDIF
+C--   IF(.NOT.UROHF) CALL DCOPY(NB,MOXA,1,MOXB,1)
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTTRFG
+      SUBROUTINE DFTTRFG(UROHF,L1,NA,CA,CB,
+     *                   GAOX,GAOY,GAOZ,
+     *                   GMOXA,GMOYA,GMOZA,
+     *                   GMOXB,GMOYB,GMOZB,TOL)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL UROHF
+      DIMENSION CA(L1,L1),CB(L1,L1),
+     *          GAOX(L1),GAOY(L1),GAOZ(L1),
+     *          GMOXA(L1),GMOYA(L1),GMOZA(L1),
+     *          GMOXB(L1),GMOYB(L1),GMOZB(L1)
+C
+C     AO->MO TRANSFORMATION FOR THE GRADIENT TERMS.
+C     SIMILARLY, A SINGLE CALL TO MRARBR WOULD DO THE TRICK.
+C     THIS ROUTINE ASSUMES THAT CB (BETA-LCAO COEFFICIENTS) ARE ZERO
+C     FOR "MISSING" ORBITALS, THAT IS, LAST NA-NB ORBITALS, FOR UROHF.
+C
+C
+C     STB - THIS THRESHOLD IS NOT VALID
+C     STB - IF THE VALUE OF A BASIS FUNCTION IS SMALL
+C     STB - IT DOESN'T FOLLOW THAT ITS GRADIENT WILL BE.
+C     STB - THIS DOES NOT SEEM TO EFFECT THE E-M GRIDS AS BAD
+C           AS THE LEBEDEV GRIDS, AND I HAVE NO IDEA WHY
+C
+      CALL VCLR(GMOXA,1,NA)
+      CALL VCLR(GMOYA,1,NA)
+      CALL VCLR(GMOZA,1,NA)
+C
+      IF(UROHF) THEN
+C        SHOULD BE NB IN PRINCIPLE
+         CALL VCLR(GMOXB,1,NA)
+         CALL VCLR(GMOYB,1,NA)
+         CALL VCLR(GMOZB,1,NA)
+         DO I=1,L1
+C          IF(ABS(AOX(I)).GT.TOL) THEN
+C            NN=NC(I)
+           GX=GAOX(I)
+           GY=GAOY(I)
+           GZ=GAOZ(I)
+           IF(ABS(GX)+ABS(GY)+ABS(GZ).GT.TOL) THEN
+           DO J=1,NA
+             COA=CA(J,I)
+             COB=CB(J,I)
+             GMOXA(J)=GMOXA(J)+GX*COA
+             GMOYA(J)=GMOYA(J)+GY*COA
+             GMOZA(J)=GMOZA(J)+GZ*COA
+             GMOXB(J)=GMOXB(J)+GX*COB
+             GMOYB(J)=GMOYB(J)+GY*COB
+             GMOZB(J)=GMOZB(J)+GZ*COB
+           ENDDO
+           ENDIF
+         ENDDO
+      ELSE
+        DO I=1,L1
+C         IF(ABS(AOX(I)).GT.TOL) THEN
+C           NN=NC(I)
+          GX=GAOX(I)
+          GY=GAOY(I)
+          GZ=GAOZ(I)
+          IF(ABS(GX)+ABS(GY)+ABS(GZ).GT.TOL) THEN
+          DO J=1,NA
+            COA=CA(J,I)
+            GMOXA(J)=GMOXA(J)+GX*COA
+            GMOYA(J)=GMOYA(J)+GY*COA
+            GMOZA(J)=GMOZA(J)+GZ*COA
+          ENDDO
+          ENDIF
+        ENDDO
+      ENDIF
+C
+CNB   THIS PART CAN PROBABLY BE NEGLECTED
+C     IF(.NOT.UROHF) THEN
+C       CALL DCOPY(NB,GMOXA,1,GMOXB,1)
+C       CALL DCOPY(NB,GMOXA,1,GMOXB,1)
+C       CALL DCOPY(NB,GMOXA,1,GMOXB,1)
+C     ENDIF
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK SWGRID
+C>    @brief SWITCH THE FINE AND COARSE GRID SIZES
+C
+      SUBROUTINE SWGRID
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      LOGICAL SG1
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFLEB/  NLEB(MXGRID),NLEB0(MXGRID)
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+C
+      IF(NGRIDS.EQ.1) THEN
+         IF(NLEB(1).EQ.0) THEN
+            NRADT=NRAD
+            NTHET=NTHE
+            NPHIT=NPHI
+            NRAD=NRAD0
+            NTHE=NTHE0
+            NPHI=NPHI0
+            NRAD0=NRADT
+            NTHE0=NTHET
+            NPHI0=NPHIT
+            NANGPT(1)=NTHE*NPHI
+            NANGPT0(1)=NTHE0*NPHI0
+         ELSE
+            NRADT=NRAD
+            NRAD=NRAD0
+            NRAD0=NRADT
+            NLEBT=NLEB(1)
+            NLEB(1)=NLEB0(1)
+            NLEB0(1)=NLEBT
+            NANGPT(1)=NLEB(1)
+            NANGPT0(1)=NLEB0(1)
+         ENDIF
+      ENDIF
+C
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DEREXC
+C>    @brief Clone of DMATD
+C>
+C>    @details SEE ADDITIONAL REFERENCES THERE.
+C>     HERE A CONTRIBUTION TO THE ENERGY GRADIENT DUE TO INTEGRATION OVER
+C>     GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>
+C>
+C>    @date : December 21, 2012 - Joe Ivanic
+C>            Modify IJX,IJY,IJZ to have dimension 84 for h,i cartesians
+C>
+C>    @date : March 2019 - Vladimir Mironov
+C>            Limited OpenMP support
+C
+      SUBROUTINE DEREXC(TOTWT,NAPTS,COEFFA,COEFFB,DA,DB,IANGN,IFACTR,
+     *                  IUNIQUE,VMOA,DVMOXA,DVMOYA,DVMOZA,VMOB,DVMOXB,
+     *                  DVMOYB,DVMOZB,WGHT,RI,RIJ,WTINTR,AIJ,WTRAD,
+     *                  L1,TOTELE,NANG,PTRAD,XDAT,YDAT,ZDAT,
+     *                  ATMXVEC,ATMYVEC,ATMZVEC,ANGXVL,ANGYVL,ANGZVL,
+     *                  RSQRD,PCOEFF,EXPS,AOX,GAOX,GAOY,GAOZ,
+     *                  G2AOXX,G2AOYY,G2AOZZ,G2AOXY,G2AOYZ,G2AOXZ,NLCT,
+     *                  NELM,IJX,IJY,IJZ,NEEDGR,DEDFT,UVEC,
+     *                  DWTINT,DWTTOT,DTOTWT,OUT)
+      USE metaGGA, ONLY: NEEDTAU, PRTTAU => printtau
+      USE funclib, ONLY: FUNCL, FUNFL
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+      USE params, ONLY: dft_bfc_algo, dft_wt_der
+      USE mod_dft_gridint, ONLY: derexc_blk
+      use libxc, only: use_libxc, libxc_calc
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      LOGICAL UROHF,OUT,NEEDGR,GOPARR,DSKWRK,MASWRK,DLB,SG1
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (HALF=0.5D+00)
+      PARAMETER (ONE=1.0D+00)
+      PARAMETER (TWO=2.0D+00)
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      COMMON /DNSAO / IDENAO
+C
+      DIMENSION TOTWT(NAT,*),COEFFA(L1,*),COEFFB(L1,*),
+     >          VMOA(NUM),DVMOXA(NUM),DVMOYA(NUM),DVMOZA(NUM),
+     >          VMOB(NUM),DVMOXB(NUM),DVMOYB(NUM),DVMOZB(NUM),
+     *          DA(NUM,NUM),DB(NUM,NUM)
+      DIMENSION NAPTS(NAT),IANGN(NAT,2,MXGRID),IFACTR(NAT)
+      DIMENSION AOX(NUM),GAOX(NUM),GAOY(NUM),GAOZ(NUM),
+     *          G2AOXX(NUM),G2AOYY(NUM),G2AOZZ(NUM),
+     *          G2AOXY(NUM),G2AOYZ(NUM),G2AOXZ(NUM),
+     *          DEDFT(3,NAT),EXPS(*),PTRAD(*),
+     *          XDAT(MAXANG,NAT,MXGRID),YDAT(MAXANG,NAT,MXGRID),
+     *          ZDAT(MAXANG,NAT,MXGRID),RSQRD(*),PCOEFF(*),
+     *          ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *          ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*),
+     *          WGHT(MAXANG,NAT,MXGRID),RI(NAT),RIJ(NAT,NAT),
+     *          WTINTR(NAT),AIJ(NAT,NAT),WTRAD(*),UVEC(3,NAT),
+     *          DWTINT(3,NAT,NAT),DWTTOT(3,NAT),DTOTWT(3,NAT)
+      DIMENSION IJX(84),IJY(84),IJZ(84)
+      DIMENSION NLCT(*),NELM(*)
+      DIMENSION IUNIQUE(*)
+C
+      DATA DEBUG/8HDEBUG   /, DFTDER/8HDFTDER  /
+      DATA UHF,ROHF/8HUHF     ,8HROHF    /
+      DATA REKS/8HREKS    /
+C
+      UROHF = SCFTYP.EQ.UHF  .OR.  SCFTYP.EQ.ROHF .OR. SCFTYP.EQ.REKS
+      OUT = EXETYP.EQ.DFTDER  .OR.  EXETYP.EQ.DEBUG
+C
+      IF (dft_bfc_algo.GE.0 .AND. idenao.EQ.0) THEN
+        CALL derexc_blk(da,db,dedft,
+     *              totele,totkin,
+     *              atmxvec,atmyvec,atmzvec,
+     *              nang,l1,needgr,urohf)
+      RETURN
+      END IF
+C
+      TOTEXC=ZERO
+C
+      EXEC = ZERO
+      NOA = NA
+      NOB = NB
+      NPT=NRAD*MAXANG
+C
+C     SET CUT-OFFS FOR DFT GRADIENT:
+C     WCUTOFF - CELL VOLUME (WEIGHT)
+C     RCUTOFF - ELECTRON DENSITY
+C     CCUTOFF - LCAO COEFFICIENTS (AS USED FOR AO -> MO TRANSFORMATION)
+C     FCUTOFF - FUNCTIONAL DERIVATIVE
+C     AT PRESENT WEIGHT DERIVATIVE CUTOFF IS FOUND UNUSEFUL.
+C
+C     DFTTHR IS NOT USED IN THE GRADIENT.
+C     INSTEAD, DFTGTHR IS USED AS FOLLOWS:
+C     DFTGTHR=1 USE DEFAULT THRESHOLDS
+C     DFTGTHR<1 SET ALL THRESHOLDS TO DFTGTHR
+C     DFTGTHR>1 DIVIDE DEFAULT THRESHOLDS BY DFTGTHR (MAKE TIGHTER).
+C     DFTTHR SET TO 1E-15 AS BEFORE SETS ALL GRAD THRESHOLDS TO 1E-15.
+C
+C     IF HIGHER ACCURACY IN GRADIENT DUE TO THRESHOLDS IS THOUGHT THE
+C     RECOMMENDED WAY IS TO SET DFTGTHR=10 (WHICH MEANS ADD ABOUT
+C     1 DIGIT OF ACCURACY, RELATIVE TO NO THRESHOLDS; DFT GRID
+C     INTEGRATION HAS ITS OWN ERRORS, FINALLY, 2E INTEGRALS ALSO HAVE
+C     CERTAIN ERROR BARS ON THEM).
+C
+      THRV1=ZERO
+      THRV2=1.0D+00
+      IF(DFTGTHR.GT.1.01D+00) THEN
+        THRV2=DFTGTHR
+      ELSE IF(DFTGTHR.LT.0.99D+00) THEN
+        THRV1=DFTGTHR
+      ENDIF
+      IF(DFTTHR.LT.1.1D-15.AND.DFTTHR.NE.ZERO) THRV1=1.0D-15
+C     THRV2=1.0D+00
+      WCUTOFF=3.0D-05/NPT/THRV2
+      RCUTOFF=1.0D-02/NPT/THRV2
+      CCUTOFF=1.0D-01/NPT/THRV2
+      FCUTOFF=3.0D-04/NPT/THRV2
+C     WDCUTOFF=1.0D+01*WCUTOFF
+C     IF(DFTTHR.LT.1.1D-15.AND.DFTTHR.NE.ZERO) THEN
+      IF(THRV1.NE.ZERO) THEN
+C        THRV1=1.0D-15
+         WCUTOFF=THRV1
+         RCUTOFF=THRV1
+         CCUTOFF=THRV1
+         FCUTOFF=THRV1
+C        WCUTOFF=WCUTOFF*1D-1
+C        RCUTOFF=RCUTOFF*1D-1
+C        CCUTOFF=CCUTOFF*1D-1
+C        FCUTOFF=FCUTOFF*1D-1
+C        WDCUTOFF=WDCUTOFF*1D-1
+      ENDIF
+C     WRITE(6,*) 'WWWG',WCUTOFF,RCUTOFF,CCUTOFF,FCUTOFF,DFTGTHR
+C
+C     ANGXVL=X**I, ANGYVL=Y**J, ANGZVL=Z**K, FOR ALL VALUES OF I,J,K
+C     WHERE (X,Y,Z) IS THE CENTRE OF A DFT GRID POINT RI
+C     MINUS AN ATOMIC CENTRE RA: XYZ= (RI - RA)
+C
+      CALL VCLR(ANGXVL(1,1),1,NAT)
+      CALL VCLR(ANGYVL(1,1),1,NAT)
+      CALL VCLR(ANGZVL(1,1),1,NAT)
+      CALL DACOPY(NAT,ONE,ANGXVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGYVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGZVL(1,2),1)
+C
+C     ----- LOOP FOR ATOMS -----
+C
+      DO 40 NCNTR = 1, NAT
+        INC0=IUNIQUE(NCNTR)
+        IF (INC0.EQ.0) GOTO 40
+C
+      RAD = BRAGGRAD(NCNTR)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+C
+C      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+      FACT=IFACTR(INC0)
+C      FACT=1
+C
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      NGRAN=20
+      IGRID = 1
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C     WRITE(6,*) 'WWWAA',DLB
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+      DO 20 IRADPT = 1, NRAD
+C
+        RADWT=RAD*RAD*RAD*WTRAD(IRADPT)
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD) THEN
+           IGRID = IGRID + 1
+        ENDIF
+C     WRITE(IW,'(A,I5,2F20.10,I5)')'RAD,PT,IGRID = ',IRADPT,RAD,
+C     *       PTRAD(IRADPT),IGRID
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+           IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) CALL DDI_DLBNEXT(NEXT)
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          FTOTWT0=FTOTWT/FACT
+          IF(FTOTWT0.LT.WCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+C
+C           NORMALISE THE R(A) VECTOR, = R(I)-R(A)
+C
+            IF (dft_wt_der) THEN
+              RI(IATM)=SQRT(RSQRD(IATM))
+              UVEC(1,IATM) = XCDNT / RI(IATM)
+              UVEC(2,IATM) = YCDNT / RI(IATM)
+              UVEC(3,IATM) = ZCDNT / RI(IATM)
+            END IF
+C
+            ANGXVL(IATM,3)=XCDNT
+            ANGYVL(IATM,3)=YCDNT
+            ANGZVL(IATM,3)=ZCDNT
+            DO 35 IANG=3,NANG
+               ANGXVL(IATM,IANG+1)=ANGXVL(IATM,IANG)*XCDNT
+               ANGYVL(IATM,IANG+1)=ANGYVL(IATM,IANG)*YCDNT
+               ANGZVL(IATM,IANG+1)=ANGZVL(IATM,IANG)*ZCDNT
+ 35         CONTINUE
+  610     CONTINUE
+C
+          CALL DFTAO(IJX,IJY,IJZ,AOX,ANGXVL,ANGYVL,ANGZVL,PCOEFF,EXPS,
+     *               RSQRD,NAT,L1)
+C***********************************************************************
+C     FORM DENSITY AT THIS POINT
+C***********************************************************************
+          IF(IDENAO.EQ.0) THEN
+             CALL DFTTRFA(UROHF,L1,NOA,COEFFA,COEFFB,AOX,VMOA,VMOB,
+     *                    CCUTOFF)
+             ROA=DDOT(NOA,VMOA,1,VMOA,1)
+             IF(UROHF) THEN
+               ROB=DDOT(NOB,VMOB,1,VMOB,1)
+             ELSE
+               ROB=ROA
+             ENDIF
+          ELSE
+             CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,AOX,VMOA,VMOB,CCUTOFF,
+     *                     NLCT,NELM)
+             ROA=DDOT(L1,AOX,1,VMOA,1)
+             IF(UROHF) THEN
+                ROB=DDOT(L1,AOX,1,VMOB,1)
+             ELSE
+                ROA=ROA*HALF
+                ROB=ROA
+             END IF
+          END IF
+          IF(ROA+ROB.LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+C         COMPUTE THE WEIGHT DERIVATIVE.
+C
+          IF (dft_wt_der) THEN
+          WGHTNOW=WGHT(IANGPT,NCNTR,IGRID)
+          NITR=4
+          CALL GRDOCT(NAT,NITR,NCNTR,ATMXVEC,ATMYVEC,ATMZVEC,RI,RIJ,AIJ,
+     *          WGHTNOW,RADWT,WTINTR,UVEC,DWTINT,DWTTOT,DTOTWT)
+C         ELSE
+C           CALL VCLR(DTOTWT,1,3*NAT)
+C         ENDIF
+C
+          END IF
+C
+          CALL DFTGAO(IJX,IJY,IJZ,GAOX,GAOY,GAOZ,ANGXVL,ANGYVL,ANGZVL,
+     *                PCOEFF,EXPS,RSQRD,NAT,L1)
+C         ---------------
+          IF(NEEDGR) THEN
+C         ----------------
+          CALL DFTG2AO(IJX,IJY,IJZ,G2AOXX,G2AOYY,G2AOZZ,G2AOXY,G2AOYZ,
+     *          G2AOXZ,ANGXVL,ANGYVL,ANGZVL,PCOEFF,EXPS,RSQRD,NAT,L1)
+C***********************************************************************
+C     FORM DENSITY GRADIENT AT THIS POINT
+C***********************************************************************
+            IF(IDENAO.EQ.0) THEN
+              CALL DFTTRFG(UROHF,L1,NOA,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+     *                     DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+     *                     CCUTOFF)
+              GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+              GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+              GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+              IF(UROHF) THEN
+                GRADXB=TWO*DDOT(NOB,VMOB,1,DVMOXB,1)
+                GRADYB=TWO*DDOT(NOB,VMOB,1,DVMOYB,1)
+                GRADZB=TWO*DDOT(NOB,VMOB,1,DVMOZB,1)
+              ELSE
+                GRADXB=GRADXA
+                GRADYB=GRADYA
+                GRADZB=GRADZA
+              ENDIF
+            ELSE
+               GRADXA=DDOT(L1,GAOX,1,VMOA,1)
+               GRADYA=DDOT(L1,GAOY,1,VMOA,1)
+               GRADZA=DDOT(L1,GAOZ,1,VMOA,1)
+               IF(UROHF) THEN
+                  GRADXA=GRADXA*TWO
+                  GRADYA=GRADYA*TWO
+                  GRADZA=GRADZA*TWO
+                  GRADXB=DDOT(L1,GAOX,1,VMOB,1)*TWO
+                  GRADYB=DDOT(L1,GAOY,1,VMOB,1)*TWO
+                  GRADZB=DDOT(L1,GAOZ,1,VMOB,1)*TWO
+               ELSE
+                  GRADXB=GRADXA
+                  GRADYB=GRADYA
+                  GRADZB=GRADZA
+               END IF
+            END IF
+C***********************************************************************
+C      FORM GRADIENT INVARIANT (GRAD DOT GRAD)
+C***********************************************************************
+            GRDAA  = GRADXA*GRADXA+GRADYA*GRADYA+GRADZA*GRADZA
+            GRDBB  = GRADXB*GRADXB+GRADYB*GRADYB+GRADZB*GRADZB
+            GRDAB  = GRADXA*GRADXB+GRADYA*GRADYB+GRADZA*GRADZB
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              IF(IDENAO.EQ.0) THEN
+                TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                IF(UROHF) THEN
+                  TAUXB =DDOT(NOB,DVMOXB,1,DVMOXB,1)
+                  TAUYB =DDOT(NOB,DVMOYB,1,DVMOYB,1)
+                  TAUZB =DDOT(NOB,DVMOZB,1,DVMOZB,1)
+                ELSE
+                  TAUXB =TAUXA
+                  TAUYB =TAUYA
+                  TAUZB =TAUZA
+                ENDIF
+              ELSE
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOX,DVMOXA,DVMOXB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOY,DVMOYA,DVMOYB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOZ,DVMOZA,DVMOZB,
+     *                        CCUTOFF,NLCT,NELM)
+                TAUXA=DDOT(L1,GAOX,1,DVMOXA,1)
+                TAUYA=DDOT(L1,GAOY,1,DVMOYA,1)
+                TAUZA=DDOT(L1,GAOZ,1,DVMOZA,1)
+                IF(UROHF) THEN
+                  TAUXB=DDOT(L1,GAOX,1,DVMOXB,1)
+                  TAUYB=DDOT(L1,GAOY,1,DVMOYB,1)
+                  TAUZB=DDOT(L1,GAOZ,1,DVMOZB,1)
+                ELSE
+                  TAUXA =TAUXA*HALF
+                  TAUYA =TAUYA*HALF
+                  TAUZA =TAUZA*HALF
+                  TAUXB =TAUXA
+                  TAUYB =TAUYA
+                  TAUZB =TAUZA
+                ENDIF
+              ENDIF
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            ENDIF
+          ELSE
+C
+C     THIS ELSE CASE WILL ALLOW USERS TO PRINT OUT THE TOTAL KINETIC
+C     ENERGY DENSITY FOR LDA TYPE FUNCTIONALS.
+C     KEEP IN MIND THAT IF THE FUNCTIONAL DOES NOT CONTAIN A TAU
+C     DEPENDENCE THEN ONE CAN NOT EXPECT THE TOTAL KINETIC ENERGY
+C     DENSITY TO BE EXACTLY EQUAL TO THE EXPECTATION VALUE OF THE
+C     KINETIC ENERGY OPERATOR.
+            IF(PRTTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              CALL DFTGAO(IJX,IJY,IJZ,GAOX,GAOY,GAOZ,ANGXVL,ANGYVL,
+     *                    ANGZVL,PCOEFF,EXPS,RSQRD,NAT,L1)
+              IF(IDENAO.EQ.0) THEN
+                CALL DFTTRFG(UROHF,L1,NOA,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+     *                       DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+     *                       CCUTOFF)
+                TAUXA =DDOT(NOA,DVMOXA,1,DVMOXA,1)
+                TAUYA =DDOT(NOA,DVMOYA,1,DVMOYA,1)
+                TAUZA =DDOT(NOA,DVMOZA,1,DVMOZA,1)
+                IF(UROHF) THEN
+                  TAUXB =DDOT(NOB,DVMOXB,1,DVMOXB,1)
+                  TAUYB =DDOT(NOB,DVMOYB,1,DVMOYB,1)
+                  TAUZB =DDOT(NOB,DVMOZB,1,DVMOZB,1)
+                ELSE
+                  TAUXB =TAUXA
+                  TAUYB =TAUYA
+                  TAUZB =TAUZA
+                ENDIF
+              ELSE
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOX,DVMOXA,DVMOXB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOY,DVMOYA,DVMOYB,
+     *                        CCUTOFF,NLCT,NELM)
+                CALL DFTTRFDM(UROHF,L1,COEFFA,COEFFB,GAOZ,DVMOZA,DVMOZB,
+     *                        CCUTOFF,NLCT,NELM)
+                TAUXA=DDOT(L1,GAOX,1,DVMOXA,1)*HALF
+                TAUYA=DDOT(L1,GAOY,1,DVMOYA,1)*HALF
+                TAUZA=DDOT(L1,GAOZ,1,DVMOZA,1)*HALF
+                IF(UROHF) THEN
+                  TAUXB=DDOT(L1,GAOX,1,DVMOXB,1)*HALF
+                  TAUYB=DDOT(L1,GAOY,1,DVMOYB,1)*HALF
+                  TAUZB=DDOT(L1,GAOZ,1,DVMOZB,1)*HALF
+                ELSE
+                  TAUXB =TAUXA
+                  TAUYB =TAUYA
+                  TAUZB =TAUZA
+                ENDIF
+              ENDIF
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            ENDIF
+          ENDIF
+C
+C***********************************************************************
+C     THE EXCHANGE-CORRELATION FUNCTIONAL CALCULATION
+C***********************************************************************
+          VXCA1=ZERO
+          VXCB1=ZERO
+          DUMAX=ZERO
+          DUMAY=ZERO
+          DUMAZ=ZERO
+          DUMBX=ZERO
+          DUMBY=ZERO
+          DUMBZ=ZERO
+          XALPHA=ZERO
+          XGRD=ZERO
+          ECF=ZERO
+C
+C         STORES THE DERIVATIVE OF THE FUNCTIONAL WITH RESPECT TO THE
+C         KINETIC ENERGY DENSITY.
+C
+C         ALPHA SPIN
+          DMGGA=ZERO
+          DMGA =ZERO
+C         BETA SPIN
+          DMGGB=ZERO
+          DMGB =ZERO
+          IF(use_libxc) THEN
+            CALL libxc_calc(FTOTWT,
+     >                      ROA,ROB,
+     >                      GRDAA, GRDAB, GRDBB,
+     >                      GRADXA,GRADYA,GRADZA,
+     >                      GRADXB,GRADYB,GRADZB,
+     >                      TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,
+     >                      XALPHA,XGRD,ECF,
+     >                      VXCA1,VXCB1,
+     >                      DUMAX,DUMAY,DUMAZ,
+     >                      DUMBX,DUMBY,DUMBZ,
+     >                      DMGGA, DMGGB)
+          ELSE IF(FUNCL) THEN
+            CALL CCALCEXC (ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                     GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                     XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                     VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE IF(FUNFL) THEN
+            CALL FCALCEXC (ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                     GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                     XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                     VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE
+            CALL CALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                   GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                   XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                   VXCB1,DUMBX,DUMBY,DUMBZ,ECF,
+     >                   TAUXA,TAUYA,TAUZA,DMGGA,
+     >                   TAUXB,TAUYB,TAUZB,DMGGB)
+          END IF
+C
+          DUMA = VXCA1
+          DUMB = VXCB1
+          DMGA = DMGGA
+          DMGB = DMGGB
+          EXEC1= XALPHA + XGRD + ECF
+          EXEC = EXEC + EXEC1
+          IF(NOB.EQ.0) THEN
+             DUMB=ZERO
+             GRADXB=ZERO
+             GRADYB=ZERO
+             GRADZB=ZERO
+             DMGB=ZERO
+          ENDIF
+          UPBOW=ABS(DUMA)*TWO
+          IF(UROHF) UPBOW=ABS(DUMA)+ABS(DUMB)
+C         IF(NEEDGR) THEN
+C           UPBOW=UPBOW+ABS(DUMAX)+ABS(DUMAY)+ABS(DUMAZ)
+C           IF(UROHF) UPBOW=UPBOW+ABS(DUMBX)+ABS(DUMBY)+ABS(DUMBZ)
+C         ENDIF
+          UPBOW=UPBOW*TWO*FTOTWT0
+          IF(UPBOW.GT.FCUTOFF) THEN
+C         XGRD1=XGRD1+XGRD
+C***********************************************************************
+C      COMPUTE DFT GRADIENT
+C***********************************************************************
+          CALL DFTGDV(NCNTR,DEDFT,FTOTWT,NUM,DUMA,DUMAX,DUMAY,DUMAZ,
+     >         DUMB,DUMBX,DUMBY,DUMBZ,AOX,GAOX,GAOY,GAOZ,
+     >         G2AOXX,G2AOYY,G2AOZZ,G2AOXY,G2AOYZ,G2AOXZ,
+     >         DA,DB,NEEDGR,UROHF,DMGA,DMGB,NEEDTAU)
+          ENDIF
+C
+C         ADD THE WEIGHT DERIVATIVE CONTRIBUTION
+C         (WEIGHT DERIVATIVE ITSELF TIMES THE FUNCTIONAL VALUE).
+C
+          IF (dft_wt_der) THEN
+              EXEC2=EXEC1/FTOTWT*FACT
+C             WRITE(6,*) 'WWWWEIGHT',EXEC2,DTOTWT(1,1),DEDFT(1,1)
+              CALL DAXPY(3*NAT,EXEC2,DTOTWT,1,DEDFT,1)
+          END IF
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          TOTELE=TOTELE+FTOTWT*(ROA+ROB)
+C
+   10   CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+   20 CONTINUE
+C
+      TOTEXC = TOTEXC+EXEC
+C
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      IF (OUT) THEN
+         WRITE(IW,9999)NCNTR,TOTEXC,TOTELE
+         DO INAT=1,NAT
+            WRITE(IW,9998) DEDFT(1,INAT),DEDFT(2,INAT),DEDFT(3,INAT)
+         ENDDO
+      ENDIF
+ 40   CONTINUE
+      RETURN
+ 9998 FORMAT(/F20.10,F20.10,F20.10)
+ 9999 FORMAT(/5X,'ATM',I8,'EXC=',F20.10,5X,'TOTELE=',F20.10)
+      END
+C*MODULE DFTGRD  *DECK GENMOLGRID
+C> @brief This routine is an interface to other subroutines
+C>        used for computing numerical DFT grid for a molecule
+C>        from atomic grids
+C> @author Vladimir Mironov
+      SUBROUTINE genmolgrid(nrad,xdat,ydat,zdat,atmxvec,atmyvec,atmzvec,
+     *                  ri,rij,nat,aij,wtintr,totwt,wght,iangn,
+     *                  numang,ncntr,rad,ptrad,wtrad,wtab)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+      USE params, ONLY: dft_bfc_algo
+      USE mod_dft_fuzzycell, ONLY: dft_fc_blk
+      USE mod_dft_molgrid, ONLY: split_grid
+      IMPLICIT NONE
+      COMMON /DFPRUN/ prunerads(MXGRID,MXGRIDTYP),
+     *                pruneatoms(2,MXGRIDTYP),
+     *                iprunecuts(MXATM),ntotgridpoints(MXATM),
+     *                ngrids,maxang,ngridtyps
+      COMMON /LRDISP/ elrd6,elrd8,elrd10,emult,lrdflg,mltint,dolrd
+      DOUBLE PRECISION elrd6,elrd8,elrd10,emult,wtab(nat,nat,*)
+      LOGICAL lrdflg,mltint,dolrd
+c
+      DOUBLE PRECISION prunerads, pruneatoms
+      INTEGER iprunecuts,ntotgridpoints,ngrids,maxang,ngridtyps
+c
+      INTEGER nrad, nat, numang, ncntr, iangn(nat,2,*)
+      DOUBLE PRECISION wght(maxang,nat,*),xdat(maxang,nat,*),
+     *          ydat(maxang,nat,*),zdat(maxang,nat,*),
+     *          atmxvec(nat,nat),atmyvec(nat,nat),atmzvec(nat,nat),
+     *          ri(nat),rij(nat,nat),wtintr(nat),totwt(nat,*),
+     *          aij(nat,nat),ptrad(nrad),wtrad(nrad)
+      DOUBLE PRECISION rad
+
+c     First, check if legacy code is selected
+      IF (dft_bfc_algo.LT.0) THEN
+c       Legacy 4th deg. Becke's polynomial and surface shifting
+        CALL genoct(nrad,xdat,ydat,zdat,atmxvec,atmyvec,atmzvec,
+     *              ri,rij,nat,aij,wtintr,totwt,wght,iangn,
+     *              numang,ncntr,rad,ptrad,wtrad,wtab)
+c
+c     The `ELSE` case is for new DFT code that runs over clusterized
+c     grid point. This code implements Becke's and SSF molecular grid
+c     calculation algorithms and support OpenMP threading.
+      ELSE
+c       Make slices for current atom
+        CALL split_grid(ncntr, ngrids, rad,
+     *       prunerads(:,iprunecuts(ncntr)))
+c
+c       Defer fuzzy cell procedure until atomic grid slices for all
+c       atoms are generated. When the last atom is finished, compute
+c       all molecular grid weigths at once.
+        IF (ncntr.NE.nat) RETURN
+c
+c       Do Becke's fuzzy cell
+        IF (dft_bfc_algo.EQ.0) THEN
+c         Becke's algorithm:
+c         4th deg. Becke's polynomial and surface shifting
+          CALL dft_fc_blk(atmxvec,atmyvec,atmzvec,rij,nat,wtab,aij)
+c
+        ELSE
+c         SSF algorithm:
+c         various partitioning functions, no surface shifting
+          CALL dft_fc_blk(atmxvec,atmyvec,atmzvec,rij,nat,wtab)
+c
+        END IF
+c
+      END IF
+      RETURN
+      END
+c
+C*MODULE DFTGRD  *DECK GENOCT
+C> @brief This routine sets up the numerical grid for the atom
+C>        or XYZ octant.
+C> @note For energy calculation only.
+C> @note This subroutine substitute other versions of this routine
+C>       co-existed in GAMESS for different grid kinds
+C> @author Vladimir Mironov
+      SUBROUTINE genoct(nrad,xdat,ydat,zdat,atmxvec,atmyvec,atmzvec,
+     *                  ri,rij,nat,aij,wtintr,totwt,wght,iangn,
+     *                  numang,ncntr,rad,ptrad,wtrad,wtab)
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp
+      IMPLICIT NONE
+C
+      INTRINSIC MOD
+      INTRINSIC SQRT
+C
+      INTEGER nrad, nat, numang, ncntr, iangn(nat,2,*)
+      DOUBLE PRECISION wght(maxang,nat,*),xdat(maxang,nat,*),
+     *          ydat(maxang,nat,*),zdat(maxang,nat,*),
+     *          atmxvec(nat,nat),atmyvec(nat,nat),atmzvec(nat,nat),
+     *          ri(nat),rij(nat,nat),wtintr(nat),totwt(nat,*),
+     *          aij(nat,nat),ptrad(nrad),wtrad(nrad)
+C
+      DOUBLE PRECISION ZERO, ONE, EPS
+      PARAMETER ( ZERO = 0.0d+00)
+      PARAMETER (ONE = 1.0d+00)
+      PARAMETER (EPS = 1.0d-05)
+C
+      INTEGER NITR
+      PARAMETER ( NITR = 4 )
+C
+      COMMON /DFPRUN/ prunerads(MXGRID,MXGRIDTYP),
+     *                pruneatoms(2,MXGRIDTYP),
+     *                iprunecuts(MXATM),ntotgridpoints(MXATM),
+     *                ngrids,maxang,ngridtyps
+      DOUBLE PRECISION prunerads, pruneatoms
+      INTEGER iprunecuts,ntotgridpoints,ngrids,maxang,ngridtyps
+C
+      COMMON /PAR   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+      INTEGER me,master,nproc,ibtyp,iptim
+      LOGICAL dskwrk, maswrk, goparr
+C
+      COMMON /RUNOPT/ runtyp,exetyp,nevals,nglevl,nhlevl
+      DOUBLE PRECISION runtyp,exetyp
+      INTEGER nevals,nglevl,nhlevl
+C
+      COMMON /LRDISP/ elrd6,elrd8,elrd10,emult,lrdflg,mltint,dolrd
+      DOUBLE PRECISION elrd6,elrd8,elrd10,emult,wtab(nat,nat,*)
+      LOGICAL lrdflg,mltint,dolrd
+C
+      LOGICAL dlb
+      INTEGER i, j, k, npt, nptme, ipt, iptme, igrid, irad, iatm, jatm
+      DOUBLE PRECISION rad, radwt, wttot, r1, xmuij, zmuij, f
+      DOUBLE PRECISION cutij, cutji, atmwt
+      DOUBLE PRECISION xd, yd, zd, xcdnt, ycdnt, zcdnt, rsqrd
+C
+      DOUBLE PRECISION CHECK
+      DATA CHECK/8HCHECK   /
+C
+      dlb = ibtyp.EQ.1
+C
+      IF (exetyp.EQ.CHECK) THEN
+C       This defeats grid pruning, by giving all points a large weight,
+c       but it is very much faster than running the computations below.
+c       It leads to an overestimated number of grid points, and thus
+c       will give memory estimates in check jobs that are too high.
+        npt = nrad*maxang
+        nptme = (npt-1)/nproc + 1
+        IF (dlb) nptme = npt
+        DO j = 1, nptme
+          totwt(ncntr,j) = 0.1
+        END DO
+        RETURN
+      END IF
+C
+      ntotgridpoints(ncntr) = 0
+      igrid = 1
+C
+      DO irad = 1, nrad
+C
+        radwt = rad*rad*rad*wtrad(irad)
+        r1 = rad*ptrad(irad)
+C
+        IF (r1.GE.prunerads(igrid,iprunecuts(ncntr))*rad) THEN
+           igrid = igrid + 1
+        END IF
+        ntotgridpoints(ncntr) = ntotgridpoints(ncntr) +
+     *       iangn(ncntr,2,igrid)-iangn(ncntr,1,igrid) + 1
+C
+        DO i = iangn(ncntr,1,igrid),iangn(ncntr,2,igrid)
+          ipt = (irad-1)*numAng + i
+C
+          IF (mod(ipt,nproc).NE.me) CYCLE
+          iptme = (ipt-1)/nproc + 1
+          IF (dlb) iptme = ipt
+C
+          xd = r1*xdat(i,ncntr,igrid)
+          yd = r1*ydat(i,ncntr,igrid)
+          zd = r1*zdat(i,ncntr,igrid)
+          DO iatm = 1, nat
+            xcdnt = xd-atmxvec(iatm,ncntr)
+            ycdnt = yd-atmyvec(iatm,ncntr)
+            zcdnt = zd-atmzvec(iatm,ncntr)
+            rsqrd = xcdnt**2+ycdnt**2+zcdnt**2
+            ri(iatm) = sqrt(rsqrd)
+          END DO
+C
+          wttot = ZERO
+          CALL dacopy(nat,ONE,wtintr,1)
+C
+          DO iatm = 1, nat
+            IF (abs(aij(1,iatm)+1.0d+00).LT.EPS) THEN
+              wtintr(iatm) = ZERO
+              CYCLE
+            END IF
+C
+            DO jatm = 1, iatm-1
+              IF (abs(aij(jatm,iatm)-1.0d+00).GE.EPS) THEN
+C               Compute Becke's partition functinon
+                zmuij = (ri(iatm)-ri(jatm))/rij(iatm,jatm)
+                xmuij = zmuij + aij(jatm,iatm)*(1.0d0-zmuij*zmuij)
+                f = xmuij
+                DO k = 1, NITR
+                  f = f * (1.5d0 - 0.5d0*f*f)
+                END DO
+                cutij = 0.5d0 - 0.5d0*f
+                cutji = 0.5d0 + 0.5d0*f
+                wtintr(iatm) = wtintr(iatm)*cutij
+                wtintr(jatm) = wtintr(jatm)*cutji
+              END IF
+            END DO
+          END DO
+C
+          DO iatm = 1, nat
+            wttot = wttot + wtintr(iatm)
+          END DO
+C
+          atmwt = wtintr(ncntr)/wttot
+          totwt(ncntr,iptme) = atmwt*radwt*wght(i,ncntr,igrid)
+C
+          IF (lrdflg) THEN
+            DO iatm = 1, nat
+              wtab(iatm,ncntr,iptme) = wtintr(iatm)/wttot
+            END DO
+          END IF
+C
+        END DO
+      END DO
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTGDV
+C>    @brief Compute DFT energy gradient (functional part only)
+C>
+C>    @details FOR A FUNCTIONAL FXC[RO,DELTA_RO] WHERE DELTA_RO IS GRADIENT OF
+C>     DENSITY TOTAL EXCHANGE-CORRELATION ENERGY E=INTEGRAL FXC DR
+C>     BY TAKING DERIVATIVE OVER SOME NUCLEAR COORDINATE R,
+C>     DE/DR =
+C>       INTEGRAL DF/D(RO)*D(RO)/DR   DF/D(DELTA_RO)*D(DELTA_RO)/DR DR
+C>     D(RO)/DR = - D(RO)/DR AND D(DELTA_RO)/DR = - D(DELTA_RO)/DR
+C>     (WHERE R IS ELECTRON COORDINATE)
+C>     DF/D(RO) AND DF/D(DELTA_RO) ARE STORED IN DUMA,DUMAX,DUMAY,DUMAZ
+C>     FOR ALPHA DENSITY AND IN DUMB, DUMBX, DUMBY, DUMBZ FOR BETA.
+C>     ALPHA + BETA DENSITY FORM ADDITIVE CONTRIBUTIONS TO THE GRADIENT.
+C>     NEXT,   D(RO)/DR(L) = 2 * SUM(I,J) D(I,J) DF(I)/DR(L) * F(J)
+C>     D(DELTA(K)_RO)/DR(L)= 2 * SUM(I,J) D(I,J)(DG[K](I)/DR[L]*F(J)
+C>                             +G[K](I)*G[L](J))
+C>     WHERE F(I) IS AO NUMBER I AND G[K](I) IS DF(I)/DR[K],
+C>     AND D(I,J) IS DENSITY, STORED IN DA AND DB, FOR ALPHA AND BETA.
+C>     F(I) IS STORED IN AOX, G[K](I) IN GAOX, GAOY, GAOZ,
+C>     DG[K](I)/DR[L] IN G2AOXX,G2AOYY,G2AOZZ,G2AOXY,G2AOYZ,G2AOXZ.
+C
+      SUBROUTINE DFTGDV(NCNTR,DEDFT,FTOTWT,NUM,DUMA,DUMAX,DUMAY,DUMAZ,
+     *                  DUMB,DUMBX,DUMBY,DUMBZ,AOX,GAOX,GAOY,GAOZ,
+     *                  G2AOXX,G2AOYY,G2AOZZ,G2AOXY,G2AOYZ,G2AOXZ,
+     *                  DA,DB,NEEDGR,UROHF,DMGA,DMGB,NEEDTAU)
+      use mx_limits, only: mxsh,mxgtot
+C
+      USE params, ONLY: dft_wt_der
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+      DIMENSION AOX(*),GAOX(*),GAOY(*),GAOZ(*),
+     >     G2AOXX(*),G2AOYY(*),G2AOZZ(*),G2AOXY(*),G2AOYZ(*),G2AOXZ(*),
+     >     DEDFT(3,*),DA(NUM,*),DB(NUM,*)
+C
+      LOGICAL NEEDGR,UROHF,NEEDTAU
+C
+      PARAMETER (TWO=2.0D+00)
+      PARAMETER (ZERO=0.0D+00)
+C
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+C
+C
+      IF (NEEDTAU.AND.(.NOT.UROHF))THEN
+        DO ISHELL=1,NSHELL
+          IAT =KATOM(ISHELL)
+          IF(IAT.NE.NCNTR.OR..NOT.dft_wt_der) THEN
+          MINI=KMIN (ISHELL)
+          MAXI=KMAX (ISHELL)
+          LOCI=KLOC (ISHELL)-MINI
+          GRADX=ZERO
+          GRADY=ZERO
+          GRADZ=ZERO
+          DO IBFN=MINI,MAXI
+            ICHI=LOCI+IBFN
+            DRA=ZERO
+            DRXA=ZERO
+            DRYA=ZERO
+            DRZA=ZERO
+            DO JCHI=1,NUM
+              DIJA=DA(JCHI,ICHI)
+C
+C             COMPUTE SUM(J) D(I,J) F(J)
+C
+              DRA= DRA+ DIJA*AOX(JCHI)
+C
+C             COMPUTE SUM(J) D(I,J) G[K](J)
+C
+              DRXA=DRXA+DIJA*GAOX(JCHI)
+              DRYA=DRYA+DIJA*GAOY(JCHI)
+              DRZA=DRZA+DIJA*GAOZ(JCHI)
+C
+            ENDDO
+            GAOXI=GAOX(ICHI)
+            GAOYI=GAOY(ICHI)
+            GAOZI=GAOZ(ICHI)
+C
+C           COMPUTE -1/2*DF/D(RO)*D(RO)/DR
+C                   = DF/D(RO)*SUM(I,J)D(I,J)DF(I)/DR*F(J)
+C
+            GRADX=GRADX+GAOXI*DRA*DUMA
+            GRADY=GRADY+GAOYI*DRA*DUMA
+            GRADZ=GRADZ+GAOZI*DRA*DUMA
+C
+C           COMPUTE -1/2* SUM(K) DF/D(DELTA[K]_RO)*D(DELTA[K]_RO)/DR[L]
+C                    =    SUM(K) DF/D(DELTA[K]_RO)*SUM(I,J)D(I,J)
+C    *                   (DG[K](I)/DR[L]*F(J)+G[K](I)*G[L](J))
+C
+            GRADX=GRADX+(G2AOXX(ICHI)*DRA + GAOXI*DRXA)*DUMAX +
+     *                  (G2AOXY(ICHI)*DRA + GAOXI*DRYA)*DUMAY +
+     *                  (G2AOXZ(ICHI)*DRA + GAOXI*DRZA)*DUMAZ
+            GRADY=GRADY+(G2AOXY(ICHI)*DRA + GAOYI*DRXA)*DUMAX +
+     *                  (G2AOYY(ICHI)*DRA + GAOYI*DRYA)*DUMAY +
+     *                  (G2AOYZ(ICHI)*DRA + GAOYI*DRZA)*DUMAZ
+            GRADZ=GRADZ+(G2AOXZ(ICHI)*DRA + GAOZI*DRXA)*DUMAX +
+     *                  (G2AOYZ(ICHI)*DRA + GAOZI*DRYA)*DUMAY +
+     *                  (G2AOZZ(ICHI)*DRA + GAOZI*DRZA)*DUMAZ
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR GGA TYPE FUNCTIONALS
+C
+            DO JCHI=1,NUM
+              GRADX=GRADX+(G2AOXX(ICHI)*GAOX(JCHI)+
+     >                     G2AOXY(ICHI)*GAOY(JCHI)+
+     >                     G2AOXZ(ICHI)*GAOZ(JCHI))*DA(JCHI,ICHI)*DMGA
+              GRADY=GRADY+(G2AOXY(ICHI)*GAOX(JCHI)+
+     >                     G2AOYY(ICHI)*GAOY(JCHI)+
+     >                     G2AOYZ(ICHI)*GAOZ(JCHI))*DA(JCHI,ICHI)*DMGA
+              GRADZ=GRADZ+(G2AOXZ(ICHI)*GAOX(JCHI)+
+     >                     G2AOYZ(ICHI)*GAOY(JCHI)+
+     >                     G2AOZZ(ICHI)*GAOZ(JCHI))*DA(JCHI,ICHI)*DMGA
+            ENDDO
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR META-GGA TYPE FUNCTIONALS
+C
+          ENDDO
+C
+          DEDFTGRADX = TWO*FTOTWT*GRADX
+          DEDFTGRADY = TWO*FTOTWT*GRADY
+          DEDFTGRADZ = TWO*FTOTWT*GRADZ
+C
+          DEDFT(1,IAT)=DEDFT(1,IAT)-DEDFTGRADX
+          DEDFT(2,IAT)=DEDFT(2,IAT)-DEDFTGRADY
+          DEDFT(3,IAT)=DEDFT(3,IAT)-DEDFTGRADZ
+C
+C         USING TRANSLATIONAL INVARIANCE SUM(B) GRAD(B) EXC = 0
+C         TO GET GRAD(A) E = - SUM(B.NE.A) GRAD(B) EXC
+C         FOR A=NCNTR, SINCE THE ABOVE CODE IS NOT CORRECT IN THIS CASE.
+C
+          IF (dft_wt_der) THEN
+              DEDFT(1,NCNTR)=DEDFT(1,NCNTR)+DEDFTGRADX
+              DEDFT(2,NCNTR)=DEDFT(2,NCNTR)+DEDFTGRADY
+              DEDFT(3,NCNTR)=DEDFT(3,NCNTR)+DEDFTGRADZ
+          ENDIF
+          ENDIF
+        ENDDO
+C
+        RETURN
+C
+C       THE ABOVE RETURN IS NEEDED SINCE NEEDGR IS USUALLY TRUE WHEN
+C       NEEDTAU IS TRUE.  MEANING THAT A META-GGA FUNCTIONAL WILL
+C       USUALLY CONSIST OF A GGA FUNCTIONAL.
+C
+      END IF
+C
+      IF (NEEDTAU.AND.UROHF)THEN
+        DO ISHELL=1,NSHELL
+          IAT =KATOM(ISHELL)
+          IF(IAT.NE.NCNTR.OR..NOT.dft_wt_der) THEN
+          MINI=KMIN (ISHELL)
+          MAXI=KMAX (ISHELL)
+          LOCI=KLOC (ISHELL)-MINI
+          GRADX=ZERO
+          GRADY=ZERO
+          GRADZ=ZERO
+          DO IBFN=MINI,MAXI
+            ICHI=LOCI+IBFN
+            DRA=ZERO
+            DRB=ZERO
+            DRXA=ZERO
+            DRYA=ZERO
+            DRZA=ZERO
+            DRXB=ZERO
+            DRYB=ZERO
+            DRZB=ZERO
+            DO JCHI=1,NUM
+              DIJA=DA(JCHI,ICHI)
+              DIJB=DB(JCHI,ICHI)
+C
+C             COMPUTE SUM(J) D(I,J) F(J)
+C
+              DRA= DRA+ DIJA*AOX(JCHI)
+              DRB= DRB+ DIJB*AOX(JCHI)
+C
+C             COMPUTE SUM(J) D(I,J) G[K](J)
+C
+              DRXA=DRXA+DIJA*GAOX(JCHI)
+              DRYA=DRYA+DIJA*GAOY(JCHI)
+              DRZA=DRZA+DIJA*GAOZ(JCHI)
+              DRXB=DRXB+DIJB*GAOX(JCHI)
+              DRYB=DRYB+DIJB*GAOY(JCHI)
+              DRZB=DRZB+DIJB*GAOZ(JCHI)
+C
+            ENDDO
+            GAOXI=GAOX(ICHI)
+            GAOYI=GAOY(ICHI)
+            GAOZI=GAOZ(ICHI)
+C
+C           COMPUTE -1/2*DF/D(RO)*D(RO)/DR
+C                   = DF/D(RO)*SUM(I,J)D(I,J)DF(I)/DR*F(J)
+C
+            GRADX=GRADX+GAOXI*DRA*DUMA
+            GRADY=GRADY+GAOYI*DRA*DUMA
+            GRADZ=GRADZ+GAOZI*DRA*DUMA
+            GRADX=GRADX+GAOXI*DRB*DUMB
+            GRADY=GRADY+GAOYI*DRB*DUMB
+            GRADZ=GRADZ+GAOZI*DRB*DUMB
+C
+C           COMPUTE -1/2* SUM(K) DF/D(DELTA[K]_RO)*D(DELTA[K]_RO)/DR[L]
+C                    =    SUM(K)DF/D(DELTA[K]_RO)*SUM(I,J)D(I,J)
+C    *                   (DG[K](I)/DR[L]*F(J)+G[K](I)*G[L](J))
+C
+            GRADX=GRADX+(G2AOXX(ICHI)*DRA + GAOXI*DRXA)*DUMAX +
+     *                  (G2AOXY(ICHI)*DRA + GAOXI*DRYA)*DUMAY +
+     *                  (G2AOXZ(ICHI)*DRA + GAOXI*DRZA)*DUMAZ
+            GRADY=GRADY+(G2AOXY(ICHI)*DRA + GAOYI*DRXA)*DUMAX +
+     *                  (G2AOYY(ICHI)*DRA + GAOYI*DRYA)*DUMAY +
+     *                  (G2AOYZ(ICHI)*DRA + GAOYI*DRZA)*DUMAZ
+            GRADZ=GRADZ+(G2AOXZ(ICHI)*DRA + GAOZI*DRXA)*DUMAX +
+     *                  (G2AOYZ(ICHI)*DRA + GAOZI*DRYA)*DUMAY +
+     *                  (G2AOZZ(ICHI)*DRA + GAOZI*DRZA)*DUMAZ
+            GRADX=GRADX+(G2AOXX(ICHI)*DRB + GAOXI*DRXB)*DUMBX +
+     *                  (G2AOXY(ICHI)*DRB + GAOXI*DRYB)*DUMBY +
+     *                  (G2AOXZ(ICHI)*DRB + GAOXI*DRZB)*DUMBZ
+            GRADY=GRADY+(G2AOXY(ICHI)*DRB + GAOYI*DRXB)*DUMBX +
+     *                  (G2AOYY(ICHI)*DRB + GAOYI*DRYB)*DUMBY +
+     *                  (G2AOYZ(ICHI)*DRB + GAOYI*DRZB)*DUMBZ
+            GRADZ=GRADZ+(G2AOXZ(ICHI)*DRB + GAOZI*DRXB)*DUMBX +
+     *                  (G2AOYZ(ICHI)*DRB + GAOZI*DRYB)*DUMBY +
+     *                  (G2AOZZ(ICHI)*DRB + GAOZI*DRZB)*DUMBZ
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR GGA TYPE FUNCTIONALS
+C
+            DO JCHI=1,NUM
+              GRADX=GRADX+(G2AOXX(ICHI)*GAOX(JCHI)+
+     >                     G2AOXY(ICHI)*GAOY(JCHI)+
+     >                     G2AOXZ(ICHI)*GAOZ(JCHI))*DA(JCHI,ICHI)*DMGA
+              GRADY=GRADY+(G2AOXY(ICHI)*GAOX(JCHI)+
+     >                     G2AOYY(ICHI)*GAOY(JCHI)+
+     >                     G2AOYZ(ICHI)*GAOZ(JCHI))*DA(JCHI,ICHI)*DMGA
+              GRADZ=GRADZ+(G2AOXZ(ICHI)*GAOX(JCHI)+
+     >                     G2AOYZ(ICHI)*GAOY(JCHI)+
+     >                     G2AOZZ(ICHI)*GAOZ(JCHI))*DA(JCHI,ICHI)*DMGA
+              GRADX=GRADX+(G2AOXX(ICHI)*GAOX(JCHI)+
+     >                     G2AOXY(ICHI)*GAOY(JCHI)+
+     >                     G2AOXZ(ICHI)*GAOZ(JCHI))*DB(JCHI,ICHI)*DMGB
+              GRADY=GRADY+(G2AOXY(ICHI)*GAOX(JCHI)+
+     >                     G2AOYY(ICHI)*GAOY(JCHI)+
+     >                     G2AOYZ(ICHI)*GAOZ(JCHI))*DB(JCHI,ICHI)*DMGB
+              GRADZ=GRADZ+(G2AOXZ(ICHI)*GAOX(JCHI)+
+     >                     G2AOYZ(ICHI)*GAOY(JCHI)+
+     >                     G2AOZZ(ICHI)*GAOZ(JCHI))*DB(JCHI,ICHI)*DMGB
+            ENDDO
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR META-GGA TYPE FUNCTIONALS
+C
+          ENDDO
+C
+          DEDFTGRADX = TWO*FTOTWT*GRADX
+          DEDFTGRADY = TWO*FTOTWT*GRADY
+          DEDFTGRADZ = TWO*FTOTWT*GRADZ
+C
+          DEDFT(1,IAT)=DEDFT(1,IAT)-DEDFTGRADX
+          DEDFT(2,IAT)=DEDFT(2,IAT)-DEDFTGRADY
+          DEDFT(3,IAT)=DEDFT(3,IAT)-DEDFTGRADZ
+C
+C         USING TRANSLATIONAL INVARIANCE SUM(B) GRAD(B) EXC = 0
+C         TO GET GRAD(A) E = - SUM(B.NE.A) GRAD(B) EXC
+C         FOR A=NCNTR, SINCE THE ABOVE CODE IS NOT CORRECT IN THIS CASE.
+C
+          IF (dft_wt_der) THEN
+              DEDFT(1,NCNTR)=DEDFT(1,NCNTR)+DEDFTGRADX
+              DEDFT(2,NCNTR)=DEDFT(2,NCNTR)+DEDFTGRADY
+              DEDFT(3,NCNTR)=DEDFT(3,NCNTR)+DEDFTGRADZ
+          ENDIF
+          ENDIF
+        ENDDO
+C
+        RETURN
+C
+C       THE ABOVE RETURN IS NEEDED SINCE NEEDGR IS USUALLY TRUE WHEN
+C       NEEDTAU IS TRUE.  MEANING THAT A META-GGA FUNCTIONAL WILL
+C       USUALLY CONSIST OF A GGA FUNCTIONAL.
+C
+      END IF
+C
+      IF (NEEDGR.AND.(.NOT.UROHF)) THEN
+        DO ISHELL=1,NSHELL
+          IAT =KATOM(ISHELL)
+          IF(IAT.NE.NCNTR.OR..NOT.dft_wt_der) THEN
+          MINI=KMIN (ISHELL)
+          MAXI=KMAX (ISHELL)
+          LOCI=KLOC (ISHELL)-MINI
+          GRADX=ZERO
+          GRADY=ZERO
+          GRADZ=ZERO
+          DO IBFN=MINI,MAXI
+            ICHI=LOCI+IBFN
+            DRA=ZERO
+            DRXA=ZERO
+            DRYA=ZERO
+            DRZA=ZERO
+            DO JCHI=1,NUM
+              DIJA=DA(JCHI,ICHI)
+C
+C             COMPUTE SUM(J) D(I,J) F(J)
+C
+              DRA= DRA+ DIJA*AOX(JCHI)
+C
+C             COMPUTE SUM(J) D(I,J) G[K](J)
+C
+              DRXA=DRXA+DIJA*GAOX(JCHI)
+              DRYA=DRYA+DIJA*GAOY(JCHI)
+              DRZA=DRZA+DIJA*GAOZ(JCHI)
+C
+            ENDDO
+            GAOXI=GAOX(ICHI)
+            GAOYI=GAOY(ICHI)
+            GAOZI=GAOZ(ICHI)
+C
+C           COMPUTE -1/2*DF/D(RO)*D(RO)/DR
+C                   = DF/D(RO)*SUM(I,J)D(I,J)DF(I)/DR*F(J)
+C
+            GRADX=GRADX+GAOXI*DRA*DUMA
+            GRADY=GRADY+GAOYI*DRA*DUMA
+            GRADZ=GRADZ+GAOZI*DRA*DUMA
+C
+C           COMPUTE -1/2* SUM(K) DF/D(DELTA[K]_RO)*D(DELTA[K]_RO)/DR[L]
+C                     =   SUM(K) DF/D(DELTA[K]_RO)*SUM(I,J)D(I,J)
+C    *                   (DG[K](I)/DR[L]*F(J)+G[K](I)*G[L](J))
+C
+            GRADX=GRADX+(G2AOXX(ICHI)*DRA + GAOXI*DRXA)*DUMAX +
+     *                  (G2AOXY(ICHI)*DRA + GAOXI*DRYA)*DUMAY +
+     *                  (G2AOXZ(ICHI)*DRA + GAOXI*DRZA)*DUMAZ
+            GRADY=GRADY+(G2AOXY(ICHI)*DRA + GAOYI*DRXA)*DUMAX +
+     *                  (G2AOYY(ICHI)*DRA + GAOYI*DRYA)*DUMAY +
+     *                  (G2AOYZ(ICHI)*DRA + GAOYI*DRZA)*DUMAZ
+            GRADZ=GRADZ+(G2AOXZ(ICHI)*DRA + GAOZI*DRXA)*DUMAX +
+     *                  (G2AOYZ(ICHI)*DRA + GAOZI*DRYA)*DUMAY +
+     *                  (G2AOZZ(ICHI)*DRA + GAOZI*DRZA)*DUMAZ
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR GGA TYPE FUNCTIONALS
+C
+          ENDDO
+C
+          DEDFTGRADX = TWO*FTOTWT*GRADX
+          DEDFTGRADY = TWO*FTOTWT*GRADY
+          DEDFTGRADZ = TWO*FTOTWT*GRADZ
+C
+          DEDFT(1,IAT)=DEDFT(1,IAT)-DEDFTGRADX
+          DEDFT(2,IAT)=DEDFT(2,IAT)-DEDFTGRADY
+          DEDFT(3,IAT)=DEDFT(3,IAT)-DEDFTGRADZ
+C
+C         USING TRANSLATIONAL INVARIANCE SUM(B) GRAD(B) EXC = 0
+C         TO GET GRAD(A) E = - SUM(B.NE.A) GRAD(B) EXC
+C         FOR A=NCNTR, SINCE THE ABOVE CODE IS NOT CORRECT IN THIS CASE.
+C
+          IF (dft_wt_der) THEN
+              DEDFT(1,NCNTR)=DEDFT(1,NCNTR)+DEDFTGRADX
+              DEDFT(2,NCNTR)=DEDFT(2,NCNTR)+DEDFTGRADY
+              DEDFT(3,NCNTR)=DEDFT(3,NCNTR)+DEDFTGRADZ
+          ENDIF
+          ENDIF
+        ENDDO
+      ENDIF
+C
+      IF (NEEDGR.AND.UROHF) THEN
+        DO ISHELL=1,NSHELL
+          IAT =KATOM(ISHELL)
+          IF(IAT.NE.NCNTR.OR..NOT.dft_wt_der) THEN
+          MINI=KMIN (ISHELL)
+          MAXI=KMAX (ISHELL)
+          LOCI=KLOC (ISHELL)-MINI
+          GRADX=ZERO
+          GRADY=ZERO
+          GRADZ=ZERO
+          DO IBFN=MINI,MAXI
+            ICHI=LOCI+IBFN
+            DRA=ZERO
+            DRB=ZERO
+            DRXA=ZERO
+            DRYA=ZERO
+            DRZA=ZERO
+            DRXB=ZERO
+            DRYB=ZERO
+            DRZB=ZERO
+            DO JCHI=1,NUM
+              DIJA=DA(JCHI,ICHI)
+              DIJB=DB(JCHI,ICHI)
+C
+C             COMPUTE SUM(J) D(I,J) F(J)
+C
+              DRA= DRA+ DIJA*AOX(JCHI)
+              DRB= DRB+ DIJB*AOX(JCHI)
+C
+C             COMPUTE SUM(J) D(I,J) G[K](J)
+C
+              DRXA=DRXA+DIJA*GAOX(JCHI)
+              DRYA=DRYA+DIJA*GAOY(JCHI)
+              DRZA=DRZA+DIJA*GAOZ(JCHI)
+              DRXB=DRXB+DIJB*GAOX(JCHI)
+              DRYB=DRYB+DIJB*GAOY(JCHI)
+              DRZB=DRZB+DIJB*GAOZ(JCHI)
+C
+            ENDDO
+            GAOXI=GAOX(ICHI)
+            GAOYI=GAOY(ICHI)
+            GAOZI=GAOZ(ICHI)
+C
+C           COMPUTE -1/2*DF/D(RO)*D(RO)/DR
+C                   = DF/D(RO)*SUM(I,J)D(I,J)DF(I)/DR*F(J)
+C
+            GRADX=GRADX+GAOXI*DRA*DUMA
+            GRADY=GRADY+GAOYI*DRA*DUMA
+            GRADZ=GRADZ+GAOZI*DRA*DUMA
+            GRADX=GRADX+GAOXI*DRB*DUMB
+            GRADY=GRADY+GAOYI*DRB*DUMB
+            GRADZ=GRADZ+GAOZI*DRB*DUMB
+C
+C           COMPUTE -1/2* SUM(K) DF/D(DELTA[K]_RO)*D(DELTA[K]_RO)/DR[L]
+C                     =   SUM(K) DF/D(DELTA[K]_RO)*SUM(I,J)D(I,J)
+C                        (DG[K](I)/DR[L]*F(J)+G[K](I)*G[L](J))
+C
+            GRADX=GRADX+(G2AOXX(ICHI)*DRA + GAOXI*DRXA)*DUMAX +
+     *                  (G2AOXY(ICHI)*DRA + GAOXI*DRYA)*DUMAY +
+     *                  (G2AOXZ(ICHI)*DRA + GAOXI*DRZA)*DUMAZ
+            GRADY=GRADY+(G2AOXY(ICHI)*DRA + GAOYI*DRXA)*DUMAX +
+     *                  (G2AOYY(ICHI)*DRA + GAOYI*DRYA)*DUMAY +
+     *                  (G2AOYZ(ICHI)*DRA + GAOYI*DRZA)*DUMAZ
+            GRADZ=GRADZ+(G2AOXZ(ICHI)*DRA + GAOZI*DRXA)*DUMAX +
+     *                  (G2AOYZ(ICHI)*DRA + GAOZI*DRYA)*DUMAY +
+     *                  (G2AOZZ(ICHI)*DRA + GAOZI*DRZA)*DUMAZ
+            GRADX=GRADX+(G2AOXX(ICHI)*DRB + GAOXI*DRXB)*DUMBX +
+     *                  (G2AOXY(ICHI)*DRB + GAOXI*DRYB)*DUMBY +
+     *                  (G2AOXZ(ICHI)*DRB + GAOXI*DRZB)*DUMBZ
+            GRADY=GRADY+(G2AOXY(ICHI)*DRB + GAOYI*DRXB)*DUMBX +
+     *                  (G2AOYY(ICHI)*DRB + GAOYI*DRYB)*DUMBY +
+     *                  (G2AOYZ(ICHI)*DRB + GAOYI*DRZB)*DUMBZ
+            GRADZ=GRADZ+(G2AOXZ(ICHI)*DRB + GAOZI*DRXB)*DUMBX +
+     *                  (G2AOYZ(ICHI)*DRB + GAOZI*DRYB)*DUMBY +
+     *                  (G2AOZZ(ICHI)*DRB + GAOZI*DRZB)*DUMBZ
+          ENDDO
+C
+          DEDFTGRADX = TWO*FTOTWT*GRADX
+          DEDFTGRADY = TWO*FTOTWT*GRADY
+          DEDFTGRADZ = TWO*FTOTWT*GRADZ
+C
+          DEDFT(1,IAT)=DEDFT(1,IAT)-DEDFTGRADX
+          DEDFT(2,IAT)=DEDFT(2,IAT)-DEDFTGRADY
+          DEDFT(3,IAT)=DEDFT(3,IAT)-DEDFTGRADZ
+C
+C         USING TRANSLATIONAL INVARIANCE SUM(B) GRAD(B) EXC = 0
+C         TO GET GRAD(A) E = - SUM(B.NE.A) GRAD(B) EXC
+C         FOR A=NCNTR, SINCE THE ABOVE CODE IS NOT CORRECT IN THIS CASE.
+C
+          IF (dft_wt_der) THEN
+              DEDFT(1,NCNTR)=DEDFT(1,NCNTR)+DEDFTGRADX
+              DEDFT(2,NCNTR)=DEDFT(2,NCNTR)+DEDFTGRADY
+              DEDFT(3,NCNTR)=DEDFT(3,NCNTR)+DEDFTGRADZ
+          ENDIF
+          ENDIF
+        ENDDO
+      ENDIF
+C
+      IF ((.NOT.NEEDGR).AND.(.NOT.UROHF)) THEN
+        DO ISHELL=1,NSHELL
+          IAT =KATOM(ISHELL)
+          IF(IAT.NE.NCNTR.OR..NOT.dft_wt_der) THEN
+          MINI=KMIN (ISHELL)
+          MAXI=KMAX (ISHELL)
+          LOCI=KLOC (ISHELL)-MINI
+          GRADX=ZERO
+          GRADY=ZERO
+          GRADZ=ZERO
+          DO IBFN=MINI,MAXI
+            ICHI=LOCI+IBFN
+            DRA=ZERO
+            DO JCHI=1,NUM
+              DIJA=DA(JCHI,ICHI)
+C
+C             COMPUTE SUM(J) D(I,J) F(J)
+C
+              DRA= DRA+ DIJA*AOX(JCHI)
+            ENDDO
+            GAOXI=GAOX(ICHI)
+            GAOYI=GAOY(ICHI)
+            GAOZI=GAOZ(ICHI)
+C
+C           COMPUTE -1/2*DF/D(RO)*D(RO)/DR
+C                   = DF/D(RO)*SUM(I,J)D(I,J)DF(I)/DR*F(J)
+C
+            GRADX=GRADX+GAOXI*DRA*DUMA
+            GRADY=GRADY+GAOYI*DRA*DUMA
+            GRADZ=GRADZ+GAOZI*DRA*DUMA
+          ENDDO
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR LDA TYPE FUNCTIONALS
+C
+          DEDFTGRADX = TWO*FTOTWT*GRADX
+          DEDFTGRADY = TWO*FTOTWT*GRADY
+          DEDFTGRADZ = TWO*FTOTWT*GRADZ
+C
+          DEDFT(1,IAT)=DEDFT(1,IAT)-DEDFTGRADX
+          DEDFT(2,IAT)=DEDFT(2,IAT)-DEDFTGRADY
+          DEDFT(3,IAT)=DEDFT(3,IAT)-DEDFTGRADZ
+C
+C         USING TRANSLATIONAL INVARIANCE SUM(B) GRAD(B) EXC = 0
+C         TO GET GRAD(A) E = - SUM(B.NE.A) GRAD(B) EXC
+C         FOR A=NCNTR, SINCE THE ABOVE CODE IS NOT CORRECT IN THIS CASE.
+C
+          IF (dft_wt_der) THEN
+              DEDFT(1,NCNTR)=DEDFT(1,NCNTR)+DEDFTGRADX
+              DEDFT(2,NCNTR)=DEDFT(2,NCNTR)+DEDFTGRADY
+              DEDFT(3,NCNTR)=DEDFT(3,NCNTR)+DEDFTGRADZ
+          ENDIF
+          ENDIF
+        ENDDO
+      ENDIF
+C
+      IF ((.NOT.NEEDGR).AND.UROHF) THEN
+        DO ISHELL=1,NSHELL
+          IAT =KATOM(ISHELL)
+          IF(IAT.NE.NCNTR.OR..NOT.dft_wt_der) THEN
+          MINI=KMIN (ISHELL)
+          MAXI=KMAX (ISHELL)
+          LOCI=KLOC (ISHELL)-MINI
+          GRADX=ZERO
+          GRADY=ZERO
+          GRADZ=ZERO
+          DO IBFN=MINI,MAXI
+            ICHI=LOCI+IBFN
+            DRA=ZERO
+            DRB=ZERO
+            DO JCHI=1,NUM
+              DIJA=DA(JCHI,ICHI)
+              DIJB=DB(JCHI,ICHI)
+C
+C             COMPUTE SUM(J) D(I,J) F(J)
+C
+              DRA= DRA+ DIJA*AOX(JCHI)
+              DRB= DRB+ DIJB*AOX(JCHI)
+            ENDDO
+            GAOXI=GAOX(ICHI)
+            GAOYI=GAOY(ICHI)
+            GAOZI=GAOZ(ICHI)
+C
+C           COMPUTE -1/2*DF/D(RO)*D(RO)/DR
+C                   = DF/D(RO)*SUM(I,J)D(I,J)DF(I)/DR*F(J)
+C
+            GRADX=GRADX+GAOXI*DRA*DUMA
+            GRADY=GRADY+GAOYI*DRA*DUMA
+            GRADZ=GRADZ+GAOZI*DRA*DUMA
+            GRADX=GRADX+GAOXI*DRB*DUMB
+            GRADY=GRADY+GAOYI*DRB*DUMB
+            GRADZ=GRADZ+GAOZI*DRB*DUMB
+          ENDDO
+C
+C     AT THIS POINT WE HAVE COMPLETED THE NUCLEAR GRADIENT CONTRIBUTIONS
+C     FOR LDA TYPE FUNCTIONALS
+C
+          DEDFTGRADX = TWO*FTOTWT*GRADX
+          DEDFTGRADY = TWO*FTOTWT*GRADY
+          DEDFTGRADZ = TWO*FTOTWT*GRADZ
+C
+          DEDFT(1,IAT)=DEDFT(1,IAT)-DEDFTGRADX
+          DEDFT(2,IAT)=DEDFT(2,IAT)-DEDFTGRADY
+          DEDFT(3,IAT)=DEDFT(3,IAT)-DEDFTGRADZ
+C
+C         USING TRANSLATIONAL INVARIANCE SUM(B) GRAD(B) EXC = 0
+C         TO GET GRAD(A) E = - SUM(B.NE.A) GRAD(B) EXC
+C         FOR A=NCNTR, SINCE THE ABOVE CODE IS NOT CORRECT IN THIS CASE.
+C
+          IF (dft_wt_der) THEN
+              DEDFT(1,NCNTR)=DEDFT(1,NCNTR)+DEDFTGRADX
+              DEDFT(2,NCNTR)=DEDFT(2,NCNTR)+DEDFTGRADY
+              DEDFT(3,NCNTR)=DEDFT(3,NCNTR)+DEDFTGRADZ
+          ENDIF
+          ENDIF
+        ENDDO
+      ENDIF
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTDER
+C>    @brief Analytical DFT gradient
+C>
+C>    @author MUNEAKI KAMIYA, TAKAO TSUNEDA, SUSUMU YANAGISAWA, DMITRI FEDOROV
+C
+      SUBROUTINE DFTDER
+      use mx_limits, only: mxatm
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C
+C
+      LOGICAL UROHF,OUT,GOPARR,DSKWRK,MASWRK,masout
+C
+      COMMON /FMCOM / X(1)
+      COMMON /GRAD  / DE(3,MXATM)
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      COMMON /MACHSW/ KDIAG,ICORFL,IXDR,MODIO,mem10,lpnt10,mem10m
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      COMMON /WFNOPT/ SCFTYP,VBTYP,DFTYPE,TDDFTYP,CITYP,CCTYP,
+     *                MPLEVL,MPCTYP
+C
+      COMMON /DNSAO / IDENAO
+C
+      DATA UHF,ROHF/8HUHF     ,8HROHF    /
+      DATA DEBUG/8HDEBUG   /, DFTGRD/8HDERDFT  /,GRD1/8HGRD1    /
+      DATA CHECK/8HCHECK   /
+      DATA REKS/8HREKS    /
+C
+      L1 = NUM
+      L2 = (L1*L1+L1)/2
+      L3=L1*L1
+C
+      UROHF = SCFTYP.EQ.UHF  .OR.  SCFTYP.EQ.ROHF .OR.SCFTYP.EQ.REKS
+      OUT=(EXETYP.EQ.DFTGRD.OR.EXETYP.EQ.DEBUG.OR.EXETYP.EQ.GRD1).AND.
+     *     MASWRK
+      masout=maswrk.and.iand(modio,16).eq.0
+C
+      CALL GRDDFT(L2,NDFTEN)
+C
+      CALL VALFM(LOADFM)
+C
+      IDFTEN  = LOADFM  + 1
+      IG2AXX  = IDFTEN  + NDFTEN
+      IG2AYY  = IG2AXX  + NUM
+      IG2AZZ  = IG2AYY  + NUM
+      IG2AXY  = IG2AZZ  + NUM
+      IG2AYZ  = IG2AXY  + NUM
+      IG2AXZ  = IG2AYZ  + NUM
+      ICOEFFA = IG2AXZ  + NUM
+      ICOEFFB = ICOEFFA + NUM*NUM
+      LDA     = ICOEFFB + NUM*NUM
+      LDB     = LDA     + L2
+      LDDA    = LDB     + L2
+      LDDB    = LDDA    + L3
+      LDEDFT  = LDDB    + L3
+      IUVEC   = LDEDFT  + NAT*3
+      IDWTINT = IUVEC   + NAT*3
+      IDWTTOT = IDWTINT + 3*NAT*NAT
+      IDTOTWT = IDWTTOT + 3*NAT
+      LAST    = IDTOTWT + 3*NAT
+C
+      NEED = LAST - LOADFM - 1
+C
+C     ---- GET MEMORY ----
+C
+      CALL GETFM(NEED)
+      IF(MASout) WRITE(IW,9000) NEED
+      IF(EXETYP.EQ.CHECK) GO TO 800
+C
+C     READ OR GENERATE DFT GRID. NOTE THAT THIS CAN BE A DIFFERENT GRID
+C     COMPARED TO THE DFT ENERGY, BECAUSE THE SYMMETRY OF THE GRADIENT
+C     COMPONENTS IS NOT THE SAME AS OF THE ENERGY, SO WE IN FACT TURN
+C     OFF USING OCTANT SYMMETRY, BUT KEEP ATOMIC CENTRE SYMMETRY.
+C     IN CASE OF C1 AND NON-ABELIAN GROUPS, OCTANT SYMMETRY IS NOT USED
+C     SO THE GRID INFORMATIONS CAN BE READ.
+C
+      CALL DFTSET(X(IDFTEN),0,.TRUE.)
+C
+      IF(IDENAO.EQ.0) THEN
+         CALL DAREAD(IDAF,IODA,X(ICOEFFA),NUM*NUM,15,0)
+C     ----- TRANSPOSE X(ICOEFFA) FOR EFFICIENCY -----
+C     ----- USE X(LDDA) FOR TEMPORARY STORAGE   -----
+         CALL TRPOSE(X(ICOEFFA),X(LDDA),L1,L1,1)
+      END IF
+      CALL DAREAD(IDAF,IODA,X(LDA),L2,16,0)
+      CALL EXPND(X(LDA),X(LDDA),L1,0)
+      IF(IDENAO.EQ.1) THEN
+         CALL DCOPY(L2,X(LDA),1,X(ICOEFFA),1)
+      ENDIF
+      IF (UROHF) THEN
+         IF(IDENAO.EQ.0) THEN
+            CALL DAREAD(IDAF,IODA,X(ICOEFFB),NUM*NUM,19,0)
+C     ----- TRANSPOSE X(ICOEFFB) FOR EFFICIENCY -----
+C     ----- USE X(LDDB) FOR TEMPORARY STORAGE   -----
+            CALL TRPOSE(X(ICOEFFB),X(LDDB),L1,L1,1)
+         ENDIF
+         CALL DAREAD(IDAF,IODA,X(LDB),L2,20,0)
+         CALL EXPND(X(LDB),X(LDDB),L1,0)
+         IF(IDENAO.EQ.1) THEN
+            CALL DCOPY(L2,X(LDB),1,X(ICOEFFB),1)
+         ENDIF
+      ENDIF
+      CALL VCLR(X(LDEDFT),1,NAT*3)
+      CALL DFTGRAD(X(IDFTEN),X(IG2AXX),X(IG2AYY),X(IG2AZZ),X(IG2AXY),
+     *             X(IG2AYZ),X(IG2AXZ),X(ICOEFFA),X(ICOEFFB),X(LDDA),
+     *             X(LDDB),X(LDEDFT),X(IUVEC),X(IDWTINT),X(IDWTTOT),
+     *             X(IDTOTWT),L1,TOTELE,OUT)
+C
+      IF(OUT) WRITE(IW,9100)
+      IF(OUT) CALL EGOUT(X(LDEDFT),NAT)
+      CALL VADD(DE,1,X(LDEDFT),1,DE,1,3*NAT)
+C
+  800 CONTINUE
+      CALL RETFM(NEED)
+      CALL TIMIT(1)
+      RETURN
+C
+ 9000 FORMAT(1X,'MEMORY FOR GRID POINT CONTRIBUTIONS TO THE',
+     *          ' DFT GRADIENT=',I10,' WORDS.')
+ 9100 FORMAT(/1X,'TOTAL DFT GRADIENT TERMS')
+      END
+C
+C*MODULE DFTGRD  *DECK BRAGGRAD
+C> @brief   Return Bragg/Slater radius, in atomic units.
+C>
+C> @details  Bragg/Slater radius determines the radial extent
+C>          of the Euler/McLaurin radial quadratures.
+C>          Standard values are known for all elements.
+C>          Ghost atoms receive the correct radius for use in
+C>          BSSE runs.  Bond functions receive no grid at all,
+C>          through a zero radius, since the grid on adjacent
+C>          atoms should adequately integrate the bond center.
+C>          Sparkles are also given zero radius, based in part
+C>          on their complete lack of any chemical identity.
+C>
+C> @param   IATOM = the atom's position in the molecule
+C>
+C> @author  Mike Schmidt: 10/2012
+C
+      DOUBLE PRECISION FUNCTION BRAGGRAD(IATOM)
+      use mx_limits, only: mxatm,mxgrid
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z)
+      LOGICAL SG1
+C
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      COMMON /FMOINF/ NFG,NLAYER,NATFMO,NBDFG,NAOTYP,NBODY,NSEGM
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /ZANDAT/ ZANINP(MXATM)
+C
+      PARAMETER (ZERO=0.0D+00)
+      PARAMETER (BOHR=0.52917715D+00)
+C      PARAMETER (BOHR=0.52917721090D+00)
+      PARAMETER (ANG=1.0D0/BOHR)
+C
+C        purpose:
+C        return a reasonable Bragg/Slater radius for atom -IATOM-
+C
+C        if -IATOM- is a ghost atom in counterpoise corrected DFT,
+C        the original input negative nuclear charge lets us look
+C        up the true radius of that element.
+C
+C        bond functions and/or sparkles assign zero radius,
+C        which is equivalent to no grid at all.
+C
+      TINY = 0.00001D+00
+C
+C        Fragment MO is presumed not to be worried about counterpoise,
+C        and to have its IAN array set appropriately, for simple lookup.
+C
+      IF(NFG.NE.0) THEN
+         NUCZ=IAN(IATOM)
+         IF(NUCZ.GT.0) THEN
+            BRAGGRAD = BSLRD(NUCZ)*ANG
+         ELSE
+            BRAGGRAD = ZERO
+         END IF
+C         BRAGGRAD = BRAGGRAD/BOHR
+         RETURN
+      END IF
+C
+      ZNUC = ZANINP(IATOM)
+C
+      IF(ZNUC.GT.ZERO) THEN
+        NUCZ = INT(ZNUC+TINY)
+        IF(ABS(ZNUC-NUCZ).LE.TINY) THEN
+           BRAGGRAD = BSLRD(NUCZ)*ANG
+        ELSE
+           BRAGGRAD = ZERO
+        END IF
+      ELSE
+        NUCZ = INT(-ZNUC+TINY)
+        IF(ABS(-ZNUC-NUCZ).LE.TINY) THEN
+           BRAGGRAD = BSLRD(NUCZ)*ANG
+        ELSE
+           BRAGGRAD = ZERO
+        END IF
+      END IF
+C
+C      BRAGGRAD = BRAGGRAD/BOHR
+C
+      RETURN
+      END
+!*MODULE DFTGRD  *DECK REXDER
+!>    @brief DFT part of REKS gradient
+!>
+!>    @author Michael Filatov; ripped the DFTDER piece
+!
+      SUBROUTINE REXDER                                                  !this procedure is used for SA-REKS type=0 only; not individual states
+      USE comm_SSR, ONLY: S2SARE,WS2SA, S3SARE, WS3SA, CLXGRD
+      USE comm_REKSCM, ONLY: NMICRO, MTTYP, WPPS, WOSS, G1, DNR,
+     * DNS, DELTA, FR, FS
+      USE comm_REXOPT, ONLY: REXTYPE, REXTARGET, REXSHIFT, REXDIIS,
+     * REXLDL, RLXDEN, REXEKT, EKTEA, REXCG, RXCGIT, RXCGTH
+      USE prec, ONLY: dp
+      USE mx_limits, ONLY: mxatm
+
+      IMPLICIT NONE
+
+      REAL(KIND=dp), DIMENSION(3,MXATM) :: C, DE
+      DOUBLE PRECISION :: CCTYP, CITYP, DFTYPE, EXETYP,                 &
+     &                    RUNTYP, SCFTYP, TDDFTYP, VBTYP
+      LOGICAL :: DSKWRK, GOPARR, MASWRK
+      INTEGER, DIMENSION(MXATM) :: IAN
+      INTEGER :: IBTYP, ICH, IDAF, IDENAO, IP, IPK, IPTIM, IR, IS, IW,  &
+     &           MASTER, ME, MPCTYP, MPLEVL, MUL, NA, NAT, NAV,         &
+     &           NB, NE, NEVALS, NGLEVL, NHLEVL, NPROC, NQMT, NUM
+      INTEGER, DIMENSION(950) :: IODA
+      REAL(KIND=dp), DIMENSION(1) :: X
+      REAL(KIND=dp), DIMENSION(MXATM) :: ZAN
+      COMMON /DNSAO / IDENAO
+      COMMON /FMCOM / X
+      COMMON /GRAD  / DE
+      COMMON /INFOA / NAT, ICH, MUL, NUM, NQMT, NE, NA, NB, ZAN, C, IAN
+      COMMON /IOFILE/ IR, IW, IP, IS, IPK, IDAF, NAV, IODA
+      COMMON /PAR   / ME, MASTER, NPROC, IBTYP, IPTIM, GOPARR, DSKWRK,  &
+     &                MASWRK
+      COMMON /RUNOPT/ RUNTYP, EXETYP, NEVALS, NGLEVL, NHLEVL
+      COMMON /WFNOPT/ SCFTYP, VBTYP, DFTYPE, TDDFTYP, CITYP, CCTYP,     &
+     &                MPLEVL, MPCTYP
+
+      INTEGER :: ICOEFFA, ICOEFFB, IDFTEN, IDTOTWT, IDWTINT, IDWTTOT,   &
+     &           IG2AXX, IG2AXY, IG2AXZ, IG2AYY, IG2AYZ, IG2AZZ, IUVEC, &
+     &           L1, L2, L3, LAST, LDA, LDB, LDDA, LDDB, LDEDFT, LOADFM,&
+     &           LREX, NASAVE, NBSAVE, NDFTEN, NEED, NREX
+      LOGICAL :: OUT, UROHF
+      REAL(KIND=dp), DIMENSION(4) :: rexCL                               !REKS weighting factors
+      REAL(KIND=dp) :: REXFCTR, TOTELE
+
+      REAL(KIND=dp), PARAMETER :: CHECK = transfer('CHECK   ', 1.0d0)
+      REAL(KIND=dp), PARAMETER :: DEBUG = transfer('DEBUG   ', 1.0d0)
+      REAL(KIND=dp), PARAMETER :: DFTGRD= transfer('DFTGRD  ', 1.0d0)
+      REAL(KIND=dp), PARAMETER :: GRD1  = transfer('GRD1    ', 1.0d0)
+      REAL(KIND=dp), PARAMETER :: REKS  = transfer('REKS    ', 1.0d0)
+      REAL(KIND=dp), PARAMETER :: ROHF  = transfer('ROHF    ', 1.0d0)
+      REAL(KIND=dp), PARAMETER :: UHF   = transfer('UHF     ', 1.0d0)
+
+      if(IDENAO/=0) then                                                 !REKS grad works only with regular DFT, not DivCon
+        if(maswrk) write(iw,*)
+     *      ' ==> REKS grad. works with regular DFT only!!!'
+        call abrt
+      endif
+
+      L1 = NUM
+      L2 = (L1*L1+L1)/2
+      L3 = L1*L1
+
+      UROHF = SCFTYP==UHF .OR. SCFTYP==ROHF .OR. SCFTYP==REKS
+      OUT = (EXETYP==DFTGRD .OR. EXETYP==DEBUG .OR. EXETYP==GRD1) .AND. &
+     &      MASWRK
+
+      CALL GRDDFT(L2,NDFTEN)
+
+      CALL VALFM(LOADFM)
+
+      IDFTEN  = LOADFM  + 1
+      IG2AXX  = IDFTEN  + NDFTEN
+      IG2AYY  = IG2AXX  + NUM
+      IG2AZZ  = IG2AYY  + NUM
+      IG2AXY  = IG2AZZ  + NUM
+      IG2AYZ  = IG2AXY  + NUM
+      IG2AXZ  = IG2AYZ  + NUM
+      ICOEFFA = IG2AXZ  + NUM
+      ICOEFFB = ICOEFFA + NUM*NUM
+      LDA     = ICOEFFB + NUM*NUM
+      LDB     = LDA     + L2
+      LDDA    = LDB     + L2
+      LDDB    = LDDA    + L3
+      LDEDFT  = LDDB    + L3
+      IUVEC   = LDEDFT  + NAT*3
+      IDWTINT = IUVEC   + NAT*3
+      IDWTTOT = IDWTINT + 3*NAT*NAT
+      IDTOTWT = IDWTTOT + 3*NAT
+      LAST    = IDTOTWT + 3*NAT
+
+      NEED = LAST - LOADFM - 1
+!
+!     ---- GET MEMORY ----
+!
+      CALL GETFM(NEED)
+      IF(MASWRK) WRITE(IW,9000) NEED
+      IF (EXETYP/=CHECK) THEN
+!
+!     READ OR GENERATE DFT GRID. NOTE THAT THIS CAN BE A DIFFERENT GRID
+!     COMPARED TO THE DFT ENERGY, BECAUSE THE SYMMETRY OF THE GRADIENT
+!     COMPONENTS IS NOT THE SAME AS OF THE ENERGY, SO WE IN FACT TURN
+!     OFF USING OCTANT SYMMETRY, BUT KEEP ATOMIC CENTRE SYMMETRY.
+!     IN CASE OF C1 AND NON-ABELIAN GROUPS, OCTANT SYMMETRY IS NOT USED
+!     SO THE GRID INFORMATIONS CAN BE READ.
+!
+         CALL DFTSET(X(IDFTEN),0,.FALSE.)
+
+!         call prtril(X(LDDA),L1)
+!         call prsql(X(ICOEFFB),L1,L1,L1)
+         nrex = 4                                                        !the number or REKS(2,2) microstates
+         DNS = 1.D0 - DNR
+         call rexcm(rexCL,DNR,DNS,DELTA,WPPS,WOSS,NREX)                  !initiate C_L's
+         if(rexTarget/=0) call dcopy(4,CLXgrd,1,rexCL,1)                 !case of individual state in SA/SSR
+                                                                         !copy SA/SSR gradient weighting factors to rexCL
+         nasave = NA                                                     !save the original NA and NB
+         nbsave = NB
+         lrex = 0
+         do
+         lrex = lrex + 1                                                 !top of the loop over microstates
+         call daread(IDAF,IODA,X(ICOEFFA),L3,15,0)                       !read in the eigenvectors
+         if(lrex<=2)then
+            rexfctr = rexCL(1)
+            if(lrex==2)then
+               call dswap(L1,X(ICOEFFA+(NA-1)*L1),1,X(ICOEFFA+NA*L1),1)  !swap R and S active orbitals for the second microstate
+               rexfctr = rexCL(2)
+            endif
+            call dcopy(L3,X(ICOEFFA),1,X(ICOEFFB),1)                     !copy to -ICOEFFB-; for β-spins
+            call dgemm('n','t',L1,L1,NA,1.d0,X(ICOEFFA),L1,X(ICOEFFA),   !do density matrix for α-spins; for microstates 1, 2
+     &                 L1,0.d0,X(LDDA),L1)
+            call dcopy(L3,X(LDDA),1,X(LDDB),1)                           !copy to -LDDB-; for β-spins
+         elseif(lrex==3)then                                             !for the third microstate
+            rexfctr = 2.d0*rexCL(3)
+            call dcopy(L3,X(ICOEFFA),1,X(ICOEFFB),1)                     !copy to -ICOEFFB-; for β-spins
+            call dswap(L1,X(ICOEFFB+(NA-1)*L1),1,X(ICOEFFB+NA*L1),1)     !swap R and S active orbitals for β-spins of 3rd microstate
+            call dgemm('n','t',L1,L1,NA,1.d0,X(ICOEFFA),L1,X(ICOEFFA),   !do density matrix for α-spins
+     &                 L1,0.d0,X(LDDA),L1)
+            call dgemm('n','t',L1,L1,NA,1.d0,X(ICOEFFB),L1,X(ICOEFFB),   !do density matrix for β-spins
+     &                 L1,0.d0,X(LDDB),L1)
+         elseif(lrex==4)then                                             !for the fourth microstate
+            rexfctr = 2.d0*rexCL(4)
+            call dcopy(L3,X(ICOEFFA),1,X(ICOEFFB),1)                     !copy to -ICOEFFB-; for β-spins
+            call dgemm('n','t',L1,L1,NA+1,1.d0,X(ICOEFFA),L1,X(ICOEFFA), !do density matrix for α-spins; this is a triplet state
+     &                 L1,0.d0,X(LDDA),L1)
+            call dgemm('n','t',L1,L1,NB-1,1.d0,X(ICOEFFB),L1,X(ICOEFFB), !do density matrix for β-spins; two orbs less than α-spins
+     &                 L1,0.d0,X(LDDB),L1)
+            NA = NA + 1
+            NB = NB - 1
+         endif                                                           !if(lrex.le.2)then
+         call trpose(X(ICOEFFA),X(LDA),L1,L1,1)                          !transpose α eigenvectors; use -LDA- as temp array
+         call trpose(X(ICOEFFB),X(LDA),L1,L1,1)                          !transpose β eigenvectors; use -LDA- as temp array
+         call vclr(X(LDEDFT),1,NAT*3)
+         call dftgrad(X(IDFTEN),X(IG2AXX),X(IG2AYY),X(IG2AZZ),X(IG2AXY),&
+     &                X(IG2AYZ),X(IG2AXZ),X(ICOEFFA),X(ICOEFFB),X(LDDA),&
+     &                X(LDDB),X(LDEDFT),X(IUVEC),X(IDWTINT),X(IDWTTOT), &
+     &                X(IDTOTWT),L1,TOTELE,OUT)
+!
+         IF(OUT) WRITE(IW,9100)
+         IF(OUT) CALL EGOUT(X(LDEDFT),NAT)
+         call dscal(3*NAT,rexfctr,X(LDEDFT),1)                           !scale by REKS weighting factor
+         call vadd(DE,1,X(LDEDFT),1,DE,1,3*NAT)
+!
+         if(maswrk) write(iw,
+     &'(1x,"==> REKS DFT XC gradient: microstate",i2,                   &
+     &" done; CL(",i2,") =",F12.8)')lrex,lrex,rexCL(lrex)
+         if(lrex<nrex)cycle                                              !bottom of the loop over microstates
+         exit
+         end do
+         NA = nasave                                                     !restore NA and NB
+         NB = nbsave
+!
+      END IF
+!
+      CALL RETFM(NEED)
+      CALL TIMIT(1)
+      RETURN
+!
+ 9000 FORMAT(1X,'MEMORY FOR GRID POINT CONTRIBUTIONS TO THE',
+     *          ' DFT GRADIENT=',I10,' WORDS.')
+ 9100 FORMAT(/1X,'TOTAL DFT GRADIENT TERMS')
+      END SUBROUTINE REXDER
+C
+C*MODULE DFTGRD  *DECK DMATD_PCC_RHF
+C>
+C>    @brief Integration of <I|V|A> for
+C>           picture change corrected(PCC) DFT by IOTC method
+C>
+C>    @details THIS ROUTINE DOES A NUMERICAL INTEGRATION TO YIELD THE <I
+C>     MATRIX WHERE V=D_E(XC)/D_RHO.  IN C1 SYMMETRY FOR NOW.
+C>     THE RADIAL QUADRATURE FORMULA IS TAKEN FROM
+C>     P.M.W.GILL, B.G.JOHNSON, J.A.POPLE AND M.J.FRISCH,
+C>     CHEM. PHYS. LETT. 197, 499 (1992).
+C>     THE ANGULAR QUADRATURE FORMULA IS TAKEN FROM V.I.LEBEDEV,
+C>     ZH. VYCHISL. MAT. FIZ. 15, 48 (1975) AND 16, 293 (1976),
+C>     (ENGLISH TRANSLATION IN U.S.S.R. COMPUT. MATH AND MATH PHYS).
+C>     EXCHANGE AND CORRELATION ENERGY CONTRIBUTION DUE TO INTEGRATION
+C>     OVER GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>     This is a clone of DMATD.
+C>     This routine is for RHF calculation
+C>     PCC-DFT transforms delta operator from 4 component picture
+C>     to 2component or 1 component one.
+C>     Here, the transformation is based on infinite-order two-component
+C>     (IOTC) method.
+C>     Please refer to the following papers about PCC DFT.
+C>      T. Oyama, Y. Ikabata, J. Seino, and H. Nakai,
+C>      Chem. Phys. Lett. 680,37 (2017).
+C>      Y. Ikabata, T. Oyama, M. Hayami, J. Seino, and H. Nakai,
+C>      J. Chem. Phys. 150, 164104 (2019).
+C>
+C>    @date : Chinami Takashima, December,2021
+C>
+C>    @note : not connected with MCPDFTRUN and divide-and-conquer method
+C
+      SUBROUTINE DMATD_PCC_RHF(
+     *                 TOTWT,IIFACT,NAPTS,COEFFA,COEFFB,IANGN,IFACTR,
+     *                 VMOA,DVMOXA,DVMOYA,DVMOZA,VALGA,VMOB,DVMOXB,
+     *                 DVMOYB,DVMOZB,VALGB,FA,FB,IUNIQ,EEXC,TOTELE,NANG,
+     *                 PTRAD,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                 ANGXVL,ANGYVL,ANGZVL,RSQRD,PCOEFF,EXPS,
+     *                 AOX,GAOX,GAOY,GAOZ,NLCT,NELM,IJX,IJY,IJZ,L1,
+     *                 NEEDGR,UROHF,TOTKIN,ATMPOL,ATPPOL,EFPOL,
+     *                 WTAB,DRSPH,MAXL,MAXM,NFREQ,
+     *                 RMOMG,PIOMG,B000,B100,B010,B001,
+     *                 B200,B110,B101,B020,B011,B002,
+     *                 WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,WORK7,
+     *                 RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *                 RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,
+     *                 RMMB000,RMPB100,RMPB010,RMPB001,RMMB100,
+     *                 RMMB010,RMMB001,RMPB200,RMPB110,RMPB101,
+     *                 RMPB020,RMPB011,RMPB002)
+      USE metaGGA, ONLY: NEEDTAU
+      USE funclib, ONLY: FUNCL, FUNFL
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp,mxrt,mxao,mxnoro
+      use comm_RDM_MCPDFT, only: ld1a,lxt4,nactive,nnz
+C
+      USE mod_dft_gridint, ONLY: dmatd_blk
+      USE params, ONLY: dft_bfc_algo
+      USE modmcpdft
+      use libxc, only: use_libxc, libxc_calc
+      IMPLICIT NONE
+C
+C#include "rdm_info.fh"
+      LOGICAL UROHF,OUT,NEEDGR,GOPARR,DSKWRK,MASWRK,DLB,SG1
+C     used common block
+      INTEGER :: NDFTFG,NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,NANGPT,
+     *           NANGPT0,JANS
+      DOUBLE PRECISION :: DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      INTEGER :: IPRUNECUTS,NTOTGRIDPOINTS,NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: PRUNERADS,PRUNEATOMS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: X
+      COMMON /FMCOM / X(1)
+      INTEGER :: IDENAO
+      COMMON /DNSAO / IDENAO
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      DOUBLE PRECISION :: GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                    GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,ECORL,EXCOR
+      COMMON /LMOEDA/ GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+      INTEGER :: NEVALS,NGLEVL,NHLEVL
+      DOUBLE PRECISION :: RUNTYP,EXETYP
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      INTEGER :: MAXIT,MCONV,NPUNCH,NPREO
+      DOUBLE PRECISION :: CONVHF,FSHIFT
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C
+      DOUBLE PRECISION :: DEBUG,DFTGRD
+      DATA DEBUG/8HDEBUG   /, DFTGRD/8HDERDFT  /
+C
+      INTEGER, INTENT(IN) :: IIFACT(NAT),NAPTS(NAT),IANGN(NAT,2,*),
+     *   IFACTR(NAT),IUNIQ(*),NANG,
+     *   NLCT(*),NELM(*),IJX(84),IJY(84),IJZ(84),L1,MAXL,MAXM,NFREQ
+      DOUBLE PRECISION, INTENT(IN) ::  TOTWT(NAT,*), PTRAD(*),
+     *   XDAT(MAXANG,NAT,*),YDAT(MAXANG,NAT,*),ZDAT(MAXANG,NAT,*),
+     *   EXPS(*),ATMPOL(NAT,MAXL,MAXM,MAXM,NFREQ),
+     *   ATPPOL(NAT,NAT,NFREQ),EFPOL(NAT),DRSPH(3,MAXL,MAXM)
+      DOUBLE PRECISION, INTENT(INOUT) :: COEFFA(L1,*),COEFFB(L1,*),
+     *   VMOA(L1),DVMOXA(L1),DVMOYA(L1),DVMOZA(L1),VMOB(L1),DVMOXB(L1),
+     *   DVMOYB(L1),DVMOZB(L1),VALGA(L1),VALGB(L1),
+     *   FA(*),FB(*),RSQRD(*),ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*),
+     *   ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *   AOX(L1),GAOX(L1),GAOY(L1),GAOZ(L1),
+     *   PCOEFF(*),WTAB(NAT,NAT,*)
+C
+      DOUBLE PRECISION, INTENT(IN) :: RMOMG(NUMU*NUM),PIOMG(NUMU*NUM),
+     *   B000(NUMU),B100(NUMU),B010(NUMU),B001(NUMU),B200(NUMU),
+     *   B110(NUMU),B101(NUMU),B020(NUMU),B011(NUMU),B002(NUMU),
+     *   WORK1(NUMU),WORK2(NUMU),WORK3(NUMU),WORK4(NUMU),WORK5(NUMU),
+     *   WORK6(NUMU),WORK7(NUM),
+     *   RMB000(NUM),RPB100(NUM),RPB010(NUM),RPB001(NUM),RMB100(NUM),
+     *   RMB010(NUM),RMB001(NUM),RPB200(NUM),RPB110(NUM),RPB101(NUM),
+     *   RPB020(NUM),RPB011(NUM),RPB002(NUM),
+     *   RMMB000(NA),RMPB100(NA),RMPB010(NA),RMPB001(NA),RMMB100(NA),
+     *   RMMB010(NA),RMMB001(NA),RMPB200(NA),RMPB110(NA),RMPB101(NA),
+     *   RMPB020(NA),RMPB011(NA),RMPB002(NA)
+C     variables defined in this routine
+      INTEGER :: NCNTR,INC0,NOA,NOB,NPT,LOOP,NGRAN,NLOOP,MCHUNK,NEXT,
+     *   IGRID,IRADPT,IANGPT,IPT,ICHUNK,IPTME,IATM,IANG
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00,ONE=1.0D+00,
+     *   HALF=0.5D+00,TWO=2.0D+00,THRSRHO=1.0D-15,THRSPI=1.0D-15,
+     *   THRSRHO2=1.0D-15,THRSRHO3=0.9D0,THRSRHO4=1.15D0,
+     *   AB1=-4.756065601D+2,BB1=-3.794733192D+2,CB1=-8.538149682D+1
+      DOUBLE PRECISION :: ABSGRID(3),EEXC,TOTELE,TOTKIN,EXEC,ECORL1,
+     *   TOTGRADX,TOTGRADY,TOTGRADZ,GRDAA,GRDBB,GRDAB,DFTTHRS,WCUTOFF,
+     *   RCUTOFF,CCUTOFF,RAD,BRAGGRAD,FACT,R1,FTOTWT,XD,YD,ZD,XCDNT,
+     *   YCDNT,ZCDNT,ROA,ROB,GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     *   TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,VXCA1,VXCB1,
+     *   DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,XALPHA,XGRD,ECF,
+     *   DMGGA,DMGA,DMGGB,DMGB,DUMA,DUMB,EXEC1
+      DOUBLE PRECISION, EXTERNAL :: DDOT
+CT      iTri(i,j) = Max(i,j)*(Max(i,j)-1)/2 + Min(i,j)
+C-END
+C
+C     IDENAO=0 MEANS REGULAR DFT
+C     IDENAO=1 MEANS DIVIDE AND CONQUER DFT
+C
+c MV
+      IF (.NOT.dolrd .AND. dft_bfc_algo.GE.0 .AND. idenao.EQ.0) THEN
+c       New XC integration algorithm
+        CALL dmatd_blk(coeffa,coeffb,fa,fb,
+     *              eexc,totele,totkin,
+     *              atmxvec,atmyvec,atmzvec,
+     *              nang,l1,needgr,urohf)
+        RETURN
+      END IF
+c /MV
+C
+C     Loop over atoms
+      DO 30 NCNTR = 1, NAT
+C
+      INC0=IUNIQ(NCNTR)
+      IF(INC0.EQ.0) GOTO 30
+
+      OUT = EXETYP.EQ.DFTGRD  .OR.  EXETYP.EQ.DEBUG
+      EXEC = ZERO
+      ECORL1 = ZERO
+      TOTGRADX = ZERO
+      TOTGRADY = ZERO
+      TOTGRADZ = ZERO
+C                 LDA WILL NOT ASSIGN ANY VALUES TO DENSITY GRADIENTS
+      GRDAA = ZERO
+      GRDBB = ZERO
+      GRDAB = ZERO
+      NOA = NA
+      NOB = NB
+      NPT = NRAD*MAXANG
+C
+C     SET CUT-OFFS FOR THE DENSITY RCUTOFF AND WEIGHT WCUTOFF
+C     RCUTOFF IS SET TO DEPEND UPON SCF DENSITY CONV. AND THE GRID SIZE
+C     WCUTOFF IS A CELL VOLUME AND WE SET IT TO A FIXED VALUE.
+C     MOST CELLS HAVE LARGE VOLUME (ABOUT 97% HAVE VOLUME .GT. 1E-14)
+C
+      DFTTHRS=DFTTHR
+      IF(DFTTHR.EQ.ZERO) DFTTHR=1.0D-04/(NPT*NAT)
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+      CCUTOFF=1.0D-03/(NPT*NAT)
+      IF(DFTTHR.LT.1.1D-15) THEN
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+      IF(MCPDFTRUN) then
+         DFTTHR =1.0D-15
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+
+
+C
+C     ANGXVL=X**I, ANGYVL=Y**J, ANGZVL=Z**K, FOR NEEDED VALUES OF I,J,K
+C     WHERE (X,Y,Z) IS THE CENTRE OF A DFT GRID POINT RI
+C     MINUS AN ATOMIC CENTRE RA: XYZ= (RI - RA)
+C
+      CALL VCLR(ANGXVL(1,1),1,NAT)
+      CALL VCLR(ANGYVL(1,1),1,NAT)
+      CALL VCLR(ANGZVL(1,1),1,NAT)
+      CALL DACOPY(NAT,ONE,ANGXVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGYVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGZVL(1,2),1)
+C
+      RAD = BRAGGRAD(NCNTR)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+C     NAPTS   + (NAT-1)/NWDVAR+1
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+C STB MODIFIED FOR PRUNING
+      IGRID = 1
+      DO 20 IRADPT = 1, NRAD
+C
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.(PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD)) THEN
+           IGRID = IGRID + 1
+        ENDIF
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+C         STB - FOR NOW THIS SHOULD BE OK AS I USED THE MAX ANGULAR
+C               POINTS SO AS TO SIMPLIFY
+          IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) THEN
+                CALL DDI_DLBNEXT(NEXT)
+              ENDIF
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          IF(ABS(FTOTWT).LT.WCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+            ANGXVL(IATM,3)=XCDNT
+            ANGYVL(IATM,3)=YCDNT
+            ANGZVL(IATM,3)=ZCDNT
+            DO 35 IANG=3,NANG
+               ANGXVL(IATM,IANG+1)=ANGXVL(IATM,IANG)*XCDNT
+               ANGYVL(IATM,IANG+1)=ANGYVL(IATM,IANG)*YCDNT
+               ANGZVL(IATM,IANG+1)=ANGZVL(IATM,IANG)*ZCDNT
+ 35         CONTINUE
+  610     CONTINUE
+C
+          ABSGRID(1)=XD+C(1,NCNTR)
+          ABSGRID(2)=YD+C(2,NCNTR)
+          ABSGRID(3)=ZD+C(3,NCNTR)
+C
+C***********************************************************************
+C     FORM DENSITY AT THIS POINT
+C***********************************************************************
+          IF(IDENAO.EQ.0) THEN
+             CALL PDELTA(ABSGRID,B000,B100,B010,B001,B200,B110,B101,
+     *                   B020,B011,B002,
+     *                   WORK1,WORK2,WORK3,WORK4,WORK5,WORK6)
+C
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B000,NUMU,
+     *                  ZERO,RMB000,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B100,NUMU,
+     *                  ZERO,RMB100,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B010,NUMU,
+     *                  ZERO,RMB010,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B001,NUMU,
+     *                  ZERO,RMB001,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B100,NUMU,
+     *                  ZERO,RPB100,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B010,NUMU,
+     *                  ZERO,RPB010,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B001,NUMU,
+     *                  ZERO,RPB001,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B200,NUMU,
+     *                  ZERO,RPB200,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B110,NUMU,
+     *                  ZERO,RPB110,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B101,NUMU,
+     *                  ZERO,RPB101,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B020,NUMU,
+     *                  ZERO,RPB020,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B011,NUMU,
+     *                  ZERO,RPB011,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B002,NUMU,
+     *                  ZERO,RPB002,NUM)
+C
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB000,NUM,
+     *                  ZERO,RMMB000,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB100,NUM,
+     *                  ZERO,RMMB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB010,NUM,
+     *                  ZERO,RMMB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB001,NUM,
+     *                  ZERO,RMMB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB100,NUM,
+     *                  ZERO,RMPB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB010,NUM,
+     *                  ZERO,RMPB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB001,NUM,
+     *                  ZERO,RMPB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB200,NUM,
+     *                  ZERO,RMPB200,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB110,NUM,
+     *                  ZERO,RMPB110,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB101,NUM,
+     *                  ZERO,RMPB101,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB020,NUM,
+     *                  ZERO,RMPB020,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB011,NUM,
+     *                  ZERO,RMPB011,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB002,NUM,
+     *                  ZERO,RMPB002,NA)
+C
+            ROA = DDOT(NA,RMMB000,1,RMMB000,1)
+            ROA = ROA + DDOT(NA,RMPB100,1,RMPB100,1)
+            ROA = ROA + DDOT(NA,RMPB010,1,RMPB010,1)
+            ROA = ROA + DDOT(NA,RMPB001,1,RMPB001,1)
+C
+            ROB = ROA
+          ELSE
+             WRITE(IW,*) "ERROR: PCC NOT FOR IDENAO.EQ.1(DCDFT?)"
+             CALL ABRT
+          END IF
+          IF(ABS(ROA+ROB).LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          IF(NEEDGR) THEN
+C***********************************************************************
+C     FORM DENSITY GRADIENT AT THIS POINT
+C***********************************************************************
+CT            IF(IDENAO.EQ.0) THEN
+            GRADXA = DDOT(NA,RMMB100,1,RMMB000,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB200,1,RMPB100,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB110,1,RMPB010,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB101,1,RMPB001,1)
+C
+            GRADYA = DDOT(NA,RMMB010,1,RMMB000,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB110,1,RMPB100,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB020,1,RMPB010,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB011,1,RMPB001,1)
+C
+            GRADZA = DDOT(NA,RMMB001,1,RMMB000,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB101,1,RMPB100,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB011,1,RMPB010,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB002,1,RMPB001,1)
+C
+            GRADXA = GRADXA * TWO
+            GRADYA = GRADYA * TWO
+            GRADZA = GRADZA * TWO
+C
+CT             IF (MCPDFTRUN) THEN
+CT              CALL DFTTRFG(UROHF,L1,L1,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+CT     *                     DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+CT     *                     CCUTOFF)
+CTC             MCPDFTRUN=.false.
+CTC             goto 444
+CT               GRADXA=DDOT(NINACT,VMOA,1,DVMOXA,1)*TWO
+CT               GRADYA=DDOT(NINACT,VMOA,1,DVMOYA,1)*TWO
+CT               GRADZA=DDOT(NINACT,VMOA,1,DVMOZA,1)*TWO
+CT              IF(NACTIVE.GT.0) THEN
+CT               DO I=1, NACTIVE
+CT                 DO J=1,I
+CT                   FACT12 = 1.0d0
+CT                   IF (I.EQ.J)FACT12=0.5D0
+CT                   IJ=iTri(i,j)
+CT                   GRADXA=GRADXA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOXA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOXA(NINACT+i))
+CT                   GRADYA=GRADYA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOYA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOYA(NINACT+i))
+CT                   GRADZA=GRADZA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOZA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOZA(NINACT+i))
+CT
+CT                 ENDDO
+CT               ENDDO
+CT              ENDIF
+CT             ELSE
+CT  444       continue
+CT              GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+CT              GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+CT              GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+CT             ENDIF
+              GRADXB = GRADXA
+              GRADYB = GRADYA
+              GRADZB = GRADZA
+CT            ELSE
+CT               GRADXA=DDOT(L1,GAOX,1,VMOA,1)
+CT               GRADYA=DDOT(L1,GAOY,1,VMOA,1)
+CT               GRADZA=DDOT(L1,GAOZ,1,VMOA,1)
+CT               IF(UROHF) THEN
+CT                  GRADXA=GRADXA*TWO
+CT                  GRADYA=GRADYA*TWO
+CT                  GRADZA=GRADZA*TWO
+CT                  GRADXB=DDOT(L1,GAOX,1,VMOB,1)*TWO
+CT                  GRADYB=DDOT(L1,GAOY,1,VMOB,1)*TWO
+CT                  GRADZB=DDOT(L1,GAOZ,1,VMOB,1)*TWO
+CT               ELSE
+CT                  GRADXB=GRADXA
+CT                  GRADYB=GRADYA
+CT                  GRADZB=GRADZA
+CT               END IF
+CT            END IF
+
+C Andrew - here we need to perform the translation for PDFT
+C First step - calculate the on-top pair density
+C  Return "ONTOP", "ONTOPX", "ONTOPY", "ONTOPZ" I guess.
+C
+C  It looks like DFTTRFG is the subroutine that calculates the gradients
+C  for the MOs (needed for building the on-top gradients needed for ft-
+C  class functionals.
+C
+C  The subroutine DFTTRFA calculates the MOs at the grid point.
+
+C           goto 457
+C          mcpdftrun=.false.
+CT          IF (.NOT.MCPDFTRUN) GOTO 457
+CT           CALL GONTOP(VMOA,VMOB,DVMOXA,DVMOXB,DVMOYA,DVMOYB,DVMOZA,
+CT     *                DVMOZB,ONTOP,ONTOPX,ONTOPY,ONTOPZ,NACTIVE)
+CT
+CT          TOTELEA = TOTELEA + FTOTWT*ROA
+CT          TOTELEB = TOTELEB + FTOTWT*ROA
+CTC Second - Translate the density/derivatives
+CT           DTOT = ROA + ROB !Total denisty
+CT           GRADX = GRADXA + GRADXB
+CT           GRADY = GRADYA + GRADYB
+CT           GRADZ = GRADZA + GRADZB
+CT           RATIO = 0.0D0
+CT           if ((DTOT.gt.THRSRHO).and.(ONTOP.ge.THRSRHO)) then
+CT             RATIO = 4.0D0*ONTOP/(DTOT**2.0D0)
+CTC             write(*,*) "ratio", ratio,4.0d0*ontop,DTOT**2d0
+CT           endif
+CTC           goto 457
+CT
+CTC Translation for t-GGA functionals:
+CT        IF (.NOT.F_FLAG) THEN
+CT           IF((1.0D0-RATIO).gt.THRSRHO) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ELSE
+CT             ZETA = 0.0D0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT        ELSE
+CTcPS           goto 457
+CT
+CTC Translation for ft-GGA functionals:
+CT           IF((1.0D0-RATIO).gt.THRSRHO.AND.(RATIO.LT.THRSRHO3)) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT     *               + RATIO*GRADX/(2.0D0*ZETA)
+CT     *               - ONTOPX/(DTOT*ZETA)
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT     *               + RATIO*GRADY/(2.0D0*ZETA)
+CT     *               - ONTOPY/(DTOT*ZETA)
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT     *               + RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               - ONTOPZ/(DTOT*ZETA)
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT     *               - RATIO*GRADX/(2.0D0*ZETA)
+CT     *               + ONTOPX/(DTOT*ZETA)
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT     *               - RATIO*GRADY/(2.0D0*ZETA)
+CT     *               + ONTOPY/(DTOT*ZETA)
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT     *               - RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               + ONTOPZ/(DTOT*ZETA)
+CT           ELSE IF((RATIO.GE.THRSRHO3).AND.(RATIO.LE.THRSRHO4)) THEN
+CT             ZETA = (AB1*(RATIO-1.15D0)**5.0D0)
+CT     *       + (BB1*(RATIO-1.15D0)**4.0D0) + (CB1*(RATIO-1.15D0)**3.0D0)
+CT
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT
+CT             GRADXA = (1.0D0+ZETA)*GRADX/2.0D0
+CT     *       + (AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPX/DTOT) - (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPX/DTOT) - (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPX/DTOT) - (3.0D0 * RATIO * GRADX))
+CT             GRADYA = (1.0D0+ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPY/DTOT) - (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPY/DTOT) - (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPY/DTOT) - (3.0D0 * RATIO * GRADY))
+CT             GRADZA = (1.0D0+ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPZ/DTOT) - (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPZ/DTOT) - (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPZ/DTOT) - (3.0D0 * RATIO * GRADZ))
+CT             GRADXB = (1.0D0-ZETA)*GRADX/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPX/DTOT) + (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPX/DTOT) + (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPX/DTOT) + (3.0D0 * RATIO * GRADX))
+CT             GRADYB = (1.0D0-ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPY/DTOT) + (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPY/DTOT) + (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPY/DTOT) + (3.0D0 * RATIO * GRADY))
+CT             GRADZB = (1.0D0-ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPZ/DTOT) + (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPZ/DTOT) + (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPZ/DTOT) + (3.0D0 * RATIO * GRADZ))
+CT           ELSE IF(RATIO.GT.THRSRHO4) THEN
+CT             ZETA = 0.0d0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT       ENDIF
+CT  457      continue
+
+C***********************************************************************
+C      FORM GRADIENT INVARIANT (GRAD DOT GRAD)
+C***********************************************************************
+            GRDAA  = GRADXA*GRADXA+GRADYA*GRADYA+GRADZA*GRADZA
+            GRDBB  = GRADXB*GRADXB+GRADYB*GRADYB+GRADZB*GRADZB
+            GRDAB  = GRADXA*GRADXB+GRADYA*GRADYB+GRADZA*GRADZB
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB =TAUXA
+              TAUYB =TAUYA
+              TAUZB =TAUZA
+
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ELSE
+C
+C     THIS ELSE CASE WILL ALLOW USERS TO PRINT OUT THE TOTAL KINETIC
+C     ENERGY DENSITY FOR LDA TYPE FUNCTIONALS.
+C     KEEP IN MIND THAT IF THE FUNCTIONAL DOES NOT CONTAIN A TAU
+C     DEPENDENCE THEN ONE CAN NOT EXPECT THE TOTAL KINETIC ENERGY
+C     DENSITY TO BE EXACTLY EQUAL TO THE EXPECTATION VALUE OF THE
+C     KINETIC ENERGY OPERATOR.
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB =TAUXA
+              TAUYB =TAUYA
+              TAUZB =TAUZA
+C             THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCT.
+C             SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C             WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ENDIF
+C***********************************************************************
+C     THE EXCHANGE-CORRELATION FUNCTIONAL CALCULATION
+C***********************************************************************
+          VXCA1=ZERO
+          VXCB1=ZERO
+          DUMAX=ZERO
+          DUMAY=ZERO
+          DUMAZ=ZERO
+          DUMBX=ZERO
+          DUMBY=ZERO
+          DUMBZ=ZERO
+          XALPHA=ZERO
+          XGRD=ZERO
+          ECF=ZERO
+C
+C         STORES THE DERIVATIVE OF THE FUNCTIONAL WITH RESPECT TO THE
+C         KINETIC ENERGY DENSITY.
+C         ALPHA SPIN
+          DMGGA=ZERO
+          DMGA =ZERO
+C         BETA SPIN
+          DMGGB=ZERO
+          DMGB =ZERO
+          IF(ROA+ROB.le.1.0D-15) THEN
+            XALPHA = 0.0d0
+            XGRD = 0.0d0
+            ECF = 0.0d0
+          ELSE IF(use_libxc) THEN
+            CALL libxc_calc(FTOTWT,
+     >                      ROA,ROB,
+     >                      GRDAA, GRDAB, GRDBB,
+     >                      GRADXA,GRADYA,GRADZA,
+     >                      GRADXB,GRADYB,GRADZB,
+     >                      TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,
+     >                      XALPHA,XGRD,ECF,
+     >                      VXCA1,VXCB1,
+     >                      DUMAX,DUMAY,DUMAZ,
+     >                      DUMBX,DUMBY,DUMBZ,
+     >                      DMGGA, DMGGB)
+          ELSE IF(FUNCL) THEN
+            CALL CCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE IF(FUNFL) THEN
+            CALL FCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE
+            CALL CALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                   GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                   XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                   VXCB1,DUMBX,DUMBY,DUMBZ,ECF,
+     >                   TAUXA,TAUYA,TAUZA,DMGGA,
+     >                   TAUXB,TAUYB,TAUZB,DMGGB)
+          END IF
+ 451      CONTINUE
+          DUMA = VXCA1
+          DUMB = VXCB1
+C
+          DMGA = DMGGA
+          DMGB = DMGGB
+C
+          EXEC1= XALPHA + XGRD + ECF
+          EXEC = EXEC + EXEC1
+          ECORL1= ECORL1 + ECF
+C
+          IF(NOB.EQ.0) THEN
+             DUMB=ZERO
+             GRADXB=ZERO
+             GRADYB=ZERO
+             GRADZB=ZERO
+          ENDIF
+C
+C Andrew - I think we can calculate the potentials here.  We need the VXCA1
+C and VXCB1, which I think are the dF/drho terms.  We also need the weights,
+C MOs, on-top, and DTOT.
+C
+C***********************************************************************
+C      CONSTRUCT FOCK MATRIX
+C***********************************************************************
+          CALL DFTFOCK_PCC_RHF(NEEDGR,NEEDTAU,FTOTWT,
+     *                 DUMA,DUMAX,DUMAY,DUMAZ,FA,DFTTHR,L1,DMGA,
+     *                 RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *                 RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,WORK7)
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          debcou = debcou + 1
+          TOTELEAt = TOTELEAt + FTOTWT*ROA
+          TOTELEBt = TOTELEBt + FTOTWT*ROB
+          TOTELE  =  TOTELE+FTOTWT*(ROA+ROB)
+          TOTGRADX=TOTGRADX+FTOTWT*GRDAA
+          TOTGRADY=TOTGRADY+FTOTWT*GRDBB
+          TOTGRADZ=TOTGRADZ+FTOTWT*GRDAB
+C
+          IF (DOLRD) THEN
+            CALL LRDPOL(ATMPOL,ATPPOL,EFPOL,FTOTWT,WTAB,FACT,
+     *                  NCNTR,IPTME,ROA,ROB,GRDAA,GRDBB,GRDAB,DRSPH,
+     *                  XD,YD,ZD,MAXL,MAXM,NFREQ)
+          END IF
+C
+   10   CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+   20 CONTINUE
+C
+C     ----- NEXT ATOM -----
+C
+c      MCPDFTRUN=.TRUE.
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      EEXC = EEXC+EXEC
+      ECORL= ECORL+ECORL1
+      DFTTHR=DFTTHRS
+      IF (OUT) WRITE(IW,9999) NCNTR,EEXC,TOTELE,TOTKIN
+   30 CONTINUE
+      RETURN
+C
+ 9999 FORMAT(/5X,'ATM',I8,' EXC=',F20.10,5X,'TOTELE=',F20.10,'TOTKIN=',
+     >        F20.10)
+      END
+C*MODULE DFTGRD  *DECK PDELTA
+C>
+C>    @brief  calculate primitive integrals of delta operator
+C>
+C>    @details This is main driver to calculate them.
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE PDELTA(RC,B000,B100,B010,B001,
+     *                  B200,B110,B101,B020,B011,B002,
+     *                  WORK1,WORK2,WORK3,WORK4,WORK5,WORK6)
+      use mx_limits, only: mxsh,mxgtot,mxatm,maxsh
+C
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00,ONE=1.0D+00,TWO=2.0D+00
+C     used common block
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER :: KSTART,KATOM,KTYPE,KNG,KLOC,KMIN,KMAX,NSHELL
+      DOUBLE PRECISION :: EX,CS,CP,CD,CF,CG,CH,CI
+      COMMON /NSHEL / EX(MXGTOT),CS(MXGTOT),CP(MXGTOT),CD(MXGTOT),
+     *                CF(MXGTOT),CG(MXGTOT),CH(MXGTOT),CI(MXGTOT),
+     *                KSTART(MXSH),KATOM(MXSH),KTYPE(MXSH),KNG(MXSH),
+     *                KLOC(MXSH),KMIN(MXSH),KMAX(MXSH),NSHELL
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+C
+      DOUBLE PRECISION, INTENT(IN) :: RC(3)
+      DOUBLE PRECISION, INTENT(OUT) :: B000(NUMU),B100(NUMU),B010(NUMU),
+     *   B001(NUMU),B200(NUMU),B110(NUMU),B101(NUMU),B020(NUMU),
+     *   B011(NUMU),B002(NUMU)
+      DOUBLE PRECISION, INTENT(INOUT) :: WORK1(NUMU),WORK2(NUMU),
+     *   WORK3(NUMU),WORK4(NUMU),WORK5(NUMU),WORK6(NUMU)
+C     newly defined variables
+      INTEGER :: ISHL,JSHL,IIA,IIB,IIC,LLA,LENSLA,JSLINIA,JSLENDA,IATOM,
+     *   IOEI_OUT_DIM
+      DOUBLE PRECISION :: EXPA,DA,CUTOFF_OEI
+C
+      CUTOFF_OEI = 1.0D-20
+      IOEI_OUT_DIM = MAXVAL(KMAX) - MAXVAL(KMIN) + 1
+      IIA = 0
+      IIB = 0
+      IIC = 0
+C
+      DO ISHL = 1, NSHELL
+        IATOM = KATOM(ISHL)
+        LLA = KTYPE(ISHL) - 1
+        LENSLA = KMAX(ISHL) - KMIN(ISHL) + 1
+        JSLINIA = KMIN(ISHL)
+        JSLENDA = KMAX(ISHL)
+        EXPA = EX(ISHL)
+        CALL PDELTA_DA(EXPA,LLA,DA)
+        CALL PDELTA_DLTINT(RC,LLA,CUTOFF_OEI,C(:,IATOM),EXPA,DA,WORK1,
+     *                     JSLINIA,JSLENDA,IOEI_OUT_DIM)
+        DO JSHL = 1, LENSLA
+          IIA = IIA + 1
+          B000(IIA) = WORK1(JSHL)
+        END DO
+C
+        CALL PDELTA_PDLTP(RC,LLA,CUTOFF_OEI,C(:,IATOM),EXPA,DA,WORK1,
+     *                    WORK2,WORK3,JSLINIA,JSLENDA,IOEI_OUT_DIM)
+        DO JSHL = 1, LENSLA
+          IIB = IIB + 1
+          B100(IIB) = WORK1(JSHL)
+          B010(IIB) = WORK2(JSHL)
+          B001(IIB) = WORK3(JSHL)
+        END DO
+C
+        CALL PDELTA_GPDLTP(RC,LLA,CUTOFF_OEI,C(:,IATOM),EXPA,DA,
+     *                     WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,
+     *                     JSLINIA,JSLENDA,IOEI_OUT_DIM)
+        DO JSHL = 1, LENSLA
+          IIC = IIC + 1
+          B200(IIC) = WORK1(JSHL)
+          B110(IIC) = WORK2(JSHL)
+          B101(IIC) = WORK3(JSHL)
+          B020(IIC) = WORK4(JSHL)
+          B011(IIC) = WORK5(JSHL)
+          B002(IIC) = WORK6(JSHL)
+        END DO
+      END DO
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK PDELTA_DA
+C>
+C>    @author Chinami Takashima
+C>
+C>    @brief  calculate DA
+C>
+C>    @details This routine calculates DA,
+C>             which is required in subroutine PDELTA.
+C>
+      SUBROUTINE PDELTA_DA(EXPA,LLA,DA)
+C
+      IMPLICIT NONE
+C
+      INTEGER, INTENT(IN) :: LLA
+      DOUBLE PRECISION, INTENT(IN) :: EXPA
+      DOUBLE PRECISION, INTENT(OUT) :: DA
+C
+      DOUBLE PRECISION :: AA,AA2,S0
+      DOUBLE PRECISION, PARAMETER :: ONE=1.0D+00,HALF=5.0D-01,
+     *   PI=3.14159265358979311599796346854D+00
+      DOUBLE PRECISION, PARAMETER :: RNRM  = PI**3
+C
+      AA = EXPA + EXPA
+      AA2 = HALF/AA
+      S0 = AA2**LLA * DSQRT(RNRM/AA**3)
+      DA = DSQRT(ONE/S0)
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK PDELTA_DLTINT
+C>
+C>    @brief  calculate delta-distribution integrals for primitives
+C>
+C>    @detail The value calculated here is
+C>            int[ phi^A |delta(r-C)| phi^B ]dr.
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE PDELTA_DLTINT(RC,LLA,CUTOFF_OEI,RA,EXPA,DA,WORK1,
+     *                         JSLINIA,JSLENDA,INTDIM)
+      use mod_lutiotc, only: LSMALL,MSMALL,NSMALL,PNRMS
+C
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION, INTENT(IN) :: RC(3),CUTOFF_OEI,RA(3),EXPA,DA
+      DOUBLE PRECISION, INTENT(OUT) :: WORK1(*)
+      INTEGER, INTENT(IN) :: LLA,JSLINIA,JSLENDA,INTDIM
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.00D+00,ONE=1.00D+00
+C
+      DOUBLE PRECISION :: RAC(3),RRAC,DUM1,DUM2,FACTOR,
+     *                    SX_D0(0:LLA),SY_D0(0:LLA),SZ_D0(0:LLA)
+      INTEGER :: I,IJ,JSLA,JSMA,JSNA
+C
+      RAC(1) = RC(1) - RA(1)
+      RAC(2) = RC(2) - RA(2)
+      RAC(3) = RC(3) - RA(3)
+      RRAC = RAC(1)*RAC(1) + RAC(2)*RAC(2) + RAC(3)*RAC(3)
+C
+      DUM1 = EXPA*RRAC
+      FACTOR = DEXP(-DUM1)
+      IF (FACTOR .LT. CUTOFF_OEI) THEN
+        WORK1(1:INTDIM) = ZERO
+        RETURN
+      END IF
+C
+C     CALCULATE INTEGRALS OVER r_1
+      SX_D0(0) = ONE
+      SY_D0(0) = ONE
+      SZ_D0(0) = ONE
+      DO I = 1, LLA
+        SX_D0(I) = SX_D0(I-1)*RAC(1)
+        SY_D0(I) = SY_D0(I-1)*RAC(2)
+        SZ_D0(I) = SZ_D0(I-1)*RAC(3)
+      END DO
+C
+C     SUM UP X,Y,Z CONTRIBUTION AND NOMALIZATION
+      IJ = 0
+      DO I = JSLINIA, JSLENDA
+        JSLA = LSMALL(I)
+        JSMA = MSMALL(I)
+        JSNA = NSMALL(I)
+C
+        DUM1 = PNRMS(I) * DA * FACTOR
+        DUM2 = SX_D0(JSLA)*SY_D0(JSMA)*SZ_D0(JSNA)
+C
+        IJ = IJ + 1
+        WORK1(IJ) = DUM1*DUM2
+      END DO
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK PDELTA_PDLTP
+C>
+C>    @brief  calculate pOp (O=delta) integrals for primitives
+C>
+C>    @details The value calculated here is
+C>             int[ phi^A |p delta(r-C)*p| phi^B ]dr.
+C>             p is momentum operator.
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE PDELTA_PDLTP(RC,LLA,CUTOFF_OEI,RA,EXPA,DA,WORK1,
+     *                        WORK2,WORK3,JSLINIA,JSLENDA,INTDIM)
+      use mod_lutiotc, only: LSMALL,MSMALL,NSMALL,PNRMS
+C
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION, INTENT(IN) :: RC(3),CUTOFF_OEI,RA(3),EXPA,DA
+      DOUBLE PRECISION, INTENT(OUT) :: WORK1(*),WORK2(*),WORK3(*)
+      INTEGER, INTENT(IN) :: LLA,JSLINIA,JSLENDA,INTDIM
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.00D+00,ONE=1.00D+00
+C
+C
+      DOUBLE PRECISION :: RAC(3),RRAC,DUM1,DUM2(3),FACTOR,
+     *                    SX_D0(0:LLA+1),SY_D0(0:LLA+1),SZ_D0(0:LLA+1),
+     *                    SX_D1(0:LLA),SY_D1(0:LLA),SZ_D1(0:LLA)
+      INTEGER :: I,IJ,JSLA,JSMA,JSNA
+C
+      RAC(1) = RC(1) - RA(1)
+      RAC(2) = RC(2) - RA(2)
+      RAC(3) = RC(3) - RA(3)
+      RRAC = RAC(1)*RAC(1) + RAC(2)*RAC(2) + RAC(3)*RAC(3)
+C
+      DUM1 = EXPA*RRAC
+      FACTOR = DEXP(-DUM1)
+      IF (FACTOR .LT. CUTOFF_OEI) THEN
+        WORK1(1:INTDIM) = ZERO
+        WORK2(1:INTDIM) = ZERO
+        WORK3(1:INTDIM) = ZERO
+        RETURN
+      END IF
+C
+C     CALCULATE INTEGRALS OVER r_1
+      SX_D0(0) = ONE
+      SY_D0(0) = ONE
+      SZ_D0(0) = ONE
+      DO I = 1, LLA+1
+        SX_D0(i) = SX_D0(i-1)*RAC(1)
+        SY_D0(i) = SY_D0(i-1)*RAC(2)
+        SZ_D0(i) = SZ_D0(i-1)*RAC(3)
+      END DO
+C
+C     CALCULATE DERIVATIVE TERMS
+      CALL PDELTA_SDER1(SX_D0,LLA+1,EXPA,SX_D1,LLA,LLA)
+      CALL PDELTA_SDER1(SY_D0,LLA+1,EXPA,SY_D1,LLA,LLA)
+      CALL PDELTA_SDER1(SZ_D0,LLA+1,EXPA,SZ_D1,LLA,LLA)
+C
+C     SUM UP X,Y,Z CONTRIBUTION AND NOMALIZATION
+      IJ = 0
+      DO I = JSLINIA,JSLENDA
+        JSLA = LSMALL(I)
+        JSMA = MSMALL(I)
+        JSNA = NSMALL(I)
+C
+        DUM1 = PNRMS(I)*DA*FACTOR
+        DUM2(1) = SX_D1(JSLA)*SY_D0(JSMA)*SZ_D0(JSNA)
+        DUM2(2) = SX_D0(JSLA)*SY_D1(JSMA)*SZ_D0(JSNA)
+        DUM2(3) = SX_D0(JSLA)*SY_D0(JSMA)*SZ_D1(JSNA)
+C
+        IJ = IJ + 1
+        WORK1(IJ) = DUM1*DUM2(1)
+        WORK2(IJ) = DUM1*DUM2(2)
+        WORK3(IJ) = DUM1*DUM2(3)
+      END DO
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK PDELTA_GPDLTP
+C>
+C>    @brief  calculate gradient pOp (O=delta) integrals for primitives
+C>
+C>    @details The value calculated here is
+C>             nabla int[ phi^A |p delta(r-C)*p| phi^B ]dr.
+C>             p is momentum operator.
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE PDELTA_GPDLTP(RC,LLA,CUTOFF_OEI,RA,EXPA,DA,
+     *                         WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,
+     *                         JSLINIA,JSLENDA,INTDIM)
+      use mod_lutiotc, only: LSMALL,MSMALL,NSMALL,PNRMS
+C
+      IMPLICIT NONE
+C
+      DOUBLE PRECISION, INTENT(IN) :: RC(3),CUTOFF_OEI,RA(3),EXPA,DA
+      DOUBLE PRECISION, INTENT(OUT) :: WORK1(*),WORK2(*),WORK3(*),
+     *                                 WORK4(*),WORK5(*),WORK6(*)
+      INTEGER, INTENT(IN) :: LLA,JSLINIA,JSLENDA,INTDIM
+C
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.00D+00,ONE=1.00D+00
+C
+      DOUBLE PRECISION :: RAC(3),RRAC,DUM1,DUM2(6),FACTOR,
+     *                    SX_D0(0:LLA+2),SY_D0(0:LLA+2),SZ_D0(0:LLA+2),
+     *                    SX_D1(0:LLA+1),SY_D1(0:LLA+1),SZ_D1(0:LLA+1),
+     *                    SX_D2(0:LLA),SY_D2(0:LLA),SZ_D2(0:LLA)
+      INTEGER :: I,IJ,JSLA,JSMA,JSNA
+C
+      RAC(1) = RC(1) - RA(1)
+      RAC(2) = RC(2) - RA(2)
+      RAC(3) = RC(3) - RA(3)
+      RRAC = RAC(1)*RAC(1) + RAC(2)*RAC(2) + RAC(3)*RAC(3)
+C
+      DUM1 = EXPA*RRAC
+      FACTOR = DEXP(-DUM1)
+      IF (FACTOR .LT. CUTOFF_OEI) THEN
+        WORK1(1:INTDIM) = ZERO
+        WORK2(1:INTDIM) = ZERO
+        WORK3(1:INTDIM) = ZERO
+        WORK4(1:INTDIM) = ZERO
+        WORK5(1:INTDIM) = ZERO
+        WORK6(1:INTDIM) = ZERO
+        RETURN
+      END IF
+C
+C     CALCULATE INTEGRALS OVER r_1
+      SX_D0(0) = ONE
+      SY_D0(0) = ONE
+      SZ_D0(0) = ONE
+      DO I = 1, LLA+2
+        SX_D0(i) = SX_D0(i-1)*RAC(1)
+        SY_D0(i) = SY_D0(i-1)*RAC(2)
+        SZ_D0(i) = SZ_D0(i-1)*RAC(3)
+      END DO
+C
+C     CALCULATE DERIVATIVE TERMS
+      CALL PDELTA_SDER1(SX_D0,LLA+2,EXPA,SX_D1,LLA+1,LLA+1)
+      CALL PDELTA_SDER1(SY_D0,LLA+2,EXPA,SY_D1,LLA+1,LLA+1)
+      CALL PDELTA_SDER1(SZ_D0,LLA+2,EXPA,SZ_D1,LLA+1,LLA+1)
+      CALL PDELTA_SDER1(SX_D1,LLA+1,EXPA,SX_D2,LLA,LLA)
+      CALL PDELTA_SDER1(SY_D1,LLA+1,EXPA,SY_D2,LLA,LLA)
+      CALL PDELTA_SDER1(SZ_D1,LLA+1,EXPA,SZ_D2,LLA,LLA)
+C
+C     SUM UP X,Y,Z CONTRIBUTION AND NOMALIZATION
+      IJ = 0
+      DO I = JSLINIA,JSLENDA
+        JSLA = LSMALL(I)
+        JSMA = MSMALL(I)
+        JSNA = NSMALL(I)
+C
+        DUM1 = PNRMS(I)*DA*FACTOR
+C
+        DUM2(1) = SX_D2(JSLA)*SY_D0(JSMA)*SZ_D0(JSNA)
+        DUM2(2) = SX_D1(JSLA)*SY_D1(JSMA)*SZ_D0(JSNA)
+        DUM2(3) = SX_D1(JSLA)*SY_D0(JSMA)*SZ_D1(JSNA)
+C
+        DUM2(4) = SX_D0(JSLA)*SY_D2(JSMA)*SZ_D0(JSNA)
+        DUM2(5) = SX_D0(JSLA)*SY_D1(JSMA)*SZ_D1(JSNA)
+C
+        DUM2(6) = SX_D0(JSLA)*SY_D0(JSMA)*SZ_D2(JSNA)
+C
+        IJ = IJ + 1
+        WORK1(IJ) = DUM1*DUM2(1)
+        WORK2(IJ) = DUM1*DUM2(2)
+        WORK3(IJ) = DUM1*DUM2(3)
+        WORK4(IJ) = DUM1*DUM2(4)
+        WORK5(IJ) = DUM1*DUM2(5)
+        WORK6(IJ) = DUM1*DUM2(6)
+      END DO
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK PDELTA_SDER1
+C>
+C>    @brief calculate gradient of delta-distribution integrals
+C>
+C>    @details The calculated
+C>             D(i,j) = dS(i,j)/dx_B
+C>                      (j*x_B^(j-1) - 2*a_B*x_B^(j+1) exp(-a_B x_B^2))
+C>             S(i,j) = int{x_A^i exp(-a_A x_A^2)*x_B^j exp(-a_B x_B^2)}
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE PDELTA_SDER1(SX,JSXDIM,EXPA,DX,JDXDIM,LLA)
+C
+      IMPLICIT NONE
+C
+      INTEGER, INTENT(IN) :: JSXDIM,JDXDIM,LLA
+      DOUBLE PRECISION, INTENT(IN) :: SX(0:JSXDIM),EXPA
+      DOUBLE PRECISION, INTENT(OUT) :: DX(0:JDXDIM)
+C
+      INTEGER :: J
+      DOUBLE PRECISION :: EXA2, DUM1
+C
+      EXA2 = EXPA + EXPA
+      DUM1 = -SX(1) * EXA2
+      DX(0) = DUM1
+C
+      DO J = 1, LLA
+        DUM1 = SX(J-1)*J - SX(J+1)*EXA2
+        DX(J) = DUM1
+      END DO
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DFTFOCK_PCC_RHF
+C>
+C>    @brief Adds PCC DFT exchange/correlation to Fock Matrix
+C>
+C>    @details This is for RHF calculation.
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE DFTFOCK_PCC_RHF(NEEDGR,NEEDTAU,FTOTWT,
+     *    DUMA,DUMAX,DUMAY,DUMAZ,FA,CUTOFF,L1,DMGA,
+     *    RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *    RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,WORKA)
+C
+      IMPLICIT NONE
+C
+      LOGICAL :: NEEDGR,NEEDTAU
+      INTEGER, INTENT(IN) :: L1
+      DOUBLE PRECISION, INTENT(IN) :: FTOTWT,DUMA,DUMAX,DUMAY,DUMAZ,DMGA
+      DOUBLE PRECISION, INTENT(IN) :: CUTOFF
+      DOUBLE PRECISION, INTENT(IN) :: RMB000(*),RPB100(*),RPB010(*),
+     *   RPB001(*),RMB100(*),RMB010(*),RMB001(*),RPB200(*),RPB110(*),
+     *   RPB101(*),RPB020(*),RPB011(*),RPB002(*),WORKA(*)
+      DOUBLE PRECISION,INTENT(INOUT) :: FA(*)
+C
+      DOUBLE PRECISION :: FCUTOFF,ADUM(5)
+      DOUBLE PRECISION, PARAMETER :: TWO=2.0D+00,HALF=0.50D+00,
+     *                               EIGHTH=1.25D-01
+      INTEGER :: I,J,IND
+C
+      FCUTOFF=CUTOFF*EIGHTH
+C
+      ADUM(1) = DUMA * HALF * FTOTWT
+      ADUM(2) = DUMAX * FTOTWT
+      ADUM(3) = DUMAY * FTOTWT
+      ADUM(4) = DUMAZ * FTOTWT
+      ADUM(5) = DMGA * FTOTWT
+C
+      CALL DCOPY(L1,RMB000,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RMB100,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RMB010,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RMB001,1,WORKA,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+ RMB000(I)*WORKA(J)+WORKA(I)*RMB000(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      CALL DCOPY(L1,RPB100,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RPB200,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RPB110,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RPB101,1,WORKA,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RPB100(I)*WORKA(J)+WORKA(I)*RPB100(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      CALL DCOPY(L1,RPB010,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RPB110,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RPB020,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RPB011,1,WORKA,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RPB010(I)*WORKA(J)+WORKA(I)*RPB010(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      CALL DCOPY(L1,RPB001,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RPB101,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RPB011,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RPB002,1,WORKA,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RPB001(I)*WORKA(J)+WORKA(I)*RPB001(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      IF (NEEDTAU) THEN
+        CALL DCOPY(L1,RMB100,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RMB100(I)*WORKA(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RMB010,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RMB010(I)*WORKA(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RMB001,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RMB001(I)*WORKA(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB200,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB200(I)*WORKA(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB110,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB110(I)*WORKA(J)*TWO
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB101,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB101(I)*WORKA(J)*TWO
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB020,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB020(I)*WORKA(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB011,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB011(I)*WORKA(J)*TWO
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB002,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB002(I)*WORKA(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+      END IF
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DMATD_PCC_UHF
+C>
+C>    @brief Integration of <I|V|A> for
+C>           picture change corrected(PCC) DFT by IOTC method
+C>
+C>    @details THIS ROUTINE DOES A NUMERICAL INTEGRATION TO YIELD THE <I|V|A>
+C>     MATRIX WHERE V=D_E(XC)/D_RHO.  IN C1 SYMMETRY FOR NOW.
+C>     THE RADIAL QUADRATURE FORMULA IS TAKEN FROM
+C>     P.M.W.GILL, B.G.JOHNSON, J.A.POPLE AND M.J.FRISCH,
+C>     CHEM. PHYS. LETT. 197, 499 (1992).
+C>     THE ANGULAR QUADRATURE FORMULA IS TAKEN FROM V.I.LEBEDEV,
+C>     ZH. VYCHISL. MAT. FIZ. 15, 48 (1975) AND 16, 293 (1976),
+C>     (ENGLISH TRANSLATION IN U.S.S.R. COMPUT. MATH AND MATH PHYS).
+C>     EXCHANGE AND CORRELATION ENERGY CONTRIBUTION DUE TO INTEGRATION
+C>     OVER GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>     This is a clone of DMATD
+C>     This routine is for UHF calculation
+C>     PCC-DFT transforms delta operator from 4 component picture
+C>     to 2component or 1 component one.
+C>     Here, the transformation is based on infinite-order two-component
+C>     (IOTC) method.
+C>     Please refer to the following papers about PCC DFT.
+C>      T. Oyama, Y. Ikabata, J. Seino, and H. Nakai,
+C>      Chem. Phys. Lett. 680,37 (2017).
+C>      Y. Ikabata, T. Oyama, M. Hayami, J. Seino, and H. Nakai,
+C>      J. Chem. Phys. 150, 164104 (2019).
+C>
+C>    @date : Chinami Takashima, December, 2021
+C>
+C>    @note : not connected with MCPDFTRUN and divide-and-conquer method
+C
+      SUBROUTINE DMATD_PCC_UHF(
+     *                 TOTWT,IIFACT,NAPTS,COEFFA,COEFFB,IANGN,IFACTR,
+     *                 VMOA,DVMOXA,DVMOYA,DVMOZA,VALGA,VMOB,DVMOXB,
+     *                 DVMOYB,DVMOZB,VALGB,FA,FB,IUNIQ,EEXC,TOTELE,NANG,
+     *                 PTRAD,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                 ANGXVL,ANGYVL,ANGZVL,RSQRD,PCOEFF,EXPS,
+     *                 AOX,GAOX,GAOY,GAOZ,NLCT,NELM,IJX,IJY,IJZ,L1,
+     *                 NEEDGR,UROHF,TOTKIN,ATMPOL,ATPPOL,EFPOL,
+     *                 WTAB,DRSPH,MAXL,MAXM,NFREQ,
+     *                 RMOMG,PIOMG,B000,B100,B010,B001,
+     *                 B200,B110,B101,B020,B011,B002,
+     *                 WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,WORK7,
+     *                 RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *                 RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,
+     *                 RMMB000,RMPB100,RMPB010,RMPB001,RMMB100,
+     *                 RMMB010,RMMB001,RMPB200,RMPB110,RMPB101,
+     *                 RMPB020,RMPB011,RMPB002,
+     *                 RMMB000B,RMPB100B,RMPB010B,RMPB001B,RMMB100B,
+     *                 RMMB010B,RMMB001B,RMPB200B,RMPB110B,RMPB101B,
+     *                 RMPB020B,RMPB011B,RMPB002B,WORK9)
+      USE metaGGA, ONLY: NEEDTAU
+      USE funclib, ONLY: FUNCL, FUNFL
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp,mxrt,mxao,mxnoro
+      use comm_RDM_MCPDFT, only: ld1a,lxt4,nactive,nnz
+C
+      USE mod_dft_gridint, ONLY: dmatd_blk
+      USE params, ONLY: dft_bfc_algo
+      USE modmcpdft
+      use libxc, only: use_libxc, libxc_calc
+      IMPLICIT NONE
+C
+C#include "rdm_info.fh"
+      LOGICAL UROHF,OUT,NEEDGR,GOPARR,DSKWRK,MASWRK,DLB,SG1
+C
+      INTEGER :: NDFTFG,NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,NANGPT,
+     *           NANGPT0,JANS
+      DOUBLE PRECISION :: DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      INTEGER :: IPRUNECUTS,NTOTGRIDPOINTS,NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: PRUNERADS,PRUNEATOMS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: X
+      COMMON /FMCOM / X(1)
+      INTEGER :: IDENAO
+      COMMON /DNSAO / IDENAO
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      DOUBLE PRECISION :: GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                    GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,ECORL,EXCOR
+      COMMON /LMOEDA/ GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+      INTEGER :: NEVALS,NGLEVL,NHLEVL
+      DOUBLE PRECISION :: RUNTYP,EXETYP
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      INTEGER :: MAXIT,MCONV,NPUNCH,NPREO
+      DOUBLE PRECISION :: CONVHF,FSHIFT
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+C
+      DOUBLE PRECISION :: DEBUG,DFTGRD
+      DATA DEBUG/8HDEBUG   /, DFTGRD/8HDERDFT  /
+C
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C-END
+C
+      INTEGER, INTENT(IN) :: IIFACT(NAT),NAPTS(NAT),IANGN(NAT,2,*),
+     *   IFACTR(NAT),IUNIQ(*),NANG,
+     *   NLCT(*),NELM(*),IJX(84),IJY(84),IJZ(84),L1,MAXL,MAXM,NFREQ
+      DOUBLE PRECISION, INTENT(IN) ::  TOTWT(NAT,*), PTRAD(*),
+     *   XDAT(MAXANG,NAT,*),YDAT(MAXANG,NAT,*),ZDAT(MAXANG,NAT,*),
+     *   EXPS(*),ATMPOL(NAT,MAXL,MAXM,MAXM,NFREQ),
+     *   ATPPOL(NAT,NAT,NFREQ),EFPOL(NAT),DRSPH(3,MAXL,MAXM)
+      DOUBLE PRECISION, INTENT(INOUT) :: COEFFA(L1,*),COEFFB(L1,*),
+     *   VMOA(L1),DVMOXA(L1),DVMOYA(L1),DVMOZA(L1),VMOB(L1),DVMOXB(L1),
+     *   DVMOYB(L1),DVMOZB(L1),VALGA(L1),VALGB(L1),
+     *   FA(*),FB(*),RSQRD(*),ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*),
+     *   ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *   AOX(L1),GAOX(L1),GAOY(L1),GAOZ(L1),
+     *   PCOEFF(*),WTAB(NAT,NAT,*)
+C
+      DOUBLE PRECISION, INTENT(IN) :: RMOMG(NUMU*NUM),PIOMG(NUMU*NUM),
+     *   B000(NUMU),B100(NUMU),B010(NUMU),B001(NUMU),B200(NUMU),
+     *   B110(NUMU),B101(NUMU),B020(NUMU),B011(NUMU),B002(NUMU),
+     *   WORK1(NUMU),WORK2(NUMU),WORK3(NUMU),WORK4(NUMU),WORK5(NUMU),
+     *   WORK6(NUMU),WORK7(NUM),
+     *   RMB000(NUM),RPB100(NUM),RPB010(NUM),RPB001(NUM),RMB100(NUM),
+     *   RMB010(NUM),RMB001(NUM),RPB200(NUM),RPB110(NUM),RPB101(NUM),
+     *   RPB020(NUM),RPB011(NUM),RPB002(NUM),
+     *   RMMB000(NA),RMPB100(NA),RMPB010(NA),RMPB001(NA),RMMB100(NA),
+     *   RMMB010(NA),RMMB001(NA),RMPB200(NA),RMPB110(NA),RMPB101(NA),
+     *   RMPB020(NA),RMPB011(NA),RMPB002(NA),
+     *   RMMB000B(NB),RMPB100B(NB),RMPB010B(NB),RMPB001B(NB),
+     *   RMMB100B(NB),RMMB010B(NB),RMMB001B(NB),RMPB200B(NB),
+     *   RMPB110B(NB),RMPB101B(NB),RMPB020B(NB),RMPB011B(NB),
+     *   RMPB002B(NB),WORK9(NUM)
+C     variables defined in this routine
+      INTEGER :: NCNTR,INC0,NOA,NOB,NPT,LOOP,NGRAN,NLOOP,MCHUNK,NEXT,
+     *   IGRID,IRADPT,IANGPT,IPT,ICHUNK,IPTME,IATM,IANG
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00,ONE=1.0D+00,
+     *   HALF=0.5D+00,TWO=2.0D+00,THRSRHO=1.0D-15,THRSPI=1.0D-15,
+     *   THRSRHO2=1.0D-15,THRSRHO3=0.9D0,THRSRHO4=1.15D0,
+     *   AB1=-4.756065601D+2,BB1=-3.794733192D+2,CB1=-8.538149682D+1
+      DOUBLE PRECISION :: ABSGRID(3),EEXC,TOTELE,TOTKIN,EXEC,ECORL1,
+     *   TOTGRADX,TOTGRADY,TOTGRADZ,GRDAA,GRDBB,GRDAB,DFTTHRS,WCUTOFF,
+     *   RCUTOFF,CCUTOFF,RAD,BRAGGRAD,FACT,R1,FTOTWT,XD,YD,ZD,XCDNT,
+     *   YCDNT,ZCDNT,ROA,ROB,GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     *   TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,VXCA1,VXCB1,
+     *   DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,XALPHA,XGRD,ECF,
+     *   DMGGA,DMGA,DMGGB,DMGB,DUMA,DUMB,EXEC1
+      DOUBLE PRECISION, EXTERNAL :: DDOT
+CT      iTri(i,j) = Max(i,j)*(Max(i,j)-1)/2 + Min(i,j)
+C
+C     IDENAO=0 MEANS REGULAR DFT
+C     IDENAO=1 MEANS DIVIDE AND CONQUER DFT
+C
+c MV
+      IF (.NOT.dolrd .AND. dft_bfc_algo.GE.0 .AND. idenao.EQ.0) THEN
+c       New XC integration algorithm
+        CALL dmatd_blk(coeffa,coeffb,fa,fb,
+     *              eexc,totele,totkin,
+     *              atmxvec,atmyvec,atmzvec,
+     *              nang,l1,needgr,urohf)
+        RETURN
+      END IF
+c /MV
+C
+C     Loop over atoms
+      DO 30 NCNTR = 1, NAT
+C
+      INC0=IUNIQ(NCNTR)
+      IF(INC0.EQ.0) GOTO 30
+
+      OUT = EXETYP.EQ.DFTGRD  .OR.  EXETYP.EQ.DEBUG
+      EXEC = ZERO
+      ECORL1 = ZERO
+      TOTGRADX = ZERO
+      TOTGRADY = ZERO
+      TOTGRADZ = ZERO
+C                 LDA WILL NOT ASSIGN ANY VALUES TO DENSITY GRADIENTS
+      GRDAA = ZERO
+      GRDBB = ZERO
+      GRDAB = ZERO
+      NOA = NA
+      NOB = NB
+      NPT = NRAD*MAXANG
+C
+C     SET CUT-OFFS FOR THE DENSITY RCUTOFF AND WEIGHT WCUTOFF
+C     RCUTOFF IS SET TO DEPEND UPON SCF DENSITY CONV. AND THE GRID SIZE
+C     WCUTOFF IS A CELL VOLUME AND WE SET IT TO A FIXED VALUE.
+C     MOST CELLS HAVE LARGE VOLUME (ABOUT 97% HAVE VOLUME .GT. 1E-14)
+C
+      DFTTHRS=DFTTHR
+      IF(DFTTHR.EQ.ZERO) DFTTHR=1.0D-04/(NPT*NAT)
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+      CCUTOFF=1.0D-03/(NPT*NAT)
+      IF(DFTTHR.LT.1.1D-15) THEN
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+      IF(MCPDFTRUN) then
+         DFTTHR =1.0D-15
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+
+
+C
+C     ANGXVL=X**I, ANGYVL=Y**J, ANGZVL=Z**K, FOR NEEDED VALUES OF I,J,K
+C     WHERE (X,Y,Z) IS THE CENTRE OF A DFT GRID POINT RI
+C     MINUS AN ATOMIC CENTRE RA: XYZ= (RI - RA)
+C
+      CALL VCLR(ANGXVL(1,1),1,NAT)
+      CALL VCLR(ANGYVL(1,1),1,NAT)
+      CALL VCLR(ANGZVL(1,1),1,NAT)
+      CALL DACOPY(NAT,ONE,ANGXVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGYVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGZVL(1,2),1)
+C
+      RAD = BRAGGRAD(NCNTR)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+C     NAPTS   + (NAT-1)/NWDVAR+1
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+C STB MODIFIED FOR PRUNING
+      IGRID = 1
+      DO 20 IRADPT = 1, NRAD
+C
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.(PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD)) THEN
+           IGRID = IGRID + 1
+        ENDIF
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+C         STB - FOR NOW THIS SHOULD BE OK AS I USED THE MAX ANGULAR
+C               POINTS SO AS TO SIMPLIFY
+          IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) THEN
+                CALL DDI_DLBNEXT(NEXT)
+              ENDIF
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          IF(ABS(FTOTWT).LT.WCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+            ANGXVL(IATM,3)=XCDNT
+            ANGYVL(IATM,3)=YCDNT
+            ANGZVL(IATM,3)=ZCDNT
+            DO 35 IANG=3,NANG
+               ANGXVL(IATM,IANG+1)=ANGXVL(IATM,IANG)*XCDNT
+               ANGYVL(IATM,IANG+1)=ANGYVL(IATM,IANG)*YCDNT
+               ANGZVL(IATM,IANG+1)=ANGZVL(IATM,IANG)*ZCDNT
+ 35         CONTINUE
+  610     CONTINUE
+C
+          ABSGRID(1)=XD+C(1,NCNTR)
+          ABSGRID(2)=YD+C(2,NCNTR)
+          ABSGRID(3)=ZD+C(3,NCNTR)
+C
+C***********************************************************************
+C     FORM DENSITY AT THIS POINT
+C***********************************************************************
+          IF(IDENAO.EQ.0) THEN
+             CALL PDELTA(ABSGRID,B000,B100,B010,B001,B200,B110,B101,
+     *                   B020,B011,B002,
+     *                   WORK1,WORK2,WORK3,WORK4,WORK5,WORK6)
+C
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B000,NUMU,
+     *                  ZERO,RMB000,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B100,NUMU,
+     *                  ZERO,RMB100,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B010,NUMU,
+     *                  ZERO,RMB010,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,RMOMG,NUMU,B001,NUMU,
+     *                  ZERO,RMB001,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B100,NUMU,
+     *                  ZERO,RPB100,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B010,NUMU,
+     *                  ZERO,RPB010,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B001,NUMU,
+     *                  ZERO,RPB001,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B200,NUMU,
+     *                  ZERO,RPB200,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B110,NUMU,
+     *                  ZERO,RPB110,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B101,NUMU,
+     *                  ZERO,RPB101,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B020,NUMU,
+     *                  ZERO,RPB020,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B011,NUMU,
+     *                  ZERO,RPB011,NUM)
+             CALL DGEMM('T','N',NUM,1,NUMU,ONE,PIOMG,NUMU,B002,NUMU,
+     *                  ZERO,RPB002,NUM)
+C
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB000,NUM,
+     *                  ZERO,RMMB000,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB100,NUM,
+     *                  ZERO,RMMB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB010,NUM,
+     *                  ZERO,RMMB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB001,NUM,
+     *                  ZERO,RMMB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB100,NUM,
+     *                  ZERO,RMPB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB010,NUM,
+     *                  ZERO,RMPB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB001,NUM,
+     *                  ZERO,RMPB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB200,NUM,
+     *                  ZERO,RMPB200,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB110,NUM,
+     *                  ZERO,RMPB110,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB101,NUM,
+     *                  ZERO,RMPB101,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB020,NUM,
+     *                  ZERO,RMPB020,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB011,NUM,
+     *                  ZERO,RMPB011,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB002,NUM,
+     *                  ZERO,RMPB002,NA)
+C
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB000,NUM,
+     *                  ZERO,RMMB000B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB100,NUM,
+     *                  ZERO,RMMB100B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB010,NUM,
+     *                  ZERO,RMMB010B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB001,NUM,
+     *                  ZERO,RMMB001B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB100,NUM,
+     *                  ZERO,RMPB100B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB010,NUM,
+     *                  ZERO,RMPB010B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB001,NUM,
+     *                  ZERO,RMPB001B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB200,NUM,
+     *                  ZERO,RMPB200B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB110,NUM,
+     *                  ZERO,RMPB110B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB101,NUM,
+     *                  ZERO,RMPB101B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB020,NUM,
+     *                  ZERO,RMPB020B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB011,NUM,
+     *                  ZERO,RMPB011B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB002,NUM,
+     *                  ZERO,RMPB002B,NB)
+C
+            ROA = DDOT(NA,RMMB000,1,RMMB000,1)
+            ROA = ROA + DDOT(NA,RMPB100,1,RMPB100,1)
+            ROA = ROA + DDOT(NA,RMPB010,1,RMPB010,1)
+            ROA = ROA + DDOT(NA,RMPB001,1,RMPB001,1)
+C
+            ROB = DDOT(NB,RMMB000B,1,RMMB000B,1)
+            ROB = ROB + DDOT(NB,RMPB100B,1,RMPB100B,1)
+            ROB = ROB + DDOT(NB,RMPB010B,1,RMPB010B,1)
+            ROB = ROB + DDOT(NB,RMPB001B,1,RMPB001B,1)
+          ELSE
+             WRITE(IW,*) "ERROR: PCC NOT FOR IDENAO.EQ.1(DCDFT?)"
+             CALL ABRT
+          END IF
+          IF(ABS(ROA+ROB).LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          IF(NEEDGR) THEN
+C***********************************************************************
+C     FORM DENSITY GRADIENT AT THIS POINT
+C***********************************************************************
+CT            IF(IDENAO.EQ.0) THEN
+            GRADXA = DDOT(NA,RMMB100,1,RMMB000,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB200,1,RMPB100,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB110,1,RMPB010,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB101,1,RMPB001,1)
+C
+            GRADYA = DDOT(NA,RMMB010,1,RMMB000,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB110,1,RMPB100,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB020,1,RMPB010,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB011,1,RMPB001,1)
+C
+            GRADZA = DDOT(NA,RMMB001,1,RMMB000,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB101,1,RMPB100,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB011,1,RMPB010,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB002,1,RMPB001,1)
+C
+            GRADXA = GRADXA * TWO
+            GRADYA = GRADYA * TWO
+            GRADZA = GRADZA * TWO
+C
+CT             IF (MCPDFTRUN) THEN
+CT              CALL DFTTRFG(UROHF,L1,L1,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+CT     *                     DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+CT     *                     CCUTOFF)
+CTC             MCPDFTRUN=.false.
+CTC             goto 444
+CT               GRADXA=DDOT(NINACT,VMOA,1,DVMOXA,1)*TWO
+CT               GRADYA=DDOT(NINACT,VMOA,1,DVMOYA,1)*TWO
+CT               GRADZA=DDOT(NINACT,VMOA,1,DVMOZA,1)*TWO
+CT              IF(NACTIVE.GT.0) THEN
+CT               DO I=1, NACTIVE
+CT                 DO J=1,I
+CT                   FACT12 = 1.0d0
+CT                   IF (I.EQ.J)FACT12=0.5D0
+CT                   IJ=iTri(i,j)
+CT                   GRADXA=GRADXA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOXA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOXA(NINACT+i))
+CT                   GRADYA=GRADYA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOYA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOYA(NINACT+i))
+CT                   GRADZA=GRADZA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOZA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOZA(NINACT+i))
+CT
+CT                 ENDDO
+CT               ENDDO
+CT              ENDIF
+CT             ELSE
+CT  444       continue
+CT              GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+CT              GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+CT              GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+CT             ENDIF
+              GRADXB = DDOT(NB,RMMB100B,1,RMMB000B,1)
+              GRADXB = GRADXB + DDOT(NB,RMPB200B,1,RMPB100B,1)
+              GRADXB = GRADXB + DDOT(NB,RMPB110B,1,RMPB010B,1)
+              GRADXB = GRADXB + DDOT(NB,RMPB101B,1,RMPB001B,1)
+C
+              GRADYB = DDOT(NB,RMMB010B,1,RMMB000B,1)
+              GRADYB = GRADYB + DDOT(NB,RMPB110B,1,RMPB100B,1)
+              GRADYB = GRADYB + DDOT(NB,RMPB020B,1,RMPB010B,1)
+              GRADYB = GRADYB + DDOT(NB,RMPB011B,1,RMPB001B,1)
+C
+              GRADZB = DDOT(NB,RMMB001B,1,RMMB000B,1)
+              GRADZB = GRADZB + DDOT(NB,RMPB101B,1,RMPB100B,1)
+              GRADZB = GRADZB + DDOT(NB,RMPB011B,1,RMPB010B,1)
+              GRADZB = GRADZB + DDOT(NB,RMPB002B,1,RMPB001B,1)
+C
+              GRADXB = GRADXB * TWO
+              GRADYB = GRADYB * TWO
+              GRADZB = GRADZB * TWO
+C
+CT            ELSE
+CT               GRADXA=DDOT(L1,GAOX,1,VMOA,1)
+CT               GRADYA=DDOT(L1,GAOY,1,VMOA,1)
+CT               GRADZA=DDOT(L1,GAOZ,1,VMOA,1)
+CT               IF(UROHF) THEN
+CT                  GRADXA=GRADXA*TWO
+CT                  GRADYA=GRADYA*TWO
+CT                  GRADZA=GRADZA*TWO
+CT                  GRADXB=DDOT(L1,GAOX,1,VMOB,1)*TWO
+CT                  GRADYB=DDOT(L1,GAOY,1,VMOB,1)*TWO
+CT                  GRADZB=DDOT(L1,GAOZ,1,VMOB,1)*TWO
+CT               ELSE
+CT                  GRADXB=GRADXA
+CT                  GRADYB=GRADYA
+CT                  GRADZB=GRADZA
+CT               END IF
+CT            END IF
+
+C Andrew - here we need to perform the translation for PDFT
+C First step - calculate the on-top pair density
+C  Return "ONTOP", "ONTOPX", "ONTOPY", "ONTOPZ" I guess.
+C
+C  It looks like DFTTRFG is the subroutine that calculates the gradients
+C  for the MOs (needed for building the on-top gradients needed for ft-
+C  class functionals.
+C
+C  The subroutine DFTTRFA calculates the MOs at the grid point.
+
+C           goto 457
+C          mcpdftrun=.false.
+CT          IF (.NOT.MCPDFTRUN) GOTO 457
+CT           CALL GONTOP(VMOA,VMOB,DVMOXA,DVMOXB,DVMOYA,DVMOYB,DVMOZA,
+CT     *                DVMOZB,ONTOP,ONTOPX,ONTOPY,ONTOPZ,NACTIVE)
+CT
+CT          TOTELEA = TOTELEA + FTOTWT*ROA
+CT          TOTELEB = TOTELEB + FTOTWT*ROA
+CTC Second - Translate the density/derivatives
+CT           DTOT = ROA + ROB !Total denisty
+CT           GRADX = GRADXA + GRADXB
+CT           GRADY = GRADYA + GRADYB
+CT           GRADZ = GRADZA + GRADZB
+CT           RATIO = 0.0D0
+CT           if ((DTOT.gt.THRSRHO).and.(ONTOP.ge.THRSRHO)) then
+CT             RATIO = 4.0D0*ONTOP/(DTOT**2.0D0)
+CTC             write(*,*) "ratio", ratio,4.0d0*ontop,DTOT**2d0
+CT           endif
+CTC           goto 457
+CT
+CTC Translation for t-GGA functionals:
+CT        IF (.NOT.F_FLAG) THEN
+CT           IF((1.0D0-RATIO).gt.THRSRHO) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ELSE
+CT             ZETA = 0.0D0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT        ELSE
+CTcPS           goto 457
+CT
+CTC Translation for ft-GGA functionals:
+CT           IF((1.0D0-RATIO).gt.THRSRHO.AND.(RATIO.LT.THRSRHO3)) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT     *               + RATIO*GRADX/(2.0D0*ZETA)
+CT     *               - ONTOPX/(DTOT*ZETA)
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT     *               + RATIO*GRADY/(2.0D0*ZETA)
+CT     *               - ONTOPY/(DTOT*ZETA)
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT     *               + RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               - ONTOPZ/(DTOT*ZETA)
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT     *               - RATIO*GRADX/(2.0D0*ZETA)
+CT     *               + ONTOPX/(DTOT*ZETA)
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT     *               - RATIO*GRADY/(2.0D0*ZETA)
+CT     *               + ONTOPY/(DTOT*ZETA)
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT     *               - RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               + ONTOPZ/(DTOT*ZETA)
+CT           ELSE IF((RATIO.GE.THRSRHO3).AND.(RATIO.LE.THRSRHO4)) THEN
+CT             ZETA = (AB1*(RATIO-1.15D0)**5.0D0)
+CT     *       + (BB1*(RATIO-1.15D0)**4.0D0) + (CB1*(RATIO-1.15D0)**3.0D0)
+CT
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT
+CT             GRADXA = (1.0D0+ZETA)*GRADX/2.0D0
+CT     *       + (AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPX/DTOT) - (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPX/DTOT) - (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPX/DTOT) - (3.0D0 * RATIO * GRADX))
+CT             GRADYA = (1.0D0+ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPY/DTOT) - (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPY/DTOT) - (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPY/DTOT) - (3.0D0 * RATIO * GRADY))
+CT             GRADZA = (1.0D0+ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPZ/DTOT) - (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPZ/DTOT) - (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPZ/DTOT) - (3.0D0 * RATIO * GRADZ))
+CT             GRADXB = (1.0D0-ZETA)*GRADX/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPX/DTOT) + (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPX/DTOT) + (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPX/DTOT) + (3.0D0 * RATIO * GRADX))
+CT             GRADYB = (1.0D0-ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPY/DTOT) + (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPY/DTOT) + (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPY/DTOT) + (3.0D0 * RATIO * GRADY))
+CT             GRADZB = (1.0D0-ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPZ/DTOT) + (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPZ/DTOT) + (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPZ/DTOT) + (3.0D0 * RATIO * GRADZ))
+CT           ELSE IF(RATIO.GT.THRSRHO4) THEN
+CT             ZETA = 0.0d0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT       ENDIF
+CT  457      continue
+
+C***********************************************************************
+C      FORM GRADIENT INVARIANT (GRAD DOT GRAD)
+C***********************************************************************
+            GRDAA  = GRADXA*GRADXA+GRADYA*GRADYA+GRADZA*GRADZA
+            GRDBB  = GRADXB*GRADXB+GRADYB*GRADYB+GRADZB*GRADZB
+            GRDAB  = GRADXA*GRADXB+GRADYA*GRADYB+GRADZA*GRADZB
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB = DDOT(NB,RMMB100B,1,RMMB100B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB200B,1,RMPB200B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+C
+              TAUYB = DDOT(NB,RMMB010B,1,RMMB010B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB020B,1,RMPB020B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C
+              TAUZB = DDOT(NB,RMMB001B,1,RMMB001B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB002B,1,RMPB002B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ELSE
+C
+C     THIS ELSE CASE WILL ALLOW USERS TO PRINT OUT THE TOTAL KINETIC
+C     ENERGY DENSITY FOR LDA TYPE FUNCTIONALS.
+C     KEEP IN MIND THAT IF THE FUNCTIONAL DOES NOT CONTAIN A TAU
+C     DEPENDENCE THEN ONE CAN NOT EXPECT THE TOTAL KINETIC ENERGY
+C     DENSITY TO BE EXACTLY EQUAL TO THE EXPECTATION VALUE OF THE
+C     KINETIC ENERGY OPERATOR.
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB = DDOT(NB,RMMB100B,1,RMMB100B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB200B,1,RMPB200B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+C
+              TAUYB = DDOT(NB,RMMB010B,1,RMMB010B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB020B,1,RMPB020B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C
+              TAUZB = DDOT(NB,RMMB001B,1,RMMB001B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB002B,1,RMPB002B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C             THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCT.
+C             SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C             WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ENDIF
+C***********************************************************************
+C     THE EXCHANGE-CORRELATION FUNCTIONAL CALCULATION
+C***********************************************************************
+          VXCA1=ZERO
+          VXCB1=ZERO
+          DUMAX=ZERO
+          DUMAY=ZERO
+          DUMAZ=ZERO
+          DUMBX=ZERO
+          DUMBY=ZERO
+          DUMBZ=ZERO
+          XALPHA=ZERO
+          XGRD=ZERO
+          ECF=ZERO
+C
+C         STORES THE DERIVATIVE OF THE FUNCTIONAL WITH RESPECT TO THE
+C         KINETIC ENERGY DENSITY.
+C         ALPHA SPIN
+          DMGGA=ZERO
+          DMGA =ZERO
+C         BETA SPIN
+          DMGGB=ZERO
+          DMGB =ZERO
+          IF(ROA+ROB.le.1.0D-15) THEN
+            XALPHA = 0.0d0
+            XGRD = 0.0d0
+            ECF = 0.0d0
+          ELSE IF(use_libxc) THEN
+            CALL libxc_calc(FTOTWT,
+     >                      ROA,ROB,
+     >                      GRDAA, GRDAB, GRDBB,
+     >                      GRADXA,GRADYA,GRADZA,
+     >                      GRADXB,GRADYB,GRADZB,
+     >                      TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,
+     >                      XALPHA,XGRD,ECF,
+     >                      VXCA1,VXCB1,
+     >                      DUMAX,DUMAY,DUMAZ,
+     >                      DUMBX,DUMBY,DUMBZ,
+     >                      DMGGA, DMGGB)
+          ELSE IF(FUNCL) THEN
+            CALL CCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE IF(FUNFL) THEN
+            CALL FCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE
+            CALL CALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                   GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                   XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                   VXCB1,DUMBX,DUMBY,DUMBZ,ECF,
+     >                   TAUXA,TAUYA,TAUZA,DMGGA,
+     >                   TAUXB,TAUYB,TAUZB,DMGGB)
+          END IF
+ 451      CONTINUE
+          DUMA = VXCA1
+          DUMB = VXCB1
+C
+          DMGA = DMGGA
+          DMGB = DMGGB
+C
+          EXEC1= XALPHA + XGRD + ECF
+          EXEC = EXEC + EXEC1
+          ECORL1= ECORL1 + ECF
+C
+          IF(NOB.EQ.0) THEN
+             DUMB=ZERO
+             GRADXB=ZERO
+             GRADYB=ZERO
+             GRADZB=ZERO
+          ENDIF
+C
+C Andrew - I think we can calculate the potentials here.  We need the VXCA1
+C and VXCB1, which I think are the dF/drho terms.  We also need the weights,
+C MOs, on-top, and DTOT.
+C
+C***********************************************************************
+C      CONSTRUCT FOCK MATRIX
+C***********************************************************************
+          CALL DFTFOCK_PCC_UHF(NEEDGR,NEEDTAU,FTOTWT,
+     *           DUMA,DUMB,DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,
+     *           FA,FB,DFTTHR,L1,DMGA,DMGB,
+     *           RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *           RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,WORK7,WORK9)
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          debcou = debcou + 1
+          TOTELEAt = TOTELEAt + FTOTWT*ROA
+          TOTELEBt = TOTELEBt + FTOTWT*ROB
+          TOTELE  =  TOTELE+FTOTWT*(ROA+ROB)
+          TOTGRADX=TOTGRADX+FTOTWT*GRDAA
+          TOTGRADY=TOTGRADY+FTOTWT*GRDBB
+          TOTGRADZ=TOTGRADZ+FTOTWT*GRDAB
+C
+          IF (DOLRD) THEN
+            CALL LRDPOL(ATMPOL,ATPPOL,EFPOL,FTOTWT,WTAB,FACT,
+     *                  NCNTR,IPTME,ROA,ROB,GRDAA,GRDBB,GRDAB,DRSPH,
+     *                  XD,YD,ZD,MAXL,MAXM,NFREQ)
+          END IF
+C
+   10   CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+   20 CONTINUE
+C
+C     ----- NEXT ATOM -----
+C
+c      MCPDFTRUN=.TRUE.
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      EEXC = EEXC+EXEC
+      ECORL= ECORL+ECORL1
+      DFTTHR=DFTTHRS
+      IF (OUT) WRITE(IW,9999) NCNTR,EEXC,TOTELE,TOTKIN
+   30 CONTINUE
+      RETURN
+C
+ 9999 FORMAT(/5X,'ATM',I8,' EXC=',F20.10,5X,'TOTELE=',F20.10,'TOTKIN=',
+     >        F20.10)
+      END
+C*MODULE DFTGRD  *DECK DFTFOCK_PCC_UHF
+C>
+C>    @brief Adds PCC DFT exchange/correlation to Fock Matrix
+C>
+C>    @details This is for UHF calculation.
+C>
+C>    @author Chinami Takashima
+C>
+      SUBROUTINE DFTFOCK_PCC_UHF(NEEDGR,NEEDTAU,FTOTWT,
+     *    DUMA,DUMB,DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,FA,FB,
+     *    CUTOFF,L1,DMGA,DMGB,
+     *    RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *    RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,WORKA,WORKB)
+C
+      IMPLICIT NONE
+C
+      LOGICAL :: NEEDGR,NEEDTAU
+      INTEGER, INTENT(IN) :: L1
+      DOUBLE PRECISION, INTENT(IN) :: FTOTWT,DUMA,DUMB,
+     *   DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,DMGA,DMGB
+      DOUBLE PRECISION, INTENT(IN) :: CUTOFF
+      DOUBLE PRECISION, INTENT(IN) :: RMB000(*),RPB100(*),RPB010(*),
+     *   RPB001(*),RMB100(*),RMB010(*),RMB001(*),RPB200(*),RPB110(*),
+     *   RPB101(*),RPB020(*),RPB011(*),RPB002(*),WORKA(*),WORKB(*)
+      DOUBLE PRECISION,INTENT(INOUT) :: FA(*),FB(*)
+C
+      DOUBLE PRECISION :: FCUTOFF,ADUM(5),BDUM(5)
+      DOUBLE PRECISION, PARAMETER :: TWO=2.0D+00,HALF=0.50D+00,
+     *                               EIGHTH=1.25D-01
+      INTEGER :: I,J,IND
+C
+      FCUTOFF=CUTOFF*EIGHTH
+C
+      ADUM(1) = DUMA * HALF * FTOTWT
+      ADUM(2) = DUMAX * FTOTWT
+      ADUM(3) = DUMAY * FTOTWT
+      ADUM(4) = DUMAZ * FTOTWT
+      ADUM(5) = DMGA * FTOTWT
+C
+      CALL DCOPY(L1,RMB000,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RMB100,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RMB010,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RMB001,1,WORKA,1)
+C
+      BDUM(1) = DUMB * HALF * FTOTWT
+      BDUM(2) = DUMBX * FTOTWT
+      BDUM(3) = DUMBY * FTOTWT
+      BDUM(4) = DUMBZ * FTOTWT
+      BDUM(5) = DMGB * FTOTWT
+C
+      CALL DCOPY(L1,RMB000,1,WORKB,1)
+      CALL DSCAL(L1,BDUM(1),WORKB,1)
+      CALL DAXPY(L1,BDUM(2),RMB100,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(3),RMB010,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(4),RMB001,1,WORKB,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RMB000(I)*WORKA(J)+WORKA(I)*RMB000(J)
+          FB(IND) = FB(IND)+RMB000(I)*WORKB(J)+WORKB(I)*RMB000(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      CALL DCOPY(L1,RPB100,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RPB200,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RPB110,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RPB101,1,WORKA,1)
+C
+      CALL DCOPY(L1,RPB100,1,WORKB,1)
+      CALL DSCAL(L1,BDUM(1),WORKB,1)
+      CALL DAXPY(L1,BDUM(2),RPB200,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(3),RPB110,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(4),RPB101,1,WORKB,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RPB100(I)*WORKA(J)+WORKA(I)*RPB100(J)
+          FB(IND) = FB(IND)+RPB100(I)*WORKB(J)+WORKB(I)*RPB100(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      CALL DCOPY(L1,RPB010,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RPB110,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RPB020,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RPB011,1,WORKA,1)
+C
+      CALL DCOPY(L1,RPB010,1,WORKB,1)
+      CALL DSCAL(L1,BDUM(1),WORKB,1)
+      CALL DAXPY(L1,BDUM(2),RPB110,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(3),RPB020,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(4),RPB011,1,WORKB,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RPB010(I)*WORKA(J)+WORKA(I)*RPB010(J)
+          FB(IND) = FB(IND)+RPB010(I)*WORKB(J)+WORKB(I)*RPB010(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      CALL DCOPY(L1,RPB001,1,WORKA,1)
+      CALL DSCAL(L1,ADUM(1),WORKA,1)
+      CALL DAXPY(L1,ADUM(2),RPB101,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(3),RPB011,1,WORKA,1)
+      CALL DAXPY(L1,ADUM(4),RPB002,1,WORKA,1)
+C
+      CALL DCOPY(L1,RPB001,1,WORKB,1)
+      CALL DSCAL(L1,BDUM(1),WORKB,1)
+      CALL DAXPY(L1,BDUM(2),RPB101,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(3),RPB011,1,WORKB,1)
+      CALL DAXPY(L1,BDUM(4),RPB002,1,WORKB,1)
+C
+      IND=1
+      DO I = 1, L1
+        DO J = 1, I
+          FA(IND) = FA(IND)+RPB001(I)*WORKA(J)+WORKA(I)*RPB001(J)
+          FB(IND) = FB(IND)+RPB001(I)*WORKB(J)+WORKB(I)*RPB001(J)
+          IND = IND + 1
+        END DO
+      END DO
+C
+      IF (NEEDTAU) THEN
+        CALL DCOPY(L1,RMB100,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RMB100,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RMB100(I)*WORKA(J)
+            FB(IND) = FB(IND) + RMB100(I)*WORKB(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RMB010,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RMB010,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RMB010(I)*WORKA(J)
+            FB(IND) = FB(IND) + RMB010(I)*WORKB(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RMB001,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RMB001,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RMB001(I)*WORKA(J)
+            FB(IND) = FB(IND) + RMB001(I)*WORKB(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB200,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RPB200,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB200(I)*WORKA(J)
+            FB(IND) = FB(IND) + RPB200(I)*WORKB(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB110,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RPB110,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB110(I)*WORKA(J)*TWO
+            FB(IND) = FB(IND) + RPB110(I)*WORKB(J)*TWO
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB101,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RPB101,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB101(I)*WORKA(J)*TWO
+            FB(IND) = FB(IND) + RPB101(I)*WORKB(J)*TWO
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB020,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RPB020,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB020(I)*WORKA(J)
+            FB(IND) = FB(IND) + RPB020(I)*WORKB(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB011,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RPB011,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB011(I)*WORKA(J)*TWO
+            FB(IND) = FB(IND) + RPB011(I)*WORKB(J)*TWO
+            IND = IND + 1
+          END DO
+        END DO
+C
+        CALL DCOPY(L1,RPB002,1,WORKA,1)
+        CALL DSCAL(L1,ADUM(5),WORKA,1)
+        CALL DCOPY(L1,RPB002,1,WORKB,1)
+        CALL DSCAL(L1,BDUM(5),WORKB,1)
+        IND=1
+        DO I = 1, L1
+          DO J = 1, I
+            FA(IND) = FA(IND) + RPB002(I)*WORKA(J)
+            FB(IND) = FB(IND) + RPB002(I)*WORKB(J)
+            IND = IND + 1
+          END DO
+        END DO
+C
+      END IF
+C
+      RETURN
+      END
+C*MODULE DFTGRD  *DECK DMATD_LUTPCC_RHF
+C>
+C>    @brief Integration of <I|V|A> for
+C>           picture change corrected(PCC) DFT by LUT-IOTC method
+C>
+C>    @details THIS ROUTINE DOES A NUMERICAL INTEGRATION TO YIELD THE <I|V|A>
+C>     MATRIX WHERE V=D_E(XC)/D_RHO.  IN C1 SYMMETRY FOR NOW.
+C>     THE RADIAL QUADRATURE FORMULA IS TAKEN FROM
+C>     P.M.W.GILL, B.G.JOHNSON, J.A.POPLE AND M.J.FRISCH,
+C>     CHEM. PHYS. LETT. 197, 499 (1992).
+C>     THE ANGULAR QUADRATURE FORMULA IS TAKEN FROM V.I.LEBEDEV,
+C>     ZH. VYCHISL. MAT. FIZ. 15, 48 (1975) AND 16, 293 (1976),
+C>     (ENGLISH TRANSLATION IN U.S.S.R. COMPUT. MATH AND MATH PHYS).
+C>     EXCHANGE AND CORRELATION ENERGY CONTRIBUTION DUE TO INTEGRATION
+C>     OVER GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>     This is a clone of DMATD
+C>     This routine is for RHF calculation
+C>     PCC-DFT transforms delta operator from 4 component picture
+C>     to 2component or 1 component one.
+C>     Here, the transformation is based on infinite-order two-component
+C>     (IOTC) method. In addition, the efficient scheme using the local
+C>     unitary transformation (LUT) is combined with PCC-DFT.
+C>     Please refer to the following papers about PCC DFT.
+C>      T. Oyama, Y. Ikabata, J. Seino, and H. Nakai,
+C>      Chem. Phys. Lett. 680,37 (2017).
+C>      Y. Ikabata, T. Oyama, M. Hayami, J. Seino, and H. Nakai,
+C>      J. Chem. Phys. 150, 164104 (2019).
+C>
+C>    @date : Chinami Takashima, December, 2021
+C>
+C>    @note : not connected with MCPDFTRUN and divide-and-conquer method
+C
+      SUBROUTINE DMATD_LUTPCC_RHF(
+     *                 TOTWT,IIFACT,NAPTS,COEFFA,COEFFB,IANGN,IFACTR,
+     *                 VMOA,DVMOXA,DVMOYA,DVMOZA,VALGA,VMOB,DVMOXB,
+     *                 DVMOYB,DVMOZB,VALGB,FA,FB,IUNIQ,EEXC,TOTELE,NANG,
+     *                 PTRAD,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                 ANGXVL,ANGYVL,ANGZVL,RSQRD,PCOEFF,EXPS,
+     *                 AOX,GAOX,GAOY,GAOZ,NLCT,NELM,IJX,IJY,IJZ,L1,
+     *                 NEEDGR,UROHF,TOTKIN,ATMPOL,ATPPOL,EFPOL,
+     *                 WTAB,DRSPH,MAXL,MAXM,NFREQ,
+     *                 RMOMG,PIOMG,B000,B100,B010,B001,
+     *                 B200,B110,B101,B020,B011,B002,
+     *                 WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,WORK7,
+     *                 RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *                 RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,
+     *                 RMMB000,RMPB100,RMPB010,RMPB001,RMMB100,
+     *                 RMMB010,RMMB001,RMPB200,RMPB110,RMPB101,
+     *                 RMPB020,RMPB011,RMPB002,
+     *                 B000S,B100S,B010S,B001S,B200S,B110S,B101S,B020S,
+     *                 B011S,B002S,RMB000S,RMB100S,RMB010S,RMB001S,
+     *                 RPB100S,RPB010S,RPB001S,RPB200S,RPB110S,RPB101S,
+     *                 RPB020S,RPB011S,RPB002S)
+      USE metaGGA, ONLY: NEEDTAU
+      USE funclib, ONLY: FUNCL, FUNFL
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp,mxrt,mxao,mxnoro
+      use comm_RDM_MCPDFT, only: ld1a,lxt4,nactive,nnz
+C
+      USE mod_dft_gridint, ONLY: dmatd_blk
+      USE params, ONLY: dft_bfc_algo
+      USE modmcpdft
+      use libxc, only: use_libxc, libxc_calc
+      use mod_lutiotc, only: NNUMAO
+      IMPLICIT NONE
+C
+C#include "rdm_info.fh"
+      LOGICAL UROHF,OUT,NEEDGR,GOPARR,DSKWRK,MASWRK,DLB,SG1
+C
+      INTEGER :: NDFTFG,NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,NANGPT,
+     *           NANGPT0,JANS
+      DOUBLE PRECISION :: DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      INTEGER :: IPRUNECUTS,NTOTGRIDPOINTS,NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: PRUNERADS,PRUNEATOMS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: X
+      COMMON /FMCOM / X(1)
+      INTEGER :: IDENAO
+      COMMON /DNSAO / IDENAO
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      DOUBLE PRECISION :: GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                    GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,ECORL,EXCOR
+      COMMON /LMOEDA/ GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+      INTEGER :: NEVALS,NGLEVL,NHLEVL
+      DOUBLE PRECISION :: RUNTYP,EXETYP
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      INTEGER :: MAXIT,MCONV,NPUNCH,NPREO
+      DOUBLE PRECISION :: CONVHF,FSHIFT
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+      INTEGER :: NSHL,NBSF,NNUM,NLOC,NUNV,NUNPV,ISUB
+      COMMON /SETATM/ NSHL(MXATM),NBSF(MXATM),NNUM(MXATM),NLOC(MXATM),
+     *                NUNV,NUNPV,ISUB
+C
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C
+      DOUBLE PRECISION :: DEBUG,DFTGRD
+      DATA DEBUG/8HDEBUG   /, DFTGRD/8HDERDFT  /
+C
+      INTEGER, INTENT(IN) :: IIFACT(NAT),NAPTS(NAT),IANGN(NAT,2,*),
+     *   IFACTR(NAT),IUNIQ(*),NANG,
+     *   NLCT(*),NELM(*),IJX(84),IJY(84),IJZ(84),L1,MAXL,MAXM,NFREQ
+      DOUBLE PRECISION, INTENT(IN) ::  TOTWT(NAT,*), PTRAD(*),
+     *   XDAT(MAXANG,NAT,*),YDAT(MAXANG,NAT,*),ZDAT(MAXANG,NAT,*),
+     *   EXPS(*),ATMPOL(NAT,MAXL,MAXM,MAXM,NFREQ),
+     *   ATPPOL(NAT,NAT,NFREQ),EFPOL(NAT),DRSPH(3,MAXL,MAXM)
+      DOUBLE PRECISION, INTENT(INOUT) :: COEFFA(L1,*),COEFFB(L1,*),
+     *   VMOA(L1),DVMOXA(L1),DVMOYA(L1),DVMOZA(L1),VMOB(L1),DVMOXB(L1),
+     *   DVMOYB(L1),DVMOZB(L1),VALGA(L1),VALGB(L1),
+     *   FA(*),FB(*),RSQRD(*),ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*),
+     *   ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *   AOX(L1),GAOX(L1),GAOY(L1),GAOZ(L1),
+     *   PCOEFF(*),WTAB(NAT,NAT,*)
+      DOUBLE PRECISION, INTENT(IN) :: RMOMG(NUMU*NUM),PIOMG(NUMU*NUM),
+     *   B000(NUMU),B100(NUMU),B010(NUMU),B001(NUMU),B200(NUMU),
+     *   B110(NUMU),B101(NUMU),B020(NUMU),B011(NUMU),B002(NUMU),
+     *   WORK1(NUMU),WORK2(NUMU),WORK3(NUMU),WORK4(NUMU),WORK5(NUMU),
+     *   WORK6(NUMU),WORK7(NUM),
+     *   RMB000(NUM),RPB100(NUM),RPB010(NUM),RPB001(NUM),RMB100(NUM),
+     *   RMB010(NUM),RMB001(NUM),RPB200(NUM),RPB110(NUM),RPB101(NUM),
+     *   RPB020(NUM),RPB011(NUM),RPB002(NUM),
+     *   RMMB000(NA),RMPB100(NA),RMPB010(NA),RMPB001(NA),RMMB100(NA),
+     *   RMMB010(NA),RMMB001(NA),RMPB200(NA),RMPB110(NA),RMPB101(NA),
+     *   RMPB020(NA),RMPB011(NA),RMPB002(NA),
+     *   B000S(NUMU),B100S(NUMU),B010S(NUMU),B001S(NUMU),B200S(NUMU),
+     *   B110S(NUMU),B101S(NUMU),B020S(NUMU),B011S(NUMU),B002S(NUMU),
+     *   RMB000S(NUM),RMB100S(NUM),RMB010S(NUM),RMB001S(NUM),
+     *   RPB100S(NUM),RPB010S(NUM),RPB001S(NUM),RPB200S(NUM),
+     *   RPB110S(NUM),RPB101S(NUM),RPB020S(NUM),RPB011S(NUM),
+     *   RPB002S(NUM)
+C
+C     variables defined in this routine
+      INTEGER :: NCNTR,INC0,NOA,NOB,NPT,LOOP,NGRAN,NLOOP,MCHUNK,NEXT,
+     *   IGRID,IRADPT,IANGPT,IPT,ICHUNK,IPTME,IANG
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00,ONE=1.0D+00,
+     *   HALF=0.5D+00,TWO=2.0D+00,THRSRHO=1.0D-15,THRSPI=1.0D-15,
+     *   THRSRHO2=1.0D-15,THRSRHO3=0.9D0,THRSRHO4=1.15D0,
+     *   AB1=-4.756065601D+2,BB1=-3.794733192D+2,CB1=-8.538149682D+1
+      DOUBLE PRECISION :: ABSGRID(3),EEXC,TOTELE,TOTKIN,EXEC,ECORL1,
+     *   TOTGRADX,TOTGRADY,TOTGRADZ,GRDAA,GRDBB,GRDAB,DFTTHRS,WCUTOFF,
+     *   RCUTOFF,CCUTOFF,RAD,FACT,BRAGGRAD,R1,FTOTWT,XD,YD,ZD,XCDNT,
+     *   YCDNT,ZCDNT,ROA,ROB,GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     *   TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,VXCA1,VXCB1,
+     *   DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,XALPHA,XGRD,ECF,
+     *   DMGGA,DMGA,DMGGB,DMGB,DUMA,DUMB,EXEC1
+      INTEGER :: IATM,IPOS,IAOS,IPAS,NPOS,NAOS
+      DOUBLE PRECISION, EXTERNAL :: DDOT
+CT      iTri(i,j) = Max(i,j)*(Max(i,j)-1)/2 + Min(i,j)
+C-END
+C
+C     IDENAO=0 MEANS REGULAR DFT
+C     IDENAO=1 MEANS DIVIDE AND CONQUER DFT
+C
+c MV
+      IF (.NOT.dolrd .AND. dft_bfc_algo.GE.0 .AND. idenao.EQ.0) THEN
+c       New XC integration algorithm
+        CALL dmatd_blk(coeffa,coeffb,fa,fb,
+     *              eexc,totele,totkin,
+     *              atmxvec,atmyvec,atmzvec,
+     *              nang,l1,needgr,urohf)
+        RETURN
+      END IF
+c /MV
+C
+C     Loop over atoms
+      DO 30 NCNTR = 1, NAT
+C
+      INC0=IUNIQ(NCNTR)
+      IF(INC0.EQ.0) GOTO 30
+
+      OUT = EXETYP.EQ.DFTGRD  .OR.  EXETYP.EQ.DEBUG
+      EXEC = ZERO
+      ECORL1 = ZERO
+      TOTGRADX = ZERO
+      TOTGRADY = ZERO
+      TOTGRADZ = ZERO
+C                 LDA WILL NOT ASSIGN ANY VALUES TO DENSITY GRADIENTS
+      GRDAA = ZERO
+      GRDBB = ZERO
+      GRDAB = ZERO
+      NOA = NA
+      NOB = NB
+      NPT = NRAD*MAXANG
+C
+C     SET CUT-OFFS FOR THE DENSITY RCUTOFF AND WEIGHT WCUTOFF
+C     RCUTOFF IS SET TO DEPEND UPON SCF DENSITY CONV. AND THE GRID SIZE
+C     WCUTOFF IS A CELL VOLUME AND WE SET IT TO A FIXED VALUE.
+C     MOST CELLS HAVE LARGE VOLUME (ABOUT 97% HAVE VOLUME .GT. 1E-14)
+C
+      DFTTHRS=DFTTHR
+      IF(DFTTHR.EQ.ZERO) DFTTHR=1.0D-04/(NPT*NAT)
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+      CCUTOFF=1.0D-03/(NPT*NAT)
+      IF(DFTTHR.LT.1.1D-15) THEN
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+      IF(MCPDFTRUN) then
+         DFTTHR =1.0D-15
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+
+
+C
+C     ANGXVL=X**I, ANGYVL=Y**J, ANGZVL=Z**K, FOR NEEDED VALUES OF I,J,K
+C     WHERE (X,Y,Z) IS THE CENTRE OF A DFT GRID POINT RI
+C     MINUS AN ATOMIC CENTRE RA: XYZ= (RI - RA)
+C
+      CALL VCLR(ANGXVL(1,1),1,NAT)
+      CALL VCLR(ANGYVL(1,1),1,NAT)
+      CALL VCLR(ANGZVL(1,1),1,NAT)
+      CALL DACOPY(NAT,ONE,ANGXVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGYVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGZVL(1,2),1)
+C
+      RAD = BRAGGRAD(NCNTR)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+C     NAPTS   + (NAT-1)/NWDVAR+1
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+C STB MODIFIED FOR PRUNING
+      IGRID = 1
+      DO 20 IRADPT = 1, NRAD
+C
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.(PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD)) THEN
+           IGRID = IGRID + 1
+        ENDIF
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+C         STB - FOR NOW THIS SHOULD BE OK AS I USED THE MAX ANGULAR
+C               POINTS SO AS TO SIMPLIFY
+          IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) THEN
+                CALL DDI_DLBNEXT(NEXT)
+              ENDIF
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          IF(ABS(FTOTWT).LT.WCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+            ANGXVL(IATM,3)=XCDNT
+            ANGYVL(IATM,3)=YCDNT
+            ANGZVL(IATM,3)=ZCDNT
+            DO 35 IANG=3,NANG
+               ANGXVL(IATM,IANG+1)=ANGXVL(IATM,IANG)*XCDNT
+               ANGYVL(IATM,IANG+1)=ANGYVL(IATM,IANG)*YCDNT
+               ANGZVL(IATM,IANG+1)=ANGZVL(IATM,IANG)*ZCDNT
+ 35         CONTINUE
+  610     CONTINUE
+C
+          ABSGRID(1)=XD+C(1,NCNTR)
+          ABSGRID(2)=YD+C(2,NCNTR)
+          ABSGRID(3)=ZD+C(3,NCNTR)
+C
+C***********************************************************************
+C     FORM DENSITY AT THIS POINT
+C***********************************************************************
+          IF(IDENAO.EQ.0) THEN
+             CALL PDELTA(ABSGRID,B000,B100,B010,B001,B200,B110,B101,
+     *                   B020,B011,B002,
+     *                   WORK1,WORK2,WORK3,WORK4,WORK5,WORK6)
+C
+             IPOS = 1
+             IAOS = 1
+             IPAS = 1
+C
+             DO IATM = 1, NAT
+               NPOS = NNUM(IATM)
+               NAOS = NNUMAO(IATM)
+C
+               CALL DCOPY(NPOS,B000(IPOS),1,B000S(1),1)
+               CALL DCOPY(NPOS,B100(IPOS),1,B100S(1),1)
+               CALL DCOPY(NPOS,B010(IPOS),1,B010S(1),1)
+               CALL DCOPY(NPOS,B001(IPOS),1,B001S(1),1)
+               CALL DCOPY(NPOS,B200(IPOS),1,B200S(1),1)
+               CALL DCOPY(NPOS,B110(IPOS),1,B110S(1),1)
+               CALL DCOPY(NPOS,B101(IPOS),1,B101S(1),1)
+               CALL DCOPY(NPOS,B020(IPOS),1,B020S(1),1)
+               CALL DCOPY(NPOS,B011(IPOS),1,B011S(1),1)
+               CALL DCOPY(NPOS,B002(IPOS),1,B002S(1),1)
+C
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B000S,NPOS,ZERO,RMB000S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B100S,NPOS,ZERO,RMB100S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B010S,NPOS,ZERO,RMB010S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B001S,NPOS,ZERO,RMB001S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B100S,NPOS,ZERO,RPB100S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B010S,NPOS,ZERO,RPB010S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B001S,NPOS,ZERO,RPB001S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B200S,NPOS,ZERO,RPB200S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B110S,NPOS,ZERO,RPB110S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B101S,NPOS,ZERO,RPB101S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B020S,NPOS,ZERO,RPB020S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B011S,NPOS,ZERO,RPB011S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B002S,NPOS,ZERO,RPB002S,NAOS)
+C
+               CALL DCOPY(NAOS,RMB000S(1),1,RMB000(IAOS),1)
+               CALL DCOPY(NAOS,RMB100S(1),1,RMB100(IAOS),1)
+               CALL DCOPY(NAOS,RMB010S(1),1,RMB010(IAOS),1)
+               CALL DCOPY(NAOS,RMB001S(1),1,RMB001(IAOS),1)
+               CALL DCOPY(NAOS,RPB100S(1),1,RPB100(IAOS),1)
+               CALL DCOPY(NAOS,RPB010S(1),1,RPB010(IAOS),1)
+               CALL DCOPY(NAOS,RPB001S(1),1,RPB001(IAOS),1)
+               CALL DCOPY(NAOS,RPB200S(1),1,RPB200(IAOS),1)
+               CALL DCOPY(NAOS,RPB110S(1),1,RPB110(IAOS),1)
+               CALL DCOPY(NAOS,RPB101S(1),1,RPB101(IAOS),1)
+               CALL DCOPY(NAOS,RPB020S(1),1,RPB020(IAOS),1)
+               CALL DCOPY(NAOS,RPB011S(1),1,RPB011(IAOS),1)
+               CALL DCOPY(NAOS,RPB002S(1),1,RPB002(IAOS),1)
+C
+               IPOS = IPOS + NPOS
+               IAOS = IAOS + NAOS
+               IPAS = IPAS + NUMU*NAOS + NPOS
+C
+             END DO
+C
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB000,NUM,
+     *                  ZERO,RMMB000,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB100,NUM,
+     *                  ZERO,RMMB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB010,NUM,
+     *                  ZERO,RMMB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB001,NUM,
+     *                  ZERO,RMMB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB100,NUM,
+     *                  ZERO,RMPB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB010,NUM,
+     *                  ZERO,RMPB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB001,NUM,
+     *                  ZERO,RMPB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB200,NUM,
+     *                  ZERO,RMPB200,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB110,NUM,
+     *                  ZERO,RMPB110,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB101,NUM,
+     *                  ZERO,RMPB101,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB020,NUM,
+     *                  ZERO,RMPB020,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB011,NUM,
+     *                  ZERO,RMPB011,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB002,NUM,
+     *                  ZERO,RMPB002,NA)
+C
+            ROA = DDOT(NA,RMMB000,1,RMMB000,1)
+            ROA = ROA + DDOT(NA,RMPB100,1,RMPB100,1)
+            ROA = ROA + DDOT(NA,RMPB010,1,RMPB010,1)
+            ROA = ROA + DDOT(NA,RMPB001,1,RMPB001,1)
+C
+            ROB = ROA
+          ELSE
+             WRITE(IW,*) "ERROR: PCC NOT FOR IDENAO.EQ.1(DCDFT?)"
+             CALL ABRT
+          END IF
+          IF(ABS(ROA+ROB).LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          IF(NEEDGR) THEN
+C***********************************************************************
+C     FORM DENSITY GRADIENT AT THIS POINT
+C***********************************************************************
+CT            IF(IDENAO.EQ.0) THEN
+            GRADXA = DDOT(NA,RMMB100,1,RMMB000,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB200,1,RMPB100,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB110,1,RMPB010,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB101,1,RMPB001,1)
+C
+            GRADYA = DDOT(NA,RMMB010,1,RMMB000,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB110,1,RMPB100,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB020,1,RMPB010,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB011,1,RMPB001,1)
+C
+            GRADZA = DDOT(NA,RMMB001,1,RMMB000,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB101,1,RMPB100,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB011,1,RMPB010,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB002,1,RMPB001,1)
+C
+            GRADXA = GRADXA * TWO
+            GRADYA = GRADYA * TWO
+            GRADZA = GRADZA * TWO
+C
+CT             IF (MCPDFTRUN) THEN
+CT              CALL DFTTRFG(UROHF,L1,L1,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+CT     *                     DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+CT     *                     CCUTOFF)
+CTC             MCPDFTRUN=.false.
+CTC             goto 444
+CT               GRADXA=DDOT(NINACT,VMOA,1,DVMOXA,1)*TWO
+CT               GRADYA=DDOT(NINACT,VMOA,1,DVMOYA,1)*TWO
+CT               GRADZA=DDOT(NINACT,VMOA,1,DVMOZA,1)*TWO
+CT              IF(NACTIVE.GT.0) THEN
+CT               DO I=1, NACTIVE
+CT                 DO J=1,I
+CT                   FACT12 = 1.0d0
+CT                   IF (I.EQ.J)FACT12=0.5D0
+CT                   IJ=iTri(i,j)
+CT                   GRADXA=GRADXA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOXA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOXA(NINACT+i))
+CT                   GRADYA=GRADYA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOYA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOYA(NINACT+i))
+CT                   GRADZA=GRADZA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOZA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOZA(NINACT+i))
+CT
+CT                 ENDDO
+CT               ENDDO
+CT              ENDIF
+CT             ELSE
+CT  444       continue
+CT              GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+CT              GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+CT              GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+CT             ENDIF
+              GRADXB = GRADXA
+              GRADYB = GRADYA
+              GRADZB = GRADZA
+CT            ELSE
+CT               GRADXA=DDOT(L1,GAOX,1,VMOA,1)
+CT               GRADYA=DDOT(L1,GAOY,1,VMOA,1)
+CT               GRADZA=DDOT(L1,GAOZ,1,VMOA,1)
+CT               IF(UROHF) THEN
+CT                  GRADXA=GRADXA*TWO
+CT                  GRADYA=GRADYA*TWO
+CT                  GRADZA=GRADZA*TWO
+CT                  GRADXB=DDOT(L1,GAOX,1,VMOB,1)*TWO
+CT                  GRADYB=DDOT(L1,GAOY,1,VMOB,1)*TWO
+CT                  GRADZB=DDOT(L1,GAOZ,1,VMOB,1)*TWO
+CT               ELSE
+CT                  GRADXB=GRADXA
+CT                  GRADYB=GRADYA
+CT                  GRADZB=GRADZA
+CT               END IF
+CT            END IF
+
+C Andrew - here we need to perform the translation for PDFT
+C First step - calculate the on-top pair density
+C  Return "ONTOP", "ONTOPX", "ONTOPY", "ONTOPZ" I guess.
+C
+C  It looks like DFTTRFG is the subroutine that calculates the gradients
+C  for the MOs (needed for building the on-top gradients needed for ft-
+C  class functionals.
+C
+C  The subroutine DFTTRFA calculates the MOs at the grid point.
+
+C           goto 457
+C          mcpdftrun=.false.
+CT          IF (.NOT.MCPDFTRUN) GOTO 457
+CT           CALL GONTOP(VMOA,VMOB,DVMOXA,DVMOXB,DVMOYA,DVMOYB,DVMOZA,
+CT     *                DVMOZB,ONTOP,ONTOPX,ONTOPY,ONTOPZ,NACTIVE)
+CT
+CT          TOTELEA = TOTELEA + FTOTWT*ROA
+CT          TOTELEB = TOTELEB + FTOTWT*ROA
+CTC Second - Translate the density/derivatives
+CT           DTOT = ROA + ROB !Total denisty
+CT           GRADX = GRADXA + GRADXB
+CT           GRADY = GRADYA + GRADYB
+CT           GRADZ = GRADZA + GRADZB
+CT           RATIO = 0.0D0
+CT           if ((DTOT.gt.THRSRHO).and.(ONTOP.ge.THRSRHO)) then
+CT             RATIO = 4.0D0*ONTOP/(DTOT**2.0D0)
+CTC             write(*,*) "ratio", ratio,4.0d0*ontop,DTOT**2d0
+CT           endif
+CTC           goto 457
+CT
+CTC Translation for t-GGA functionals:
+CT        IF (.NOT.F_FLAG) THEN
+CT           IF((1.0D0-RATIO).gt.THRSRHO) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ELSE
+CT             ZETA = 0.0D0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT        ELSE
+CTcPS           goto 457
+CT
+CTC Translation for ft-GGA functionals:
+CT           IF((1.0D0-RATIO).gt.THRSRHO.AND.(RATIO.LT.THRSRHO3)) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT     *               + RATIO*GRADX/(2.0D0*ZETA)
+CT     *               - ONTOPX/(DTOT*ZETA)
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT     *               + RATIO*GRADY/(2.0D0*ZETA)
+CT     *               - ONTOPY/(DTOT*ZETA)
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT     *               + RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               - ONTOPZ/(DTOT*ZETA)
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT     *               - RATIO*GRADX/(2.0D0*ZETA)
+CT     *               + ONTOPX/(DTOT*ZETA)
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT     *               - RATIO*GRADY/(2.0D0*ZETA)
+CT     *               + ONTOPY/(DTOT*ZETA)
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT     *               - RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               + ONTOPZ/(DTOT*ZETA)
+CT           ELSE IF((RATIO.GE.THRSRHO3).AND.(RATIO.LE.THRSRHO4)) THEN
+CT             ZETA = (AB1*(RATIO-1.15D0)**5.0D0)
+CT     *       + (BB1*(RATIO-1.15D0)**4.0D0) + (CB1*(RATIO-1.15D0)**3.0D0)
+CT
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT
+CT             GRADXA = (1.0D0+ZETA)*GRADX/2.0D0
+CT     *       + (AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPX/DTOT) - (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPX/DTOT) - (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPX/DTOT) - (3.0D0 * RATIO * GRADX))
+CT             GRADYA = (1.0D0+ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPY/DTOT) - (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPY/DTOT) - (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPY/DTOT) - (3.0D0 * RATIO * GRADY))
+CT             GRADZA = (1.0D0+ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPZ/DTOT) - (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPZ/DTOT) - (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPZ/DTOT) - (3.0D0 * RATIO * GRADZ))
+CT             GRADXB = (1.0D0-ZETA)*GRADX/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPX/DTOT) + (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPX/DTOT) + (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPX/DTOT) + (3.0D0 * RATIO * GRADX))
+CT             GRADYB = (1.0D0-ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPY/DTOT) + (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPY/DTOT) + (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPY/DTOT) + (3.0D0 * RATIO * GRADY))
+CT             GRADZB = (1.0D0-ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPZ/DTOT) + (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPZ/DTOT) + (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPZ/DTOT) + (3.0D0 * RATIO * GRADZ))
+CT           ELSE IF(RATIO.GT.THRSRHO4) THEN
+CT             ZETA = 0.0d0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT       ENDIF
+CT  457      continue
+
+C***********************************************************************
+C      FORM GRADIENT INVARIANT (GRAD DOT GRAD)
+C***********************************************************************
+            GRDAA  = GRADXA*GRADXA+GRADYA*GRADYA+GRADZA*GRADZA
+            GRDBB  = GRADXB*GRADXB+GRADYB*GRADYB+GRADZB*GRADZB
+            GRDAB  = GRADXA*GRADXB+GRADYA*GRADYB+GRADZA*GRADZB
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB =TAUXA
+              TAUYB =TAUYA
+              TAUZB =TAUZA
+
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ELSE
+C
+C     THIS ELSE CASE WILL ALLOW USERS TO PRINT OUT THE TOTAL KINETIC
+C     ENERGY DENSITY FOR LDA TYPE FUNCTIONALS.
+C     KEEP IN MIND THAT IF THE FUNCTIONAL DOES NOT CONTAIN A TAU
+C     DEPENDENCE THEN ONE CAN NOT EXPECT THE TOTAL KINETIC ENERGY
+C     DENSITY TO BE EXACTLY EQUAL TO THE EXPECTATION VALUE OF THE
+C     KINETIC ENERGY OPERATOR.
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB =TAUXA
+              TAUYB =TAUYA
+              TAUZB =TAUZA
+C             THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCT.
+C             SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C             WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ENDIF
+C***********************************************************************
+C     THE EXCHANGE-CORRELATION FUNCTIONAL CALCULATION
+C***********************************************************************
+          VXCA1=ZERO
+          VXCB1=ZERO
+          DUMAX=ZERO
+          DUMAY=ZERO
+          DUMAZ=ZERO
+          DUMBX=ZERO
+          DUMBY=ZERO
+          DUMBZ=ZERO
+          XALPHA=ZERO
+          XGRD=ZERO
+          ECF=ZERO
+C
+C         STORES THE DERIVATIVE OF THE FUNCTIONAL WITH RESPECT TO THE
+C         KINETIC ENERGY DENSITY.
+C         ALPHA SPIN
+          DMGGA=ZERO
+          DMGA =ZERO
+C         BETA SPIN
+          DMGGB=ZERO
+          DMGB =ZERO
+          IF(ROA+ROB.le.1.0D-15) THEN
+            XALPHA = 0.0d0
+            XGRD = 0.0d0
+            ECF = 0.0d0
+          ELSE IF(use_libxc) THEN
+            CALL libxc_calc(FTOTWT,
+     >                      ROA,ROB,
+     >                      GRDAA, GRDAB, GRDBB,
+     >                      GRADXA,GRADYA,GRADZA,
+     >                      GRADXB,GRADYB,GRADZB,
+     >                      TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,
+     >                      XALPHA,XGRD,ECF,
+     >                      VXCA1,VXCB1,
+     >                      DUMAX,DUMAY,DUMAZ,
+     >                      DUMBX,DUMBY,DUMBZ,
+     >                      DMGGA, DMGGB)
+          ELSE IF(FUNCL) THEN
+            CALL CCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE IF(FUNFL) THEN
+            CALL FCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE
+            CALL CALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                   GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                   XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                   VXCB1,DUMBX,DUMBY,DUMBZ,ECF,
+     >                   TAUXA,TAUYA,TAUZA,DMGGA,
+     >                   TAUXB,TAUYB,TAUZB,DMGGB)
+          END IF
+ 451      CONTINUE
+          DUMA = VXCA1
+          DUMB = VXCB1
+C
+          DMGA = DMGGA
+          DMGB = DMGGB
+C
+          EXEC1= XALPHA + XGRD + ECF
+          EXEC = EXEC + EXEC1
+          ECORL1= ECORL1 + ECF
+C
+          IF(NOB.EQ.0) THEN
+             DUMB=ZERO
+             GRADXB=ZERO
+             GRADYB=ZERO
+             GRADZB=ZERO
+          ENDIF
+C
+C Andrew - I think we can calculate the potentials here.  We need the VXCA1
+C and VXCB1, which I think are the dF/drho terms.  We also need the weights,
+C MOs, on-top, and DTOT.
+C
+C***********************************************************************
+C      CONSTRUCT FOCK MATRIX
+C***********************************************************************
+          CALL DFTFOCK_PCC_RHF(NEEDGR,NEEDTAU,FTOTWT,
+     *                 DUMA,DUMAX,DUMAY,DUMAZ,FA,DFTTHR,L1,DMGA,
+     *                 RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *                 RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,WORK7)
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          debcou = debcou + 1
+          TOTELEAt = TOTELEAt + FTOTWT*ROA
+          TOTELEBt = TOTELEBt + FTOTWT*ROB
+          TOTELE  =  TOTELE+FTOTWT*(ROA+ROB)
+          TOTGRADX=TOTGRADX+FTOTWT*GRDAA
+          TOTGRADY=TOTGRADY+FTOTWT*GRDBB
+          TOTGRADZ=TOTGRADZ+FTOTWT*GRDAB
+C
+          IF (DOLRD) THEN
+            CALL LRDPOL(ATMPOL,ATPPOL,EFPOL,FTOTWT,WTAB,FACT,
+     *                  NCNTR,IPTME,ROA,ROB,GRDAA,GRDBB,GRDAB,DRSPH,
+     *                  XD,YD,ZD,MAXL,MAXM,NFREQ)
+          END IF
+C
+   10   CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+   20 CONTINUE
+C
+C     ----- NEXT ATOM -----
+C
+c      MCPDFTRUN=.TRUE.
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      EEXC = EEXC+EXEC
+      ECORL= ECORL+ECORL1
+      DFTTHR=DFTTHRS
+      IF (OUT) WRITE(IW,9999) NCNTR,EEXC,TOTELE,TOTKIN
+   30 CONTINUE
+      RETURN
+C
+ 9999 FORMAT(/5X,'ATM',I8,' EXC=',F20.10,5X,'TOTELE=',F20.10,'TOTKIN=',
+     >        F20.10)
+      END
+C*MODULE DFTGRD  *DECK DMATD_LUTPCC_UHF
+C>
+C>    @brief Integration of <I|V|A> for
+C>           picture change corrected(PCC) DFT by LUT-IOTC method
+C>
+C>    @details THIS ROUTINE DOES A NUMERICAL INTEGRATION TO YIELD THE <I|V|A>
+C>     MATRIX WHERE V=D_E(XC)/D_RHO.  IN C1 SYMMETRY FOR NOW.
+C>     THE RADIAL QUADRATURE FORMULA IS TAKEN FROM
+C>     P.M.W.GILL, B.G.JOHNSON, J.A.POPLE AND M.J.FRISCH,
+C>     CHEM. PHYS. LETT. 197, 499 (1992).
+C>     THE ANGULAR QUADRATURE FORMULA IS TAKEN FROM V.I.LEBEDEV,
+C>     ZH. VYCHISL. MAT. FIZ. 15, 48 (1975) AND 16, 293 (1976),
+C>     (ENGLISH TRANSLATION IN U.S.S.R. COMPUT. MATH AND MATH PHYS).
+C>     EXCHANGE AND CORRELATION ENERGY CONTRIBUTION DUE TO INTEGRATION
+C>     OVER GRID POINTS SURROUNDING ATOM NCNTR IS COMPUTED.
+C>     This is a clone of DMATD
+C>     This routine is for UHF calculation
+C>     PCC-DFT transforms delta operator from 4 component picture
+C>     to 2component or 1 component one.
+C>     Here, the transformation is based on infinite-order two-component
+C>     (IOTC) method. In addition, the efficient scheme using the local
+C>     unitary transformation (LUT) is combined with PCC-DFT.
+C>     Please refer to the following papers about PCC DFT.
+C>      T. Oyama, Y. Ikabata, J. Seino, and H. Nakai,
+C>      Chem. Phys. Lett. 680,37 (2017).
+C>      Y. Ikabata, T. Oyama, M. Hayami, J. Seino, and H. Nakai,
+C>      J. Chem. Phys. 150, 164104 (2019).
+C>
+C>    @date : Chinami Takashima, December, 2021
+C>
+C>    @note : not connected with MCPDFTRUN and divide-and-conquer method
+C
+      SUBROUTINE DMATD_LUTPCC_UHF(
+     *                 TOTWT,IIFACT,NAPTS,COEFFA,COEFFB,IANGN,IFACTR,
+     *                 VMOA,DVMOXA,DVMOYA,DVMOZA,VALGA,VMOB,DVMOXB,
+     *                 DVMOYB,DVMOZB,VALGB,FA,FB,IUNIQ,EEXC,TOTELE,NANG,
+     *                 PTRAD,XDAT,YDAT,ZDAT,ATMXVEC,ATMYVEC,ATMZVEC,
+     *                 ANGXVL,ANGYVL,ANGZVL,RSQRD,PCOEFF,EXPS,
+     *                 AOX,GAOX,GAOY,GAOZ,NLCT,NELM,IJX,IJY,IJZ,L1,
+     *                 NEEDGR,UROHF,TOTKIN,ATMPOL,ATPPOL,EFPOL,
+     *                 WTAB,DRSPH,MAXL,MAXM,NFREQ,
+     *                 RMOMG,PIOMG,B000,B100,B010,B001,
+     *                 B200,B110,B101,B020,B011,B002,
+     *                 WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,WORK7,
+     *                 RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *                 RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,
+     *                 RMMB000,RMPB100,RMPB010,RMPB001,RMMB100,
+     *                 RMMB010,RMMB001,RMPB200,RMPB110,RMPB101,
+     *                 RMPB020,RMPB011,RMPB002,
+     *                 RMMB000B,RMPB100B,RMPB010B,RMPB001B,RMMB100B,
+     *                 RMMB010B,RMMB001B,RMPB200B,RMPB110B,RMPB101B,
+     *                 RMPB020B,RMPB011B,RMPB002B,WORK9,
+     *                 B000S,B100S,B010S,B001S,B200S,B110S,B101S,B020S,
+     *                 B011S,B002S,RMB000S,RMB100S,RMB010S,RMB001S,
+     *                 RPB100S,RPB010S,RPB001S,RPB200S,RPB110S,RPB101S,
+     *                 RPB020S,RPB011S,RPB002S)
+      USE metaGGA, ONLY: NEEDTAU
+      USE funclib, ONLY: FUNCL, FUNFL
+      use mx_limits, only: mxatm,mxgrid,mxgridtyp,mxrt,mxao,mxnoro
+      use comm_RDM_MCPDFT, only: ld1a,lxt4,nactive,nnz
+C
+      USE mod_dft_gridint, ONLY: dmatd_blk
+      USE params, ONLY: dft_bfc_algo
+      USE modmcpdft
+      use libxc, only: use_libxc, libxc_calc
+      use mod_lutiotc, only: NNUMAO
+      IMPLICIT NONE
+C
+C#include "rdm_info.fh"
+      LOGICAL UROHF,OUT,NEEDGR,GOPARR,DSKWRK,MASWRK,DLB,SG1
+C     used common block
+      INTEGER :: NDFTFG,NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,NANGPT,
+     *           NANGPT0,JANS
+      DOUBLE PRECISION :: DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD
+      COMMON /DFGRID/ DFTTHR,DFTGTHR,SWOFF,SW0,BSLRD(137),NDFTFG,
+     *                NRAD,NTHE,NPHI,NRAD0,NTHE0,NPHI0,
+     *                NANGPT(MXGRID),NANGPT0(MXGRID),SG1,JANS
+      INTEGER :: IPRUNECUTS,NTOTGRIDPOINTS,NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: PRUNERADS,PRUNEATOMS
+      COMMON /DFPRUN/ PRUNERADS(MXGRID,MXGRIDTYP),
+     *                PRUNEATOMS(2,MXGRIDTYP),
+     *                IPRUNECUTS(MXATM),NTOTGRIDPOINTS(MXATM),
+     *                NGRIDS,MAXANG,NGRIDTYPS
+      DOUBLE PRECISION :: X
+      COMMON /FMCOM / X(1)
+      INTEGER :: IDENAO
+      COMMON /DNSAO / IDENAO
+      INTEGER :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION :: ZAN,C
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,
+     *                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      INTEGER :: IR,IW,IP,IS,IPK,IDAF,NAV,IODA
+      COMMON /IOFILE/ IR,IW,IP,IS,IPK,IDAF,NAV,IODA(950)
+      DOUBLE PRECISION :: GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                    GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,ECORL,EXCOR
+      COMMON /LMOEDA/ GDTOLA,GJTOLA,GKTOLA,TKTOLA,VTOLA,
+     *                GDTOLB,GJTOLB,GKTOLB,TKTOLB,VTOLB,
+     *                ECORL,EXCOR
+      INTEGER :: ME,MASTER,NPROC,IBTYP,IPTIM
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      INTEGER :: IQRORD,MODQR,NESOC,NRATOM,NUMU,NQMTR,NQRDAF,MORDA,
+     *           NDARELB
+      DOUBLE PRECISION :: RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU
+      COMMON /RELWFN/ RMETHOD,QRQMT,CLIG,CLIG2,QRTOL,TAU,
+     *                IQRORD,MODQR,NESOC,NRATOM,
+     *                NUMU,NQMTR,NQRDAF,MORDA,NDARELB
+      INTEGER :: NEVALS,NGLEVL,NHLEVL
+      DOUBLE PRECISION :: RUNTYP,EXETYP
+      COMMON /RUNOPT/ RUNTYP,EXETYP,NEVALS,NGLEVL,NHLEVL
+      INTEGER :: MAXIT,MCONV,NPUNCH,NPREO
+      DOUBLE PRECISION :: CONVHF,FSHIFT
+      COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+      INTEGER :: NSHL,NBSF,NNUM,NLOC,NUNV,NUNPV,ISUB
+      COMMON /SETATM/ NSHL(MXATM),NBSF(MXATM),NNUM(MXATM),NLOC(MXATM),
+     *                NUNV,NUNPV,ISUB
+      LOGICAL LRDFLG,MLTINT,DOLRD
+      DOUBLE PRECISION :: ELRD6,ELRD8,ELRD10,EMULT
+      COMMON /LRDISP/ ELRD6,ELRD8,ELRD10,EMULT,LRDFLG,MLTINT,DOLRD
+C
+      DOUBLE PRECISION :: DEBUG,DFTGRD
+      DATA DEBUG/8HDEBUG   /, DFTGRD/8HDERDFT  /
+C
+      INTEGER, INTENT(IN) :: IIFACT(NAT),NAPTS(NAT),IANGN(NAT,2,*),
+     *   IFACTR(NAT),IUNIQ(*),NANG,
+     *   NLCT(*),NELM(*),IJX(84),IJY(84),IJZ(84),L1,MAXL,MAXM,NFREQ
+      DOUBLE PRECISION, INTENT(IN) ::  TOTWT(NAT,*), PTRAD(*),
+     *   XDAT(MAXANG,NAT,*),YDAT(MAXANG,NAT,*),ZDAT(MAXANG,NAT,*),
+     *   EXPS(*),ATMPOL(NAT,MAXL,MAXM,MAXM,NFREQ),
+     *   ATPPOL(NAT,NAT,NFREQ),EFPOL(NAT),DRSPH(3,MAXL,MAXM)
+      DOUBLE PRECISION, INTENT(INOUT) :: COEFFA(L1,*),COEFFB(L1,*),
+     *   VMOA(L1),DVMOXA(L1),DVMOYA(L1),DVMOZA(L1),VMOB(L1),DVMOXB(L1),
+     *   DVMOYB(L1),DVMOZB(L1),VALGA(L1),VALGB(L1),
+     *   FA(*),FB(*),RSQRD(*),ANGXVL(NAT,*),ANGYVL(NAT,*),ANGZVL(NAT,*),
+     *   ATMXVEC(NAT,NAT),ATMYVEC(NAT,NAT),ATMZVEC(NAT,NAT),
+     *   AOX(L1),GAOX(L1),GAOY(L1),GAOZ(L1),
+     *   PCOEFF(*),WTAB(NAT,NAT,*)
+C
+      DOUBLE PRECISION, INTENT(IN) :: RMOMG(NUMU*NUM),PIOMG(NUMU*NUM),
+     *   B000(NUMU),B100(NUMU),B010(NUMU),B001(NUMU),B200(NUMU),
+     *   B110(NUMU),B101(NUMU),B020(NUMU),B011(NUMU),B002(NUMU),
+     *   WORK1(NUMU),WORK2(NUMU),WORK3(NUMU),WORK4(NUMU),WORK5(NUMU),
+     *   WORK6(NUMU),WORK7(NUM),
+     *   RMB000(NUM),RPB100(NUM),RPB010(NUM),RPB001(NUM),RMB100(NUM),
+     *   RMB010(NUM),RMB001(NUM),RPB200(NUM),RPB110(NUM),RPB101(NUM),
+     *   RPB020(NUM),RPB011(NUM),RPB002(NUM),
+     *   RMMB000(NA),RMPB100(NA),RMPB010(NA),RMPB001(NA),RMMB100(NA),
+     *   RMMB010(NA),RMMB001(NA),RMPB200(NA),RMPB110(NA),RMPB101(NA),
+     *   RMPB020(NA),RMPB011(NA),RMPB002(NA),
+     *   RMMB000B(NB),RMPB100B(NB),RMPB010B(NB),RMPB001B(NB),
+     *   RMMB100B(NB),RMMB010B(NB),RMMB001B(NB),RMPB200B(NB),
+     *   RMPB110B(NB),RMPB101B(NB),RMPB020B(NB),RMPB011B(NB),
+     *   RMPB002B(NB),WORK9(NUM),
+     *   B000S(NUMU),B100S(NUMU),B010S(NUMU),B001S(NUMU),B200S(NUMU),
+     *   B110S(NUMU),B101S(NUMU),B020S(NUMU),B011S(NUMU),B002S(NUMU),
+     *   RMB000S(NUM),RMB100S(NUM),RMB010S(NUM),RMB001S(NUM),
+     *   RPB100S(NUM),RPB010S(NUM),RPB001S(NUM),RPB200S(NUM),
+     *   RPB110S(NUM),RPB101S(NUM),RPB020S(NUM),RPB011S(NUM),
+     *   RPB002S(NUM)
+C     variables defined in this routine
+      INTEGER :: NCNTR,INC0,NOA,NOB,NPT,LOOP,NGRAN,NLOOP,MCHUNK,NEXT,
+     *   IGRID,IRADPT,IANGPT,IPT,ICHUNK,IPTME,IANG
+      DOUBLE PRECISION, PARAMETER :: ZERO=0.0D+00,ONE=1.0D+00,
+     *   HALF=0.5D+00,TWO=2.0D+00,THRSRHO=1.0D-15,THRSPI=1.0D-15,
+     *   THRSRHO2=1.0D-15,THRSRHO3=0.9D0,THRSRHO4=1.15D0,
+     *   AB1=-4.756065601D+2,BB1=-3.794733192D+2,CB1=-8.538149682D+1
+      DOUBLE PRECISION :: ABSGRID(3),EEXC,TOTELE,TOTKIN,EXEC,ECORL1,
+     *   TOTGRADX,TOTGRADY,TOTGRADZ,GRDAA,GRDBB,GRDAB,DFTTHRS,WCUTOFF,
+     *   RCUTOFF,CCUTOFF,RAD,BRAGGRAD,FACT,R1,FTOTWT,XD,YD,ZD,XCDNT,
+     *   YCDNT,ZCDNT,ROA,ROB,GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     *   TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,VXCA1,VXCB1,
+     *   DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,XALPHA,XGRD,ECF,
+     *   DMGGA,DMGA,DMGGB,DMGB,DUMA,DUMB,EXEC1
+      INTEGER :: IATM,IPOS,IAOS,IPAS,NPOS,NAOS
+      DOUBLE PRECISION, EXTERNAL :: DDOT
+CT      iTri(i,j) = Max(i,j)*(Max(i,j)-1)/2 + Min(i,j)
+C-END
+C
+C     IDENAO=0 MEANS REGULAR DFT
+C     IDENAO=1 MEANS DIVIDE AND CONQUER DFT
+C
+c MV
+      IF (.NOT.dolrd .AND. dft_bfc_algo.GE.0 .AND. idenao.EQ.0) THEN
+c       New XC integration algorithm
+        CALL dmatd_blk(coeffa,coeffb,fa,fb,
+     *              eexc,totele,totkin,
+     *              atmxvec,atmyvec,atmzvec,
+     *              nang,l1,needgr,urohf)
+        RETURN
+      END IF
+c /MV
+C
+C     Loop over atoms
+      DO 30 NCNTR = 1, NAT
+C
+      INC0=IUNIQ(NCNTR)
+      IF(INC0.EQ.0) GOTO 30
+
+      OUT = EXETYP.EQ.DFTGRD  .OR.  EXETYP.EQ.DEBUG
+      EXEC = ZERO
+      ECORL1 = ZERO
+      TOTGRADX = ZERO
+      TOTGRADY = ZERO
+      TOTGRADZ = ZERO
+C                 LDA WILL NOT ASSIGN ANY VALUES TO DENSITY GRADIENTS
+      GRDAA = ZERO
+      GRDBB = ZERO
+      GRDAB = ZERO
+      NOA = NA
+      NOB = NB
+      NPT = NRAD*MAXANG
+C
+C     SET CUT-OFFS FOR THE DENSITY RCUTOFF AND WEIGHT WCUTOFF
+C     RCUTOFF IS SET TO DEPEND UPON SCF DENSITY CONV. AND THE GRID SIZE
+C     WCUTOFF IS A CELL VOLUME AND WE SET IT TO A FIXED VALUE.
+C     MOST CELLS HAVE LARGE VOLUME (ABOUT 97% HAVE VOLUME .GT. 1E-14)
+C
+      DFTTHRS=DFTTHR
+      IF(DFTTHR.EQ.ZERO) DFTTHR=1.0D-04/(NPT*NAT)
+      WCUTOFF=1.0D-08/(NPT*NAT)
+      RCUTOFF=CONVHF/(NPT*NAT)
+      CCUTOFF=1.0D-03/(NPT*NAT)
+      IF(DFTTHR.LT.1.1D-15) THEN
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+      IF(MCPDFTRUN) then
+         DFTTHR =1.0D-15
+         WCUTOFF=1.0D-15
+         RCUTOFF=1.0D-15
+         CCUTOFF=1.0D-15
+      ENDIF
+
+
+C
+C     ANGXVL=X**I, ANGYVL=Y**J, ANGZVL=Z**K, FOR NEEDED VALUES OF I,J,K
+C     WHERE (X,Y,Z) IS THE CENTRE OF A DFT GRID POINT RI
+C     MINUS AN ATOMIC CENTRE RA: XYZ= (RI - RA)
+C
+      CALL VCLR(ANGXVL(1,1),1,NAT)
+      CALL VCLR(ANGYVL(1,1),1,NAT)
+      CALL VCLR(ANGZVL(1,1),1,NAT)
+      CALL DACOPY(NAT,ONE,ANGXVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGYVL(1,2),1)
+      CALL DACOPY(NAT,ONE,ANGZVL(1,2),1)
+C
+      RAD = BRAGGRAD(NCNTR)
+C
+C     ---- SYMMETRY MULTIPLICATION FACTOR ----
+      FACT = IIFACT(NCNTR)*IFACTR(INC0)
+C
+C     NAPTS   + (NAT-1)/NWDVAR+1
+C     DYNAMIC LOAD BALANCING: DIVIDE ALL POINTS INTO NGRAN*NPROC CHUNKS.
+C     NGRAN CANNOT BE SET IN THE INPUT FILE. THEN EACH NODE GETS A CHUNK
+C     AND TOILS IT OVER UNTIL READY TO ASK FOR MORE.
+C
+      LOOP=0
+      NGRAN=20
+      IF(NGRIDS.EQ.1) THEN
+         NLOOP=NRAD*(IANGN(NCNTR,2,1)-IANGN(NCNTR,1,1)+1)
+      ELSE
+         NLOOP=NTOTGRIDPOINTS(NCNTR)
+      ENDIF
+      MCHUNK=(NLOOP-1)/(NGRAN*NPROC)+1
+      NEXT  = -1
+      DLB = IBTYP.EQ.1
+C***********************************************************************
+C     LOOP OVER RADIAL GRIDS
+C     LOOP OVER ANGULAR GRIDS
+C***********************************************************************
+C STB MODIFIED FOR PRUNING
+      IGRID = 1
+      DO 20 IRADPT = 1, NRAD
+C
+        R1= RAD*PTRAD(IRADPT)
+        IF(R1.GE.(PRUNERADS(IGRID,IPRUNECUTS(NCNTR))*RAD)) THEN
+           IGRID = IGRID + 1
+        ENDIF
+        DO 10 IANGPT = IANGN(NCNTR,1,IGRID), IANGN(NCNTR,2,IGRID)
+C         STB - FOR NOW THIS SHOULD BE OK AS I USED THE MAX ANGULAR
+C               POINTS SO AS TO SIMPLIFY
+          IPT=(IRADPT-1)*NAPTS(NCNTR)+IANGPT
+C
+          IF(GOPARR) THEN
+            IF(DLB) THEN
+              LOOP=LOOP+1
+              ICHUNK=(LOOP-1)/MCHUNK
+              IF(ICHUNK.GT.NEXT) THEN
+                CALL DDI_DLBNEXT(NEXT)
+              ENDIF
+              IF(NEXT.NE.ICHUNK) GOTO 10
+            ELSE
+              IF(MOD(IPT,NPROC).NE.ME) GOTO 10
+            ENDIF
+          ENDIF
+          IPTME=(IPT-1)/NPROC+1
+          IF(DLB) IPTME=IPT
+C
+          FTOTWT = TOTWT(NCNTR,IPTME)*FACT
+          IF(ABS(FTOTWT).LT.WCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          XD=R1*XDAT(IANGPT,NCNTR,IGRID)
+          YD=R1*YDAT(IANGPT,NCNTR,IGRID)
+          ZD=R1*ZDAT(IANGPT,NCNTR,IGRID)
+          DO 610 IATM=1,NAT
+            XCDNT=ATMXVEC(NCNTR,IATM)+XD
+            YCDNT=ATMYVEC(NCNTR,IATM)+YD
+            ZCDNT=ATMZVEC(NCNTR,IATM)+ZD
+            RSQRD(IATM)=XCDNT**2+YCDNT**2+ZCDNT**2
+            ANGXVL(IATM,3)=XCDNT
+            ANGYVL(IATM,3)=YCDNT
+            ANGZVL(IATM,3)=ZCDNT
+            DO 35 IANG=3,NANG
+               ANGXVL(IATM,IANG+1)=ANGXVL(IATM,IANG)*XCDNT
+               ANGYVL(IATM,IANG+1)=ANGYVL(IATM,IANG)*YCDNT
+               ANGZVL(IATM,IANG+1)=ANGZVL(IATM,IANG)*ZCDNT
+ 35         CONTINUE
+  610     CONTINUE
+C
+          ABSGRID(1)=XD+C(1,NCNTR)
+          ABSGRID(2)=YD+C(2,NCNTR)
+          ABSGRID(3)=ZD+C(3,NCNTR)
+C
+C***********************************************************************
+C     FORM DENSITY AT THIS POINT
+C***********************************************************************
+          IF(IDENAO.EQ.0) THEN
+             CALL PDELTA(ABSGRID,B000,B100,B010,B001,B200,B110,B101,
+     *                   B020,B011,B002,
+     *                   WORK1,WORK2,WORK3,WORK4,WORK5,WORK6)
+C
+             IPOS = 1
+             IAOS = 1
+             IPAS = 1
+C
+             DO IATM = 1, NAT
+               NPOS = NNUM(IATM)
+               NAOS = NNUMAO(IATM)
+C
+               CALL DCOPY(NPOS,B000(IPOS),1,B000S(1),1)
+               CALL DCOPY(NPOS,B100(IPOS),1,B100S(1),1)
+               CALL DCOPY(NPOS,B010(IPOS),1,B010S(1),1)
+               CALL DCOPY(NPOS,B001(IPOS),1,B001S(1),1)
+               CALL DCOPY(NPOS,B200(IPOS),1,B200S(1),1)
+               CALL DCOPY(NPOS,B110(IPOS),1,B110S(1),1)
+               CALL DCOPY(NPOS,B101(IPOS),1,B101S(1),1)
+               CALL DCOPY(NPOS,B020(IPOS),1,B020S(1),1)
+               CALL DCOPY(NPOS,B011(IPOS),1,B011S(1),1)
+               CALL DCOPY(NPOS,B002(IPOS),1,B002S(1),1)
+C
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B000S,NPOS,ZERO,RMB000S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B100S,NPOS,ZERO,RMB100S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B010S,NPOS,ZERO,RMB010S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,RMOMG(IPAS),NUMU,
+     *                    B001S,NPOS,ZERO,RMB001S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B100S,NPOS,ZERO,RPB100S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B010S,NPOS,ZERO,RPB010S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B001S,NPOS,ZERO,RPB001S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B200S,NPOS,ZERO,RPB200S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B110S,NPOS,ZERO,RPB110S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B101S,NPOS,ZERO,RPB101S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B020S,NPOS,ZERO,RPB020S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B011S,NPOS,ZERO,RPB011S,NAOS)
+               CALL DGEMM('T','N',NAOS,1,NPOS,ONE,PIOMG(IPAS),NUMU,
+     *                    B002S,NPOS,ZERO,RPB002S,NAOS)
+C
+               CALL DCOPY(NAOS,RMB000S(1),1,RMB000(IAOS),1)
+               CALL DCOPY(NAOS,RMB100S(1),1,RMB100(IAOS),1)
+               CALL DCOPY(NAOS,RMB010S(1),1,RMB010(IAOS),1)
+               CALL DCOPY(NAOS,RMB001S(1),1,RMB001(IAOS),1)
+               CALL DCOPY(NAOS,RPB100S(1),1,RPB100(IAOS),1)
+               CALL DCOPY(NAOS,RPB010S(1),1,RPB010(IAOS),1)
+               CALL DCOPY(NAOS,RPB001S(1),1,RPB001(IAOS),1)
+               CALL DCOPY(NAOS,RPB200S(1),1,RPB200(IAOS),1)
+               CALL DCOPY(NAOS,RPB110S(1),1,RPB110(IAOS),1)
+               CALL DCOPY(NAOS,RPB101S(1),1,RPB101(IAOS),1)
+               CALL DCOPY(NAOS,RPB020S(1),1,RPB020(IAOS),1)
+               CALL DCOPY(NAOS,RPB011S(1),1,RPB011(IAOS),1)
+               CALL DCOPY(NAOS,RPB002S(1),1,RPB002(IAOS),1)
+C
+               IPOS = IPOS + NPOS
+               IAOS = IAOS + NAOS
+               IPAS = IPAS + NUMU*NAOS + NPOS
+C
+             END DO
+C
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB000,NUM,
+     *                  ZERO,RMMB000,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB100,NUM,
+     *                  ZERO,RMMB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB010,NUM,
+     *                  ZERO,RMMB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RMB001,NUM,
+     *                  ZERO,RMMB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB100,NUM,
+     *                  ZERO,RMPB100,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB010,NUM,
+     *                  ZERO,RMPB010,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB001,NUM,
+     *                  ZERO,RMPB001,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB200,NUM,
+     *                  ZERO,RMPB200,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB110,NUM,
+     *                  ZERO,RMPB110,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB101,NUM,
+     *                  ZERO,RMPB101,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB020,NUM,
+     *                  ZERO,RMPB020,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB011,NUM,
+     *                  ZERO,RMPB011,NA)
+             CALL DGEMM('N','N',NA,1,NUM,ONE,COEFFA,NUM,RPB002,NUM,
+     *                  ZERO,RMPB002,NA)
+C
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB000,NUM,
+     *                  ZERO,RMMB000B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB100,NUM,
+     *                  ZERO,RMMB100B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB010,NUM,
+     *                  ZERO,RMMB010B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RMB001,NUM,
+     *                  ZERO,RMMB001B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB100,NUM,
+     *                  ZERO,RMPB100B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB010,NUM,
+     *                  ZERO,RMPB010B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB001,NUM,
+     *                  ZERO,RMPB001B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB200,NUM,
+     *                  ZERO,RMPB200B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB110,NUM,
+     *                  ZERO,RMPB110B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB101,NUM,
+     *                  ZERO,RMPB101B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB020,NUM,
+     *                  ZERO,RMPB020B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB011,NUM,
+     *                  ZERO,RMPB011B,NB)
+             CALL DGEMM('N','N',NB,1,NUM,ONE,COEFFB,NUM,RPB002,NUM,
+     *                  ZERO,RMPB002B,NB)
+C
+            ROA = DDOT(NA,RMMB000,1,RMMB000,1)
+            ROA = ROA + DDOT(NA,RMPB100,1,RMPB100,1)
+            ROA = ROA + DDOT(NA,RMPB010,1,RMPB010,1)
+            ROA = ROA + DDOT(NA,RMPB001,1,RMPB001,1)
+C
+            ROB = DDOT(NB,RMMB000B,1,RMMB000B,1)
+            ROB = ROB + DDOT(NB,RMPB100B,1,RMPB100B,1)
+            ROB = ROB + DDOT(NB,RMPB010B,1,RMPB010B,1)
+            ROB = ROB + DDOT(NB,RMPB001B,1,RMPB001B,1)
+          ELSE
+             WRITE(IW,*) "ERROR: PCC NOT FOR IDENAO.EQ.1(DCDFT?)"
+             CALL ABRT
+          END IF
+          IF(ABS(ROA+ROB).LT.RCUTOFF) THEN
+             GOTO 10
+          ENDIF
+C
+          IF(NEEDGR) THEN
+C***********************************************************************
+C     FORM DENSITY GRADIENT AT THIS POINT
+C***********************************************************************
+CT            IF(IDENAO.EQ.0) THEN
+            GRADXA = DDOT(NA,RMMB100,1,RMMB000,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB200,1,RMPB100,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB110,1,RMPB010,1)
+            GRADXA = GRADXA + DDOT(NA,RMPB101,1,RMPB001,1)
+C
+            GRADYA = DDOT(NA,RMMB010,1,RMMB000,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB110,1,RMPB100,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB020,1,RMPB010,1)
+            GRADYA = GRADYA + DDOT(NA,RMPB011,1,RMPB001,1)
+C
+            GRADZA = DDOT(NA,RMMB001,1,RMMB000,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB101,1,RMPB100,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB011,1,RMPB010,1)
+            GRADZA = GRADZA + DDOT(NA,RMPB002,1,RMPB001,1)
+C
+            GRADXA = GRADXA * TWO
+            GRADYA = GRADYA * TWO
+            GRADZA = GRADZA * TWO
+C
+CT             IF (MCPDFTRUN) THEN
+CT              CALL DFTTRFG(UROHF,L1,L1,COEFFA,COEFFB,GAOX,GAOY,GAOZ,
+CT     *                     DVMOXA,DVMOYA,DVMOZA,DVMOXB,DVMOYB,DVMOZB,
+CT     *                     CCUTOFF)
+CTC             MCPDFTRUN=.false.
+CTC             goto 444
+CT               GRADXA=DDOT(NINACT,VMOA,1,DVMOXA,1)*TWO
+CT               GRADYA=DDOT(NINACT,VMOA,1,DVMOYA,1)*TWO
+CT               GRADZA=DDOT(NINACT,VMOA,1,DVMOZA,1)*TWO
+CT              IF(NACTIVE.GT.0) THEN
+CT               DO I=1, NACTIVE
+CT                 DO J=1,I
+CT                   FACT12 = 1.0d0
+CT                   IF (I.EQ.J)FACT12=0.5D0
+CT                   IJ=iTri(i,j)
+CT                   GRADXA=GRADXA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOXA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOXA(NINACT+i))
+CT                   GRADYA=GRADYA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOYA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOYA(NINACT+i))
+CT                   GRADZA=GRADZA+X(LD1A-1+IJ)*FACT12*
+CT     *        (VMOA(NINACT+i)*DVMOZA(NINACT+j)
+CT     *        + VMOA(NINACT+j)*DVMOZA(NINACT+i))
+CT
+CT                 ENDDO
+CT               ENDDO
+CT              ENDIF
+CT             ELSE
+CT  444       continue
+CT              GRADXA=TWO*DDOT(NOA,VMOA,1,DVMOXA,1)
+CT              GRADYA=TWO*DDOT(NOA,VMOA,1,DVMOYA,1)
+CT              GRADZA=TWO*DDOT(NOA,VMOA,1,DVMOZA,1)
+CT             ENDIF
+              GRADXB = DDOT(NB,RMMB100B,1,RMMB000B,1)
+              GRADXB = GRADXB + DDOT(NB,RMPB200B,1,RMPB100B,1)
+              GRADXB = GRADXB + DDOT(NB,RMPB110B,1,RMPB010B,1)
+              GRADXB = GRADXB + DDOT(NB,RMPB101B,1,RMPB001B,1)
+C
+              GRADYB = DDOT(NB,RMMB010B,1,RMMB000B,1)
+              GRADYB = GRADYB + DDOT(NB,RMPB110B,1,RMPB100B,1)
+              GRADYB = GRADYB + DDOT(NB,RMPB020B,1,RMPB010B,1)
+              GRADYB = GRADYB + DDOT(NB,RMPB011B,1,RMPB001B,1)
+C
+              GRADZB = DDOT(NB,RMMB001B,1,RMMB000B,1)
+              GRADZB = GRADZB + DDOT(NB,RMPB101B,1,RMPB100B,1)
+              GRADZB = GRADZB + DDOT(NB,RMPB011B,1,RMPB010B,1)
+              GRADZB = GRADZB + DDOT(NB,RMPB002B,1,RMPB001B,1)
+C
+              GRADXB = GRADXB * TWO
+              GRADYB = GRADYB * TWO
+              GRADZB = GRADZB * TWO
+C
+CT            ELSE
+CT               GRADXA=DDOT(L1,GAOX,1,VMOA,1)
+CT               GRADYA=DDOT(L1,GAOY,1,VMOA,1)
+CT               GRADZA=DDOT(L1,GAOZ,1,VMOA,1)
+CT               IF(UROHF) THEN
+CT                  GRADXA=GRADXA*TWO
+CT                  GRADYA=GRADYA*TWO
+CT                  GRADZA=GRADZA*TWO
+CT                  GRADXB=DDOT(L1,GAOX,1,VMOB,1)*TWO
+CT                  GRADYB=DDOT(L1,GAOY,1,VMOB,1)*TWO
+CT                  GRADZB=DDOT(L1,GAOZ,1,VMOB,1)*TWO
+CT               ELSE
+CT                  GRADXB=GRADXA
+CT                  GRADYB=GRADYA
+CT                  GRADZB=GRADZA
+CT               END IF
+CT            END IF
+
+C Andrew - here we need to perform the translation for PDFT
+C First step - calculate the on-top pair density
+C  Return "ONTOP", "ONTOPX", "ONTOPY", "ONTOPZ" I guess.
+C
+C  It looks like DFTTRFG is the subroutine that calculates the gradients
+C  for the MOs (needed for building the on-top gradients needed for ft-
+C  class functionals.
+C
+C  The subroutine DFTTRFA calculates the MOs at the grid point.
+
+C           goto 457
+C          mcpdftrun=.false.
+CT          IF (.NOT.MCPDFTRUN) GOTO 457
+CT           CALL GONTOP(VMOA,VMOB,DVMOXA,DVMOXB,DVMOYA,DVMOYB,DVMOZA,
+CT     *                DVMOZB,ONTOP,ONTOPX,ONTOPY,ONTOPZ,NACTIVE)
+CT
+CT          TOTELEA = TOTELEA + FTOTWT*ROA
+CT          TOTELEB = TOTELEB + FTOTWT*ROA
+CTC Second - Translate the density/derivatives
+CT           DTOT = ROA + ROB !Total denisty
+CT           GRADX = GRADXA + GRADXB
+CT           GRADY = GRADYA + GRADYB
+CT           GRADZ = GRADZA + GRADZB
+CT           RATIO = 0.0D0
+CT           if ((DTOT.gt.THRSRHO).and.(ONTOP.ge.THRSRHO)) then
+CT             RATIO = 4.0D0*ONTOP/(DTOT**2.0D0)
+CTC             write(*,*) "ratio", ratio,4.0d0*ontop,DTOT**2d0
+CT           endif
+CTC           goto 457
+CT
+CTC Translation for t-GGA functionals:
+CT        IF (.NOT.F_FLAG) THEN
+CT           IF((1.0D0-RATIO).gt.THRSRHO) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ELSE
+CT             ZETA = 0.0D0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT        ELSE
+CTcPS           goto 457
+CT
+CTC Translation for ft-GGA functionals:
+CT           IF((1.0D0-RATIO).gt.THRSRHO.AND.(RATIO.LT.THRSRHO3)) THEN
+CT             ZETA = SQRT(1.0D0-RATIO)
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT     *               + RATIO*GRADX/(2.0D0*ZETA)
+CT     *               - ONTOPX/(DTOT*ZETA)
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT     *               + RATIO*GRADY/(2.0D0*ZETA)
+CT     *               - ONTOPY/(DTOT*ZETA)
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT     *               + RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               - ONTOPZ/(DTOT*ZETA)
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT     *               - RATIO*GRADX/(2.0D0*ZETA)
+CT     *               + ONTOPX/(DTOT*ZETA)
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT     *               - RATIO*GRADY/(2.0D0*ZETA)
+CT     *               + ONTOPY/(DTOT*ZETA)
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT     *               - RATIO*GRADZ/(2.0D0*ZETA)
+CT     *               + ONTOPZ/(DTOT*ZETA)
+CT           ELSE IF((RATIO.GE.THRSRHO3).AND.(RATIO.LE.THRSRHO4)) THEN
+CT             ZETA = (AB1*(RATIO-1.15D0)**5.0D0)
+CT     *       + (BB1*(RATIO-1.15D0)**4.0D0) + (CB1*(RATIO-1.15D0)**3.0D0)
+CT
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT
+CT             GRADXA = (1.0D0+ZETA)*GRADX/2.0D0
+CT     *       + (AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPX/DTOT) - (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPX/DTOT) - (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPX/DTOT) - (3.0D0 * RATIO * GRADX))
+CT             GRADYA = (1.0D0+ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPY/DTOT) - (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPY/DTOT) - (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPY/DTOT) - (3.0D0 * RATIO * GRADY))
+CT             GRADZA = (1.0D0+ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((10.0D0*ONTOPZ/DTOT) - (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((8.0D0*ONTOPZ/DTOT) - (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((6.0D0*ONTOPZ/DTOT) - (3.0D0 * RATIO * GRADZ))
+CT             GRADXB = (1.0D0-ZETA)*GRADX/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPX/DTOT) + (5.0D0 * RATIO * GRADX))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPX/DTOT) + (4.0D0 * RATIO * GRADX))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPX/DTOT) + (3.0D0 * RATIO * GRADX))
+CT             GRADYB = (1.0D0-ZETA)*GRADY/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPY/DTOT) + (5.0D0 * RATIO * GRADY))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPY/DTOT) + (4.0D0 * RATIO * GRADY))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPY/DTOT) + (3.0D0 * RATIO * GRADY))
+CT             GRADZB = (1.0D0-ZETA)*GRADZ/2.0D0
+CT     *       +(AB1*(RATIO-1.15D0)**4.0D0)
+CT     *       * ((-10.0D0*ONTOPZ/DTOT) + (5.0D0 * RATIO * GRADZ))
+CT     *       +(BB1*(RATIO-1.15D0)**3.0D0)
+CT     *       * ((-8.0D0*ONTOPZ/DTOT) + (4.0D0 * RATIO * GRADZ))
+CT     *       +(CB1*(RATIO-1.15D0)**2.0D0)
+CT     *       * ((-6.0D0*ONTOPZ/DTOT) + (3.0D0 * RATIO * GRADZ))
+CT           ELSE IF(RATIO.GT.THRSRHO4) THEN
+CT             ZETA = 0.0d0
+CT             ROA = (1.0D0+ZETA)*DTOT/2.0D0
+CT             ROB = (1.0D0-ZETA)*DTOT/2.0D0
+CT             GRADXA = (1.0D0 + ZETA)*GRADX/2.0D0
+CT             GRADYA = (1.0D0 + ZETA)*GRADY/2.0D0
+CT             GRADZA = (1.0D0 + ZETA)*GRADZ/2.0D0
+CT             GRADXB = (1.0D0 - ZETA)*GRADX/2.0D0
+CT             GRADYB = (1.0D0 - ZETA)*GRADY/2.0D0
+CT             GRADZB = (1.0D0 - ZETA)*GRADZ/2.0D0
+CT           ENDIF
+CT       ENDIF
+CT  457      continue
+
+C***********************************************************************
+C      FORM GRADIENT INVARIANT (GRAD DOT GRAD)
+C***********************************************************************
+            GRDAA  = GRADXA*GRADXA+GRADYA*GRADYA+GRADZA*GRADZA
+            GRDBB  = GRADXB*GRADXB+GRADYB*GRADYB+GRADZB*GRADZB
+            GRDAB  = GRADXA*GRADXB+GRADYA*GRADYB+GRADZA*GRADZB
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB = DDOT(NB,RMMB100B,1,RMMB100B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB200B,1,RMPB200B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+C
+              TAUYB = DDOT(NB,RMMB010B,1,RMMB010B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB020B,1,RMPB020B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C
+              TAUZB = DDOT(NB,RMMB001B,1,RMMB001B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB002B,1,RMPB002B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C         THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCTIONAL.
+C         SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C         WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ELSE
+C
+C     THIS ELSE CASE WILL ALLOW USERS TO PRINT OUT THE TOTAL KINETIC
+C     ENERGY DENSITY FOR LDA TYPE FUNCTIONALS.
+C     KEEP IN MIND THAT IF THE FUNCTIONAL DOES NOT CONTAIN A TAU
+C     DEPENDENCE THEN ONE CAN NOT EXPECT THE TOTAL KINETIC ENERGY
+C     DENSITY TO BE EXACTLY EQUAL TO THE EXPECTATION VALUE OF THE
+C     KINETIC ENERGY OPERATOR.
+C
+            IF(NEEDTAU) THEN
+C***********************************************************************
+C     FORM X, Y, Z COMPONENTS OF KINETIC DENISTY AT THIS POINT
+C***********************************************************************
+              TAUXA = DDOT(NA,RMMB100,1,RMMB100,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB200,1,RMPB200,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUXA = TAUXA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUYA = DDOT(NA,RMMB010,1,RMMB010,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB020,1,RMPB020,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB110,1,RMPB110,1)
+              TAUYA = TAUYA + DDOT(NA,RMPB011,1,RMPB011,1)
+C
+              TAUZA = DDOT(NA,RMMB001,1,RMMB001,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB002,1,RMPB002,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB011,1,RMPB011,1)
+              TAUZA = TAUZA + DDOT(NA,RMPB101,1,RMPB101,1)
+C
+              TAUXB = DDOT(NB,RMMB100B,1,RMMB100B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB200B,1,RMPB200B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUXB = TAUXB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+C
+              TAUYB = DDOT(NB,RMMB010B,1,RMMB010B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB020B,1,RMPB020B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB110B,1,RMPB110B,1)
+              TAUYB = TAUYB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C
+              TAUZB = DDOT(NB,RMMB001B,1,RMMB001B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB002B,1,RMPB002B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB101B,1,RMPB101B,1)
+              TAUZB = TAUZB + DDOT(NB,RMPB011B,1,RMPB011B,1)
+C             THE FORMATION OF TAU# IS DONE WITHIN THE META-GGA FUNCT.
+C             SPECIFICALLY, TAU# = (ONE/TWO)*(TAUX#+TAUY#+TAUZ#)
+C             WHERE #=A (ALPHA) OR B (BETA)
+C     ----- THE TOTAL KINETIC DENSITY -----
+            TOTKIN=TOTKIN+FTOTWT*
+     >                 (ONE/TWO)*(TAUXA+TAUYA+TAUZA+TAUXB+TAUYB+TAUZB)
+            ENDIF
+          ENDIF
+C***********************************************************************
+C     THE EXCHANGE-CORRELATION FUNCTIONAL CALCULATION
+C***********************************************************************
+          VXCA1=ZERO
+          VXCB1=ZERO
+          DUMAX=ZERO
+          DUMAY=ZERO
+          DUMAZ=ZERO
+          DUMBX=ZERO
+          DUMBY=ZERO
+          DUMBZ=ZERO
+          XALPHA=ZERO
+          XGRD=ZERO
+          ECF=ZERO
+C
+C         STORES THE DERIVATIVE OF THE FUNCTIONAL WITH RESPECT TO THE
+C         KINETIC ENERGY DENSITY.
+C         ALPHA SPIN
+          DMGGA=ZERO
+          DMGA =ZERO
+C         BETA SPIN
+          DMGGB=ZERO
+          DMGB =ZERO
+          IF(ROA+ROB.le.1.0D-15) THEN
+            XALPHA = 0.0d0
+            XGRD = 0.0d0
+            ECF = 0.0d0
+          ELSE IF(use_libxc) THEN
+            CALL libxc_calc(FTOTWT,
+     >                      ROA,ROB,
+     >                      GRDAA, GRDAB, GRDBB,
+     >                      GRADXA,GRADYA,GRADZA,
+     >                      GRADXB,GRADYB,GRADZB,
+     >                      TAUXA,TAUYA,TAUZA,TAUXB,TAUYB,TAUZB,
+     >                      XALPHA,XGRD,ECF,
+     >                      VXCA1,VXCB1,
+     >                      DUMAX,DUMAY,DUMAZ,
+     >                      DUMBX,DUMBY,DUMBZ,
+     >                      DMGGA, DMGGB)
+          ELSE IF(FUNCL) THEN
+            CALL CCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE IF(FUNFL) THEN
+            CALL FCALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                    GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                    XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                    VXCB1,DUMBX,DUMBY,DUMBZ,ECF)
+          ELSE
+            CALL CALCEXC(ROA,ROB,FTOTWT,GRDAA,GRDBB,GRDAB,
+     >                   GRADXA,GRADYA,GRADZA,GRADXB,GRADYB,GRADZB,
+     >                   XALPHA,XGRD,VXCA1,DUMAX,DUMAY,DUMAZ,
+     >                   VXCB1,DUMBX,DUMBY,DUMBZ,ECF,
+     >                   TAUXA,TAUYA,TAUZA,DMGGA,
+     >                   TAUXB,TAUYB,TAUZB,DMGGB)
+          END IF
+ 451      CONTINUE
+          DUMA = VXCA1
+          DUMB = VXCB1
+C
+          DMGA = DMGGA
+          DMGB = DMGGB
+C
+          EXEC1= XALPHA + XGRD + ECF
+          EXEC = EXEC + EXEC1
+          ECORL1= ECORL1 + ECF
+C
+          IF(NOB.EQ.0) THEN
+             DUMB=ZERO
+             GRADXB=ZERO
+             GRADYB=ZERO
+             GRADZB=ZERO
+          ENDIF
+C
+C Andrew - I think we can calculate the potentials here.  We need the VXCA1
+C and VXCB1, which I think are the dF/drho terms.  We also need the weights,
+C MOs, on-top, and DTOT.
+C
+C***********************************************************************
+C      CONSTRUCT FOCK MATRIX
+C***********************************************************************
+          CALL DFTFOCK_PCC_UHF(NEEDGR,NEEDTAU,FTOTWT,
+     *           DUMA,DUMB,DUMAX,DUMAY,DUMAZ,DUMBX,DUMBY,DUMBZ,
+     *           FA,FB,DFTTHR,L1,DMGA,DMGB,
+     *           RMB000,RPB100,RPB010,RPB001,RMB100,RMB010,RMB001,
+     *           RPB200,RPB110,RPB101,RPB020,RPB011,RPB002,WORK7,WORK9)
+C
+C     ----- THE TOTAL ELECTRON DENSITY -----
+C
+          debcou = debcou + 1
+          TOTELEAt = TOTELEAt + FTOTWT*ROA
+          TOTELEBt = TOTELEBt + FTOTWT*ROB
+          TOTELE  =  TOTELE+FTOTWT*(ROA+ROB)
+          TOTGRADX=TOTGRADX+FTOTWT*GRDAA
+          TOTGRADY=TOTGRADY+FTOTWT*GRDBB
+          TOTGRADZ=TOTGRADZ+FTOTWT*GRDAB
+C
+          IF (DOLRD) THEN
+            CALL LRDPOL(ATMPOL,ATPPOL,EFPOL,FTOTWT,WTAB,FACT,
+     *                  NCNTR,IPTME,ROA,ROB,GRDAA,GRDBB,GRDAB,DRSPH,
+     *                  XD,YD,ZD,MAXL,MAXM,NFREQ)
+          END IF
+C
+   10   CONTINUE
+C
+C     ----- NEXT RADIAL POINT -----
+C
+   20 CONTINUE
+C
+C     ----- NEXT ATOM -----
+C
+c      MCPDFTRUN=.TRUE.
+      IF(GOPARR.AND.DLB) CALL DDI_DLBRESET
+      EEXC = EEXC+EXEC
+      ECORL= ECORL+ECORL1
+      DFTTHR=DFTTHRS
+      IF (OUT) WRITE(IW,9999) NCNTR,EEXC,TOTELE,TOTKIN
+   30 CONTINUE
+      RETURN
+C
+ 9999 FORMAT(/5X,'ATM',I8,' EXC=',F20.10,5X,'TOTELE=',F20.10,'TOTKIN=',
+     >        F20.10)
+      END

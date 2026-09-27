@@ -1,0 +1,1674 @@
+C*MODULE DEAEOMDIP DECK deaeom3ahr3B1A101
+C> @brief Calculate H*R
+C>
+C> @author Jun Shen
+C>
+C> @param N0 number of frozen core orbitals
+C> @param N1 number of occupied alpha orbitals (including frozen core)
+C> @param N2 number of occupied beta orbitals (including frozen core)
+C> @param N3 number of orbitals (including frozen core and virtual)
+C> @param M2 index of the last active unoccupied orbital
+C> @param K1 number of occupied alpha orbitals
+C> @param K2 number of occupied beta orbitals
+C> @param K3 number of unoccupied alpha orbitals
+C> @param K4 number of unoccupied beta orbitals
+C> @param K6 number of non-active unoccupied orbitals
+C> @param K9 number of active unoccupied alpha orbitals
+C> @param K0 number of active unoccupied beta orbitals
+C> @param VAHHPP Twobody alpha-alpha HHPP array
+C> @param VBHHPP Twobody alpha-beta HHPP array
+C> @param VCHHPP Twobody beta-beta HHPP array
+C> @param HAHH One-body Hamiltonian alpha HH array
+C> @param HAHP One-body Hamiltonian alpha HP array
+C> @param HAPP One-body Hamiltonian alpha PP array
+C> @param HBHH One-body Hamiltonian beta HH array
+C> @param HBHP One-body Hamiltonian beta HP array
+C> @param HBPP One-body Hamiltonian beta PP array
+C> @param HAHHHH Twobody Hamiltonian alpha-alpha HHHH array
+C> @param HAHHHP Twobody Hamiltonian alpha-alpha HHHP array
+C> @param HAHPHH Twobody Hamiltonian alpha-alpha HPHH array
+C> @param HAHPHP Twobody Hamiltonian alpha-alpha HPHP array
+C> @param HAHPPP Twobody Hamiltonian alpha-alpha HPPP array
+C> @param HAPPHP Twobody Hamiltonian alpha-alpha PPHP array
+C> @param HBHHHH Twobody Hamiltonian alpha-beta HHHH array
+C> @param HBHHHP Twobody Hamiltonian alpha-beta HHHP array
+C> @param HBHHPH Twobody Hamiltonian alpha-beta HHPH array
+C> @param HBHPHH Twobody Hamiltonian alpha-beta HPHH array
+C> @param HBPHHH Twobody Hamiltonian alpha-beta PHHH array
+C> @param HBHPHP Twobody Hamiltonian alpha-beta HPHP array
+C> @param HBHPPH Twobody Hamiltonian alpha-beta HPPH array
+C> @param HBPHHP Twobody Hamiltonian alpha-beta PHHP array
+C> @param HBPHPH Twobody Hamiltonian alpha-beta PHPH array
+C> @param HBHPPP Twobody Hamiltonian alpha-beta HPPP array
+C> @param HBPHPP Twobody Hamiltonian alpha-beta PHPP array
+C> @param HBPPHP Twobody Hamiltonian alpha-beta PPHP array
+C> @param HBPPPH Twobody Hamiltonian alpha-beta PPPH array
+C> @param HCHHHH Twobody Hamiltonian beta-beta HHHH array
+C> @param HCHHHP Twobody Hamiltonian beta-beta HHHP array
+C> @param HCHPHH Twobody Hamiltonian beta-beta HPHH array
+C> @param HCHPHP Twobody Hamiltonian beta-beta HPHP array
+C> @param HCHPPP Twobody Hamiltonian beta-beta HPPP array
+C> @param HCPPHP Twobody Hamiltonian beta-beta PPHP array
+C> @param T1A one-body alpha cluster components
+C> @param T1B one-body beta cluster components
+C> @param T2A two-body alpha-alpha cluster components
+C> @param T2B two-body alpha-beta cluster components
+C> @param T2C two-body beta-beta cluster components
+C> @param R2B0A 2p R_ab alpha-beta components
+C> @param R3B1A 3p1h R_Abc^i (active-alpha)-alpha-beta,alpha components
+C> @param R3B1A1 3p1h R_abC^i (non-active-alpha)-(non-active-alpha)-(active-beta),alpha components
+C> @param R3C1B 3p1h R_aBc^i alpha-(active-beta)-beta,beta components
+C> @param R3C1B1 3p1h R_Abc^i (active-alpha)-(non-active-beta)-(non-active-beta),beta components
+C> @param R4B2A 4p2h R_ABcd^ij
+C> (active-alpha)-(active-alpha)-alpha-beta,alpha-alpha components
+C> @param R4B2A1 4p2h R_AbcD^ij
+C> (active-alpha)-(non-active-alpha)-(non-active-alpha)-(active-beta),alpha-alpha components
+C> @param R4C2B 4p2h R_AbCd^ij
+C> (active-alpha)-(active-alpha)-(non-active-beta)-(non-active-beta),alpha-beta components
+C> @param R4C2B1 4p2h R_ABcd^ij
+C> (active-alpha)-alpha-(active-beta)-beta,alpha-beta components
+C> @param R4C2B2 4p2h R_abCD^ij
+C> (non-active-alpha)-(non-active-alpha)-(active-beta)-(active-beta),alpha-beta components
+C> @param R4D2C 4p2h R_aBCd^ij
+C> alpha-(active-beta)-(active-beta)-beta,beta-beta components
+C> @param R4D2C1 4p2h R_ABcd^ij
+C> (active-alpha)-(active-beta)-(non-active-beta)-(non-active-beta),beta-beta components
+C>
+       subroutine deaeom3ahr3B1A101(N0,N1,N2,N3,M2,HR3B1A,
+     & K1,K2,K3,K4,K6,K9,K0,
+     & VAHHPP,VBHHPP,VCHHPP,
+     & HAHH,HAHP,HAPP,HBHH,HBHP,HBPP,
+     & HAHHHH,HAHHHP,HAHPHH,HAHPHP,HAHPPP,HAPPHP,
+     & HBHHHH,HBHHHP,HBHHPH,HBHPHH,HBPHHH,HBHPHP,HBHPPH,
+     & HBPHHP,HBPHPH,HBHPPP,HBPHPP,HBPPHP,HBPPPH,
+     & HCHHHH,HCHHHP,HCHPHH,HCHPHP,HCHPPP,HCPPHP,
+     & HAAPPP,HAPPAP,HBAPPP,HBPAPP,HBPPAP,HBPPPA,HCAPPP,HCPPAP,
+     & t1A,t1B,t2A,t2B,t2C,
+     & r2B0A,r3B1A,r3B1A1,r3C1B,r3C1B1,
+     & r4B2A,r4B2A1,r4C2B,r4C2B1,r4C2B2,r4D2C,r4D2C1)
+       use ccsd3a_reorder_mod
+       use ccsd3a_sum_mod
+       use prec, only: dp
+C
+       real*8 VAHHPP(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8 VBHHPP(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8 VCHHPP(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+       real*8 HAHH(N0+1:N1,N0+1:N1)
+       real*8 HAHP(N1+1:N3,N0+1:N1)
+       real*8 HAPP(N1+1:N3,N1+1:N3)
+       real*8 HBHH(N0+1:N2,N0+1:N2)
+       real*8 HBHP(N2+1:N3,N0+1:N2)
+       real*8 HBPP(N2+1:N3,N2+1:N3)
+       real*8 HAHHHH(N0+1:N1,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8 HAHHHP(N1+1:N3,N0+1:N1,N0+1:N1,N0+1:N1)
+       real*8 HAHPHH(N0+1:N1,N0+1:N1,N1+1:N3,N0+1:N1)
+       real*8 HAHPHP(N1+1:N3,N0+1:N1,N1+1:N3,N0+1:N1)
+       real*8 HAHPPP(N1+1:N3,N1+1:N3,N1+1:N3,N0+1:N1)
+       real*8 HAPPHP(N1+1:N3,N0+1:N1,N1+1:N3,N1+1:N3)
+       real*8 HBHHHH(N0+1:N2,N0+1:N1,N0+1:N2,N0+1:N1)
+       real*8 HBHHHP(N2+1:N3,N0+1:N1,N0+1:N2,N0+1:N1)
+       real*8 HBHPHH(N0+1:N2,N0+1:N1,N2+1:N3,N0+1:N1)
+       real*8 HBHHPH(N0+1:N2,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8 HBPHHH(N0+1:N2,N0+1:N1,N0+1:N2,N1+1:N3)
+       real*8 HBHPHP(N2+1:N3,N0+1:N1,N2+1:N3,N0+1:N1)
+       real*8 HBHPPH(N0+1:N2,N1+1:N3,N2+1:N3,N0+1:N1)
+       real*8 HBPHHP(N2+1:N3,N0+1:N1,N0+1:N2,N1+1:N3)
+       real*8 HBPHPH(N0+1:N2,N1+1:N3,N0+1:N2,N1+1:N3)
+       real*8 HBHPPP(N2+1:N3,N1+1:N3,N2+1:N3,N0+1:N1)
+       real*8 HBPPHP(N2+1:N3,N0+1:N1,N2+1:N3,N1+1:N3)
+       real*8 HBPHPP(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:N3)
+       real*8 HBPPPH(N0+1:N2,N1+1:N3,N2+1:N3,N1+1:N3)
+       real*8 HCHHHH(N0+1:N2,N0+1:N2,N0+1:N2,N0+1:N2)
+       real*8 HCHHHP(N2+1:N3,N0+1:N2,N0+1:N2,N0+1:N2)
+       real*8 HCHPHH(N0+1:N2,N0+1:N2,N2+1:N3,N0+1:N2)
+       real*8 HCHPHP(N2+1:N3,N0+1:N2,N2+1:N3,N0+1:N2)
+       real*8 HCHPPP(N2+1:N3,N2+1:N3,N2+1:N3,N0+1:N2)
+       real*8 HCPPHP(N2+1:N3,N0+1:N2,N2+1:N3,N2+1:N3)
+       real*8 HAAPPP(N1+1:N3,N1+1:N3,N1+1:N3,N1+1:M2)
+       real*8 HAPPAP(N1+1:N3,N1+1:M2,N1+1:N3,N1+1:N3)
+       real*8 HBAPPP(N2+1:N3,N1+1:N3,N2+1:N3,N1+1:M2)
+       real*8 HBPAPP(N2+1:N3,N1+1:N3,N2+1:M2,N1+1:N3)
+       real*8 HBPPAP(N2+1:N3,N1+1:M2,N2+1:N3,N1+1:N3)
+       real*8 HBPPPA(N2+1:M2,N1+1:N3,N2+1:N3,N1+1:N3)
+       real*8 HCAPPP(N2+1:N3,N2+1:N3,N2+1:N3,N2+1:M2)
+       real*8 HCPPAP(N2+1:N3,N2+1:M2,N2+1:N3,N2+1:N3)
+       real*8 t1A(N1+1:N3,N0+1:N1)
+       real*8 t1B(N2+1:N3,N0+1:N2)
+       real*8 t2A(N1+1:N3,N1+1:N3,N0+1:N1,N0+1:N1)
+       real*8 t2B(N2+1:N3,N1+1:N3,N0+1:N2,N0+1:N1)
+       real*8 t2C(N2+1:N3,N2+1:N3,N0+1:N2,N0+1:N2)
+       real*8 r2B0A(N2+1:N3,N1+1:N3)
+       real*8 r3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+       real*8 r3B1A1(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1)
+       real*8 r3C1B(N2+1:N3,N2+1:M2,N1+1:N3,N0+1:N2)
+       real*8 r3C1B1(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N2)
+       real*8
+     & r4B2A(N2+1:N3,N1+1:N3,N1+1:M2,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     & r4B2A1(N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1,N0+1:N1)
+       real*8
+     & r4C2B(N2+1:N3,N2+1:M2,N1+1:N3,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     & r4C2B1(M2+1:N3,M2+1:N3,N1+1:M2,N1+1:M2,N0+1:N2,N0+1:N1)
+       real*8
+     & r4C2B2(N2+1:M2,N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N2,N0+1:N1)
+       real*8
+     & r4D2C(N2+1:N3,N2+1:M2,N2+1:M2,N1+1:N3,N0+1:N2,N0+1:N2)
+       real*8
+     & r4D2C1(M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N2,N0+1:N2)
+       real*8 HR3B1A(N2+1:N3,N1+1:N3,N1+1:M2,N0+1:N1)
+C
+       real*8,allocatable::B1(:,:)
+       real*8,allocatable::B2(:,:)
+       real*8,allocatable::C1(:,:,:)
+       real*8,allocatable::C2(:,:,:)
+       real*8,allocatable::D1(:,:,:,:)
+       real*8,allocatable::D2(:,:,:,:)
+       real*8,allocatable::F2(:,:,:,:,:,:)
+C
+       real*8,allocatable::Q1(:,:)
+       real*8,allocatable::Q2(:,:)
+       real*8,allocatable::Q3(:,:)
+       real*8,allocatable::Q4(:,:)
+       real*8,allocatable::Q5(:,:)
+       real*8,allocatable::Q6(:,:)
+       real*8,allocatable::Q7(:,:)
+       real*8,allocatable::Q8(:,:)
+       real*8,allocatable::Q9(:,:)
+       real*8,allocatable::Q10(:,:)
+       real*8,allocatable::Q11(:,:)
+       real*8,allocatable::Q12(:,:)
+       real*8,allocatable::Q13(:,:)
+       real*8,allocatable::Q14(:,:)
+       real*8,allocatable::Q15(:,:)
+       real*8,allocatable::Q16(:,:)
+       real*8,allocatable::Q17(:,:)
+       real*8,allocatable::Q18(:,:)
+       real*8,allocatable::Q19(:,:)
+       real*8,allocatable::Q20(:,:)
+       real*8,allocatable::Q21(:,:)
+       real*8,allocatable::Q22(:,:)
+       real*8,allocatable::U1(:,:,:,:)
+       real*8,allocatable::U2(:,:,:,:)
+       real*8,allocatable::U3(:,:,:,:)
+       real*8,allocatable::X1(:,:)
+       real*8,allocatable::U4(:,:,:,:)
+       real*8,allocatable::X2(:,:)
+       real*8,allocatable::U5(:,:,:,:)
+       real*8,allocatable::X3(:,:)
+       real*8,allocatable::U6(:,:,:,:)
+       real*8,allocatable::U7(:,:,:,:)
+       real*8,allocatable::U8(:,:,:,:)
+       real*8,allocatable::U9(:,:,:,:)
+       real*8,allocatable::U10(:,:,:,:)
+       real*8,allocatable::U11(:,:,:,:)
+       real*8,allocatable::U12(:,:,:,:)
+       real*8,allocatable::U13(:,:,:,:)
+       real*8,allocatable::U14(:,:,:,:)
+       real*8,allocatable::U15(:,:,:,:)
+       real*8,allocatable::U16(:,:,:,:)
+       real*8,allocatable::U17(:,:,:,:)
+       real*8,allocatable::U18(:,:,:,:)
+       real*8,allocatable::U19(:,:,:,:)
+       real*8,allocatable::U20(:,:,:,:)
+       real*8,allocatable::U21(:,:,:,:)
+       real*8,allocatable::U22(:,:,:,:)
+       real*8,allocatable::U23(:,:,:,:)
+       real*8,allocatable::U24(:,:,:,:)
+       real*8,allocatable::U25(:,:,:,:)
+       real*8,allocatable::U26(:,:,:,:)
+       real*8,allocatable::U27(:,:,:,:)
+       real*8,allocatable::U28(:,:,:,:)
+       real*8,allocatable::U29(:,:,:,:)
+       real*8,allocatable::U40(:,:,:,:)
+       real*8,allocatable::U41(:,:,:,:)
+       real*8,allocatable::U42(:,:,:,:)
+       real*8,allocatable::U43(:,:,:,:)
+       real*8,allocatable::U53(:,:,:,:)
+       real*8,allocatable::U54(:,:,:,:)
+       real*8,allocatable::U55(:,:,:,:)
+       real*8,allocatable::U56(:,:,:,:)
+       real*8,allocatable::U57(:,:,:,:)
+       real*8,allocatable::U58(:,:,:,:)
+       real*8,allocatable::U59(:,:,:,:)
+       real*8,allocatable::U60(:,:,:,:)
+       real*8,allocatable::U61(:,:,:,:)
+       real*8,allocatable::U62(:,:,:,:)
+       real*8,allocatable::U63(:,:,:,:)
+       real*8,allocatable::U64(:,:,:,:)
+       real*8,allocatable::U65(:,:,:,:)
+       real*8,allocatable::U66(:,:,:,:)
+       real*8,allocatable::U67(:,:,:,:)
+       real*8,allocatable::U68(:,:,:,:)
+       real*8,allocatable::U69(:,:,:,:)
+       real*8,allocatable::U70(:,:,:,:)
+       real*8,allocatable::U71(:,:,:,:)
+       real*8,allocatable::U72(:,:,:,:)
+       real*8,allocatable::U73(:,:,:,:)
+       real*8,allocatable::U74(:,:,:,:)
+       real*8,allocatable::U75(:,:,:,:)
+       real*8,allocatable::U76(:,:,:,:)
+       real*8,allocatable::U77(:,:,:,:)
+C
+       real*8,allocatable::V3B1A(:,:,:,:)
+       allocate(V3B1A(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1),
+     &          source=0.0d0)
+C
+       allocate(D1(N2+1:N3,N1+1:N3,N0+1:N1,N2+1:M2))
+       call reorder1243(N2,N3,N1,N3,N2,N3,N0,N1,
+     & N2,N3,N1,N3,N0,N1,N2,M2,HBHPPP,D1)
+       allocate(B2(N2+1:N3,N1+1:N3))
+       call reorder12(N2,N3,N1,N3,
+     & N2,N3,N1,N3,r2B0A,B2)
+       allocate(Q1(N0+1:N1,N2+1:M2))
+       I1=K0*K1
+       I3=K3*K4
+       call EGEMM1(I1,I3,D1,B2,Q1)
+       deallocate(D1)
+       deallocate(B2)
+C
+       allocate(X1(N0+1:N1,N2+1:M2),
+     &          source=0.0d0)
+       X1=X1+Q1
+       deallocate(Q1)
+C
+       allocate(D1(N2+1:N3,N1+1:N3,N0+1:N2,M2+1:N3))
+       call reorder1234(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N2,N3,N1,N3,N0,N2,M2,N3,HBPHPP,D1)
+       allocate(B2(N2+1:N3,N1+1:N3))
+       call reorder12(N2,N3,N1,N3,
+     & N2,N3,N1,N3,r2B0A,B2)
+       allocate(Q2(N0+1:N2,M2+1:N3))
+       I1=K6*K2
+       I3=K3*K4
+       call EGEMM1(I1,I3,D1,B2,Q2)
+       deallocate(D1)
+       deallocate(B2)
+C
+       allocate(X2(N0+1:N2,M2+1:N3),
+     &          source=0.0d0)
+       X2=X2+Q2
+       deallocate(Q2)
+C
+       allocate(D1(N2+1:N3,N1+1:N3,N0+1:N2,N1+1:M2))
+       call reorder1234(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N2,N3,N1,N3,N0,N2,N1,M2,HBPHPP,D1)
+       allocate(B2(N2+1:N3,N1+1:N3))
+       call reorder12(N2,N3,N1,N3,
+     & N2,N3,N1,N3,r2B0A,B2)
+       allocate(Q3(N0+1:N2,N1+1:M2))
+       I1=K9*K2
+       I3=K3*K4
+       call EGEMM1(I1,I3,D1,B2,Q3)
+       deallocate(D1)
+       deallocate(B2)
+C
+       allocate(X3(N0+1:N2,N1+1:M2),
+     &          source=0.0d0)
+       X3=X3+Q3
+       deallocate(Q3)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,M2+1:N3,N0+1:N1))
+       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N0,N1,VAHHPP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,M2+1:N3,N2+1:M2))
+       call reorder4231(N2,M2,M2,N3,M2,N3,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N2,M2,r3B1A1,D2)
+       allocate(Q4(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K6*K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q4)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q4,-0.5_dp)
+       deallocate(Q4)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N0,N1,VAHHPP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,N1+1:M2,N2+1:M2))
+       call reorder4231(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N2,M2,r3B1A,D2)
+       allocate(Q5(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K9*K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q5)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q5,-1.0_dp)
+       deallocate(Q5)
+C
+       allocate(D1(N0+1:N1,N1+1:M2,N1+1:M2,N0+1:N1))
+       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
+     & N0,N1,N1,M2,N1,M2,N0,N1,VAHHPP,D1)
+       allocate(D2(N0+1:N1,N1+1:M2,N1+1:M2,N2+1:M2))
+       call reorder4231(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N1,M2,N1,M2,N2,M2,r3B1A,D2)
+       allocate(Q6(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K9*K9*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q6)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q6,-0.5_dp)
+       deallocate(Q6)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,M2+1:N3,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,M2+1:N3,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N1,M2,r3B1A,D2)
+       allocate(Q7(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K6*K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q7)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q7,-1.0_dp)
+       deallocate(Q7)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,M2+1:N3,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,N2,M2,M2,N3,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N2,M2,M2,N3,N1,M2,r3B1A,D2)
+       allocate(Q8(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K6*K0*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q8)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q8,-1.0_dp)
+       deallocate(Q8)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,N1+1:M2,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N1,M2,r3B1A,D2)
+       allocate(Q9(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K9*K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q9)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q9,-1.0_dp)
+       deallocate(Q9)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,N1+1:M2,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,N2,M2,N1,M2,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,N2+1:M2,N1+1:M2,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N2,M2,N1,M2,N1,M2,r3B1A,D2)
+       allocate(Q10(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K9*K0*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q10)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q10,-1.0_dp)
+       deallocate(Q10)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,M2+1:N3,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,N2,M2,M2,N3,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,N2+1:M2,M2+1:N3,M2+1:N3))
+       call reorder4123(N2,M2,M2,N3,M2,N3,N0,N1,
+     & N0,N1,N2,M2,M2,N3,M2,N3,r3B1A1,D2)
+       allocate(Q11(M2+1:N3,N0+1:N2))
+       I1=K2
+       I2=K6
+       I3=K6*K0*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q11)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,M2,N3,X2,Q11,-1.0_dp)
+       deallocate(Q11)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,N1+1:M2,M2+1:N3))
+       call reorder4132(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,M2,N3,N1,M2,M2,N3,r3B1A,D2)
+       allocate(Q12(M2+1:N3,N0+1:N2))
+       I1=K2
+       I2=K6
+       I3=K9*K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q12)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,M2,N3,X2,Q12, 1.0_dp)
+       deallocate(Q12)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,N1+1:M2,N0+1:N2))
+       call reorder4123(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N1,N2,M2,N1,M2,N0,N2,VBHHPP,D1)
+       allocate(D2(N0+1:N1,N2+1:M2,N1+1:M2,M2+1:N3))
+       call reorder4132(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N2,M2,N1,M2,M2,N3,r3B1A,D2)
+       allocate(Q13(M2+1:N3,N0+1:N2))
+       I1=K2
+       I2=K6
+       I3=K9*K0*K1
+       call EGEMM(I1,I2,I3,D1,D2,Q13)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,M2,N3,X2,Q13, 1.0_dp)
+       deallocate(Q13)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,M2+1:N3,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,M2,N3,M2,N3,N0,N1,VBHHPP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,M2+1:N3,N2+1:M2))
+       call reorder4132(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,M2,N3,M2,N3,N2,M2,r3C1B,D2)
+       allocate(Q14(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K6*K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q14)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q14, 1.0_dp)
+       deallocate(Q14)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,N2,M2,M2,N3,N0,N1,VBHHPP,D1)
+       allocate(D2(N0+1:N2,N2+1:M2,M2+1:N3,N2+1:M2))
+       call reorder4132(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,N2,M2,M2,N3,N2,M2,r3C1B,D2)
+       allocate(Q15(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K6*K0*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q15)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q15, 1.0_dp)
+       deallocate(Q15)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,M2,N3,N1,M2,N0,N1,VBHHPP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,N1+1:M2,N2+1:M2))
+       call reorder4132(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,M2,N3,N1,M2,N2,M2,r3C1B,D2)
+       allocate(Q16(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K9*K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q16)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q16, 1.0_dp)
+       deallocate(Q16)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,N2,M2,N1,M2,N0,N1,VBHHPP,D1)
+       allocate(D2(N0+1:N2,N2+1:M2,N1+1:M2,N2+1:M2))
+       call reorder4132(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,N2,M2,N1,M2,N2,M2,r3C1B,D2)
+       allocate(Q17(N2+1:M2,N0+1:N1))
+       I1=K1
+       I2=K0
+       I3=K9*K0*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q17)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N1,N2,M2,X1,Q17, 1.0_dp)
+       deallocate(Q17)
+C
+       allocate(D2(N0+1:N1,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder3124(N1,N3,N1,N3,N0,N1,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N0,N1,t2A,D2)
+       allocate(U4(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K1
+       call EGEMM(I1,I2,I3,X1,D2,U4)
+       deallocate(D2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U4,-1.0_dp)
+       deallocate(U4)
+       deallocate(X1)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,M2+1:N3,N0+1:N2))
+       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
+     & N0,N2,M2,N3,M2,N3,N0,N2,VCHHPP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,M2+1:N3,N1+1:M2))
+       call reorder4123(M2,N3,M2,N3,N1,M2,N0,N2,
+     & N0,N2,M2,N3,M2,N3,N1,M2,r3C1B1,D2)
+       allocate(Q18(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K6*K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q18)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q18,-0.5_dp)
+       deallocate(Q18)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N2+1:M2,N0+1:N2))
+       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
+     & N0,N2,M2,N3,N2,M2,N0,N2,VCHHPP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,N2+1:M2,N1+1:M2))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,M2,N3,N2,M2,N1,M2,r3C1B,D2)
+       allocate(Q19(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K0*K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q19)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q19,-1.0_dp)
+       deallocate(Q19)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N2+1:M2,N0+1:N2))
+       call reorder4123(N2,N3,N2,N3,N0,N2,N0,N2,
+     & N0,N2,N2,M2,N2,M2,N0,N2,VCHHPP,D1)
+       allocate(D2(N0+1:N2,N2+1:M2,N2+1:M2,N1+1:M2))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,N2,M2,N2,M2,N1,M2,r3C1B,D2)
+       allocate(Q20(N1+1:M2,N0+1:N2))
+       I1=K2
+       I2=K9
+       I3=K0*K0*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q20)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,N1,M2,X3,Q20,-0.5_dp)
+       deallocate(Q20)
+C
+       allocate(D2(N0+1:N2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,N2,M2,M2,N3,N0,N1,t2B,D2)
+       allocate(U6(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K2
+       call EGEMM(I1,I2,I3,X3,D2,U6)
+       deallocate(D2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U6, 1.0_dp)
+       deallocate(U6)
+       deallocate(X3)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N2+1:M2,N0+1:N2))
+       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
+     & N0,N2,M2,N3,N2,M2,N0,N2,VCHHPP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,N2+1:M2,M2+1:N3))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,M2,N3,N2,M2,M2,N3,r3C1B,D2)
+       allocate(Q21(M2+1:N3,N0+1:N2))
+       I1=K2
+       I2=K6
+       I3=K0*K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q21)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,M2,N3,X2,Q21, 1.0_dp)
+       deallocate(Q21)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N2+1:M2,N0+1:N2))
+       call reorder3124(N2,N3,N2,N3,N0,N2,N0,N2,
+     & N0,N2,N2,M2,N2,M2,N0,N2,VCHHPP,D1)
+       allocate(D2(N0+1:N2,N2+1:M2,N2+1:M2,M2+1:N3))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,N2,M2,N2,M2,M2,N3,r3C1B,D2)
+       allocate(Q22(M2+1:N3,N0+1:N2))
+       I1=K2
+       I2=K6
+       I3=K0*K0*K2
+       call EGEMM(I1,I2,I3,D1,D2,Q22)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum21(N0,N2,M2,N3,X2,Q22, 0.5_dp)
+       deallocate(Q22)
+C
+       allocate(D2(N0+1:N2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N0,N1,
+     & N0,N2,N2,M2,N1,M2,N0,N1,t2B,D2)
+       allocate(U5(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K2
+       call EGEMM(I1,I2,I3,X2,D2,U5)
+       deallocate(D2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U5,-1.0_dp)
+       deallocate(U5)
+       deallocate(X2)
+C
+       allocate(D1(N1+1:N3,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder1342(N1,N3,N0,N1,N1,N3,N1,N3,
+     & N1,N3,M2,N3,N1,M2,N0,N1,HAPPHP,D1)
+       allocate(B2(N1+1:N3,N2+1:M2))
+       call reorder21(N2,N3,N1,N3,
+     & N1,N3,N2,M2,r2B0A,B2)
+       allocate(U1(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1*K9*K6
+       I2=K0
+       I3=K3
+       call EGEMM(I1,I2,I3,D1,B2,U1)
+       deallocate(D1)
+       deallocate(B2)
+C
+       V3B1A=V3B1A+U1
+       deallocate(U1)
+C
+       allocate(D1(N2+1:N3,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder1342(N2,N3,N0,N1,N2,N3,N1,N3,
+     & N2,N3,N2,M2,M2,N3,N0,N1,HBPPHP,D1)
+       allocate(B2(N2+1:N3,N1+1:M2))
+       call reorder12(N2,N3,N1,N3,
+     & N2,N3,N1,M2,r2B0A,B2)
+       allocate(U2(N1+1:M2,N2+1:M2,M2+1:N3,N0+1:N1))
+       I1=K1*K6*K0
+       I2=K9
+       I3=K4
+       call EGEMM(I1,I2,I3,D1,B2,U2)
+       deallocate(D1)
+       deallocate(B2)
+C
+       call
+     &sum3124(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U2,-1.0_dp)
+       deallocate(U2)
+C
+       allocate(D1(N2+1:N3,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder1342(N2,N3,N0,N1,N2,N3,N1,N3,
+     & N2,N3,N2,M2,N1,M2,N0,N1,HBPPHP,D1)
+       allocate(B2(N2+1:N3,M2+1:N3))
+       call reorder12(N2,N3,N1,N3,
+     & N2,N3,M2,N3,r2B0A,B2)
+       allocate(U3(M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N1))
+       I1=K1*K9*K0
+       I2=K6
+       I3=K4
+       call EGEMM(I1,I2,I3,D1,B2,U3)
+       deallocate(D1)
+       deallocate(B2)
+C
+       call
+     &sum2134(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U3, 1.0_dp)
+       deallocate(U3)
+C
+       allocate(B1(N0+1:N1,N0+1:N1))
+       call reorder21(N0,N1,N0,N1,
+     & N0,N1,N0,N1,HAHH,B1)
+       allocate(D2(N0+1:N1,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N2,M2,M2,N3,N1,M2,r3B1A,D2)
+       allocate(U7(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1
+       I2=K9*K6*K0
+       I3=K1
+       call EGEMM(I1,I2,I3,B1,D2,U7)
+       deallocate(B1)
+       deallocate(D2)
+C
+       V3B1A=V3B1A-U7
+       deallocate(U7)
+C
+       allocate(B1(M2+1:N3,M2+1:N3))
+       call reorder12(N1,N3,N1,N3,
+     & M2,N3,M2,N3,HAPP,B1)
+       allocate(D2(M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder2134(N2,N3,N1,N3,N1,M2,N0,N1,
+     & M2,N3,N2,M2,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U8(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K6
+       call EGEMM(I1,I2,I3,B1,D2,U8)
+       deallocate(B1)
+       deallocate(D2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U8, 1.0_dp)
+       deallocate(U8)
+C
+       allocate(B1(N1+1:M2,M2+1:N3))
+       call reorder12(N1,N3,N1,N3,
+     & N1,M2,M2,N3,HAPP,B1)
+       allocate(D2(N1+1:M2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder2134(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N1,M2,N2,M2,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U9(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K9
+       call EGEMM(I1,I2,I3,B1,D2,U9)
+       deallocate(B1)
+       deallocate(D2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U9, 1.0_dp)
+       deallocate(U9)
+C
+       allocate(B1(M2+1:N3,N1+1:M2))
+       call reorder12(N1,N3,N1,N3,
+     & M2,N3,N1,M2,HAPP,B1)
+       allocate(D2(M2+1:N3,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder2134(N2,M2,M2,N3,M2,N3,N0,N1,
+     & M2,N3,N2,M2,M2,N3,N0,N1,r3B1A1,D2)
+       allocate(U10(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K6
+       call EGEMM(I1,I2,I3,B1,D2,U10)
+       deallocate(B1)
+       deallocate(D2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U10,-1.0_dp)
+       deallocate(U10)
+C
+       allocate(B1(N1+1:M2,N1+1:M2))
+       call reorder12(N1,N3,N1,N3,
+     & N1,M2,N1,M2,HAPP,B1)
+       allocate(D2(N1+1:M2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder3124(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N1,M2,N2,M2,M2,N3,N0,N1,r3B1A,D2)
+       allocate(U11(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K9
+       call EGEMM(I1,I2,I3,B1,D2,U11)
+       deallocate(B1)
+       deallocate(D2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U11, 1.0_dp)
+       deallocate(U11)
+C
+       allocate(B1(M2+1:N3,N2+1:M2))
+       call reorder12(N2,N3,N2,N3,
+     & M2,N3,N2,M2,HBPP,B1)
+       allocate(D2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder1234(N2,N3,N1,N3,N1,M2,N0,N1,
+     & M2,N3,M2,N3,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U12(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K6
+       call EGEMM(I1,I2,I3,B1,D2,U12)
+       deallocate(B1)
+       deallocate(D2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U12, 1.0_dp)
+       deallocate(U12)
+C
+       allocate(B1(N2+1:M2,N2+1:M2))
+       call reorder12(N2,N3,N2,N3,
+     & N2,M2,N2,M2,HBPP,B1)
+       allocate(D2(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder1234(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N2,M2,M2,N3,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U13(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K0
+       call EGEMM(I1,I2,I3,B1,D2,U13)
+       deallocate(B1)
+       deallocate(D2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U13, 1.0_dp)
+       deallocate(U13)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,M2+1:N3,N0+1:N1))
+       call reorder4132(N1,N3,N0,N1,N1,N3,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N0,N1,HAHPHP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,N2+1:M2,N1+1:M2))
+       call reorder4213(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,M2,N3,N2,M2,N1,M2,r3B1A,D2)
+       allocate(U14(N2+1:M2,N1+1:M2,M2+1:N3,N0+1:N1))
+       I1=K1*K6
+       I2=K9*K0
+       I3=K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,U14)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1324(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U14,-1.0_dp)
+       deallocate(U14)
+C
+       allocate(D1(N0+1:N1,N1+1:M2,M2+1:N3,N0+1:N1))
+       call reorder4132(N1,N3,N0,N1,N1,N3,N0,N1,
+     & N0,N1,N1,M2,M2,N3,N0,N1,HAHPHP,D1)
+       allocate(D2(N0+1:N1,N1+1:M2,N2+1:M2,N1+1:M2))
+       call reorder4213(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N1,M2,N2,M2,N1,M2,r3B1A,D2)
+       allocate(U15(N2+1:M2,N1+1:M2,M2+1:N3,N0+1:N1))
+       I1=K1*K6
+       I2=K9*K0
+       I3=K9*K1
+       call EGEMM(I1,I2,I3,D1,D2,U15)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1324(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U15,-1.0_dp)
+       deallocate(U15)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder4132(N1,N3,N0,N1,N1,N3,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N0,N1,HAHPHP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,N2+1:M2,M2+1:N3))
+       call reorder4213(N2,M2,M2,N3,M2,N3,N0,N1,
+     & N0,N1,M2,N3,N2,M2,M2,N3,r3B1A1,D2)
+       allocate(U16(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1*K9
+       I2=K6*K0
+       I3=K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,U16)
+       deallocate(D1)
+       deallocate(D2)
+C
+       V3B1A=V3B1A+U16
+       deallocate(U16)
+C
+       allocate(D1(N0+1:N1,N1+1:M2,N1+1:M2,N0+1:N1))
+       call reorder4132(N1,N3,N0,N1,N1,N3,N0,N1,
+     & N0,N1,N1,M2,N1,M2,N0,N1,HAHPHP,D1)
+       allocate(D2(N0+1:N1,N1+1:M2,N2+1:M2,M2+1:N3))
+       call reorder4312(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N1,M2,N2,M2,M2,N3,r3B1A,D2)
+       allocate(U17(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1*K9
+       I2=K6*K0
+       I3=K9*K1
+       call EGEMM(I1,I2,I3,D1,D2,U17)
+       deallocate(D1)
+       deallocate(D2)
+C
+       V3B1A=V3B1A-U17
+       deallocate(U17)
+C
+       allocate(D1(M2+1:N3,M2+1:N3,M2+1:N3,N1+1:M2))
+       call reorder1234(N1,N3,N1,N3,N1,N3,N1,M2,
+     & M2,N3,M2,N3,M2,N3,N1,M2,HAAPPP,D1)
+       allocate(D2(M2+1:N3,M2+1:N3,N2+1:M2,N0+1:N1))
+       call reorder2314(N2,M2,M2,N3,M2,N3,N0,N1,
+     & M2,N3,M2,N3,N2,M2,N0,N1,r3B1A1,D2)
+       allocate(U18(N2+1:M2,N0+1:N1,M2+1:N3,N1+1:M2))
+       I1=K9*K6
+       I2=K1*K0
+       I3=K6*K6
+       call EGEMM(I1,I2,I3,D1,D2,U18)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1423(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U18, 0.5_dp)
+       deallocate(U18)
+C
+       allocate(D1(M2+1:N3,N1+1:M2,M2+1:N3,N1+1:M2))
+       call reorder1234(N1,N3,N1,N3,N1,N3,N1,M2,
+     & M2,N3,N1,M2,M2,N3,N1,M2,HAAPPP,D1)
+       allocate(D2(M2+1:N3,N1+1:M2,N2+1:M2,N0+1:N1))
+       call reorder2314(N2,N3,N1,N3,N1,M2,N0,N1,
+     & M2,N3,N1,M2,N2,M2,N0,N1,r3B1A,D2)
+       allocate(U19(N2+1:M2,N0+1:N1,M2+1:N3,N1+1:M2))
+       I1=K9*K6
+       I2=K1*K0
+       I3=K9*K6
+       call EGEMM(I1,I2,I3,D1,D2,U19)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1423(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U19, 1.0_dp)
+       deallocate(U19)
+C
+       allocate(D1(N1+1:M2,N1+1:M2,M2+1:N3,N1+1:M2))
+       call reorder1234(N1,N3,N1,N3,N1,N3,N1,M2,
+     & N1,M2,N1,M2,M2,N3,N1,M2,HAAPPP,D1)
+       allocate(D2(N1+1:M2,N1+1:M2,N2+1:M2,N0+1:N1))
+       call reorder2314(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N1,M2,N1,M2,N2,M2,N0,N1,r3B1A,D2)
+       allocate(U20(N2+1:M2,N0+1:N1,M2+1:N3,N1+1:M2))
+       I1=K9*K6
+       I2=K1*K0
+       I3=K9*K9
+       call EGEMM(I1,I2,I3,D1,D2,U20)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1423(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U20, 0.5_dp)
+       deallocate(U20)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N2+1:M2,N0+1:N1))
+       call reorder4132(N2,N3,N0,N1,N2,N3,N0,N1,
+     & N0,N1,M2,N3,N2,M2,N0,N1,HBHPHP,D1)
+       allocate(D2(N0+1:N1,M2+1:N3,M2+1:N3,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N1,M2,r3B1A,D2)
+       allocate(U21(M2+1:N3,N1+1:M2,N2+1:M2,N0+1:N1))
+       I1=K1*K0
+       I2=K9*K6
+       I3=K6*K1
+       call EGEMM(I1,I2,I3,D1,D2,U21)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum2314(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U21,-1.0_dp)
+       deallocate(U21)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,N2+1:M2,N0+1:N1))
+       call reorder4132(N2,N3,N0,N1,N2,N3,N0,N1,
+     & N0,N1,N2,M2,N2,M2,N0,N1,HBHPHP,D1)
+       allocate(D2(N0+1:N1,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder4123(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N0,N1,N2,M2,M2,N3,N1,M2,r3B1A,D2)
+       allocate(U22(M2+1:N3,N1+1:M2,N2+1:M2,N0+1:N1))
+       I1=K1*K0
+       I2=K9*K6
+       I3=K0*K1
+       call EGEMM(I1,I2,I3,D1,D2,U22)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum2314(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U22,-1.0_dp)
+       deallocate(U22)
+C
+       allocate(D1(M2+1:N3,M2+1:N3,N2+1:M2,M2+1:N3))
+       call reorder1234(N2,N3,N1,N3,N2,M2,N1,N3,
+     & M2,N3,M2,N3,N2,M2,M2,N3,HBPAPP,D1)
+       allocate(D2(M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder1234(N2,N3,N1,N3,N1,M2,N0,N1,
+     & M2,N3,M2,N3,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U23(N1+1:M2,N0+1:N1,N2+1:M2,M2+1:N3))
+       I1=K6*K0
+       I2=K1*K9
+       I3=K6*K6
+       call EGEMM(I1,I2,I3,D1,D2,U23)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum3412(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U23, 1.0_dp)
+       deallocate(U23)
+C
+       allocate(D1(N2+1:M2,M2+1:N3,N2+1:M2,M2+1:N3))
+       call reorder1234(N2,N3,N1,N3,N2,M2,N1,N3,
+     & N2,M2,M2,N3,N2,M2,M2,N3,HBPAPP,D1)
+       allocate(D2(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder1234(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N2,M2,M2,N3,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U24(N1+1:M2,N0+1:N1,N2+1:M2,M2+1:N3))
+       I1=K6*K0
+       I2=K1*K9
+       I3=K6*K0
+       call EGEMM(I1,I2,I3,D1,D2,U24)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum3412(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U24, 1.0_dp)
+       deallocate(U24)
+C
+       allocate(D1(M2+1:N3,N1+1:M2,N2+1:M2,M2+1:N3))
+       call reorder1234(N2,N3,N1,N3,N2,M2,N1,N3,
+     & M2,N3,N1,M2,N2,M2,M2,N3,HBPAPP,D1)
+       allocate(D2(M2+1:N3,N1+1:M2,N1+1:M2,N0+1:N1))
+       call reorder1234(N2,N3,N1,N3,N1,M2,N0,N1,
+     & M2,N3,N1,M2,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U25(N1+1:M2,N0+1:N1,N2+1:M2,M2+1:N3))
+       I1=K6*K0
+       I2=K1*K9
+       I3=K9*K6
+       call EGEMM(I1,I2,I3,D1,D2,U25)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum3412(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U25, 1.0_dp)
+       deallocate(U25)
+C
+       allocate(D1(N2+1:M2,N1+1:M2,N2+1:M2,M2+1:N3))
+       call reorder1234(N2,N3,N1,N3,N2,M2,N1,N3,
+     & N2,M2,N1,M2,N2,M2,M2,N3,HBPAPP,D1)
+       allocate(D2(N2+1:M2,N1+1:M2,N1+1:M2,N0+1:N1))
+       call reorder1234(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N2,M2,N1,M2,N1,M2,N0,N1,r3B1A,D2)
+       allocate(U26(N1+1:M2,N0+1:N1,N2+1:M2,M2+1:N3))
+       I1=K6*K0
+       I2=K1*K9
+       I3=K9*K0
+       call EGEMM(I1,I2,I3,D1,D2,U26)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum3412(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U26, 1.0_dp)
+       deallocate(U26)
+C
+       allocate(D1(N2+1:M2,M2+1:N3,N2+1:M2,N1+1:M2))
+       call reorder1234(N2,N3,N1,N3,N2,N3,N1,M2,
+     & N2,M2,M2,N3,N2,M2,N1,M2,HBAPPP,D1)
+       allocate(D2(N2+1:M2,M2+1:N3,M2+1:N3,N0+1:N1))
+       call reorder1234(N2,M2,M2,N3,M2,N3,N0,N1,
+     & N2,M2,M2,N3,M2,N3,N0,N1,r3B1A1,D2)
+       allocate(U27(M2+1:N3,N0+1:N1,N2+1:M2,N1+1:M2))
+       I1=K9*K0
+       I2=K1*K6
+       I3=K6*K0
+       call EGEMM(I1,I2,I3,D1,D2,U27)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum2413(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U27,-1.0_dp)
+       deallocate(U27)
+C
+       allocate(D1(M2+1:N3,N1+1:M2,N2+1:M2,N1+1:M2))
+       call reorder1234(N2,N3,N1,N3,N2,N3,N1,M2,
+     & M2,N3,N1,M2,N2,M2,N1,M2,HBAPPP,D1)
+       allocate(D2(M2+1:N3,N1+1:M2,M2+1:N3,N0+1:N1))
+       call reorder1324(N2,N3,N1,N3,N1,M2,N0,N1,
+     & M2,N3,N1,M2,M2,N3,N0,N1,r3B1A,D2)
+       allocate(U28(M2+1:N3,N0+1:N1,N2+1:M2,N1+1:M2))
+       I1=K9*K0
+       I2=K1*K6
+       I3=K9*K6
+       call EGEMM(I1,I2,I3,D1,D2,U28)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum2413(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U28, 1.0_dp)
+       deallocate(U28)
+C
+       allocate(D1(N2+1:M2,N1+1:M2,N2+1:M2,N1+1:M2))
+       call reorder1234(N2,N3,N1,N3,N2,N3,N1,M2,
+     & N2,M2,N1,M2,N2,M2,N1,M2,HBAPPP,D1)
+       allocate(D2(N2+1:M2,N1+1:M2,M2+1:N3,N0+1:N1))
+       call reorder1324(N2,N3,N1,N3,N1,M2,N0,N1,
+     & N2,M2,N1,M2,M2,N3,N0,N1,r3B1A,D2)
+       allocate(U29(M2+1:N3,N0+1:N1,N2+1:M2,N1+1:M2))
+       I1=K9*K0
+       I2=K1*K6
+       I3=K9*K0
+       call EGEMM(I1,I2,I3,D1,D2,U29)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum2413(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U29, 1.0_dp)
+       deallocate(U29)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,M2+1:N3,N0+1:N1))
+       call reorder3142(N2,N3,N0,N1,N0,N2,N1,N3,
+     & N0,N2,M2,N3,M2,N3,N0,N1,HBPHHP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,N2+1:M2,N1+1:M2))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,M2,N3,N2,M2,N1,M2,r3C1B,D2)
+       allocate(U40(N2+1:M2,N1+1:M2,M2+1:N3,N0+1:N1))
+       I1=K1*K6
+       I2=K9*K0
+       I3=K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,U40)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1324(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U40,-1.0_dp)
+       deallocate(U40)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder3142(N2,N3,N0,N1,N0,N2,N1,N3,
+     & N0,N2,N2,M2,M2,N3,N0,N1,HBPHHP,D1)
+       allocate(D2(N0+1:N2,N2+1:M2,N2+1:M2,N1+1:M2))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,N2,M2,N2,M2,N1,M2,r3C1B,D2)
+       allocate(U41(N2+1:M2,N1+1:M2,M2+1:N3,N0+1:N1))
+       I1=K1*K6
+       I2=K9*K0
+       I3=K0*K2
+       call EGEMM(I1,I2,I3,D1,D2,U41)
+       deallocate(D1)
+       deallocate(D2)
+C
+       call
+     &sum1324(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U41,-1.0_dp)
+       deallocate(U41)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder3142(N2,N3,N0,N1,N0,N2,N1,N3,
+     & N0,N2,M2,N3,N1,M2,N0,N1,HBPHHP,D1)
+       allocate(D2(N0+1:N2,M2+1:N3,N2+1:M2,M2+1:N3))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,M2,N3,N2,M2,M2,N3,r3C1B,D2)
+       allocate(U42(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1*K9
+       I2=K6*K0
+       I3=K6*K2
+       call EGEMM(I1,I2,I3,D1,D2,U42)
+       deallocate(D1)
+       deallocate(D2)
+C
+       V3B1A=V3B1A+U42
+       deallocate(U42)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder3142(N2,N3,N0,N1,N0,N2,N1,N3,
+     & N0,N2,N2,M2,N1,M2,N0,N1,HBPHHP,D1)
+       allocate(D2(N0+1:N2,N2+1:M2,N2+1:M2,M2+1:N3))
+       call reorder4123(N2,N3,N2,M2,N1,N3,N0,N2,
+     & N0,N2,N2,M2,N2,M2,M2,N3,r3C1B,D2)
+       allocate(U43(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1*K9
+       I2=K6*K0
+       I3=K0*K2
+       call EGEMM(I1,I2,I3,D1,D2,U43)
+       deallocate(D1)
+       deallocate(D2)
+C
+       V3B1A=V3B1A+U43
+       deallocate(U43)
+C
+       allocate(B1(N0+1:N1,M2+1:N3))
+       call reorder21(N1,N3,N0,N1,
+     & N0,N1,M2,N3,HAHP,B1)
+       allocate(F2(N0+1:N1,M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder521346(N2,M2,M2,N3,M2,N3,N1,M2,N0,N1,N0,N1,
+     & N0,N1,M2,N3,N2,M2,M2,N3,N1,M2,N0,N1,r4B2A1,F2)
+       allocate(U53(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I2=K1*K9*K6*K0
+       I3=K6*K1
+       call EGEMM2(I2,I3,B1,F2,U53)
+       deallocate(B1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A-U53
+       deallocate(U53)
+C
+       allocate(B1(N0+1:N1,N1+1:M2))
+       call reorder21(N1,N3,N0,N1,
+     & N0,N1,N1,M2,HAHP,B1)
+       allocate(F2(N0+1:N1,N1+1:M2,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder531246(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N1,M2,N2,M2,M2,N3,N1,M2,N0,N1,r4B2A,F2)
+       allocate(U54(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I2=K1*K9*K6*K0
+       I3=K9*K1
+       call EGEMM2(I2,I3,B1,F2,U54)
+       deallocate(B1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A+U54
+       deallocate(U54)
+C
+       allocate(D1(N0+1:N1,N0+1:N1,M2+1:N3,N0+1:N1))
+       call reorder3412(N1,N3,N0,N1,N0,N1,N0,N1,
+     & N0,N1,N0,N1,M2,N3,N0,N1,HAHHHP,D1)
+       allocate(F2(N0+1:N1,N0+1:N1,M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder562134(N2,M2,M2,N3,M2,N3,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N0,N1,M2,N3,N2,M2,M2,N3,N1,M2,r4B2A1,F2)
+       allocate(U55(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1
+       I2=K9*K6*K0
+       I3=K6*K1*K1
+       call EGEMM(I1,I2,I3,D1,F2,U55)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A+0.5_dp*U55
+       deallocate(U55)
+C
+       allocate(D1(N0+1:N1,N0+1:N1,N1+1:M2,N0+1:N1))
+       call reorder3412(N1,N3,N0,N1,N0,N1,N0,N1,
+     & N0,N1,N0,N1,N1,M2,N0,N1,HAHHHP,D1)
+       allocate(F2(N0+1:N1,N0+1:N1,N1+1:M2,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder563124(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N0,N1,N1,M2,N2,M2,M2,N3,N1,M2,r4B2A,F2)
+       allocate(U56(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1
+       I2=K9*K6*K0
+       I3=K9*K1*K1
+       call EGEMM(I1,I2,I3,D1,F2,U56)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A-0.5_dp*U56
+       deallocate(U56)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,M2+1:N3,M2+1:N3))
+       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
+     & N0,N1,M2,N3,M2,N3,M2,N3,HAHPPP,D1)
+       allocate(F2(N0+1:N1,M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder523146(N2,M2,M2,N3,M2,N3,N1,M2,N0,N1,N0,N1,
+     & N0,N1,M2,N3,M2,N3,N2,M2,N1,M2,N0,N1,r4B2A1,F2)
+       allocate(U57(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K6*K6*K1
+       call EGEMM(I1,I2,I3,D1,F2,U57)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U57, 0.5_dp)
+       deallocate(U57)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,M2+1:N3))
+       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
+     & N0,N1,M2,N3,N1,M2,M2,N3,HAHPPP,D1)
+       allocate(F2(N0+1:N1,M2+1:N3,N1+1:M2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder523146(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N2,M2,N1,M2,N0,N1,r4B2A,F2)
+       allocate(U58(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K9*K6*K1
+       call EGEMM(I1,I2,I3,D1,F2,U58)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U58, 1.0_dp)
+       deallocate(U58)
+C
+       allocate(D1(N0+1:N1,N1+1:M2,N1+1:M2,M2+1:N3))
+       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
+     & N0,N1,N1,M2,N1,M2,M2,N3,HAHPPP,D1)
+       allocate(F2(N0+1:N1,N1+1:M2,N1+1:M2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder523146(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N1,M2,N1,M2,N2,M2,N1,M2,N0,N1,r4B2A,F2)
+       allocate(U59(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K9*K9*K1
+       call EGEMM(I1,I2,I3,D1,F2,U59)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U59, 0.5_dp)
+       deallocate(U59)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,N1+1:M2))
+       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N1,M2,HAHPPP,D1)
+       allocate(F2(N0+1:N1,M2+1:N3,N1+1:M2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder524136(N2,M2,M2,N3,M2,N3,N1,M2,N0,N1,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N2,M2,M2,N3,N0,N1,r4B2A1,F2)
+       allocate(U60(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K9*K6*K1
+       call EGEMM(I1,I2,I3,D1,F2,U60)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U60, 1.0_dp)
+       deallocate(U60)
+C
+       allocate(D1(N0+1:N1,N1+1:M2,N1+1:M2,N1+1:M2))
+       call reorder4123(N1,N3,N1,N3,N1,N3,N0,N1,
+     & N0,N1,N1,M2,N1,M2,N1,M2,HAHPPP,D1)
+       allocate(F2(N0+1:N1,N1+1:M2,N1+1:M2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder534126(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N1,M2,N1,M2,N2,M2,M2,N3,N0,N1,r4B2A,F2)
+       allocate(U61(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K9*K9*K1
+       call EGEMM(I1,I2,I3,D1,F2,U61)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U61,-0.5_dp)
+       deallocate(U61)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,M2+1:N3,N2+1:M2))
+       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
+     & N0,N1,N2,M2,M2,N3,N2,M2,HBHPPP,D1)
+       allocate(F2(N0+1:N1,N2+1:M2,M2+1:N3,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder512346(N2,M2,M2,N3,M2,N3,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N2,M2,M2,N3,M2,N3,N1,M2,N0,N1,r4B2A1,F2)
+       allocate(U62(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K6*K0*K1
+       call EGEMM(I1,I2,I3,D1,F2,U62)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U62,-1.0_dp)
+       deallocate(U62)
+C
+       allocate(D1(N0+1:N1,M2+1:N3,N1+1:M2,N2+1:M2))
+       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
+     & N0,N1,M2,N3,N1,M2,N2,M2,HBHPPP,D1)
+       allocate(F2(N0+1:N1,M2+1:N3,N1+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder513246(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,M2,N3,N1,M2,M2,N3,N1,M2,N0,N1,r4B2A,F2)
+       allocate(U63(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K9*K6*K1
+       call EGEMM(I1,I2,I3,D1,F2,U63)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U63, 1.0_dp)
+       deallocate(U63)
+C
+       allocate(D1(N0+1:N1,N2+1:M2,N1+1:M2,N2+1:M2))
+       call reorder4123(N2,N3,N1,N3,N2,N3,N0,N1,
+     & N0,N1,N2,M2,N1,M2,N2,M2,HBHPPP,D1)
+       allocate(F2(N0+1:N1,N2+1:M2,N1+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder513246(N2,N3,N1,N3,N1,M2,N1,M2,N0,N1,N0,N1,
+     & N0,N1,N2,M2,N1,M2,M2,N3,N1,M2,N0,N1,r4B2A,F2)
+       allocate(U64(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K9*K0*K1
+       call EGEMM(I1,I2,I3,D1,F2,U64)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U64, 1.0_dp)
+       deallocate(U64)
+C
+       allocate(B1(N0+1:N2,M2+1:N3))
+       call reorder21(N2,N3,N0,N2,
+     & N0,N2,M2,N3,HBHP,B1)
+       allocate(F2(N0+1:N2,M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder512346(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,M2,N3,N2,M2,M2,N3,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U65(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I2=K1*K9*K6*K0
+       I3=K6*K2
+       call EGEMM2(I2,I3,B1,F2,U65)
+       deallocate(B1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A+U65
+       deallocate(U65)
+C
+       allocate(B1(N0+1:N2,N2+1:M2))
+       call reorder21(N2,N3,N0,N2,
+     & N0,N2,N2,M2,HBHP,B1)
+       allocate(F2(N0+1:N2,N2+1:M2,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder512346(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N2,M2,N2,M2,M2,N3,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U66(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I2=K1*K9*K6*K0
+       I3=K0*K2
+       call EGEMM2(I2,I3,B1,F2,U66)
+       deallocate(B1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A+U66
+       deallocate(U66)
+C
+       allocate(D1(N0+1:N2,N0+1:N1,M2+1:N3,N0+1:N1))
+       call reorder3412(N2,N3,N0,N1,N0,N2,N0,N1,
+     & N0,N2,N0,N1,M2,N3,N0,N1,HBHHHP,D1)
+       allocate(F2(N0+1:N2,N0+1:N1,M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder561234(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N0,N1,M2,N3,N2,M2,M2,N3,N1,M2,r4C2B,F2)
+       allocate(U67(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1
+       I2=K9*K6*K0
+       I3=K6*K1*K2
+       call EGEMM(I1,I2,I3,D1,F2,U67)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A-U67
+       deallocate(U67)
+C
+       allocate(D1(N0+1:N2,N0+1:N1,N2+1:M2,N0+1:N1))
+       call reorder3412(N2,N3,N0,N1,N0,N2,N0,N1,
+     & N0,N2,N0,N1,N2,M2,N0,N1,HBHHHP,D1)
+       allocate(F2(N0+1:N2,N0+1:N1,N2+1:M2,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder561234(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N0,N1,N2,M2,N2,M2,M2,N3,N1,M2,r4C2B,F2)
+       allocate(U68(N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       I1=K1
+       I2=K9*K6*K0
+       I3=K0*K1*K2
+       call EGEMM(I1,I2,I3,D1,F2,U68)
+       deallocate(D1)
+       deallocate(F2)
+C
+       V3B1A=V3B1A-U68
+       deallocate(U68)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,M2+1:N3,M2+1:N3))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,M2,N3,M2,N3,M2,N3,HBPHPP,D1)
+       allocate(F2(N0+1:N2,M2+1:N3,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder513246(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,M2,N3,M2,N3,N2,M2,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U69(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K6*K6*K2
+       call EGEMM(I1,I2,I3,D1,F2,U69)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U69, 1.0_dp)
+       deallocate(U69)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,M2+1:N3,M2+1:N3))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,N2,M2,M2,N3,M2,N3,HBPHPP,D1)
+       allocate(F2(N0+1:N2,N2+1:M2,M2+1:N3,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder513246(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N2,M2,M2,N3,N2,M2,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U70(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K6*K0*K2
+       call EGEMM(I1,I2,I3,D1,F2,U70)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U70, 1.0_dp)
+       deallocate(U70)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N1+1:M2,M2+1:N3))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,M2,N3,N1,M2,M2,N3,HBPHPP,D1)
+       allocate(F2(N0+1:N2,M2+1:N3,N1+1:M2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder513246(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,M2,N3,N1,M2,N2,M2,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U71(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K9*K6*K2
+       call EGEMM(I1,I2,I3,D1,F2,U71)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U71, 1.0_dp)
+       deallocate(U71)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N1+1:M2,M2+1:N3))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,N2,M2,N1,M2,M2,N3,HBPHPP,D1)
+       allocate(F2(N0+1:N2,N2+1:M2,N1+1:M2,N2+1:M2,N1+1:M2,N0+1:N1))
+       call reorder513246(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N2,M2,N1,M2,N2,M2,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U72(N2+1:M2,N1+1:M2,N0+1:N1,M2+1:N3))
+       I1=K6
+       I2=K1*K9*K0
+       I3=K9*K0*K2
+       call EGEMM(I1,I2,I3,D1,F2,U72)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1342(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U72, 1.0_dp)
+       deallocate(U72)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,M2+1:N3,N1+1:M2))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,N2,M2,M2,N3,N1,M2,HBPHPP,D1)
+       allocate(F2(N0+1:N2,N2+1:M2,M2+1:N3,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder513246(N2,M2,N2,M2,M2,N3,M2,N3,N0,N2,N0,N1,
+     & N0,N2,N2,M2,M2,N3,N2,M2,M2,N3,N0,N1,r4C2B2,F2)
+       allocate(U73(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K6*K0*K2
+       call EGEMM(I1,I2,I3,D1,F2,U73)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U73,-1.0_dp)
+       deallocate(U73)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N1+1:M2,N1+1:M2))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,M2,N3,N1,M2,N1,M2,HBPHPP,D1)
+       allocate(F2(N0+1:N2,M2+1:N3,N1+1:M2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder514236(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,M2,N3,N1,M2,N2,M2,M2,N3,N0,N1,r4C2B,F2)
+       allocate(U74(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K9*K6*K2
+       call EGEMM(I1,I2,I3,D1,F2,U74)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U74, 1.0_dp)
+       deallocate(U74)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N1+1:M2,N1+1:M2))
+       call reorder3124(N2,N3,N1,N3,N0,N2,N1,N3,
+     & N0,N2,N2,M2,N1,M2,N1,M2,HBPHPP,D1)
+       allocate(F2(N0+1:N2,N2+1:M2,N1+1:M2,N2+1:M2,M2+1:N3,N0+1:N1))
+       call reorder514236(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N2,M2,N1,M2,N2,M2,M2,N3,N0,N1,r4C2B,F2)
+       allocate(U75(N2+1:M2,M2+1:N3,N0+1:N1,N1+1:M2))
+       I1=K9
+       I2=K1*K6*K0
+       I3=K9*K0*K2
+       call EGEMM(I1,I2,I3,D1,F2,U75)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum1243(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U75, 1.0_dp)
+       deallocate(U75)
+C
+       allocate(D1(N0+1:N2,M2+1:N3,N2+1:M2,N2+1:M2))
+       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
+     & N0,N2,M2,N3,N2,M2,N2,M2,HCHPPP,D1)
+       allocate(F2(N0+1:N2,M2+1:N3,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder512346(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,M2,N3,N2,M2,M2,N3,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U76(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K0*K6*K2
+       call EGEMM(I1,I2,I3,D1,F2,U76)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U76,-1.0_dp)
+       deallocate(U76)
+C
+       allocate(D1(N0+1:N2,N2+1:M2,N2+1:M2,N2+1:M2))
+       call reorder4123(N2,N3,N2,N3,N2,N3,N0,N2,
+     & N0,N2,N2,M2,N2,M2,N2,M2,HCHPPP,D1)
+       allocate(F2(N0+1:N2,N2+1:M2,N2+1:M2,M2+1:N3,N1+1:M2,N0+1:N1))
+       call reorder512346(N2,N3,N2,M2,N1,N3,N1,M2,N0,N2,N0,N1,
+     & N0,N2,N2,M2,N2,M2,M2,N3,N1,M2,N0,N1,r4C2B,F2)
+       allocate(U77(M2+1:N3,N1+1:M2,N0+1:N1,N2+1:M2))
+       I1=K0
+       I2=K1*K9*K6
+       I3=K0*K0*K2
+       call EGEMM(I1,I2,I3,D1,F2,U77)
+       deallocate(D1)
+       deallocate(F2)
+C
+       call
+     &sum2341(N2,M2,M2,N3,N1,M2,N0,N1,V3B1A,U77,-0.5_dp)
+       deallocate(U77)
+C
+       call VtoHR1234(N2,M2,M2,N3,N1,M2,N0,N1,
+     & N2,N3,N1,N3,N1,M2,N0,N1,V3B1A,HR3B1A)
+       deallocate(V3B1A)
+C
+       end

@@ -1,0 +1,105 @@
+! GAMESS/VB2000 Test 43 
+! This example demonstrates a multiconfiguration spin-coupled VB approach 
+! for the pi system of allyl cation in conjunction with PP-GVB for the 
+! two C-C sigma bonds.
+!
+! This example has been contributed by the group of Andre Barbosa from the
+! Instituto de Quimica, Universidade Federal Fluminense, Niteroi, RJ, Brazil
+! and is part of the work published in Theoretical Chemistry Accounts,
+! (2018) 137-21. We are gratefull to Professor Barbosa for sharing his
+! work with the VB2000 community.
+!
+! The data has been modified from that contributed from the group of Andre
+! Barbosa as their data takes a significantly longer time than the other
+! tests. Their data used the cc-pVTZ basis set. This test uses the cc-pVDZ
+! basis set. Their data read the initial guess with $READGUESS from a file
+! called exam-vb43.orb. This test gets the initial data from $04VBORB.
+!
+! We have also removed the $MOLDEN directive and adding $VECINIT and
+! $VECONLY to use MacMolPlt to investigate the final VB orbitals. The
+! $SYSTEM block as been altered for a single processor run.
+!
+! The orginal results from the group of Andre Barbosa can be obtained by
+! altering the input file below as follows:-
+! 1. Inactivate $04VBORB by removing the $ symbol.
+! 2. Activate READGUESS By adding a $ symbol to give $READGUESS.
+! 3. Remove the blank line in $VBGA so that it reads 3 entries not 2.
+! 4. Change 'ccd' in the $basis group 3 lines below this to 'cct'.
+!
+ $contrl scftyp=rhf runtyp=energy icharg=1 mult=1 ispher=1 vbtyp=vb2000 $end
+ $basis gbasis=ccd $end
+ $system timlim=200000 memory=140000000 $end
+ $scf fdiff=.f. mvoq=-1 $end
+ $DATA
+ Cation Allyl: guess from natural orbitals and geo from CASSCF(2,3) 
+C1
+ C           6.0   0.0003739604   0.4928438748   0.0000000000
+ H           1.0   0.0025134081   1.5655406715   0.0000000000
+ C           6.0   1.1809527336  -0.2110755399   0.0000000000
+ C           6.0  -1.1830335028  -0.2063111164   0.0000000000
+ H           1.0  -2.1327899233   0.2963526544   0.0000000000
+ H           1.0  -1.1934624472  -1.2809471721   0.0000000000
+ H           1.0   1.1870598604  -1.2857418575   0.0000000000
+ H           1.0   2.1327092706   0.2877974752   0.0000000000
+ $END
+
+ $VB2000
+
+#! VB(2).VB(2).VB(2,4)/cc-pVTZ PRINTALL FROZEN DIIS
+
+ALLYL CATION (2 CC BONDS AND 2 PI ELECTRONS)
+
+1 1
+
+6.0   0.0003739604   0.4928438748   0.0000000000
+1.0   0.0025134081   1.5655406715   0.0000000000
+6.0   1.1809527336  -0.2110755399   0.0000000000
+6.0  -1.1830335028  -0.2063111164   0.0000000000
+1.0  -2.1327899233   0.2963526544   0.0000000000
+1.0  -1.1934624472  -1.2809471721   0.0000000000
+1.0   1.1870598604  -1.2857418575   0.0000000000
+1.0   2.1327092706   0.2877974752   0.0000000000
+
+ $MACROITER
+ 90
+
+ $NOTROT
+ 3
+ 1,2
+ 1,3
+ 1,4
+
+ $04VBSTR
+ 2
+ 1 2
+ 3 4
+
+ $VBGA
+ 1-3(1) => 2
+ 1-4(1) => 3
+
+ 1-4(2) => 4
+
+ $04VBORB
+ 0.32 AO 6 +0.22 AO 9 +0.49 AO 26 +0.31 AO 29
+ 0.32 AO 6 +0.22 AO 9 +0.49 AO 41 +0.31 AO 44
+ 0.71 AO 6 +0.30 AO 9
+ 0.16 AO 9 +0.37 AO 26 +0.30 AO 29 +0.37 AO 41 +0.30 AO 44
+
+ $GRPDIM
+ 8,2,2,4
+
+ READGUESS
+ exam-vb43.orb
+
+ $MEMORY
+ 140000000
+
+ $VECINIT
+
+ $VECONLY
+
+ $PRINTHS
+
+ $END
+

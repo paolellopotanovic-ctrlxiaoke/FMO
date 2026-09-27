@@ -1,0 +1,596 @@
+{
+  "name": "na2_chain_dimer12_fed.log",
+  "validation": [
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "WAVEFUNCTION NORMALIZATION",
+      "value": "1.0000000000",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "ONE ELECTRON ENERGY",
+      "value": "-1051.6896338281",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TWO ELECTRON ENERGY",
+      "value": "334.3320764709",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "NUCLEAR REPULSION ENERGY",
+      "value": "69.9969630086",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TOTAL ENERGY",
+      "value": "-647.3605943486",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "NUCLEUS-NUCLEUS POTENTIAL ENERGY",
+      "value": "69.9969630086",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "ELECTRON-ELECTRON POTENTIAL ENERGY",
+      "value": "334.3320764709",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "NUCLEUS-ELECTRON POTENTIAL ENERGY",
+      "value": "-1698.5328298529",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TOTAL POTENTIAL ENERGY",
+      "value": "-1294.2037903734",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "TOTAL KINETIC ENERGY",
+      "value": "646.8431960248",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "WAVEFUNCTION PROPERTIES",
+      "name": "VIRIAL RATIO (V/T)",
+      "value": "2.0007998821",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-647.3605943486",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -5",
+      "value": "2.744442",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -4",
+      "value": "2.867846",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -3",
+      "value": "2.875232",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -2",
+      "value": "2.955691",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "STATE ENERGIES",
+      "name": "ENERGY : STATE -1",
+      "value": "3.075869",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "0.025837",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "ENERGY : TRANSITION 1",
+      "value": "1.984050",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "ENERGY : TRANSITION 2",
+      "value": "2.267006",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "ENERGY : TRANSITION 3",
+      "value": "2.409396",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "ENERGY : TRANSITION 4",
+      "value": "2.488878",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "ENERGY : TRANSITION 5",
+      "value": "2.693827",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "OSCILLATOR STRENGTH : TRANSITION 1",
+      "value": "0.210625",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "OSCILLATOR STRENGTH : TRANSITION 2",
+      "value": "1.878873",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "OSCILLATOR STRENGTH : TRANSITION 3",
+      "value": "1.502733",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "OSCILLATOR STRENGTH : TRANSITION 4",
+      "value": "0.132925",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TDDFT",
+      "name": "OSCILLATOR STRENGTH : TRANSITION 5",
+      "value": "1.599989",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 1",
+      "value": "-0.1167839",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 2",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 3",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 4",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 5",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 6",
+      "value": "-0.0188820",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 7",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 8",
+      "value": "-0.0257086",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 9",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 10",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 11",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 12",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 13",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 14",
+      "value": "-0.0960524",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 15",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 16",
+      "value": "-0.1684365",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 17",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 18",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 19",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 20",
+      "value": "-0.1598186",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 21",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 22",
+      "value": "-0.1606144",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 23",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 24",
+      "value": "-0.0746292",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 25",
+      "value": "-0.0868029",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 26",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 27",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 28",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 29",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 30",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 31",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 32",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 33",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 34",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 35",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 36",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 37",
+      "value": "-0.0387692",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 38",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 39",
+      "value": "-0.0096435",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 40",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 41",
+      "value": "-0.0024611",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 42",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 43",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 44",
+      "value": "-0.0271535",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "FED COUPLINGS",
+      "name": "FED COUPLING (EV) : COUPLING STATE 45",
+      "value": "-0.0000000",
+      "type": "float",
+      "precision": 7,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "2.6",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

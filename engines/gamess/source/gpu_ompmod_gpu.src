@@ -1,0 +1,625 @@
+!#define __TIMING 0
+#define __PRINT_ESS 0
+module mod_shell_index
+ implicit none
+    integer :: N_S_SHL,N_P_SHL,N_D_SHL
+    integer, dimension(:), allocatable :: I_S_SHL,I_P_SHL,I_D_SHL
+    double precision, dimension(:), allocatable :: xintsSS,xintsSP,xintsPP
+    double precision, dimension(:), allocatable :: xintsSD,xintsPD,xintsDD
+    logical rotspd
+end module mod_shell_index
+module mod_xint_scrn
+ implicit none
+ integer :: nij01,nij02,nij03,nij04,nij05,nij06
+ integer :: nkl02,nkl03,nkl05
+ integer,dimension(:), allocatable :: nbraJ01,nbraJ02,nbraJ03,nbraJ04,nbraJ05,nbraJ06
+ integer,dimension(:), allocatable :: nketJ02,nketJ03,nketJ05
+ double precision, dimension(:), allocatable :: xintBJ01,xintBJ02,xintBJ03,xintBJ04,xintBJ05,xintBJ06
+ double precision, dimension(:), allocatable :: xintKJ02,xintKJ03,xintKJ05
+end module mod_xint_scrn
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+MODULE gpu_ompmod
+
+    USE omp_lib
+    USE prec, ONLY: fp
+    private
+    public gpu_shell_index_SPshell,gpu_shell_index_Dshell
+    
+
+CONTAINS
+
+  SUBROUTINE gpu_shell_index_SPshell(schwrz,l1,l2a,nsh2,ia,cutoff,xints,dsh)
+      use mod_shell_index
+      use comm_NSHEL_sp, only:KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP,CD,NSHELL
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+  implicit none
+
+    double precision, parameter :: F04=4.0D+00
+    LOGICAL, INTENT(IN) :: schwrz
+    INTEGER, INTENT(IN) ::l1, l2a, nsh2,ia(l1)
+    double precision, INTENT(IN) :: cutoff,xints(nsh2),dsh(nsh2)
+
+    integer :: ii,jj,IANG,ish,jsh,iijj,ijsh
+
+! GET THE NUMBER OF S,P,D SHELLS
+ rotspd=.false.
+N_S_SHL=0
+N_P_SHL=0
+N_D_SHL=0
+DO II=1,NSHELL
+   IANG=KTYPE(II)
+   IF(IANG.EQ.1) THEN
+      N_S_SHL = N_S_SHL+1
+   ELSEIF(IANG.EQ.2) THEN
+      N_P_SHL=N_P_SHL+1
+   ELSEIF(IANG.EQ.3) THEN
+      N_D_SHL=N_D_SHL+1
+   ENDIF
+ENDDO
+
+IF(N_D_SHL.ne.0) rotspd=.true.
+ALLOCATE(I_S_SHL(N_S_SHL))
+ALLOCATE(I_P_SHL(N_P_SHL))
+
+! COPY S,P,D SHELLS INTO I_S_SHL,I_P_SHL,I_D_SHL
+N_S_SHL = 0
+N_P_SHL = 0
+DO II=1,NSHELL
+   IANG=KTYPE(II)
+   IF(IANG.EQ.1) THEN
+      N_S_SHL = N_S_SHL+1
+      I_S_SHL(N_S_SHL) = II
+   ELSEIF(IANG.EQ.2) THEN
+      N_P_SHL = N_P_SHL+1
+      I_P_SHL(N_P_SHL) = II
+   ENDIF
+ENDDO
+
+! <=============
+
+DO II=1,N_S_SHL
+DO JJ=1,II
+  ISH=I_S_SHL(II)
+  JSH=I_S_SHL(JJ)
+  IF(ISH.lt.JSH) THEN
+    I_S_SHL(II) = JSH
+    I_S_SHL(JJ) = ISH    
+  ENDIF
+ENDDO
+ENDDO
+
+DO II=1,N_P_SHL
+DO JJ=1,II
+  ISH=I_P_SHL(II)
+  JSH=I_P_SHL(JJ)
+  IF(ISH.lt.JSH) THEN
+    I_P_SHL(II) = JSH
+    I_P_SHL(JJ) = ISH    
+  ENDIF
+ENDDO
+ENDDO
+! ==========================================
+
+ALLOCATE(xintsSS(N_S_SHL*(N_S_SHL+1)/2))
+DO ii=1,N_S_SHL
+   DO jj=1,ii
+      iijj=jj+ii*(ii-1)/2
+      ish=I_S_SHL(ii)
+      jsh=I_S_SHL(jj)
+      ijsh = ia(ish) + jsh
+      if(jsh.gt.ish) ijsh = ia(jsh) + ish
+      xintsSS(iijj) = xints(ijsh)
+   ENDDO
+ENDDO
+
+! ===============================================
+ALLOCATE(xintsSP(N_S_SHL*N_P_SHL))
+DO ii=1,N_S_SHL
+   DO jj=1,N_P_SHL
+      iijj=jj+(ii-1)*N_P_SHL
+      ish=I_S_SHL(ii)
+      jsh=I_P_SHL(jj)
+      ijsh = ia(ish) + jsh
+      if(jsh.gt.ish) ijsh = ia(jsh) + ish
+      xintsSP(iijj) = xints(ijsh)
+   ENDDO
+ENDDO
+
+ALLOCATE(xintsPP(N_P_SHL*(N_P_SHL+1)/2))
+DO ii=1,N_P_SHL
+   DO jj=1,ii
+      iijj=jj+ii*(ii-1)/2
+      ish=I_P_SHL(ii)
+      jsh=I_P_SHL(jj)
+      ijsh = ia(ish) + jsh
+      if(jsh.gt.ish) ijsh = ia(jsh) + ish
+      xintsPP(iijj) = xints(ijsh)
+   ENDDO
+ENDDO
+! =============================
+
+ return
+ end
+! for D shell
+  SUBROUTINE gpu_shell_index_Dshell(schwrz,l1,l2a,nsh2,ia,cutoff,xints,dsh)
+      use mod_shell_index
+      use comm_NSHEL_sp, only:KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP,CD,NSHELL
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+  implicit none
+  double precision, parameter :: F04=4.0D+00
+
+    LOGICAL, INTENT(IN) :: schwrz
+    INTEGER, INTENT(IN) ::l1, l2a, nsh2,ia(l1)
+    double precision, INTENT(IN) :: cutoff,xints(nsh2),dsh(nsh2)
+
+    integer :: ii,jj,IANG,ish,jsh,iijj,ijsh
+
+! GET THE NUMBER OF D SHELLS
+N_D_SHL=0
+DO II=1,NSHELL
+   IANG=KTYPE(II)
+   IF(IANG.EQ.3) THEN
+      N_D_SHL=N_D_SHL+1
+   ENDIF
+ENDDO
+ALLOCATE(I_D_SHL(N_D_SHL))
+
+! COPY D SHELLS INTO I_D_SHL
+N_D_SHL = 0
+I_D_SHL=0
+   DO II=1,NSHELL
+      IANG=KTYPE(II)
+      IF(IANG.EQ.3) THEN
+         N_D_SHL = N_D_SHL+1
+         I_D_SHL(N_D_SHL) = II
+      ENDIF
+   ENDDO
+! <=============
+
+DO II=1,N_D_SHL
+DO JJ=1,II
+  ISH=I_D_SHL(II)
+  JSH=I_D_SHL(JJ)
+  IF(ISH.lt.JSH) THEN
+    I_D_SHL(II) = JSH
+    I_D_SHL(JJ) = ISH    
+  ENDIF
+ENDDO
+ENDDO
+! ==========================================
+
+ALLOCATE(xintsDD(N_D_SHL*(N_D_SHL+1)/2))
+DO ii=1,N_D_SHL
+   DO jj=1,ii
+      iijj=jj+ii*(ii-1)/2
+      ish=I_D_SHL(ii)
+      jsh=I_D_SHL(jj)
+      ijsh = ia(ish) + jsh
+      if(jsh.gt.ish) ijsh = ia(jsh) + ish
+      xintsDD(iijj) = xints(ijsh)
+   ENDDO
+ENDDO
+
+! ===============================================
+ALLOCATE(xintsPD(N_P_SHL*N_D_SHL))
+DO ii=1,N_P_SHL
+   DO jj=1,N_D_SHL
+      iijj=jj+(ii-1)*N_D_SHL
+      ish=I_P_SHL(ii)
+      jsh=I_D_SHL(jj)
+      ijsh = ia(ish) + jsh
+      if(jsh.gt.ish) ijsh = ia(jsh) + ish
+      xintsPD(iijj) = xints(ijsh)
+   ENDDO
+ENDDO
+
+! ===============================================
+ALLOCATE(xintsSD(N_S_SHL*N_D_SHL))
+DO ii=1,N_S_SHL
+   DO jj=1,N_D_SHL
+      iijj=jj+(ii-1)*N_D_SHL
+      ish=I_S_SHL(ii)
+      jsh=I_D_SHL(jj)
+      ijsh = ia(ish) + jsh
+      if(jsh.gt.ish) ijsh = ia(jsh) + ish
+      xintsSD(iijj) = xints(ijsh)
+   ENDDO
+ENDDO
+
+! =============================
+
+ return
+ end
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+END MODULE gpu_ompmod
+  SUBROUTINE gpu_ompmod_twoei_jk(schwrz,nintn,nschwz, &
+                             l1,l2a,l2b, &
+                             nsh2,maxg, &
+                             xints, dsh, &
+                             ia,da,fa,nflmat, &
+                             cutoff, oflag,&
+                             len1,len2,len3,len4,cmax)
+    USE prec, ONLY: fp
+      use comm_NSHEL_sp, only: KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP,CD,NSHELL
+      USE comm_FMTTBL, only: RFINC,FGRID,XGRID,RMR,RXINC,TMAX
+      use comm_B_1, only: CO
+      use comm_INTAC2, only: EI1,EI2,CUX
+
+      use DATA_IDPOP, only: IDPOP
+      use mod_shell_index
+    USE omp_lib
+      use gpu_ompmod, only: gpu_shell_index_SPshell,gpu_shell_index_Dshell
+      use mx_limits, only: mxgtot,mxgsh,mxg2,mxsh
+ use mod_xint_scrn, only : nbraJ01,nbraJ02,nbraJ03,nbraJ04,nbraJ05,nbraJ06, &
+     nketJ02,nketJ03,nketJ05, xintBJ01,xintBJ02,xintBJ03,xintBJ04,xintBJ05,xintBJ06, &
+     xintKJ02,xintKJ03,xintKJ05
+
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    LOGICAL, INTENT(IN) :: schwrz,oflag
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, nsh2, nflmat, maxg, &
+      len1,len2,len3,len4, ia(l1)
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot) 
+    double precision, INTENT(IN) :: da(l2a), &
+      xints(nsh2), dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a*nflmat)
+    INTEGER, INTENT(INOUT) :: nintn, nschwz
+
+    COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+        INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+    INTEGER :: lstri,lstrj,lstrk,lstrl
+    double precision :: qq4
+    INTEGER :: num_threads, ithread, thr_nshq, &
+      ii, jj, kk, ll, jork, shlmxang, i
+    double precision :: tim, tim0, tim1, tim2, tim3, tim4
+
+    integer :: maxthreads,nteams,limitthread
+    double precision :: ntotalmem, nshare, nprv
+
+    integer :: IJ,IK,IL,KL,JK,JL,nskip, ijij,klkl, mine, next
+    double precision :: denmax,test
+
+    integer*4 :: devid
+!
+!   --- Initialization of variables ---
+!
+      NEXT = -1
+      MINE = -1
+    tim = zero
+    nintn   = 0
+    nskip=0
+    qq4 = one
+    !norgp = 0
+
+
+!   allocate temporary memory for integrals
+
+#if defined(SETDEVICEID)
+    devid=me
+    devid=mod(devid,omp_get_num_devices())
+    call omp_set_default_device(devid)
+#endif
+
+    nteams=2560
+    limitthread=256
+
+#if __PRINT_ESS==1
+    tim0     = omp_get_wtime()
+#endif
+  call gpu_shell_index_SPshell(schwrz,l1,l2a,nsh2,ia,cutoff,xints,dsh)
+
+  call  gpu_scrn_xint_j01(cutoff)
+  call  gpu_scrn_xint_j02(cutoff)
+  call  gpu_scrn_xint_j03(cutoff)
+  call  gpu_scrn_xint_j04(cutoff)
+  call  gpu_scrn_xint_j05(cutoff)
+  call  gpu_scrn_xint_j06(cutoff)
+
+    tim1 = omp_get_wtime() 
+!$omp target data map(to:IA,DA) &
+!$omp map(to:KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp map(to:RFINC,FGRID,XGRID,RMR,CMAX,CO) &
+!$omp map(to:I_S_SHL,I_P_SHL) &
+!$omp map(to:nbraJ01,xintBJ01,nbraJ02,xintBJ02,nketJ02,xintKJ02) &
+!$omp map(to:nbraJ03,xintBJ03,nketJ03,xintKJ03,nbraJ04,xintBJ04) &
+!$omp map(to:nbraJ05,xintBJ05,nketJ05,xintKJ05,nbraJ06,xintBJ06) &
+!$omp map(tofrom:nintn,FA)
+
+    tim2 = omp_get_wtime() 
+  call gpu_rhf_j01_SSSS(l1,l2a,l2b,ia,da,fa,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,&
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+    tim2 = omp_get_wtime() - tim2
+!    write(6,900) 'j01', tim2
+    tim2 = omp_get_wtime() 
+  call gpu_rhf_j02_PSSS(l1,l2a,l2b,ia,da,fa,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,&
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+    tim2 = omp_get_wtime() - tim2
+!    write(6,900) 'j02', tim2
+    tim2 = omp_get_wtime() 
+  call gpu_rhf_j03_PPSS(l1,l2a,l2b,ia,da,fa,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+    tim2 = omp_get_wtime() - tim2
+!    write(6,900) 'j03', tim2
+    tim2 = omp_get_wtime() 
+  call gpu_rhf_j04_PSPS(l1,l2a,l2b,ia,da,fa,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+    tim2 = omp_get_wtime() - tim2
+!    write(6,900) 'j04', tim2
+    tim2 = omp_get_wtime() 
+  call gpu_rhf_j05_PPPS(l1,l2a,l2b,ia,da,fa,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+    tim2 = omp_get_wtime() - tim2
+!    write(6,900) 'j05', tim2
+    tim2 = omp_get_wtime() 
+  call gpu_rhf_j06_PPPP(l1,l2a,l2b,ia,da,fa,cutoff, &
+       len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+    tim2 = omp_get_wtime() - tim2
+!    write(6,900) 'j06', tim2
+!$omp end target data
+    tim1 = omp_get_wtime() - tim1
+!    write(6,900) 'sp ',tim1
+
+       deallocate(I_S_SHL,I_P_SHL) 
+       deallocate(xintsSS,xintsSP,xintsPP)
+    call release_gpu_gpu_ompmod_1d_twoei_jk()
+
+#if __PRINT_ESS==1
+    tim0 = omp_get_wtime() - tim0
+  if(maswrk) write(iw,900) 'gpu time rhf (s)=', tim0
+#endif
+  900 format(A,F10.2)
+  END SUBROUTINE gpu_ompmod_twoei_jk
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+
+   subroutine gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+   use omp_lib
+   integer, intent(in) :: nproc,NQUARTS,me
+   integer, intent(inout) :: nshell_start_, nshell_end_
+    integer :: me_1
+   integer :: mpi_left_,mpi_parts_,mpi_size_
+   integer :: icnt,istart,iend
+   double precision :: tim0
+ integer, allocatable :: mpi_slice_(:)
+
+    mpi_parts_ = NQUARTS/nproc
+    mpi_left_ = mod(NQUARTS,nproc)
+    allocate(mpi_slice_(nproc))
+    mpi_slice_(:) = mpi_parts_
+    do ii=1,mpi_left_
+     mpi_slice_(ii) = mpi_slice_(ii) + 1
+    enddo
+    do ii=2,nproc
+     mpi_slice_(ii) = mpi_slice_(ii) + mpi_slice_(ii-1)
+    enddo
+    if(me.eq.0) then
+     nshell_start_ = 1
+    else
+     nshell_start_ = mpi_slice_(me) + 1
+    endif
+    nshell_end_ = mpi_slice_(me + 1)
+
+    deallocate(mpi_slice_)
+
+    return
+    end
+
+  subroutine release_gpu_gpu_ompmod_1d_twoei_jk()
+ use mod_xint_scrn, only : nbraJ01,nbraJ02,nbraJ03,nbraJ04,nbraJ05,nbraJ06, &
+     nketJ02,nketJ03,nketJ05, xintBJ01,xintBJ02,xintBJ03,xintBJ04,xintBJ05,xintBJ06, &
+     xintKJ02,xintKJ03,xintKJ05
+  implicit none
+  deallocate(nbraJ01,xintBJ01)
+  deallocate(nbraJ02,xintBJ02,nketJ02,xintKJ02)
+  deallocate(nbraJ03,xintBJ03,nketJ03,xintKJ03)
+  deallocate(nbraJ04,xintBJ04)
+  deallocate(nbraJ05,xintBJ05,nketJ05,xintKJ05)
+  deallocate(nbraJ06,xintBJ06)
+  return
+  end
+
+ subroutine gpu_scrn_xint_j01(cutoff)
+ use mod_xint_scrn, only: nij01, nbraJ01, xintBJ01
+ use mod_shell_index, only: xintsSS,N_S_SHL
+ implicit none
+ double precision, intent(in) :: cutoff
+
+ double precision :: scutij
+ integer :: iijj, NSHL_SS
+  NSHL_SS=N_S_SHL*(N_S_SHL+1)/2
+  if(.not.allocated(nbraJ01)) allocate(nbraJ01(NSHL_SS))
+  if(.not.allocated(xintBJ01)) allocate(xintBJ01(NSHL_SS))
+  scutij = cutoff/maxval(xintsSS)
+  nij01=0
+  DO iijj=1,NSHL_SS
+     if(xintsSS(iijj).ge.scutij) then
+        nij01=nij01+1
+        XINTBJ01(nij01) = xintsSS(iijj)
+        nbraJ01(nij01) = iijj
+     endif
+  ENDDO
+ return
+ end 
+
+ subroutine gpu_scrn_xint_j02(cutoff)
+ use mod_xint_scrn, only: nij02, nbraJ02, xintBJ02, &
+     nkl02, nketJ02,xintKJ02
+ use mod_shell_index, only: xintsSS,N_S_SHL, xintsSP,N_P_SHL
+ implicit none
+ double precision, intent(in) :: cutoff
+
+ double precision :: scutij
+ integer :: iijj, NSHL_SS, NSHL_SP
+  NSHL_SS=N_S_SHL*(N_S_SHL+1)/2
+  NSHL_SP=N_S_SHL*N_P_SHL
+  if(.not.allocated(nbraJ02)) allocate(nbraJ02(NSHL_SS))
+  if(.not.allocated(xintBJ02)) allocate(xintBJ02(NSHL_SS))
+  if(.not.allocated(nketJ02)) allocate(nketJ02(NSHL_SP))
+  if(.not.allocated(xintKJ02)) allocate(xintKJ02(NSHL_SP))
+
+   scutij = cutoff/maxval(xintsSP)
+   nij02=0
+   DO iijj=1,NSHL_SS
+      if(xintsSS(iijj).ge.scutij) then
+         nij02=nij02+1
+         XINTBJ02(nij02) = xintsSS(iijj)
+         nbraJ02(nij02) = iijj
+      endif
+   ENDDO
+   
+   scutij = cutoff/maxval(xintsSS)
+   nkl02=0
+   DO iijj=1,NSHL_SP
+      if(xintsSP(iijj).ge.scutij) then
+         nkl02=nkl02+1
+         xintKJ02(nkl02) = xintsSP(iijj)
+         nketJ02(nkl02) = iijj
+      endif
+   ENDDO
+   
+ return
+ end 
+
+ subroutine gpu_scrn_xint_j03(cutoff)
+ use mod_xint_scrn, only: nij03, nbraJ03, xintBJ03, &
+     nkl03, nketJ03,xintKJ03
+ use mod_shell_index, only: xintsSS,N_S_SHL, xintsPP,N_P_SHL
+ implicit none
+ double precision, intent(in) :: cutoff
+
+ double precision :: scutij
+ integer :: iijj, NSHL_SS, NSHL_PP
+  NSHL_SS=N_S_SHL*(N_S_SHL+1)/2
+  NSHL_PP=N_P_SHL*(N_P_SHL+1)/2
+  if(.not.allocated(nbraJ03)) allocate(nbraJ03(NSHL_SS))
+  if(.not.allocated(xintBJ03)) allocate(xintBJ03(NSHL_SS))
+  if(.not.allocated(nketJ03)) allocate(nketJ03(NSHL_PP))
+  if(.not.allocated(xintKJ03)) allocate(xintKJ03(NSHL_PP))
+
+   scutij = cutoff/maxval(xintsPP)
+   nij03=0
+   DO iijj=1,N_S_SHL*(N_S_SHL+1)/2
+      if(xintsSS(iijj).ge.scutij) then
+         nij03=nij03+1
+         XINTBJ03(nij03) = xintsSS(iijj)
+         nbraJ03(nij03) = iijj
+      endif
+   ENDDO
+   
+   scutij = cutoff/maxval(xintsSS)
+   nkl03=0
+   DO iijj=1,NSHL_PP
+      if(xintsPP(iijj).ge.scutij) then
+         nkl03=nkl03+1
+         xintKJ03(nkl03) = xintsPP(iijj)
+         nketJ03(nkl03) = iijj
+      endif
+   ENDDO
+   
+ return
+ end 
+
+ subroutine gpu_scrn_xint_j04(cutoff)
+ use mod_xint_scrn, only: nij04, nbraJ04, xintBJ04
+ use mod_shell_index, only: xintsSP,N_S_SHL,N_P_SHL
+ implicit none
+ double precision, intent(in) :: cutoff
+
+ double precision :: scutij
+ integer :: iijj, NSHL_SP
+  NSHL_SP=N_S_SHL*N_P_SHL
+  if(.not.allocated(nbraJ04)) allocate(nbraJ04(NSHL_SP))
+  if(.not.allocated(xintBJ04)) allocate(xintBJ04(NSHL_SP))
+  scutij = cutoff/maxval(xintsSP)
+  nij04=0
+  DO iijj=1,NSHL_SP
+     if(xintsSP(iijj).ge.scutij) then
+        nij04=nij04+1
+        XINTBJ04(nij04) = xintsSP(iijj)
+        nbraJ04(nij04) = iijj
+     endif
+  ENDDO
+
+ return
+ end 
+
+ subroutine gpu_scrn_xint_j05(cutoff)
+ use mod_xint_scrn, only: nij05, nbraJ05, xintBJ05,nkl05, nketJ05,xintKJ05
+ use mod_shell_index, only: xintsSP,N_S_SHL, xintsPP,N_P_SHL
+ implicit none
+ double precision, intent(in) :: cutoff
+
+ double precision :: scutij
+ integer :: iijj, NSHL_SP, NSHL_PP
+  NSHL_SP=N_S_SHL*N_P_SHL
+  NSHL_PP=N_P_SHL*(N_P_SHL+1)/2
+  if(.not.allocated(nbraJ05)) allocate(nbraJ05(NSHL_SP))
+  if(.not.allocated(xintBJ05)) allocate(xintBJ05(NSHL_SP))
+  if(.not.allocated(nketJ05)) allocate(nketJ05(NSHL_PP))
+  if(.not.allocated(xintKJ05)) allocate(xintKJ05(NSHL_PP))
+
+scutij = cutoff/maxval(xintsPP)
+nij05=0
+DO iijj=1,NSHL_SP
+   if(xintsSP(iijj).ge.scutij) then
+      nij05=nij05+1
+      xintBJ05(nij05) = xintsSP(iijj)
+      nbraJ05(nij05) = iijj
+   endif
+ENDDO
+
+scutij = cutoff/maxval(xintsSP)
+nkl05=0
+DO iijj=1,NSHL_PP
+   if(xintsPP(iijj).ge.scutij) then
+      nkl05=nkl05+1
+      xintKJ05(nkl05) = xintsPP(iijj)
+      nketJ05(nkl05) = iijj
+   endif
+ENDDO
+
+ return
+ end 
+
+ subroutine gpu_scrn_xint_j06(cutoff)
+ use mod_xint_scrn, only: nij06, nbraJ06, xintBJ06
+ use mod_shell_index, only: xintsPP,N_P_SHL
+ implicit none
+ double precision, intent(in) :: cutoff
+
+ double precision :: scutij
+ integer :: iijj, NSHL_PP
+  NSHL_PP=N_P_SHL*(N_P_SHL+1)/2
+  if(.not.allocated(nbraJ06)) allocate(nbraJ06(NSHL_PP))
+  if(.not.allocated(xintBJ06)) allocate(xintBJ06(NSHL_PP))
+  scutij = cutoff/maxval(xintsPP)
+  nij06=0
+  DO iijj=1,NSHL_PP
+     if(xintsPP(iijj).ge.scutij) then
+        nij06=nij06+1
+        XINTBJ06(nij06) = xintsPP(iijj)
+        nbraJ06(nij06) = iijj
+     endif
+  ENDDO
+ return
+ end 
+

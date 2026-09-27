@@ -1,0 +1,41 @@
+{
+  "parse_header" : "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+  "parse_group" : [
+   {
+     "regex_string" : "^         ---- SUMMARY OF DEA-EOMCC CALCULATIONS ----.*$",
+     "parse_name"   : "E(DOUBLY ELECTRON ATTACHMENT)",
+     "parse_type" : "float",
+     "parse_value_index" : 0,
+     "parse_line_offset" : 4,
+     "parse_multiple_lines" : 5,
+     "parse_multiple_label" : "STATE"
+   },
+   {
+     "regex_string" : "^         ---- SUMMARY OF DEA-EOMCC CALCULATIONS ----.*$",
+     "parse_name"   : "E(TOTAL DEA-EOMCC)",
+     "parse_type" : "float",
+     "parse_value_index" : 1,
+     "parse_line_offset" : 4,
+     "parse_multiple_lines" : 5,
+     "parse_multiple_label" : "STATE"
+   },
+   {
+     "regex_string" : "^         ---- SUMMARY OF DIP-EOMCC CALCULATIONS ----.*$",
+     "parse_name"   : "E(DOUBLED IONIZATION)",
+     "parse_type" : "float",
+     "parse_value_index" : 0,
+     "parse_line_offset" : 4,
+     "parse_multiple_lines" : 5,
+     "parse_multiple_label" : "STATE"
+   },
+   {
+     "regex_string" : "^         ---- SUMMARY OF DIP-EOMCC CALCULATIONS ----.*$",
+     "parse_name"   : "E(TOTAL DIP-EOMCC)",
+     "parse_type" : "float",
+     "parse_value_index" : 1,
+     "parse_line_offset" : 4,
+     "parse_multiple_lines" : 5,
+     "parse_multiple_label" : "STATE"
+   }
+  ]
+}

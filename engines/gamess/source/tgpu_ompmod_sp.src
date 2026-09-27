@@ -1,0 +1,636 @@
+!---------------------------------------------------------------------
+!=====================================================================
+!---------------------------------------------------------------------
+  SUBROUTINE gpu_rhf_j01_SSSS(l1,l2a,l2b,ia,da,fa,cutoff, &
+             len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+
+      use comm_NSHEL_sp, only: NSHELL
+      USE comm_FMTTBL, only: RXINC,TMAX
+                             
+    USE prec, ONLY: fp
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use mod_shell_index
+      use mod_jtype1
+      use mod_dirfck
+      use omp_lib
+      use mx_limits, only: mxgtot,mxsh
+  use mod_xint_scrn, only: nij01, nbraJ01, xintBJ01
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00, eight=8.00D+00
+
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, ia(l1),len1,len2,len3,len4,&
+    NSH2,nteams,limitthread
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot),qq4,da(l2a),dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a)
+    INTEGER, INTENT(INOUT) :: nintn
+
+    double precision, INTENT(IN) :: CO(MXSH,3)
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  double precision, INTENT(IN) :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision, INTENT(IN) :: XGRID(0:NTX,0:NPX)
+  double precision, INTENT(IN) :: RFINC(0:NGRD), RMR(MXQT)
+  double precision, INTENT(IN) :: ex(mxgtot),cs(mxgtot),cp(mxgtot)
+  integer, INTENT(IN) :: kstart(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh)
+    integer :: ii, jj, kk, ll, jork, shlmxang, i
+
+    integer :: IJ,IK,IL,KL,JK,JL, ijij,klkl
+    integer ::  nshell_start_, nshell_end_
+
+    integer ij_tmp, kl_tmp,i_tmp, ii_tmp,jj_tmp,kk_tmp,ll_tmp,&
+     iijjkkll,iijj_tmp,kkll_tmp,iijj,kkll,niijj, NQUARTS
+    double precision :: scutij, cutoff_denmax, denmax,test
+
+    integer :: NCHUNK, LPOPI,LPOPJ,LPOPK,LPOPL, IQUART
+
+    double precision :: gpople(256)
+
+
+
+niijj=nij01
+denmax = maxval(DSH)*F04
+if(denmax.gt.1.0D00) denmax=1.0D00
+cutoff_denmax = cutoff/denmax
+
+NQUARTS=niijj
+   call gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+
+  LPOPI=64; LPOPJ=16; LPOPK= 4; LPOPL= 1;
+
+
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp num_teams(nteams) thread_limit(limitthread)  &
+!$omp private(i_tmp,iijjkkll,iijj_tmp,kkll_tmp) &
+!$omp private(iijj,kkll,ii_TMP,jj_TMP,kk_TMP,ll_TMP) &
+!$omp private(ii,jj,kk,ll) &
+!$omp shared(I_S_SHL) &
+!$omp shared(nbraJ01,xintBJ01) private(IQUART) &
+!$omp shared(IA,DA) &
+!$omp shared(CO,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp shared(RFINC,FGRID,XGRID,RMR,CMAX) &
+!$omp shared(fa) &
+!$omp private(gpople) 
+
+   DO iijj_tmp=nshell_start_, nshell_end_
+   DO kkll_tmp=1,niijj
+    if(kkll_tmp.gt.iijj_tmp) cycle
+
+      !if(xintBJ01(iijj_TMP)*xintBJ01(kkll_TMP) .lt. cutoff_denmax) cycle
+
+   iijj = nbraJ01(iijj_tmp)-1
+   kkll = nbraJ01(kkll_tmp)-1
+
+   ii_TMP = (1 + sqrt(one+eight*iijj))/2
+   jj_TMP = iijj - ii_TMP*(ii_TMP-1)/2 + 1
+
+   kk_TMP = (1 + sqrt(one+eight*kkll))/2
+   ll_TMP = kkll - kk_TMP*(kk_TMP-1)/2 + 1
+
+   ii = I_S_SHL(ii_TMP)
+   jj = I_S_SHL(jj_TMP)
+   kk = I_S_SHL(kk_TMP)
+   ll = I_S_SHL(ll_TMP)   
+                       
+      call GPU_GENR70_jtype1(QQ4,II,JJ,KK,LL,CO,KSTART,KNG,&
+      EX,CS,CMAX,RFINC,FGRID,gpople,EI1,EI2,CUX,RXINC,TMAX)
+      
+      call GPU_GENR70_dirfck(II,JJ,KK,LL,LPOPI,LPOPJ,LPOPK,LPOPL, &
+      IA,DA,FA,one,one,CUTOFF,NINTN,L1,L2a,GPOPLE,KLOC,KMIN,KMAX)
+      
+    END DO 
+    END DO 
+!$omp end target teams distribute parallel do simd  
+
+  return
+  END 
+! gpu_rhf_j02_PSSS
+  SUBROUTINE gpu_rhf_j02_PSSS(l1,l2a,l2b,ia,da,fa,cutoff, &
+             len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+
+      use comm_NSHEL_sp, only: NSHELL
+      USE comm_FMTTBL, only: RXINC,TMAX
+                             
+    USE prec, ONLY: fp
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use mod_shell_index
+      use mod_jtype2
+      use mod_dirfck
+      use mx_limits, only: mxgtot,mxsh
+ use mod_xint_scrn, only: nij02, nbraJ02, xintBJ02, &
+     nkl02, nketJ02,xintKJ02
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00, eight=8.00D+00
+
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, ia(l1),len1,len2,len3,len4,&
+    NSH2,nteams,limitthread
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot),qq4,da(l2a),dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a)
+    INTEGER, INTENT(INOUT) :: nintn
+
+    double precision, INTENT(IN) :: CO(MXSH,3)
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  double precision, INTENT(IN) :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision, INTENT(IN) :: XGRID(0:NTX,0:NPX)
+  double precision, INTENT(IN) :: RFINC(0:NGRD), RMR(MXQT)
+  double precision, INTENT(IN) :: ex(mxgtot),cs(mxgtot),cp(mxgtot)
+  integer, INTENT(IN) :: kstart(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh)
+    integer :: ii, jj, kk, ll, jork, shlmxang, i
+
+    integer :: IJ,IK,IL,KL,JK,JL, ijij,klkl
+    integer ::  nshell_start_, nshell_end_
+
+    integer ij_tmp, kl_tmp,i_tmp, ii_tmp,jj_tmp,kk_tmp,ll_tmp,&
+     iijjkkll,iijj_tmp,kkll_tmp,iijj,kkll,niijj, NQUARTS,nkkll
+    double precision :: scutij, cutoff_denmax, denmax,test
+
+    integer :: NCHUNK, LPOPI,LPOPJ,LPOPK,LPOPL
+
+    double precision :: gpople(256)
+
+
+denmax = maxval(DSH)*F04
+if(denmax.gt.1.0D00) denmax=1.0D00
+cutoff_denmax = cutoff/denmax
+niijj=nij02
+
+  NQUARTS=niijj
+   call gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+
+  LPOPI=64; LPOPJ=16; LPOPK= 4; LPOPL= 1;
+
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp num_teams(nteams) thread_limit(limitthread)  &
+!$omp private(i_tmp,iijjkkll,iijj_tmp,kkll_tmp) &
+!$omp private(iijj,kkll,ii_TMP,jj_TMP,kk_TMP,ll_TMP) &
+!$omp private(ii,jj,kk,ll) &
+!$omp shared(I_S_SHL,I_P_SHL) &
+!$omp shared(NBRAJ02,NKETJ02) &
+!$omp shared(IA,DA,CUTOFF) &
+!$omp shared(CO,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp shared(RFINC,FGRID,XGRID,RMR,CMAX) &
+!$omp shared(fa) &
+!$omp private(gpople) 
+   DO iijj_tmp=nshell_start_, nshell_end_
+   DO kkll_tmp=1,nkl02
+
+   iijj = NBRAJ02(iijj_tmp)-1
+   kkll = NKETJ02(kkll_tmp)-1
+
+   ii_TMP = (1 + sqrt(1.0+8.0*iijj))/2
+   jj_TMP = iijj - ii_TMP*(ii_TMP-1)/2 + 1
+
+   ll_TMP = mod(kkll,N_P_SHL) + 1
+   kk_TMP = kkll/N_P_SHL + 1
+
+   ii = I_S_SHL(ii_TMP)
+   jj = I_S_SHL(jj_TMP)
+   kk = I_S_SHL(kk_TMP)
+   ll = I_P_SHL(ll_TMP)
+
+      call GPU_GENR70_jtype2(QQ4,II,JJ,KK,LL,CO,KSTART,KNG,&
+      EX,CS,CP,CMAX,RFINC,FGRID,XGRID,gpople,EI1,EI2,CUX,RXINC,TMAX)
+      
+      call GPU_GENR70_dirfck(II,JJ,KK,LL,LPOPI,LPOPJ,LPOPK,LPOPL, &
+      IA,DA,FA,one,one,CUTOFF,NINTN,L1,L2a,GPOPLE,KLOC,KMIN,KMAX)
+    END DO 
+    END DO 
+!$omp end target teams distribute parallel do simd  
+
+  return
+  END 
+! gpu_rhf_j03_PPSS
+  SUBROUTINE gpu_rhf_j03_PPSS(l1,l2a,l2b,ia,da,fa,cutoff, &
+             len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+
+      use comm_NSHEL_sp, only: NSHELL
+      USE comm_FMTTBL, only: RXINC,TMAX
+                             
+    USE prec, ONLY: fp
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use mod_shell_index
+      use mod_jtype3
+      use mod_dirfck
+      use mx_limits, only: mxgtot,mxsh
+ use mod_xint_scrn, only: nij03, nbraJ03, xintBJ03, &
+     nkl03, nketJ03,xintKJ03
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00, eight=8.00D+00
+
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, ia(l1),len1,len2,len3,len4,&
+    NSH2,nteams,limitthread
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot),qq4,da(l2a),dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a)
+    INTEGER, INTENT(INOUT) :: nintn
+
+    double precision, INTENT(IN) :: CO(MXSH,3)
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  double precision, INTENT(IN) :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision, INTENT(IN) :: XGRID(0:NTX,0:NPX)
+  double precision, INTENT(IN) :: RFINC(0:NGRD), RMR(MXQT)
+  double precision, INTENT(IN) :: ex(mxgtot),cs(mxgtot),cp(mxgtot)
+  integer, INTENT(IN) :: kstart(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh)
+    integer :: ii, jj, kk, ll, jork, shlmxang, i
+
+    integer :: IJ,IK,IL,KL,JK,JL, ijij,klkl
+    integer ::  nshell_start_, nshell_end_
+
+    integer ij_tmp, kl_tmp,i_tmp, ii_tmp,jj_tmp,kk_tmp,ll_tmp,&
+     iijjkkll,iijj_tmp,kkll_tmp,iijj,kkll,niijj, NQUARTS, nkkll
+    double precision :: scutij, cutoff_denmax, denmax,test
+
+    integer :: NCHUNK, LPOPI,LPOPJ,LPOPK,LPOPL
+
+    double precision :: gpople(256)
+
+denmax = maxval(DSH)*F04
+if(denmax.gt.1.0D00) denmax=1.0D00
+cutoff_denmax = cutoff/denmax
+
+niijj=nij03
+  NQUARTS=niijj
+   call gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+
+  LPOPI=64; LPOPJ=16; LPOPK= 4; LPOPL= 1;
+
+!$omp target teams distribute parallel do simd  collapse(2) &
+!$omp num_teams(nteams) thread_limit(limitthread)  &
+!$omp private(i_tmp,iijjkkll,iijj_tmp,kkll_tmp) &
+!$omp private(iijj,kkll,ii_TMP,jj_TMP,kk_TMP,ll_TMP) &
+!$omp private(ii,jj,kk,ll) &
+!$omp shared(I_S_SHL,I_P_SHL) &
+!$omp shared(NBRAJ03,NKETJ03) &
+!$omp shared(IA,DA,CUTOFF) &
+!$omp shared(CO,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp shared(RFINC,FGRID,XGRID,RMR,CMAX) &
+!$omp shared(fa) &
+!$omp private(gpople) 
+   DO iijj_tmp=nshell_start_, nshell_end_
+   DO kkll_tmp=1,nkl03
+
+   iijj=NBRAJ03(iijj_tmp)-1
+   kkll=NKETJ03(kkll_tmp)-1
+
+   ii_TMP = (1 + sqrt(one+eight*iijj))/2
+   jj_TMP = iijj - ii_TMP*(ii_TMP-1)/2 + 1
+
+   kk_TMP = (1 + sqrt(one+eight*kkll))/2
+   ll_TMP = kkll - kk_TMP*(kk_TMP-1)/2 + 1
+
+
+   ii = I_S_SHL(ii_TMP)
+   jj = I_S_SHL(jj_TMP)
+   kk = I_P_SHL(kk_TMP)
+   ll = I_P_SHL(ll_TMP)
+      call GPU_GENR70_jtype3(QQ4,II,JJ,KK,LL,CO,KSTART,KNG,&
+      EX,CS,CP,CMAX,RFINC,FGRID,XGRID,RMR,gpople,EI1,EI2,CUX,RXINC,TMAX)
+      
+      call GPU_GENR70_dirfck(II,JJ,KK,LL,LPOPI,LPOPJ,LPOPK,LPOPL, &
+      IA,DA,FA,one,one,CUTOFF,NINTN,L1,L2a,GPOPLE,KLOC,KMIN,KMAX)
+      
+    END DO 
+    END DO 
+!$omp end target teams distribute parallel do simd  
+
+  return
+  END 
+! gpu_rhf_j04_PSPS
+  SUBROUTINE gpu_rhf_j04_PSPS(l1,l2a,l2b,ia,da,fa,cutoff, &
+             len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+
+      use comm_NSHEL_sp, only: NSHELL
+      USE comm_FMTTBL, only: RXINC,TMAX
+                             
+    USE prec, ONLY: fp
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use mod_shell_index
+      use mod_jtype4
+      use mod_dirfck
+      use mx_limits, only: mxgtot,mxsh
+ use mod_xint_scrn, only: nij04, nbraJ04, xintBJ04
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00, eight=8.00D+00
+
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, ia(l1),len1,len2,len3,len4,&
+    NSH2,nteams,limitthread
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot),qq4,da(l2a),dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a)
+    INTEGER, INTENT(INOUT) :: nintn
+
+    double precision, INTENT(IN) :: CO(MXSH,3)
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  double precision, INTENT(IN) :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision, INTENT(IN) :: XGRID(0:NTX,0:NPX)
+  double precision, INTENT(IN) :: RFINC(0:NGRD), RMR(MXQT)
+  double precision, INTENT(IN) :: ex(mxgtot),cs(mxgtot),cp(mxgtot)
+  integer, INTENT(IN) :: kstart(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh)
+    integer :: ii, jj, kk, ll, jork, shlmxang, i
+
+    integer :: IJ,IK,IL,KL,JK,JL, ijij,klkl
+    integer ::  nshell_start_, nshell_end_
+
+    integer ij_tmp, kl_tmp,i_tmp, ii_tmp,jj_tmp,kk_tmp,ll_tmp,&
+     iijjkkll,iijj_tmp,kkll_tmp,iijj,kkll,niijj, NQUARTS, nkkll, IQUART
+    double precision :: scutij, cutoff_denmax, denmax,test
+
+    integer :: NCHUNK, LPOPI,LPOPJ,LPOPK,LPOPL
+
+    double precision :: gpople(256)
+
+
+denmax = maxval(DSH)*F04
+if(denmax.gt.1.0D00) denmax=1.0D00
+cutoff_denmax = cutoff/denmax
+
+niijj=nij04
+NQUARTS=niijj
+   call gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+
+  LPOPI=64; LPOPJ=16; LPOPK= 4; LPOPL= 1;
+
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp num_teams(nteams) thread_limit(limitthread)  &
+!$omp private(i_tmp,iijjkkll,iijj_tmp,kkll_tmp) &
+!$omp private(iijj,kkll,ii_TMP,jj_TMP,kk_TMP,ll_TMP) &
+!$omp private(ii,jj,kk,ll) &
+!$omp shared(I_S_SHL,I_P_SHL) &
+!$omp shared(NBRAJ04,xintBJ04) private(IQUART) &
+!$omp shared(IA,DA) &
+!$omp shared(CO,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp shared(RFINC,FGRID,XGRID,RMR,CMAX) &
+!$omp shared(fa) &
+!$omp private(gpople) 
+  DO iijj_tmp=nshell_start_, nshell_end_
+   DO kkll_tmp=1,niijj
+    if(kkll_tmp.gt.iijj_tmp) cycle
+
+      !if(xintBJ04(iijj_TMP)*xintBJ04(kkll_TMP) .lt. cutoff_denmax) cycle
+
+   iijj = NBRAJ04(iijj_tmp)
+   kkll = NBRAJ04(kkll_tmp)
+
+   ii_TMP = (iijj-1)/N_P_SHL + 1 
+   jj_TMP = mod(iijj-1,N_P_SHL) + 1
+
+   kk_TMP = (kkll-1)/N_P_SHL + 1
+   ll_TMP = mod(kkll-1,N_P_SHL) + 1
+
+   ii = I_S_SHL(ii_TMP)
+   jj = I_P_SHL(jj_TMP)
+   kk = I_S_SHL(kk_TMP)
+   ll = I_P_SHL(ll_TMP) 
+      call GPU_GENR70_jtype4(QQ4,II,JJ,KK,LL,CO,KSTART,KNG,&
+      EX,CS,CP,CMAX,RFINC,FGRID,XGRID,RMR,gpople,EI1,EI2,CUX,RXINC,TMAX)
+      
+      call GPU_GENR70_dirfck(II,JJ,KK,LL,LPOPI,LPOPJ,LPOPK,LPOPL, &
+      IA,DA,FA,one,one,CUTOFF,NINTN,L1,L2a,GPOPLE,KLOC,KMIN,KMAX)
+    END DO 
+    END DO 
+!$omp end target teams distribute parallel do simd  
+
+  return
+  END 
+! gpu_rhf_j05_PPPS
+  SUBROUTINE gpu_rhf_j05_PPPS(l1,l2a,l2b,ia,da,fa,cutoff, &
+             len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+
+      use comm_NSHEL_sp, only: NSHELL
+      USE comm_FMTTBL, only: RXINC,TMAX
+                             
+    USE prec, ONLY: fp
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use mod_shell_index
+      use mod_jtype5
+      use mod_dirfck
+      use mx_limits, only: mxgtot,mxsh
+ use mod_xint_scrn, only: nij05, nbraJ05, xintBJ05, &
+     nkl05, nketJ05,xintKJ05
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00, eight=8.00D+00
+
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, ia(l1),len1,len2,len3,len4,&
+    NSH2,nteams,limitthread
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot),qq4,da(l2a),dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a)
+    INTEGER, INTENT(INOUT) :: nintn
+
+    double precision, INTENT(IN) :: CO(MXSH,3)
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  double precision, INTENT(IN) :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision, INTENT(IN) :: XGRID(0:NTX,0:NPX)
+  double precision, INTENT(IN) :: RFINC(0:NGRD), RMR(MXQT)
+  double precision, INTENT(IN) :: ex(mxgtot),cs(mxgtot),cp(mxgtot)
+  integer, INTENT(IN) :: kstart(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh)
+    integer :: ii, jj, kk, ll, jork, shlmxang, i
+
+    integer :: IJ,IK,IL,KL,JK,JL, ijij,klkl
+    integer ::  nshell_start_, nshell_end_
+
+    integer ij_tmp, kl_tmp,i_tmp, ii_tmp,jj_tmp,kk_tmp,ll_tmp,&
+     iijjkkll,iijj_tmp,kkll_tmp,iijj,kkll,niijj, NQUARTS, nkkll
+    double precision :: scutij, cutoff_denmax, denmax,test
+
+    integer :: NCHUNK, LPOPI,LPOPJ,LPOPK,LPOPL
+
+    double precision :: gpople(256)
+
+
+denmax = maxval(DSH)*F04
+if(denmax.gt.1.0D00) denmax=1.0D00
+cutoff_denmax = cutoff/denmax
+
+niijj=nij05
+  NQUARTS=niijj
+   call gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+
+  LPOPI=64; LPOPJ=16; LPOPK= 4; LPOPL= 1;
+
+!$omp target teams distribute parallel do simd  collapse(2) &
+!$omp num_teams(nteams) thread_limit(limitthread)  &
+!$omp private(i_tmp,iijjkkll,iijj_tmp,kkll_tmp) &
+!$omp private(iijj,kkll,ii_TMP,jj_TMP,kk_TMP,ll_TMP) &
+!$omp private(ii,jj,kk,ll) &
+!$omp shared(I_S_SHL,I_P_SHL) &
+!$omp shared(NBRAJ05,NKETJ05) &
+!$omp shared(IA,DA) &
+!$omp shared(CO,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp shared(RFINC,FGRID,XGRID,RMR,CMAX) &
+!$omp shared(fa) &
+!$omp private(gpople) 
+   DO iijj_tmp=nshell_start_, nshell_end_
+   DO kkll_tmp=1,nkl05
+
+iijj = NBRAJ05(iijj_tmp)
+kkll = NKETJ05(kkll_tmp)
+
+   ii_TMP = (iijj-1)/N_P_SHL + 1
+   jj_TMP = mod(iijj-1,N_P_SHL) + 1
+
+   kk_TMP = (1 + sqrt(1.0+8.0*(kkll-1)))/2
+   ll_TMP = kkll - kk_TMP*(kk_TMP-1)/2
+
+   ii = I_S_SHL(ii_TMP)
+   jj = I_P_SHL(jj_TMP)
+   kk = I_P_SHL(kk_TMP)
+   ll = I_P_SHL(ll_TMP)
+
+      call GPU_GENR70_jtype5(QQ4,II,JJ,KK,LL,CO,KSTART,KNG,&
+      EX,CS,CP,CMAX,RFINC,FGRID,XGRID,RMR,gpople,EI1,EI2,CUX,RXINC,TMAX)
+      
+      call GPU_GENR70_dirfck(II,JJ,KK,LL,LPOPI,LPOPJ,LPOPK,LPOPL, &
+      IA,DA,FA,one,one,CUTOFF,NINTN,L1,L2a,GPOPLE,KLOC,KMIN,KMAX)
+    END DO 
+    END DO 
+!$omp end target teams distribute parallel do simd  
+
+  return
+  END 
+! gpu_rhf_j06_PPPP
+  SUBROUTINE gpu_rhf_j06_PPPP(l1,l2a,l2b,ia,da,fa,cutoff, &
+             len1,len2,len3,len4,nintn,qq4,DSH,NSH2,nteams,limitthread,cmax,& 
+    CO,RFINC,FGRID,XGRID,RMR,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) 
+
+      use comm_NSHEL_sp, only: NSHELL
+      USE comm_FMTTBL, only: RXINC,TMAX
+                             
+    USE prec, ONLY: fp
+      use comm_INTAC2, only: EI1,EI2,CUX
+      use mod_shell_index
+      use mod_jtype6
+      use mod_dirfck
+      use mx_limits, only: mxgtot,mxsh
+ use mod_xint_scrn, only: nij06, nbraJ06, xintBJ06
+  implicit none
+
+    double precision, parameter :: one=1.00D+00, zero=0.00D+00, HALF=0.5D+00,&
+    memMB=1024*1024, F04=4.00D+00, eight=8.00D+00
+
+
+    COMMON /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+        INTEGER :: me,master,nproc,ibtyp,iptim
+        LOGICAL :: dskwrk, maswrk, goparr
+
+    INTEGER, INTENT(IN) ::l1, l2a, l2b, ia(l1),len1,len2,len3,len4,&
+    NSH2,nteams,limitthread
+    double precision, INTENT(IN) :: cutoff,cmax(mxgtot),qq4,da(l2a),dsh(nsh2)
+    double precision, INTENT(INOUT) :: fa(l2a)
+    INTEGER, INTENT(INOUT) :: nintn
+
+    double precision, INTENT(IN) :: CO(MXSH,3)
+  integer, parameter :: NTX=4, NPF=450, NGRD=7, NPX=1000, MXQT=16
+  double precision, INTENT(IN) :: FGRID(0:NTX,0:NPF,0:NGRD)
+  double precision, INTENT(IN) :: XGRID(0:NTX,0:NPX)
+  double precision, INTENT(IN) :: RFINC(0:NGRD), RMR(MXQT)
+  double precision, INTENT(IN) :: ex(mxgtot),cs(mxgtot),cp(mxgtot)
+  integer, INTENT(IN) :: kstart(mxsh),ktype(mxsh),kng(mxsh),  &
+                  kloc(mxsh),kmin(mxsh),kmax(mxsh)
+    integer :: ii, jj, kk, ll, jork, shlmxang, i
+
+    integer :: IJ,IK,IL,KL,JK,JL, ijij,klkl
+    integer ::  nshell_start_, nshell_end_
+
+    integer ij_tmp, kl_tmp,i_tmp, ii_tmp,jj_tmp,kk_tmp,ll_tmp,&
+     iijjkkll,iijj_tmp,kkll_tmp,iijj,kkll,niijj, NQUARTS,IQUART
+    double precision :: scutij, cutoff_denmax, denmax,test
+
+    integer :: NCHUNK, LPOPI,LPOPJ,LPOPK,LPOPL
+
+    double precision :: gpople(256)
+
+
+denmax = maxval(DSH)*F04
+if(denmax.gt.1.0D00) denmax=1.0D00
+cutoff_denmax = cutoff/denmax
+
+niijj=nij06
+NQUARTS=niijj
+   call gpu_mpi_slice_nshell(nproc,NQUARTS,me,nshell_start_, nshell_end_)
+
+  LPOPI=64; LPOPJ=16; LPOPK= 4; LPOPL= 1;
+
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp num_teams(nteams) thread_limit(limitthread)  &
+!$omp private(i_tmp,iijjkkll,iijj_tmp,kkll_tmp) &
+!$omp private(iijj,kkll,ii_TMP,jj_TMP,kk_TMP,ll_TMP) &
+!$omp private(ii,jj,kk,ll) &
+!$omp shared(I_P_SHL) &
+!$omp shared(NBRAJ06,xintBJ06) private(IQUART) &
+!$omp shared(IA,DA) &
+!$omp shared(CO,KTYPE,KLOC,KMIN,KMAX,KSTART,KNG,EX,CS,CP) &
+!$omp shared(RFINC,FGRID,XGRID,RMR,CMAX) &
+!$omp shared(fa) &
+!$omp private(gpople) 
+   DO iijj_tmp=nshell_start_, nshell_end_
+   DO kkll_tmp=1,niijj
+    if(kkll_tmp.gt.iijj_tmp) cycle
+      !if(xintBJ06(iijj_TMP)*xintBJ06(kkll_TMP) .lt. cutoff_denmax) cycle
+
+
+   iijj = NBRAJ06(iijj_TMP)-1
+   kkll = NBRAJ06(kkll_TMP)-1
+
+   ii_TMP = (1 + sqrt(one+eight*iijj))/2
+   jj_TMP = iijj - ii_TMP*(ii_TMP-1)/2 + 1
+
+   kk_TMP = (1 + sqrt(one+eight*kkll))/2
+   ll_TMP = kkll - kk_TMP*(kk_TMP-1)/2 + 1
+
+   ii = I_P_SHL(ii_TMP)
+   jj = I_P_SHL(jj_TMP)
+   kk = I_P_SHL(kk_TMP)
+   ll = I_P_SHL(ll_TMP)
+
+      call GPU_GENR70_jtype6(QQ4,II,JJ,KK,LL,CO,KSTART,KNG,&
+      EX,CS,CP,CMAX,RFINC,FGRID,XGRID,RMR,gpople,EI1,EI2,CUX,RXINC,TMAX)
+      
+      call GPU_GENR70_dirfck(II,JJ,KK,LL,LPOPI,LPOPJ,LPOPK,LPOPL, &
+      IA,DA,FA,one,one,CUTOFF,NINTN,L1,L2a,GPOPLE,KLOC,KMIN,KMAX)
+    END DO 
+    END DO 
+!$omp end target teams distribute parallel do simd  
+
+  return
+  END 

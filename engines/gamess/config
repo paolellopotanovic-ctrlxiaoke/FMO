@@ -1,0 +1,2529 @@
+#!/bin/csh -f
+#
+#   Configuration script to set up GAMESS' compile/link
+#
+#   This script asks questions about FORTRAN, math libraries, and
+#   message passing libraries.  The answers to these questions are
+#   used by 'compall' and 'comp' and 'compddi' and 'lked', so those
+#   scripts should not require additional customizations.
+#
+#######################################################################
+#
+#   Last updated by Sarom S. Leang - May 28, 2022
+#
+#   Like Python? Compile GAMESS a lot? Tired of these config questions?
+#   Then have a look at $GMS_PATH/bin/create-install-info.py
+#
+#   Please send your issues to the GAMESS public
+#   issue tracker on GitHub:
+#   https://github.com/gms-bbg/gamess-issues/issues
+#
+#            Architecture information
+set GMS_ARCH=`uname -p`
+#            the following will always be set by this script.
+
+set GMS_VERSION=''
+set GMS_BUILD_DIR=''
+set GMS_TARGET=''
+set GMS_HPC_SYSTEM_TARGET='generic'
+set GMS_PATH=''
+set GMS_FORTRAN=''
+set GMS_MATHLIB=''
+set GMS_DDI_COMM=''
+#            the following may optionally be set to non-blank below,
+#            but will be left uninitialized in many cases.
+set GMS_MATHLIB_PATH=''
+set GMS_LAPACK_LINK_LINE=''
+set GMS_GFORTRAN_VERNO=''
+set GMS_IFORT_VERNO=''
+set GMS_MKL_VERNO=''
+set GMS_AMD_FLAME_PATH=''
+set GMS_MAC_OSX_VERNO=''
+#            MSU Coupled Cluster option
+set GMS_MSUAUTO='false'
+set GMS_THREADED_BLAS='false'
+#            LIBCCHEM options
+
+set GMS_HPCCHEM='false'
+set GMS_HPCCHEM_USE_DATA_SERVERS='false'
+set GMS_HPCCHEM_CUDA='true'
+set GMS_HPCCHEM_MAGMA='false'
+set GMS_HPCCHEM_PATH=''
+set GMS_HPC_ROCM_PATH=''
+set GMS_HPC_HIP_PATH=''
+set GMS_HPC_MAGMA_PATH=''
+
+set GMS_HPC_CUDA_PATH=''
+
+#           LibXC option
+set GMS_LIBXC='false'
+#           MDI option
+set GMS_MDI='false'
+#           message passing options
+set GMS_BG_MODEL=''
+set GMS_ARMCI_PATH=''
+set GMS_MPI_LIB=''
+set GMS_MPI_PATH=''
+set GMS_OFED_PATH=''
+set GMS_MPI_SOFTWARE_VERNO=''
+#
+# PGI/Intel compiler flags:
+# - Linux 64
+set GMS_L64_OPT=''
+set GMS_LIN_FLAGS=''
+# - LIN/WIN
+set GMS_INT_OPT=''
+set GMS_IPO_OPT=''
+set GMS_PGI_OPT=''
+set GMS_IPA_OPT=''
+# - Windows
+set GMS_WIN_OPT=''
+set GMS_WIN_FLAGS=''
+set GMS_WIN_TP=''
+#
+# Intel Phi build option:
+set GMS_PHI='none'
+#
+# Shared memory type:
+set GMS_SHMTYPE='sysv'
+#
+# OpenMP/OpenMP Offload support:
+set GMS_OPENMP='false'
+set GMS_OPENMP_OFFLOAD='false'
+set GMS_USE_HIPFORT='false'
+set USE_CUBLAS='false'
+set USE_HIPBLAS='false'
+#
+# Singularity support:
+set GMS_CONTAINER=''
+set GMS_CONTAINER_PATH=''
+#
+# Capture floating-point execptions
+set GMS_FPE_FLAGS=''
+#
+# VeraChem integration
+# VM2
+set GMS_VM2=''
+#
+set TINKER='false'
+set VB2000='false'
+set XMVB='false'
+set NEO='false'
+set NBO='false'
+set RISM='false'
+#
+#    ----- Step 1: get GMS_TARGET and GMS_PATH values -----
+#
+echo "This script asks a few questions, depending on your computer system,"
+echo "to set up compiler names, libraries, message passing libraries,"
+echo "and so forth."
+echo " "
+echo "You can quit at any time by pressing control-C, and then <ENTER>."
+echo " "
+echo "Please open a second window by logging into your target machine,"
+echo "in case this script asks you to 'type' a command to learn something"
+echo "about your system software situation.  All such extra questions will"
+echo "use the word 'type' to indicate it is a command for the other window."
+echo " "
+echo -n "After the new window is open, please hit <ENTER> to go on."
+set reply=$<
+tput clear
+#
+echo "   GAMESS can compile on the following 64 bit machines:"
+echo "hpe-apollo   - HPE Apollo Gen10 Plus architecture (e.g., polaris)"
+echo "hpe-cray-ex  - HPE Cray's EX architecture (e.g., narwhal, perlmutter, crusher, frontier)"
+echo "cray-xt      - Cray's XT massively parallel system, running CNL"
+echo "cray-xc      - Cray's XC massively parallel system (e.g., DoE Theta, DoD Onyx, NERSC Cori)"
+echo "fj-a64fx     - Fujitsu PRIMEHPC with A64FX cpus and Fujitsu Compilers (e.g., FX1000, FX700)"
+echo "ibm64        - IBM, Power8 chip or newer, running AIX or Linux (e.g., DoE Summit, DoD Hokulea)"
+echo "linux64      - Linux (any 64 bit distribution), for x86_64, ia64, or arm64 chips,"
+echo "               using gfortran, ifort, or perhaps PGI compilers."
+echo "mac64        - Apple Mac, any chip, running OS X 10.5 or newer"
+echo "win64        - Windows 64-bit (Windows 10)"
+echo "singularity  - GAMESS Singularity container image"
+echo " "
+echo "    type 'uname -a' to partially clarify your computer's flavor."
+echo " "
+echo -n "please enter your target machine name: "
+set GMS_TARGET=$<
+tput clear
+badgmspath:
+echo "Where is the GAMESS software located on your system?"
+echo " "
+echo -n "GAMESS directory? [`pwd`] "
+set GMS_PATH=$<
+if (null$GMS_PATH == null) set GMS_PATH=`pwd`
+#
+if (-d $GMS_PATH) then
+   tput clear
+else
+   echo "That directory name doesn't seem to exist, please try again."
+   goto badgmspath
+endif
+#
+echo "Setting up GAMESS compile and link for GMS_TARGET=$GMS_TARGET"
+echo "GAMESS software is located at GMS_PATH=$GMS_PATH"
+echo " "
+#
+badbuilddir:
+echo "Please provide the name of the build location."
+echo "This may be the same location as the GAMESS directory."
+echo " "
+echo -n "GAMESS build directory? [`pwd`] "
+set GMS_BUILD_DIR=$<
+if (null$GMS_BUILD_DIR == null) set GMS_BUILD_DIR=`pwd`
+if (! -d $GMS_BUILD_DIR) then
+   mkdir $GMS_BUILD_DIR
+endif
+if (! -d $GMS_BUILD_DIR/object) then
+   mkdir $GMS_BUILD_DIR/object
+endif
+if (! -d $GMS_BUILD_DIR/tools) then
+   mkdir $GMS_BUILD_DIR/tools
+endif
+if (! -d $GMS_BUILD_DIR/ddi) then
+   mkdir $GMS_BUILD_DIR/ddi
+endif
+if (! -d $GMS_BUILD_DIR/tests) then
+   mkdir $GMS_BUILD_DIR/tests
+endif
+echo " "
+#
+echo "Please provide a version number for the GAMESS executable."
+echo "This will be used as the middle part of the binary name,"
+echo "for example: gamess.00.x"
+echo ""
+echo -n "Version? [00] "
+set GMS_VERSION=$<
+if(null$GMS_VERSION == null) set GMS_VERSION=00
+#
+#    ----- Step 2: get compiler and math library values -----
+#
+#    We must set GMS_FORTRAN and GMS_MATHLIB for each target.
+#    For vendor Unix, these may not need to be very precise.  As an
+#    example, IBM sets the math library to simply "essl" as 'lked'
+#    knows how to spell the correct incantation such as  '-lessl'.
+#    For Linux, we ask enough questions to get very precise values,
+#    as 'comp' and 'lked' don't otherwise know what to do.
+#
+#    Depending on the situation, we may set a few other values as well.
+#
+tput clear
+switch ($GMS_TARGET)
+
+   case hpe-apollo:
+   case hpe-cray-ex:
+      tput clear
+      echo "Are you building for a specific HPC system?"
+      echo " "
+      echo "Options:"
+      if ($GMS_TARGET == hpe-cray-ex) then
+         echo "    narwhal    - DoD HPE Cray system at Navy DSCR w/ AMD EPYC (Rome), NVIDIA V100 GPGPUs, and Slingshot"
+         echo "    perlmutter - DoE HPE Cray EX system at NERSC w/ AMD EPYC (Milan), NVIDIA A100 GPGPUs, and Slingshot"
+         echo "    spock      - DoE HPE Cray EX system at ORNL w/ AMD EPYC (Rome), AMD MI100 GPGPUs, and Slingshot"
+         echo "    crusher    - DoE HPE Cray EX system at ORNL w/ AMD EPYC (Trento), AMD MI250X GPGPUs, and Slingshot"
+         echo "    frontier   - DoE HPE Cray EX system at ORNL w/ AMD EPYC (Trento), AMD MI250X GPGPUs, and Slingshot"
+      endif
+      if ($GMS_TARGET == hpe-apollo) then
+         echo "    polaris    - DoE HPE Apollo 6500 Gen10+ system at ANL w/ AMD EPYC (Milan), NVIDIA A100 GPGPUs, and Slingshot"
+      endif
+      echo "    <ENTER>    - none"
+      echo " "
+      echo -n "HPC system target for HPE Cray system: "
+      set GMS_HPC_SYSTEM_TARGET=$<
+      if(null$GMS_HPC_SYSTEM_TARGET == null) set GMS_HPC_SYSTEM_TARGET="generic"
+      echo " "
+      echo "The 'ftn' compiler is selected based on your module settings."
+      echo " "
+      echo -n "Hit <return> after you have read this message."
+      set reply=$<
+      set GMS_FORTRAN=ftn
+      set GMS_MATHLIB=LibSci
+      set GMS_MATHLIB_PATH=$CRAY_PE_LIBSCI_PREFIX_DIR
+      set GMS_MPI_LIB=craycs
+      set GMS_MPI_PATH=""
+      breaksw
+   case cray-xt:
+      tput clear
+      echo "Compilation on the Cray-XT has no further questions."
+      echo " "
+      echo "The 'ftn' compiler is selected based on your module settings."
+      echo "This is best tested if your modules pick Portland Group compilers."
+      echo "The math library will be ACML.  DDI will run over Cray's MPI."
+      echo "You can type      'module list'      to see if your software"
+      echo "environment includes the 'PrgEnv-pgi' and 'acml' modules, if not,"
+      echo "you may need to uncomment two lines in the 'comp' script."
+      echo " "
+      echo "You probably should review the machine dimensions in 'compddi' script"
+      echo "to match your number of nodes (MAXNODES), and cores/node (MAXCPUS)."
+      echo " "
+      echo -n "Hit <ENTER> after you have read this message."
+      set reply=$<
+      set GMS_FORTRAN=ftn
+      set GMS_MATHLIB=acml
+      set GMS_MPI_LIB=CrayXT
+      breaksw
+   case cray-xc:
+      tput clear
+      echo "Are you building for a specific HPC system?"
+      echo " "
+      echo "Options:"
+      echo "    cori     - DoE Cray XC 40 system at NERSC"
+      echo "    onyx     - DoD Cray XC unclassified system at ERDC DSRC"
+      echo "    theta    - DoE Cray XC KNL system at Argonne National Laboratory"
+      echo "    <ENTER> - none"
+      echo " "
+      echo -n "HPC system target for cray-xc: "
+      set GMS_HPC_SYSTEM_TARGET=$<
+      if(null$GMS_HPC_SYSTEM_TARGET == null) set GMS_HPC_SYSTEM_TARGET="generic"
+      tput clear
+      echo "Compilation on the Cray-XC has no further questions."
+      echo " "
+      echo "The 'ftn' compiler is selected based on your module settings."
+      echo " "
+      echo -n "Hit <ENTER> after you have read this message."
+      set reply=$<
+      if ($GMS_HPC_SYSTEM_TARGET == cori) then
+         set GMS_FORTRAN=ftn
+         set GMS_MATHLIB=LibSci
+         set GMS_MATHLIB_PATH=$CRAY_LIBSCI_PREFIX_DIR
+         set GMS_MPI_LIB=craycs
+         set GMS_MPI_PATH=""
+      else
+         set GMS_FORTRAN=ftn
+         set GMS_MATHLIB=mkl
+         set GMS_MPI_LIB=Cray-XC-MPI
+      endif
+      if ($GMS_HPC_SYSTEM_TARGET == theta) set GMS_PHI=knl
+      breaksw
+   case fj-a64fx
+      tput clear
+      echo "You selected FUJITSU PRIMEHPC with FUJITSU A64FX cpus and FUJITSU compilers"
+      echo "to be used in either direct or cross-compiler mode."
+      echo ""
+      set ARCH = `uname -m`
+      if ($ARCH == aarch64 ) then
+         set GMS_FORTRAN=frt
+         echo "The script is running on $ARCH architecture. Fujitsu compilers are selected"
+      else
+         set GMS_FORTRAN=frtpx
+         echo "The script is running on non-aarch64 architecture (possibly, $ARCH login node"
+         echo "of your FUJITSU PRIMEHPC). Fujitsu cross-compilers are selected."
+      endif
+      echo ""
+      echo "You can always change the compilers selection by updating values of GMS_FORTRAN in install.info."
+      echo ""
+      echo -n "Hit <ENTER> to continue to the math library setup."
+      set reply=$<
+      tput clear
+      badfj-a64fxmathlib:
+      echo "Fujitsu Compiler Suite may or may not include SSL2 math library. Use of an"
+      echo "optimized math. library, such us SSL2, is highly advised. Yet, it is possible"
+      echo "to build GAMESS binary without external math. library."
+      echo " "
+      echo -n "Enter your choice of 'ssl2' or 'none': "
+      set GMS_MATHLIB=$<
+      switch ($GMS_MATHLIB)
+         case none:
+            set GMS_MATHLIB_PATH=''
+            breaksw
+         case ssl2
+            echo 'We assume the FUJITSU PRIMEHPC case with predefined $FJSV_HOME env. variable'
+            echo "giving path to Fujitsu Compilers Suite with SSL2 and MPI libraries."
+            badssl2:
+            set SSL2LOC =''
+            if ( ! ($?FJSV_HOME) ) then
+               echo ""
+            else
+               # Looking for LAPACK location doing search of libfjlapack.so
+               set SSL2LOC = `find $FJSV_HOME -name 'libfjlapack.so'`
+               set SSL2LOC = $SSL2LOC:h
+               echo "Math. libraries found in $SSL2LOC"
+            endif
+            echo " "
+            echo "Please enter the full path to the directory with SSL2 libraries"
+            echo -n "SSL2 path [$SSL2LOC]:"
+            set SSL2HEAD=$<
+            if (null$SSL2HEAD == null) then
+                if (null$SSL2LOC == null) goto badssl2
+                set SSL2HEAD=$SSL2LOC
+            endif
+            if (!(-d $SSL2HEAD)) then
+               echo " "
+               echo "The directory $SSL2HEAD does not exist."
+               echo " "
+               goto badssl2
+            endif
+            set GMS_MATHLIB_PATH = $SSL2HEAD
+            set GMS_LAPACK_LINK_LINE = "-L$GMS_MATHLIB_PATH –lfjlapacksve_ilp64"
+            # We choose to use of the sve_ilp64 version of libfjlapack.so if the system allows us.
+            # If –lfjlapacksve_ilp64 does not work try –lfjlapack_ilp64"
+            echo "GMS_LAPACK_LINK_LINE is defined as $GMS_LAPACK_LINK_LINE"
+            echo "Please update definition of GMS_LAPACK_LINK_LINE in install.info if you prefer to use"
+            echo "a different version of LAPACK library."
+            breaksw
+        default:
+            echo "You didn't provide a valid math library name, try again."
+            echo " "
+            goto badfj-a64fxmathlib
+            breaksw
+     endsw
+   breaksw
+   case ibm64:
+badibmfortran:
+      tput clear
+      echo "Are you building for a specific HPC system?"
+      echo " "
+      echo "Options:"
+      echo "    summit   - DoE IBM Power9 system at Oak Ridge National Laboratory"
+      echo "    hokulea  - DoD Hokule'a at Maui High Performance Computing Center"
+      echo "    <ENTER>  - none"
+      echo " "
+      echo -n "HPC system target for ibm64: "
+      set GMS_HPC_SYSTEM_TARGET=$<
+      if(null$GMS_HPC_SYSTEM_TARGET == null) set GMS_HPC_SYSTEM_TARGET="generic"
+      if ($GMS_HPC_SYSTEM_TARGET == summit) then
+         echo ""
+         echo "====================================================================="
+         echo ""
+         echo "You select Summit as your HPC system target for ibm64."
+         echo ""
+         echo "Pleae make sure that you have loaded the desired compiler"
+         echo "in yourenvironment (e.g., xl, gcc, nvhpc, pgi)."
+         echo ""
+         echo "Please also make sure that you have loaded IBM's ESSL math library:"
+         echo ""
+         echo "   module load essl"
+         echo ""
+         echo "For the remainder of the script you can just hit <ENTER> to accept"
+         echo "the default values."
+         echo ""
+         echo -n "Hit <ENTER> to continue."
+         set reply=$<
+         tput clear
+         if ($OLCF_FAMILY_COMPILER == xl) then
+            set GMS_FORTRAN=xlf
+         else if ($OLCF_FAMILY_COMPILER == pgi) then
+            set GMS_FORTRAN=pgfortran
+         else if ($OLCF_FAMILY_COMPILER == gcc) then
+            set GMS_FORTRAN=gfortran
+         else if ($OLCF_FAMILY_COMPILER == nvhpc) then
+            set GMS_FORTRAN=nvfortran
+         endif
+      else
+         #       for IBM, we have to get a FORTRAN choice
+         echo "IBM offers three choices for FORTRAN compilers, - the GNU"
+         echo "compiler suite's free compiler 'gfortran', IBM's 'xlf' compiler"
+         echo "from the IBM compiler suite, and the Portland Group's 'pgfortran'"
+         echo "compiler."
+         echo
+         echo "type 'which gfortran'  to look for GNU's gfortran"
+         echo "type 'which xlf'       to look for IBM's compiler"
+         echo "type 'which pgfortran' to look for PGI's compiler"
+         echo "type 'which nvfortran' to look for NVIDIA's compiler"
+         echo
+         echo -n "Please enter your choice of FORTRAN: "
+         set GMS_FORTRAN=$<
+      endif
+      switch ($GMS_FORTRAN)
+         case xlf:
+            echo "This compiler is not commonly used with GAMESS, so"
+            echo "please be careful verifying the test examples all work."
+            breaksw
+         case gfortran:
+            echo "gfortran is very robust, so this is a wise choice."
+            echo " "
+            echo "Please type 'gfortran -dumpversion' or else 'gfortran -v' to"
+            echo "detect the version number of your gfortran."
+            echo "This reply should be a string with at least two decimal points,"
+            echo "such as 8.3.0 or 11.2.0."
+            echo "The reply may be labeled as a 'gcc' version,"
+            echo "but it is really your gfortran version."
+            echo " "
+            echo -n "Please enter only the first decimal place, such as 8.2 or 11.2: "
+            set GMS_GFORTRAN_VERNO=$<
+            #
+            if ($GMS_HPC_SYSTEM_TARGET == summit) then
+               set COMPILER_VERSION=`echo $OLCF_FAMILY_COMPILER_VERSION | grep -Eo '^[0-9]+\.[0-9]+'`
+               if(null$GMS_GFORTRAN_VERNO == null) set GMS_GFORTRAN_VERNO=$COMPILER_VERSION
+            endif
+            if ("$GMS_GFORTRAN_VERNO" !~ [0-9]*.[0-9]) then
+              echo "Please specify the version up to one decimal place, such as X.X"
+              exit 4
+            endif
+            #
+            switch ($GMS_GFORTRAN_VERNO)
+               case 5.[1-5]:
+               case 6.[1-5]:
+               case 7.[1-5]:
+               case 8.[1-5]:
+               case 9.[1-5]:
+               case 10.[1-5]:
+               case 11.[1-4]:
+               case 12.[1-3]:
+               case 13.[1-3]:
+               case 14.[1]:
+                  echo "   Good, the newest gfortran version number ${GMS_GFORTRAN_VERNO} can compile REAL*16 data type."
+                  echo "   Please report any numerical issues you encounter."
+                  breaksw
+               default:
+                  echo "The gfortran version number ${GMS_GFORTRAN_VERNO} is not supported or has a syntax error." >> /dev/stderr
+                  echo "GAMESS does not support anything below 5" >> /dev/stderr
+                  echo "It should only have one decimal place, such as 11.x" >> /dev/stderr
+                  echo "GAMESS is tested on up to 14.1 as of May 2024" >> /dev/stderr
+                  exit 4
+                  breaksw
+            endsw
+            breaksw
+         case pgfortran:
+         case pgf77:
+            echo "pgfortran does not support quadruple precision,"
+            echo "      so heavy element DK3 resolution of the identity will fail"
+            echo "but everything else should work."
+            echo " "
+            set GMS_L64_OPT='default'
+            endif
+            breaksw
+         case nvfortran:
+            echo "nvfortran does not support quadruple precision,"
+            echo "      so heavy element DK3 resolution of the identity will fail"
+            echo "but everything else should work."
+            echo " "
+            set GMS_L64_OPT='default'
+            endif
+            breaksw
+         default:
+            echo "You didn't provide a valid FORTRAN compiler name for ibm64 target, try again." >> /dev/stderr
+            echo " "
+            goto badibmfortran
+            breaksw
+      endsw
+      if ($GMS_HPC_SYSTEM_TARGET == summit) then
+         tput clear
+         echo " "
+         echo "The operating system may be AIX or Linux, either one will work."
+         echo "This target will use the ESSL math library, if that is installed,"
+         echo "or a slow FORTRAN substitute otherwise. This target will also"
+         echo "use the IBM Specturm MPI library. However, some extra information"
+         echo "is needed to perform compilation on IBM machines."
+         echo ""
+         echo "First, where is the location of the ESSL root directory?"
+         echo ""
+         if ( ! ($?OLCF_ESSL_ROOT) ) then
+            echo "Found:       Nothing. ESSL module not loaded."
+         else
+            echo "Found:       $OLCF_ESSL_ROOT"
+         endif
+         echo ""
+         set GMS_MATHLIB=essl
+         echo -n "ESSL root directory path: "
+         set GMS_MATHLIB_PATH=$<
+         if(null$GMS_MATHLIB_PATH == null) set GMS_MATHLIB_PATH=$OLCF_ESSL_ROOT
+         endif
+         echo ""
+         echo "Next, where is the location of the Spectrum MPI directory?"
+         echo ""
+         if ( ! ($?OLCF_SPECTRUM_MPI_ROOT) ) then
+            echo "Found:       Nothing."
+         else
+            echo "Found:       $OLCF_SPECTRUM_MPI_ROOT"
+         endif
+         echo ""
+         echo -n "Spectrum MPI root directory path: "
+         set GMS_MPI_PATH=$<
+         if(null$GMS_MPI_PATH == null) set GMS_MPI_PATH=$OLCF_SPECTRUM_MPI_ROOT
+         echo ""
+         echo "Finally, where is the location of the XL compiler suite?"
+         echo "This is required even when using gfortran as the compiler,"
+         echo "as some xl libraries are required to perform compilation."
+         echo ""
+         if ( ! ($?OLCF_XL_ROOT) ) then
+            set OLCF_XL_ROOT=`bash -c 'module load xl 2>/dev/null; echo $OLCF_XL_ROOT'`
+            if ( null$OLCF_XL_ROOT == null ) then
+               echo "Found:       Nothing."
+            else
+               echo "Found:       $OLCF_XL_ROOT"
+            endif
+         else
+            echo "Found:       $OLCF_XL_ROOT"
+         endif
+         unset XL_PATH
+         echo ""
+         echo -n "IBM XL compiler root directory path: "
+         set GMS_XL_PATH=$<
+         if(null$GMS_XL_PATH == null) then
+            set GMS_XL_PATH=$OLCF_XL_ROOT
+         endif
+         breaksw
+      endif
+      if ($GMS_HPC_SYSTEM_TARGET == generic) then
+         tput clear
+         badibm64mathlib:
+         echo "IBM64 math library selection"
+         echo "----------------------------"
+         echo ""
+         echo "openblas - OpenBLAS http://www.openblas.net"
+         echo "netlib   - Netlib BLAS and LAPACK https://www.netlib.org"
+         echo "pgiblas  - Provided with installation of the Portland Group Compiler"
+         echo "nvblas   - Provided with installation of the NVIDIA HPC SDK"
+         echo " "
+         echo -n "Please enter your choice of IBM64 math library: "
+         set GMS_MATHLIB=$<
+         switch ($GMS_MATHLIB)
+            case netlib:
+            case none:
+               echo "--------------------------------------------------------------"
+               echo "GAMESS internal BLAS routines in blas.src has been replaced"
+               echo "with Netlib BLAS and LAPACK libraries."
+               echo ""
+               set nonomatch=1
+               if (! -f lapack*.tar.gz) then
+                  echo "The Netlib BLAS and LAPACK libraries will now be downloaded."
+                  echo ""
+                  tools/lapack/download-lapack.csh
+                  echo ""
+                  if (-f lapack*.tar.gz) then
+                     echo "The download was successful."
+                     echo ""
+                  else
+                     echo "The download failed. You can try again later by calling"
+                     echo "the following script from inside the GAMESS directory:"
+                     echo ""
+                     echo "tools/lapack/download-lapack.csh"
+                     echo ""
+                  endif
+               endif
+               unset nonomatch
+               echo "The Netlib BLAS and LAPACK libraries will be compiled by running:"
+               echo ""
+               echo "make -j lapack"
+               echo ""
+               echo "CMake is the preferred approach to building the Netlib BLAS and"
+               echo "LAPACK libraries."
+               echo ""
+               echo "Alternatelively you can build these libraries without CMake by"
+               echo "following the instructions available at:"
+               echo ""
+               echo "$GMS_PATH/tools/lapack/README.md"
+               echo "--------------------------------------------------------------"
+               echo ""
+               echo "Hit <ENTER> after you have read this message."
+               set GMS_MATHLIB_PATH=''
+               set reply=$<
+               tput clear
+               breaksw
+            case openblas:
+         badopenblas:
+               echo "Where is your libopenblas.a file located?"
+               echo " "
+               echo "You can search for it with:"
+               echo " "
+               echo "find / -type f -name libopenblas.a"
+               echo " "
+               echo -n "Enter this full pathname: "
+               set openblaspath=$<
+               if (!(-e $openblaspath/libopenblas.a)) then
+                  echo " "
+                  echo "The file libopenblas.a does not exist in the directory $openblaspath"
+                  echo " "
+                  goto badopenblas
+               endif
+               set GMS_MATHLIB_PATH=$openblaspath
+               breaksw
+            case nvblas:
+         badnvblas:
+               echo "Where is your libblas_ilp64.a file located?  A likely place is:"
+               echo " "
+               echo "You can search for it with:"
+               echo " "
+               echo "find / -type f -name libblas_ilp64.a"
+               echo " "
+               echo -n "Enter this full pathname: "
+               set nvblaspath=$<
+               if (!(-e $nvblaspath/libblas_ilp64.a)) then
+                  echo " "
+                  echo "The file libblas_ilp64.a does not exist in the directory $nvblaspath"
+                  echo " "
+                  goto badnvblas
+               endif
+               set GMS_MATHLIB_PATH=$nvblaspath
+               breaksw
+            case pgiblas:
+         badpgi:
+               echo "Where is your libblas.a file located? A likely place is:"
+               echo " "
+               echo "You can search for it with:"
+               echo " "
+               echo "find / -type f -name libblas.a"
+               echo " "
+               echo -n "Enter this full pathname: "
+               set pgipath=$<
+               if (!(-e $pgipath/libblas.a)) then
+                  echo " "
+                  echo "The file libblas.a does not exist in the directory $pgipath"
+                  echo " "
+                  goto badpgi
+               endif
+               set GMS_MATHLIB_PATH=$pgipath
+               breaksw
+            default:
+               echo "You didn't provide a valid math library name, try again."
+               echo " "
+               goto badlinuxmathlib
+               breaksw
+         endsw
+         if($GMS_MATHLIB != none) then
+            echo "Math library '$GMS_MATHLIB' will be taken from $GMS_MATHLIB_PATH"
+         endif
+         if(($GMS_MATHLIB == openblas) || ($GMS_MATHLIB == nvblas) || ($GMS_MATHLIB == pgiblas)) then
+            echo ""
+            echo "Next, where is the location of your LAPACK library?"
+            echo "You can proceed without specifying a LAPACK library however, if"
+            echo "you encounter undefined references to dsygst, dspev during linking"
+            echo "then you will need to specify the linking to your LAPACK library"
+            echo 'in install.info under the environmental variable $GMS_LAPACK_LINK_LINE.'
+            echo ""
+            echo -n "LAPACK library link line: "
+            set GMS_LAPACK_LINK_LINE="$<"
+            echo ""
+            echo "The folloiwng LAPACK library link line will be used: "
+            echo "${GMS_LAPACK_LINK_LINE}"
+         endif
+      endif
+      breaksw
+   case linux64:
+      #
+      #    for Linux, we have to get a FORTRAN choice, and a math library choice.
+      #        The lack of a single compiler or library choice in Linux is in
+      #        fact the major motivation for this configuration script.
+linuxsystemtarget:
+      echo "Are you building for a specific HPC system?"
+      echo " "
+      echo "Options:"
+      echo "    nautilus     - DoD Penguin system at Navy DSCR w/ AMD EPYC (Milan), NVIDIA A100 GPGPUs, and HDR-200 Infiniband"
+      echo "    grace-hopper - NVIDIA Grace-Hopper Superchip System"
+      echo "    <ENTER>      - none"
+      echo " "
+      echo -n "HPC system target for 64-bit Linux system: "
+      set GMS_HPC_SYSTEM_TARGET=$<
+      if(null$GMS_HPC_SYSTEM_TARGET == null) set GMS_HPC_SYSTEM_TARGET="generic"
+      tput clear
+badlinuxfortran:
+      echo "Linux FORTRAN Compiler Selection"
+      echo "--------------------------------"
+      echo ""
+      if ($GMS_HPC_SYSTEM_TARGET == nautilus) then
+         echo "aocc          - AMD Fortran compiler"
+         echo "gfortran      - GNU Fortran compiler"
+         echo "oneapi-ifort  - Intel OneAPI Classic Fortran compiler"
+         echo "oneapi-ifx    - Intel OneAPI Beta Fortran compiler"
+         echo "nvfortran     - NVIDIA HPC SDK Fortran compiler"
+      else if ($GMS_ARCH == aarch64) then
+         echo "acfl          - ARM Compiler for Linux"
+         echo "armflang      - ARM Fortran compiler"
+         echo "gfortran      - GNU Fortran compiler"
+         echo "nvfortran     - NVIDIA HPC SDK Fortran compiler"
+      else
+         echo "aocc          - AMD Fortran compiler                  (minimum support v. 3.2.0)"
+         echo "gfortran      - GNU Fortran compiler                  (minimum support v. GCC-5)"
+         echo "ifort         - Intel Fortran compiler                (minimum support v. 2018.3)"
+         echo "oneapi-ifort  - Intel OneAPI Classic Fortran compiler (minimum support v. 2022.1.2)"
+         echo "oneapi-ifx    - Intel OneAPI Beta Fortran compiler    (minimum support v. 2022.1.2)"
+         echo "pgfortran     - NVIDIA PGI Fortran compiler           (minimum support v. 19.10 Community)"
+         echo "nvfortran     - NVIDIA HPC SDK Fortran compiler       (minimum support v. 22.1)"
+         echo "flang-new     - LLVM (new) Fortran compiler"
+      endif
+      echo ""
+      echo -n "Please enter your choice of FORTRAN: "
+      set GMS_FORTRAN=$<
+      echo " "
+      switch ($GMS_FORTRAN)
+         case acfl:
+            breaksw
+         case armflang:
+            breaksw
+         case gfortran:
+            set GMS_FPE_FLAGS="-ffpe-trap=invalid,zero,overflow -finit-real=snan -finit-integer=-9223372036854775808"
+            echo "gfortran is very robust, so this is a wise choice."
+            echo " "
+            echo "Please type 'gfortran -dumpversion' or else 'gfortran -v' to"
+            echo "detect the version number of your gfortran."
+            echo "This reply should be a string with at least two decimal points,"
+            echo "such as 8.3.0 or 11.2.0."
+            echo "The reply may be labeled as a 'gcc' version,"
+            echo "but it is really your gfortran version."
+            echo " "
+            echo -n "Please enter only the first decimal place, such as 8.2 or 11.2: "
+            set GMS_GFORTRAN_VERNO=$<
+            if (null$reply == null) then
+               if ($GMS_HPC_SYSTEM_TARGET == nautilus) set GMS_GFORTRAN_VERNO=8.5
+
+            endif
+            if ("$GMS_GFORTRAN_VERNO" !~ [0-9]*.[0-9]) then
+              echo "Please specify the version up to one decimal place, such as X.X"
+              exit 4
+            endif
+            switch ($GMS_GFORTRAN_VERNO)
+               case 5.[1-5]:
+               case 6.[1-5]:
+               case 7.[1-5]:
+               case 8.[1-5]:
+               case 9.[1-5]:
+               case 10.[1-5]:
+               case 11.[1-4]:
+               case 12.[1-3]:
+               case 13.[1-3]:
+               case 14.[1]:
+                  echo "   Good, the newest gfortran version number ${GMS_GFORTRAN_VERNO} can compile REAL*16 data type."
+                  echo "   Please report any numerical issues you encounter."
+                  breaksw
+               default:
+                  echo "The gfortran version number ${GMS_GFORTRAN_VERNO} is not supported or has a syntax error." >> /dev/stderr
+                  echo "GAMESS does not support anything below 5" >> /dev/stderr
+                  echo "It should only have one decimal place, such as 11.x" >> /dev/stderr
+                  echo "GAMESS is tested on up to 14.1 as of May 2024" >> /dev/stderr
+                  exit 4
+                  breaksw
+            endsw
+            echo " "
+            breaksw
+         case ifort:
+            set GMS_FPE_FLAGS="-fpe0"
+            echo "Use of 'ifort' requires additional information since library"
+            echo "names, and compiler flags, are very version number specific."
+            echo " "
+            echo "Type 'ifort --version' and note the version number."
+            echo " "
+            echo "Enter only the main version number, such as 18, 19, 20, 21, 22, 23."
+            echo -n "Version? "
+            set GMS_IFORT_VERNO=$<
+            if ($GMS_IFORT_VERNO == 12) then
+               echo -n "Hit <ENTER> to continue after digesting this message."
+               set reply=$<
+               echo " "
+            endif
+            breaksw
+         case oneapi-ifort:
+         case oneapi-ifx:
+            set GMS_FPE_FLAGS="-fpe0"
+            set GMS_IFORT_VERNO=2022
+            echo "You have selected $GMS_FORTRAN".
+            echo ""
+            echo "No additional compiler information is needed."
+            breaksw
+         case nvfortran:
+         case pgfortran:
+         case pgf77:
+            set GMS_FPE_FLAGS="-Ktrap=fp"
+            echo "pgfortran does not support quadruple precision,"
+            echo "      so heavy element DK3 resolution of the identity will fail"
+            echo "but everything else should work."
+            echo " "
+            echo "This compiler is not commonly used with GAMESS, so"
+            echo "please be careful verifying the test examples all work."
+            echo "pgfortran will use target=linux64."
+            echo " "
+            set GMS_LIN_FLAGS=""
+            echo " "
+            echo "Compiler Optimization Level"
+            echo "---------------------------"
+            echo "'default'     - default optimization settings -fastsse -Mipa=fast,safe "
+            echo "'testing'     - for testing and development"
+            echo -n "Compiler Optimization Level?: "
+            set GMS_L64_OPT=$<
+            if ($GMS_L64_OPT == testing) then
+               echo "Testing"
+               echo "-------"
+               echo " "
+               echo " "
+               echo "'testing'  - modify variables GMS_PGI_OPT, GMS_IPA_OPT in install.info to"
+               echo "             your needs."
+               echo " "
+               set GMS_PGI_OPT="'-O3            '    #default optimization flag, add/change if desired"
+               set GMS_IPA_OPT="'-Mipa=fast,safe'    #default optimization flag, add/change if desired"
+               echo " "
+            else
+               set GMS_L64_OPT='default'
+               echo " "
+            endif
+            breaksw
+         case aocc:
+            echo "AMD Optimizing C/C++ and Fortran Compilers (AOCC)"
+            echo " "
+            breaksw
+         case flang-new:
+            echo "LLVM (new) Fortran compiler"
+            echo " "
+            breaksw
+         default:
+            echo "You didn't provide a valid FORTRAN compiler name, try again."
+            echo " "
+            goto badlinuxfortran
+            breaksw
+      endsw
+      echo -n "Hit <ENTER> to continue to the math library setup."
+      set reply=$<
+      #         we are doing linux64, now choosing math library
+      tput clear
+badlinuxmathlib:
+      echo "Math Library Selection"
+      echo "----------------------"
+      echo ""
+      echo "Linux distributions do not include a standard math library."
+      echo " "
+      echo "There are several reasonable add-on library choices,"
+      echo "       MKL from Intel           for 64 bit Linux (free)"
+      echo "      AOCL from AMD             for 64 bit Linux (free)"
+      if ($GMS_ARCH == aarch64) then
+         echo "     ArmPL from ARM             for 64 bit Linux (free)"
+         echo "     MVPL  from NVIDIA          for 64 bit Linux (free)"
+      endif
+      echo "and one very unreasonable option, namely 'none', which will use"
+      echo "some slow FORTRAN routines supplied with GAMESS.  Choosing 'none'"
+      echo "will run MP2 jobs 2x slower, or CCSD(T) jobs 5x slower."
+      echo " "
+      echo "Some typical places (but not the only ones) to find math libraries are"
+      echo "Type 'echo" '$MKLROOT'"'                     to look for MKL"
+      echo "Type 'echo" '$ARMPL_DIR'"'                   to look for ArmPL"
+      echo " "
+      echo "Enter your math library choice from one of the options below:"
+      echo " "
+      echo "'acml', 'aocl', 'atlas', 'mkl', 'openblas', 'nvblas', 'armpl', 'nvpl', 'none'"
+      echo " "
+      echo -n ": "
+      set GMS_MATHLIB=$<
+      if (null$GMS_MATHLIB == null) then
+         set GMS_MATHLIB=none
+      endif
+      echo " "
+      echo " Math library selection: $GMS_MATHLIB"
+      echo " "
+      switch ($GMS_MATHLIB)
+         case none:
+            echo
+            echo "GAMESS internal BLAS routines in blas.src has been replaced"
+            echo "with Netlib BLAS and LAPACK libraries."
+            echo
+            set nonomatch=1
+            if (! -f lapack*.tar.gz) then
+               echo "The Netlib BLAS and LAPACK libraries will now be downloaded."
+               echo ""
+               tools/lapack/download-lapack.csh
+               echo ""
+               if (-f lapack*.tar.gz) then
+                  echo "The download was successful."
+                  echo ""
+               else
+                  echo "The download failed. You can try again later by calling"
+                  echo "the following script from inside the GAMESS directory:"
+                  echo ""
+                  echo "tools/lapack/download-lapack.csh"
+                  echo ""
+               endif
+            endif
+            unset nonomatch
+            echo "The Netlib BLAS and LAPACK libraries will be compiled by running:"
+            echo ""
+            echo "make -j lapack"
+            echo ""
+            echo "CMake is the preferred approach to building the Netlib BLAS and"
+            echo "LAPACK libraries."
+            echo ""
+            echo "Alternatelively you can build these libraries without CMake by"
+            echo "following the instructions available at:"
+            echo ""
+            echo "$GMS_PATH/tools/lapack/README.md"
+            echo "--------------------------------------------------------------"
+            echo ""
+            echo "Hit <ENTER> after you have read this message."
+            set GMS_MATHLIB_PATH=''
+            set reply=$<
+            tput clear
+            breaksw
+         case armpl:
+            echo
+badarmpl:
+            echo " If environment modules are being used, then ARMPL_DIR should be set for you."
+            echo " If this has a value, then enter it next. Otherwise, find the correct path."
+            echo " "
+            if ( ! ($?ARMPL_DIR) ) then
+               echo "Found:       Nothing."
+            else
+               echo "Found:       $ARMPL_DIR"
+               echo " "
+               echo "You can just press ENTER to accept the path shown above"
+            endif
+            echo " "
+            echo -n "ARMPL pathname? "
+            set armplhead=$<
+            if(null$armplhead == null) then
+               set armplhead=$ARMPL_DIR
+            endif
+            if(null$armplhead == null) then
+               echo "You did not specify a path.  Please try again"
+               goto badarmpl
+            endif
+            if (!(-d $armplhead)) then
+               echo " " >> /dev/stderr
+               echo "The directory $armplhead does not exist." >> /dev/stderr
+               echo " Find the right spot and try again. Exiting..." >> /dev/stderr
+               exit
+            else
+               set GMS_MATHLIB_PATH=$armplhead/lib
+            endif
+            breaksw
+         case nvpl:
+            echo
+badnvpl:
+            echo " If environment modules are being used, then NVPL_DIR should be set for you."
+            echo " If this has a value, then enter it next. Otherwise, find the correct path."
+            echo " "
+            if ( ! ($?NVPL_DIR) ) then
+               echo "Found:       Nothing."
+            else
+               echo "Found:       $NVPL_DIR"
+               echo " "
+               echo "You can just press ENTER to accept the path shown above"
+            endif
+            echo " "
+            echo -n "NVPL pathname? "
+            set nvplhead=$<
+            if(null$nvplhead == null) then
+               set nvplhead=$NVPL_DIR
+            endif
+            if(null$nvplhead == null) then
+               echo "You did not specify a path.  Please try again"
+               goto badnvpl
+            endif
+            if (!(-d $nvplhead)) then
+               echo " " >> /dev/stderr
+               echo "The directory $nvplhead does not exist." >> /dev/stderr
+               echo " Find the right spot and try again. Exiting..." >> /dev/stderr
+               exit
+            else
+               set GMS_MATHLIB_PATH=$nvplhead/lib
+            endif
+            breaksw
+         case mkl:
+            echo
+badmkl:
+            echo "The exact MKL libraries needed depend on its version number."
+            echo "First, where is your MKL software installed?  For example"
+            echo "             /opt/intel/oneapi/mkl/2023.1.0"
+            echo "             /opt/intel/oneapi/mkl/latest"
+            echo " "
+            if ( ! ($?MKLROOT) ) then
+               echo "Found:       Nothing."
+            else
+               echo "Found:       $MKLROOT"
+            endif
+            echo " "
+            echo "This is sometimes referred to as the MKL ROOT folder."
+            echo -n "MKL pathname? "
+            set mklhead=$<
+            if(null$mklhead == null) then
+               set mklhead=$MKLROOT
+            endif
+            if(null$mklhead == null) then
+               echo "You did not specify a path.  Please try again"
+               goto badmkl
+            endif
+            if (!(-d $mklhead)) then
+               echo " "
+               echo "The directory $mklhead does not exist."
+               echo " "
+               goto badmkl
+            endif
+            set GMS_MATHLIB_PATH=$mklhead/lib/intel64
+            if (`uname` == Darwin) then
+               set GMS_MATHLIB_PATH=$MKLROOT/lib
+            endif
+            set GMS_MKL_VERNO=oneapi
+            breaksw
+         case aocl:
+badblis:
+            echo "Please enter the absolulte path of the directory containing libblis.a on your system"
+            echo ""
+            echo -n ": "
+            set GMS_MATHLIB_PATH=$<
+            if (-f $GMS_MATHLIB_PATH/libblis.a) then
+               echo ""
+               echo "AMD's BLIS library, located at $GMS_MATHLIB_PATH, will be used."
+               echo ""
+            else
+               echo ""
+               echo "The file $GMS_MATHLIB_PATH/libblis.a does not seem to exist. Please try again..."
+               echo "Please download and install LibBLIS from https://developer.amd.com/amd-aocl/blas-library,"
+               echo "and try again..."
+               echo ""
+               goto badblis
+            endif
+badlibflame:
+            echo ""
+            echo "Please enter the absolulte path of the directory containing libflame.a on your system"
+            echo ""
+            echo -n ": "
+            set GMS_AMD_FLAME_PATH=$<
+            if (-f $GMS_AMD_FLAME_PATH/libflame.a) then
+               echo ""
+               echo "AMD's LibFLAME library, located at $GMS_AMD_FLAME_PATH, will be used."
+               echo ""
+            else
+               echo ""
+               echo "The file $GMS_AMD_FLAME_PATH/libflame.a does not seem to exist."
+               echo ""
+               echo "Please download and install LibFLAME from https://developer.amd.com/amd-aocl/blas-library,"
+               echo "and try again..."
+               echo ""
+               goto badlibflame
+            endif
+            breaksw
+         case openblas:
+badopenblas:
+            if ($GMS_TARGET == linux64) then
+               echo "Where is your libopenblas64.a or libopenblas.a file located?"
+               echo " "
+               echo -n "enter this full pathname: "
+               set openblaspath=$<
+               if (-e $openblaspath/libopenblas64.a) then
+                  set openblaslib=$openblaspath/libopenblas64.a
+               else if (-e $openblaspath/libopenblas.a) then
+                  set openblaslib=$openblaspath/libopenblas.a
+               else
+                  echo " "
+                  echo "The directory $openblaspath does not contain either libopenblas64.a or libopenblas.a"
+                  echo " "
+                  goto badopenblas
+               endif
+               echo " "
+               echo "Found $openblaslib"
+               echo " "
+               set GMS_MATHLIB_PATH=$openblaspath
+               switch ($GMS_FORTRAN)
+                  case gfortran:
+                     echo "Checking whether $openblaslib uses 64-bit integers."
+                     set echo
+                     $GMS_FORTRAN -fdefault-integer-8 -finit-integer=-9223372036854775808 -fopenmp $GMS_PATH/tools/test_dgesv.f90 $openblaslib -o $GMS_BUILD_DIR/test_dgesv
+                     $GMS_BUILD_DIR/test_dgesv
+                     set rc=$status
+                     unset echo
+                     if ($rc != 0) then
+                        echo "Could not verify that $openblaslib uses 64-bit integers."
+                        echo " "
+                        goto badopenblas
+                     endif
+                     rm $GMS_BUILD_DIR/test_dgesv
+                     unset rc
+                     breaksw
+                  default:
+                     breaksw
+               endsw
+               unset openblaslib
+            else
+               echo "Where is your libopenblas.a file located?"
+               echo " "
+               echo -n "enter this full pathname: "
+               set openblaspath=$<
+               if (!(-e $openblaspath/libopenblas.a)) then
+                  echo " "
+                  echo "The file libopenblas.a does not exist in the directory $openblaspath"
+                  echo " "
+                  goto badopenblas
+               endif
+               set GMS_MATHLIB_PATH=$openblaspath
+            endif
+            breaksw
+         case nvblas:
+badnvblas:
+            echo "Where is your libblas_ilp64.a file located?  A likely place is:"
+            echo " "
+            echo '${NVHPC_ROOT}/compilers/lib'
+            echo ""
+            echo -n "enter this full pathname: "
+            set nvblaspath=$<
+            if (!(-e $nvblaspath/libblas_ilp64.a)) then
+               echo " "
+               echo "The file libblas_ilp64.a does not exist in the directory $nvblaspath"
+               echo " "
+               goto badnvblas
+            endif
+            set GMS_MATHLIB_PATH=$nvblaspath
+            breaksw
+            #
+      endsw
+      if($GMS_MATHLIB != none) then
+         echo "Math library '$GMS_MATHLIB' will be taken from $GMS_MATHLIB_PATH"
+      endif
+      echo " "
+      breaksw
+      #       just above has finally ended the very long linux64 section
+      #
+      #       Apple 64 bit, using Gnu compiler and Apple's Framework math lib.
+      #       the GMS_MATHLIB string is set only generically for Apple.
+   case mac64:
+      tput clear
+      echo "Compiling on Apple equipment is straightforward."
+      echo " "
+      echo "This target assumes the use of the GNU compilers, gfortran/gcc."
+      echo "Information about first installing Xcode from Apple, to get gcc,"
+      echo "and then obtaining a precompiled gfortran for your Apple OS X version"
+      echo "can be found in the 'comp' script."
+      echo " "
+      set GMS_FORTRAN=gfortran
+      set GMS_MATHLIB=vecLib
+      #
+      echo "Please type 'gfortran -dumpversion' or else 'gfortran -v' to"
+      echo "detect the version number of your gfortran."
+      echo "This reply should be a string with at least two decimal points,"
+      echo "such as 8.3.0 or 11.2.0."
+      echo "The reply may be labeled as a 'gcc' version,"
+      echo "but it is really your gfortran version."
+      echo " "
+      echo -n "Please enter only the first decimal place, such as 8.2 or 11.2: "
+      set GMS_GFORTRAN_VERNO=$<
+      if ("$GMS_GFORTRAN_VERNO" !~ [0-9]*.[0-9]) then
+        echo "Please specify the version up to one decimal place, such as X.X"
+        exit 4
+      endif
+      switch ($GMS_GFORTRAN_VERNO)
+         case 5.[1-5]:
+         case 6.[1-5]:
+         case 7.[1-5]:
+         case 8.[1-5]:
+         case 9.[1-5]:
+         case 10.[1-5]:
+         case 11.[1-4]:
+         case 12.[1-3]:
+         case 13.[1-3]:
+         case 14.[1]:
+            echo "   Good, the newest gfortran version number ${GMS_GFORTRAN_VERNO} can compile REAL*16 data type."
+            echo "   Please report any numerical issues you encounter."
+            breaksw
+         default:
+            echo "The gfortran version number ${GMS_GFORTRAN_VERNO} is not supported or has a syntax error." >> /dev/stderr
+            echo "GAMESS does not support anything below 5" >> /dev/stderr
+            echo "It should only have one decimal place, such as 11.x" >> /dev/stderr
+            echo "GAMESS is tested on up to 14.1 as of May 2024" >> /dev/stderr
+            exit 4
+      endsw
+      #
+      #   truncate the usual three level OS X version to just two levels.
+      #   note that an initial release, such as 10.9 may say just that, not 10.9.0
+      set osxver=`/usr/bin/sw_vers -productVersion`
+      if ($osxver:r == 10) then
+      else
+         set osxver=$osxver:r
+      endif
+      switch ($osxver)
+         case 10.8:
+         case 10.9:
+         case 10.10:
+         case 10.11:
+         case 10.12:
+         case 10.13:
+         case 10.14:
+         case 10.15:
+            echo " "
+            echo "This target will use the Accelerate framework math library,"
+            echo "which is standard in OS X."
+            set GMS_MATHLIB=Accelerate
+            breaksw
+         case 11:
+         case 11.0:
+         case 11.1:
+         case 11.2:
+         case 11.3:
+         case 11.4:
+         case 12:
+         case 12.0:
+         case 12.1:
+         case 12.2:
+         case 12.3:
+         case 12.4:
+         case 12.5:
+         case 12.6:
+         case 13:
+         case 13.0:
+         case 13.1:
+         case 13.2:
+         case 13.3:
+         case 14:
+         case 14.0:
+         case 14.1:
+         case 14.2:
+            echo " "
+            echo "This target will use the VecLib math library"
+            set GMS_MATHLIB=vecLib
+            set osxver='11'
+            breaksw
+         default:
+            echo " "
+            echo "OS X version number is unrecognized: $osxver"
+            echo "You may experience problems, will attempt to build for Big Sur (OS X 11)"
+            set osxver='11'
+            breaksw
+      endsw
+      set GMS_MAC_OSX_VERNO=$osxver
+      #
+      breaksw
+      #  thus ends a passage common to both mac64.
+      #
+      #  Currently, Windows only supports the Portland Group compilers (PGI)
+      #
+   case win64:
+      #      GMS_WIN_OPT   will be set below, to user's optimization level
+      #      GMS_WIN_FLAGS adds extra flags for purposes of testing,
+      #                    but will be set to a null string,
+      #                    unless a user hand-edits install.info to add something.
+      #      GMS_WIN_TP    will be a processor type compiler flag,
+      #                    and will be set to a null string, unless
+      #                    user's environment has one specified as TP.
+      setenv GMS_WIN_FLAGS "''"
+      if ($?TP) then
+         setenv GMS_WIN_TP "-tp $TP"
+      else
+         setenv GMS_WIN_TP "''"
+      endif
+badwinfortran:
+      tput clear
+      echo "Windows Fortran Compiler"
+      echo "------------------------"
+      echo " "
+      echo "'oneapi-ifort'   - Intel OneAPI Fortran Classic Compiler"
+      echo "                   Last version tested: "
+      echo "                     OneAPI 2022.1.2"
+      echo "                     - ifort Version 2021.5.0 20211109"
+      echo " "
+      echo "'oneapi-ifx'     - Intel OneAPI Fortran Compiler (Beta)"
+      echo "                   Last version tested: "
+      echo "                     OneAPI 2022.1.2"
+      echo "                     - ifx Version 2022.0.0 20211123"
+      echo " "
+      echo -n "Enter your Fortran compiler choice: "
+      set GMS_FORTRAN=$<
+      switch ($GMS_FORTRAN)
+         case oneapi-ifort:
+            echo " "
+            echo "Using Intel OneAPI Fortran Compiler Classic"
+            set GMS_IFORT_VERNO=21
+            echo " "
+            breaksw
+         case oneapi-ifx:
+            echo " "
+            echo "Using Intel OneAPI Fortran Compiler (Beta)"
+            set GMS_IFORT_VERNO=21
+            echo " "
+            breaksw
+         default:
+            echo "You didn't provide a valid FORTRAN compiler name."
+            echo -n "Hit <ENTER> to try again."
+            set reply=$<
+            goto badwinfortran
+            breaksw
+      endsw
+      echo -n "Hit <ENTER> to set up the compiler optimization level."
+      set reply=$<
+badwinoptimizationlevel:
+      tput clear
+      echo "Compiler Optimization Level"
+      echo "---------------------------"
+      echo " "
+      echo "'baseline'    - Do not apply compiler optimization '-O0' flag (slow)"
+      echo "'linux'       - Apply compiler optimizations using '-O2' flag (safe)"
+      echo "'samara'      - Apply compiler optimizations using '-O3' flag (un-tested for accuracy)"
+      echo "'fast'        - Apply compiler optimizations using: "
+      echo "                                             PGI  :'-fastsse'"
+      echo "                                             INTEL:'-fast'"
+      echo " "
+      echo -n "Enter your compiler optimization level choice: "
+      set GMS_WIN_OPT=$<
+      switch ($GMS_WIN_OPT)
+         case baseline:
+            echo " "
+            echo "'baseline' - will result in a quick build process for GAMESS but at the cost "
+            echo "             of a slow running GAMESS binary."
+            echo " "
+            breaksw
+         case linux:
+            echo " "
+            echo "'linux'    - will result in a safe build process for GAMESS using settings that "
+            echo "             have been verified to work on Linux systems."
+            echo " "
+            echo "The linking step will take a while."
+            echo " "
+            breaksw
+         case samara:
+            echo " "
+            echo "'samara'   - will result in a GAMESS build that has not be tested for accuracy."
+            echo " "
+            echo "The linking step will take a while."
+            echo " "
+            breaksw
+         case fast:
+            echo " "
+            echo "'fast'     - will result in a GAMESS build that has not be tested for accuracy."
+            echo " ifort     - applies: -fast"
+            echo " pgfortran - applies: -fastsse"
+            echo " pgf77     - applies: -fastsse"
+            echo " "
+            echo "The linking step will take a while."
+            echo " "
+            breaksw
+         case testing:
+            echo " "
+            if ($GMS_FORTRAN == ifort || $GMS_FORTRAN == oneapi-ifort || $GMS_FORTRAN == oneapi-ifx) then
+               echo "'testing'  - modify variables GMS_INT_OPT, GMS_IPO_OPT, GMS_WIN_FLAGS in"
+               echo "             install.info to your needs."
+               echo " "
+               set GMS_INT_OPT="'-O3              '  #default optimization flag, add/change if desired"
+               set GMS_IPO_OPT="'-Qipo -Qprec-div-'  #default optimization flag, add/change if desired"
+            else
+               echo "'testing'  - modify variables GMS_PGI_OPT, GMS_IPA_OPT, GMS_WIN_FLAGS in"
+               echo "             install.info to your needs."
+               echo " "
+               set GMS_PGI_OPT="'-O3              '  #default optimization flag, add/change if desired"
+               set GMS_IPA_OPT="'                 '  #default optimization flag, add/change if desired"
+            endif
+            breaksw
+         default:
+            echo " "
+            echo "You did not provide a valid compiler optimization level."
+            echo -n "Hit <ENTER> try again."
+            set reply=$<
+            goto badwinoptimizationlevel
+            breaksw
+      endsw
+
+      echo -n "Hit <ENTER> to continue to the math library setup."
+      set reply=$<
+      #  Currently, Windows math library selection limited to what is offered
+      #  by the PGI compilers.
+      #
+badwinmathlib:
+      tput clear
+      echo "Windows Math Library Selection"
+      echo "-------------------------------"
+      echo " "
+      echo "'mkl'  to Intel's math library"
+      echo " "
+      echo -n "Enter your math library choice: "
+      set GMS_MATHLIB=$<
+      #
+      switch ($GMS_MATHLIB)
+         case mkl:
+            if ( ! ($?MKLROOT) ) then
+               echo "Found:     Nothing. Intel environment not loaded."
+               echo " "
+               echo "Normally the Intel compiler is automatically able to find the MKL library."
+               echo " "
+               echo "If you have the library installed in a different or non-standard location,"
+               echo -n "enter the directory DOS path with no spaces (e.g., cygpath -d 'Windows PATH')."
+            else
+               set GMS_MATHLIB_PATH=`cygpath -d "$MKLROOT"`
+               echo "Found:     $GMS_MATHLIB_PATH"
+            endif
+            echo " "
+            echo -n "Enter your MKL Root Path: "
+            set reply="$<"
+            if ("$reply" != "") then
+               set GMS_MATHLIB_PATH="$reply"
+               echo " "
+            else
+               if ("$GMS_MATHLIB_PATH" == "") goto badwinmathlib
+            endif
+            set GMS_MKL_VERNO=oneapi
+            echo " "
+            breaksw
+         case blas:
+            echo "$GMS_FORTRAN compiler's BLAS library will be used"
+            echo " "
+            breaksw
+         default:
+            echo "You didn't provide a valid math library name."
+            echo -n "Hit <ENTER> try again."
+            set reply=$<
+            goto badwinmathlib
+            breaksw
+      endsw
+      echo -n "Hit <ENTER> to continue."
+      set reply=$<
+      #
+      #  End of win64 section
+      #
+      breaksw
+   case singularity:
+      echo    "Using a GAMESS Singularity container image."
+      echo    " "
+      echo    "Enter the name of the Singularity container image"
+      echo    "or hit <enter> to accept the default (gamess.simg)"
+      echo -n "Singularity container image name: "
+      set CONTAINER_NAME=$<
+      echo " "
+      if (null$CONTAINER_NAME != null) then
+         set GMS_CONTAINER="$CONTAINER_NAME"
+         echo "Singularity container image name:" $CONTAINER_NAME
+      endif
+      echo    " "
+      echo -n "Hit <ENTER> to select DDI communication options "
+      set reply=$<
+      tput clear
+      goto top_of_comm_choice
+      breaksw
+   default:
+      echo "There is no support for compiling on $GMS_TARGET," >> /dev/stderr
+      echo "probably you typed the target name incorrectly." >> /dev/stderr
+      exit 12
+      breaksw
+endsw
+echo -n "Hit <ENTER> to continue to the GAMESS DDI communications setup."
+set reply=$<
+#
+#    ----- Step 3: acquire data necessary to use MPI instead of sockets -----
+#                             Note:
+#    a) We try asking about MPI choices only for linux64 clusters.
+#    b) For now, vendor workstations fall back to TCP/IP sockets.
+#    c) High end machines using MPI or other sophisticated libraries force
+#       their usage inside 'compddi', but it looks good if we generate the
+#       right name for the config file for what is going to be hardwired.
+#
+tput clear
+set GMS_DDI_COMM='sockets'
+if ($GMS_TARGET =~ hpe-*)      set GMS_DDI_COMM='mpi'
+if ($GMS_TARGET == cray-xt)    set GMS_DDI_COMM='mpi'
+if ($GMS_TARGET == cray-xc)    set GMS_DDI_COMM='mpi'
+if ($GMS_TARGET == ibm64)      set GMS_DDI_COMM='mpi'
+#
+if ($GMS_TARGET == fj-a64fx) then
+   echo "This script assumes that you use MPI for DDI communications. If for some reason"
+   echo "you intension is to use GAMESS on a single node only, you can try TCP/IP sockets as well."
+   echo "For that you need to change GMS_DDI_COMM value in file 'install.info' to 'sockets' after"
+   echo "completing this script."
+   echo ""
+   set GMS_DDI_COMM='mpi'
+   set GMS_MPI_LIB=fj-mpi
+   if ( ! ($?FJSV_HOME) ) then
+      echo ""
+      echo "MPI libraries were not found."
+      set MPILOC=''
+   else
+       # Looking for MPI libraries doing search of libfjlapack.so
+       set MPILOC = `find $FJSV_HOME -name 'libmpi.so'`
+       set MPILOC = $MPILOC:h:h
+       echo "MPI libraries found in $MPILOC"
+   endif
+   fj_mpi_lib_choice:
+   echo -n "Please enter the MPI root location [$MPILOC]:"
+   set GMS_MPI_PATH=$<
+   if (null$GMS_MPI_PATH == null) then
+      if (null$MPILOC == null) goto fj_mpi_lib_choice
+      set GMS_MPI_PATH=$MPILOC
+   endif
+   if (!(-d $GMS_MPI_PATH)) then
+      echo " "
+      echo "The directory $GMS_MPI_PATH does not exist."
+      echo " "
+      goto fj_mpi_lib_choice
+   endif
+endif
+#
+top_enter_ibm64_mpi_path:
+if ($GMS_TARGET == ibm64) then
+   if (($GMS_HPC_SYSTEM_TARGET == summit) || ($GMS_HPC_SYSTEM_TARGET == hokulea)) then
+      set GMS_MPI_LIB=spectrum
+   endif
+   if ($GMS_HPC_SYSTEM_TARGET == generic) then
+      tput clear
+      echo ""
+      echo -n "Enter your MPI library choice for ibm64 target (spectrum, openmpi): "
+      set GMS_MPI_LIB=$<
+      echo ""
+      echo "Please enter the root directory path (containing bin, lib, include folders) for ${GMS_MPI_LIB}: "
+      set GMS_MPI_PATH=$<
+      if (!(-d $GMS_MPI_PATH)) then
+         echo "Path $GMS_MPI_PATH does not exist.  Please try again."
+         goto top_enter_ibm64_mpi_path
+      endif
+   endif
+   goto done_with_comm_choice
+endif
+#
+if ($GMS_TARGET == linux64) then
+top_of_comm_choice:
+   tput clear
+   echo "Communication Library Selection"
+   echo "-------------------------------"
+   echo " "
+   echo "             Choose a communication library"
+   echo " "
+   echo "---- sockets (small private cluster oriented) ---- "
+   echo " "
+   echo "    If you want to use Gigabit Ethernet, 10 GbE, or Infiniband with IPoIB,"
+   echo "    if you can ssh to each compute node,"
+   echo "    if you do not want to adapt rungms script to use MPI,"
+   echo "        choose 'sockets'."
+   echo " "
+   echo "---- mpi (public cluster oriented) ---- "
+   echo " "
+   echo "    If you want to use a network that does not allow TCP and/or ssh,"
+   echo "        for example, Infiniband without IPoIB,"
+   echo "    if you are able to do C-shell scripting to edit rungms,"
+   echo "    if you have an MPI library correctly installed,"
+   echo "        choose 'mpi'."
+   echo " "
+   echo "---- mixed ---- "
+   echo " "
+   echo "    If you wish to use a combination of TCP/IP networking for small"
+   echo "    messages and MPI for large messages in a 'mixed' fashion,"
+   echo "        choose 'mixed'."
+   echo " "
+   echo -n "communication library ('serial','sockets' or 'mpi' or 'mixed')? "
+   set GMS_DDI_COMM=$<
+   switch ($GMS_DDI_COMM)
+      case serial:
+      case serial-debug:
+      case sockets:
+         breaksw
+      case mixed:
+      case mpi:
+         #               Although not listed below, other choices can be made:
+         #                   openmpi, mpich2
+         #               See readme.ddi for their status, which can be summarized as
+         #                 mpich2 has not been able to be tested on IB,
+         #                        but has been found to be usable on 10GE.
+         #                 openMPI does aggressive polling in data servers,
+         #                         so it runs only very slowly.
+         tput clear
+         echo "The MPI libraries which work well on linux64/Infiniband are"
+         echo "      Intel's MPI (impi)"
+         echo "      MPICH/MPICH2"
+         echo "      MVAPICH2"
+         echo "Other libraries may work, please see 'readme.ddi' for info."
+         echo "The choices listed above will compile and link easily,"
+         echo "and are known to run correctly and efficiently."
+         echo ""
+         echo "Enter 'sockets' if you just changed your mind about trying MPI."
+         echo ""
+         echo -n "Enter MPI library (hpcx, impi, mpich, mvapich2, mpt, openmpi, sockets): "
+         set GMS_MPI_LIB=$<
+         if ($GMS_MPI_LIB == sockets) then
+            set GMS_DDI_COMM=sockets
+            set GMS_MPI_LIB=''
+         endif
+         breaksw
+      default:
+         echo "the only two choices are 'sockets' and 'mpi', try again..."
+         goto top_of_comm_choice
+         breaksw
+   endsw
+   if ($GMS_DDI_COMM == sockets) goto done_with_comm_choice
+   if ($GMS_DDI_COMM =~ serial*) goto done_with_comm_choice
+   #      make sure everything after this works with lower case names
+   if ($GMS_MPI_LIB == iMPI)     set GMS_MPI_LIB=impi
+   if ($GMS_MPI_LIB == MVAPICH)  set GMS_MPI_LIB=mvapich
+   if ($GMS_MPI_LIB == MVAPICH2) set GMS_MPI_LIB=mvapich2
+   if ($GMS_MPI_LIB == openMPI)  set GMS_MPI_LIB=openmpi
+   if ($GMS_MPI_LIB == MPICH2)   set GMS_MPI_LIB=mpich2
+   if ($GMS_MPI_LIB == MPICH)    set GMS_MPI_LIB=mpich
+   if ($GMS_MPI_LIB == MPT)      set GMS_MPI_LIB=mpt
+   #
+   #      Your sys/op might have put the MPI library almost anywhere!
+   #      Both /opt and /usr/local are very reasonable places to hunt.
+   #      We show some known locations of MPI libraries below, as hints.
+   tput clear
+top_enter_mpi_path:
+   echo " "
+   echo "MPI Library Path Setup"
+   echo "----------------------"
+   echo " "
+   echo "MPI can be installed in many places, so let's find $GMS_MPI_LIB."
+   echo "The person who installed your MPI can tell you where it really is."
+   echo " "
+   switch ($GMS_MPI_LIB)
+      case impi:
+         if ( ! ($?I_MPI_ROOT) ) then
+            echo "Found:        Nothing."
+         else
+            echo "Found:        $I_MPI_ROOT"
+         endif
+         echo " "
+         breaksw
+      case hpcx:
+      case mpt:
+      case mpich:
+      case mpich2:
+      case mvapich:
+      case mvapich2:
+      case openmpi:
+         echo "${GMS_MPI_LIB}  could be almost anywhere, perhaps some directory like"
+         if (!($?MPI_ROOT)) then
+             echo "Found:       Nothing. MPI_ROOT variable not set."
+         else
+             echo "Found:       $MPI_ROOT"
+         endif
+         if (($?HPCX_MPI_DIR)) then
+             echo "Found:       $HPCX_MPI_DIR"
+         else
+             echo "Found:       Nothing. HPCX_MPI_DIR variable not set."
+         endif
+         echo " "
+         breaksw
+      default:
+         echo "Missing path instructions for $GMS_MPI_LIB" >> /dev/stderr
+         echo "please repair the config script ..." >> /dev/stderr
+         exit 4
+         breaksw
+   endsw
+   #
+   echo -n "Please enter your ${GMS_MPI_LIB}'s location: "
+   set GMS_MPI_PATH=$<
+   if ((null$GMS_MPI_PATH == null) && ($GMS_MPI_LIB == impi)) then
+      if ($?I_MPI_ROOT) then
+         set GMS_MPI_PATH=$I_MPI_ROOT
+      endif
+   else if (null$GMS_MPI_PATH == null) then
+      if ($?MPI_ROOT) then
+         set GMS_MPI_PATH=$MPI_ROOT
+      endif
+   endif
+   if (null$GMS_MPI_PATH == null) then
+      echo "You did not specify a path.  Please try again"
+      goto top_enter_mpi_path
+   endif
+   if (!(-d $GMS_MPI_PATH)) then
+      echo "Pathname $GMS_MPI_PATH does not exist.  Please try again"
+      goto top_enter_mpi_path
+   endif
+   #
+   #     in principle, MPI libraries using Infiniband or iWarp need
+   #     a lower level library "Open Fabrics Enterprise Distribution"
+   #     to handle communications on the device.
+   #                    This is a bit murky!
+   #     On our system, we needed to explicitly link OFED for MVAPICH2,
+   #     but iMPI and openMPI either don't need OFED, or found it w/o
+   #     needing to specify the libraries.  New MVAPICH2 also seems
+   #     to link to OFED without explicit assistance.
+   #
+   #     So, we'll ask about OFED only for old versions of MVAPICH2...
+   #
+   set ofedlibs=false
+   #
+   if ($GMS_MPI_LIB == mvapich2) then
+      echo "Linking against MVAPICH2 is a function of its version number"
+      echo "Please type"
+      echo "   mpiname -v     (or mpiname -a)"
+      echo "to reveal the version number to be 1.9a or 2.1a or similar".
+      echo "Please enter only a number, with one decimal point, such as 2.0"
+      echo -n "MVAPICH2 version? "
+      set GMS_MPI_SOFTWARE_VERNO=$<
+      switch ($GMS_MPI_SOFTWARE_VERNO)
+         case 1.4:
+         case 1.5:
+         case 1.6:
+         case 1.7:
+         case 1.8:
+         case 1.9:
+            set ofedlibs=true
+            breaksw
+         case 2.0:
+         case 2.1:
+         case 2.3.7-*:
+         default:
+            breaksw
+      endsw
+      if ("$ofedlibs" == "true") then
+         echo " "
+         echo "$GMS_MPI_LIB requires a lower level library named OFED to handle"
+         echo "the network device.  The 'Open Fabrics Enterprise Distribution'"
+         echo "handles Infiniband and other fast network connections."
+         echo "   See www.openfabrics.org for more information."
+         echo "Typical places to find OFED's libraries might include"
+         echo "        /usr/lib64"
+         echo "        /opt/ofed/lib64"
+         echo "One of the OFED libraries you are looking for is libibverbs.so"
+         echo " "
+         echo -n "Please enter your OFED's location: "
+         set GMS_OFED_PATH=$<
+         if (!(-d $GMS_OFED_PATH)) then
+            echo "The pathname $GMS_OFED_PATH does not exist." >> /dev/stderr
+            echo "Please install OFED, and then try 'config' again." >> /dev/stderr
+            exit 44
+         endif
+      endif
+   endif
+   echo "MPI library '${GMS_MPI_LIB}' will be taken from ${GMS_MPI_PATH}"
+endif
+#
+if ($GMS_TARGET == win64) then
+   echo " "
+   echo -n "Hit <ENTER> to to set up your network."
+   set reply=$<
+badwinmpiselection:
+   tput clear
+   echo "Options"
+   echo "-------"
+   echo " "
+   echo "'impi'   - use Intel Message Passing Interface (Intel MPI)."
+   echo "'msmpi'  - use Microsoft Message Passing Interface (MS-MPI)."
+   echo "'serial' - no communication."
+   echo " "
+   echo -n "Please enter your communication choice: "
+   set GMS_MPI_LIB=$<
+   set GMS_DDI_COMM='mpi'
+   switch ($GMS_MPI_LIB)
+      case impi:
+         echo " "
+         echo "Intel MPI"
+         if ( ! ($?I_MPI_ROOT) ) then
+            echo "Found:     Nothing. Intel environment not loaded."
+            echo " "
+            echo "Normally the Intel compiler is automatically able to find the Intel MPI library."
+            echo " "
+            echo "If you have the library installed in a different or non-standard location,"
+            echo -n "enter the directory DOS path with no spaces (e.g., cygpath -d 'Windows PATH')."
+         else
+            set GMS_MPI_PATH=`cygpath -d "$I_MPI_ROOT"`
+            echo "Found:     $GMS_MPI_PATH"
+         endif
+         echo " "
+         echo -n "Enter your Intel MPI Root Path: "
+         set reply="$<"
+         if ("$reply" != "") then
+            set GMS_MPI_PATH="$reply"
+            echo " "
+         else
+            if ("$GMS_MPI_PATH" == "") goto badwinmpiselection
+         endif
+         echo " "
+         echo "Intel MPI will be used from the directory:"
+         echo "$GMS_MPI_PATH"
+         echo " "
+         breaksw
+      case msmpi:
+         echo " "
+         echo "MS-MPI."
+         if ($GMS_FORTRAN == pgfortran) echo "The following PGI flag will be used: '-Mmpi=msmpi'"
+         if ($GMS_FORTRAN == ifort || $GMS_FORTRAN == oneapi-ifort || $GMS_FORTRAN == oneapi-ifx) then
+            echo "MS-MPI variables, MSMPI_INC and MSMPI_LIB64, will be used."
+            echo "Make sure they are set before proceeding further."
+            echo " "
+            if ($?MSMPI_INC) echo "MPI header path: $MSMPI_INC"
+            if (($GMS_TARGET == win64) && $?MSMPI_LIB64) echo "64-bit MPI lib path: $MSMPI_LIB64"
+         endif
+         breaksw
+      case serial:
+         echo " "
+         echo "serial.src will be compiled"
+         set GMS_MPI_LIB='none'
+         set GMS_DDI_COMM='serial'
+         breaksw
+      default:
+         echo "$GMS_MPI_PATH is not a valid option."
+         echo -n "Hit <ENTER> to try again."
+         set reply=$<
+         goto badwinmpiselection
+         breaksw
+   endsw
+   echo -n "Hit <ENTER> to continue."
+   set reply=$<
+endif
+#
+done_with_comm_choice:
+if ($GMS_TARGET == singularity) goto final_comment
+#
+#      Step 4: Collect information for LIBXC
+#              Only 64 bit Linux is supported.
+#
+echo " "
+echo "Hit <ENTER> to continue through the GAMESS build options."
+echo " "
+echo "Note: You can just <ENTER> through the next series of questions"
+echo "      if you want to accept the default answer of 'no'."
+set reply=$<
+tput clear
+echo "LibXC Option"
+echo "============"
+echo ""
+echo "GAMESS-US now supports LibXC."
+echo "LibXC is a library of exchange-correlation functionals for density-functional"
+echo "theory (DFT). It adds many new DFT functionals that are enabled with the"
+echo '$'"LIBXC input group. This feature requires modern Fortran 2003 but not all"
+echo "compilers support it. For gfortran, the minimal tested version is gfortran 5.5."
+echo "If your gfortran is older than this, you can try to use the LibXC interface"
+echo "but it may not work. The IBM XL Fortran compiler is not fully supported!"
+echo ""
+echo "This option can be manually changed later by modifying install.info"
+echo ""
+echo -n "Optional: Build LibXC interface?  (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set GMS_LIBXC=false
+else
+   set GMS_LIBXC=true
+   echo ""
+   echo "Do not forget to run './tools/libxc/download-libxc.csh' for downloading libxc,"
+   echo "And do not forget to run 'make libxc -j"`echo '$'`"(nproc)' before 'make modules' for compiling of LibXC..."
+   echo ""
+   echo -n "Hit <ENTER>."
+   set reply=$<
+endif
+tput clear
+echo "The Molecular Science Software Institute (MolSSI) Driver Interface (MDI)"
+echo "========================================================================"
+echo ""
+echo "GAMESS-US now supports the MolSSI Driver Interface (MDI)."
+echo "MDI enables GAMESS to interoperate with other codes via a standardized"
+echo "interface. More information about MDI can be found here:"
+echo ""
+echo "https://molssi-mdi.github.io/MDI_Library/html/index.html"
+echo ""
+echo "This feature requires modern Fortran 2003 but not all compilers support it"
+echo ""
+echo "This option can be manually changed later by modifying install.info"
+echo ""
+echo -n "Optional: Build MDI support?  (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set GMS_MDI=false
+else
+   set GMS_MDI=true
+   echo ""
+   echo "Do not forget to run './tools/mdi/download-mdi.csh' for downloading the MDI Library,"
+   echo "And do not forget to run 'make libmdi -j"`echo '$'`"(nproc)' before 'make modules' for compiling of MDI..."
+   echo ""
+   echo -n "Hit <ENTER>."
+   set reply=$<
+endif
+tput clear
+echo "MSU CCSDt, CC(t;3), ACP, and DEA/DIP-EOMCC Option"
+echo "================================================================"
+echo ""
+echo "Users have the option of compiling the beta version of the"
+echo "active-space CCSDt and CC(t;3), ACP, and DEA/DIP-EOMCC codes"
+echo "developed at Michigan State University (CCTYP = CCSD3A, CCT3,"
+echo "ACCSD, ACC23, ACCSD3A, ACCT3, DEAEOMx and DIPEOMx, respectively)."
+echo ""
+echo "These builds take a considerable amount of time and memory for"
+echo "compilation due to the amount of machine generated source code."
+echo "We recommend that users interested in installing these codes"
+echo "compile GAMESS in parallel using the Makefile generated during"
+echo "the initial configuration ('make -j [number of cores]')."
+echo ""
+echo "This option can be manually changed later by modifying install.info"
+echo ""
+echo -n "Optional: Build MSU CCT3, CCSD3A, ACP & DEA/DIP-EOMCC methods?  (yes/no):"
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set GMS_MSUAUTO=false
+else
+   set GMS_MSUAUTO=true
+endif
+tput clear
+if (($GMS_TARGET == linux64) || ($GMS_TARGET == ibm64) || ($GMS_TARGET == hpe-cray-ex)) then
+  echo ""
+   #
+   echo "LIBCCHEM 2.0 Option"
+   echo "==============="
+   echo ""
+   echo "64 bit Linux, IBM, and Cray builds can attach the C++/CUDA/HIP "
+   echo "LibCChem library for fast, GPU accelerated code through the CUDA, "
+   echo "and HIP programming models for NVIDIA or AMD GPUs. "
+   echo "This is the new, improved version of the original LibCChem which "
+   echo "includes a full SCF with capability up to d functions, and an independent"
+   echo "Fock build algorithm. At the moment only "
+   echo "energies are available. "
+   echo "Usage of LibCChem 2.0 requires a CUDA/ROCM installation and MPI."
+   echo " "
+   echo -n "Do you want to use LIBCCHEM 2.0?  (yes/no): "
+  set reply=$<
+   if(null$reply == null) set reply=no
+   if ($reply == no) then
+      set GMS_HPCCHEM=false
+      goto skip_hpcchem_config
+   else
+      set GMS_HPCCHEM=true
+    endif
+   #
+  tput clear
+  bad_path_to_cchem:
+  echo " Please provide the absolute path to cchem_2.0"
+  echo " "
+  echo " Default $GMS_PATH/cchem_2.0/ "
+  echo " "
+  echo -n "cchem_2.0 path:"
+  set GMS_HPCCHEM_PATH=$<
+   if ($GMS_HPCCHEM_PATH == exit) then
+      set GMS_HPCCHEM_PATH=`$GMS_PATH/cchem_2.0`
+   endif
+  tput clear
+  bad_data_servers:
+  echo " Would you like to use data servers in DDI?"
+  echo " "
+  echo " Default: false "
+  echo " "
+  echo -n "Would you like to use data servers in DDI?  (yes/no): "
+  set reply=$<
+   if(null$reply == null) set reply=no
+   if ($reply == no) then
+      set GMS_HPCCHEM_USE_DATA_SERVERS=false
+   else
+      set GMS_HPCCHEM_USE_DATA_SERVERS=true
+    endif
+  tput clear
+  bad_GPU_model:
+  echo "Are you using NVIDIA graphics cards? "
+  echo " "
+  echo -n " (yes = compile using CUDA)"
+  echo " "
+  echo -n " (no = compile using HIP)"
+  echo " "
+  echo -n " Answer (yes/no): "
+  set reply=$<
+  if(null$reply == null) set reply=yes
+  if($reply == yes) then
+    set GMS_HPCCHEM_CUDA=true
+  else
+    set GMS_HPCCHEM_CUDA=false
+  endif
+  if("$GMS_HPCCHEM_CUDA" == "true") then
+#do cuda setup
+  bad_CUDA_path:
+    echo " "
+    echo "Where is the CUDA software for nVIDIA GPUs installed?"
+    echo " "
+    echo "The path name will have 'include' and 'lib64' directories below it."
+    echo "Typing 'which nvcc' may help locate the right path on your machine."
+    echo " "
+    if ($GMS_HPC_SYSTEM_TARGET == summit) then
+        if ( ! ($?OLCF_CUDA_ROOT) ) then
+          echo "Found:       Nothing. CUDA module not loaded."
+        else
+          echo "Found:       $OLCF_CUDA_ROOT"
+        endif #if olcf root
+      else if ( ! ($?CUDA_ROOT) ) then
+        echo "Found:       Nothing. CUDA module not loaded."
+      else
+        echo "Found:       $CUDA_ROOT"
+   endif #if summit
+   echo ""
+   echo -n "CUDA path: "
+   set GMS_HPC_CUDA_PATH=$<
+   #
+   if ($GMS_HPC_CUDA_PATH == exit) then
+      set GMS_HPCCHEM=false
+      goto dump_install_info
+   endif
+   #
+   if (-d $GMS_HPC_CUDA_PATH/include) then
+   else
+      echo "That does not appear to be a correct path."
+      echo "I don't see the $GMS_HPC_CUDA_PATH/include directory."
+      echo "Please try again (type 'exit' if you need to quit)."
+      goto bad_CUDA_path
+   endif
+   #
+  else
+    # do HIP things
+  bad_HIP_path:
+    echo " "
+     echo "Where is the ROCM software for AMD GPUs installed?"
+    echo " "
+     echo "The path name will have 'include' and 'lib' directories below it."
+    echo "Typing 'which hipcc' may help locate the right path on your machine."
+    echo " "
+    if ( ! ($?ROCM_PATH) ) then
+        echo "Found:       Nothing. ROCM module not loaded."
+    else
+        echo "Found:       $ROCM_PATH"
+    endif
+    echo ""
+    echo -n "ROCM path: "
+    set GMS_HPC_ROCM_PATH=$<
+   #
+    if ($GMS_HPC_ROCM_PATH == exit) then
+        set GMS_HPCCHEM=false
+        goto dump_install_info
+    endif
+    set GMS_HPC_HIP_PATH=$GMS_HPC_ROCM_PATH/hip
+    echo -n "setting the hip path to $GMS_HPC_HIP_PATH "
+    echo " "
+    bad_magma_rocm:
+    echo " "
+    echo "At the moment, rocsolver is slow. We have the ability to "
+    echo "use MAGMA as an alternative. Do you want to use MAGMA? "
+    echo " "
+    echo -n " (yes = compile using MAGMA)"
+    echo " "
+    echo -n " (no = compile using ROCSOLVER): "
+    set reply=$<
+    if(null$reply == null) set reply=yes
+      if($reply == yes) then
+        set GMS_HPCCHEM_MAGMA=true
+      else
+        set GMS_HPCCHEM_MAGMA=false
+      endif
+
+    if("$GMS_HPCCHEM_MAGMA" == "false") then
+      echo "Using ROCM then! "
+      goto skip_hpcchem_config
+    endif
+    if("$GMS_HPCCHEM_MAGMA" == "true") then
+      echo " Where is MAGMA installed? "
+      echo "Found:       $MAGMA_ROOT"
+      echo -n "MAGMA path: "
+      set GMS_HPC_MAGMA_PATH=$<
+   #
+      if ($GMS_HPC_MAGMA_PATH == exit) then
+        set GMS_HPCCHEM=false
+        goto dump_install_info
+      endif
+    endif
+
+  endif #end if hip
+final_comment:
+   echo
+   echo "                Please make a note:"
+   echo "   Step-by-step directions for compiling LIBCCHEM 2.0 can be found in"
+   echo "         $GMS_PATH/cchem_2.0/README.md"
+   echo " PLEASE read the readme "
+   echo -n "Hit <ENTER> once you have jotted down this important file name."
+   set reply=$<
+endif
+skip_hpcchem_config:
+if ($GMS_FORTRAN == pgfortran) goto skip_openmp_config
+if (($GMS_DDI_COMM != sockets)) then
+   tput clear
+   echo "OpenMP Threading Option"
+   echo "======================="
+   echo ""
+   echo "Users have the option of compiling the OpenMP threaded"
+   echo "version of GAMESS."
+   echo ""
+   echo "The following methods are threaded:"
+   echo '* HF (see INTOMP in $INTGRL)'
+   echo '* DFT (see BFCTYP in $DFT)'
+   echo '* RI-MP2 (see CODE=OMPRIMP2 in $MP2)'
+   echo '* RI-CC (see CCERI=RI in $CCINP)'
+   echo ""
+   echo "\!\!\! WARNING \!\!\! Do not choose OpenMP for any other type of calculations."
+   echo "\!\!\! WARNING \!\!\! Jobs not listed above may fail with OpenMP."
+   echo ""
+   echo "This option can be manually changed later by modifying"
+   echo "install.info and setting GMS_OPENMP = [true|false]"
+   echo ""
+   echo -n "Build GAMESS with OpenMP thread support?  (yes/no): "
+   set reply=$<
+   if(null$reply == null) set reply=no
+   if ($reply == no) then
+      set GMS_OPENMP=false
+   else
+      set GMS_OPENMP=true
+   endif
+endif
+openmp_offload:
+if ($GMS_OPENMP == true) then
+   if (($GMS_HPC_SYSTEM_TARGET == aurora)       || \
+       ($GMS_HPC_SYSTEM_TARGET == frontier)     || \
+       ($GMS_HPC_SYSTEM_TARGET == grace-hopper) || \
+       ($GMS_HPC_SYSTEM_TARGET == perlmutter)   || \
+       ($GMS_HPC_SYSTEM_TARGET == summit)) then
+      set GMS_OPENMP_OFFLOAD=true
+   else
+      set GMS_OPENMP_OFFLOAD=false
+   endif
+endif
+#
+if ($GMS_OPENMP_OFFLOAD == true) then
+   if (($GMS_HPC_SYSTEM_TARGET == grace-hopper) || \
+       ($GMS_HPC_SYSTEM_TARGET == perlmutter)   || \
+       ($GMS_HPC_SYSTEM_TARGET == summit)) then
+      set USE_CUBLAS=true
+      set USE_HIPBLAS=false
+   else if (($GMS_HPC_SYSTEM_TARGET == frontier)) then
+      set USE_CUBLAS=false
+      set USE_HIPBLAS=true
+      set GMS_USE_HIPFORT=true
+   else if (($GMS_HPC_SYSTEM_TARGET == aurora)) then
+      # Assume that MKL Offloading will be used.
+      # Users can modify their install.info for other usecases.
+      set USE_CUBLAS=false
+      set USE_HIPBLAS=false
+   endif
+endif
+#
+if ($GMS_HPCCHEM == true) then
+   set GMS_OPENMP_OFFLOAD=false
+   set USE_CUBLAS=false
+   set USE_HIPBLAS=false
+endif
+skip_openmp_config:
+#
+#    ----- Ask users if they want to build the VeraChem VM2 library
+#
+tput clear
+echo "VeraChem VM2 Option"
+echo "======================="
+echo ""
+echo "Users have the option of linking in the VeraChem VM2 statistical"
+echo "mechanics package binary when building GAMESS. The resulting"
+echo "GAMESS-VM2 package provides a mining minima free energy calculation"
+echo "capability. Dual energy potential (MM and QM) based molecular"
+echo "conformational searching and subsequent processing of these conformers"
+echo "for temperature effects, e.g. entropic terms, result in a Boltzmann"
+echo "weighted conformer ensemble and an associated free energy."
+echo "Note that linking VM2 package requires using intel compilers (ifort) "
+echo "DATA SERVER will be turned off automatically and  "
+echo "dynamic linking of math libray is required, so  change  GMS_MKL_VERNO to 12-so"
+echo ""
+echo "The VeraChem binary package can be licensed for commercial use,"
+echo "and free licensing is also available for purely academic use."
+echo "Send requests for the package binary by email to vc@verachem.com or"
+echo "through the VeraChem website www.verachem.com."
+echo ""
+echo -n "Optional: Build GAMESS with VeraChem's VM2 library? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set GMS_VM2=false
+else
+   set GMS_VM2=true
+echo -n "Please enter the full path for the VM2 executable (VC_CompChemPackage_mpi.a): "
+set reply=$<
+set VM2LIB="$reply"
+endif
+#
+#    ----- Ask users if they want to build the optional plug-ins
+#
+tput clear
+echo "Tinker Option"
+echo "============="
+echo ""
+echo -n "Optional: Build GAMESS with TINKER plug-in? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set TINKER=false
+else
+   set TINKER=true
+endif
+tput clear
+echo "VB2000 Option"
+echo "============="
+echo ""
+echo -n "Optional: Build GAMESS with VB2000 plug-in? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set VB2000=false
+else
+   set VB2000=true
+endif
+tput clear
+echo "XMVB Option"
+echo "==========="
+echo ""
+echo -n "Optional: Build GAMESS with XMVB plug-in? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set XMVB=false
+else
+   set XMVB=true
+endif
+tput clear
+echo "NEO Option"
+echo "=========="
+echo ""
+echo "The NEO approach is designed to incorporate nuclear quantum effects into"
+echo "electronic structure calculations by treating specified nuclei quantum"
+echo "mechanically on the same level as the electrons."
+echo ""
+echo "An advantage of the NEO approach is that nuclear quantum effects such as"
+echo "delocalization, anharmonicity, and zero-point energy, as well as"
+echo "non-Born-Oppenheimer effects, are inherently included during geometry"
+echo "optimizations, reaction paths, and dynamics."
+echo ""
+echo -n "Optional: Build GAMESS with NEO plug-in? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set NEO=false
+else
+   set NEO=true
+endif
+tput clear
+echo "NBO Option"
+echo "=========="
+echo ""
+echo -n "Optional: Build GAMESS with NBO plug-in? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set NBO=false
+else
+   set NBO=true
+   echo "Please enter the full file name of your NBO library (being careful about your"
+   echo -n "choice of i4 or i8 integers): "
+   set reply=$<
+   set NBOLIB="$reply"
+endif
+tput clear
+echo "RISM-SCF-cSED option"
+echo "===================="
+echo ""
+echo -n "Optional: Build GAMESS with RISM-SCF-cSED plug-in? (yes/no): "
+set reply=$<
+if(null$reply == null) set reply=no
+if ($reply == no) then
+   set RISM=false
+else
+   set RISM=true
+endif
+#
+#    ----- Step 5: output what we learned into a 'configuration file' -----
+#
+dump_install_info:
+#
+#    development vs. production environment
+#
+if (! -d $GMS_PATH/.git ) then
+    set GMS_FPE_FLAGS=""
+endif
+#
+set cf=$GMS_BUILD_DIR/install.info
+#
+echo '#\!/bin/csh -f' > $cf
+echo " "                                                   >> $cf
+echo "#   Compilation configuration for GAMESS"            >> $cf
+echo "#   Generated on `hostname`"                         >> $cf
+echo "#   Generated at `date`"                             >> $cf
+echo " "                                                   >> $cf
+echo "setenv GMS_VERSION           $GMS_VERSION"           >> $cf
+echo " "                                                   >> $cf
+echo "#                 GAMESS Paths                     #">> $cf
+echo "setenv GMS_PATH              $GMS_PATH"              >> $cf
+echo "setenv GMS_BUILD_DIR         $GMS_BUILD_DIR"         >> $cf
+echo " "                                                   >> $cf
+echo "#                  Machine Type                    #">> $cf
+echo "setenv GMS_TARGET            $GMS_TARGET"            >> $cf
+echo "setenv GMS_HPC_SYSTEM_TARGET $GMS_HPC_SYSTEM_TARGET" >> $cf
+echo "setenv GMS_ARCH              `uname -p`"             >> $cf
+   if (null$GMS_BG_MODEL != null) \
+echo "setenv GMS_BG_MODEL          $GMS_BG_MODEL"          >> $cf
+   if (null$GMS_MAC_OSX_VERNO != null) \
+echo "setenv GMS_MAC_OSX_VERNO     $GMS_MAC_OSX_VERNO"     >> $cf
+echo " "                                                   >> $cf
+echo "#              FORTRAN Compiler Setup              #">> $cf
+echo "setenv GMS_FORTRAN           $GMS_FORTRAN"           >> $cf
+   if (null$GMS_GFORTRAN_VERNO != null) \
+echo "setenv GMS_GFORTRAN_VERNO    $GMS_GFORTRAN_VERNO"    >> $cf
+   if ($GMS_TARGET == ibm64) then
+      if ($GMS_HPC_SYSTEM_TARGET != generic) then
+echo "setenv GMS_XL_PATH           $GMS_XL_PATH"           >> $cf
+      endif
+   endif
+   if (null$GMS_IFORT_VERNO != null) \
+echo "setenv GMS_IFORT_VERNO       $GMS_IFORT_VERNO"       >> $cf
+   if (null$GMS_L64_OPT != null)  then
+echo "#         PGI/Linux 64 optimization level          #">> $cf
+echo "setenv GMS_L64_OPT           $GMS_L64_OPT"           >> $cf
+echo "#         PGI/Linux 64 compiler flags              #">> $cf
+echo "setenv GMS_LIN_FLAGS         $GMS_LIN_FLAGS"         >> $cf
+   endif
+   if ($GMS_L64_OPT == testing)  then
+echo "#         PGI specific compiler flags              #">> $cf
+echo "setenv GMS_PGI_OPT           $GMS_PGI_OPT"           >> $cf
+echo "setenv GMS_IPA_OPT           $GMS_IPA_OPT"           >> $cf
+   endif
+   if ($GMS_TARGET == win64) then
+echo "#         Windows optimization level               #">> $cf
+echo "setenv GMS_WIN_OPT           $GMS_WIN_OPT"           >> $cf
+echo "#         Windows compiler flags                   #">> $cf
+echo "setenv GMS_WIN_FLAGS         $GMS_WIN_FLAGS"         >> $cf
+echo "setenv GMS_WIN_TP            $GMS_WIN_TP"            >> $cf
+      if ($GMS_FORTRAN == ifort || $GMS_FORTRAN == oneapi-ifort || $GMS_FORTRAN == oneapi-ifx) then
+echo "#         INTEL specific compiler flags            #">> $cf
+echo "setenv GMS_INT_OPT           $GMS_INT_OPT"           >> $cf
+echo "setenv GMS_IPO_OPT           $GMS_IPO_OPT"           >> $cf
+      else
+echo "#         PGI specific compiler flags"               >> $cf
+echo "setenv GMS_PGI_OPT           $GMS_PGI_OPT"           >> $cf
+echo "setenv GMS_IPA_OPT           $GMS_IPA_OPT"           >> $cf
+      endif
+   endif
+echo " "                                                   >> $cf
+echo "#         Mathematical Library Setup               #">> $cf
+echo "setenv GMS_MATHLIB           $GMS_MATHLIB"           >> $cf
+   if (($GMS_TARGET  == win64) && ($GMS_MATHLIB == mkl)) then
+      if (null"$GMS_MATHLIB_PATH" != null) \
+echo 'setenv GMS_MATHLIB_PATH    "'"$GMS_MATHLIB_PATH"'"'  >> $cf
+   else
+      if (null$GMS_MATHLIB_PATH != null) \
+echo "setenv GMS_MATHLIB_PATH      $GMS_MATHLIB_PATH"      >> $cf
+   endif
+   if (null$GMS_MKL_VERNO != null) \
+echo "setenv GMS_MKL_VERNO         $GMS_MKL_VERNO"         >> $cf
+   if ($GMS_MATHLIB == aocl) \
+echo "setenv GMS_AMD_FLAME_PATH    $GMS_AMD_FLAME_PATH"    >> $cf
+echo "setenv GMS_THREADED_BLAS     $GMS_THREADED_BLAS"     >> $cf
+echo 'setenv GMS_LAPACK_LINK_LINE  "'"${GMS_LAPACK_LINK_LINE}"'"' >> $cf
+echo "#         parallel message passing model setup"      >> $cf
+echo "setenv GMS_DDI_COMM          $GMS_DDI_COMM"          >> $cf
+   if (null$GMS_MPI_LIB != null) \
+echo "setenv GMS_MPI_LIB           $GMS_MPI_LIB"           >> $cf
+   if (($GMS_TARGET  == win64) && ($GMS_MPI_LIB == impi)) then
+      if (null"$GMS_MPI_PATH" != null) \
+echo 'setenv GMS_MPI_PATH        "'"$GMS_MPI_PATH"'"'      >> $cf
+   else
+      if (null$GMS_MPI_PATH != null) \
+echo "setenv GMS_MPI_PATH          $GMS_MPI_PATH"          >> $cf
+   endif
+   if ($GMS_MPI_LIB == mvapich2) \
+echo "setenv GMS_MPI_SOFTWARE_VERNO $GMS_MPI_SOFTWARE_VERNO">> $cf
+   if (null$GMS_OFED_PATH != null) \
+echo "setenv GMS_OFED_PATH         $GMS_OFED_PATH"         >> $cf
+   if (null$GMS_ARMCI_PATH != null) \
+echo "setenv GMS_ARMCI_PATH        $GMS_ARMCI_PATH"        >> $cf
+echo " "                                                   >> $cf
+echo "#     Michigan State University Coupled Cluster    #">> $cf
+echo "setenv GMS_MSUAUTO           $GMS_MSUAUTO"           >> $cf
+echo " "                                                   >> $cf
+echo "#         LIBCCHEM 2.0 interface          #">> $cf
+echo "setenv GMS_HPCCHEM           $GMS_HPCCHEM"           >> $cf
+echo "setenv GMS_HPCCHEM_PATH      $GMS_HPCCHEM_PATH"      >> $cf
+echo "setenv GMS_HPCCHEM_USE_DATA_SERVERS $GMS_HPCCHEM_USE_DATA_SERVERS" >> $cf
+   if ("$GMS_HPCCHEM" == "true") then
+   if ("$GMS_HPCCHEM_CUDA" == "true" ) then
+echo "setenv GMS_HPCCHEM_CUDA      $GMS_HPCCHEM_CUDA"      >> $cf
+echo "setenv GMS_HPC_CUDA_PATH     $GMS_HPC_CUDA_PATH"     >> $cf
+endif #if cuda
+if ("$GMS_HPCCHEM_CUDA" == "false" && "$GMS_HPCCHEM_MAGMA" == "false") then
+echo "setenv GMS_HPCCHEM_CUDA      $GMS_HPCCHEM_CUDA"      >> $cf
+echo "setenv GMS_HPC_ROCM_PATH     $GMS_HPC_ROCM_PATH"     >> $cf
+echo "setenv GMS_HPC_HIP_PATH      $GMS_HPC_HIP_PATH"      >> $cf
+else if ("$GMS_HPCCHEM_CUDA" == "false" && "$GMS_HPCCHEM_MAGMA" == "true") then
+echo "setenv GMS_HPCCHEM_CUDA      $GMS_HPCCHEM_CUDA"      >> $cf
+echo "setenv GMS_HPCCHEM_MAGMA     $GMS_HPCCHEM_MAGMA"     >> $cf
+echo "setenv GMS_HPC_ROCM_PATH     $GMS_HPC_ROCM_PATH"     >> $cf
+echo "setenv GMS_HPC_HIP_PATH      $GMS_HPC_HIP_PATH"      >> $cf
+echo "setenv GMS_HPC_MAGMA_PATH    $GMS_HPC_MAGMA_PATH"    >> $cf
+endif #if hip
+endif #hpcchem
+echo " "                                                   >> $cf
+
+   if ($GMS_TARGET == singularity) then
+echo "#             Singularity Setup                    #">> $cf
+echo "setenv GMS_CONTAINER         $GMS_CONTAINER"         >> $cf
+echo "setenv GMS_CONTAINER_PATH    $GMS_PATH"              >> $cf
+   endif
+echo " "                                                   >> $cf
+echo "#      Intel Xeon Phi Build: none/knc/knl          #">> $cf
+echo "setenv GMS_PHI               $GMS_PHI"               >> $cf
+echo " "                                                   >> $cf
+echo "#         Shared Memory Type: sysv/posix           #">> $cf
+echo "setenv GMS_SHMTYPE           $GMS_SHMTYPE"           >> $cf
+echo " "                                                   >> $cf
+echo "#      GAMESS OpenMP support: true/false           #">> $cf
+echo "setenv GMS_OPENMP            $GMS_OPENMP"            >> $cf
+echo "#      GAMESS OpenMP Offload support: true/false   #">> $cf
+echo "setenv GMS_OPENMP_OFFLOAD    $GMS_OPENMP_OFFLOAD"    >> $cf
+echo "setenv GMS_USE_HIPFORT       $GMS_USE_HIPFORT"       >> $cf
+  if (($GMS_OPENMP_OFFLOAD == true) && ($USE_CUBLAS == true)) then
+echo "setenv NVCOMPILER_ACC_POOL_SIZE 0"                   >> $cf
+  endif
+  if (($GMS_OPENMP_OFFLOAD == true) && ($GMS_TARGET =~ hpe-*)) then
+echo "setenv CRAY_ACC_REUSE_MEM_LIMIT 0"                   >> $cf
+  endif
+  if ($GMS_USE_HIPFORT == true) then
+     if ($?HIPFORT) then
+echo "setenv HIPFORT_HOME          ${HIPFORT}"             >> $cf
+     else
+echo "setenv HIPFORT_HOME          /define/path/to/hipfort/home">> $cf
+     endif
+  endif
+echo "setenv USE_CUBLAS            $USE_CUBLAS"            >> $cf
+echo "setenv USE_HIPBLAS           $USE_HIPBLAS"           >> $cf
+echo " "                                                   >> $cf
+echo "#      GAMESS LibXC library: true/false            #">> $cf
+echo "setenv GMS_LIBXC             $GMS_LIBXC"             >> $cf
+echo " "                                                   >> $cf
+echo "#      GAMESS MDI library: true/false              #">> $cf
+echo "setenv GMS_MDI               $GMS_MDI"               >> $cf
+echo " "                                                   >> $cf
+echo "#       VM2 library: true/false                    #">> $cf
+echo "setenv  GMS_VM2              $GMS_VM2"               >> $cf
+   if ($GMS_VM2 == true) then
+echo "setenv  VM2LIB               $VM2LIB"                >> $cf
+   endif
+echo " "                                                   >> $cf
+echo "#       Tinker: true/false                         #">> $cf
+echo "setenv  TINKER               $TINKER"                >> $cf
+echo " "                                                   >> $cf
+echo "#       VB2000: true/false                         #">> $cf
+echo "setenv  VB2000               $VB2000"                >> $cf
+echo " "                                                   >> $cf
+echo "#       XMVB: true/false                           #">> $cf
+echo "setenv  XMVB                 $XMVB"                  >> $cf
+echo " "                                                   >> $cf
+echo "#       NEO: true/false                            #">> $cf
+echo "setenv  NEO                  $NEO"                   >> $cf
+echo " "                                                   >> $cf
+echo "#       NBO: true/false                            #">> $cf
+echo "setenv  NBO                  $NBO"                   >> $cf
+   if ($NBO == true) then
+echo "setenv  NBOLIB               $NBOLIB"                >> $cf
+   endif
+echo " "                                                   >> $cf
+echo "#       RISM: true/false                           #">> $cf
+echo "setenv  RISM                 $RISM"                  >> $cf
+echo " "                                                   >> $cf
+echo "####################################################">> $cf
+echo "# Added any additional environmental variables or  #">> $cf
+echo "# module loads below if needed.                    #">> $cf
+echo "####################################################">> $cf
+echo "# Capture floating-point exceptions                #">> $cf
+echo "setenv GMS_FPE_FLAGS        '$GMS_FPE_FLAGS'"        >> $cf
+echo " "                                                   >> $cf
+   if ($GMS_OPENMP == true) then
+echo "# You will want to adjust OMP_NUM_THREADS to       #">> $cf
+echo "# reflect your desired run settings.               #">> $cf
+echo "# Note that a conditional is in place to           #">> $cf
+echo "# prevent this value from overriding your          #">> $cf
+echo "# current environment if the variable exist.       #">> $cf
+echo " "                                                   >> $cf
+echo 'if (! $?OMP_NUM_THREADS ) setenv OMP_NUM_THREADS 8'  >> $cf
+echo " "                                                   >> $cf
+echo "# Increase OMP_STACKSIZE if you are SEGFAULTing#"    >> $cf
+echo 'if (! $?OMP_STACKSIZE ) setenv OMP_STACKSIZE   1G'   >> $cf
+   endif
+if ($GMS_MATHLIB == pgiblas) then
+  if ($GMS_OPENMP == false) then
+    echo " "                                                   >> $cf
+    echo "# Need to set OMP_NUM_THREADS if using PGI BLAS    #">> $cf
+    echo "# For parallel runs set number of threads to 1     #">> $cf
+    echo "# Serial runs may benefit larger thread values     #">> $cf
+    echo 'if (! $?OMP_NUM_THREADS ) setenv OMP_NUM_THREADS 1'  >> $cf
+  endif
+endif
+tput clear
+echo "********************************************************"
+echo "*             End of GAMESS Configuration              *"
+echo "********************************************************"
+echo " "
+echo "Your configuration for GAMESS compilation is in"
+echo "     $cf"
+echo " "
+echo "Now, you are ready to compile GAMESS by running:"
+echo " "
+echo " make "
+echo " "
+echo "or"
+echo " "
+echo " make -j4"
+echo " "
+echo "If you run into any issues have a look at README.md or"
+echo "post your question in the GAMESS Google Group:"
+echo "     http://groups.google.com/group/gamess"
+echo " "

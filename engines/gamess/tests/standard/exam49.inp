@@ -1,0 +1,39 @@
+! An SN2 reaction that takes place in water but here for speed
+! the solvent is removed.
+! QM is used for all atoms (HF-3c).
+! NVT MD at 298 K with umbrella sampling 
+! for asymmetric coordinate R=R(NC)-R(CBr) (N...C...Br).
+! The value is contrained to -0.7 A with the force constant of 50.0 kcal/mol/A2.
+! MD summary printed every 2 steps, trajectory written every 3 steps.
+! Step size 1 fs, 6 steps (6 fs total).
+! A fresh start (not a restart with velocities).
+!
+!    US asymmetric stretch =   -0.6801927343 Ang
+!    ...
+!    US asymmetric stretch =   -0.6817046732 Ang
+!
+!    POT  ENERGY      =     -1.673731258E+06 KCAL/MOL
+!    ...
+!    POT  ENERGY      =     -1.673730574E+06 KCAL/MOL
+!
+ $CONTRL RUNTYP=MD NPRINT=-5 $END
+ $SYSTEM MWORDS=100 MODIO=1040 $END
+ $SCF DIRSCF=.T. NPUNCH=0 $END
+ $BASIS GBASIS=HF-3c $END
+ $MD MDINT= VVERLET NVTNH=2 MBT=.t. MBR=.t. BATHT=298 RSTEMP=.T.
+DT= 1E-15 NSTEPS=6 JEVERY=2 KEVERY=3 IRATTL(1)= 1,1,1 TRJFMT=F14O6
+USAMP=.T. UFORCE(1)=50.0 RZERO(1)=-0.7 IUSTYP= 1 ipair(1)= 1,3,2
+ $END
+ $DATA
+ SN2 reaction NH3 + CH3I -> NH3CH3(+) + I(-)
+ C1 
+C           6.0       6.0954818495     8.7425780425    11.9974795652
+Br         35.0       8.3845926748    10.2458278361    11.9273643888
+N           7.0       4.3600420583     7.6340703439    12.0068982721
+H           1.0       6.5227697425     8.2586325701    12.9090227905
+H           1.0       6.3148008489     8.3079169447    10.9921646587
+H           1.0       5.5317196490     9.7033113333    12.0802596387
+H           1.0       3.5681779795     7.9873850761    12.5756591606
+H           1.0       4.1179627497     7.7493772544    11.0051642408
+H           1.0       4.4885865261     6.6114832513    12.1216191546
+ $end

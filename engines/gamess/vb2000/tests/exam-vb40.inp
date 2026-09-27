@@ -1,0 +1,91 @@
+! GAMESS/VB2000 Test 40.
+! This run is an example of a VB2000 run for a closed shell case with
+! the structures selected by ionicity or seniority number. It is for
+! benzene with STO-6G and structures selected from ionicity 0 and 2,
+! equivalent to seniority numbers 6 and 2. This leads to 90 structures
+! of ionicity 2 (seniority 2) are added to the 5 spin coupled structures
+! of ionicity 0 (seniority 6). Adding these 90 structures gets a result 
+! closer to the full CASVB than adding any other single ionicity 
+! (seniority) set of structures to the 5 SC structures.
+!
+! The geometry and basis set and therefore the RHF energy are identical
+! to exam-vb24.
+!
+! The RHF energy is:-
+!
+! RHF ENERGY IS -230.1300205664 AFTER   8 ITERATIONS
+!
+! The VB final energy is:-
+!
+! ENERGY AND DIFF OF MACROITER    4 =   -230.2376633323     -0.0000000003
+!
+! This energy is 99.23% of the RHF -> CASVB difference, while SC is
+! 93.54. Adding ionicity 1 (seniority 4) to SC leads to 99.70%, but
+! symetry is broken, and adding ionicity 3 (seniority 0) to SC leads i
+! to 96.27%. 
+!
+ $CONTRL SCFTYP=RHF RUNTYP=ENERGY COORD=UNIQUE 
+ NOSYM=1 UNITS=BOHR VBTYP=VB2000 $END
+ $SYSTEM TIMLIM=200000 MEMORY=2000000 $END
+ $BASIS  GBASIS=STO NGAUSS=6 $END
+ $GUESS  GUESS=HUCKEL $END
+ $DATA
+C6H6 STO-6G
+Dnh  6
+
+C       6.00    2.642389499    0.000000000    0.000000000
+H       1.00    4.687413116    0.000000000    0.000000000
+ $END
+ $VB2000
+#! SEN(6,6)/STO-6G PRINTALL
+ 
+Benzene STO-6G test - MP2 geom 
+  
+0 1
+6     1.3211947495        2.2883764328 0.0000000000
+6    -1.3211947495        2.2883764328 0.0000000000
+6    -2.6423894990        0.0000000000 0.0000000000
+6    -1.3211947495       -2.2883764328 0.0000000000
+6     1.3211947495       -2.2883764328 0.0000000000
+6     2.6423894990        0.0000000000 0.0000000000
+1     2.3437065580        4.0594188365 0.0000000000
+1    -2.3437065580        4.0594188365 0.0000000000
+1    -4.6874131160        0.0000000000 0.0000000000
+1    -2.3437065580       -4.0594188365 0.0000000000
+1     2.3437065580       -4.0594188365 0.0000000000
+1     4.6874131160        0.0000000000 0.0000000000
+
+ $MEMORY
+ 20000000
+
+ $CMAXCUT
+ 0.0
+
+ $NOTROT
+ 1
+ 1 2
+
+ $02IONICITY
+ 2
+ 0 2 
+
+ 02SENIORITY
+ 2
+ 6 2
+
+ $MACROITER
+ 20
+
+ $ECONV
+ 7
+ 
+ $VBSCF
+ 0.0001,55
+
+ $AOGROUP
+ 6
+ 5,10,15,20,25,30
+ 2  2  2  2  2  2
+
+ $END
+

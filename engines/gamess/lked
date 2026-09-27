@@ -1,0 +1,1798 @@
+#!/bin/tcsh -f
+#
+#  5 Dec 2014 - script to "link-edit" a GAMESS executable
+#
+#  Invoke this job by 'lked EXE VERNO >& lked.log &'
+#    EXE is normally 'gamess',
+#    VERNO is the next version number, e.g. 01, 02, 03, ...
+#    This produces executable "EXE.VERNO.x", e.g. gamess.01.x
+#
+#  Please send your issues to the GAMESS public
+#  issue tracker on GitHub:
+#  https://github.com/gms-bbg/gamess-issues/issues
+#
+unset echo
+if (-e install.info) then
+   source install.info
+else
+   echo "Please run 'config' first, to set up GAMESS compiling information" >> /dev/stderr
+   exit 4
+endif
+#
+#  Allow debug flags during linking
+#
+if ($?GMS_DEBUG_LINK_FLAGS == 0) then
+   set GMS_DEBUG_LINK_FLAGS=''
+endif
+#
+if (($GMS_HPC_SYSTEM_TARGET == crusher || $GMS_HPC_SYSTEM_TARGET == frontier ) && ($GMS_HPCCHEM == true)) then
+   # older versions of rocm migth need this!
+   #set EXTRA_LINK_FLAGS="--rocm-path=$GMS_HPC_ROCM_PATH --hip-link "
+   set GMS_HPCCHEM_CUDA=false
+   set EXTRA_LINK_FLAGS=''
+else
+   set EXTRA_LINK_FLAGS=''
+endif
+#
+set EXTRA_MPI_LIB_FLAGS=''
+#
+#  the configuration file read just above provides the next two variables,
+#  and some others that are used below.
+#
+set TARGET=$GMS_TARGET
+set MATHLIBS=''
+chdir $GMS_BUILD_DIR
+#
+if (!($?GMS_BG_MODEL)) set GMS_BG_MODEL=' '
+#
+#    ---- and now the script begins...
+#
+set FAILED=0
+set EXE=$1
+set VERNO=$2
+if (null$EXE == null) set EXE=gamess
+if (null$VERNO == null) set VERNO=00
+date
+#
+echo GAMESS will be linked into the binary file $EXE.$VERNO.x.
+#
+#  Optional Valence Bond method, using VB2000 code --or-- XMVB code
+#
+if ($GMS_PHI != none) set VB2000=false
+if ($GMS_OPENMP == true) set VB2000=false
+#
+#   Optional C++ code, running on CPUs, and possibly Nvidia/CUDA GPUs
+#         see ~/gamess/libcchem/aaa.readme.1st for more information
+#
+
+if ( $GMS_HPCCHEM == false) then 
+  set HPCCHEM=false
+else 
+  set HPCCHEM=$GMS_HPCCHEM
+  #set EXE=gamess.hpc
+endif
+#
+#   Optional MPQC interface
+#
+set MPQC=false
+#   Optional interface to VeraChem's VM2 package
+#
+#   choose compiler and math library options for each system
+#   ========================================================
+#   these consist of
+#       LDR       - the name of the loader (usually a compiler).
+#       LDOPTS    - options, such as asking for a load map.
+#       LIBRARIES - extra system libraries which must be searched.
+#       LAPACK    - default: set to '${GMS_PATH}/3rd-party/lib/liblapack64.a'
+#                 - set to blank to take LAPACK from a math lib
+#   In principle, the 'config' step has captured enough information
+#   about library locations that no user need change anything below.
+#
+set LAPACK_WARNING=false
+if (($GMS_MATHLIB == none) && (-f $GMS_PATH/3rd-party/lib/liblapack64.a)) then
+   set GMS_LAPACK_LINK_LINE="$GMS_PATH/3rd-party/lib/liblapack64.a"
+else if  (($GMS_MATHLIB == essl) && (-f $GMS_PATH/3rd-party/lib/liblapack64.a)) then
+   set GMS_LAPACK_LINK_LINE="$GMS_PATH/3rd-party/lib/liblapack64.a"
+else if  (($GMS_MATHLIB == LibSci) && (-f $GMS_PATH/3rd-party/lib/liblapack64.a)) then
+   set GMS_LAPACK_LINK_LINE="$GMS_PATH/3rd-party/lib/liblapack64.a"
+else
+   set LAPACK_WARNING=true
+endif
+#
+set LAPACK="${GMS_LAPACK_LINK_LINE}"
+#
+#   HPE Cray Series:
+#
+if ($TARGET =~ hpe-*) then
+   # If your load a PrgEnv-(aocc,cray,gnu,intel-nvidia) the LDR (Loader) will
+   # be 'ftn'. However, we also account for situations where the user
+   # what want to unload a PrgEnv and load a compiler directly. In those
+   # situations we specify the LDR explicitly.
+   set LDR = $GMS_FORTRAN
+
+   if ( $?CRAY_FTN_VERSION ) then
+      set GMS_HPE_CRAY_COMP = cray
+   endif
+
+   if ( $?INTEL_VERSION ) then
+      set GMS_HPE_CRAY_COMP = intel
+      if ( $?PE_ENV ) then
+         if ( $PE_ENV != "INTEL") set LDR = ifort
+      endif
+   endif
+
+   if ( $?GNU_VERSION ) then
+      set GMS_HPE_CRAY_COMP = gnu
+      if ( $?PE_ENV ) then
+         if ( $PE_ENV != "GNU") set LDR = gfortran
+      endif
+   endif
+
+   if ( $?NVIDIA_VERSION ) then
+      set GMS_HPE_CRAY_COMP = nvidia
+      if ( $?PE_ENV ) then
+         if ( $PE_ENV != "NVIDIA") set LDR = nvfortran
+      endif
+   endif
+
+   if ( $?AOCC_VERSION ) then
+      set GMS_HPE_CRAY_COMP = aocc
+      if ( $?PE_ENV ) then
+         if ( $PE_ENV != "AOCC") set LD = flang
+      endif
+   endif
+
+   if ( $?CRAY_AMD_COMPILER_VERSION ) then
+      set GMS_HPE_CRAY_COMP = rocm
+      if ( $?PE_ENV ) then
+         if ( $PE_ENV != "AMD") set FC = amdflang
+      endif
+   endif
+
+   # Previous Cray platforms there has been a need to also take into
+   # account the CPU target. We have found that $CRAY_CPU_TARGET is
+   # typically available when a PrgEnv is loaded. However, $CPU seems
+   # to always be avilable.
+   if  ( $?CRAY_CPU_TARGET ) then
+      set GMS_HPE_CRAY_ARCH = $CRAY_CPU_TARGET
+   else
+      set GMS_HPE_CRAY_ARCH = $CPU
+   endif
+
+   # Placeholder in case we need to handle things differently based on the compiler
+   switch ($GMS_HPE_CRAY_COMP)
+      case gnu:
+         set LDOPTS='-m64'
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -lgomp"
+         breaksw
+      case intel:
+         set LDOPTS='-i8'
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -qopenmp"
+         breaksw
+      case cray:
+         set LDOPTS='-s default64'
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -lcraymp"
+         breaksw
+      case nvidia:
+         set LDOPTS='-i8 -m64 -mcmodel=medium'
+         if ($GMS_OPENMP_OFFLOAD == true) then
+            set LDOPTS="$LDOPTS -mp=gpu -gpu=cc80,lineinfo -Minfo=mp,accel"
+            set LDOPTS="$LDOPTS -g -traceback"
+         else if ($GMS_OPENMP == true) then
+            set LDOPTS="$LDOPTS -mp -Minfo=mp"
+         endif
+         if ($GMS_MPI_LIB != craycs) set LDOPTS="$LDOPTS -lgfortran"
+         breaksw
+      case rocm:
+         set LDOPTS='-m64 -fdefault-integer-8'
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -fopenmp"
+         breaksw
+      default:
+         breaksw
+   endsw
+
+   # Placeholder in case we need to handle things differently based on the CPU architecture
+   switch ($GMS_HPE_CRAY_ARCH)
+      case x86-rome:
+      case x86_64:
+      default:
+         set LDOPTS = "$LDOPTS"
+         breaksw
+   endsw
+
+   # Linking Cray's math library
+   if ($GMS_HPC_SYSTEM_TARGET == perlmutter) then
+      if ($GMS_OPENMP == true) then
+         set MATHLIBS="-L$GMS_MATHLIB_PATH/lib -lsci_${GMS_HPE_CRAY_COMP}_mp"
+      else
+         set MATHLIBS="-L$GMS_MATHLIB_PATH/lib -lsci_${GMS_HPE_CRAY_COMP}"
+      endif
+   else
+      set MATHLIBS=""
+   endif
+
+   # Linking message passing libraries
+   if ( $?CRAY_MPICH_VERSION ) then
+      echo "Linking Cray MPICH libraries"
+      if ( "$CRAY_MPICH_PREFIX" =~ "$CRAY_MPICH_BASEDIR/amd"*    ) set MPILIBS="-L$CRAY_MPICH_PREFIX/lib -lmpi"
+      if ( "$CRAY_MPICH_PREFIX" =~ "$CRAY_MPICH_BASEDIR/aocc"*   ) set MPILIBS="-L$CRAY_MPICH_PREFIX/lib -lmpi"
+      if ( "$CRAY_MPICH_PREFIX" =~ "$CRAY_MPICH_BASEDIR/nvidia"* ) set MPILIBS="-L$CRAY_MPICH_PREFIX/lib -lmpi"
+      if ( "$CRAY_MPICH_PREFIX" =~ "$CRAY_MPICH_BASEDIR/gnu"*    ) set MPILIBS="-L$CRAY_MPICH_PREFIX/lib -lmpi"
+      if ( "$CRAY_MPICH_PREFIX" =~ "$CRAY_MPICH_BASEDIR/intel"*  ) set MPILIBS="-L$CRAY_MPICH_PREFIX/lib -lmpi"
+      if ( "$CRAY_MPICH_PREFIX" =~ "$CRAY_MPICH_BASEDIR/cray"*   ) set MPILIBS="-L$CRAY_MPICH_PREFIX/lib -lmpi"
+   else if ( $?MPT_VERSION ) then
+      echo "Linking SGI MPT libraries"
+      set MPILIBS="-L$MPI_ROOT/lib -lmpi"
+   else if ( $?I_MPI_ROOT ) then
+      echo "Linking Intel MPI libraries"
+      set MPILIBS="-L$I_MPI_ROOT/lib"
+      set MPILIBS="$MPILIBS -lmpifort -lrt"
+      set MPILIBS="$MPILIBS -L$I_MPI_ROOT/lib/release"
+      set MPILIBS="$MPILIBS -lmpi"
+   endif
+
+   # TODO: Linking other math libraries instead of using Cray's math library
+
+   set LIBRARIES="$MATHLIBS $MPILIBS"
+
+   if ($GMS_USE_HIPFORT == true) then
+      set ARCH=amdgcn
+      set LIBRARIES="${HIPFORT_HOME}/lib/libhipfort-${ARCH}.a -L${ROCM_PATH}/lib -lhipblas -lamdhip64 -Wl,-rpath=${ROCM_PATH}/lib ${LIBRARIES}"
+   endif
+
+   if ($USE_CUBLAS == true) then
+      if ($GMS_HPC_SYSTEM_TARGET == polaris) then
+         set LIBRARIES="-cudalib=cublas,cusolver ${LIBRARIES}"
+      else
+         set LIBRARIES="-L$CUDA_HOME/lib64 -cudalib=cublas,cusolver ${LIBRARIES}"
+      endif
+   endif
+endif
+
+#
+# Cray XT
+#
+if ($TARGET == cray-xt) then
+   #         this will be set to 'ftn' by the configuration step
+   set LDR=$GMS_FORTRAN
+
+   #         two choices not included in the configuration step
+   #         These must match 'comp' and 'compddi', and loaded software modules.
+   #            valid choices: intel, cray, pgi
+   set GMS_XT_COMP = 'pgi'
+   #            valid choices: i7, barcelona, shanghai, or blank
+   set GMS_XT_ARCH = ' '
+
+   set LDOPTS='-default64'
+
+   switch ($GMS_XT_COMP)
+      case pgi:
+         set LDOPTS="$LDOPTS -i8 -mcmodel=medium"
+         breaksw
+      case intel:
+      case cray:
+      default:
+         breaksw
+   endsw
+
+   switch ($GMS_XT_ARCH)
+      case barcelona:
+         set LDOPTS = "$LDOPTS -tp barcelona-64 -Mfpmisalign"
+         breaksw
+      case shanghai:
+         set LDOPTS = "$LDOPTS -tp shanghai-64 -Mfpmisalign"
+         breaksw
+      case i7:
+         set LDOPTS = "$LDOPTS -tp x64"
+         breaksw
+      default:
+         set LDOPTS = "$LDOPTS"
+         breaksw
+   endsw
+   set LIBRARIES="-L/cray/iss/park_bench/lib -lfpmpi64-cnl"
+   set LIBRARIES=" "
+   set LIBRARIES="$LIBRARIES -lhugetlbfs"
+   #
+   # ------------------------ -lfast_mv ------------------------------
+   # use -lfast_mv for faster evaluation of the exponential function.
+   # -lfast_mv must come after the objects, yet before -lm or -lacml
+   # performance improvement will vary.
+   # not used by default, since it is so far a non-standard module.
+   # ------------------------ -lfast_mv ------------------------------
+   #
+endif
+#
+#   Various IBM sections follow.
+#   To see length of common blocks and subroutine sizes,
+#     add "-Wl,-bmap:../lked.sizes" to LDOPTS.
+#   The following will pick out the huge common blocks:
+#          a) grep -i " cm " lked.sizes >& filtered
+#          b) vi filtered
+#             :%s/^/ /
+#             :wq     (pushes subroutine names above column72)
+#          c) strip72   (Mike's program on Si.FI)
+#               input=filtered
+#               output=stripped
+#          d) vi stripped
+#             :%s/^     //
+#             :wq    (no blanks in column 1)
+#          e) sort +1 -d stripped >& sorted
+#          f) keep only the end of 'sorted'
+#
+#   To avoid use of dynamic link libraries, if xlfrte is absent,
+#     add "-Wl,-bnso -Wl,-bI:/lib/syscalls.exp" to LDOPTS.
+#
+#   The fast math library from IBM is called ESSL:
+#   1. Power2 has a different ESSL name, -lessl2, which we don't
+#      any longer try to detect since few Power2 systems remain.
+#   2. If you don't have ESSL, a fallback is to remove the 32 bit
+#      wrapper hack in "comp" (search on DASUM), repeat compall,
+#      and set BLAS to "libblas64.a" and LIBRARIES to blank below.
+#
+if ($TARGET == ibm64) then
+   set LIBRARIES=""
+   set MATHLIBS="-L$GMS_MATHLIB_PATH/lib64 -lessl6464"
+   if ($GMS_OPENMP_OFFLOAD == true) then
+      if ($GMS_USE_HIPFORT == true) then
+         set MATHLIBS="${MATHLIBS}"
+      else
+         if ($GMS_FORTRAN == xlf) then
+            set MATHLIBS="${MATHLIBS} -L${CUDA_DIR}/lib64/ -lcublas -lcusolver"
+         endif
+         if ($GMS_FORTRAN == nvfortran) then
+            set MATHLIBS="${MATHLIBS} -L${CUDA_DIR}/lib64/ -cudalib=cublas,cusolver"
+         endif
+      endif
+   endif
+   if ($GMS_FORTRAN == xlf) then
+      set LDR='xlf_r'
+      if(`uname` == AIX) then
+         set LDOPTS="-bbigtoc -q64 -Wl,-m -Wl,-bloadmap:$GMS_BUILD_DIR/lked.map"
+      else
+         set LDOPTS="-L$GMS_XL_PATH/xlsmp/5.1.1/lib -lxlsmp -lgfortran -g -q64 -lxlf90_r -qintsize=8"
+
+      endif
+      if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -qsmp=omp"
+      if ($GMS_OPENMP_OFFLOAD == true) set LDOPTS="$LDOPTS -qoffload"
+   else if ($GMS_FORTRAN == nvfortran) then
+      set LDR="$GMS_FORTRAN"
+      set LDOPTS=''
+      set FORTLIBS=''
+      if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -mp"
+      if ($GMS_OPENMP_OFFLOAD == true) set LDOPTS="${LDOPTS} -fast -Minline -mp=gpu -DSETDEVICEID -Minfo=mp,accel -i8 -gpu=cc70"
+   else if ($GMS_FORTRAN == gfortran) then
+      set LDR='gfortran'
+      set LDOPTS=''
+      if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -fopenmp"
+   else if (($GMS_FORTRAN == pgfortran) || ($GMS_FORTRAN == pgf77)) then
+      set LDR="$GMS_FORTRAN"
+      set LDOPTS='-g77libs'
+      set FORTLIBS=''
+   else
+      echo "Un-addressed compiler option $GMS_FORTRAN under target $TARGET" >> /dev/stderr
+      exit 1
+   endif
+
+   set MATHLIBS="$MATHLIBS -L$GMS_XL_PATH/xlf/16.1.1/lib/ -lxlf90_r -lxlfmath"
+   # also adding in norm2 since XLF2008 doesn't support norm2 right now.
+   if ($GMS_FORTRAN == xlf) then
+      if ($GMS_OPENMP == true) then
+         set MATHLIBS="$MATHLIBS norm2.o"
+      endif
+   endif
+endif
+#
+# Cray XC
+#
+if ($TARGET == cray-xc) then
+   if ($GMS_HPC_SYSTEM_TARGET == cori) then
+      set FC = 'ftn'
+      #
+      if ( $?INTEL_VERSION ) then
+         set GMS_HPE_CRAY_COMP = intel
+         if ( $?PE_ENV ) then
+            if ( $PE_ENV != "INTEL") set FC = ifort
+         endif
+      endif
+      #
+      if ( $?GNU_VERSION ) then
+         set GMS_HPE_CRAY_COMP = gnu
+         if ( $?PE_ENV ) then
+            if ( $PE_ENV != "GNU") set FC = gfortran
+         endif
+      endif
+      #
+      if  ( $?CRAY_CPU_TARGET ) then
+         set GMS_HPE_CRAY_ARCH = $CRAY_CPU_TARGET
+      else
+         set GMS_HPE_CRAY_ARCH = $CPU
+      endif
+      #
+      set LDR=$FC
+      set MATHLIBS=""
+      set LDOPTS=""
+
+      # Placeholder in case we need to handle things differently based on the compiler
+      switch ($GMS_HPE_CRAY_COMP)
+         case intel:
+            if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -qopenmp"
+            set LIBRARIES=' '
+            set LDOPTS = "-i8 -mcmodel=medium $LDOPTS"
+            breaksw
+         case gnu:
+            if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -lgomp"
+            set LIBRARIES=' '
+            set LDOPTS = "$LDOPTS"
+            breaksw
+         default:
+            echo "Please spell your FORTRAN compiler name correctly." >> /dev/stderr
+            exit 4
+            breaksw
+      endsw
+
+      # Placeholder in case we need to handle things differently based on the CPU architecture
+      switch ($GMS_HPE_CRAY_ARCH)
+         case x86-rome:
+         case x86_64:
+         default:
+            set LDOPTS = "$LDOPTS"
+            breaksw
+      endsw
+
+      # Linking Cray's math library
+      set MATHLIBS="-L$GMS_MATHLIB_PATH/lib -lsci_$GMS_HPE_CRAY_COMP"
+
+      # Linking message passing libraries
+      if ( $?CRAY_MPICH2_VER ) then
+         echo "Linking Cray MPICH libraries"
+         set MATHLIBS="$MATHLIBS -lsci_${GMS_HPE_CRAY_COMP}_mpi"
+         set MPILIBS=""
+         if ( "$CRAY_MPICH2_DIR" =~ "$CRAY_MPICH_BASEDIR/mpich-gnu"*    ) set MPILIBS="-L$CRAY_MPICH2_DIR/lib -lmpich"
+         if ( "$CRAY_MPICH2_DIR" =~ "$CRAY_MPICH_BASEDIR/mpich-intel"*  ) set MPILIBS="-L$CRAY_MPICH2_DIR/lib -lmpichf90_intel"
+         if ( "$CRAY_MPICH2_DIR" =~ "$CRAY_MPICH_BASEDIR/mpich-cray"*   ) set MPILIBS="-L$CRAY_MPICH2_DIR/lib -lmpich"
+      endif
+      #
+      if ( $?I_MPI_ROOT ) then
+         set LDR=mpiifort
+         echo "Linking Intel MPI libraries"
+         set MPILIBS="-L$I_MPI_ROOT/lib"
+         set MPILIBS="$MPILIBS -lmpifort -lrt"
+         set MPILIBS="$MPILIBS -L$I_MPI_ROOT/lib/release"
+         set MPILIBS="$MPILIBS -lmpi"
+      endif
+
+      # TODO: Linking other math libraries instead of using Cray's math library
+
+      set LIBRARIES="$MATHLIBS $MPILIBS"
+
+   else
+      #         this will be set to 'ftn' by the configuration step
+      set LDR=$GMS_FORTRAN
+      set MATHLIBS=""
+      #
+      # Need to read these variables from config
+      set GMS_XC_COMP = 'intel'
+      set GMS_IFORT_VERNO = '16'
+      #
+      switch ($GMS_XC_COMP)
+         case intel:
+            if ( $?GMS_HPC_SYSTEM_TARGET ) then
+               if ( $GMS_HPC_SYSTEM_TARGET == onyx ) then
+                  if ($GMS_PHI == none) set LDOPTS='-i8 -xCORE-AVX2'
+                  if ($GMS_PHI == knl)  set LDOPTS='-i8 -xMIC-AVX512'
+               endif
+               #
+               if ( $GMS_HPC_SYSTEM_TARGET == theta ) then
+                  if ($GMS_PHI == knl) set LDOPTS='-i8 -xMIC-AVX512'
+               endif
+            endif
+            set LIBRARIES=' '
+            if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -qopenmp"
+            breaksw
+         default:
+            echo "Please spell your FORTRAN compiler name correctly." >> /dev/stderr
+            exit 4
+            breaksw
+      endsw
+   endif
+endif
+#
+#   ------ Fujitsu PrimeHPC on A64FX cpus -----
+#
+if ($TARGET == fj-a64fx) then
+   if (($GMS_DDI_COMM == mpi) || ($GMS_DDI_COMM == mixed)) then
+      switch ($GMS_FORTRAN)
+         case frt:
+            set LDR='mpifrt'
+            breaksw
+         case frtpx:
+            set LDR='mpifrtpx'
+            breaksw
+         default:
+            echo "don't know how to use a $TARGET compiler named $GMS_FORTRAN with $GMS_DDI_COMM"
+            exit 4
+            breaksw
+      endsw
+   else
+      set LDR=$GMS_FORTRAN
+   endif
+   if ($GMS_OPENMP == true) then
+      set LDOPTS="-Kopenmp"
+   else
+      set LDOPTS=' '
+   endif
+#   if ($GMS_MSUAUTO == true) set LDOPTS="$LDOPTS -Kcmodel=large"
+   set LIBRARIES=''
+#
+endif
+#
+#   Linux has become the standard Unix flavor, and thus blossomed into
+#   the usual Unix confusion: multiple FORTRAN compilers, multiple
+#   math libraries, and since there is no vendor, or even one main
+#   distribution, the software is installed at random locations.
+#   Hence, the 'config' script will have asked many questions to get the
+#   compiler, math library, version numbers, and appropriate path names.
+#
+#   ------ Linux on 64 bit chips -----
+#
+if ($TARGET == linux64) then
+   #
+   #  settings which depend on the FORTRAN:
+   #
+   switch ($GMS_FORTRAN)
+      case acfl:
+      case armflang:
+         set LDR='armflang'
+         set LDOPTS=' '
+         set FORTLIBS=' '
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -fopenmp"
+         breaksw
+      case aocc:
+         set LDR='flang'
+         set LDOPTS=' '
+         set FORTLIBS=' '
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -mp"
+         if ($GMS_HPC_SYSTEM_TARGET == nautilus) set LDOPTS="$LDOPTS -mp"
+         breaksw
+      case gfortran:
+         set LDR='gfortran'
+         set LDOPTS=' '
+         set FORTLIBS=' '
+         if ($GMS_OPENMP == true)    set LDOPTS="$LDOPTS -fopenmp"
+         breaksw
+      case flang-new:
+         set LDR='flang-new'
+         set LDOPTS=' '
+         set FORTLIBS=' '
+         if ($GMS_OPENMP == true)    set LDOPTS="$LDOPTS -fopenmp"
+         breaksw
+      case oneapi-ifort:
+      case ifort:
+         if ($GMS_DDI_COMM != sockets) then
+            if ($GMS_MPI_LIB == impi) then
+               set LDR='mpiifort'
+            else
+               set LDR='ifort'
+            endif
+         else
+             set LDR='ifort'
+         endif
+         set LDOPTS='-i8'  # -Wl,-M generates a load map
+         #            this auxiliary library seems to have disappeared in ifort 10
+         if (`uname` == Darwin) then
+            set FORTLIBS="-lm -ldl -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+         else
+            set FORTLIBS=' '
+         endif
+         #
+         if ($GMS_IFORT_VERNO < 10) set FORTLIBS='-Vaxlib'
+         if ($GMS_PHI == knl) then
+            set LDOPTS="$LDOPTS -xMIC-AVX512"
+         else if ($GMS_PHI == knc) then
+            set LDOPTS="$LDOPTS -mmic"
+         endif
+         if ($GMS_OPENMP == true) then
+            if ($GMS_IFORT_VERNO > 13) then
+               set LDOPTS="$LDOPTS -qopenmp"
+            else
+               set LDOPTS="$LDOPTS -openmp"
+            endif
+         endif
+         breaksw
+      case oneapi-ifx:
+         set LDR='ifx'
+         set LDOPTS='-i8'
+         if (`uname` == Darwin) then
+            set FORTLIBS="-lm -ldl -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+         else
+            set FORTLIBS=' '
+         endif
+         #
+         if ($GMS_OPENMP == true) then
+            set LDOPTS="$LDOPTS -fiopenmp -fopenmp-targets=spir64"
+         endif
+         breaksw
+      case nvfortran:
+         if ($GMS_MPI_LIB == hpcx) then
+            set LDR="mpifort"
+         else
+            set LDR="$GMS_FORTRAN"
+         endif
+         set LDOPTS="-i8 "
+         set FORTLIBS=' '
+         if ($GMS_OPENMP == true) set LDOPTS="$LDOPTS -mp"
+         if ($GMS_OPENMP_OFFLOAD == true) set LDOPTS="$LDOPTS -mp=gpu"
+         breaksw
+      case pgfortran:
+      case pgf77:
+         set LDR="$GMS_FORTRAN"
+         if ( `uname` == Darwin ) then
+            set LDOPTS="$GMS_LIN_FLAGS -i8               "
+         else
+            set LDOPTS="$GMS_LIN_FLAGS -i8 -mcmodel=medium"
+         endif
+         if ($GMS_L64_OPT == testing) then
+            set LDOPTS="$LDOPTS $GMS_PGI_OPT $GMS_IPA_OPT"
+         else
+            set LDOPTS="$LDOPTS -fastsse"
+         endif
+         set LDOPTS="$LDOPTS "
+         set FORTLIBS=' '
+         breaksw
+      default:
+         echo "don't know how to use a linux64 compiler named $GMS_FORTRAN" >> /dev/stderr
+         exit 4
+         breaksw
+   endsw
+   #
+   #  settings which depend on the math library: mkl, atlas, acml, none
+   #
+   switch ($GMS_MATHLIB)
+
+      case mkl:
+         set mpath=$GMS_MATHLIB_PATH
+         set mklver=$GMS_MKL_VERNO
+
+         if ($GMS_PHI != none) set mklver=${mklver}-so
+         switch ($mklver)
+            case 8:
+               set MATHLIBS="-L$mpath -lmkl_lapack64 -lmkl -lguide -lpthread"
+               breaksw
+            case 9:
+               set MATHLIBS="-L$mpath -lmkl_lapack   -lmkl -lguide -lpthread"
+               breaksw
+               breaksw
+            case 10:
+            case 11:
+            case 12:
+            case oneapi:
+               # next are a static link, in single-threaded mode (serial BLAS).
+               # The choices preclude any need to
+               #     a) install .so shared object libraries on every node,
+               #     b) define LD_LIBRARY_PATH to find the .so libraries, or
+               #     c) define MKL_NUM_THREADS=1
+               # If desired, there is a single-threaded shared object link below.
+               # Note, there's now a gfortran-specific compiler interface library.
+               set iflib=intel
+               if (($GMS_FORTRAN == gfortran) || ($GMS_FORTRAN == aocc)) set iflib=gf
+               set MATHLIBS="-Wl,--start-group"
+               set MATHLIBS="$MATHLIBS $mpath/libmkl_${iflib}_ilp64.a "
+               set MATHLIBS="$MATHLIBS $mpath/libmkl_core.a "
+               if ($GMS_THREADED_BLAS == true) then
+                  set MATHLIBS="$MATHLIBS $mpath/libmkl_gnu_thread.a "
+                  set MATHLIBS="$MATHLIBS -Wl,--end-group -lgomp"
+               else
+                  set MATHLIBS="$MATHLIBS $mpath/libmkl_sequential.a "
+                  set MATHLIBS="$MATHLIBS -Wl,--end-group"
+               endif
+               if (`uname` == Darwin) then
+                  set MATHLIBS="${MKLROOT}/lib/libmkl_intel_ilp64.a ${MKLROOT}/lib/libmkl_sequential.a ${MKLROOT}/lib/libmkl_core.a"
+               endif
+               if ($GMS_OPENMP == true) set MATHLIBS="$MATHLIBS -ldl"
+               if ($GMS_OPENMP_OFFLOAD == true) then
+                 set MATHLIBS="-fsycl ${MKLROOT}/lib/intel64/libmkl_sycl.a $MATHLIBS -lsycl -lOpenCL -lstdc++ -lpthread -lm"
+               endif
+               if (($GMS_FORTRAN == gfortran) || ($GMS_FORTRAN == aocc)) then
+                  set MATHLIBS="$MATHLIBS -ldl"
+               endif
+               breaksw
+            case 10-so:
+            case 11-so:
+            case 12-so:
+            case oneapi-so:
+               #  next one chooses dynamic linking (so= shared object libs)
+               #  Just hand edit GMS_MKL_VERNO in your 'install.info' to use this.
+               #  run-time libs (and LD_LIBRARY_PATH) needed on every compute node!
+               #  note that it does force single-threaded usage.
+               set iflib=intel
+               if (($GMS_FORTRAN == gfortran) || ($GMS_FORTRAN == aocc)) set iflib=gf
+                  set MATHLIBS="-L$mpath -lmkl_${iflib}_ilp64 -lmkl_sequential -lmkl_core"
+                  if ($GMS_VM2 == true ) set MATHLIBS=" $MATHLIBS -lmpi_ilp64 -lpthread -lm -ilp64"
+                  if (($GMS_FORTRAN == ifort) || ($GMS_FORTRAN =~ oneapi-*)) then
+                     if ($GMS_PHI != none) then
+                        # not necessarily right thing to do
+                        #                set MATHLIBS="-mkl"
+                     else if ($GMS_OPENMP == true) then
+                        set MATHLIBS="-mkl"
+                     endif
+                  endif
+                  if (($GMS_FORTRAN == gfortran) || ($GMS_FORTRAN == aocc)) then
+                     if ($GMS_PHI == knc) then
+                        echo "INVALID OPTION: GMS_FORTRAN=gfortran AND GMS_PHI=knc" >> /dev/stderr
+                        exit 4
+                     else if ($GMS_OPENMP == true) then
+                        set MATHLIBS="-Wl,--no-as-needed -L$mpath -lmkl_${iflib}_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lm -ldl"
+                     endif
+                  endif
+               breaksw
+            default:
+               echo "unknown version number for MKL/linux64" >> /dev/stderr
+               echo "please edit 'lked' to select the right 64 bit MKL libraries." >> /dev/stderr
+               exit
+               breaksw
+         endsw
+         breaksw
+
+      case atlas:
+         #     If the ATLAS comes with static libraries, link to them,
+         #     so that only the compile node has to have the libraries.
+         #     Otherwise, attempt a link against shared object libs.
+         #     Alas, recent RPMs for Atlas have only .so libraries.
+         #
+         #     Most RPM versions of Atlas come w/o proper setup to use them.
+         #     For example, your 'root' account should probably do the
+         #     following soft links:
+         #          chdir /usr/lib64/atlas
+         #          ln -s libatlas.so.3.0        libatlas.so
+         #          ln -s libblas.so.3.0         libblas.so
+         #          ln -s libcblas.so.3.0        libcblas.so
+         #          ln -s libf77blas.so.3.0      libf77blas.so
+         #          ln -s liblapack_atlas.so.3.0 liblapack.so
+         #          ln -s liblapack.so.3.0       liblapack.so
+         #     It is strange the RPM's don't do these soft links for us.
+         if (-e $GMS_MATHLIB_PATH/lib/libf77blas.a) then
+            echo "case 1 $GMS_MATHLIB_PATH"
+            set MATHLIBS="$GMS_MATHLIB_PATH/lib/libf77blas.a"
+            set MATHLIBS="$MATHLIBS $GMS_MATHLIB_PATH/lib/libatlas.a"
+            set MATHLIBS="$MATHLIBS $GMS_MATHLIB_PATH/lib/libcblas.a"
+         else
+            echo "case 2 $GMS_MATHLIB_PATH"
+            set MATHLIBS="-L$GMS_MATHLIB_PATH -lf77blas -latlas"
+         endif
+
+         breaksw
+      case atlas-so:
+         set MATHLIBS="-L$GMS_MATHLIB_PATH/lib -lf77blas -latlas"
+
+         breaksw
+      case acml:
+         #     do a static link so that only compile node needs to install ACML
+         set MATHLIBS="$GMS_MATHLIB_PATH/libacml.a"
+         #     if you want to try a dynamic link, use this:
+         #---set MATHLIBS="-L$GMS_MATHLIB_PATH -lacml -lacml_mv"
+         breaksw
+
+      case nvblas:
+         set MATHLIBS=""
+         set MATHLIBS="${MATHLIBS} -L$GMS_MATHLIB_PATH -lblas_ilp64 -llapack_ilp64"
+         breaksw
+
+      case pgiblas:
+         # As of PGI 19.10, pgiblas must be linked with -fopenmp.
+         # This would suggest that the threaded version of OpenBLAS is being
+         # used.
+         set MATHLIBS=""
+
+         if ((-e $GMS_MATHLIB_PATH/libblas.a) ) then
+            set MATHLIBS="${MATHLIBS} $GMS_MATHLIB_PATH/libblas.a"
+         else
+            set MATHLIBS="${MATHLIBS} -L$GMS_MATHLIB_PATH -lblas"
+         endif
+
+         if (($GMS_OPENMP == false) && ($GMS_FORTRAN == gfortran)) set MATHLIBS="${MATHLIBS} -fopenmp"
+
+         breaksw
+
+      case openblas:
+         set MATHLIBS=""
+
+            if (-e $GMS_MATHLIB_PATH/libopenblas64.a) then
+               set openblaslib=$GMS_MATHLIB_PATH/libopenblas64.a
+            else if (-e $GMS_MATHLIB_PATH/libopenblas.a) then
+               set openblaslib=$GMS_MATHLIB_PATH/libopenblas.a
+            else
+               echo "The directory $GMS_MATHLIB_PATH does not contain either libopenblas64.a or libopenblas.a" >> /dev/stderr
+               exit 4
+            endif
+            switch ($GMS_FORTRAN)
+               case gfortran:
+                  echo " "
+                  echo "Checking whether $openblaslib uses 64-bit integers."
+                  echo " "
+
+                  set echo
+                  $GMS_FORTRAN -fdefault-integer-8 -finit-integer=-9223372036854775808 -fopenmp $GMS_PATH/tools/test_dgesv.f90 $openblaslib -o $GMS_BUILD_DIR/test_dgesv
+                  $GMS_BUILD_DIR/test_dgesv
+                  set rc=$status
+                  unset echo
+
+                  if ($rc != 0) then
+                     echo "Could not verify that $openblaslib uses 64-bit integers." >> /dev/stderr
+                     exit 4
+                  endif
+
+                  rm $GMS_BUILD_DIR/test_dgesv
+                  unset rc
+                  breaksw
+               case aocc:
+                  # Needed if OpenBLAS was compiled with GNU
+                  set MATHLIBS="$MATHLIBS -lgfortran"
+                  breaksw
+               default:
+                  breaksw
+            endsw
+            set MATHLIBS="${MATHLIBS} $openblaslib"
+            unset openblaslib
+
+         if ($GMS_FORTRAN == nvfortran) set MATHLIBS="${MATHLIBS} -lgfortran"
+         breaksw
+      case openblas-so:
+         set MATHLIBS="-L$GMS_MATHLIB_PATH -lopenblas"
+         breaksw
+
+      case aocl:
+         if ($GMS_THREADED_BLAS == true) then
+            if (-f $GMS_MATHLIB_PATH/libblis-mt.a) then
+               set MATHLIBS="-L$GMS_MATHLIB_PATH -lblis-mt"
+            endif
+         else
+            if (-f $GMS_MATHLIB_PATH/libblis.a) then
+               set MATHLIBS="-L$GMS_MATHLIB_PATH -lblis"
+            endif
+         endif
+         set MATHLIBS="$MATHLIBS -L$GMS_AMD_FLAME_PATH -lflame"
+         breaksw
+
+      case armpl:
+         # note that we link the 64-bit version!
+         set LAPACK=""
+         if (-e $GMS_MATHLIB_PATH/libarmpl_lp64.a) then
+            set MATHLIBS="$GMS_MATHLIB_PATH/libarmpl_ilp64.a -lrt"
+         else
+            set MATHLIBS="-L$GMS_MATHLIB_PATH -larmpl_ilp64"
+         endif
+         breaksw
+
+      case nvpl:
+         set LAPACK=""
+         set MATHLIBS="-L$GMS_MATHLIB_PATH -lnvpl_blas_lp64_seq -lnvpl_lapack_ilp64_seq"
+         breaksw
+
+      case none:
+      default:
+         echo "Warning.  No math library was found, you should install one."
+         echo "    MP2 calculations speed up about 2x with a math library."
+         echo "CCSD(T) calculations speed up about 5x with a math library."
+         set MATHLIBS="$GMS_PATH/3rd-party/lib/libblas64.a"
+         breaksw
+   endsw
+   #
+   if ($GMS_OPENMP_OFFLOAD == true) then
+      if ($USE_CUBLAS == true) then
+         if ($?NVBLAS_ROOT) then
+            set MATHLIBS="${MATHLIBS} -L$NVBLAS_ROOT/lib64 -cudalib=cublas,cusolver"
+         endif
+         if ($?CUDA_HOME) then
+            set MATHLIBS="${MATHLIBS} -L$CUDA_HOME/lib64 -cudalib=cublas,cusolver"
+         endif
+      endif
+   endif
+   #
+   set LIBRARIES="$FORTLIBS $MATHLIBS"
+   #
+endif
+#
+#      MacIntosh
+#
+#      The incantation to link to Apple's BLAS library is rather strange.
+#      The math library is Apple's veclib framework,
+#      which is part of a larger framework called Accelerate.
+#
+#      Older sytems may need to link against the "SystemStubs library"
+#      Even older systems (e.g. 10.3) may need this changed to -lcc_dynamic
+#
+if ($TARGET == mac64) then
+   set LDR=$GMS_FORTRAN
+   set MATHLIBS=""
+   if ($GMS_MAC_OSX_VERNO == 11) then
+      set LDOPTS=''
+   else
+      set LDOPTS='-m64'
+   endif
+   switch ($GMS_MAC_OSX_VERNO)
+      #     the Accelerate framework is the new standard
+      case 10.8:
+      case 10.9:
+      case 10.10:
+      case 10.11:
+      case 10.12:
+      case 10.13:
+      case 10.14:
+      case 10.15:
+      case 11.0:
+      case 11.1:
+      case 11.2:
+      case 11:
+         set LIBRARIES='-Wl,-framework -Wl,Accelerate'
+      breaksw
+   endsw
+endif
+#
+#   ------ Windows on 64 bit chips -----
+#
+if ($TARGET == win64) then
+   #
+   #  settings which depend on the FORTRAN: pgfortran, ifort
+   #
+   #  WS2_32.Lib is needed for WinSock
+   #
+   set LIBRARIES="WS2_32.lib"
+   #
+   switch ($GMS_FORTRAN)
+      case oneapi-ifort:
+      case oneapi-ifx:
+      case ifort:
+         if ($GMS_FORTRAN == oneapi-ifx) then
+            set LDR = "ifx"
+         else
+            set LDR = "ifort"
+         endif
+         set EXTRA_LINK_FLAGS="-Qlocation,link,$VCToolsInstallDir/bin/Hostx64/x64"
+         set LDOPTS="$GMS_WIN_TP -integer-size:64 -Qzero"
+         if ($GMS_WIN_OPT == baseline)        set LDOPTS="$LDOPTS -Od $GMS_WIN_FLAGS"
+         if ($GMS_WIN_OPT == linux)           set LDOPTS="$LDOPTS -O2 $GMS_WIN_FLAGS"
+         if ($GMS_WIN_OPT == samara)          set LDOPTS="$LDOPTS -O3 $GMS_WIN_FLAGS"
+         if ($GMS_WIN_OPT == fast)            set LDOPTS="$LDOPTS -fast $GMS_WIN_FLAGS"
+         if ($GMS_WIN_OPT == testing)         set LDOPTS="$LDOPTS $GMS_INT_OPT $GMS_IPO_OPT $GMS_WIN_FLAGS"
+         breaksw
+      case pgfortran:
+         set LDR = "$GMS_FORTRAN"
+         set LDOPTS="$GMS_WIN_FLAGS -m64 -i8 -Bstatic"
+         if ($GMS_WIN_OPT == baseline)        set LDOPTS="$LDOPTS -O0                             $GMS_WIN_TP"
+         #     if ($GMS_WIN_OPT == linux)           set LDOPTS="$LDOPTS -fastsse -Mipa=fast,safe        $GMS_WIN_TP"
+         if ($GMS_WIN_OPT == linux)           set LDOPTS="$LDOPTS -fastsse                        $GMS_WIN_TP"
+         #     if ($GMS_WIN_OPT == samara)          set LDOPTS="$LDOPTS -O3      -Mipa=fast,safe        $GMS_WIN_TP"
+         if ($GMS_WIN_OPT == samara)          set LDOPTS="$LDOPTS -O3                             $GMS_WIN_TP"
+         #     if ($GMS_WIN_OPT == fast)            set LDOPTS="$LDOPTS -fastsse -Mipa=fast,inline,safe $GMS_WIN_TP"
+         if ($GMS_WIN_OPT == fast)            set LDOPTS="$LDOPTS -fastsse                        $GMS_WIN_TP"
+         if ($GMS_WIN_OPT == testing)         set LDOPTS="$LDOPTS $GMS_PGI_OPT $GMS_IPA_OPT       $GMS_WIN_TP"
+         #
+         #     For more detailed information as to which flags are being used
+         #     by the compiler during the build - uncomment the line below.
+         #
+         #     set LDOPTS="$LDOPTS -v"
+         #
+         if ($GMS_OPENMP == true) then
+            set LDOPTS="$LDOPTS -mp"
+         endif
+         breaksw
+      default:
+      echo "Please spell your win64 compiler correctly." >> /dev/stderr
+         exit 4
+         breaksw
+   endsw
+   #
+   #  settings which depend on the math library: mkl, acml, blas, none
+   #
+   switch ($GMS_MATHLIB)
+      case mkl:
+         if ($GMS_FORTRAN == pgfortran) then
+            set GMS_MATHLIB_DOSPATH=`cygpath -d $GMS_MATHLIB_PATH:q`
+            set MATHLIBS="-Wl,-libpath:$GMS_MATHLIB_DOSPATH:q mkl_intel_ilp64.lib mkl_sequential.lib mkl_core.lib"
+            #set MATHLIBS="-Wl,-libpath:$GMS_MATHLIB_DOSPATH:q mkl_blas95_ilp64.lib mkl_intel_ilp64.lib mkl_sequential.lib mkl_core.lib"
+            echo "Using Intel's MKL libraries: $LIBRARIES"
+         endif
+         if ($GMS_FORTRAN == ifort) then
+            set MATHLIBS="mkl_blas95_ilp64.lib mkl_intel_ilp64.lib mkl_sequential.lib mkl_core.lib"
+            echo "Using Intel's MKL libraries: $LIBRARIES"
+         endif
+         if ($GMS_FORTRAN == oneapi-ifort) then
+            set MATHLIBS="mkl_scalapack_ilp64.lib mkl_intel_ilp64.lib mkl_sequential.lib mkl_core.lib mkl_blacs_intelmpi_ilp64.lib impi.lib"
+            echo "Using Intel's MKL libraries: $LIBRARIES"
+         endif
+         if ($GMS_FORTRAN == oneapi-ifx) then
+            set MATHLIBS="mkl_blas95_ilp64.lib mkl_intel_ilp64.lib mkl_sequential.lib mkl_core.lib"
+            set BLAS=' '
+            echo "Using Intel's MKL libraries: $LIBRARIES"
+         endif
+         breaksw
+      case acml:
+         if ($GMS_FORTRAN == pgfortran) then
+            set MATHLIBS="-Bdynamic -Macml"
+            echo "Using ACML blas libraries"
+         endif
+         if ($GMS_FORTRAN == ifort) then
+            set MATHLIBS="$GMS_MATHLIB_PATH:q libacml.lib"
+            echo "Using ACML blas libraries"
+         endif
+         breaksw
+      case blas:
+         if ($GMS_FORTRAN == pgfortran) then
+            set MATHLIBS="-Bstatic -lblas"
+            echo "Using PGI's 64-bit blas"
+         else if ($GMS_FORTRAN == ifort) then
+            set MATHLIBS="$GMS_MATHLIB_PATH:q libblas.lib"
+            echo "Using PGI's 64-bit blas"
+         endif
+         breaksw
+      case none:
+      default:
+         echo "Using Netlib BLAS and LAPACK libraries"
+         set MATHLIBS="$GMS_PATH/3rd-party/lib/libblas64.a"
+         breaksw
+   endsw
+   #
+endif
+#
+#   Choose the message passing libraries, MSG_LIBRARIES.
+#   ====================================================
+#
+#      In all cases, the Distributed Data Interface has been
+#      compiled to a library archive, with the name ../ddi/libddi.a,
+#      where we must look first.  Depending on the machine DDI has
+#      several implementations and may be looking for
+#         TCP/IP sockets, SHMEM, MPI, or LAPI/MPI
+#      so here we select the specific low level system libraries.
+#
+switch ($TARGET)
+   #             TCP/IP sockets interface (most systems)
+   case fj-a64fx:
+   case ibm64:
+   case linux64:
+   case mac64:
+      #
+      #                   set up Spectrum MPI usage on 64-bit IBM clusters.
+      set MPILIBS=''
+      if ($TARGET == ibm64) then
+         set MPILIBS="-L$GMS_MPI_PATH/lib -L/usr/lib -L/usr/lib64"
+         #set MPILIBS="$MPILIBS -lmpi_ibm_usempi -lmpi_ibm_mpifh -lmpi_ibm -lgfortran"
+         #set MPILIBS="$MPILIBS -pthread -lmpiprofilesupport -lmpi_ibm_mpifh  -lmpi_ibm -libverbs"
+         if ($GMS_HPC_SYSTEM_TARGET == generic) then
+            set MPILIBS="$MPILIBS -lmpiprofilesupport -lmpi_mpifh  -lmpi_ibm -libverbs"
+         else if (($GMS_HPC_SYSTEM_TARGET == summit) || ($GMS_HPC_SYSTEM_TARGET == hokulea)) then
+            set MPILIBS="$MPILIBS -lmpiprofilesupport -lmpi_ibm_mpifh  -lmpi_ibm -libverbs"
+         endif
+      endif
+      #                   set up MPI usage on 64-bit linux clusters.
+      if (($TARGET == fj-a64fx) && (($GMS_DDI_COMM == mpi) || ($GMS_DDI_COMM == mixed))) then
+         switch ($GMS_MPI_LIB)
+            case fj-mpi:
+#              Fujitsu MPI is based on OpenMPI so all flags are similar to linux64/openmpi case
+
+                  set MPILIBS="-L$GMS_MPI_PATH/lib64"
+                  set MPILIBS="$MPILIBS -lmpi"
+
+               breaksw
+            default:
+               echo "lked script has unknown MPI software requested" >> /dev/stderr
+               exit 4
+               breaksw
+         endsw
+      endif
+      if (($TARGET == linux64) && (($GMS_DDI_COMM == mpi) || ($GMS_DDI_COMM == mixed))) then
+         switch ($GMS_MPI_LIB)
+            case impi:
+               if ($GMS_PHI == knc) set MPILIBS="-L$GMS_MPI_PATH/mic/lib"
+               if ( -d $GMS_MPI_PATH/lib64 ) then
+                  #
+                  # Pre-2019 Intel directory structure for MPI includes
+                  #
+                  set MPILIBS="-L$GMS_MPI_PATH/lib64"
+                  set MPILIBS="$MPILIBS -lmpi -lmpigf -lmpigi -lrt"
+               else if (-d $GMS_MPI_PATH/intel64/lib) then
+                  #
+                  # 2019 Intel directory structure for MPI includes
+                  #
+                  set MPILIBS="-L$GMS_MPI_PATH/intel64/lib"
+                  set MPILIBS="$MPILIBS -lmpifort -lrt"
+                  set MPILIBS="$MPILIBS -L$GMS_MPI_PATH/intel64/lib/release"
+                  set MPILIBS="$MPILIBS -lmpi "
+               else if (-d $GMS_MPI_PATH/lib) then
+                  set MPILIBS="-L$GMS_MPI_PATH/lib"
+                  set MPILIBS="$MPILIBS -lmpifort -lrt"
+                  set MPILIBS="$MPILIBS -L$GMS_MPI_PATH/lib/release"
+                  set MPILIBS="$MPILIBS -lmpi "
+               else
+                  echo "Intel MPI library not found!" >> /dev/stderr
+                  exit 4
+               endif
+
+               breaksw
+            case spectrum:
+               set MPILIBS="-L$GMS_MPI_PATH/lib -L/usr/lib -L/usr/lib64"
+               #set MPILIBS="$MPILIBS -lmpi_ibm_usempi -lmpi_ibm_mpifh -lmpi_ibm -lgfortran"
+               set MPILIBS="$MPILIBS -pthread -lmpiprofilesupport -lmpi_ibm_mpifh  -lmpi_ibm -libverbs"
+               breaksw
+            case mpich:
+            case mpich2:
+               set MPILIBS="-L$GMS_MPI_PATH/lib"
+               if ( `uname` == Darwin ) then
+                  set MPILIBS="$MPILIBS -lmpi -lmpl -lmpich     "
+               else
+                  set MPILIBS="$MPILIBS -lmpi -lmpl -lmpich -lmpifort -lrt"
+               endif
+               breaksw
+            case mvapich:
+            case mvapich2:
+               switch ($GMS_MPI_SOFTWARE_VERNO)
+                  #
+                  #                    early versions needed the user to specify three
+                  #                    basic libraries from MVAPICH2, and to follow that
+                  #                    up with explicit OFED libraries.
+                  #                    These are a bit tricky, being both a function of the
+                  #                    Infiniband type, and to at least some extent, maybe
+                  #                    also the MVAPICH2 version.
+                  #                    E-mail us if you have trouble with MVAPICH2 linking!
+                  case 1.4:
+                  case 1.5:
+                  case 1.6:
+                  case 1.7:
+                  case 1.8:
+                  case 1.9:
+                     #                          several of our older clusters allow a static link
+                     set MPILIBS="$GMS_MPI_PATH/lib/libmpich.a"
+                     set MPILIBS="$MPILIBS $GMS_MPI_PATH/lib/libopa.a"
+                     set MPILIBS="$MPILIBS $GMS_MPI_PATH/lib/libmpl.a"
+                     #                          but you can try a .so link if you like:
+                     #--set MPILIBS="-L$GMS_MPI_PATH/lib -lmpich -lopa -lmpl"
+                     #
+                     #                   QLogic Infiniband likes to look at its
+                     #                   its "path scale messaging" PSM library.
+                     #                   Mellanux Infiniband does not need this library,
+                     #                   and it can be an error to name if non-existent.
+                     #
+                     if (-e /usr/lib64/libpsm_infinipath.so) then
+                        set MPILIBS="$MPILIBS -L/usr/lib64 -lpsm_infinipath"
+                     endif
+                     #
+                     #                   Append OFED's libs to the end of the MVAPICH2 list,
+                     #                   one particular cluster needed to look into -libnetdisc.
+                     #                   Finally, allow it to peek into the runtime/thread libs
+                     #
+                     set OFEDLIST="-libverbs -lrdmacm -libumad"
+                     if (-e $GMS_OFED_PATH/libibnetdisc.so ) then
+                        set OFEDLIST="$OFEDLIST -libnetdisc"
+                     endif
+                     set MPILIBS="$MPILIBS -L$GMS_OFED_PATH $OFEDLIST"
+                     set MPILIBS="$MPILIBS -lrt -lpthread"
+                     breaksw
+                     #
+                     #                       as of version 2.0, MVAPICH2 seems to have a simple
+                     #                       link list, just its own two libs.  It then finds
+                     #                       the requisite OFED libraries all on its own.
+                     #                       On our 2.1 cluster, DDI linked to various libs:
+                     #                           xml2, ibmad, rdmacm, ibumad, ibverbs, rt
+                     #                       without any need to specify them here.
+                  case 2.0:
+                  case 2.1:
+                  case 2.3.7-*:
+                  default:
+                     set MPILIBS="-L$GMS_MPI_PATH/lib -lmpifort -lmpi"
+                     set MPILIBS="$MPILIBS -lpthread"
+                     breaksw
+               endsw
+               breaksw
+            case hpcx:
+            case openmpi:
+
+                  if ( -d $GMS_MPI_PATH/lib64 ) then
+                     set MPILIBS="-L$GMS_MPI_PATH/lib64"
+                  else
+                     set MPILIBS="-L$GMS_MPI_PATH/lib"
+                  endif
+                  set MPILIBS="$MPILIBS -lmpi"
+                  if (($GMS_OPENMP == true) && ($GMS_FORTRAN == nvfortran)) set MPILIBS="$MPILIBS -lopen-pal -lopen-rte"
+
+               breaksw
+            case mpt:
+               set MPILIBS="-L$GMS_MPI_PATH/lib"
+               set MPILIBS="$MPILIBS -lmpi"
+               breaksw
+            case myrinet:
+               # very old information, perhaps not correct anymore.
+               set MPILIBS="/usr/local/mpich-gm/lib/libmpich.a"
+               set MPILIBS="$MPILIBS /usr/local/gm/lib/libgm.a"
+               breaksw
+            default:
+               echo "comp script has unknown MPI software requested" >> /dev/stderr
+               exit 4
+               breaksw
+         endsw
+      endif
+      #
+      #         plain old TCP/IP will have initialized MPILIBS as empty string
+      if ($GMS_DDI_COMM =~ serial*) then
+         set MSG_LIBRARIES="serial.o -lpthread"
+      else
+         set MSG_LIBRARIES="$GMS_BUILD_DIR/ddi/libddi.a $MPILIBS -lpthread"
+      endif
+      #
+      #         On linux (and possibly other systems) librt is needed for POSIX mem
+      if (("$GMS_SHMTYPE" == posix) && ($TARGET == linux64)) then
+         set MSG_LIBRARIES="$MSG_LIBRARIES -lrt"
+      endif
+      breaksw
+      #
+      #               MPI interface, for entire HPE Cray EX product line
+   case hpe-cray-cs:
+   case hpe-cray-ex:
+   case hpe-apollo:
+      set MSG_LIBRARIES="$GMS_BUILD_DIR/ddi/libddi.a"
+      breaksw
+      #
+      #               MPI interface, for entire XT product line
+   case cray-xt:
+      set MSG_LIBRARIES="$GMS_BUILD_DIR/ddi/libddi.a"
+      breaksw
+      #
+      #               MPI interface, for XC product line
+   case cray-xc:
+      set MSG_LIBRARIES="$GMS_BUILD_DIR/ddi/libddi.a"
+      breaksw
+      #
+      #               Microsoft Windows systems uses MPI (MS-MPI or IMPI)
+   case win64:
+      #
+      #     Use Microsoft MPI implementation (MS-MPI)
+      #
+      #     This flag only works with PGI compilers. Any other compiler will
+      #     have to specify the actual location of the MS-MPI libraries.
+      #
+      if (($GMS_MPI_LIB == msmpi) && \
+         ($GMS_FORTRAN == pgfortran)) set MPILIBS="-Mmpi=msmpi"
+      if (($GMS_MPI_LIB == msmpi) && ($GMS_FORTRAN == ifort || $GMS_FORTRAN == oneapi-ifort || $GMS_FORTRAN == oneapi-ifx)) then
+         set MPILIBS=""
+         if (! $?MSMPI_LIB64) then
+            echo "Set MSMPI_LIB64 to the directory containing the MS MPI library and try again" >&2
+            exit 1
+         endif
+         set EXTRA_MPI_LIB_FLAGS=`cygpath -d "$MSMPI_LIB64/msmpi.lib"`
+      endif
+      #
+      #     Use Intel MPI implementation (IMPI)
+      #
+      if ($GMS_MPI_LIB == impi) then
+         if ($TARGET == win64) set MPILIBS="$GMS_MPI_PATH""lib\release\impi.lib"
+      endif
+      #
+      set C_LIBDDI_PATH=`cygpath -d "$GMS_BUILD_DIR/ddi/libddi.a"`
+      set MSG_LIBRARIES="$C_LIBDDI_PATH $MPILIBS $EXTRA_MPI_LIB_FLAGS"
+      breaksw
+   #               to get here must be a target typo.
+   default:
+      echo The lked script does not select a correct TARGET machine type. >> /dev/stderr
+      echo What you typed when editing this script was $TARGET >> /dev/stderr
+      exit 4
+      breaksw
+endsw
+#
+#         It might at some times be convenient to run in serial, such
+#         as porting to a new machine, when you might want to divide
+#         the process of understanding new compiler/math libraries,
+#         from understanding a new MPI.  "./comp serial" to compile
+#         a file which is purely serial, then uncomment the next line.
+#---set MSG_LIBRARIES=serial.o
+#
+#     Final setup for linking
+#     =======================
+#
+unset echo
+set STANDARD_GAMESS_OBJ1=(aambs.o  aldeci.o algnci.o \
+                          basccn.o basecp.o basext.o basg3l.o bashuz.o bashz2.o baskar.o  \
+                          basminix.o basn21.o basn31.o baspcn.o basg3x.o bassto.o  \
+                          casino.o ccaux.o  ccddi.o  ccqaux.o ccquad.o ccsdt.o   \
+                          ceeis.o  cepa.o   cnglob.o \
+                          chgpen.o cimf.o   ciminf.o cimi.o   cimlib.o cimsub.o  \
+                          cisgrd.o comp.o   cosmo.o  cosprt.o cphf.o   cpmchf.o cprohf.o  cphf_tddnlr.o \
+                          cpuhf.o  dccc.o   dcgrd.o  dcgues.o dcint2.o dclib.o  dcmp2.o   \
+                          dcscf.o  dctran.o ddilib.o delocl.o demrpt.o dft.o    dftaux.o  \
+                          dftbfo.o dftbgr.o dftbhs.o dftblb.o dftbpb.o dftbsk.o dftbtd.o dftbx.o \
+                          dftdis.o dftfun.o dftgrd.o dftint.o  \
+                          dftxca.o dftxcb.o dftxcc.o dftxcd.o dftxce.o dftxcf.o dftxcg.o  \
+                          diab.o   dmulti.o drc.o     \
+                          eaipcc.o ecp.o    ecpder.o ecplib.o ecppot.o  \
+                          efpmodule.o \
+                          efchtr.o efdrvr.o efelec.o efgrd2.o efgrda.o efgrdb.o efgrdc.o  \
+                          efinp.o  efinta.o efintb.o efmo.o efmograd.o efmograd_es.o \
+                          efmograd_exrep.o efmograd_disp.o efmograd_pol.o  efpaul.o efpcm.o  \
+                          efpcov.o efpfmo.o eftei.o eftei_genr70.o eftei_genr03.o eftei_eric.o  \
+                          eigen.o  elglib.o elgloc.o elgscf.o eomcc.o  ewald.o  excorr.o  \
+                          ffield.o fmo.o    fmoafo.o fmocp.o  fmoesd.o fmogrd.o fmoh1a.o fmoh2a.o \
+                          fmoh2b.o fmoh2c.o fmohss.o fmoint.o  \
+                          fmoio.o  fmolib.o fmomm.o  fmopbc.o fmoprp.o )
+set STANDARD_GAMESS_OBJ2=(frfmt.o  fsodci.o  \
+                          g3.o     globop.o gmcpt.o  gradex.o guess.o   \
+                          grd1.o   grd2a.o  grd2b.o  grd2c.o   \
+                          gugdga.o gugdgb.o gugdm.o  gugdm2.o gugdrt.o gugem.o  gugsrt.o  \
+                          gvb.o    hess.o   hss1a.o  hss1b.o  hss1c.o  hss2a.o  hss2b.o   \
+                          hss2c.o  inputa.o inputb.o inputc.o  \
+                          int1.o   int2a.o  int2b.o  int2c.o  int2d.o  int2f.o  int2g.o   \
+                          int2r.o  int2s.o   \
+                          iolib.o  ivocas.o  \
+                          lagran.o local.o  locatd.o loccd.o  locpol.o locsvd.o  \
+                          lrd.o    lut.o    mod_lutiotc.o  \
+                          modmcpdft.o mcpdft.o mcpgrd.o mcpinp.o mcpint.o \
+                          mcpl10.o mcpl20.o mcpl30.o mcpl40.o  \
+                          mcpl50.o mcpl60.o mcpl70.o mcpl80.o  \
+                          mccas.o  mcjac.o  mcqdpt.o mcqdwt.o mcqud.o  mcscf.o  mctwo.o   mctwo-defensive.o \
+                          mdefp.o  mexing.o mltfmo.o mm23.o   modmnfun.o mod_offload.o  \
+                          modcc.o morokm.o mnsol.o   \
+                          mp2.o    mp2ddi.o mp2grd.o mp2grd-defensive.o mp2gr2.o mp2ims.o mod_sformas.o  \
+                          mpcdat.o mpcdatpm6.o mpcgrd.o mpchbond.o mpcint.o mpcmol.o mpcmsc.o  \
+                          mpcpcm.o mrsf.o   mthlib.o nameio.o nebpath.o namd.o nmr.o )
+set STANDARD_GAMESS_OBJ3=(optcix.o ordint.o ormas1.o ormpt2.o \
+                          parley.o pcm.o    pcmcav.o pcmcv2.o pcmder.o  \
+                          pcmdis.o pcmhss.o pcmief.o pcmpol.o pcmvch.o  \
+                          prpamm.o prpel.o  prplib.o prppop.o  \
+                          qeigen.o qfmm.o   qmfm.o   qrel.o   \
+                          quanpoa.o quanpoa_1.o quanpob.o quanpoc.o quanpod.o quanpoe.o quanpof.o \
+                          raman.o  reks.o   reorg.o  rhfuhf.o ricab.o  \
+                          riint.o  rimp2.o  rimp2_1.o rimp2omp.o rimp2grd.o rimp2gpu.o \
+                          rmd.o    rmddat.o rmdgen.o rmdwrk.o rmdrun.o \
+                          roeom.o  rohfcc.o rxncrd.o ryspol.o  \
+                          scflib.o scfmi.o  scrf.o   secor.o  sfdft.o  sfgrad.o  \
+                          sobrt.o  soffac.o solib.o  sozeff.o  \
+                          statpt.o hrmrst.o surf.o   svpchg.o svpinp.o svpleb.o  \
+                          symhi.o  symorb.o symslc.o  \
+                          tddft.o  tduprp.o tddefp.o tddfun.o tddfxc.o tddgrd.o tddint.o tddnlr.o  \
+                          tddxca.o tddxcc.o \
+                          tddxcd_m05.o  tddxcd_m06.o     tddxcd_m08.o \
+                          tddxcd_pkzb.o tddxcd_revtpss.o tddxcd_tpss.o tddxcd_vs98.o \
+                          tddxce.o tdhf.o   tdx.o    tdxio.o  tdxitr.o tdxni.o  tdxprp.o  \
+                          trans.o  trfdm2.o trnstn.o trudge.o umpddi.o utddft.o utdgrd.o \
+                          vibanl.o vm2_module.o \
+                          vscf.o   vvos.o  zapddi.o zmatrx.o \
+                          mod_nosp_basis.o \
+                          mod_grid_storage.o mod_dft_partfunc.o \
+                          mod_dft_molgrid.o mod_dft_fuzzycell.o \
+                          mod_dft_gridint.o constants.o gausshermite.o \
+                          modules_dft.o mod_vvos.o modf77_aambs.o utils_strings.o modules_common.o messages.o \
+                          fcidump.o )
+if ($GMS_MSUAUTO == true) then
+   set STANDARD_GAMESS_OBJ4=(ccsd3aacgreorder.o ccsd3aacgsum.o ccsd3aacgt1A00.o \
+                             ccsd3aacgt1A01.o ccsd3aacgt1A10.o ccsd3aacgt1A11.o ccsd3aacgt1A.o \
+                             ccsd3aacgt1B00.o ccsd3aacgt1B01.o ccsd3aacgt1B10.o ccsd3aacgt1B11.o \
+                             ccsd3aacgt1B.o ccsd3aacgt2A0000.o ccsd3aacgt2A0010.o ccsd3aacgt2A0011.o \
+                             ccsd3aacgt2A1000.o ccsd3aacgt2A1010.o ccsd3aacgt2A1011.o \
+                             ccsd3aacgt2A1100.o ccsd3aacgt2A1110.o ccsd3aacgt2A1111.o \
+                             ccsd3aacgt2A1.o ccsd3aacgt2A.o ccsd3aacgt2B0000.o ccsd3aacgt2B0001.o \
+                             ccsd3aacgt2B0010.o ccsd3aacgt2B0011.o ccsd3aacgt2B0100.o \
+                             ccsd3aacgt2B0101.o ccsd3aacgt2B0110.o ccsd3aacgt2B0111.o \
+                             ccsd3aacgt2B1000.o ccsd3aacgt2B1001.o ccsd3aacgt2B1010.o \
+                             ccsd3aacgt2B1011.o ccsd3aacgt2B1100.o ccsd3aacgt2B1101.o \
+                             ccsd3aacgt2B1110.o ccsd3aacgt2B1111.o ccsd3aacgt2B1.o ccsd3aacgt2B.o \
+                             ccsd3aacgt2C0000.o ccsd3aacgt2C0010.o ccsd3aacgt2C0011.o \
+                             ccsd3aacgt2C1000.o ccsd3aacgt2C1010.o ccsd3aacgt2C1011.o \
+                             ccsd3aacgt2C1100.o ccsd3aacgt2C1110.o ccsd3aacgt2C1111.o \
+                             ccsd3aacgt2C1.o ccsd3aacgt2C.o ccsd3aacgt3A100100.o \
+                             ccsd3aacgt3A100110.o ccsd3aacgt3A100111.o ccsd3aacgt3A110100.o \
+                             ccsd3aacgt3A110110.o ccsd3aacgt3A110111.o ccsd3aacgt3A111100.o \
+                             ccsd3aacgt3A111110.o ccsd3aacgt3A111111.o ccsd3aacgt3AB.o \
+                             ccsd3aacgt3B001001.o ccsd3aacgt3B001100.o ccsd3aacgt3B001101.o \
+                             ccsd3aacgt3B001110.o ccsd3aacgt3B001111.o ccsd3aacgt3B100001.o \
+                             ccsd3aacgt3B100100.o ccsd3aacgt3B100101.o ccsd3aacgt3B100110.o \
+                             ccsd3aacgt3B100111.o ccsd3aacgt3B101001.o ccsd3aacgt3B101100.o \
+                             ccsd3aacgt3B101101.o ccsd3aacgt3B101110.o ccsd3aacgt3B101111.o \
+                             ccsd3aacgt3B110001.o ccsd3aacgt3B110100.o ccsd3aacgt3B110101.o \
+                             ccsd3aacgt3B110110.o ccsd3aacgt3B110111.o ccsd3aacgt3B111001.o \
+                             ccsd3aacgt3B111100.o ccsd3aacgt3B111101.o ccsd3aacgt3B111110.o \
+                             ccsd3aacgt3B111111.o ccsd3aacgt3BC.o ccsd3aacgt3C010010.o \
+                             ccsd3aacgt3C010011.o ccsd3aacgt3C010100.o ccsd3aacgt3C010110.o \
+                             ccsd3aacgt3C010111.o ccsd3aacgt3C011010.o ccsd3aacgt3C011011.o \
+                             ccsd3aacgt3C011100.o ccsd3aacgt3C011110.o ccsd3aacgt3C011111.o \
+                             ccsd3aacgt3C100010.o ccsd3aacgt3C100011.o ccsd3aacgt3C100100.o \
+                             ccsd3aacgt3C100110.o ccsd3aacgt3C100111.o ccsd3aacgt3C110010.o \
+                             ccsd3aacgt3C110011.o ccsd3aacgt3C110100.o ccsd3aacgt3C110110.o \
+                             ccsd3aacgt3C110111.o ccsd3aacgt3C111010.o ccsd3aacgt3C111011.o \
+                             ccsd3aacgt3C111100.o ccsd3aacgt3C111110.o ccsd3aacgt3C111111.o \
+                             ccsd3aacgt3CD.o ccsd3aacgt3D100100.o ccsd3aacgt3D100110.o \
+                             ccsd3aacgt3D100111.o ccsd3aacgt3D110100.o ccsd3aacgt3D110110.o \
+                             ccsd3aacgt3D110111.o ccsd3aacgt3D111100.o ccsd3aacgt3D111110.o \
+                             ccsd3aacgt3D111111.o ccsd3amain.o \
+                             ccsd3aacgt1A2.o ccsd3aacgt1B2.o ccsd3aacgt2A2.o\
+                             ccsd3aacgt2B2.o ccsd3aacgt2C2.o ccsd3aacgt3A2.o\
+                             ccsd3aacgt3B2.o ccsd3aacgt3C2.o ccsd3aacgt3D2.o\
+                             deaeom2hr2B0A.o deaeom2hr3B1A.o deaeom2hr3C1B.o \
+                             deaeom2ahr2B0A00.o deaeom2ahr2B0A01.o deaeom2ahr2B0A10.o \
+                             deaeom2ahr2B0A11.o deaeom2ahr3B1A001.o deaeom2ahr3B1A100.o \
+                             deaeom2ahr3B1A101.o deaeom2ahr3B1A110.o deaeom2ahr3B1A111.o \
+                             deaeom2ahr3C1B010.o deaeom2ahr3C1B011.o deaeom2ahr3C1B100.o \
+                             deaeom2ahr3C1B110.o deaeom2ahr3C1B111.o \
+                             deaeom3ahr2B0A00.o deaeom3ahr2B0A01.o deaeom3ahr2B0A10.o \
+                             deaeom3ahr2B0A11.o deaeom3ahr3B1A001.o deaeom3ahr3B1A100.o \
+                             deaeom3ahr3B1A101.o deaeom3ahr3B1A110.o deaeom3ahr3B1A111.o \
+                             deaeom3ahr3C1B010.o deaeom3ahr3C1B011.o deaeom3ahr3C1B100.o \
+                             deaeom3ahr3C1B110.o deaeom3ahr3C1B111.o deaeom3ahr4B2A1001.o \
+                             deaeom3ahr4B2A1100.o deaeom3ahr4B2A1101.o deaeom3ahr4B2A1110.o \
+                             deaeom3ahr4B2A1111.o deaeom3ahr4C2B0011.o deaeom3ahr4C2B1010.o \
+                             deaeom3ahr4C2B1011.o deaeom3ahr4C2B1100.o deaeom3ahr4C2B1110.o \
+                             deaeom3ahr4C2B1111.o deaeom3ahr4D2C0110.o deaeom3ahr4D2C0111.o \
+                             deaeom3ahr4D2C1100.o deaeom3ahr4D2C1110.o deaeom3ahr4D2C1111.o \
+                             deaeom3bhr2B0A00.o deaeom3bhr2B0A01.o deaeom3bhr2B0A10.o \
+                             deaeom3bhr2B0A11.o deaeom3bhr3B1A000.o deaeom3bhr3B1A001.o \
+                             deaeom3bhr3B1A100.o deaeom3bhr3B1A101.o deaeom3bhr3B1A110.o \
+                             deaeom3bhr3B1A111.o deaeom3bhr3C1B000.o deaeom3bhr3C1B010.o \
+                             deaeom3bhr3C1B011.o deaeom3bhr3C1B100.o deaeom3bhr3C1B110.o \
+                             deaeom3bhr3C1B111.o deaeom3bhr4B2A1001.o deaeom3bhr4B2A1100.o \
+                             deaeom3bhr4B2A1101.o deaeom3bhr4B2A1110.o deaeom3bhr4B2A1111.o \
+                             deaeom3bhr4C2B0011.o deaeom3bhr4C2B1010.o deaeom3bhr4C2B1011.o \
+                             deaeom3bhr4C2B1100.o deaeom3bhr4C2B1110.o deaeom3bhr4C2B1111.o \
+                             deaeom3bhr4D2C0110.o deaeom3bhr4D2C0111.o deaeom3bhr4D2C1100.o \
+                             deaeom3bhr4D2C1110.o deaeom3bhr4D2C1111.o deaeom3hr2B0A.o \
+                             deaeom3hr3B1A.o deaeom3hr3C1B.o deaeom3hr4B2A.o \
+                             deaeom3hr4C2B.o deaeom3hr4D2C.o deaeomdipmain.o \
+                             deaeomdipr.o deaeomdiptool.o eomdip2hr0A2B.o \
+                             eomdip2hr1A3B.o eomdip2hr1B3C.o eomdip3ahr0A2B00.o \
+                             eomdip3ahr0A2B01.o eomdip3ahr0A2B10.o eomdip3ahr0A2B11.o \
+                             eomdip3ahr1A3B000.o eomdip3ahr1A3B001.o eomdip3ahr1A3B100.o \
+                             eomdip3ahr1A3B101.o eomdip3ahr1A3B110.o eomdip3ahr1A3B111.o \
+                             eomdip3ahr1B3C000.o eomdip3ahr1B3C010.o eomdip3ahr1B3C011.o \
+                             eomdip3ahr1B3C100.o eomdip3ahr1B3C110.o eomdip3ahr1B3C111.o \
+                             eomdip3ahr2A4B1001.o eomdip3ahr2A4B1100.o eomdip3ahr2A4B1101.o \
+                             eomdip3ahr2A4B1110.o eomdip3ahr2A4B1111.o eomdip3ahr2B4C0011.o \
+                             eomdip3ahr2B4C1010.o eomdip3ahr2B4C1011.o eomdip3ahr2B4C1100.o \
+                             eomdip3ahr2B4C1110.o eomdip3ahr2B4C1111.o eomdip3ahr2C4D0110.o \
+                             eomdip3ahr2C4D0111.o eomdip3ahr2C4D1100.o eomdip3ahr2C4D1110.o \
+                             eomdip3ahr2C4D1111.o eomdip3hr0A2B.o eomdip3hr1A3B.o \
+                             eomdip3hr1B3C.o eomdip3hr2A4B.o eomdip3hr2B4C.o \
+                             eomdip3hr2C4D.o deaeomdiphbar.o deaeomdipfock.o )
+else
+   set STANDARD_GAMESS_OBJ4=( stubcc3.o )
+endif
+
+if ($GMS_OPENMP == true) then
+   set OPENMP_GAMESS_OBJ=(params.o mx_limits.o prec.o grd2_consts.o \
+                          blkint.o ompmod_tools.o ompmod.o ompgrd2.o \
+                          mod_shell_tools.o mod_gauss_hermite.o \
+                          omp_int1.o \
+                          mod_1e_primitives.o omp_grd1.o omp_fmo.o omp_fmogrd1.o \
+                          omp_fmogrd2.o omp_pcm.o efteiomp.o cphf_tddnlr_omp.o \
+                          riccutils.o riccints.o riccdiag.o riccrhf.o )
+else
+   set OPENMP_GAMESS_OBJ=(prec.o params.o mx_limits.o )
+endif
+
+if ($HPCCHEM == true) then 
+  set HPCCHEM_GAMESS_OBJ=( hpcchem_molecule_module.o hpcchem_runner_module.o hpcchem_driver.o hpcchem_module.o )
+endif 
+if ($GMS_HPCCHEM == false) then 
+ set HPCCHEM_GAMESS_OBJ=(hpcchem_stubs.o)
+endif 
+if ($GMS_OPENMP_OFFLOAD == true) then
+   echo "Need to define OPENMP_OFFLOAD_GAMESS_OBJ in lked"
+   set OPENMP_OFFLOAD_GAMESS_OBJ=(modules_rimp2gpu.o mod_device.o vxx.o rimp2int.o \
+                                  shellprocessing.o shellpairs.o \
+ gpu_mod_ERI.o \
+ gpu_jtype1.o gpu_jtype2.o gpu_jtype3.o gpu_jtype4.o gpu_jtype5.o gpu_jtype6.o \
+ gpu_ompmod_gpu.o gpu_dirfck.o tgpu_ompmod_sp.o \
+ gpu_dirfck_cphf.o gpu_ompmod_cphf.o tgpu_ompmod_cphf_sp.o\
+ gpu_dirfck_tdhf.o  gpu_ompmod_tdhf_amb.o tgpu_ompmod_tdhf_amb_sp.o \
+ gpu_ompmod_tdhf_apb.o tgpu_ompmod_tdhf_apb_sp.o\
+                                  i00.o i01.o i02.o i11.o i12.o i22.o \
+                                  rt1.o rt2.o rt3.o rimp2subs.o work.o )
+else
+   set OPENMP_OFFLOAD_GAMESS_OBJ=( )
+endif
+
+if ($GMS_LIBXC == true) then
+  set LIBXC=( functionals.o libxc.o mod_nameio.o )
+  set LIBXC_FLAGS="$GMS_PATH/3rd-party/lib/libxcf03.a $GMS_PATH/3rd-party/lib/libxc.a"
+else
+  set LIBXC=( libxc_empty.o )
+  set LIBXC_FLAGS=""
+endif
+if ($GMS_MDI == true) then
+  set MDI=( modmdi.o )
+  set MDI_FLAGS="$GMS_PATH/3rd-party/lib/mdi/libmdi.a"
+else
+  set MDI=( modmdi_empty.o )
+  set MDI_FLAGS=""
+endif
+#
+#     unfortunately, the link command has become too long to show it
+#     explicitly (full command line below will exceed 2048 bytes).
+#     Show what we will be linking piecemeal,
+#     taking great care that the order matches the actual LDR command.
+#
+echo " "
+echo The name of the linker on this machine is $LDR,
+echo and the linker options are \"$LDOPTS\".
+echo " "
+echo 'Object code list begins "gamess.o unport.o",'
+echo 'followed by LAPACK object code '\"$LAPACK\",
+echo 'followed by the standard GAMESS object code list,'
+echo " "
+echo $STANDARD_GAMESS_OBJ1
+echo $STANDARD_GAMESS_OBJ2
+echo $STANDARD_GAMESS_OBJ3
+echo $STANDARD_GAMESS_OBJ4
+echo $OPENMP_GAMESS_OBJ
+echo $OPENMP_OFFLOAD_GAMESS_OBJ
+echo $LIBXC
+echo $LIBXC_FLAGS
+echo $MDI
+echo $MDI_FLAGS
+#
+echo " "
+echo "Choices for some optional plug-in codes are"
+#
+#   Tinker is turned off with qmmm.o dummy substitute in GAMESS distribution.
+if ($TINKER == true) then
+   set QMMMOBJ="Libtad.o Libteac.o Libtedl.o Libtemo.o Libterx.o Libtfi.o"
+   set QMMMOBJ="$QMMMOBJ Libtjo.o Libtpr.o Libtsx.o Tdrive.o Tinkin.o Toys.o"
+   echo "   Tinker/SIMOMM object files are $QMMMOBJ"
+else
+   set QMMMOBJ='qmmm.o'
+   echo "   Tinker/SIMOMM code skipped, using dummy file $QMMMOBJ"
+endif
+#
+#   VB is turned off with vbdum.o dummy substitute in GAMESS distribution.
+if (($VB2000 == true) || ($XMVB == true)) then
+   if ($VB2000 == true) then
+      set VBOBJ='vb2000.o vb2gms.o mod_vb2000.o'
+      echo "   Valence Bond program VB2000 object files are $VBOBJ"
+   endif
+   if ($XMVB == true) then
+      set VBOBJ='xmvb.o'
+      echo "   Valence Bond program XMVB object files are $VBOBJ"
+   endif
+else
+   set VBOBJ='vbdum.o'
+   echo "   Both VB programs skipped, using dummy file $VBOBJ"
+endif
+#
+#   NEO is turned off with neostb.o dummy substitute in GAMESS distribution.
+if ($NEO == true) then
+   set NEOOBJ="neo.o   neobas.o neocas.o neoden.o neofci.o"
+   set NEOOBJ="$NEOOBJ neog2a.o neog2b.o neog2c.o neogrd.o"
+   set NEOOBJ="$NEOOBJ neohf.o  neohss.o neoint.o neomp2.o"
+   set NEOOBJ="$NEOOBJ neonci.o neoopt.o neopos.o neoprp.o"
+   set NEOOBJ="$NEOOBJ neosym.o neotrn.o neovib.o neoepc.o"
+   set NEOOBJ="$NEOOBJ neogradient.o neodft.o"
+   echo "   Nuclear Electron Orbital object files are $NEOOBJ"
+else
+   set NEOOBJ='neostb.o'
+   echo "   Nuclear Electron Orbital code skipped, using dummy file $NEOOBJ"
+endif
+#
+if ($RISM == true) then
+   set RSMOBJ=" rsm_mod.o rsm_fftdrv.o rsm_ios.o rsm_main.o rsm_lninp.o"
+   set RSMOBJ="$RSMOBJ rsm_uninp.o rsm_rsmutl.o rsm_sddutl.o rsm_cprsm.o"
+   set RSMOBJ="$RSMOBJ rsm_sddint.o rsm_gms_main.o rsm_gms_cc.o rsm_gms_cphf.o"
+   set RSMOBJ="$RSMOBJ rsm_gms_nmr.o rsm_gms_ci.o rsm_gms_getdat.o rsm_gms_mcscf.o"
+   set RSMOBJ="$RSMOBJ rsm_gms_td.o rsm_gms_conicl.o rsm_gms_gmspar.o"
+   set RSMOBJ="$RSMOBJ rsm_gms_mp2.o"
+   echo "   RISM files are $RSMOBJ"
+else
+   set RSMOBJ="rsmstop.o"
+   echo "   RISM-SCF-cSED code skipped, using dummy file $RSMOBJ"
+endif
+#   Writing out numpy arrays
+set NPY_OBJ=''
+if ($?NPY) then
+   if ($NPY == true) set NPY_OBJ='npy.o'
+endif
+#
+
+if ($HPCCHEM == true) then 
+if ("$GMS_HPCCHEM_CUDA" == "true" ) then
+ set GMS_HPCCHEM_MAGMA = false
+endif 
+set HPCCHEM_LIBS="-L$GMS_HPCCHEM_PATH/lib -lhpcchem"
+
+if ("$GMS_HPCCHEM_CUDA" == "true" ) then
+echo "   Using HPCCHEM add-in C++ code for Nvidia/CUDA GPUs."
+   set HPCCHEM_LIBS="$HPCCHEM_LIBS -lz"
+   set HPCCHEM_LIBS="$HPCCHEM_LIBS -lstdc++"
+   set HPCCHEM_LIBS="$HPCCHEM_LIBS -L$GMS_HPC_CUDA_PATH/lib64 -lcudart -lcublas -lcudadevrt -lcusparse -lcusolver"
+else if ("$GMS_HPCCHEM_CUDA" == "false" && "$GMS_HPCCHEM_MAGMA" == "false") then 
+echo "   Using HPCCHEM add-in C++ code for AMD GPUs."
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -lz"
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -lstdc++"
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -L$GMS_HPC_ROCM_PATH/lib -lhipsolver -lhipsparse -lhipblas -lrocsolver -lrocsparse -lrocblas "
+else if ("$GMS_HPCCHEM_CUDA" == "false" && "$GMS_HPCCHEM_MAGMA" == "true") then 
+echo "Using hpcchem amd gpus + magma"
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -lz"
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -lstdc++"
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -L$GMS_HPC_ROCM_PATH/lib -lhipsolver -lhipsparse -lhipblas -lrocsolver -lrocsparse -lrocblas "
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -L$GMS_HPC_ROCM_PATH -lrccl -lamdhip64"
+set HPCCHEM_LIBS="$HPCCHEM_LIBS -L$GMS_HPC_MAGMA_PATH/lib -lmagma "
+else 
+set HPCCHEM_LIBS=""
+endif 
+else
+set HPCCHEM_LIBS=""
+endif 
+#
+#   NBO is turned off with nbostb.o dummy substitute in GAMESS distribution.
+if ($NBO == true) then
+   set NBOOBJ=$NBOLIB
+   echo "   Natural Bond Orbital (NBO) code is taken from library"
+   echo "        $NBOOBJ"
+else
+   set NBOOBJ='nbostb.o'
+   echo "   Natural Bond Orbital (NBO) code skipped, using dummy file $NBOOBJ"
+endif
+#
+#   MPQC is turned off with mpqcst.o dummy substitute in GAMESS distribution.
+if ($MPQC == true) then
+   # Make sure MPQC and LIBINT are present in $GMS_BUILD_DIR
+   if !(-e $GMS_BUILD_DIR/mpqc/lib/libmpqcinit.a || \
+        -e $GMS_BUILD_DIR/libint-gamess/lib/libint1.a) then
+      echo "   ERROR! MPQC AND/OR LIBINT COULD NOT BE FOUND IN THE GAMESS BUILD DIRECTORY: $GMS_BUILD_DIR/" >> /dev/stderr
+      exit
+   endif
+   # prepend path to MPQC libraries
+   set MPQCLIBS = "$GMS_BUILD_DIR/mpqc/src/bin/pt2r12/libpt2r12gamess.a"
+   foreach LIB_NAME (libmpqcinit.a libSCmbptr12.a libSClmp2.a libSClibint2.a \
+                     libSCmbpt.a libSCscf.a libSClcao.a libSCdistarray4.a \
+                     libSCwfn.a libSCmmisc.a libSCintv3.a libSCbasis.a \
+                     libSCoint3.a libSCmolecule.a libSCisosurf.a libSCsymmetry.a \
+                     libSCrender.a libSCoptimize.a libSCscmat.a libSCgroup.a \
+                     libSCmisc.a libSCstate.a libSCkeyval.a libSCclass.a \
+                     libSCcontainer.a libSCref.a libSCoptions.a)
+      set MPQCLIBS = "$MPQCLIBS $GMS_BUILD_DIR/mpqc/lib/$LIB_NAME"
+   end
+   #LIBINT libraries
+   set LIBINT = "-L$GMS_BUILD_DIR/libint/lib -lint2 -lm -ldl"
+   #LIBRARIES
+   switch ($GMS_MATHLIB)
+      case mkl:
+         set LIBRARIES = "-Wl,--start-group $LIBRARIES -Wl,--end-group -lstdc++"
+         breaksw
+      case acml:
+         set LIBRARIES="$GMS_MATHLIB_PATH/libacml.a -lm -lstdc++"
+         breaksw
+      case atlas-so:
+      case atlas:
+         set LIBRARIES = "$LIBRARIES  -llapack -lstdc++"
+         breaksw
+      case none:
+         echo 'system math library is required' >> /dev/stderr
+         exit 4
+         breaksw
+   endsw
+   # The system math libraries must contain LAPACK: remove GAMESS LAPACK
+   set LAPACK=''
+   set MPQCOBJ=''
+   echo "   MPQC libraries are $MPQCLIBS"
+   echo "   LIBINT2 libraries are $LIBINT"
+else
+   set MPQCOBJ='mpqcst.o'
+   set MPQCLIBS=''
+   set LIBINT=''
+   echo "   MPQC code skipped, using dummy file $MPQCOBJ"
+endif
+#
+#   VM2 is turned off with vm2_stub.o dummy substitute in GAMESS distribution.
+if ($GMS_VM2 == true) then
+   set VM2OBJ=$VM2LIB
+   echo "   VeraChem's VM2 package is taken from library"
+   echo "        $VM2OBJ"
+else
+   set VM2OBJ='vm2_stub.o'
+   echo "   VM2 code skipped, using dummy file $VM2OBJ"
+endif
+#
+echo " "
+echo "   The message passing libraries searched are"
+echo $MSG_LIBRARIES
+echo " "
+echo "   Other libraries, including math libraries, to be searched are"
+echo $LIBRARIES
+echo $LAPACK
+echo " "
+#
+#    Optional user specified additional libraries and/or object files:
+#
+if ($?GMS_EXTRA_OBJS) then
+   echo "   User specified libraries and/or object files:"
+   echo "$GMS_EXTRA_OBJS"
+else
+   set GMS_EXTRA_OBJS=''
+endif
+
+#
+#   link GAMESS, using objects/library information as collected above
+#   =================================================================
+#   Insert a "set echo" line to see the full link command in the log file,
+#   which may result in too long a line to display for some vi/c-shells.
+#   Hence it has been printed out piecemeal, but in order, just above.
+#
+echo "Linker messages (if any) follow..."
+if ($GMS_TARGET == win64) then
+   if ($GMS_FORTRAN == ifort || $GMS_FORTRAN == oneapi-ifort || $GMS_FORTRAN == oneapi-ifx) then
+      set GMS_BUILD_DIR=`cygpath -d "$GMS_BUILD_DIR"`
+   endif
+endif
+chdir $GMS_BUILD_DIR/object
+#
+# older versions of rocm might need this! 
+if ($GMS_HPC_SYSTEM_TARGET == crusher && $GMS_HPCCHEM == true && $GMS_OPENMP_OFFLOAD == false) then 
+set LDR = CC
+endif 
+set echo
+$LDR  $EXTRA_LINK_FLAGS:q -o $GMS_BUILD_DIR/$EXE.$VERNO.x $LDOPTS \
+      $GMS_DEBUG_LINK_FLAGS \
+      -I$GMS_BUILD_DIR/object \
+      gamess.o gamess_version.o unport.o util.o \
+      $STANDARD_GAMESS_OBJ1 \
+      $STANDARD_GAMESS_OBJ2 \
+      $STANDARD_GAMESS_OBJ3 \
+      $STANDARD_GAMESS_OBJ4 \
+      $LIBXC \
+      $MDI \
+      $QMMMOBJ $VBOBJ $NEOOBJ $NBOOBJ $RSMOBJ \
+      $NPY_OBJ $VM2OBJ \
+      $GMS_EXTRA_OBJS \
+      $HPCCHEM_GAMESS_OBJ \
+      $HPCCHEM_LIBS \
+      $OPENMP_GAMESS_OBJ \
+      $OPENMP_OFFLOAD_GAMESS_OBJ \
+      $MPQCOBJ $MPQCLIBS $LIBINT \
+      $LIBRARIES $LAPACK $MATHLIBS $MSG_LIBRARIES \
+      $LIBXC_FLAGS \
+      $MDI_FLAGS
+#
+set rc=$status
+#
+#   give the installer a simple thumbs up or down on success
+#
+unset echo
+chdir ..
+if ((-x $EXE.$VERNO.x) && ($rc == 0)) then
+   echo " "
+   echo The linking of GAMESS to binary $EXE.$VERNO.x was successful.
+   set rc=0
+else
+   echo " "
+   echo Unfortunately, there was an error while linking GAMESS.
+   set rc=1
+   if ($LAPACK_WARNING == true) then
+      echo "*******************************************************"
+      echo "*                      N O T I C E                    *"
+      echo "*******************************************************"
+      echo ""
+      echo "GAMESS now requires a LAPACK library for compilation."
+      echo "Your math library may already provide this library."
+      echo "However, if you receive an error during linking about"
+      echo "undefined references to dsygst and dspev then you"
+      echo "will need to link to a LAPACK library."
+      echo ""
+      echo "You can try compiling the Netlib LAPACK library from"
+      echo "scratch by one of the following two options below:"
+      echo ""
+      echo " 1. (Requires CMake)"
+      echo ""
+      echo "       ./tools/lapack/download-lapack.csh"
+      echo "       make -j lapack"
+      echo ""
+      echo " 2. (Does not require CMake)"
+      echo ""
+      echo "       make -j lapack USE_CMAKE=false"
+      echo ""
+      echo "Or provide a valid GMS_LAPACK_LINK_LINE in install.info"
+      echo "to an installation of LAPACK (compiled with 8-byte integer)"
+      echo "already on your 64-bit system."
+      echo ""
+      echo "For example:"
+      echo ""
+      echo 'setenv GMS_LAPACK_LINK_LINE "-L/path/to/lapack/library -llapack"'
+      echo ""
+      echo "You do not need to specify GMS_LAPACK_LINK_LINE if you"
+      echo "decide to do option 1. or 2."
+      echo "*******************************************************"
+   endif
+endif
+time
+exit $rc

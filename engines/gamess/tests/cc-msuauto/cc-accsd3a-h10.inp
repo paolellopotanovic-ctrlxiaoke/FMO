@@ -1,0 +1,25 @@
+!   Test of various ACP methods in the strong correlation regime.
+!   Hydrogen ring comprised of 10 equidistant H atoms with R_hh = 1.7 angs.
+!   The DZV basis for H10 has 5 occupied and 15 unoccupied orbitals.
+!
+!   Results
+!   =======
+!
+!
+!    REFERENCE ENERGY:       -4.8640933546
+!        CCSDt ENERGY:       -5.1875854757   CORR. E=  -0.3234921211
+!
+ $contrl runtyp=energy scftyp=rohf cctyp=accsd3a $end
+ $system mwords=63 $end
+ $basis gbasis=DZV $end
+ $scf soscf=.true. diis=.false. $end
+ $ccinp ncore=0 maxcc=100 nacto=5 nactu=5 acp(1)=1.0,0.0,1.0,0.0,0.0 $end
+!
+ $data
+H10/DZ at R_hh = 1.7 angs
+dnh 2
+
+H 1.0   2.750657780874825   0.000000000000000   0.000000000000000
+H 1.0   2.225328890437412   1.616796077701760   0.000000000000000
+H 1.0   0.849999999999999   2.616031006598967   0.000000000000000
+$end

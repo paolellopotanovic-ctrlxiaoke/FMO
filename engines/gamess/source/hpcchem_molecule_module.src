@@ -1,0 +1,122 @@
+module Molecule_Module
+  use, intrinsic :: ISO_C_Binding, only: C_int, C_ptr, C_NULL_ptr,C_int64_t,c_loc,c_double, c_bool
+  implicit none
+  public
+  type, bind(C) :: Molecule_type
+    type(C_ptr) :: object = C_NULL_ptr
+  end type Molecule_type
+
+  interface
+    subroutine C_Molecule__delete (this) bind(C,name="Molecule__delete")
+      import
+      type(C_ptr), value :: this
+    end subroutine C_Molecule__delete
+
+    subroutine C_Molecule__print_information (this) bind(C,name="Molecule__print_information")
+      import
+      type(C_ptr), value :: this
+    end subroutine C_Molecule__print_information
+
+    function C_Molecule__new(number_of_atoms, atomic_charges, atomic_centers, atomic_numbers, number_of_electrons, units_are_angstroms) result(this) bind(C,name="Molecule__new")
+      import
+      type(C_ptr) :: this
+      integer(C_int64_t), value :: number_of_atoms
+      integer(C_int64_t), value :: number_of_electrons
+      type(c_ptr), value :: atomic_charges
+      type(c_ptr), value :: atomic_centers 
+      type(c_ptr), value :: atomic_numbers
+      logical(c_bool), value :: units_are_angstroms
+    end function C_Molecule__new
+
+    function C_Molecule_natoms(this) result(natoms) bind(C,name="Molecule__natoms")
+      import
+      type(C_ptr), value :: this
+      integer(C_int64_t) :: natoms
+
+    end function C_Molecule_natoms
+
+
+  end interface 
+
+  interface new_molecule
+    module procedure Molecule__new
+  end interface new_molecule
+  
+  interface build_molecule
+    module procedure Molecule__build
+  end interface build_molecule
+
+  interface delete_molecule
+    module procedure Molecule__delete
+  end interface delete_molecule
+
+interface print_molecule
+    module procedure Molecule__print
+  end interface print_molecule
+
+interface natoms
+  module procedure Molecule_natoms
+end interface
+
+  public :: new_molecule, delete_molecule, print_molecule, Molecule_type, natoms, build_molecule
+contains
+
+  subroutine Molecule__delete(this)
+    type(Molecule_type), intent(inout) :: this
+    call C_Molecule__delete(this%object)
+    this%object = C_NULL_ptr
+  end subroutine Molecule__delete
+
+   subroutine Molecule__print(this)
+    type(Molecule_type), intent(inout) :: this
+    call C_Molecule__print_information(this%object)
+  end subroutine Molecule__print
+
+  subroutine Molecule__new(this, number_of_atoms, atomic_charges, atomic_centers, atomic_numbers, number_of_electrons, units_are_angstroms)
+    type(Molecule_type), intent(out) :: this
+    integer(c_int64_t) :: number_of_atoms
+    integer(c_int64_t) :: number_of_electrons
+    logical(c_bool) :: units_are_angstroms
+
+    real(c_double), allocatable, target :: atomic_charges(:), atomic_centers(:,:)
+    integer(c_int64_t), allocatable, target :: atomic_numbers(:)
+
+    this%object = C_Molecule__new(number_of_atoms, c_loc(atomic_charges), &
+      c_loc(atomic_centers), c_loc(atomic_numbers), number_of_electrons, units_are_angstroms)
+
+  end subroutine Molecule__new
+  
+  subroutine Molecule__build(this, number_of_atoms, atomic_charges, atomic_centers, atomic_numbers, number_of_electrons, units_are_angstroms)
+    !inputs
+    type(Molecule_type), intent(out) :: this
+    double precision :: atomic_charges(:),atomic_centers(:,:)
+    integer :: atomic_numbers(:), i
+    integer:: number_of_atoms, number_of_electrons
+    logical(c_bool) :: units_are_angstroms
+
+    !c type arrays
+    real(c_double), allocatable, target :: atomic_charges_c(:),  atomic_centers_c(:,:)
+    integer(c_int64_t), allocatable, target :: atomic_numbers_c(:)
+
+    allocate(atomic_charges_c(number_of_atoms), atomic_centers_c(3,number_of_atoms), atomic_numbers_c(number_of_atoms))
+
+    do i = 1, number_of_atoms
+        atomic_charges_c(i) = atomic_charges(i)
+        atomic_centers_c(1,i) = atomic_centers(1,i)
+        atomic_centers_c(2,i) = atomic_centers(2,i)
+        atomic_centers_c(3,i) = atomic_centers(3,i)
+        atomic_numbers_c(i) = atomic_numbers(i)
+    end do    
+
+
+    call Molecule__new(this, number_of_atoms, atomic_charges_c, atomic_centers_c, atomic_numbers_c, number_of_electrons, units_are_angstroms) 
+
+  end subroutine Molecule__build
+
+  function Molecule_natoms(this) result(natoms)
+    type(Molecule_type), intent(inout) :: this
+    integer(c_int64_t) :: natoms
+    natoms = C_Molecule_natoms(this%object)
+  end function Molecule_natoms
+
+end module Molecule_Module

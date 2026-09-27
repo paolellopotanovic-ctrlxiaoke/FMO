@@ -1,0 +1,519 @@
+
+
+module cchem_driver_functions
+implicit none
+public copy_molecule_information, get_number_of_exponents, create_coefficient_array,&
+ copy_basis_information, calculate_matrix_size, &
+ calculate_matrix_triangle_size, multiply_non_diagonal_by_2
+contains 
+
+    function calculate_matrix_size(number_of_basis_functions) result(size)
+        integer :: number_of_basis_functions, size
+        size = number_of_basis_functions * number_of_basis_functions
+    end function calculate_matrix_size 
+    
+    function calculate_matrix_triangle_size(number_of_basis_functions) result(size)
+        integer :: number_of_basis_functions, size
+        size = (number_of_basis_functions*number_of_basis_functions+number_of_basis_functions)/2
+    end function calculate_matrix_triangle_size 
+    
+    subroutine copy_molecule_information(atomic_charges, ZAN, atomic_centers, C, atomic_numbers, IAN, number_of_atoms)
+        use, intrinsic :: iso_c_binding
+        integer :: IAN(:), i, number_of_atoms
+        double precision :: ZAN(:),C(:,:)
+        real(c_double), allocatable, target :: atomic_charges(:), atomic_centers(:,:)
+        integer(c_int64_t), allocatable, target :: atomic_numbers(:)
+        allocate(atomic_charges(number_of_atoms), atomic_centers(3,number_of_atoms), atomic_numbers(number_of_atoms))
+
+        do i = 1, number_of_atoms
+            atomic_charges(i) = ZAN(i)
+            atomic_centers(1,i) = C(1,i)
+            atomic_centers(2,i) = C(2,i)
+            atomic_centers(3,i) = C(3,i)
+            atomic_numbers(i) = IAN(i)
+        end do     
+
+    end subroutine copy_molecule_information
+    
+    function get_number_of_exponents(kmin, kmax, kng, nshell) result(number_of_exponents)
+        integer :: kmin(:), kmax(:), kng(:), nshell        
+        integer :: number_of_exponents, i
+        number_of_exponents = 0
+        do i = 1, nshell
+            if(kmin(i) == 1 .and. kmax(i) == 4) then 
+                number_of_exponents = number_of_exponents + 2 * kng(i)
+            else
+                number_of_exponents = number_of_exponents + kng(i)
+            endif
+        end do        
+    end function get_number_of_exponents
+
+    function create_coefficient_array(number_of_exponents, cs, cp, cd) result(coefficient_array)
+        double precision :: cs(:), cp(:), cd(:)
+        integer :: number_of_exponents, i
+        double precision, allocatable :: coefficient_array(:,:)         
+        allocate(coefficient_array(3, number_of_exponents))
+
+        do i = 1, number_of_exponents
+            coefficient_array(1,i) = cs(i)
+            coefficient_array(2,i) = cp(i)
+            coefficient_array(3,i) = cd(i)
+        end do
+    end function create_coefficient_array
+
+    subroutine copy_basis_information(coefficients, coefficient_array, exponents, number_of_exponents, &
+        ex, kstart, katom, kmin, kmax, kng, ktype, nshell, number_of_atoms, atom_in_shell, &
+        type_of_shell, gaussians_in_shell, number_of_shells_in_atom)
+        use, intrinsic :: iso_c_binding
+
+        integer, intent(in) :: kstart(:), katom(:), kmin(:), kmax(:), kng(:), nshell, ktype(:), number_of_exponents,number_of_atoms
+        integer i, j !looping variables
+        integer basis_function_offset, L_shell_count , number_shells_split
+        real(c_double), allocatable, target :: exponents(:), coefficients(:)
+        double precision, intent(in) :: ex(:), coefficient_array(:,:)
+
+        integer(c_int64_t), allocatable, target :: atom_in_shell(:) ,gaussians_in_shell(:) ,type_of_shell(:) ,number_of_shells_in_atom(:)
+        allocate(number_of_shells_in_atom(number_of_atoms))
+        allocate(coefficients(number_of_exponents), exponents(number_of_exponents))
+        number_of_shells_in_atom = 0
+        ! loop over shells to extract the coefficients
+        basis_function_offset = 0
+        L_shell_count = 0
+        ! the goal of this is to store the coefficients into a single array with s and p shells split
+
+        do i = 1, nshell
+            if(kmin(i) == 1 .and. kmax(i) == 4) then 
+                do j = 1, kng(i)
+                    coefficients(basis_function_offset + j) = coefficient_array(1,kstart(i)+j-1)
+                    coefficients(basis_function_offset + j + kng(i)) = coefficient_array(2,kstart(i)+j-1)
+                    exponents(basis_function_offset + j) = ex(kstart(i)+j-1)
+                    exponents(basis_function_offset + j + kng(i)) = ex(kstart(i)+j-1)
+                end do 
+                do j = 1, number_of_atoms
+                    if(katom(i) .eq. j) then 
+                        number_of_shells_in_atom(j) = number_of_shells_in_atom(j) + 2
+                    endif
+                end do
+                basis_function_offset = basis_function_offset +   2 * kng(i)
+                L_shell_count = L_shell_count + 1
+            else
+                do j = 1, kng(i)
+                    coefficients(basis_function_offset + j) = coefficient_array(ktype(i), kstart(i) + j - 1)
+                    exponents(basis_function_offset + j) = ex( kstart(i) + j - 1)
+                end do
+                do j = 1, number_of_atoms
+                    if(katom(i) .eq. j) then 
+                        number_of_shells_in_atom(j) = number_of_shells_in_atom(j) + 1
+                    endif
+                end do
+                basis_function_offset = basis_function_offset + kng(i)
+            endif
+        end do
+        ! we have hereby split the SP shells into S & P, we now have to account for this
+        number_shells_split = nshell + L_shell_count 
+        allocate(type_of_shell(number_shells_split), atom_in_shell(number_shells_split), gaussians_in_shell(number_shells_split))
+
+        ! now we need the final arrays with the angular momentum types, which atom is in which shell and how many primitives without L shells
+        basis_function_offset = 0
+        do i = 1, nshell
+            if(kmin(i) == 1 .and. kmax(i) == 4) then ! if L shell
+                type_of_shell(basis_function_offset + i) = 0
+                type_of_shell(basis_function_offset + i + 1) = 1
+                atom_in_shell(basis_function_offset + i) = katom(i)
+                atom_in_shell(basis_function_offset + i + 1) = katom(i)
+                gaussians_in_shell(basis_function_offset + i) = kng(i)
+                gaussians_in_shell(basis_function_offset + i + 1) = kng(i)
+                basis_function_offset = basis_function_offset + 1
+            else
+                ! need to substract one to the angular momentum type for C purposes
+                type_of_shell(basis_function_offset + i) = ktype(i) - 1
+                atom_in_shell(basis_function_offset + i) = katom(i)
+                gaussians_in_shell(basis_function_offset + i) = kng(i)
+            endif
+        end do
+        
+    end subroutine copy_basis_information
+
+    subroutine write_results_to_DAF(scf_results, number_of_basis_functions)
+        use, intrinsic :: iso_c_binding
+        use SCFRunner_Module
+
+        type(scf_runner_results) :: scf_results
+        integer, intent(in) :: number_of_basis_functions
+        integer size_of_matrix, size_of_matrix_triangle
+
+        ! for i/o and direct access file (DAF)
+        COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+            INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda, i
+
+         
+        size_of_matrix = calculate_matrix_size(number_of_basis_functions)! this is called L3 in gamess 
+        size_of_matrix_triangle = calculate_matrix_triangle_size(number_of_basis_functions) ! this is called L2 in gamess
+        CALL DAWRIT(IDAF, IODA, scf_results%molecular_orbital_coefficients, size_of_matrix, 15, 0) 
+        CALL DAWRIT(IDAF, IODA, scf_results%density_matrix, size_of_matrix_triangle, 16, 0)
+        CALL DAWRIT(IDAF, IODA, scf_results%fock_matrix, size_of_matrix_triangle, 14, 0)
+        CALL DAWRIT(IDAF, IODA, scf_results%molecular_orbital_energies, number_of_basis_functions, 17, 0)
+       
+    end subroutine write_results_to_DAF
+! Assuming the lower triangular matrix has dimension N
+! The one-dimensional array should have length N*(N+1)/2 to store all the lower triangular elements.
+
+subroutine multiply_non_diagonal_by_2(matrix, N)
+  integer, intent(in) :: N
+  double precision :: matrix(*)
+  integer :: i, j, index
+  
+  index = 1
+  do j = 1, N
+    do i = 1, j
+      if (i /= j) then  ! Non-diagonal element
+        matrix(index) = 2.0 * matrix(index)
+      else
+        matrix(index) = matrix(index)
+      end if
+      index = index + 1
+    end do
+  end do
+  
+end subroutine multiply_non_diagonal_by_2
+
+
+end module cchem_driver_functions
+
+subroutine pack_matrix(unpacked_matrix, packed_matrix, nflmat, number_of_basis_functions)
+implicit none 
+
+
+double precision :: unpacked_matrix(*), packed_matrix(*)
+integer :: nflmat, number_of_basis_functions
+integer :: ik, ij, i,j, k
+
+ik = 1
+do i = 1, nflmat 
+  ij = 0
+  do j = 1, number_of_basis_functions ! l1 = number of basis functions 
+    do k = 1, j
+      packed_matrix(ik) = unpacked_matrix(i + ij)
+      ij = ij + nflmat
+      ik = ik + 1
+    end do ! k
+  end do ! j
+
+end do ! i
+
+end subroutine pack_matrix
+
+subroutine unpack_matrix(unpacked_matrix, packed_matrix, nflmat, number_of_basis_functions)
+implicit none 
+double precision :: unpacked_matrix(*)
+double precision :: packed_matrix(*)
+integer :: nflmat, number_of_basis_functions
+integer :: ik, ij, i,j, k
+
+ik = 1
+do i = 1, nflmat 
+  ij = 0
+  do j = 1, number_of_basis_functions ! l1 = number of basis functions 
+    do k = 1, j
+      unpacked_matrix(i+ij) = packed_matrix(ik)
+      ij = ij + nflmat
+      ik = ik + 1
+    end do ! k
+  end do ! j
+
+ end do ! i
+    
+end subroutine unpack_matrix
+
+subroutine map_2d_matrix_to_1d(input_matrix, output_matrix, nflmat, number_of_basis_functions, size_triangle)
+use cchem_driver_functions
+implicit none 
+double precision :: output_matrix(*)
+integer :: nflmat, number_of_basis_functions, size_of_matrix_triangle, size_triangle
+double precision :: input_matrix(size_triangle, nflmat)
+integer :: ik, ij, i,j, k
+
+
+
+size_of_matrix_triangle = calculate_matrix_triangle_size(number_of_basis_functions) ! this is called L2 in gamess
+
+do i = 1, nflmat
+  do j = 1, size_of_matrix_triangle
+    output_matrix(j + (i-1)*size_of_matrix_triangle) = input_matrix(j, i)
+  end do 
+end do
+
+end subroutine map_2d_matrix_to_1d
+
+subroutine map_1d_matrix_to_2d(input_matrix, output_matrix, nflmat, number_of_basis_functions, size_triangle)
+use cchem_driver_functions
+implicit none 
+double precision :: input_matrix(*)
+integer :: nflmat, number_of_basis_functions, size_of_matrix_triangle, size_triangle
+double precision :: output_matrix(size_triangle, nflmat)
+integer :: ik, ij, i,j, k
+
+
+
+size_of_matrix_triangle = calculate_matrix_triangle_size(number_of_basis_functions) ! this is called L2 in gamess
+
+do i = 1, nflmat
+  do j = 1, size_of_matrix_triangle
+    output_matrix(j,i) = input_matrix(j + (i-1)*size_of_matrix_triangle)
+  end do 
+end do
+
+end subroutine map_1d_matrix_to_2d
+subroutine cchem_rhf_driver(density_matrix_gms,fock_matrix_gms, gafo_mo_coefficients, &
+                              number_of_occupied_frozen_orbitals, &
+                              number_of_frozen_orbitals, orbital_shift, total_energy, do_afo, number_of_electrons)
+use mx_limits, only: mxgtot,mxsh,MXATM
+use, intrinsic :: iso_c_binding
+use SCFRunner_Module
+use Molecule_Module
+use cchem_driver_functions
+use omp_lib
+use hpc_chem, only: print_mode, convergence_threshold,  dynamic_threshold
+implicit none
+
+! for i/o and direct access file (DAF)
+COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+    INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+COMMON /NSHEL / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),     &
+                cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),     &
+                kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh),  &
+                kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+    INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+double precision :: ex,cs,cp,cd,cf,cg,ch,ci
+
+COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB, &
+                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+integer :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+
+integer :: MAXIT,NPUNCH,NPREO
+double precision :: CONVHF,MCONV,FSHIFT
+
+        INTEGER :: ME, MASTER, NPROC, IBTYP, IPTIM
+        LOGICAL :: GOPARR, DSKWRK, MASWRK
+COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+COMMON /SCFOPT/ CONVHF,MAXIT,MCONV,NPUNCH,NPREO(4),FSHIFT
+integer :: MAXDII
+double precision :: SOGTOL,ETHRSH,IRAF
+COMMON /DIISSO/ SOGTOL,ETHRSH,MAXDII,IRAF
+COMMON /BASSPH/ QMTTOL,ISPHER
+double precision QMTTOL
+logical ISPHER
+
+INTEGER(c_int64_t) :: ierr, mpi_world
+integer :: idworld, comm_world, comm_group, comm_masters,next
+
+double precision, target::  density_matrix_gms(*),fock_matrix_gms(*), gafo_mo_coefficients(*) 
+double precision total_energy !resulting energy 
+double precision :: ZAN,C
+double precision, allocatable :: coefficient_array(:,:), eigenvalues(:), molecular_vectors(:,:)
+
+integer number_of_basis_functions, size_of_matrix_triangle, size_of_matrix, number_of_atoms
+integer basis_function_offset, i
+integer number_of_exponents, number_shells_split !basis set parsing values
+integer omp_num_threads_ftn
+
+!GAFO parameters
+integer(c_int64_t) number_of_occupied_frozen_orbitals,  number_of_frozen_orbitals
+integer(c_int64_t) number_of_electrons
+real(c_double) orbital_shift
+
+type(Molecule_type) :: molecule
+type(SCFRunner_type) :: scf_runner
+type(scf_runner_results) :: scf_results
+logical(c_bool) :: units_are_angstroms
+
+!todo move these down to the interface level / into object so drive doesn't need to know anything about c_iso
+real(c_double), allocatable, target :: exponents(:), coefficients(:)
+integer(c_int64_t), allocatable, target :: atom_in_shell(:) ,gaussians_in_shell(:) ,type_of_shell(:) ,number_of_shells_in_atom(:)
+real(c_double), allocatable, target :: density_matrix(:), fock_matrix(:) ! fock and density matrices
+logical :: do_afo
+double precision ::  overlap_threshold
+
+!let's rename things for the sake of sanity
+! set number of threads to 1 because the code needs it 
+call omp_set_num_threads(1)
+call ddi_comp_comm(comm_world)
+mpi_world = comm_world
+number_of_basis_functions = NUM ! this is called L1 in gamess
+number_of_atoms = NAT
+overlap_threshold = QMTTOL 
+units_are_angstroms = .false.
+
+call new_SCFRunner(scf_runner)
+
+size_of_matrix = calculate_matrix_size(number_of_basis_functions)! this is called L3 in gamess 
+size_of_matrix_triangle = calculate_matrix_triangle_size(number_of_basis_functions) ! this is called L2 in gamess
+
+number_of_exponents = get_number_of_exponents(kmin, kmax, kng, nshell)
+coefficient_array = create_coefficient_array(number_of_exponents, cs, cp, cd)
+
+
+call copy_basis_information(coefficients, coefficient_array, exponents, number_of_exponents, ex,& 
+ kstart, katom, kmin, kmax, kng, ktype,&
+ nshell, number_of_atoms,atom_in_shell,&
+ type_of_shell, gaussians_in_shell, number_of_shells_in_atom)
+ 
+call set_print_mode_SCFRunner(scf_runner, print_mode)
+call set_convergence_parameters_SCFRunner(scf_runner, MAXIT,  &
+ convergence_threshold, &
+ dynamic_threshold, overlap_threshold, MAXDII)
+
+call build_molecule(molecule, number_of_atoms, ZAN, C, IAN, number_of_electrons, units_are_angstroms)
+call print_molecule(molecule)
+call set_molecule_SCFRunner(scf_runner, molecule)
+
+if(do_afo) then 
+call set_gafo_parameters_SCFRunner(scf_runner, gafo_mo_coefficients, number_of_occupied_frozen_orbitals, number_of_frozen_orbitals, orbital_shift)
+endif
+call create_basis_set(scf_runner, exponents, coefficients, &
+                      atom_in_shell, gaussians_in_shell, type_of_shell, &
+                      number_of_shells_in_atom)
+
+call run_SCFRunner(scf_runner, density_matrix_gms, mpi_world)
+scf_results = SCFRunner__get_results(scf_runner)
+total_energy = scf_results%energy
+call write_results_to_DAF(scf_results,number_of_basis_functions)
+
+call delete_molecule(molecule)
+call delete_SCFRunner(scf_runner)
+
+deallocate(number_of_shells_in_atom)
+deallocate(coefficient_array)
+deallocate(coefficients, exponents)
+deallocate(type_of_shell, atom_in_shell, gaussians_in_shell)
+! reset the number of threads 
+omp_num_threads_ftn = omp_get_max_threads()
+
+return
+end subroutine cchem_rhf_driver
+
+
+subroutine cchem_fock_build_driver(density_matrix_gms,fock_matrix_gms, number_of_electrons, do_tdhf_digestion, scale_fock)
+use mx_limits, only: mxgtot,mxsh,MXATM
+use, intrinsic :: iso_c_binding
+use SCFRunner_Module
+use Molecule_Module
+use cchem_driver_functions
+use omp_lib
+implicit none
+
+! for i/o and direct access file (DAF)
+COMMON /iofile/ ir,iw,ip,is,ipk,idaf,nav,ioda(950)
+    INTEGER :: ir,iw,ip,is,ipk,idaf,nav,ioda
+
+
+      integer me,master,nproc,ibtyp,iptim
+      logical goparr,dskwrk,maswrk
+      common /par   / me,master,nproc,ibtyp,iptim,goparr,dskwrk,maswrk
+
+COMMON /NSHEL / ex(mxgtot),cs(mxgtot),cp(mxgtot),cd(mxgtot),     &
+                cf(mxgtot),cg(mxgtot),ch(mxgtot),ci(mxgtot),     &
+                kstart(mxsh),katom(mxsh),ktype(mxsh),kng(mxsh),  &
+                kloc(mxsh),kmin(mxsh),kmax(mxsh),nshell
+    INTEGER :: kstart,katom,ktype,kng,kloc,kmin,kmax,nshell
+double precision :: ex,cs,cp,cd,cf,cg,ch,ci
+
+COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB, &
+                ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+integer :: NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+
+INTEGER(c_int64_t) :: ierr, mpi_world
+integer :: idworld, comm_world, comm_group, comm_masters,next
+logical scale_fock
+double precision, target::  density_matrix_gms(*),fock_matrix_gms(*) 
+double precision total_energy !resulting energy 
+double precision :: ZAN,C
+double precision, allocatable :: coefficient_array(:,:), eigenvalues(:), molecular_vectors(:,:)
+double precision :: factor
+integer number_of_basis_functions, size_of_matrix_triangle, size_of_matrix, number_of_atoms
+integer basis_function_offset, i, j, index
+integer number_of_exponents, number_shells_split !basis set parsing values
+integer omp_num_threads_ftn
+integer nproc_division
+integer(c_int64_t) number_of_electrons
+logical(c_bool) do_tdhf_digestion
+type(Molecule_type) :: molecule
+type(SCFRunner_type) :: scf_runner
+type(scf_runner_results) :: scf_results
+logical(c_bool) :: units_are_angstroms
+
+!todo move these down to the interface level / into object so drive doesn't need to know anything about c_iso
+real(c_double), allocatable, target :: exponents(:), coefficients(:)
+integer(c_int64_t), allocatable, target :: atom_in_shell(:) ,gaussians_in_shell(:) ,type_of_shell(:) ,number_of_shells_in_atom(:)
+real(c_double), allocatable, target :: density_matrix(:), fock_matrix(:) ! fock and density matrices
+!let's rename things for the sake of sanity
+! set number of threads to 1 because the code needs it
+
+call omp_set_num_threads(1)
+call ddi_comp_comm(comm_world)
+mpi_world = comm_world
+
+units_are_angstroms = .false.
+
+
+
+number_of_basis_functions = NUM ! this is called L1 in gamess
+number_of_atoms = NAT
+
+call new_SCFRunner(scf_runner)
+
+size_of_matrix = calculate_matrix_size(number_of_basis_functions)! this is called L3 in gamess 
+size_of_matrix_triangle = calculate_matrix_triangle_size(number_of_basis_functions) ! this is called L2 in gamess
+
+
+
+number_of_exponents = get_number_of_exponents(kmin, kmax, kng, nshell)
+coefficient_array = create_coefficient_array(number_of_exponents, cs, cp, cd)
+
+
+
+call copy_basis_information(coefficients, coefficient_array, exponents, number_of_exponents, ex,& 
+ kstart, katom, kmin, kmax, kng, ktype,&
+ nshell, number_of_atoms,atom_in_shell,&
+ type_of_shell, gaussians_in_shell, number_of_shells_in_atom)
+
+
+call build_molecule(molecule, number_of_atoms, ZAN, C, IAN, number_of_electrons, units_are_angstroms)
+
+call set_molecule_SCFRunner(scf_runner, molecule)
+
+call create_basis_set(scf_runner, exponents, coefficients, &
+                      atom_in_shell, gaussians_in_shell, type_of_shell, &
+                      number_of_shells_in_atom)
+
+
+
+call run_Fockbuild(scf_runner, density_matrix_gms, fock_matrix_gms, do_tdhf_digestion, mpi_world)
+if(scale_fock) then 
+call multiply_non_diagonal_by_2(fock_matrix_gms, number_of_basis_functions)
+endif
+
+if(scale_fock) then 
+nproc_division = nproc
+else
+nproc_division = 1
+end if 
+call dscal(size_of_matrix_triangle, 1.D0/nproc_division, fock_matrix_gms, 1) ! stil don't know why this is needed but it is 
+call ddi_dlbreset()
+
+call delete_molecule(molecule)
+call delete_SCFRunner(scf_runner)
+
+deallocate(number_of_shells_in_atom)
+deallocate(coefficient_array)
+deallocate(coefficients, exponents)
+deallocate(type_of_shell, atom_in_shell, gaussians_in_shell)
+! reset the number of threads 
+omp_num_threads_ftn = omp_get_max_threads()
+
+return
+end subroutine cchem_fock_build_driver
+
+
+

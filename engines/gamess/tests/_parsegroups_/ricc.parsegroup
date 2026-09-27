@@ -1,0 +1,23 @@
+{
+  "parse_header" : "RI-CC",
+  "parse_group" : [
+   {
+     "regex_string" : "^(\\s*)TOTAL RI-MP2 ENERGY.*$",
+     "parse_name"   : "TOTAL RI-MP2 ENERGY",
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_tolerance" : -1
+   },
+   {
+     "regex_string" : "^(\\s*)TOTAL RI-CCSD ENERGY.*$",
+     "parse_name"   : "TOTAL RI-CCSD ENERGY",
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_tolerance" : -1
+   },
+   {
+     "regex_string" : "^(\\s*)TOTAL RI-CCSD\\(T\\) ENERGY.*$",
+     "parse_name"   : "TOTAL RI-CCSD(T) ENERGY",
+     "parse_recipe" : "lastinstance_firstindex",
+     "parse_tolerance" : -1
+   }
+  ]
+}

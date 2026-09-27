@@ -1,0 +1,23 @@
+! Legacy code run
+ $contrl scftyp=rhf dfttyp=m06 runtyp=gradient units=bohr $end
+ $system mwords=4 $end
+ $basis  gbasis=n31 ngauss=6 ndfunc=1 $end
+ $dft    nrad=96 nleb=1202 $end
+ $dft    bfctyp=legacy $end
+ $data
+ethylalchohol...AM1 structure in NWchem's orientation
+C1
+C 6.0    -2.26068515     0.48494271    -0.05569511
+C 6.0     0.13837656    -1.06159157     0.03883002
+O 8.0     2.33077668     0.46188113    -0.13078484
+H 1.0     2.23554248     1.69767784     1.20480906
+H 1.0    -3.93975684    -0.78972276    -0.07799918
+H 1.0    -2.29233099     1.68456861    -1.79093736
+H 1.0    -2.39597248     1.75066114     1.62721903
+H 1.0     0.27494637    -2.36119537    -1.63494687
+H 1.0     0.20520962    -2.21714532     1.81932461
+ $end
+
+
+! TRAVIS-CI SMALL
+

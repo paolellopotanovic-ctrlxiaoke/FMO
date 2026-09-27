@@ -1,0 +1,68 @@
+! This example calculates FMO1-FRET couplings between
+! excited states of two Na2 "molecules". It was inspired by:
+!
+! J. Chem. Theory Comput. 2022, 18, 11, 6577–6587
+!
+! This artificial example has the advantage that the
+! electrostatic coupling between the investigated
+! states is well described by a dipole approximation.
+!
+! The first excitation of both Na2 "molecules", each of
+! which is in separate fragment, has a strong dipole
+! moment in the Y direction.  For fragment 1 we have
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  1  A         -323.6146045713    2.224     0.0000  4.1995  0.0000    0.9610
+!  2  A         -323.5987316893    2.656    -1.8166  0.0000  3.1091    0.8438
+!
+! while fragment 2 yields
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  1  A         -323.6184241973    2.059     0.0000 -4.5642 -0.0000    1.0510
+!  2  A         -323.6005418084    2.546     2.5846 -0.0000  2.6228    0.8457
+!
+! The molecules form an excitonic dimer, a so-called
+! J-aggregate. The two first excitations of both
+! molecules couple
+!
+! FRET DxyzI       1 =   0.000000 -4.564181 -0.000000 dist=     13.75860848
+!      DxyzJ       2 =   0.000000  4.199484  0.000000 energy=    0.05934981
+!
+!        1       2 FRET ES =    0.06472326
+! ----------------------------------------
+!        1       2 FRET TO =    0.06472326
+!
+! The electrostatic coupling 0.05934981 eV that we get
+! from the dipole approximation is very close to the
+! electrostatic coupling 0.06472326 eV from the exact
+! Coulomb integral. This leads to the split into two new
+! excitonic levels
+!
+! STATE  EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!            eV          X       Y       Z     STRENGTH
+!   1       2.037     0.0000 -5.6849 -0.0000    1.613
+!   2       2.247     0.0000  2.4797 -0.0000    0.338
+!
+ $contrl scftyp=rhf runtyp=energy icut=10
+         tddft=excite dfttyp=none units=bohr $end
+ $system mwords=5 $end
+ $basis  gbasis=n31 ngauss=6 $end
+ $scf    conv=1d-7 $end
+ $tddft  nstate=10 tammd=.true. cnvtol=1d-7 $end
+ $fmo    nfrag=2 nacut=2
+         iexcit(1)=-1,1,2,0 iactfg(1)=1,1
+         resppc=0 resdim=0 rcorsd=0 $end
+ $fmoprp nprint=9 coroff=0 modorb=1 $end
+ $data
+Basis set input using no atomic coordinates
+c1
+Na 11
+ $end
+ $fmoxyz
+Na Na   0.0000000     -3.20000000     0.00000000
+Na Na   0.0000000      3.20000000     0.00000000
+Na Na   0.0000000     23.22500000     0.00000000
+Na Na   0.0000000     28.77500000     0.00000000
+ $end

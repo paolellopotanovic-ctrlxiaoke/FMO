@@ -1,0 +1,37 @@
+! The method described here is published as:
+! Dmitri G. Fedorov, J. Chem. Theory Comput. 2019, 15, 5404-5416.
+!
+! idisp is set to 0 because no parameters for Na and Cl.
+!
+!    I    J DL  Z    R   Q(I->J)  EIJ-EI-EJ dDIJ*VIJ    total
+!                                 Ees      Eex    Ect+mix   Erc+di    Gsol
+!    2    1 N1 -1   0.92 -0.1163  -117.823    0.000   -19.204
+!                                 -113.085    2.211   -6.949    0.000   98.619
+!
+!    Free uncorr energy in solvent=     -621.425828607
+!
+
+ $contrl nprint=-5 ispher=1 $end
+ $system memory=10000000 memddi=10 $end
+ $gddi ngroup=1 parout=.f. $end
+ $scf dirscf=.t. NPUNCH=0 diis=.t. soscf=.f. $end
+ $basis gbasis=n31 ngauss=6 ndfunc=1 $end
+ $pcm    solvnt=water ief=-10 icomp=2 icav=1 idisp=0 ifmo=-1 modpar=9 $end
+! 9=8+1
+! 8 turns on new (partial) screening
+ $pcmcav rin(1)=1.5,2.3 $end
+ $fmo    nfrag=2 nlayer=1 indat(1)=1,2 frgnam(1)=Na+,Cl- icharg(1)=1,-1
+ $end
+ $fmoprp nprint=9 ipieda=1 modpar=8205 $end
+! 8205=8192+13
+! 8192 uses DDI memory to accelerate new screening.
+ $fmoxyz
+ Na Na 0 0  1.5
+ Cl Cl 0 0 -1.5
+ $end
+ $data
+Basis set input using fake atomic coordinates
+c1
+Na-1 11
+Cl-1 17 
+ $end

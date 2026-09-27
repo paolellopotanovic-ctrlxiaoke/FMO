@@ -1,0 +1,58 @@
+! PIEDA/DFTB results
+!Total energy of the molecule: Eunco+D(2)=      -32.680780172
+!    Electrostatic (PL state, incl. EPLs)  EES         -60.500
+!    0-th order DFTB energy (PL state)      E0          -7.461
+!    Charge transfer coupled to ES (PL) E(CT*ES)         0.536
+!    Dispersion (PL state)                 EDI          -8.121
+!        Total interaction (PL state)         Eint         -75.545
+!Dipole moment D(xyz),DA(2)=    0.0017419   -0.0000959    0.0000000    0.0017445
+!ELECTROSTATIC INTERACTION  =     -10.076 KCAL/MOL
+!PIEROTTI CAVITATION ENERGY =      28.930 KCAL/MOL
+!DISPERSION FREE ENERGY     =     -23.409 KCAL/MOL
+!REPULSION FREE ENERGY      =       3.708 KCAL/MOL
+!TOTAL INTERACTION          =      -0.848 KCAL/MOL
+ $contrl units=angs nosym=1 nprint=-5 ispher=1 $end
+ $system BALTYP=NXTVAL memory=10000000 $end
+ $gddi ngroup=1 parout=.t. $end
+ $scf  dirscf=.t. NPUNCH=0 diis=.f. soscf=.t. $end
+ $elmom where=cocharge $end
+ $basis gbasis=dftb $end
+ $dftb scc=.true.  dampxh=.true.  dampex=4.00 dftb3=.true. param=3ob-3-1 $end
+ $dft dc=.t. idcver=4 $end
+ $fmo nfrag=8 nbody=2 nlayer=1 nacut=3 $end
+ $fmoprp nprint=9 modorb=3 ipieda=1 $end
+ $pcm solvnt=water ief=-10 icomp=0 icav=1 idisp=1 ifmo=-1 $end
+ $pcmcav radii=vandw $end
+ $tescav ntsall=60 $end
+ $fmoxyz
+ 1           8   0.8204785564  -0.3493814033   1.6647402996
+ 2           1   0.1584312196   0.1712955508   2.1002720648
+ 3           1   0.7581202919  -0.1462599725   0.7227466825
+ 4           8   0.8940639270   0.0412841547  -1.0733463549
+ 5           1   1.8050170137   0.2802645638  -1.2328371171
+ 6           1   0.7983675153  -0.8395451817  -1.4300614751
+ 7           8   1.0023160780  -2.8394876173  -1.5509827016
+ 8           1   0.9384671112  -3.0496039858  -0.6106951040
+ 9           1   0.4143750029  -3.4303508497  -2.0029348880
+ 10          8   1.0478098700  -3.2233848257   1.1886943500
+ 11          1   0.8448564587  -2.3592786979   1.5413788074
+ 12          1   1.9753269256  -3.3590740871   1.3722635491
+ 13          8   3.7351153241  -0.3022204963   1.7288621305
+ 14          1   2.8037830468  -0.1828957354   1.9043254275
+ 15          1   3.8758222049   0.0606040807   0.8566108213
+ 16          8   3.8054007976   0.1782522891  -1.1526218540
+ 17          1   4.4127697054   0.6566003192  -1.7015865784
+ 18          1   3.9239029564  -0.7578384657  -1.3577033217
+ 19          8   3.9045634043  -2.5598252767  -1.5386027588
+ 20          1   4.0621272711  -2.9058412370  -0.6624146388
+ 21          1   2.9973289032  -2.7822754436  -1.7381397567
+ 22          8   3.9530565189  -3.0336063290   1.3444647539
+ 23          1   3.9607672497  -2.0903452538   1.5511672299
+ 24          1   4.5956386473  -3.4417821002   1.9097554326
+ $end
+ $data
+ Water8 cubic
+c1
+h 1
+o 8
+ $end

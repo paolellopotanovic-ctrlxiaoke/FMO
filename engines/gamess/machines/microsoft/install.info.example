@@ -1,0 +1,86 @@
+#!/bin/csh -f
+ 
+#   Compilation configuration for GAMESS
+#   Generated on XPS
+#   Generated at Tue, Jul 11, 2023 10:46:54 PM
+
+setenv GMS_VERSION           00
+
+#                 GAMESS Paths                     #
+setenv GMS_PATH              /home/sarom/gamess
+setenv GMS_BUILD_DIR         /home/sarom/gamess
+
+#                  Machine Type                    #
+setenv GMS_TARGET            win64
+setenv GMS_HPC_SYSTEM_TARGET generic
+
+#              FORTRAN Compiler Setup              #
+setenv GMS_FORTRAN           oneapi-ifort
+setenv GMS_IFORT_VERNO       21
+#         Windows optimization level               #
+setenv GMS_WIN_OPT           linux
+#         Windows compiler flags                   #
+setenv GMS_WIN_FLAGS
+setenv GMS_WIN_TP
+#         INTEL specific compiler flags            #
+setenv GMS_INT_OPT
+setenv GMS_IPO_OPT
+
+#         Mathematical Library Setup               #
+setenv GMS_MATHLIB           mkl
+setenv GMS_MATHLIB_PATH    "C:\PROGRA~2\Intel\oneAPI\mkl\latest"
+setenv GMS_MKL_VERNO         12
+setenv GMS_THREADED_BLAS     false
+setenv GMS_LAPACK_LINK_LINE  ""
+#         parallel message passing model setup
+setenv GMS_DDI_COMM          mpi
+setenv GMS_MPI_LIB           impi
+setenv GMS_MPI_PATH        "C:\PROGRA~2\Intel\oneAPI\mpi\latest\\"
+
+#     Michigan State University Coupled Cluster    #
+setenv GMS_MSUAUTO           false
+
+#         LIBCCHEM CPU/GPU Code Interface          #
+setenv GMS_LIBCCHEM          false
+
+#      Intel Xeon Phi Build: none/knc/knl          #
+setenv GMS_PHI               none
+
+#         Shared Memory Type: sysv/posix           #
+setenv GMS_SHMTYPE           sysv
+
+#      GAMESS OpenMP support: true/false           #
+setenv GMS_OPENMP            false
+setenv GMS_OPENMP_OFFLOAD    false
+ 
+#      GAMESS LibXC library: true/false            #
+setenv GMS_LIBXC             false
+ 
+#      GAMESS MDI library: true/false              #
+setenv GMS_MDI               false
+ 
+#       VM2 library: true/false                    #
+setenv  GMS_VM2              false
+ 
+#       Tinker: true/false                         #
+setenv  TINKER               false
+ 
+#       VB2000: true/false                         #
+setenv  VB2000               false
+ 
+#       XMVB: true/false                           #
+setenv  XMVB                 false
+ 
+#       NEO: true/false                            #
+setenv  NEO                  false
+ 
+#       NBO: true/false                            #
+setenv  NBO                  false
+ 
+####################################################
+# Added any additional environmental variables or  #
+# module loads below if needed.                    #
+####################################################
+# Capture floating-point exceptions                #
+setenv GMS_FPE_FLAGS        ''
+ 

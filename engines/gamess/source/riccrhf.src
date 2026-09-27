@@ -1,0 +1,1351 @@
+#ifndef _OPENMP
+   SUBROUTINE DRRICC_rhf(methcc,exetyp,amptsh,nccfzc,nccfzv,mxccit,       &
+                         mxrleit,nwrdcc,icccnv,iccrst,cceri,EREF,         &
+                         ERIMP2,ERISD,ERINT3)
+   USE RICC_GMS_globals
+       if(maswrk)write(LuOut,*)'The RI-CC module requires GMS_OPENMP=true in install.info'
+       call abrt
+   END SUBROUTINE DRRICC_rhf
+#else
+
+!*MODULE RICCRHF  * DECK DRRICC_RHF
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    March 5, 2020 First submission to github
+!> 
+!>    @brief   The main RI-CC driver for the closed-shell case.
+!>
+!>
+
+   SUBROUTINE DRRICC_rhf(methcc,exetyp,amptsh,nccfzc,nccfzv,mxccit,       &
+                         mxrleit,nwrdcc,icccnv,iccrst,cceri,EREF,         &
+                         ERIMP2,ERISD,ERINT3)
+
+   USE RICC_GMS_globals
+   USE RICC_Shared_Data
+   USE RICC_memalloc 
+   USE RICC_procs
+   USE RICC_ints
+   USE RICC_MAT
+   USE RICCDIAG
+
+   IMPLICIT NONE
+
+   REAL(KIND=dp),INTENT(OUT)  :: ERIMP2,ERISD,ERINT3
+   INTEGER,INTENT(IN)         :: methcc,nccfzc,nccfzv,mxccit,mxrleit
+   INTEGER,INTENT(IN)         :: icccnv,iccrst,nwrdcc
+   REAL(KIND=dp),INTENT(IN)   :: amptsh,EREF,exetyp,cceri
+   REAL(KIND=dp)              :: check,standard,ri,cd
+   INTEGER                    :: i,ioerr,jret,NgotMx,DDI_NP,DDI_NN,DDI_ME,DDI_MY
+   INTEGER                    :: ddiprnt,Mxthreads,DMemIn,DMem3,DMem4_A,DMem4_B
+   INTEGER                    :: MemThrdMP2,MemThrdCCSD_A,MemThrdCCSD_B
+   INTEGER                    :: MemShMPI_A,MemShMPI_B,abDDIl,aiDDIl
+   INTEGER                    :: MemInts,MemMP2,MemCCSD,MemTot,ibas
+   INTEGER,PARAMETER          :: nnam=9
+   REAL(KIND=dp)              :: qnam(nnam)
+   INTEGER                    :: kqnam(nnam)
+   REAL(KIND=dp)              :: ricc,empty,cabnam(2)
+   REAL(KIND=dp)              :: normt1,normt2,DDOT
+   REAL(KIND=dp),ALLOCATABLE  :: T2full(:,:,:,:)
+   LOGICAL                    :: extcab 
+   REAL(KIND=dp)              :: energies(10)
+   REAL(KIND=dp)              :: tim,tmp2,wall0,trecl
+   CHARACTER(LEN=2)           :: HMSD
+   TYPE(NormH)                :: HNP 
+   TYPE(WMAT)                 :: T(2)  
+   TYPE(WMAT)                 :: RT(2) 
+
+   data check  /8HCHECK   /
+   data empty  /8H        /
+   data ricc   /8HRICC    /
+   data qnam   /8HIAUXBF  ,8HIVMTD   ,8HVTOL    ,8HSTOL    ,8HOTHAUX  ,   &
+                8HCABNAM  ,8HEXTCAB  ,8HUSEDM3  ,8HUSEDM4  /        
+   data kqnam  /1,1,3,3,0,25,0,0,0/    
+   data standard,ri,cd /8HSTANDARD,8HRI      ,8HCD      /
+
+            
+                              ! A N F A N G !
+
+!-------------------------------------------------------------------------
+! Rename the variables, put them in the shared-data module and avoid using
+! common blocks in core RICC modules. 
+!-------------------------------------------------------------------------
+
+   call DDI_SYNC(3000)
+
+   nbas        = num
+   nbas2       = nbas*nbas
+   nnbas       = nbas*(nbas+1)/2
+   nfc         = nccfzc
+   nfv         = nccfzv
+   norbs       = nqmt                ! Including frozen core and virtuals
+   nocc        = na                  ! Including frozen core
+   nvir        = norbs - nocc        ! Including frozen virtuals
+   no          = nocc  - nfc         ! Correlated occupied orbitals
+   nu          = norbs - nfv - nocc  ! Correlated virtual orbitals
+   nctot       = no+nu               ! Correlated MOs (all)
+   nctots      = nctot*(nctot+1)/2
+   tolt        = TEN**(-icccnv)
+   nitmax      = mxccit
+   mxdiis      = mxrleit
+   rstrt       = iccrst
+   athrsh      = amptsh              
+   LuOut       = iw                  ! Output file unit
+   LpOut       = ip                  ! Punch  file unit      
+   memchk      = .FALSE.
+   energies(1) = EREF
+   erityp      = 1
+   if(cceri  .EQ.      cd)erityp = 2
+   if(exetyp .EQ.   check)memchk = .TRUE.
+   if(mxdiis .GT. 10) mxdiis = 5          ! Makes little sense to use an iterative subspace
+   if(mxdiis .EQ.  0) mxdiis = nitmax+1   ! with a dimension larger than 10 => would entail
+                                          ! too large disk space and disk I/O. Set to default.
+   DBGFLG = .FALSE.                   
+
+   if(maswrk)write(LuOut,9000)
+!-------------------------------------------------------------------------
+! 'CPMET': Coupled-Pair Many Electron Theory, the predecessor of 
+!          Coupled-Cluster Theory. O. Sinanoglu
+!-------------------------------------------------------------------------
+
+   SELECT CASE(methcc)
+     CASE(0)
+          cpmet  = 0
+          cclevl = 'LCCD'
+     CASE(1)
+          cpmet  = 1
+          cclevl = 'CCD'
+     CASE(2)
+          cpmet  = 2
+          cclevl = 'CCSD'
+     CASE(3)  
+          cpmet  = 3
+          cclevl = 'CCSD(T)'
+     CASE DEFAULT
+          cpmet  = -1
+          cclevl = 'Undetected'
+   END SELECT
+
+   if(cpmet .EQ. -1)then
+     if(maswrk) write(iw,7001)cclevl
+     call abrt 
+   end if
+
+   no2  = no*no
+   nu2  = nu*nu
+   nou  = no*nu
+   noo  = no*(no+1)/2
+   nuu  = nu*(nu+1)/2
+
+!-------------------------------------------------------------------------
+! Prepare to read the $RICC namelist.
+!-------------------------------------------------------------------------
+   iauxbf = 0
+   if(ispher .EQ. 1)iauxbf = 1
+   othaux = .TRUE.
+   stol   = 1.0D-6
+   ivmtd  = 0
+   vtol   = 1.0D-6
+   cabnam(1) = empty
+   cabnam(2) = empty
+   extcab = .FALSE.
+   usedm3 = .FALSE.
+   usedm4 = .TRUE.
+
+   call nameio(ir,jret,ricc,nnam,qnam,kqnam,                              &
+               iauxbf,ivmtd,vtol,stol,othaux,cabnam,extcab,usedm3,        &
+               usedm4,0,                                                  &
+               0,0,0,0,0,  0,0,0,0,0,   0,0,0,0,0,  0,0,0,0,0,            &
+               0,0,0,0,0,  0,0,0,0,0,   0,0,0,0,0,  0,0,0,0,0,            &
+               0,0,0,0,0,  0,0,0,0,0,   0,0,0,0,0,  0,0,0,0,0)
+
+   if(jret .EQ. 2)then 
+     if(maswrk) write(LuOut,7002)   
+     call abrt
+   end if
+   call getauxbas(ibas)
+   if(maswrk) write(LuOut,7010) cabnam(ibas),extcab
+   if(iauxbf.NE.0 .AND. iauxbf.NE.1)then
+      if(maswrk) write(LuOut,7003)iauxbf
+      call abrt
+   end if
+   if(iauxbf.EQ.1 .AND. ispher.NE.1)then
+      if(maswrk)then
+        write(LuOut,*)'SPHERICAL HARMONIC AUXILIARY GAUSSIAN BASIS SET'
+        write(LuOut,*)'CAN NOT BE USED IN CONJUNCTION WITH A CARTESIAN'
+        write(LuOut,*)'GAUSSIAN BASIS SET'
+      end if
+      call abrt
+   end if
+   if(ivmtd.NE.0 .AND. ivmtd.NE.2)then
+     if(maswrk)then
+       write(LuOut,*)'ILLEGAL VALUE FOR IVMTD. SET IVMTD TO 0 OR 2.'
+     end if
+     call abrt
+   end if
+   if(cabnam(ibas).EQ.empty .AND. .NOT.extcab)then
+      if(maswrk)then
+        write(LuOut,*)'EITHER AN AUXILIARY BASIS NAME SHOULD BE PROVIDED'
+        write(LuOut,*)'VIA CABNAM IN $RICC, OR EXTCAB SHOULD BE SET TO'
+        write(LuOut,*)'.TRUE. AND A BASIS SHOULD BE PROVIDED EXTERNALLY.'    
+      end if
+      call abrt
+   endif
+
+!-------------------------------------------------------------------------
+! DDI set up. Turn on DDI_CREATE's message printing option. 
+!-------------------------------------------------------------------------
+   call DDI_NPROC(DDI_NP,DDI_ME)
+   call DDI_NNODE(DDI_NN,DDI_MY)
+   Mxthreads = omp_get_max_threads()
+   if(.NOT.memchk .AND. maswrk)then
+      write(LuOut,9001)DDI_NN,DDI_NP/DDI_NN,Mxthreads
+      call flshbf(LuOut)
+   end if
+
+   ddiprnt = 0
+   if(maswrk) ddiprnt = 1
+   call DDI_OUTPUT(ddiprnt)
+
+   call SYSINP(MaxCor,DMemIn) 
+!-------------------------------------------------------------------------
+! Load replicated memory. 
+!-------------------------------------------------------------------------
+   call gotfm(NgotMx)
+   if(nwrdcc .GT. 0)NgotMx = MIN(NgotMx,nwrdcc)  
+   MaxCor = NgotMx 
+
+!-------------------------------------------------------------------------
+! Integral generation: three-index RI integrals in MO basis. 
+!-------------------------------------------------------------------------
+   call RICC_vzero(1,25,ccwtim)
+   call TSECND(tim)
+   wall0 = wall
+
+   if(erityp.EQ.1)then
+      call RICC_gen_Ints(cabnam(ibas),extcab,HNP,MemInts,DMem3,DMemIn)
+!--------------------------------
+!  Entry point for CD integrals  |
+!  else if(erityp.EQ.2)then      |
+!     call CDCC_gen_Ints()       |
+!--------------------------------
+   end if
+
+   call TSECND(tim)
+   ccwtim(1) = wall-wall0
+
+!-------------------------------------------------------------------------
+! Memory estimation: We have now read the auxiliary basis in RICC_gen_Ints.
+! Now we are able to compute memory demand for the entire RI-CC module.
+!-------------------------------------------------------------------------
+! 1. Shared memory per MPI/DDI rank on hold during the entire calculation.
+   MemShMPI_A = (no2+nou+nu2+nctot)+(nou+noo*nu2)+(nou+noo*nu2)
+!               <---- FockMat ----> <---- T ----> <-- Res.T -->  
+   if(.NOT. usedm3)then
+     MemShMPI_A = MemShMPI_A + nauxbas*no2 + nauxbas*nu2 + nauxbas*nou
+!                              - OO block-   - VV block-   - OV block- 
+!                              - 3-index density-fitted/RI integrals -
+   end if
+
+   trecl = REAL(nu2*noo,dp)*EIGHT/(TWO**30)
+
+! 2. Initial MP2 step: Memory per thread
+   if(usedm3)then
+     MemThrdMP2 = nu2 + 2*nu*nauxbas
+   else
+     MemThrdMP2 = nu2
+   end if  
+
+! Total MemMP2 per MPI/DDI rank, assuming Mxthreads
+   MemMP2 = DMem3/DDI_NP + MOD(DMem3,DDI_NP) 
+   MemMP2 = MemMP2 + MemShMPI_A + Mxthreads*MemThrdMP2
+
+   MemShMPI_B = MemShMPI_A
+!-------------------------------------------------------------------------
+! 3. CCSD iterations
+! The cases of SD_PPL and SD_H3P3 are special. Two implementations are 
+! available, which may be requested via the input keyword USEDM4=.T. or .F.
+! The keyword USEDM4 determines whether or not a distributed computation 
+! (NOT storage) of the 4-index integral classes (VV|VV) and (VO|VO)/(VV|OO) 
+! over a number of compute processes, viz. MPI/DDI ranks, will be invoked.
+! An EXETYP=CHECK run will print out memory needs for both algorithms.
+!-------------------------------------------------------------------------
+   abDDIl  = nuu/DDI_NP + MOD(nuu,DDI_NP)  
+   aiDDIl  = nou/DDI_NP + MOD(nou,DDI_NP)
+   if(DDI_NP .GT. nuu) abDDIl = 1
+   if(DDI_NP .GT. nou) aiDDIl = 1
+
+   if(memchk)then
+     DMem4_A = MAX(nuu*(nuu+noo),3*nou*nou)
+     DMem4_B = 0
+   else
+     DMem4_A = MAX(abDDIl*(nuu+noo),3*aiDDIl*nou)
+     DMem4_B = 0
+   end if
+
+! 3a. Additional shared memory per MPI/DDI rank:
+!     t1-transformed intermediates plus an additional nu2 array in SD_FOCK
+!     plus the above shared memories in SD_PPL and SD_H3P3. 
+
+   if(memchk)then
+     MemShMPI_A = MemShMPI_A + MAX(no2+nou+2*nu2+nauxbas*(no2+nou),       &
+                                   nauxbas*(nu2+no2)+nuu*noo)
+     MemShMPI_B = MemShMPI_B + MAX(no2+nou+2*nu2+nauxbas*(no2+nou),       &
+                                   nauxbas*(nu2+no2)+2*nuu*noo) 
+   else
+     MemShMPI_A = MemShMPI_A + MAX(no2+nou+2*nu2+nauxbas*(no2+nou),       &
+                                   nauxbas*(nu2+no2)+nuu*noo+DMem4_A)
+
+     MemShMPI_B = MemShMPI_B + MAX(no2+nou+2*nu2+nauxbas*(no2+nou),       &
+                                   nauxbas*(nu2+no2)+2*nuu*noo+DMem4_B)
+   end if
+
+! 3b. Memory per OpenMP thread. At the most cubic storage is permitted.
+!     For schemeA, i.e., USEDM4=.T., the EXETYP=CHECK run will show a little
+!     larger memory need per thread than will be actually required. The
+!     maximum memory need per thread comes from the SD_H3P3A subroutine. One
+!     half of this memory is factorizable w.r.t DDI_NP. The EXETYP=CHECK runs
+!     are usually performed with one processor (DDI_NP=1). For a real 
+!     calculation with DDI_NP>1, the memory need per thread becomes smaller.
+!     However, it is hard to guess the actual memory need per thread from an
+!     EXETYP=CHECK run, since the value of DDI_NP is up to the user to choose.
+!     To be on the safe side, the EXETYP=CHECK runs will predict the maximum
+!     memory need.
+
+   if(usedm3)then 
+     if(memchk)then
+
+     MemThrdCCSD_A = MAX(no2+nu2+nou+nauxbas+nctot*nauxbas,    & ! MPT_0
+                         no2+nou+no*nauxbas+nctot*nauxbas,     & ! MPT_OO              
+                         2*nu2+2*nu*nauxbas+nou+nctot*nauxbas, & ! MPT_OV
+                         nctot*nauxbas,                        & ! MPT_VV
+                         nu2+nu*nauxbas+nctot*nauxbas,         & ! SD_ECORR 
+                         2*nu2*no,                             & ! SD_FOCK
+                         no2+2*nu2*no+noo*no+2*nu*nauxbas,     & ! SD_HHL
+                         nu2,                                  & ! SD_PPL_A
+                         nauxbas*(no+2*nu),                    & ! SD_H3P3_A
+                         2*no*nu2+2*nu2*no) 
+     else
+
+     MemThrdCCSD_A = MAX(no2+nu2+nou+nauxbas+nctot*nauxbas,    & ! MPT_0
+                         no2+nou+no*nauxbas+nctot*nauxbas,     & ! MPT_OO              
+                         2*nu2+2*nu*nauxbas+nou+nctot*nauxbas, & ! MPT_OV
+                         nctot*nauxbas,                        & ! MPT_VV
+                         nu2+nu*nauxbas+nctot*nauxbas,         & ! SD_ECORR 
+                         2*nu2*no,                             & ! SD_FOCK
+                         no2+2*nu2*no+noo*no+2*nu*nauxbas,     & ! SD_HHL
+                         nu2,                                  & ! SD_PPL_A
+                         nauxbas*(no+2*nu),                    & ! SD_H3P3_A
+                         2*aiDDIl*nu+2*nu2*no) 
+     end if
+
+     MemThrdCCSD_B = MAX(no2+nu2+nou+nauxbas+nctot*nauxbas,    & ! MPT_0
+                         no2+nou+no*nauxbas+nctot*nauxbas,     & ! MPT_OO              
+                         2*nu2+2*nu*nauxbas+nou+nctot*nauxbas, & ! MPT_OV
+                         nctot*nauxbas,                        & ! MPT_VV
+                         nu2+nu*nauxbas+nctot*nauxbas,         & ! SD_ECORR 
+                         2*nu2*no,                             & ! SD_FOCK
+                         no2+2*nu2*no+noo*no+2*nu*nauxbas,     & ! SD_HHL
+                         2*nu+2*noo+nu2,                       & ! SD_PPL_B
+                         5*no2*nu+2*nu2+nctot*nauxbas)           ! SD_H3P3_B
+   else
+     if(memchk)then
+    
+     MemThrdCCSD_A = MAX(no2+nu2+nou+nauxbas,                  & ! MPT_0
+                         no2+nou+no*nauxbas,                   & ! MPT_OO              
+                         2*nu2+2*nu*nauxbas+nou,               & ! MPT_OV
+                         0,                                    & ! MPT_VV
+                         nu2+nu*nauxbas,                       & ! SD_ECORR 
+                         2*nu2*no,                             & ! SD_FOCK
+                         no2+2*nu2*no+noo*no,                  & ! SD_HHL
+                         nu2,                                  & ! SD_PPL_A
+                         2*no*nu2+2*nu2*no)                      ! SD_H3P3_A
+     else
+
+     MemThrdCCSD_A = MAX(no2+nu2+nou+nauxbas,                  & ! MPT_0
+                         no2+nou+no*nauxbas,                   & ! MPT_OO              
+                         2*nu2+2*nu*nauxbas+nou,               & ! MPT_OV
+                         0,                                    & ! MPT_VV
+                         nu2+nu*nauxbas,                       & ! SD_ECORR 
+                         2*nu2*no,                             & ! SD_FOCK
+                         no2+2*nu2*no+noo*no,                  & ! SD_HHL
+                         nu2,                                  & ! SD_PPL_A
+                         2*aiDDIl*nu+2*nu2*no)                   ! SD_H3P3_A
+     end if
+   
+     MemThrdCCSD_B = MAX(no2+nu2+nou+nauxbas,                  & ! MPT_0
+                         no2+nou+no*nauxbas,                   & ! MPT_OO              
+                         2*nu2+2*nu*nauxbas+nou,               & ! MPT_OV
+                         0,                                    & ! MPT_VV
+                         nu2+nu*nauxbas,                       & ! SD_ECORR 
+                         2*nu2*no,                             & ! SD_FOCK
+                         no2+2*nu2*no+noo*no,                  & ! SD_HHL
+                         2*nu+2*noo+nu2,                       & ! SD_PPL_B
+                         5*no2*nu+2*nu2)                         ! SD_H3P3_B
+   end if
+
+! Total memory on hold during CCSD iterations, assuming Mxthreads
+
+   if(.NOT. memchk)then
+     if(usedm4)then
+       MemCCSD = DMem3/DDI_NP + MOD(DMem3,DDI_NP) 
+       MemCCSD = MemCCSD + MemShMPI_A + Mxthreads*MemThrdCCSD_A
+     else
+       MemCCSD = DMem3/DDI_NP + MOD(DMem3,DDI_NP) 
+       MemCCSD = MemCCSD + MemShMPI_B + Mxthreads*MemThrdCCSD_B
+     end if
+
+! Total replicated memory need per MPI/DDI rank, assuming Mxthreads
+     MemTot = MAX(MemInts,MemMP2,MemCCSD)
+
+   end if
+
+! Maximum memory per OpenMP thread: 
+   jret = MAX(MemThrdMP2,MemThrdCCSD_A)
+   MemThrdCCSD_A = jret
+   jret = MAX(MemThrdMP2,MemThrdCCSD_B)
+   MemThrdCCSD_B = jret
+
+   if(memchk)then
+     if(maswrk)then
+     write(LuOut,9002)no,nu,nauxbas
+     write(LuOut,9003)
+     write(LuOut,9004)1+MemShMPI_A/INT(1.0D+6),1+MemThrdCCSD_A/INT(1.0D+6),&
+                      1+DMem4_A/INT(1.0D+6),1+DMem3/INT(1.0D+6)
+     write(LuOut,9005)1+MemShMPI_A/INT(1.0D+6),1+MemThrdCCSD_A/INT(1.0D+6),&
+                      1+DMem4_A/INT(1.0D+6),1+DMem3/INT(1.0D+6),           &
+                      REAL(MemShMPI_A,dp)*EIGHT/(TWO**30),                 &
+                      REAL(MemThrdCCSD_A,dp)*EIGHT/(TWO**30),              &
+                      REAL(DMem4_A,dp)*EIGHT/(TWO**30),                    &
+                      REAL(DMem3,dp)*EIGHT/(TWO**30)
+     write(LuOut,9006)1+MemShMPI_B/INT(1.0D+6),1+MemThrdCCSD_B/INT(1.0D+6),&
+                      DMem4_B/INT(1.0D+6),1+DMem3/INT(1.0D+6)
+     write(LuOut,9007)1+MemShMPI_B/INT(1.0D+6),1+MemThrdCCSD_B/INT(1.0D+6),&
+                      DMem4_B/INT(1.0D+6),1+DMem3/INT(1.0D+6),             &
+                      REAL(MemShMPI_B,dp)*EIGHT/(TWO**30),                 &
+                      REAL(MemThrdCCSD_B,dp)*EIGHT/(TWO**30),              &
+                      REAL(DMem4_B,dp)*EIGHT/(TWO**30),                    &
+                      REAL(DMem3,dp)*EIGHT/(TWO**30)
+     write(LuOut,9008)
+     write(LuOut,9009)
+     write(LuOut,9010)
+     write(LuOut,9011)
+     if(trecl .GE. TWO)write(LuOut,9012)nu2*noo,trecl
+     end if
+   else
+     if(MemTot .GT. NgotMx)then
+       if(maswrk)write(LuOut,9013)NgotMx,MemTot
+       call abrt
+     end if
+   end if
+
+!  EXETYP = CHECK jobs return from here.
+   if(memchk) RETURN
+
+!-------------------------------------------------------------------------
+! Open direct access file for storing t amplitudes and error vectors
+! for DIIS extrapolation. Unit number for the file and fname have to be 
+! the same as those permitted by iolib/ccopen: itfile= 71, fname='CCDIIS'
+!-------------------------------------------------------------------------
+
+   if(maswrk) call CCOPEN(itfile,nu2*noo,'CCDIIS')
+
+!-------------------------------------------------------------------------
+! Initialize the cluster operator T and the CCSD residual vector RT. Get 
+! initial RI-MP2 guess for doubles amplitudes and compute E(RI-MP2). 
+!-------------------------------------------------------------------------
+   call T(1)%InitMat('T1' ,  'ph')
+   call T(2)%InitMat('T2' ,'pphh')
+   call T(1)%SetZERO()
+   call T(2)%SetZERO()
+
+   call RT(1)%InitMat('RT1',  'ph')
+   call RT(2)%InitMat('RT2','pphh')
+
+   if(maswrk)write(LuOut,9014)REAL(MemMP2,dp)*EIGHT/1.0D+9,               &
+                              REAL(MemMP2,dp)*EIGHT/(TWO**30),            &
+                              REAL(NgotMx, dp)*EIGHT/1.0D+9,              &
+                              REAL(NgotMx, dp)*EIGHT/(TWO**30)
+
+   call TSECND(tim)
+   wall0 = wall 
+
+   call RICC_MP2guessT2(HNP,T,energies(2)) 
+   call DDI_GSUMF(3001,T(2)%MAT,nu2*noo)
+   ERIMP2 = energies(2)
+
+   if(DBGFLG .AND. maswrk)then
+      write(LuOut,*)'    T2 AMPLITUDES AT THE RI-MP2 LEVEL'
+      call T(2)%PrintTensor()
+   end if
+
+   if(maswrk)then
+   ioerr = 0
+   call CCDAWRIT(itfile,T(1)%MAT,nou,    1,ioerr,'DRRICC_rhf:WritMP2')
+   ioerr = 0
+   call CCDAWRIT(itfile,T(2)%MAT,noo*nu2,2,ioerr,'DRRICC_rhf:WritMP2')
+   end if
+
+   call TSECND(tim)
+   tmp2      = wall-wall0
+   ccwtim(2) = wall-wall0
+
+   call RICC_TUNIT(tmp2,HMSD)
+   if(maswrk)write(LuOut,9015)tmp2,HMSD
+   call flshbf(LuOut)
+
+!-------------------------------------------------------------------------
+! Iterative solution of CCSD amplitude equations. Destroy CCSD residual 
+! vectors once amplitude iterations converge. 
+!-------------------------------------------------------------------------
+   call RICC_TSOLVE(HNP,T,RT,NgotMx,MemCCSD,energies(3))
+   call RT(1)%DelMat()
+   call RT(2)%DelMat()
+   normt1 = SQRT(DDOT(nou,    T(1)%MAT,1,T(1)%MAT,1))
+   normt2 = SQRT(DDOT(nu2*noo,T(2)%MAT,1,T(2)%MAT,1))
+   ERISD  = energies(3)
+   ERINT3 = ZERO
+
+!-------------------------------------------------------------------------
+! Non-iterative triples corrections to energies. 
+! For terms involving a hole contraction, e.g., -\sum_m (ia|jm)*t(km)_(cb),
+! the fully symmetry unpacked T2 matrix is needed, as the sum over m has
+! to be complete over the occupied space. For this reason, we copy the 
+! symmetry packed T(2)%MAT matrix into an array called T2 and delete the
+! symmetry packed one. If gradients are to be implemented at some stage, 
+! the symmetry packed matrix can be resurrected from the unpacked one.
+!-------------------------------------------------------------------------
+   if(cpmet.EQ.3)then
+
+     call TSECND(tim)
+     wall0 = wall 
+
+     call RICC_dalloc4(nu,nu,no,no,T2full)
+     call T(2)%SymUnPack1234(nu2,no2,T2full)
+     call T(2)%DelMat()
+
+     call RICC_nitrip(HNP,T,T2full,energies(4))
+
+     call RICC_dfree4(T2full)
+
+     call TSECND(tim)
+     ccwtim(17) = wall-wall0
+
+     ERINT3 = ERINT3 + energies(4)
+   end if
+
+!-------------------------------------------------------------------------
+! Print out Euclidean norms of amplitude vectors, the t1-diagnostic, and
+! the summary of energy calculation.
+!-------------------------------------------------------------------------
+   if(maswrk)then
+     write(LuOut,9016)normt1/SQRT(TWO*REAL(no,dp)),normt1,normt2
+     call RICC_ESUMMARY(energies)
+   end if
+
+!-------------------------------------------------------------------------
+! All Done. Now destroy various types.
+!-------------------------------------------------------------------------
+   if(usedm3)then
+     do i=1,3
+        call DDI_DESTROY(HNP%INTS(i))
+     end do
+   end if
+   call HNP%DelH()
+   call T(1)%DelMat()
+   if(cpmet .NE. 3)call T(2)%DelMat()
+
+   ddiprnt = 0
+   call DDI_OUTPUT(ddiprnt)
+!-------------------------------------------------------------------------
+! Finally, print out a nice wall-time statictics. Skip for (E)FMO-RI-CC.
+!-------------------------------------------------------------------------
+   if(nfg .EQ. 0) call RICC_TimeStat
+
+!-------------------------------------------------------------------------
+! For FMO/EFMO calculations, close itfile.
+!-------------------------------------------------------------------------
+   if(nfg.NE.0 .AND. maswrk) call CCCLOS(itfile,'DELETE')
+   
+
+                                   ! F I N !
+
+
+   if(MaxCor .NE. NgotMx)then
+     if(maswrk) write(LuOut,7000)NgotMx-MaxCor
+   end if
+
+   9000 format(//,T10,                                                                       &
+               '*****************************************************************'           &
+               /T10,                                                                         &
+               '*                                                               *'           &
+               /T10,                                                                         &
+               '*       PARALLEL COUPLED-CLUSTER CALCULATION BASED ON THE       *'           &
+               /T10,                                                                         &
+               '*   RESOLUTION-OF-THE-IDENTITY APPROXIMATION FOR TWO-ELECTRON   *'           &
+               /T10,                                                                         &
+               '*                      REPULSION INTEGRALS                      *'           &
+               /T10,                                                                         &
+               '*                                                               *'           &     
+               /T10,                                                                         &     
+               '*               MODULE DEVELOPED BY DIPAYAN DATTA               *'           &     
+               /T10,                                                                         &     
+               '*                                                               *'           &
+               /T10,                                                                         &
+               '*      THE FOLLOWING PAPER SHOULD BE CITED WHEN USING RI-CC:    *'           &
+               /T10,                                                                         &
+               '*       DATTA, D.; GORDON, M. S. JCTC 2021, 17, 4799-4822.      *'           &
+               /T10,                                                                         &
+               '*                                                               *'           &
+               /T10,                                                                         &
+               '*****************************************************************'/)
+   9001 format(  5X,'THIS JOB IS RUNNING ON ',I3,' NODE(S) WITH ',I3,' PROCESSOR(S)/NODE'          ,/,&
+                 5X,'USING A MAXIMUM OF     ',I3,' OpenMP THREADS/PROCESSOR.') 
+   9002 format(//5X,'THIS PROGRAM USES A HYBRID PARALLELIZATION MODEL BASED ON THE MESSAGE'        ,/,&
+                 5X,'PASSING DISTRIBUTED DATA INTERFACE (DDI) AND THE SHARED MEMORY OpenMP.'      ,//,&
+                 5X,'FOR THE REQUESTED CALCULATION:'                                               ,/,&
+                 5X,'    NUMBER OF CORRELATED OCCUPIED ORBITALS (No): ',I7                         ,/,&
+                 5X,'    NUMBER OF CORRELATED VIRTUAL ORBITALS (Nv) : ',I7                         ,/,&
+                 5X,'    NUMBER OF AUXILIARY BASIS FUNCTIONS (Naux) : ',I7)
+   9003 format(/,5X,'TWO ALGORITHMS ARE AVAILABLE FOR EVALUATING THE MOST EXPENSIVE TERMS'         ,/,&
+                 5X,'IN CCSD EQUATIONS:'                                                           ,/,&
+                 5X,'     ALGORITHM A: SET USEDM4=.TRUE.  IN $RICC'                                ,/,&
+                 5X,'     ALGORITHM B: SET USEDM4=.FALSE. IN $RICC'                                ,/,&
+                 5X,'ALGORITHM A IS FASTER AND IS THEREFORE THE DEFAULT OPTION.'                   ,/,&
+                 5X,'ALGORITHM B MIGHT BE USEFUL WHEN THE CALCULATION SIZE IS LARGE AND/OR THE'    ,/,&
+                 5X,'COMPUTATIONAL RESOURCES ARE LIMITED.')  
+   9004 format(/,5X,'MEMORY ESTIMATES FOR ALGORITHM A:',/,5X,50('-')                               ,/,&
+                 5X,'1. SHARED MEMORY ON EACH PROCESSOR (DDI):                      ',I7,' MWORDS,',/,&
+                 5X,'2. MEMORY PER OpenMP THREAD:                                   ',I7,' MWORDS,',/,&
+                 5X,'3. TOTAL SHARED MEMORY FOR TEMPORARY STORAGE OF 4-INDEX 2ERIs: ',I7,' MWORDS,',/,& 
+                 5X,'4. TOTAL DISTRIBUTED MEMORY FOR STORING 3-CENTER 2-ERIs:       ',I7,' MWORDS.',/)  
+   9005 format(  5X,'TOTAL MEMORY NEED PER PROCESSOR (I.E., THE VALUE FOR - MWORDS - IN $SYSTEM):' ,/,&
+                 5X,I7,' (#1) + ',I7,' (#2) X q + ',I7,'/p (#3) + ',I7,'/p (#4) (IN MWORDS)'       ,/,&
+                 5X,F9.2,' (#1) + ',F9.2,' (#2) X q + ',F9.2,'/p (#3) + ',F9.2,'/p (#4) (IN GiB)' ,//,&
+                 5X,'WHERE p: NUMBER OF PROCESSORS (DDI),'                                         ,/,&
+                 5X,'      q: NUMBER OF OpenMP THREADS PER PROCESSOR.')
+   9006 format(/,5X,'MEMORY ESTIMATES FOR ALGORITHM B:',/,5X,50('-')                               ,/,&
+                 5X,'1. SHARED MEMORY ON EACH PROCESSOR (DDI):                      ',I7,' MWORDS,',/,&
+                 5X,'2. MEMORY PER OpenMP THREAD:                                   ',I7,' MWORDS,',/,&
+                 5X,'3. TOTAL SHARED MEMORY FOR TEMPORARY STORAGE OF 4-INDEX 2ERIs: ',I7,' MWORDS,',/,& 
+                 5X,'4. TOTAL DISTRIBUTED MEMORY FOR STORING 3-CENTER 2-ERIs:       ',I7,' MWORDS.',/)  
+   9007 format(  5X,'TOTAL MEMORY NEED PER PROCESSOR (I.E., THE VALUE FOR - MWORDS - IN $SYSTEM):' ,/,&
+                 5X,I7,' (#1) + ',I7,' (#2) X q + ',I7,'/p (#3) + ',I7,'/p (#4) (IN MWORDS)'       ,/,&
+                 5X,F9.2,' (#1) + ',F9.2,' (#2) X q + ',F9.2,'/p (#3) + ',F9.2,'/p (#4) (IN GiB)'  ,/)
+   9008 format(  5X,'*** THE ESTIMATE #4 IS RELEVANT ONLY IF USEDM3=.TRUE. IN $RICC.'              ,/,&
+                 5X,'IN THAT CASE:'                                                                ,/,&
+                 5X,'(a) SET - MEMDDI - IN $SYSTEM TO THE VALUE GIVEN IN #4 (IN MWORDS), AND'      ,/,&
+                 5X,'(b) RUN THE EXETYP=CHECK JOB ONE MORE TIME WITH USEDM3=.TRUE. IN $RICC,'      ,/,&
+                 5X,'    AS THIS WILL CHANGE THE ESTIMATES #1 AND #2.'                             ,/,&
+                 5X,'IF USEDM3=.FALSE., PLEASE IGNORE THE CONTRIBUTION #4 FROM THE MEMORY ESTIMATE',/,&
+               /,5X,'*** THE TOTAL SHARED MEMORY GIVEN IN #3 (ALGORITHM A) SHOULD BE DISTRIBUTED'  ,/,&
+                 5X,'OVER p PROCESSORS.',/)
+   9009 format(  5X,'FOR LARGE CALCULATIONS, WE RECOMMEND MULTINODE RUNS WITH ONE PROCESSOR PER'   ,/,&
+                 5X,'COMPUTE NODE.',/)
+   9010 format(  5X,'*** PLEASE SET OMP_NUM_THREADS IN rungms/install.info IN SUCH A WAY THAT THE' ,/,&
+                 5X,'NUMBER (q X ppn) DOES NOT EXCEED THE NUMBER OF LOGICAL CORES ON A COMPUTE'    ,/,&
+                 5X,'NODE. (ppn: NUMBER OF PROCESSORS PER NODE)')
+   9011 format(/,5X,'*** PLEASE CHOOSE THE NUMBER OF COMPUTE NODES AND/OR THE NUMBER OF PROCESSORS ',/,&
+                 5X,'(p) IN SUCH A WAY THAT'                                                        ,/,&
+                 5X,' (a) THE NET SHARED MEMORY IS ENOUGH TO HOLD THE 4-INDEX 2ERIs (ALGORITHM A).' ,/,&
+                 5X,' (b) THE TOTAL MEMORY NEED ON A COMPUTE NODE, I.E., ppn * MWORDS (IN $SYSTEM)' ,/,&
+                 5X,'     DOES NOT EXCEED THE AVAILABLE MEMORY ON THAT COMPUTE NODE.',/)
+   9012 format(  5X,'A POSSIBLE VALUE FOR - IOSIZE - IN $CCINP:',/,5X,42('-')                       ,/,&
+                 5X,'FOR THIS CALCULATION, THE RECORD LENGTH OF THE DISK FILE TO BE USED IS:'       ,/,&
+                 5X,I15,' WORDS (',F7.2,' GiB), WHICH EXCEEDS THE 2 GiB LIMIT.'                     ,/,&
+                 5X,'PLEASE SET - IOSIZE - TO 1/2, 1/3, ...., OF THE VALUE GIVEN IN WORDS.'         ,/,&
+                 5X,'NOTE THAT THE INPUT - IOSIZE - SHOULD BE SMALLER THAN THE MAXIMUM ALLOWED'     ,/,&
+                 5X,'VALUE OF 268435455 (2**28-1).',/)
+   9013 format(//5X,'                 *** INSUFFICIENT MEMORY REQUESTED *** '                       ,/,&
+                 5X,'AVAILABLE: ',I12,' WORDS, REQUIRED: ',I12,' WORDS.'                            ,/,&
+                 5X,'PLEASE PERFORM AN EXETYP=CHECK RUN FOR AN ESTIMATION OF THE MEMORY REQUIRED'   ,/,&
+                 5X,'FOR THIS CALCULATION.'//)   
+   9014 format(5X,'MEMORY NEED/PROCESSOR FOR THE RI-MP2 STEP: ',F9.2,' GB (',F9.2,' GiB)'           ,/,&
+               5X,'                         MEMORY AVAILABLE: ',F9.2,' GB (',F9.2,' GiB)')
+   9015 format(5X,'TIME TO COMPLETE THE RI-MP2 STEP: ',F6.2,2A,/) 
+   9016 format(/,5X,'        T1-DIAGNOSTIC: ',F15.8                                                 ,/,&
+                 5X,'NORM OF THE T1 VECTOR: ',F15.8                                                 ,/,&
+                 5X,'NORM OF THE T2 VECTOR: ',F15.8)
+   7000 format(/,1X,'Warning: Replicated memory leak in DRRICC_rhf.'                                ,/,&
+                 1X,I12,' words remain on the memory stack.',/)
+   7001 format(1X,'UNRECOGNIZED CCTYP FOR THE RICC MODULE: ',A8)
+   7002 format(1X,'SYNTAX ERROR FOUND IN $RICC GROUP')
+   7003 format(1X,'ILLEGAL VALUE OF IAUXBF FOUND IN THE $RICC NAMELIST ',I4)
+   7010 format(1X,'AUXILIARY BASIS OPTIONS',/,5X,23('-')                                            ,/,&
+               1X,'CABNAM=',A8,1X,'EXTCAB=',L2)
+
+   END SUBROUTINE DRRICC_rhf
+
+!*MODULE RICCRHF  * DECK RICC_TSOLVE
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    May 20, 2020
+!>
+!>    @brief   Construct CCSD residuals and solve them iteratively.
+!>
+!>
+
+   SUBROUTINE RICC_TSOLVE(HNP,T,RT,NgotMx,MemCCSD,ECCSD)
+
+   USE RICC_GMS_globals, ONLY: maswrk
+   USE RICC_ints,        ONLY: NormH
+   USE RICC_Shared_Data
+   USE RICC_memalloc
+   USE RICC_procs
+   USE RICC_MAT
+   USE RICCDIAG
+
+   IMPLICIT NONE
+
+   REAL(KIND=dp),INTENT(OUT) :: ECCSD
+   INTEGER,INTENT(IN)        :: NgotMx,MemCCSD
+   TYPE(NormH),INTENT(IN)    :: HNP
+   TYPE(WMAT),INTENT(INOUT)  :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   TYPE(HbarT1)              :: HBT1
+   REAL(KIND=dp)             :: wall0,tim,itstrt,itend,difmax,diismax
+   CHARACTER(LEN=2)          :: HMSD
+   INTEGER,PARAMETER         :: namptyp=2
+   INTEGER                   :: MemIn,i,ioerr,nextrap,IER1,IER2
+   INTEGER                   :: iter,macroiter,microiter,recn,IT1,IT2
+
+   MemIn = MaxCor
+
+   if(maswrk)then
+      write(LuOut,9001)
+      write(LuOut,9002)REAL(MemCCSD,dp)*EIGHT/1.0D+9,                     &
+                       REAL(MemCCSD,dp)*EIGHT/(TWO**30),                  &
+                       REAL(NgotMx,dp)*EIGHT/1.0D+9,                      &
+                       REAL(NgotMx,dp)*EIGHT/(TWO**30)
+      write(LuOut,9003)tolt
+      write(LuOut,9004)nitmax
+      if(mxdiis .EQ. nitmax+1)then
+        write(LuOut,*)'    DIIS CONVERGENCE ACCELERATION                  ...  OFF'
+      else
+        write(LuOut,*)'    DIIS CONVERGENCE ACCELERATION                  ...  ON'
+        write(LuOut,9005)mxdiis
+      end if
+      if(usedm4)then
+        write(LuOut,9006)
+      else
+        write(LuOut,9007)
+      end if 
+      write(LuOut,9008)
+   end if
+   call flshbf(LuOut)
+
+   iter = 0
+   loop_macro: do macroiter = 1,nitmax
+   loop_micro: do microiter = 1,mxdiis
+                  iter = iter+1
+                  if(mxdiis .NE. nitmax+1)then
+                    recn = namptyp*(microiter-1)
+                    IT1  = recn+1
+                    IT2  = recn+2
+                    IER1 = IT1 + namptyp*mxdiis
+                    IER2 = IT2 + namptyp*mxdiis 
+                  else
+                    IT1  = 1
+                    IT2  = 2
+                  end if 
+
+   call TSECND(tim)
+   itstrt = wall
+
+                  call RT(1)%SetZERO()
+                  call RT(2)%SetZERO()
+!-------------------------------------------------------------------------
+! Initialize T1-transformed Fock matrices and RI integrals. Add heads
+! to FBHH, FBHP, FBPP.
+!-------------------------------------------------------------------------
+                  call HBT1%Init_HbarT1('FBHH')
+                  call HBT1%Init_HbarT1('FBHP')
+                  call HBT1%Init_HbarT1('FBPP')
+                  call HBT1%Init_HbarT1('WmnX')
+                  call HBT1%Init_HbarT1('WmeX')
+
+                  call HBT1%SetZERO('FBHH')
+                  call HBT1%SetZERO('FBHP')
+                  call HBT1%SetZERO('FBPP')
+                  call HBT1%SetZERO('WmnX')
+                  call HBT1%SetZERO('WmeX')
+
+                  call DAXPY(no2,ONE,HNP%FHH,1,HBT1%FBHH,1)
+                  call DAXPY(nou,ONE,HNP%FHP,1,HBT1%FBHP,1)
+                  call DAXPY(nu2,ONE,HNP%FPP,1,HBT1%FBPP,1)
+!-------------------------------------------------------------------------
+! Construct T1-transformed intermediates and compute their contributions
+! to singles residuals, T1-transformed Fock matrix and RI integrals.
+!-------------------------------------------------------------------------
+   call TSECND(tim)
+   wall0 = wall
+
+                  call RICC_SD_MPT_0(HNP,HBT1,T,RT)
+
+   call TSECND(tim)
+   ccwtim(3)=ccwtim(3)+(wall-wall0)
+   wall0 = wall
+
+                  call RICC_SD_MPT_OO(HNP,HBT1,T)
+
+   call TSECND(tim)
+   ccwtim(4)=ccwtim(4)+(wall-wall0)
+   wall0 = wall
+
+                  call RICC_SD_MPT_OV(HNP,HBT1,T,RT)
+
+   call TSECND(tim)
+   ccwtim(5)=ccwtim(5)+(wall-wall0)
+   wall0 = wall
+!-------------------------------------------------------------------------
+! Add the leading term to the doubles residual, along with all T1 (also T2)
+! -transformed contributions. 
+!-------------------------------------------------------------------------
+
+                  call RICC_SD_WiaWjb(HBT1,RT)
+                  call HBT1%Del_HbarT1('WmeX')
+
+   call TSECND(tim)
+   ccwtim(7)=ccwtim(7)+(wall-wall0)
+   wall0 = wall
+!-------------------------------------------------------------------------
+! The (T1-transformed) Fock matrix contributions to CCSD residuals.
+!
+! Add FBHP contributions to the FBHH intermediate => needed for both RT1 and
+! RT2 residuals. This is an inexpensive N^3 step, thus perform in sequential. 
+!-------------------------------------------------------------------------
+                  call DGEMM('T','T',no,no,nu,ONE,T(1)%MAT,nu,HBT1%FBHP,  &
+                             no,ONE,HBT1%FBHH,no)
+
+                  call RICC_SD_FOCK(HBT1,T,RT)
+
+                  call DGEMM('N','T',nu,no,no,ONEM,T(1)%MAT,nu,HBT1%FBHH, &
+                             no,ONE,RT(1)%MAT,nu)
+                  call DGEMM('N','N',nu,no,nu,ONE,HBT1%FBPP,nu,T(1)%MAT,  &
+                             nu,ONE,RT(1)%MAT,nu)
+                  do i=1,no
+                     call DAXPY(nu,ONE,HNP%FHP(i,:),1,RT(1)%MAT(:,i),1)
+                  end do
+
+                  call HBT1%Del_HbarT1('FBHH')
+                  call HBT1%Del_HbarT1('FBHP')
+                  call HBT1%Del_HbarT1('FBPP')
+
+   call TSECND(tim)
+   ccwtim(8)=ccwtim(8)+(wall-wall0)
+   wall0 = wall
+!-------------------------------------------------------------------------
+! Crux of the CCSD problem! Add most expensive groups to the doubles 
+! residual. First construct the W^P_(a,b) intermediate.
+!-------------------------------------------------------------------------
+                  call HBT1%Init_HbarT1('WefX')
+                  call HBT1%SetZERO('WefX')
+                  call RICC_SD_MPT_VV(HNP,HBT1,T)
+
+   call TSECND(tim)
+   ccwtim(6)=ccwtim(6)+(wall-wall0)
+   wall0 = wall
+                  if(usedm4)then
+                    call RICC_SD_PPL_A(HBT1,T,RT,ONE) 
+                    call RICC_SD_PPL_A(HBT1,T,RT,ONEM) 
+                  else
+                    call RICC_SD_PPL_B(HBT1,T,RT) 
+                  end if
+
+   call TSECND(tim)
+   ccwtim(9)=ccwtim(9)+(wall-wall0)
+   wall0 = wall
+
+                  if(usedm4)then
+                    call RICC_SD_H3P3A(HNP,HBT1,T,RT) 
+                  else
+                    call RICC_SD_H3P3B(HNP,HBT1,T,RT) 
+                  end if
+                  call HBT1%Del_HbarT1('WefX')
+
+   call TSECND(tim)
+   ccwtim(10)=ccwtim(10)+(wall-wall0)
+   wall0 = wall
+
+                  call RICC_SD_HHL(HNP,HBT1,T,RT)
+                  call HBT1%Del_HbarT1('WmnX')
+
+   call TSECND(tim)
+   ccwtim(11)=ccwtim(11)+(wall-wall0)
+   wall0 = wall
+!-------------------------------------------------------------------------
+!  All done. Accumulate contributions from DDI/MPI ranks.
+!-------------------------------------------------------------------------
+                  call DDI_GSUMF(3002,RT(2)%MAT,nu2*noo)
+
+   call TSECND(tim)
+   ccwtim(12)=ccwtim(12)+(wall-wall0)
+   wall0 = wall
+
+                  call RICC_UpdateT2(HNP,RT,T)
+                  call RICC_UpdateT1(HNP,RT,T)
+
+   call TSECND(tim)
+   ccwtim(13)=ccwtim(13)+(wall-wall0)
+   wall0 = wall
+!-------------------------------------------------------------------------
+! Steps concerning iterative solution of amplitude equations and DIIS   
+! extrapolation. These steps involve disk I/O and are therefore performed
+! solely on DDI rank = 0, i.e., maswrk. In the case of DIIS extrapolation,
+! the extrapolated T vectors must in addition be broadcasted to all DDI 
+! ranks.
+! We are done with RT. The matrices therein can now be used for other work.
+!-------------------------------------------------------------------------
+
+    block_maswrk: if(maswrk)then
+      block_diis: if(mxdiis .NE. nitmax+1)then
+
+                  ioerr = 0
+                  call CCDAREAD(itfile,RT(1)%MAT,nou,    IT1,ioerr,       &
+                                'RICC_TSOLVE:ReadOld')
+                  ioerr = 0
+                  call CCDAREAD(itfile,RT(2)%MAT,nu2*noo,IT2,ioerr,       &
+                                'RICC_TSOLVE:ReadOld')
+                  call RICC_CalcErr(T,RT)
+                  call RICC_MaxErr(RT,difmax)
+                  ioerr = 0
+                  call CCDAWRIT(itfile,RT(1)%MAT,nou,    IER1,ioerr,      &
+                                'RICC_TSOLVE:WritErr')
+                  ioerr = 0
+                  call CCDAWRIT(itfile,RT(2)%MAT,nu2*noo,IER2,ioerr,      &
+                                'RICC_TSOLVE:WritErr')
+
+                  if(microiter .EQ. mxdiis)then
+                    IT1 = 1
+                    IT2 = 2
+                  else  
+                    IT1 = IT1 + namptyp
+                    IT2 = IT2 + namptyp
+                  end if
+                                       nextrap = microiter
+                  if(iter .GE. mxdiis) nextrap = mxdiis
+
+                  call RICC_DIIS_RHF(T,RT,IT1,IT2,itfile,nextrap,diismax)
+
+      else block_diis 
+                  ioerr = 0
+                  call CCDAREAD(itfile,RT(1)%MAT,nou,    IT1,ioerr,       &
+                                'RICC_TSOLVE:ReadOld')
+                  ioerr = 0
+                  call CCDAREAD(itfile,RT(2)%MAT,nu2*noo,IT2,ioerr,       &
+                                'RICC_TSOLVE:ReadOld')
+                  call RICC_CalcErr(T,RT)
+                  call RICC_MaxErr(RT,difmax)
+                  diismax = difmax
+                  ioerr = 0
+                  call CCDAWRIT(itfile,T(1)%MAT,nou,    IT1,ioerr,        &
+                                'RICC_TSOLVE:WritNew')
+                  ioerr = 0
+                  call CCDAWRIT(itfile,T(2)%MAT,nu2*noo,IT2,ioerr,        &
+                                'RICC_TSOLVE:WritNew')
+      end if block_diis
+      end if block_maswrk
+
+   call TSECND(tim)
+   ccwtim(14)=ccwtim(14)+(wall-wall0)
+   wall0 = wall
+
+                  if(mxdiis .NE. nitmax+1)then
+                    call DDI_BCAST(3003,'F',T(1)%MAT,nou,    0) 
+                    call DDI_BCAST(3004,'F',T(2)%MAT,nu2*noo,0) 
+                  end if
+                  call DDI_BCAST(3005,'F',difmax, 1,0) 
+                  call DDI_BCAST(3006,'F',diismax,1,0) 
+
+   call TSECND(tim)
+   ccwtim(12)=ccwtim(12)+(wall-wall0)
+   wall0 = wall
+
+                  call RICC_SD_ECORR(HNP,T,ECCSD)
+
+   call TSECND(tim)
+   ccwtim(15)=ccwtim(15)+(wall-wall0)
+   itend = wall-itstrt
+   ccwtim(16)=ccwtim(16)+(wall-itstrt)
+   call RICC_TUNIT(itend,HMSD) 
+
+                  if(maswrk)write(LuOut,9009)iter,ECCSD,difmax,diismax,   &
+                                             itend,HMSD
+                  call flshbf(LuOut)
+
+                  if(difmax .LT. tolt) go to 1
+
+                  if(iter .EQ. nitmax)then
+                    if(maswrk) write(LuOut,9010)
+                    call abrt
+                  end if
+
+   end do loop_micro
+   end do loop_macro
+
+   1 continue
+   if(maswrk) write(LuOut,9011)iter
+
+!-------------------------------------------------------------------------
+! Compute average time per iteration for steps involved in CCSD iter.
+!-------------------------------------------------------------------------
+   do i=3,16 
+      ccwtim(i) = ccwtim(i)/iter
+   end do
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   9001 format(//,25X,10('<'),1X,'CCSD AMPLITUDE ITERATIONS',1X,10('>'),/)
+   9002 format(5X,'MEMORY NEED/PROCESSOR FOR CCSD ITERATIONS: ',F9.2,' GB (',F9.2,' GiB)' ,/,&
+               5X,'                         MEMORY AVAILABLE: ',F9.2,' GB (',F9.2,' GiB)',/)
+   9003 format(5X,'CONVERGENCE THRESHOLD FOR CLUSTER AMPLITUDES   ... ',1P,E8.1)
+   9004 format(5X,'MAXIMUM NUMBER OF ITERATIONS ALLOWED           ... ',I4)
+   9005 format(5X,'MAXIMUM DIMENSION OF THE ITERATIVE SUBSPACE    ... ',I2)
+   9006 format(5X,'USEDM4=.T.: THE FASTER ALGORITHM IS USED FOR THE V4O2 & V3O3 TERMS',/)
+   9007 format(5X,'USEDM4=.F.: THE SLOWER ALGORITHM IS USED FOR THE V4O2 & V3O3 TEMRS',/)
+   9008 format(5X,'ITERATION',3X,'CCSD CORR. ENERGY',3X,'LARGEST AMPLITUDE ERROR', &
+               3X,'LARGEST DIIS ELEMENT',3X,'TIME')
+   9009 format(7X,I3,7X,f15.10,9X,E15.8,9X,E15.8,3X,F6.2,2A)
+   9010 format(/,5X,'CCSD ITERATIONS FAILED TO CONVERGE! ABORTING THE JOB',/)
+   9011 format(/,25X,' **** CC ITERATIONS CONVERGED IN ',I3,' CYCLES **** ')
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_TSOLVE.'  ,/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_TSOLVE
+
+   SUBROUTINE RICC_UpdateT1(HNP,RT,T)
+
+   USE RICC_ints,        ONLY: NormH
+   USE RICC_MAT
+   USE RICC_Shared_Data
+
+   IMPLICIT NONE
+
+   TYPE(WMAT),INTENT(INOUT) :: T(2)
+   TYPE(WMAT),INTENT(IN)    :: RT(2)
+   TYPE(NormH),INTENT(IN)   :: HNP
+   REAL(KIND=dp)            :: D1
+   INTEGER                  :: i,a,ai
+   INTEGER                  :: Mxthreads,Nthreads
+
+   Mxthreads   = omp_get_max_threads()
+   Nthreads    = MIN(Mxthreads,nou)
+   call omp_set_dynamic(.false.)
+   ccnumth(11) = Nthreads
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nou,HNP,T,RT)                                             &
+!$omp private(i,a,ai,D1)
+!$omp do schedule(static)
+
+   do ai=1,nou
+      a = (ai - 1)/no + 1
+      i = ai - (a - 1)*no
+      D1 = HNP%ORBEN(i) - HNP%ORBEN(a+no)
+      T(1)%MAT(a,i) = RT(1)%MAT(a,i)/D1
+   end do
+
+!$omp end do nowait
+!$omp end parallel
+
+   END SUBROUTINE RICC_UpdateT1
+
+   SUBROUTINE RICC_UpdateT2(HNP,RT,T)
+
+   USE RICC_ints,        ONLY: NormH
+   USE RICC_MAT
+   USE RICC_Shared_Data
+
+   IMPLICIT NONE
+
+   TYPE(WMAT),INTENT(INOUT) :: T(2)
+   TYPE(WMAT),INTENT(IN)    :: RT(2)
+   TYPE(NormH),INTENT(IN)   :: HNP
+   REAL(KIND=dp)            :: x,D2
+   INTEGER                  :: i,j,ij,a,b,ab,ba
+   INTEGER                  :: Mxthreads,Nthreads
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,noo)
+   call omp_set_dynamic(.false.)
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(no,nu,noo,HNP,T,RT)                                          &
+!$omp private(i,j,ij,a,b,ab,ba,x,D2)
+!$omp do schedule(static)
+
+   loop_ij: do ij=1,noo
+            x = HALF*(ONE + SQRT(ONE + EIGHT*REAL(ij,dp)))
+            i = FLOOR(x)
+            j = ij - i*(i-1)/2
+            if(j .EQ. 0)then
+              i = i-1
+              j = i
+            end if
+
+            do a=1,nu
+               do b=1,a
+                  ab = (a-1)*nu+b
+                  ba = (b-1)*nu+a
+                  D2 = HNP%ORBEN(i)    + HNP%ORBEN(j)                     &
+                      -HNP%ORBEN(a+no) - HNP%ORBEN(b+no)
+
+                            T(2)%MAT(ab,ij) = RT(2)%MAT(ab,ij)/D2
+                  if(a.NE.b)T(2)%MAT(ba,ij) = RT(2)%MAT(ba,ij)/D2
+               end do
+            end do
+
+   end do loop_ij
+
+!$omp end do nowait
+!$omp end parallel
+
+   END SUBROUTINE RICC_UpdateT2
+
+!*MODULE RICCRHF  * DECK RICC_DIIS_RHF
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    June 7, 2020 
+!> 
+!>    @brief   The DIIS convergence accelerator for the RHF case.
+!>
+!>
+
+   SUBROUTINE RICC_DIIS_RHF(T,RT,WR1,WR2,ifile,nextrap,diismax)
+
+   USE RICC_GMS_globals, ONLY: maswrk
+   USE RICC_Shared_Data
+   USE RICC_memalloc
+   USE RICC_procs
+   USE RICC_MAT
+
+   IMPLICIT NONE
+
+   TYPE(WMAT),INTENT(INOUT)  :: T(2)
+   TYPE(WMAT),INTENT(INOUT)  :: RT(2)
+   REAL(KIND=dp),INTENT(OUT) :: diismax
+   INTEGER,INTENT(IN)        :: ifile,WR1,WR2,nextrap
+   REAL(KIND=dp),ALLOCATABLE :: ERM(:,:),Z(:)
+   INTEGER,ALLOCATABLE       :: IPVT(:)
+   REAL(KIND=dp)             :: coeff,X,DDOT,DET
+   INTEGER                   :: i,j,iter,jter,job,IT1,IT2,JT1,JT2
+   INTEGER                   :: MemIn,trskip,ioerr
+
+   MemIn = Maxcor
+
+   call RICC_ialloc1(nextrap+1,IPVT)
+   call RICC_dalloc1(nextrap+1,Z)
+   call RICC_dalloc2(nextrap+1,nextrap+1,ERM)
+   
+   call RICC_dzero(1,nextrap+1,1,nextrap+1,ERM)
+
+   trskip = 2*mxdiis
+
+   do i=2,nextrap+1
+      iter = 2*(i-2) + trskip
+      IT1  = iter+1
+      IT2  = iter+2
+
+      ioerr = 0
+      call CCDAREAD(ifile,T(1)%MAT,nou,    IT1,ioerr,'RICC_DIIS:Read t1')
+      ioerr = 0
+      call CCDAREAD(ifile,T(2)%MAT,nu2*noo,IT2,ioerr,'RICC_DIIS:Read t2')
+
+      do j=2,i
+         jter = 2*(j-2) + trskip
+         JT1  = jter+1
+         JT2  = jter+2
+
+         ioerr = 0
+         call CCDAREAD(ifile,RT(1)%MAT,nou,    JT1,ioerr,                 &
+                      'RICC_DIIS:Read r1')
+         ioerr = 0
+         call CCDAREAD(ifile,RT(2)%MAT,nu2*noo,JT2,ioerr,                 &
+                      'RICC_DIIS:Read r2')
+
+         X =     DDOT(nou,    T(1)%MAT,1,RT(1)%MAT,1)
+         X = X + DDOT(nu2*noo,T(2)%MAT,1,RT(2)%MAT,1)
+         ERM(i,j) = X
+         ERM(j,i) = X
+      end do
+   end do
+
+!-------------------------------------------------------------------------
+! Apply a diagonal preconditioner (1.d-4,1,...,1) in order to slightly 
+! improve numerical stability. CFOUR trick!
+!-------------------------------------------------------------------------
+   do i=2,nextrap+1
+      ERM(i,1) = -1.0D-04 
+      ERM(1,i) = -1.0D-04 
+   end do
+!-------------------------------------------------------------------------
+! Gaussian Elimination and factoring the error matrix.
+!-------------------------------------------------------------------------
+   call DGECO(ERM,nextrap+1,nextrap+1,IPVT,DET,Z)
+
+!-------------------------------------------------------------------------
+! Solve the system of linear equations: ERM*X = Z. Set Z first.
+!-------------------------------------------------------------------------
+   job = 0
+   call RICC_vzero(1,nextrap+1,Z)
+   Z(1) = -1.0D-04
+
+   call DGESL(ERM,nextrap+1,nextrap+1,IPVT,Z,job)
+!-------------------------------------------------------------------------
+! 1. Compute DIIS residual + current Jacobi update 
+!-------------------------------------------------------------------------
+
+   call T(1)%SetZERO()
+   call T(2)%SetZERO()
+
+   do i=1,nextrap
+      iter  = 2*(i-1) + trskip
+      IT1   = iter+1
+      IT2   = iter+2
+      coeff = Z(i+1)
+
+      ioerr = 0
+      call CCDAREAD(ifile,RT(1)%MAT,nou,    IT1,ioerr,'RICC_DIIS:r11')
+      ioerr = 0
+      call CCDAREAD(ifile,RT(2)%MAT,nu2*noo,IT2,ioerr,'RICC_DIIS:r12')
+
+      call DAXPY(nou,    coeff,RT(1)%MAT,1,T(1)%MAT,1)
+      call DAXPY(nu2*noo,coeff,RT(2)%MAT,1,T(2)%MAT,1)
+   end do
+
+   call RICC_MaxErr(T,diismax)
+!-------------------------------------------------------------------------
+! 2. DIIS extrapolation
+!-------------------------------------------------------------------------
+
+   do i=1,nextrap
+      iter = 2*(i-1)
+      IT1  = iter+1
+      IT2  = iter+2
+      coeff = Z(i+1)
+
+      ioerr = 0
+      call CCDAREAD(ifile,RT(1)%MAT,nou,    IT1,ioerr,'RICC_DIIS:r21')
+      ioerr = 0
+      call CCDAREAD(ifile,RT(2)%MAT,nu2*noo,IT2,ioerr,'RICC_DIIS:r22')
+
+      call DAXPY(nou,    coeff,RT(1)%MAT,1,T(1)%MAT,1)
+      call DAXPY(nu2*noo,coeff,RT(2)%MAT,1,T(2)%MAT,1)
+   end do
+!-------------------------------------------------------------------------
+! Extrapolated amplitudes have been obtained, store them in the disk.
+!-------------------------------------------------------------------------
+   ioerr = 0
+   call CCDAWRIT(ifile,T(1)%MAT,nou,    WR1,ioerr,'RICC_DIIS:WritET1')
+   ioerr = 0
+   call CCDAWRIT(ifile,T(2)%MAT,noo*nu2,WR2,ioerr,'RICC_DIIS:WritET2')
+
+   call RICC_ifree1(IPVT)
+   call RICC_dfree1(Z)
+   call RICC_dfree2(ERM)
+
+   if(MaxCor .NE. MemIn)then
+     if(maswrk) write(LuOut,7000)MemIn-MaxCor
+   end if
+
+   7000 format(/,1X,'Warning: Replicated memory leak in RICC_DIIS_RHF.'  ,/,&
+                 1X,I12,' words remain on the memory stack.',/)
+
+   END SUBROUTINE RICC_DIIS_RHF
+
+!*MODULE RICCRHF  * DECK RICC_CalcErr
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    June 5, 2020 
+!> 
+!>    @brief   Compute error between amplitude vectors from two  
+!>             consecutive iterations. Note: Aold is altered.
+!>
+!>
+
+   SUBROUTINE RICC_CalcErr(Anew,Aold)
+
+   USE RICC_MAT
+   USE RICC_Shared_Data
+
+   IMPLICIT NONE
+
+   TYPE(WMAT),INTENT(INOUT) :: Aold(2)
+   TYPE(WMAT),INTENT(IN)    :: Anew(2)
+   INTEGER                  :: i,j,ij,Mxthreads,Nthreads
+
+   Mxthreads = omp_get_max_threads()
+   Nthreads  = MIN(Mxthreads,SIZE(Anew(1)%MAT))
+   call omp_set_dynamic(.false.)
+
+!$omp parallel default(none) num_threads(Nthreads)                        &
+!$omp shared(Aold,Anew)                                                   &
+!$omp private(i,j,ij)
+
+!$omp do schedule(static)
+
+   do ij=1,SIZE(Anew(1)%MAT)
+      i = (ij - 1)/SIZE(Anew(1)%MAT,2) + 1
+      j = ij - (i - 1)*SIZE(Anew(1)%MAT,2)
+      Aold(1)%MAT(i,j) = Anew(1)%MAT(i,j)-Aold(1)%MAT(i,j)
+   end do
+
+!$omp end do nowait
+
+!$omp do schedule(static) collapse(2)
+
+   do i=1,SIZE(Anew(2)%MAT,1)
+   do j=1,SIZE(Anew(2)%MAT,2)
+      Aold(2)%MAT(i,j) = Anew(2)%MAT(i,j)-Aold(2)%MAT(i,j)
+   end do
+   end do
+
+!$omp end do nowait
+!$omp end parallel
+
+   END SUBROUTINE RICC_CalcErr
+
+!*MODULE RICCRHF  * DECK RICC_MaxErr
+!>
+!>    @author  Dipayan Datta
+!>
+!>    @date    June 5, 2020 
+!> 
+!>    @brief   Compute the maximum of an amplitude error vector.
+!>
+!>
+
+   SUBROUTINE RICC_MaxErr(A,difmax)
+
+   USE RICC_MAT
+   USE RICC_Shared_Data
+
+   IMPLICIT NONE
+
+   REAL(KIND=dp),INTENT(OUT) :: difmax
+   TYPE(WMAT),INTENT(IN)     :: A(2)
+   INTEGER                   :: i,j,ij
+
+   difmax = ZERO
+   
+   do ij=1,SIZE(A(1)%MAT)
+      i = (ij - 1)/SIZE(A(1)%MAT,2) + 1
+      j = ij - (i - 1)*SIZE(A(1)%MAT,2)
+      if(ABS(A(1)%MAT(i,j)) .GT. difmax) difmax = ABS(A(1)%MAT(i,j))
+   end do
+
+   do i=1,SIZE(A(2)%MAT,1)
+   do j=1,SIZE(A(2)%MAT,2)
+      if(ABS(A(2)%MAT(i,j)) .GT. difmax) difmax = ABS(A(2)%MAT(i,j))
+   end do
+   end do
+
+   END SUBROUTINE RICC_MaxErr
+
+#endif

@@ -1,0 +1,17 @@
+ $CONTRL DFTTYP=REVPBEX $END
+ $SYSTEM MWORDS=100 $END
+ $CONTRL MAXIT=200 SCFTYP=UHF RUNTYP=ENERGY ISPHER=1 UNITS=ANGS
+  EXETYP=RUN COORD=UNIQUE ICHARG=0 MULT=2            $END
+ $BASIS GBASIS=MIDI                                  $END
+ $SCF DIRSCF=.TRUE.                                  $END
+ $SCF DIIS=.TRUE.                                    $END
+ $DFT NRAD=48 NLEB=110                               $END
+ $DATA
+ Hydrogen atom
+C1
+ H           1.0   0. 0. 0.
+ $END
+
+!
+!TRAVIS-CI SMALL
+!

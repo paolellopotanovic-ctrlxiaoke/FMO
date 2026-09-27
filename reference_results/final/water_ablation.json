@@ -1,0 +1,69 @@
+{
+  "metrics": [
+    {
+      "explicit_water_policy": "retained_water",
+      "model": "raw_tPIE",
+      "pearson_r": 0.4792326084,
+      "kendall_tau": 0.3200549764,
+      "p38_pearson_r": 0.5681527263,
+      "p38_kendall_tau": 0.3824156061
+    },
+    {
+      "explicit_water_policy": "retained_water",
+      "model": "tPIE+clogP in-sample",
+      "pearson_r": 0.6088423482,
+      "kendall_tau": 0.4996327305,
+      "p38_pearson_r": 0.6540354569,
+      "p38_kendall_tau": 0.4650030139
+    },
+    {
+      "explicit_water_policy": "removed_from_fmo_pocket",
+      "model": "raw_tPIE",
+      "pearson_r": 0.475757305,
+      "kendall_tau": 0.3158451236,
+      "p38_pearson_r": 0.5592600381,
+      "p38_kendall_tau": 0.3716433355
+    },
+    {
+      "explicit_water_policy": "removed_from_fmo_pocket",
+      "model": "tPIE+clogP in-sample",
+      "pearson_r": 0.6020411692,
+      "kendall_tau": 0.4884064561,
+      "p38_pearson_r": 0.6366324398,
+      "p38_kendall_tau": 0.436276959
+    },
+    {
+      "explicit_water_policy": "removed_before_preparation",
+      "model": "raw_tPIE",
+      "pearson_r": 0.4137782296,
+      "kendall_tau": 0.2765531634,
+      "p38_pearson_r": 0.4006665216,
+      "p38_kendall_tau": 0.2711021433
+    },
+    {
+      "explicit_water_policy": "removed_before_preparation",
+      "model": "tPIE+clogP in-sample",
+      "pearson_r": 0.5577311504,
+      "kendall_tau": 0.482793319,
+      "p38_pearson_r": 0.5232509212,
+      "p38_kendall_tau": 0.4219139316
+    }
+  ],
+  "paired_p38": {
+    "retained_water": {
+      "n_pairs": 34,
+      "mean_tpie_delta_kcal_mol": 0.0,
+      "median_tpie_delta_kcal_mol": 0.0
+    },
+    "removed_from_fmo_pocket": {
+      "n_pairs": 34,
+      "mean_tpie_delta_kcal_mol": 20.034499999999998,
+      "median_tpie_delta_kcal_mol": 17.571000000000005
+    },
+    "removed_before_preparation": {
+      "n_pairs": 34,
+      "mean_tpie_delta_kcal_mol": 16.86264705882353,
+      "median_tpie_delta_kcal_mol": 17.076499999999996
+    }
+  }
+}

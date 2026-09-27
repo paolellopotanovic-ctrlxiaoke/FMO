@@ -1,0 +1,15 @@
+#!/bin/csh
+set VBE0=-76.052875
+set VBE1=-75.130286
+
+set VB0=`grep "TOTAL ENERGY =" $1 | tail -1 | awk '{ print $4 }'`0
+set VB1=`grep "TOTAL E\[REF\] =" $1 | tail -1 | awk '{ print $4 }'`0
+
+set ierr=0
+set TOTerr=`$chkabs $VB0 $VBE0 $tolE`
+if($status != 0) set ierr=1 
+set REFerr=`$chkabs $VB1 $VBE1 $tolE`
+if($status != 0) set ierr=1 
+#echo -n "VB1=$VB1 REFerr=$REFerr VBE1=$VBE1"
+echo -n "TOTerr=$TOTerr REFerr=$REFerr."
+exit $ierr 

@@ -1,0 +1,79 @@
+! This example calculates FED couplings between
+! locally excited states of two Na2 "molecules". It
+! was inspired by:
+!
+! J. Chem. Theory Comput. 2022, 18, 11, 6577–6587
+!
+! This artificial example has the advantage that the
+! electrostatic coupling between the investigated
+! localized states is well described by a dipole
+! approximation.
+!
+! From FMO1-TDDFT (na2_chain2_dimer12_fmo_fret.inp)
+! we get the lowest localized excited state of
+! fragment 1 at
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  1  A         -323.6146045713    2.224     0.0000  4.1995  0.0000    0.9610
+!
+! and that of fragment 2 at
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  1  A         -323.6184241973    2.059     0.0000 -4.5642 -0.0000    1.0510
+!
+! In FMO1-FRET the coupling between those states is
+!
+!        1       2 FRET TO =    0.06472326
+!
+! and the two corresponding delocalized states are
+!
+! STATE  EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!            eV          X       Y       Z     STRENGTH
+!   1       2.037     0.0000 -5.6849 -0.0000    1.613
+!   2       2.247     0.0000  2.4797 -0.0000    0.338
+!
+! For the full TDDFT calculation we get
+!
+!  STATE             ENERGY     EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!  0 ->             HARTREE          EV         X       Y       Z     STRENGTH
+!  1  A         -647.2859985599    2.034     0.0000  5.6859 -0.0000    1.6109
+!  2  A         -647.2782849599    2.244    -0.0000 -2.4673 -0.0000    0.3346
+!
+! for the first two delocalized states and
+!
+!  STATES     X12(D)     X12(A)       DX12   COUPLING(EV)    FED-DX1    FED-DX2            EL1            EL2
+!  1    2  -0.616703   0.616703  -1.233406     -0.0650376  -1.563229   1.560881      2.0563354      2.2210700
+!
+! for the FED coupling that can be extracted from these delocalized states.
+! With Multi-FED-FCD we have
+!
+! STATE  EXCITATION  TRANSITION DIPOLE, A.U.  OSCILLATOR
+!            eV          X       Y       Z     STRENGTH
+!   1       2.222     0.0000  4.1995  0.0000    0.960
+!   5       2.057     0.0000 -4.5646  0.0000    1.050
+!
+! for the two lowest-lying localized states and 0.0650540
+! for their coupling. State energies and absolute values
+! of transition dipole moments are very close between
+! fragment FMO1-TDDFT states and Multi-FED-FCD localized
+! states, while the absolute value of the coupling is a
+! bit higher with Multi-FED-FCD than with FMO1-FRET.
+!
+ $contrl scftyp=rhf runtyp=energy icut=10
+         tddft=excite dfttyp=none units=bohr $end
+ $system mwords=5 $end
+ $basis  gbasis=n31 ngauss=6 $end
+ $scf    conv=1d-7 $end
+ $tddft  nstate=10 tammd=.true. cnvtol=1d-7
+         unrlx=.true. fed=.true. ifedat(1)=1,2,3,4
+ $end
+ $data
+na2 chain dimer12
+C1
+Na  11.0   0.0000000     -3.20000000     0.00000000
+Na  11.0   0.0000000      3.20000000     0.00000000
+Na  11.0   0.0000000     23.22500000     0.00000000
+Na  11.0   0.0000000     28.77500000     0.00000000
+ $end

@@ -1,0 +1,227 @@
+{
+  "parse_header" : "FMO - Segment pair properties",
+  "parse_group" : [
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - i        ",
+     "parse_type" : "integer",
+     "parse_precision" : 0,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - j        ",
+     "parse_type" : "integer",
+     "parse_precision" : 0,
+     "parse_value_index" : 1,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - R,A      ",
+     "parse_precision" : -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - R,rel    ",
+     "parse_precision" : -1,
+     "parse_value_index" : 1,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - EES_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 2,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - EDI_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 3,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - Ees_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 4,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - Enones_ij",
+     "parse_precision" : -1,
+     "parse_value_index" : 5,
+     "parse_line_offset" : 4,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "1st pair - E_ij     ",
+     "parse_precision" : -1,
+     "parse_value_index" : 6,
+     "parse_line_offset" : 4,
+     "parse_required" : true
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - i        ",
+     "parse_type" : "integer",
+     "parse_precision" : 0,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - j        ",
+     "parse_type" : "integer",
+     "parse_precision" : 0,
+     "parse_value_index" : 1,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - R,A      ",
+     "parse_precision" : -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - R,rel    ",
+     "parse_precision" : -1,
+     "parse_value_index" : 1,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - EES_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 2,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - EDI_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 3,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - Ees_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 4,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - Enones_ij",
+     "parse_precision" : -1,
+     "parse_value_index" : 5,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "2nd pair - E_ij     ",
+     "parse_precision" : -1,
+     "parse_value_index" : 6,
+     "parse_line_offset" : 5,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - i        ",
+     "parse_type" : "integer",
+     "parse_precision" : 0,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - j        ",
+     "parse_type" : "integer",
+     "parse_precision" : 0,
+     "parse_value_index" : 1,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - R,A      ",
+     "parse_precision" : -1,
+     "parse_value_index" : 0,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - R,rel    ",
+     "parse_precision" : -1,
+     "parse_value_index" : 1,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - EES_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 2,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - EDI_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 3,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - Ees_ij   ",
+     "parse_precision" : -1,
+     "parse_value_index" : 4,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - Enones_ij",
+     "parse_precision" : -1,
+     "parse_value_index" : 5,
+     "parse_line_offset" : 6,
+     "parse_required" : true   
+  },
+  {
+     "regex_string" : "^(\\s*)Segment pair properties(\\s*)\\(kcal/mol\\).*$",
+     "parse_name"   : "3rd pair - E_ij     ",
+     "parse_precision" : -1,
+     "parse_value_index" : 6,
+     "parse_line_offset" : 6,
+     "parse_required" : false   
+  }
+  ]
+}

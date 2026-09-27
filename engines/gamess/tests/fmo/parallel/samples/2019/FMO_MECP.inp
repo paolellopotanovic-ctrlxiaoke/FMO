@@ -1,0 +1,61 @@
+! This is an example of three-level GDDI (GDDI/3)
+! applied to the search of the minimum energy crossing point
+! of the singlet and triplet states of solvated methylene,
+! computed with FMO.
+! The method is described in DOI: 10.1021/acs.jctc.9b00641.
+!
+! $CONTRL should describe any open-shell state of the two (here, triplet).
+! $FMO should describe state 1 (here, singlet).
+! $MEX describes the actual details of the two states (singlet and triplet).
+! MULT1=1/SCF1=RHF in $MEX should be the same as SCFFRG/MULT in $FMO.
+!
+! This run uses two worlds (ngroup=2). Each world is divided into
+! 3 groups (nsubgr=3). 
+! Therefore, this job should be run at least on 6 logical nodes.
+! It will not run on less than 6 *nodes* (do not confuse with cores).
+! Now, if you have one physical node, you can define logical nodes.
+! For sockets it is done by providong a hostlist argument to rungms.
+! For MPI, set up DDI_LOGICAL_NODE_SIZE in rungms.
+!
+! This run is limited by 2 steps. It does not actually find the MECP.
+!
+!                       singlet            triplet
+!NSERCH:   0 E=      -188.31389676      -188.35577985 GM= 0.111584 GR= 0.027299
+!NSERCH:   1 E=      -188.30919576      -188.33693698 GM= 0.069297 GR= 0.018412
+!
+ $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=MEX nprint=-5 $END
+ $GDDI ngroup=2 parout=.t. nsubgr=3 baltyp=dlb $end
+ $SYSTEM TIMLIM=1000 memory=10000000 $END
+ $MEX IMEXFG=1 MULT1=1 MULT2=3 scf1=rhf scf2=rohf NSTEP=1 $END
+ $SCF DIRSCF=.TRUE. NPUNCH=0 $END
+ $BASIS  GBASIS=STO NGAUSS=3 $END
+ $FMOPRP NPRINT=9 MODORB=3 $END
+ $FMO
+      SCFFRG(1)=RHF
+      MULT(1)=1
+      MODGRD=42
+      NLAYER=1
+      NFRAG=3
+      FRGNAM(1)= CH2, aH2O, bH2O
+      INDAT(1)= 1 1 1 2 2 2 3 3 3
+ $END
+ $DATA
+Solvated Methylene.
+C1
+H 1
+C 6
+O 8
+ $END
+ $FMOXYZ
+ C           6.0  -0.6264309158  -0.0122690426  -0.0304646599
+ H           1.0  -0.1540222436  -0.0398548862   0.9872657099
+ H           1.0   0.2873245934  -0.0549355744  -0.6807028551
+ O           8.0   5.9563041199   0.3748240310   0.0870239172
+ H           1.0   6.1177801646  -0.0463557848   0.9660624234
+ H           1.0   6.8860220368   0.4686611264  -0.2386438351
+ O           8.0   8.5351524374   0.6295155764  -0.7980741746
+ H           1.0   8.7591140570   1.5687397204  -1.0026845104
+ H           1.0   8.6576577504   0.2106148340  -1.6832876389
+ $END
+!TRAVIS-CI SKIP
+!Requires multi-node

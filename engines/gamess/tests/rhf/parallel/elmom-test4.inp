@@ -1,0 +1,47 @@
+!          ---------------------
+!          ELECTROSTATIC MOMENTS
+!          ---------------------
+!
+! POINT   1           X           Y           Z (BOHR)    CHARGE
+!                -0.000000   -0.000000   -0.000000       -0.00 (A.U.)
+!         DX          DY          DZ         /D/  (DEBYE)
+!     0.000975    4.457488    0.088199    4.458361
+!        QXX         QYY         QZZ         QXY         QXZ         QYZ
+!     6.387571   -6.127463   -0.260109   -0.002849    0.000415    2.154300
+!        OXXX        OXXY        OXXZ        OXYY        OYYY        OYYZ
+!    -0.003992   -5.726118   -2.726056    0.005459   11.830376   -6.792236
+!        OXZZ        OYZZ        OZZZ        OXYZ  (X10**34 ESU-CM**3)
+!    -0.001467   -6.104259    9.518293   -0.000712
+!
+ !
+ $contrl maxit=200 scftyp=rhf runtyp=energy $end
+ $contrl QMTTOL=1.0E-06 icut=11 itol=30 ispher=1 $end
+ $contrl nzvar=1 $end
+ *** $contrl molplt=.t. exetyp=check $end
+ $system mwords=40  $end
+ !
+ $elmom iemom=3 $end
+ $basis gbasis=cc6 $end
+ *** $guess guess=moread $end
+ $scf dirscf=.true. damp=.t. fdiff=.f. $end
+ !
+ $zmat auto=.t. dlc=.t. $end
+ !
+ $data
+ DMSO, C1
+ C1
+ O01         8.0  -0.0003168606  -1.4361756868   0.1861335850
+ S02        16.0  -0.0000308427  -0.0978593582  -0.4422667422
+ C03         6.0  -1.3347262865   0.8353375632   0.3415109279
+ C04         6.0   1.3351145037   0.8347093872   0.3414946356
+ H05         1.0  -1.3038146434   1.8742857816   0.0166767841
+ H06         1.0   2.2712295969   0.3758464124   0.0326965185
+ H07         1.0  -1.2243779609   0.7562517077   1.4225444664
+ H08         1.0  -2.2710681543   0.3769353292   0.0327186488
+ H09         1.0   1.2247160978   0.7556492802   1.4225223211
+ H10         1.0   1.3046998824   1.8736861643   0.0167318543
+ $end
+! TRAVIS-CI LARGE
+! TRAVIS-CI LONG 
+! TRAVIS-CI SKIP
+

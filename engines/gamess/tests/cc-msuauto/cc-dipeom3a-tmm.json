@@ -1,0 +1,52 @@
+{
+  "name": "cc-dipeom3a-tmm.log",
+  "validation": [
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-154.8790862158",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(DOUBLED IONIZATION) : STATE 1",
+      "value": "-0.2244461434",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(TOTAL DIP-EOMCC) : STATE 1",
+      "value": "-155.4159810318",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SPIN",
+      "name": "S-SQUARED",
+      "value": "2.000",
+      "type": "float",
+      "precision": 3,
+      "tolerance": 0.5
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "0.000000",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "1819.7",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

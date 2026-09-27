@@ -1,0 +1,116 @@
+{
+  "name": "cc-deaeom2a-tmm.log",
+  "validation": [
+    {
+      "header": "SELF-CONSISTENT FIELD ENERGY",
+      "name": "FINAL SCF ENERGY",
+      "value": "-154.1487296460",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(DOUBLY ELECTRON ATTACHMENT) : STATE 1",
+      "value": "-0.7824235700",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(DOUBLY ELECTRON ATTACHMENT) : STATE 2",
+      "value": "-0.7341033357",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(DOUBLY ELECTRON ATTACHMENT) : STATE 3",
+      "value": "-0.7341033357",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(DOUBLY ELECTRON ATTACHMENT) : STATE 4",
+      "value": "-0.6325135188",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(DOUBLY ELECTRON ATTACHMENT) : STATE 5",
+      "value": "-0.5488352004",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(TOTAL DEA-EOMCC) : STATE 1",
+      "value": "-155.4300289206",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(TOTAL DEA-EOMCC) : STATE 2",
+      "value": "-155.3817086864",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(TOTAL DEA-EOMCC) : STATE 3",
+      "value": "-155.3817086864",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(TOTAL DEA-EOMCC) : STATE 4",
+      "value": "-155.2801188695",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "COUPLED-CLUSTER : DEA/DIP-EOMCC CALCULATIONS",
+      "name": "E(TOTAL DEA-EOMCC) : STATE 5",
+      "value": "-155.1964405510",
+      "type": "float",
+      "precision": 10,
+      "tolerance": 5e-08
+    },
+    {
+      "header": "SPIN",
+      "name": "S-SQUARED",
+      "value": "0.000",
+      "type": "float",
+      "precision": 3,
+      "tolerance": 0.5
+    },
+    {
+      "header": "ELECTROSTATICS",
+      "name": "DIPOLE MOMENT",
+      "value": "0.000000",
+      "type": "float",
+      "precision": 6,
+      "tolerance": 0.0005
+    },
+    {
+      "header": "TOTAL WALLTIME",
+      "name": "TOTAL WALLTIME (S)",
+      "value": "257.6",
+      "type": "skip_float",
+      "precision": 1
+    }
+  ]
+}

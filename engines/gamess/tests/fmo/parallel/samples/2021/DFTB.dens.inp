@@ -1,0 +1,55 @@
+! This input produces a cube file with electron density on a grid for FMO-DFTB.
+! The grid is constructed automatically (modprp=20) by adding 2 vdW radius
+! long extra space around the molecule (grdpad(1)=2).
+! This input uses the grid window technique to accelerate calculations
+! by avoiding far points. If you do not want it, you can use grdpad(1)=2,1000.
+! The mesh spacing of the grid is 0.1 A (SIZE=0.1).
+! For DFTB, AOs stored in an external file will be read ($DFTBAO $end).
+! If you fail to include $DFTBAO, you will get zero density.
+! The external AO file is stored in the same place as "param", that is,
+! in $GMSPATH/auxdata/DFTB (typically, ~/gamess/auxdata/DFTB).
+! In this case, 3ob-3-1 parameters are used, so the AO file must be put into
+! ~/gamess/auxdata/DFTB/3OB-3-1/ (note that capitals MUST be used for 3OB-3-1).
+! The AO file should be named wfc-3ob-3-1.hsd (note small letters in 3ob-3-1),
+! so it should be present as ~/gamess/auxdata/DFTB/3OB-3-1/wfc-3ob-3-1.hsd .
+! The file itself will probably be provided later with GAMESS but if it not 
+! there, you can get it from www.dftb.org.
+!
+! If your grid is too large, you can use DDI memory to store it (add 512 to
+! modprp, i.e., use modprp=532). 
+!
+! As a result, you will get a cube file in the punch (.dat). The first data row:
+!  0.00000E+00  1.01068E-10  1.16602E-10  1.32898E-10  1.49396E-10  1.65463E-10
+!
+ $CONTRL NPRINT=-5 ISPHER=-1 MAXIT=50 $END
+ $SYSTEM MWORDS=100 $END
+ $GDDI NGROUP=1 parout=.t. $END
+ $SCF DIRSCF=.FALSE. NPUNCH=0 $END
+ $BASIS GBASIS=DFTB $END
+ $dftb scc=.true.  dampxh=.true. dftb3=.true. disp=uff param=3ob-3-1 $end
+ $DFTBAO $end
+ $grid SIZE=0.1 $end
+ $fmoprp nprint=9 modprp=20 grdpad(1)=2 $end
+ $FMO NLAYER=1 NFRAG=4 nbody=2 nacut=3 $end
+ $data
+ NSERCH:  22  E=      -16.3055175152  GRAD. MAX=  0.0000432  R.M.S.=  0.0000174
+ C1
+ h    1
+ c    6
+ n    7
+ o    8
+ $end
+ $fmoxyz
+ O           8.0  -0.1440141634  -0.1831532166  -0.1309546186
+ H           1.0  -0.4356773596   0.4172864614  -0.8219337724
+ H           1.0   0.8021059581  -0.0277670839   0.0626611169
+ O           8.0   2.6186655510  -0.1754182750   0.2361968545
+ H           1.0   3.2173087850   0.1532569593   0.9120061374
+ H           1.0   2.7739533725  -1.1308022949   0.0950109202
+ O           8.0   2.6258923482  -2.9537897064   0.0187318562
+ H           1.0   1.6699792219  -3.1006827275   0.1651913251
+ H           1.0   2.9554105480  -3.5864645971  -0.6249385002
+ O           8.0  -0.1532994676  -2.9471301951   0.2263199551
+ H           1.0  -0.2991480437  -2.0005533076   0.0274225745
+ H           1.0  -0.7885387505  -3.2407020169   0.8847211511
+ $end

@@ -1,0 +1,27 @@
+!  Note: This bombs out because somehow GAMESS thinks ISPHER=-1 with this input
+
+  $contrl
+  runtyp=energy
+  scftyp=rohf
+  mult=3
+  ispher=1
+  pp=mcp
+  local=svd
+ $end
+
+ $scf vvos=.t. soscf=.t. diis=.f. damp=.t. shift=.t. $end
+
+ $basis gbasis=MCP-TZP $end
+
+ $guess guess=huckel $end
+
+ $system mwords=15 memddi=10 $end
+
+ $data
+AAMBS MCP test
+Oh
+
+Po 84.0
+ $end
+! 
+

@@ -1,0 +1,29 @@
+!*MODULE NORM2 *DECK norm2
+!>
+!>    @brief    Normalization of vectors
+!>    @details  Calculates the Euclidean vector norm
+!>              (L_2 norm) of "array"
+!>
+!>    @param array : array to take norm of
+!>    @author   C. Bertoni
+!>
+!
+   module norm2_module
+
+   implicit none
+
+   contains
+   
+    function norm2( array )
+
+      implicit none
+      double precision, intent(in) :: array(:)
+      double precision :: norm2,dnrm2,xnrm2
+!
+      norm2 = dnrm2(size(array),array,1)
+!
+
+    end function norm2
+
+
+   end module norm2_module

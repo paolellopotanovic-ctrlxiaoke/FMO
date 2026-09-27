@@ -1,0 +1,142 @@
+#!/bin/csh
+set E0_1=-154.9207540060,0
+set E0_2=-154.9203693244,0
+set E0_3=-154.9194368084,0
+set E0_4=-154.9182480007,0
+set E0_5=-154.9170826666,0
+set E0_6=-154.9162094504,0
+set E0_7=-154.9158432712,0
+set E0_8=-154.9161101026,0
+set E0_9=-154.9170331838,0
+set E0_10=-154.9185109181,0
+set E0_11=-154.9203245657,0
+set E0_12=-154.9222127995,0
+set E0_13=-154.9239187468,0
+set E0_14=-154.9251936473,0
+set E0_15=-154.9257247442,0
+set G0_1=0.0000031504540
+set G0_2=0.0009034847520
+set G0_3=0.0013996647810
+set G0_4=0.0015888727120
+set G0_5=0.0015915276710
+set G0_6=0.0015492137100
+set G0_7=0.0015839093220
+set G0_8=0.0017018553110
+set G0_9=0.0018078461580
+set G0_10=0.0018950102460
+set G0_11=0.0020025283190
+set G0_12=0.0019991843400
+set G0_13=0.0017381599500
+set G0_14=0.0011143175310
+set G0_15=0.0000006696760
+set E_1=`grep "#image =    1, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_2=`grep "#image =    2, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_3=`grep "#image =    3, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_4=`grep "#image =    4, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_5=`grep "#image =    5, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_6=`grep "#image =    6, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_7=`grep "#image =    7, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_8=`grep "#image =    8, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_9=`grep "#image =    9, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_10=`grep "#image =   10, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_11=`grep "#image =   11, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_12=`grep "#image =   12, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_13=`grep "#image =   13, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_14=`grep "#image =   14, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set E_15=`grep "#image =   15, Energy=" $1 | tail -1 | awk '{ print $5 }'`0
+set G_1=`grep "#image =    1, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_2=`grep "#image =    2, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_3=`grep "#image =    3, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_4=`grep "#image =    4, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_5=`grep "#image =    5, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_6=`grep "#image =    6, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_7=`grep "#image =    7, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_8=`grep "#image =    8, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_9=`grep "#image =    9, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_10=`grep "#image =   10, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_11=`grep "#image =   11, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_12=`grep "#image =   12, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_13=`grep "#image =   13, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_14=`grep "#image =   14, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+set G_15=`grep "#image =   15, Energy=" $1 | tail -1 | awk '{ print $8 }'`0
+
+set ierr=0
+set E1err=`$chkabs $E_1 $E0_1 $tolE`
+if($status != 0) set ierr=1 
+set E2err=`$chkabs $E_2 $E0_2 $tolE`
+if($status != 0) set ierr=1 
+set E3err=`$chkabs $E_3 $E0_3 $tolE`
+if($status != 0) set ierr=1 
+set E4err=`$chkabs $E_4 $E0_4 $tolE`
+if($status != 0) set ierr=1 
+set E5err=`$chkabs $E_5 $E0_5 $tolE`
+if($status != 0) set ierr=1 
+set E6err=`$chkabs $E_6 $E0_6 $tolE`
+if($status != 0) set ierr=1 
+set E7err=`$chkabs $E_7 $E0_7 $tolE`
+if($status != 0) set ierr=1 
+set E8err=`$chkabs $E_8 $E0_8 $tolE`
+if($status != 0) set ierr=1 
+set E9err=`$chkabs $E_9 $E0_9 $tolE`
+if($status != 0) set ierr=1 
+set E10err=`$chkabs $E_10 $E0_10 $tolE`
+if($status != 0) set ierr=1 
+set E11err=`$chkabs $E_11 $E0_11 $tolE`
+if($status != 0) set ierr=1 
+set E12err=`$chkabs $E_12 $E0_12 $tolE`
+if($status != 0) set ierr=1 
+set E13err=`$chkabs $E_13 $E0_13 $tolE`
+if($status != 0) set ierr=1 
+set E14err=`$chkabs $E_14 $E0_14 $tolE`
+if($status != 0) set ierr=1 
+set E15err=`$chkabs $E_15 $E0_15 $tolE`
+if($status != 0) set ierr=1 
+set G1err=`$chkabs $G_1 $G0_1 $tolG`
+if($status != 0) set ierr=1
+set G1err=`$chkabs $G_1 $G0_1 $tolG`
+if($status != 0) set ierr=1
+set G2err=`$chkabs $G_2 $G0_2 $tolG`
+if($status != 0) set ierr=1
+set G3err=`$chkabs $G_3 $G0_3 $tolG`
+if($status != 0) set ierr=1
+set G4err=`$chkabs $G_4 $G0_4 $tolG`
+if($status != 0) set ierr=1
+set G5err=`$chkabs $G_5 $G0_5 $tolG`
+if($status != 0) set ierr=1
+set G6err=`$chkabs $G_6 $G0_6 $tolG`
+if($status != 0) set ierr=1
+set G7err=`$chkabs $G_7 $G0_7 $tolG`
+if($status != 0) set ierr=1
+set G8err=`$chkabs $G_8 $G0_8 $tolG`
+if($status != 0) set ierr=1
+set G9err=`$chkabs $G_9 $G0_9 $tolG`
+if($status != 0) set ierr=1
+set G10err=`$chkabs $G_10 $G0_10 $tolG`
+if($status != 0) set ierr=1
+set G11err=`$chkabs $G_11 $G0_11 $tolG`
+if($status != 0) set ierr=1
+set G12err=`$chkabs $G_12 $G0_12 $tolG`
+if($status != 0) set ierr=1
+set G13err=`$chkabs $G_13 $G0_13 $tolG`
+if($status != 0) set ierr=1
+set G14err=`$chkabs $G_14 $G0_14 $tolG`
+if($status != 0) set ierr=1
+set G15err=`$chkabs $G_15 $G0_15 $tolG`
+if($status != 0) set ierr=1
+
+echo -n "E1err=$E1err G1err=$G1err. "
+echo -n "E2err=$E2err G2err=$G2err. "
+echo -n "E3err=$E3err G3err=$G3err. "
+echo -n "E4err=$E4err G4err=$G4err. "
+echo -n "E5err=$E5err G5err=$G5err. "
+echo -n "E6err=$E6err G6err=$G6err. "
+echo -n "E7err=$E7err G7err=$G7err. "
+echo -n "E8err=$E8err G8err=$G8err. "
+echo -n "E9err=$E9err G9err=$G9err. "
+echo -n "E10err=$E10err G10err=$G10err. "
+echo -n "E11err=$E11err G11err=$G11err. "
+echo -n "E12err=$E12err G12err=$G12err. "
+echo -n "E13err=$E13err G13err=$G13err. "
+echo -n "E14err=$E14err G14err=$G14err. "
+echo -n "E15err=$E15err G15err=$G15err. "
+exit $ierr 

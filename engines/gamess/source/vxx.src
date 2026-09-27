@@ -1,0 +1,340 @@
+
+
+      SUBROUTINE RIMP2_VXX_gpu(VXX, NAUXBAS)
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: MXAUXSH,MXAXGTOT, MXATM
+      use gpuGlobalRimp2Eng,only: LOCSPH
+      use gpuGlobalRimp2Eng,only: MaxAUXBFX
+      use gpuGlobalRimp2Eng,only: FlgSphAux,BUG
+      use gpuGlobalRimp2Eng,only: MIXS
+
+      implicit none
+
+      COMMON /AUXBAS/ EXAUX(MXAXGTOT),CAUXS(MXAXGTOT),CAUXP(MXAXGTOT),  &
+                      CAUXD(MXAXGTOT),CAUXF(MXAXGTOT),CAUXG(MXAXGTOT),  &
+                      CAUXH(MXAXGTOT),CAUXI(MXAXGTOT),                  &
+                      KAUXST(MXAUXSH),KAUXAT(MXAUXSH),KAUXTY(MXAUXSH),  &
+                      KAUXNG(MXAUXSH),KAUXLO(MXAUXSH),KAUXMI(MXAUXSH),  &
+                      KAUXMX(MXAUXSH),NAUXSH
+      COMMON /INFOA / NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,                    &
+                      ZAN(MXATM),C(3,MXATM),IAN(MXATM)
+      COMMON /PAR   / ME,MASTER,NPROC,IBTYP,IPTIM,GOPARR,DSKWRK,MASWRK
+      COMMON /OUTPUT/ NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+
+!     /AUXBAS/
+      DOUBLE PRECISION EXAUX,CAUXS,CAUXP,CAUXD,CAUXF,CAUXG,CAUXH,CAUXI
+      INTEGER KAUXST,KAUXAT,KAUXTY,KAUXNG,KAUXLO,KAUXMI,KAUXMX
+
+!     /INFOA /
+      INTEGER NAT,ICH,MUL,NUM,NQMT,NE,NA,NB,IAN
+      DOUBLE PRECISION ZAN,C
+
+!     /PAR   /
+      INTEGER ME,MASTER,NPROC,IBTYP,IPTIM
+
+!     /OUTPUT/
+      INTEGER NPRINT,ITOL,ICUT,NORMF,NORMP,NOPK
+
+      INTEGER NAUXBAS,NAUXSH
+      INTEGER NORM,ITHREADID,II,ISTART,IEND,IAT,LANGI,NGI,MINI,MAXI,I1,LOCI
+      INTEGER NI,MINIS,MAXIS,LOCIS,NIS,JJ,JAT,LANGJ,NGJ,MINJ,MAXJ,J1,LOCJ
+      INTEGER NJ,MINJS,MAXJS,LOCJS,NJS
+      INTEGER MAXG
+      INTEGER LDDIAUXSHSTART,LDDIAUXSHEND,LDDIAUXSTART,LDDIAUXEND,NTHREADS
+
+      ! OUTPUT
+      double precision :: VXX(NAUXBAS,NAUXBAS)
+
+      ! LOCAL
+      double precision,allocatable,dimension(:) :: TI,TJ,W,GHONDO
+
+      double precision :: CC(3,2)
+      logical :: GOPARR,DSKWRK,MASWRK, IANDJ,LOMP
+      
+
+                          !!! ~ GO ~ !!!
+
+
+      VXX=0.0D00
+
+      ! MAX BASIS FUNCTIONS
+      MaxG=MaxAUXBFX*MaxAUXBFX
+
+      ALLOCATE(TI(MaxG))
+      ALLOCATE(TJ(MaxG))
+      ALLOCATE(W(MaxG))
+      ALLOCATE(GHONDO(MaxG))
+
+
+      CALL RIMP2_AuxShAux_gpu &
+      (LddiAuxShStart,LddiAuxShEnd, &
+       LddiAuxStart,LddiAuxEnd, NAUXBAS,MIXS)
+
+
+      Nthreads=omp_get_max_threads()
+
+      ! FORM VXX
+!$omp parallel NUM_THREADS(Nthreads)                                    &
+!$omp shared(VXX,                                                       &
+!$omp        KAUXAT,C,KAUXTY,KAUXNG,KAUXMI,KAUXMX,KAUXST,KAUXLO,        &
+!$omp        EXAUX,CAUXI,CAUXH,CAUXG,CAUXF,CAUXD,CAUXP,CAUXS,NORM,      &
+!$omp        FlgSphAux,LOCSPH,NAUXBAS)                                  &
+!$omp private(GHONDO,W, IthreadID,II,Istart,Iend,                       &
+!$omp         IAT,CC,LANGI,NGI,MINI,MAXI,I1,LOCI,NI,                    &
+!$omp         MINIS,MAXIS,LOCIS,NIS,                                    &
+!$omp         JJ,JAT,LANGJ,NGJ,MINJ,MAXJ,J1,LOCJ,NJ,IANDJ,TI,TJ,        &
+!$omp         MINJS,MAXJS,LOCJS,NJS)
+
+!$omp do schedule(DYNAMIC)
+      ! DO II = 1, NAUXSH
+      DO II=LddiAuxShStart,LddiAuxShEnd
+         IAT = KAUXAT(II)
+         CC(1,1) = C(1,IAT)
+         CC(2,1) = C(2,IAT)
+         CC(3,1) = C(3,IAT)
+         LANGI = KAUXTY(II)-1
+         NGI   = KAUXNG(II)
+         MINI  = KAUXMI(II)
+         MAXI  = KAUXMX(II)
+         I1    = KAUXST(II)
+         LOCI  = KAUXLO(II)-MINI
+         NI    = MAXI-MINI+1
+
+         IF(FlgSphAux) THEN
+            CALL RIMP2CSTRM(TI,LANGI,MINI,NI,MINIS,MAXIS)
+            LOCIS = LOCSPH(II)-MINIS
+            NIS   = MAXIS-MINIS+1
+         END IF
+
+         DO JJ = 1, II
+
+            JAT = KAUXAT(JJ)
+            CC(1,2) = C(1,JAT)
+            CC(2,2) = C(2,JAT)
+            CC(3,2) = C(3,JAT)
+            LANGJ = KAUXTY(JJ)-1
+            NGJ   = KAUXNG(JJ)
+            MINJ  = KAUXMI(JJ)
+            MAXJ  = KAUXMX(JJ)
+            J1    = KAUXST(JJ)
+            LOCJ  = KAUXLO(JJ)-MINJ
+            NJ = MAXJ-MINJ+1
+            IANDJ = II .EQ. JJ
+
+            IF(FlgSphAux) THEN
+               CALL RIMP2CSTRM(TJ,LANGJ,MINJ,NJ,MINJS,MAXJS)
+               LOCJS = LOCSPH(JJ)-MINJS
+               NJS   = MAXJS-MINJS+1
+            END IF
+
+            CALL RIMP2_X_I22_gpu                                        &
+                (GHONDO, II,JJ,CC,                                      &
+                 EXAUX(I1),EXAUX(J1),                                   &
+                 LANGI,LANGJ,NI,NJ,NGI,NGJ,MINI,MAXI,MINJ,MAXJ)
+
+            CALL RIMP2_COPY_VXX_gpu &
+                (VXX, GHONDO, TI,TJ,W,NAUXBAS,                          &
+                 LOCI,LOCJ,MINI,MAXI,MINJ,MAXJ,NI,NJ,                   &
+                 LOCIS,LOCJS,MINIS,MAXIS,MINJS,MAXJS,NIS,NJS,           &
+                 FlgSphAux,IANDJ)
+
+         ENDDO
+      ENDDO
+
+!$omp end do
+
+!$OMP END PARALLEL
+
+  120 CONTINUE
+
+      CALL DDI_GSUMF(1504,VXX,NAUXBAS*NAUXBAS)
+
+
+      END
+      !***********************************************************
+
+
+
+
+      SUBROUTINE RIMP2_COPY_VXX_gpu &
+          (VXX, GHONDO, TI,TJ,W,NAUXBAS,                                &
+           LOCI,LOCJ,MINI,MAXI,MINJ,MAXJ,NI,NJ,                         &
+           LOCIS,LOCJS,MINIS,MAXIS,MINJS,MAXJS,NIS,NJS,SPHAUX,IANDJ)
+
+      implicit none
+
+      double precision :: VXX(NAUXBAS,NAUXBAS)
+
+      double precision :: GHONDO(NI*NJ)
+      double precision :: TI(NI*NI),TJ(NJ*NJ),W(NI*NJ)
+
+      logical SPHAUX,IANDJ
+
+      INTEGER NAUXBAS,NI,NJ
+      INTEGER LOCI,LOCJ,MINI,MAXI,MINJ,MAXJ,LOCIS,LOCJS,MINIS,MAXIS,MINJS
+      INTEGER MAXJS,NIS,NJS,MINIT,MAXIT,MINJT,MAXJT,LOCIT,LOCJT,NIT,JMAX
+      INTEGER I,ICNT,IAUX
+      INTEGER J,JCNT,JAUX,IJ
+
+      ! CARTESIAN TO SPHERICAL
+      IF(SPHAUX) THEN
+         MINIT = MINIS
+         MAXIT = MAXIS
+         MINJT = MINJS
+         MAXJT = MAXJS
+         LOCIT = LOCIS
+         LOCJT = LOCJS
+         NIT = NIS
+         CALL DGEMM('N','N', NI,NJS,NJ,                                 &
+                     1.0D00, GHONDO,NI,                                 &
+                              TJ,NJ,                                    &
+                     0.0D00, W,NI)
+         CALL DGEMM('T','N',  NIS,NJS,NI,                               &
+                     1.0D00, TI,NI,                                     &
+                              W,NI,                                     &
+                     0.0D00, GHONDO,NIS)
+
+      ELSE
+         MINIT = MINI
+         MAXIT = MAXI
+         MINJT = MINJ
+         MAXJT = MAXJ
+         LOCIT = LOCI
+         LOCJT = LOCJ
+         NIT = NI
+      END IF
+
+      ! COPY I22 TO VXX
+      JMAX = MAXJT
+      DO I = MINIT, MAXIT
+         ICNT=(I-MINIT)+1
+         IAUX = LOCIT+I
+
+         IF(IANDJ) JMAX = I
+         DO J = MINJT, JMAX
+            JCNT=(J-MINJT)+1
+            JAUX = LOCJT+J
+            IJ = ICNT+(JCNT-1)*NIT
+            VXX(IAUX,JAUX) = GHONDO(IJ)
+            VXX(JAUX,IAUX) = GHONDO(IJ)
+         END DO
+      END DO
+
+      RETURN
+
+      END
+      ! ***********************************************************
+
+
+      SUBROUTINE RIMP2_X_I22_gpu                                        &
+                (GG, II,JJ,CC,                                          &
+                 EXI,EXJ,                                               &
+                 LI,LJ,NI,NJ,NGI,NGJ,MINI,MAXI,MINJ,MAXJ)
+
+      use gpuGlobalRimp2Eng,only: LX,LY,LZ
+      use gpuGlobalRimp2Eng,only: DAux
+
+      implicit none
+
+      COMMON /ROOT  / XX,U(13),W(13),NROOTS
+!$omp threadprivate(/ROOT  /)
+
+      double precision GG(NI*NJ)
+      double precision CC(3,2)
+      double precision EXI(NGI),EXJ(NGJ)
+      double precision DI(28),DJ(28),G(1911)
+      double precision A1(3,13),B1(13),C1(13),A2(3,13),B2(13),F00(13)
+
+      integer LLI(3,28),LLJ(3,28)
+
+      INTEGER NI,NJ,NGI,NGJ
+      INTEGER NROOTS
+      INTEGER II,JJ,LI,LJ,MINI,MAXI,MINJ,MAXJ,LTOT
+      INTEGER I,ICNT,J,JCNT,IG
+      INTEGER JG
+
+      DOUBLE PRECISION XX,U,W
+      DOUBLE PRECISION RXIJ,RYIJ,RZIJ,RIJ2
+      DOUBLE PRECISION AI,AIINV,AJ,AJINV,RHO
+
+      ! TOTAL ANG MOMENTUM, #ROOTS
+      LTOT = LI+LJ
+      NROOTS = LTOT/2+1
+
+      RXIJ = CC(1,1)-CC(1,2)
+      RYIJ = CC(2,1)-CC(2,2)
+      RZIJ = CC(3,1)-CC(3,2)
+      RIJ2 = RXIJ**2+RYIJ**2+RZIJ**2
+
+      ! ANG MOMENTUM COMPONENTS
+      DO I = MINI, MAXI
+         ICNT=(I-MINI)+1
+         LLI(1,ICNT) = LX(I)
+         LLI(2,ICNT) = LY(I)
+         LLI(3,ICNT) = LZ(I)
+      END DO
+
+      DO J = MINJ, MAXJ
+         JCNT=(J-MINJ)+1
+         LLJ(1,JCNT) = LX(J)
+         LLJ(2,JCNT) = LY(J)
+         LLJ(3,JCNT) = LZ(J)
+      END DO
+
+      ! ZERO OUT I22
+      GG=0.0D00
+
+      ! PRIMITIVES IN I-SHELL
+      DO IG = 1, NGI
+
+         AI  = EXI(IG)
+         AIINV = 1.0D00/AI
+
+         ! CONTRACTION COEFFICIENTS
+         DO I=1,NI
+            DI(I)=DAux(II,IG,I)
+         ENDDO
+
+         ! PRIMITIVES IN J-SHELL
+         DO JG = 1, NGJ
+            AJ  = EXJ(JG)
+            AJINV = 1.0D00/AJ
+
+            ! CONTRACTION COEFFICIENTS
+            DO J=1,NJ
+              DJ(J)=DAux(JJ,JG,J)
+            ENDDO
+
+            RHO = AI*AJ/(AI+AJ)
+            XX = RHO*RIJ2
+
+            ! RYS ROOTS AND WEIGHTS
+            SELECT CASE(NROOTS)
+               CASE(:3)
+                  CALL RT123
+               CASE(4)
+                  CALL ROOT4
+               CASE(5)
+                  CALL ROOT5
+               CASE(6:)
+                  CALL ROOT6
+            END SELECT
+
+            ! IXYZ
+            CALL I22XYZ &
+                (G, CC,U,W,A1,B1,C1, &
+                 A2,B2,F00,AI,AJ,LI,LJ,NROOTS)
+
+            ! FORM I22
+            CALL RIMP2_I22 &
+                (GG, G, DI,DJ,LLI,LLJ, &
+                 LI,LJ,NI,NJ,NROOTS)
+         END DO
+      END DO
+
+      RETURN
+
+      END
+      !***********************************************************

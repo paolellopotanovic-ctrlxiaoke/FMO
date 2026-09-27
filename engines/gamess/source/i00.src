@@ -1,0 +1,1335 @@
+      SUBROUTINE RIMP2_X_FORM_I32_X300 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+
+      use shellProcessing,only: CCS
+
+      use shellpairs,only: ss_PAV_PRE, &
+                           ss_P_PRE,   &
+                           ss_DUM0_PRE,&
+                           ss_DUM_PRE, &
+                           ss_AB_PRE,  &
+                           ! ss_VAL_PRE, &
+                           LOCss,   &
+                           N_ss_PRE
+
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(2),W(2)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      double precision :: VAL,DB
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          P(3),PAV(3),CPV(3),               &
+                          A2(3,2),B2(2),F00(2)
+
+      double precision :: GGID(10)
+      double precision :: DK(10),T1(7)
+      double precision :: G3ID(24)
+                        
+      double precision :: TMP(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NGI, &
+                 LOCI,I1,ILOC,IG, &
+                 JSH,JAT, &
+                 NGJ,LOCJ,J1,JLOC,JG
+
+      integer :: LTOT,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+      integer :: iijj,iijj_tmp,JI
+
+double precision :: a1114,a6114,a5214,a7214,a1314,a6314,a8314,a5414,a2514,a4514,a9514,a2714,a4714         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+a1114 = TLL(1,1,14)
+a6114 = TLL(6,1,14)
+a5214 = TLL(5,2,14)
+a7214 = TLL(7,2,14)
+a1314 = TLL(1,3,14)
+a6314 = TLL(6,3,14)
+a8314 = TLL(8,3,14)
+a5414 = TLL(5,4,14)
+a2514 = TLL(2,5,14)
+a4514 = TLL(4,5,14)
+a9514 = TLL(9,5,14)
+a2714 = TLL(2,7,14)
+a4714 = TLL(4,7,14)
+
+NROOTS=2
+NK=10
+NKS=7
+
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_S_SHL,KNG,KLOC,KAUX_ELSE,KAUXAT,C,KAUXNG,KAUXST,LOCSPH) &
+!$omp shared(LOCKT_INIT,DAUX,NK,LOCSS,SS_DUM_PRE,TOL,SS_P_PRE,SS_DUM0_PRE) &
+!$omp shared(CCS,EXAUX,NROOTS,A1114,A6114,N_ELSE,N_S_SHL,SS_AB_PRE,A5214,A7214) &
+!$omp shared(A1314,A6314,A8314,A5414,A2514,A4514,A9514,A2714,A4714,I32,NKS) &
+!$omp private(ISH,JSH,NGI,LOCI,NGJ,LOCJ,KAUXSH,KAT,CC,NGK,K1,IAUXSTART,DK) &
+!$omp private(GGID,DB,W,G3ID,T1,III,JJJ,IIJJ,JI,AB,DUM) &
+!$omp private(CPV,RR,AJINV,XX,U,AIJINVSQ,AJINV2,A2)
+
+
+
+! DO III =1, N_S_SHL
+!    DO JJJ = 1,III
+
+DO iijj_tmp = 0, N_S_SHL*(N_S_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+   ISH = I_S_SHL(III)
+   JSH = I_S_SHL(JJJ)
+
+   NGI   = KNG(ISH)
+   LOCI  = KLOC(ISH)
+
+   NGJ   = KNG(JSH)
+   LOCJ  = KLOC(JSH)
+   
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+   ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+   DO I_ELSE=1,N_ELSE
+      ! DO ISH = 1,NSHELL
+      KAUXSH = KAUX_ELSE(I_ELSE)
+
+      KAT = KAUXAT(KAUXSH)
+      CC(1) = C(1,KAT)
+      CC(2) = C(2,KAT)
+      CC(3) = C(3,KAT)
+
+      NGK   = KAUXNG(KAUXSH)
+      K1    = KAUXST(KAUXSH)
+
+      ! AUX POINTER FOR I32
+      IauxStart = LOCSPH(KAUXSH)
+      IauxStart = IauxStart-LOCKT_init+1
+
+      ! DENSITY FACTOR
+      DO K=1,NK
+         DK(K) = PI252 * DAux(KAUXSH,1,K)
+      ENDDO
+
+      ! ZERO OUT INTEGRAL ARRAY
+      DO II=1,NK
+         GGID(II)=zero
+      ENDDO
+
+      JI=0
+      DO IG = 1, NGI                 
+         DO JG = 1, NGJ
+            JI=JI+1
+            AB = ss_AB_PRE(LOCss(iijj)+JI)
+            DUM = ss_DUM_PRE(LOCss(iijj)+JI)
+            IF (DUM .GT. TOL) CYCLE
+            CPV(1:3) = ss_P_PRE(1:3,LOCss(iijj)+JI)
+            CPV(1:3) = CC(1:3)-CPV(1:3)
+            RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+            DB = ss_DUM0_PRE(LOCss(iijj)+JI)
+            DB = DB*CCS(IG,III)
+            DB = DB*CCS(JG,JJJ)
+
+            ! PRIMITIVE IN K-SHELL
+            DO KG = 1, NGK
+               AJINV = EXAUX(K1+KG-1)
+               XX = AB*AJINV/(AB+AJINV)
+               XX = XX*RR
+
+               ! RYS ROOTS AND WEIGHT
+               CALL RT2_gpu(XX,U,W,NROOTS)
+
+               AIJINVSQ = one/(AB+AJINV)
+               XX = AB*AJINV*AIJINVSQ
+               AJINV  = one/AJINV
+               AJINV2 = half*AJINV
+               AIJINVSQ = SQRT(AIJINVSQ)
+
+               DO IR = 1, NROOTS
+                  U(IR) = U(IR)*XX
+                  U(IR) = U(IR)/(XX+U(IR))
+                  U(IR) = XX*AJINV*U(IR)
+                  A2(1:3,IR) = -U(IR)*CPV(1:3)
+                  U(IR) = AJINV2-AJINV2*U(IR)
+                  G3ID(3*IR) = AIJINVSQ*W(IR)
+               ENDDO
+
+DO IR=1,2
+   G3ID(4+IR*3) = A2(1,IR)
+   G3ID(5+IR*3) = A2(2,IR)
+   G3ID(6+IR*3) = A2(3,IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,2
+   G3ID(10+IR*3) = A2(1,IR)*G3ID(4+IR*3) + U(IR)
+   G3ID(11+IR*3) = A2(2,IR)*G3ID(5+IR*3) + U(IR)
+   G3ID(12+IR*3) = A2(3,IR)*G3ID(6+IR*3) + U(IR)*G3ID(IR*3)
+ENDDO
+DO IR=1,2
+   G3ID(16+IR*3) = A2(1,IR)*G3ID(10+IR*3) + 2*U(IR)*G3ID(4+IR*3)
+   G3ID(17+IR*3) = A2(2,IR)*G3ID(11+IR*3) + 2*U(IR)*G3ID(5+IR*3)
+   G3ID(18+IR*3) = A2(3,IR)*G3ID(12+IR*3) + 2*U(IR)*G3ID(6+IR*3)
+ENDDO
+
+XX = G3ID(19)*G3ID(3) + G3ID(22)*G3ID(6)
+GGID(1) = GGID(1) + DB*DK(1)*XX
+XX = G3ID(20)*G3ID(3) + G3ID(23)*G3ID(6)
+GGID(2) = GGID(2) + DB*DK(2)*XX
+XX = G3ID(21) + G3ID(24)
+GGID(3) = GGID(3) + DB*DK(3)*XX
+XX = G3ID(13)*G3ID(8)*G3ID(3) + G3ID(16)*G3ID(11)*G3ID(6)
+GGID(4) = GGID(4) + DB*DK(4)*XX
+XX = G3ID(13)*G3ID(9) + G3ID(16)*G3ID(12)
+GGID(5) = GGID(5) + DB*DK(5)*XX
+XX = G3ID(7)*G3ID(14)*G3ID(3) + G3ID(10)*G3ID(17)*G3ID(6)
+GGID(6) = GGID(6) + DB*DK(6)*XX
+XX = G3ID(14)*G3ID(9) + G3ID(17)*G3ID(12)
+GGID(7) = GGID(7) + DB*DK(7)*XX
+XX = G3ID(7)*G3ID(15) + G3ID(10)*G3ID(18)
+GGID(8) = GGID(8) + DB*DK(8)*XX
+XX = G3ID(8)*G3ID(15) + G3ID(11)*G3ID(18)
+GGID(9) = GGID(9) + DB*DK(9)*XX
+XX = G3ID(7)*G3ID(8)*G3ID(9) + G3ID(10)*G3ID(11)*G3ID(12)
+GGID(10) = GGID(10) + DB*DK(10)*XX
+
+            ENDDO !KG
+         ENDDO !JG
+      ENDDO !IG
+
+      ! TRANSFORM TO SPHERICAL
+      T1(1) = a1114*GGID(1)
+      T1(1) = T1(1) + a6114*GGID(6)
+      T1(2) = a5214*GGID(5)
+      T1(2) = T1(2) +  a7214*GGID(7)
+      T1(3) = a1314*GGID(1)
+      T1(3) = T1(3) + a6314*GGID(6)
+      T1(3) = T1(3) + a8314*GGID(8)
+      T1(4) = GGID(3) + a5414*(GGID(5)+GGID(7))
+      T1(5) = a2514*GGID(2)
+      T1(5) = T1(5) + a4514*GGID(4)
+      T1(5) = T1(5) + a9514*GGID(9)
+      T1(6) = GGID(10)
+      T1(7) = a2714*GGID(2)
+      T1(7) = T1(7) + a4714*GGID(4)
+
+      ! COPY INTEGRAL GG(P|MN) TO I32
+      DO LNKS=1,NKS
+         I32(LOCI,LOCJ,IauxStart+LNKS-1) = T1(LNKS) 
+         I32(LOCJ,LOCI,IauxStart+LNKS-1) = T1(LNKS) 
+      ENDDO
+
+     ! ENDDO !ISH
+   ENDDO !JSH
+ENDDO !KSH
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X200 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+
+      use shellProcessing,only: CCS
+
+      use shellpairs,only: ss_PAV_PRE, &
+                           ss_P_PRE,   &
+                           ss_DUM0_PRE,&
+                           ss_DUM_PRE, &
+                           ss_AB_PRE,  &
+                           LOCss,   &
+                           N_ss_PRE
+
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(13),W(13)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      double precision :: VALL,DB
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          P(3),PAV(3),CPV(3),               &
+                          A2(3,2),B2(2),F00(2)
+
+      double precision :: GGID(3)
+      double precision :: DK(6),T1(5)
+      double precision :: G3ID(18)
+                        
+      double precision :: TMP(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NGI, &
+                 LOCI,I1,ILOC,IG, &
+                 JSH,JAT, &
+                 NGJ,LOCJ,J1,JLOC,JG
+
+      integer :: LTOT,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: VAL,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL,a127
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+      integer :: iijj,iijj_tmp,JI
+
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+a127=TLL(1,2,7)
+
+
+NK=6
+NROOTS=2
+NKS=5
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_S_SHL,KNG,KLOC,KAUX_ELSE,KAUXAT,C,KAUXNG,KAUXST,LOCSPH) &
+!$omp shared(LOCKT_INIT,DAUX,TOL,CCS,EXAUX,A127,I32,N_ELSE,N_S_SHL) &
+!$omp shared(NK,LOCSS,SS_DUM_PRE,SS_P_PRE,SS_DUM0_PRE,NROOTS,NKS,ss_AB_PRE) &
+!$omp private(ISH,JSH,NGI,LOCI,NGJ,LOCJ,KAUXSH,KAT,CC,NGK,K1,IAUXSTART) &
+!$omp private(DK,GGID,T1,DB,G3ID,III,JJJ,IIJJ,JI,AB,DUM,CPV,RR,AK,XX) &
+!$omp private(U,AIJINVSQ,AJINV,AJINV2,VAL,A2,B2,W)
+
+
+! DO III =1, N_S_SHL
+!    DO JJJ = 1,III
+
+DO iijj_tmp = 0, N_S_SHL*(N_S_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+   ISH = I_S_SHL(III)
+   JSH = I_S_SHL(JJJ)
+
+   NGI   = KNG(ISH)
+   LOCI  = KLOC(ISH)
+
+   NGJ   = KNG(JSH)
+   LOCJ  = KLOC(JSH)
+   
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+   ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+   DO I_ELSE=1,N_ELSE
+      ! DO ISH = 1,NSHELL
+      KAUXSH = KAUX_ELSE(I_ELSE)
+
+      KAT = KAUXAT(KAUXSH)
+      CC(1) = C(1,KAT)
+      CC(2) = C(2,KAT)
+      CC(3) = C(3,KAT)
+
+      NGK   = KAUXNG(KAUXSH)
+      K1    = KAUXST(KAUXSH)
+
+      ! AUX POINTER FOR I32
+      IauxStart = LOCSPH(KAUXSH)
+      IauxStart = IauxStart-LOCKT_init+1
+
+      ! DENSITY FACTOR
+      DO K=1,NK
+         DK(K) = PI252 * DAux(KAUXSH,1,K)
+      ENDDO
+
+      ! ZERO OUT INTEGRAL ARRAY
+      DO II=1,3
+         GGID(II)=zero
+      ENDDO
+
+      DO II=3,5
+         T1(II) = zero
+      ENDDO
+
+
+      JI=0
+      DO IG = 1, NGI                 
+         DO JG = 1, NGJ
+            JI=JI+1
+            AB = ss_AB_PRE(LOCss(iijj)+JI)
+            DUM = ss_DUM_PRE(LOCss(iijj)+JI)
+            IF (DUM > TOL) CYCLE
+            CPV(1:3) = ss_P_PRE(1:3,LOCss(iijj)+JI)
+            CPV(1:3) = CC(1:3)-CPV(1:3)
+            RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+            DB = ss_DUM0_PRE(LOCss(iijj)+JI)
+            DB = DB*CCS(IG,III)
+            DB = DB*CCS(JG,JJJ)
+
+            ! PRIMITIVE IN K-SHELL
+            DO KG = 1, NGK
+               AK = EXAUX(K1+KG-1)
+               XX = AB*AK/(AB+AK)
+               XX = XX*RR
+
+               ! RYS ROOTS AND WEIGHT
+               CALL RT2_gpu(XX,U,W,NROOTS)
+
+               AIJINVSQ = one/(AB+AK)
+               XX = AB*AK*AIJINVSQ
+               AJINV  = one/AK
+               AJINV2 = half*AJINV
+               AIJINVSQ = SQRT(AIJINVSQ)
+
+               DO IR = 1, NROOTS
+                  U(IR) = U(IR)*XX
+                  U(IR) = U(IR)/(XX+U(IR))
+                  VAL = XX*AJINV*U(IR)
+                  A2(1:3,IR) = -VAL*CPV(1:3)
+                  B2(IR) = AJINV2-AJINV2*VAL
+                  G3ID(3*IR) = AIJINVSQ*W(IR)
+               ENDDO
+
+DO IR=1,2
+   G3ID(4+IR*3) = A2(1,IR)
+   G3ID(5+IR*3) = A2(2,IR)
+   G3ID(6+IR*3) = A2(3,IR)*G3ID(3*IR)
+ENDDO
+
+DO IR=1,2
+   G3ID(10+IR*3) = A2(1,IR)*G3ID(4+IR*3) + B2(IR)
+   G3ID(11+IR*3) = A2(2,IR)*G3ID(5+IR*3) + B2(IR)
+   G3ID(12+IR*3) = A2(3,IR)*G3ID(6+IR*3) + B2(IR)*G3ID(3*IR)
+ENDDO
+
+VAL = G3ID(13)*G3ID(3) + G3ID(16)*G3ID(6)
+GGID(1) = GGID(1) + DB*DK(1)*VAL
+VAL = G3ID(14)*G3ID(3) + G3ID(17)*G3ID(6)
+GGID(2) = GGID(2) + DB*DK(2)*VAL
+VAL = G3ID(15) + G3ID(18)
+GGID(3) = GGID(3) + DB*DK(3)*VAL
+
+VAL = G3ID(7)*G3ID(8)*G3ID(3) + G3ID(10)*G3ID(11)*G3ID(6)
+T1(3) = T1(3) + DB*DK(4)*VAL
+VAL = G3ID(7)*G3ID(9) + G3ID(10)*G3ID(12)
+T1(4) = T1(4) + DB*DK(5)*VAL
+VAL = G3ID(8)*G3ID(9) + G3ID(11)*G3ID(12)
+T1(5) = T1(5) + DB*DK(6)*VAL
+
+
+            ENDDO !KG
+         ENDDO !JG
+      ENDDO !IG
+
+      ! TRANSFORM TO SPHERICAL
+      T1(1) = GGID(3)-half*(GGID(1)+GGID(2))
+      T1(2) = a127*(GGID(1)-GGID(2))
+
+
+      ! COPY INTEGRAL GG(P|MN) TO I32
+      DO LNKS=1,NKS
+         I32(LOCI,LOCJ,IauxStart+LNKS-1) = T1(LNKS) 
+         I32(LOCJ,LOCI,IauxStart+LNKS-1) = T1(LNKS) 
+      ENDDO
+
+  ! ENDDO !ISH
+ENDDO !JSH
+ENDDO !KSH
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X100 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAux, &
+                                  MXATM, &
+                                  LOCSPH
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+
+      use shellProcessing,only: CCS
+
+      use shellpairs,only: ss_PAV_PRE, &
+                           ss_P_PRE,   &
+                           ss_DUM0_PRE,&
+                           ss_DUM_PRE, &
+                           ss_AB_PRE,  &
+                           LOCss,   &
+                           N_ss_PRE
+
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U,W
+      integer :: NROOTS
+      
+      ! OUTPUT
+      double precision :: VALL,DB
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          P(3),PAV(3),CPV(3),               &
+                          B1,C1,           &
+                          A2(3),B2,F00
+
+      double precision :: GGID(3),G3ID(4)
+      double precision :: DK(3)
+                        
+      integer :: LLK(3,28)
+
+      double precision :: TMP(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NGI, &
+                 LOCI,I1,ILOC,IG, &
+                 JSH,JAT, &
+                 NGJ,LOCJ,J1,JLOC,JG
+
+      integer :: LTOT,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: VAL1,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+      integer :: iijj,iijj_tmp,JI
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+NK=3
+NROOTS=1
+
+IF(KAUXMI(KAUX_ELSE(1)).NE.2) CALL ABRT
+
+!$omp parallel do default(none) &
+!$omp shared(I_S_SHL,KNG,KLOC,KAUX_ELSE,KAUXAT,C,KAUXNG,KAUXST,LOCSPH) &
+!$omp shared(LOCKT_INIT,DAUX,LOCSS,SS_DUM_PRE,TOL,SS_P_PRE,SS_DUM0_PRE) &
+!$omp shared(CCS,EXAUX,I32,N_ELSE,N_S_SHL,NK,SS_AB_PRE,NROOTS) &
+!$omp private(III,JJJ,IIJJ,ISH,JSH,NGI,LOCI,NGJ,LOCJ,KAUXSH,KAT,CC,NGK) &
+!$omp private(K1,IAUXSTART,DK,GGID,JI,AB,DUM,CPV,RR,DB,AK,RHO) &
+!$omp private(W,XX,U,AJINV,AIJINVSQ,G3ID)
+
+
+! DO III =1, N_S_SHL
+!    DO JJJ = 1,III
+
+DO iijj_tmp = 0, N_S_SHL*(N_S_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+   ISH = I_S_SHL(III)
+   JSH = I_S_SHL(JJJ)
+
+   NGI   = KNG(ISH)
+   LOCI  = KLOC(ISH)
+
+   NGJ   = KNG(JSH)
+   LOCJ  = KLOC(JSH)
+
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+DO I_ELSE=1,N_ELSE
+   ! DO ISH = 1,NSHELL
+   KAUXSH = KAUX_ELSE(I_ELSE)
+
+   KAT = KAUXAT(KAUXSH)
+   CC(1) = C(1,KAT)
+   CC(2) = C(2,KAT)
+   CC(3) = C(3,KAT)
+
+   NGK   = KAUXNG(KAUXSH)
+   K1    = KAUXST(KAUXSH)
+
+   ! AUX POINTER FOR I32
+   IauxStart = LOCSPH(KAUXSH)
+   IauxStart = IauxStart-LOCKT_init+1
+
+
+   ! DENSITY FACTOR
+   DO K=1,NK
+      DK(K) = PI252 * DAux(KAUXSH,1,K)
+   ENDDO
+
+   ! ZERO OUT INTEGRAL ARRAY
+   DO II=1,NK
+      GGID(II)=zero
+   ENDDO
+
+   JI=0
+   DO IG = 1, NGI                 
+      DO JG = 1, NGJ
+      JI=JI+1
+         AB = ss_AB_PRE(LOCss(iijj)+JI)
+         DUM = ss_DUM_PRE(LOCss(iijj)+JI)
+         IF (DUM > TOL) CYCLE
+         CPV(1:3) = ss_P_PRE(1:3,LOCss(iijj)+JI)
+         CPV(1:3) = CC(1:3)-CPV(1:3)
+         RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+         DB = ss_DUM0_PRE(LOCss(iijj)+JI)
+         DB = DB*CCS(IG,III)
+         DB = DB*CCS(JG,JJJ)
+
+         ! PRIMITIVE IN K-SHELL
+         DO KG = 1, NGK
+            AK = EXAUX(K1+KG-1)
+            RHO = AB*AK/(AB+AK)
+            XX = RHO*RR
+
+            ! RYS ROOTS AND WEIGHT
+            CALL RT1_gpu(XX,U,W,NROOTS)
+
+            XX = one/(AB+AK)
+            RHO = AB*AK*XX
+            AJINV  = one/AK
+            AIJINVSQ = SQRT(XX)
+
+            U = U*RHO
+            U = U/(RHO+U)
+            U = RHO*AJINV*U
+
+            G3ID(1) = AIJINVSQ*W
+            G3ID(2:4) = -U*CPV(1:3)
+            G3ID(4) = G3ID(4)*G3ID(1)
+
+            GGID(1) = GGID(1) + DB*DK(1)*G3ID(2)*G3ID(1)
+            GGID(2) = GGID(2) + DB*DK(2)*G3ID(3)*G3ID(1)
+            GGID(3) = GGID(3) + DB*DK(3)*G3ID(4)
+
+         ENDDO !KG
+      ENDDO !JG
+   ENDDO !IG
+
+
+   ! COPY INTEGRAL GG(P|MN) TO I32
+   DO LNKS=1,NK
+      I32(LOCI,LOCJ,IauxStart+LNKS-1) = GGID(LNKS) 
+      I32(LOCJ,LOCI,IauxStart+LNKS-1) = GGID(LNKS) 
+   ENDDO
+
+     ! ENDDO !ISH
+   ENDDO !JSH
+ENDDO !KSH
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X000 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+
+      use shellProcessing,only: CCS
+
+      use shellpairs,only: ss_PAV_PRE, &
+                           ss_P_PRE,   &
+                           ss_DUM0_PRE,&
+                           ss_DUM_PRE, &
+                           ss_AB_PRE,  &
+                           LOCss,   &
+                           N_ss_PRE
+
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U,W
+      integer :: NROOTS
+      
+      ! OUTPUT
+      double precision :: VALL,DB,DK
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          P(3),CPV(3),               &
+                          F00
+
+      double precision :: GGID
+                        
+      double precision :: TMP(3),VAL(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NGI, &
+                 LOCI,I1,ILOC,IG, &
+                 JSH,JAT, &
+                 NGJ,LOCJ,J1,JLOC,JG
+
+      integer :: NLJ
+
+      double precision :: AK,AI,AJ,AB,RR,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: ABKINV,ABKINV2,ABKINVSQ
+      double precision :: AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,II,LL,LIJ,KG,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: IA
+      integer :: IDX,IDZ,IDY
+      integer :: III,JJJ
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK
+      integer :: iijj,iijj_tmp,JI
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+
+NROOTS=1
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_S_SHL,KNG,KLOC,KAUX_ELSE,KAUXAT,C,KAUXNG,KAUXST,LOCSPH) &
+!$omp shared(LOCKT_INIT,DAUX,TOL,CCS,EXAUX,I32,N_ELSE,N_S_SHL,LOCSS) &
+!$omp shared(SS_DUM_PRE,SS_P_PRE,SS_DUM0_PRE,NROOTS,ss_AB_PRE) &
+!$omp private(ISH,JSH,NGI,LOCI,NGJ,LOCJ,KAUXSH,KAT,CC,NGK,K1,IAUXSTART) &
+!$omp private(DK,GGID,AB,DUM,CPV,RR,DB,III,JJJ,IIJJ,JI,AK,XX,U,F00,W) 
+
+
+
+! DO III =1, N_S_SHL
+!    DO JJJ = 1,III
+
+DO iijj_tmp = 0, N_S_SHL*(N_S_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+   ISH = I_S_SHL(III)
+   JSH = I_S_SHL(JJJ)
+
+   NGI   = KNG(ISH)
+   LOCI  = KLOC(ISH)
+
+   NGJ   = KNG(JSH)
+   LOCJ  = KLOC(JSH)
+   
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+   ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+   DO I_ELSE=1,N_ELSE
+      ! DO ISH = 1,NSHELL
+      KAUXSH = KAUX_ELSE(I_ELSE)
+
+      KAT = KAUXAT(KAUXSH)
+      CC(1) = C(1,KAT)
+      CC(2) = C(2,KAT)
+      CC(3) = C(3,KAT)
+
+      NGK   = KAUXNG(KAUXSH)
+      K1    = KAUXST(KAUXSH)
+
+      ! AUX POINTER FOR I32
+      IauxStart = LOCSPH(KAUXSH)
+      IauxStart = IauxStart-LOCKT_init+1
+           
+      ! DENSITY FACTOR
+      DK = PI252 * DAux(KAUXSH,1,1)
+
+      ! zero out integral
+      GGID = zero
+
+      JI=0
+      DO IG = 1, NGI                 
+         DO JG = 1, NGJ
+            JI=JI+1
+            AB = ss_AB_PRE(LOCss(iijj)+JI)
+            DUM = ss_DUM_PRE(LOCss(iijj)+JI)
+            IF (DUM .GT. TOL) CYCLE
+            CPV(1:3) = ss_P_PRE(1:3,LOCss(iijj)+JI)
+            CPV(1:3) = CC(1:3)-CPV(1:3)
+            RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+            DB = ss_DUM0_PRE(LOCss(iijj)+JI)
+            DB = DB*CCS(IG,III)
+            DB = DB*CCS(JG,JJJ)
+
+            ! PRIMITIVE IN K-SHELL
+            DO KG = 1, NGK
+               AK = EXAUX(K1+KG-1)
+               XX = AB*AK/(AB+AK)
+               XX = XX*RR
+
+               ! RYS ROOTS AND WEIGHT
+               CALL RT1_gpu(XX,U,W,NROOTS)
+
+               F00 = one/(AB+AK)
+               F00 = SQRT(F00)
+               F00 = F00*W
+
+               GGID = GGID + DB*DK*F00
+
+            ENDDO !KG
+         ENDDO !JG
+      ENDDO !IG
+  
+      ! COPY INTEGRAL GG(P|MN) TO I32
+      I32(LOCI,LOCJ,IauxStart) = GGID
+      I32(LOCJ,LOCI,IauxStart) = GGID
+
+     ! ENDDO !ISH
+   ENDDO !JSH
+ENDDO !KSH
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+
+
+
+
+      SUBROUTINE RIMP2_X_FORM_I32_X00 &
+                (I32,TOL,LOCKT_init, &
+                 NSHELL,MXEX,EX,KATOM,KTYPE,KMIN,KMAX, &
+                 KNG,KSTART,KLOC,C,NBASIS,NddiChunk,MXBSH, &
+                 NAUXSH,MXEXAUX,EXAUX,KAUXAT,KAUXTY, &
+                 KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO, &
+                 LddiAuxShStart,LddiAuxShEnd,ISIZE, &
+                 KAUX_ELSE,N_ELSE)
+
+
+      use omp_lib
+
+      use gpuGlobalRimp2Eng,only: zero,half,one,eight
+
+      use gpuGlobalRimp2Eng,only: PI252,RLN10, &
+                                  MXLTOT,ITOLRI, &
+                                  LX,LY,LZ, &
+                                  DAux, &
+                                  MXATM, &
+                                  MIXS,LOCSPH, &
+                                  TLL
+
+      use shellProcessing,only: I_S_SHL,I_P_SHL,I_D_SHL, &
+                                N_S_SHL,N_P_SHL,N_D_SHL
+
+      use shellProcessing,only: CCS
+
+      use shellpairs,only: ss_PAV_PRE, &
+                           ss_P_PRE,   &
+                           ss_DUM0_PRE,&
+                           ss_DUM_PRE, &
+                           ss_AB_PRE,  &
+                           ! ss_VAL_PRE, &
+                           LOCss,   &
+                           N_ss_PRE
+
+      implicit none
+
+      integer,intent(in) :: KMIN(NSHELL),KMAX(NSHELL),KNG(NSHELL),KSTART(NSHELL),&
+                            KLOC(NSHELL),KATOM(NSHELL),KTYPE(NSHELL)
+      integer,intent(in) :: KAUXST(NAUXSH),KAUXAT(NAUXSH),KAUXTY(NAUXSH),KAUXNG(NAUXSH), &
+                            KAUXLO(NAUXSH),KAUXMI(NAUXSH),KAUXMX(NAUXSH),NAUXSH
+      integer,intent(in) :: NSHELL,NBASIS,MXEX,MXEXAUX,NddiChunk,MXBSH
+      integer,intent(in) :: N_ELSE,KAUX_ELSE(N_ELSE)
+      integer,intent(in) :: LddiAuxShStart,LddiAuxShEnd
+      ! COMMON /ROOTgpu  /
+      double precision :: XX,U(13),W(13)
+      integer :: NROOTS
+      
+      ! OUTPUT
+      double precision :: VALL,DB
+
+      ! BUFFER
+      double precision :: CC(3), EX(MXEX),EXAUX(MXEXAUX), &
+                          P(3),PAV(3),CPV(3),               &
+                          A1(3,13),B1(13),C1(13),           &
+                          A2(3,13),B2(13),F00(13)
+
+      double precision :: GGID(1000)
+      double precision :: DK(1000),T1(1000)
+      double precision :: G2ID(728)
+      double precision :: G3ID(2688)
+                        
+      integer :: LLK(3,28)
+
+      double precision :: TMP(3)
+
+      double precision :: I32(NBASIS,NBASIS,NddiChunk)
+
+      double precision :: C(3,MXATM)
+
+      logical :: FlgSphAux
+
+      integer :: KAUXSH,KAT,LK,NK,NGK,MINK,MAXK, &
+                 LOCK,MINKT,MAXKT,K1,NKS, &
+                 LOCKT_init,IauxStart
+
+      integer :: ISH,IAT,NGI, &
+                 LOCI,I1,ILOC,IG, &
+                 JSH,JAT, &
+                 NGJ,LOCJ,J1,JLOC,JG
+
+      integer :: LTOT,NLJ
+
+      double precision :: AK,AI,AJ,AB,AIRAB,ABINV,EXPB,RR,RAB2,RHO
+      double precision :: DUM,DUM0,DUM2
+      double precision :: VAL1,ABKINV,ABKINV2,ABKINVSQ,AKINV,AKINV2,ABINV2
+      double precision :: AJINV2,AIJINV2,AIJINVSQ,AIINV2,AIJINV,AIINV,AJINV
+      double precision :: FACTOR,TOL
+
+      integer :: I,J,K,JNJ,II,LL,IJ,KJ,LIJ,KG,LNKS,KK,JJ
+      integer :: NIX,NJX,NKX,NIY,NJY,NKY,NIZ,NJZ,NKZ
+      integer :: I3,N3,IA
+      integer :: IDX,IDZ,IDY
+      integer :: IBF,JBF,III,JJJ
+      integer :: I_ELSE,INDEX,ISIZE,IR,IJK,KNK,INI
+      integer :: iijj,iijj_tmp,JI
+         
+
+         ! ~~~ Start ~~~
+
+
+
+      IF(N_ELSE.EQ.0) RETURN
+
+
+!$omp parallel do default(none) &
+!$omp shared(I_S_SHL,N_S_SHL) &
+!$omp shared(N_ELSE,KAUX_ELSE) &
+!$omp shared(CCS) &
+!$omp shared(EXAUX,KAUXAT,KAUXTY,KAUXMI,KAUXMX,KAUXNG,KAUXST,KAUXLO)    &
+!$omp shared(C,KNG,KSTART,KLOC,NSHELL)         &
+!$omp shared(MIXS,TLL,DAux,LOCSPH,TOL)     &
+!$omp shared(LX,LY,LZ,lockt_init)           &
+!$omp shared(I32) &
+!$omp shared(ss_AB_PRE,ss_DUM_PRE,ss_P_PRE,ss_DUM0_PRE,LOCss) &
+!$omp private(ISH,JSH,NGI,I1,LOCI,NGJ,J1,LOCJ,KAUXSH) &
+!$omp private(KAT,CC,LK,MINK,MAXK,NK,NGK,K1,LOCK) &
+!$omp private(INDEX,MINKT,MAXKT,NKS,IAUXSTART,DK,GGID) &
+!$omp private(DB,G2ID,G3ID,VALL,T1) &
+!$omp private(LTOT,NROOTS,AB,DUM,EXPB) &
+!$omp private(P,CPV,RR,DUM0,DUM2,AK,RHO) &
+!$omp private(XX,U,VAL1,A2,B2,F00,W) &
+!$omp private(KNK,LLK,AIJINV,AJINV,AJINV2,AIJINVSQ,NKX,NKY,NKZ) &
+!$omp private(III,JJJ,IIJJ,JI,N3,IJK,FACTOR,I3,IDX,IDY,IDZ)
+
+
+! DO III =1, N_S_SHL
+!    DO JJJ = 1,III
+
+DO iijj_tmp = 0, N_S_SHL*(N_S_SHL+1)/2-1
+
+   III = (1 + sqrt(one+eight*iijj_tmp))/2
+   JJJ = iijj_tmp - III*(III-1)/2 + 1
+   iijj =  iijj_tmp + 1
+
+      ISH = I_S_SHL(III)
+      JSH = I_S_SHL(JJJ)
+            
+               NGI   = KNG(ISH)
+               I1    = KSTART(ISH)
+               LOCI  = KLOC(ISH)
+
+               NGJ   = KNG(JSH)
+               J1    = KSTART(JSH)
+               LOCJ  = KLOC(JSH)
+   
+
+! K-SHELL (AUX)
+! DO KAUXSH=1,NAUXSH
+      ! DO KAUXSH=LddiAuxShStart,LddiAuxShEnd
+      DO I_ELSE=1,N_ELSE
+         ! DO ISH = 1,NSHELL
+         KAUXSH = KAUX_ELSE(I_ELSE)
+
+         KAT = KAUXAT(KAUXSH)
+         CC(1) = C(1,KAT)
+         CC(2) = C(2,KAT)
+         CC(3) = C(3,KAT)
+
+         LK = KAUXTY(KAUXSH)-1
+         MINK  = KAUXMI(KAUXSH)
+         MAXK  = KAUXMX(KAUXSH)
+         NK    = MAXK-MINK+1
+
+! write(*,'(A30,4I10)') "LK,MINK,MAXK,NK",LK,MINK,MAXK,NK
+
+         NGK   = KAUXNG(KAUXSH)
+         K1    = KAUXST(KAUXSH)
+         LOCK  = KAUXLO(KAUXSH)-MINK
+         INDEX = MINK+LK
+
+         DO K=MINK,MAXK
+            KNK=K-MINK+1
+            LLK(1,KNK) = LX(K)
+            LLK(2,KNK) = LY(K)
+            LLK(3,KNK) = LZ(K)
+         ENDDO
+
+         ! SPHERICAL TRANSFORMATION
+         MINKT = MIXS(1,INDEX)
+         MAXKT = MIXS(2,INDEX)
+         NKS = MAXKT - MINKT + 1
+
+         IauxStart = LOCSPH(KAUXSH)
+
+         ! AUX POINTER FOR I32
+         IauxStart = IauxStart-LOCKT_init+1
+
+           
+               ! DENSITY FACTOR
+               DO K=1,NK
+                  DK(K)=DAux(KAUXSH,1,K)
+               ENDDO
+
+               ! TOTAL ANG MOM & ROOTS
+               LTOT = LK
+               NROOTS = LTOT/2+1
+
+! write(*,'(A30,4I10)') "NROOTS,MINKT,MAXKT,NKS",NROOTS,MINKT,MAXKT,NKS
+
+               ! ZERO OUT INTEGRAL ARRAY
+               DO II=1,NK
+                  GGID(II)=zero
+               ENDDO
+            JI=0
+               ! PRIMITIVE IN I-SHELL
+               DO IG = 1, NGI                 
+                  ! PRIMITIVE IN J-SHELL
+                  DO JG = 1, NGJ
+               JI=JI+1
+                  AB = ss_AB_PRE(LOCss(iijj)+JI)
+                  DUM = ss_DUM_PRE(LOCss(iijj)+JI)
+                     IF (DUM > TOL) CYCLE
+                     EXPB = EXP(-DUM)
+                  P(1:3) = ss_P_PRE(1:3,LOCss(iijj)+JI)
+                     CPV(1:3) = CC(1:3)-P(1:3)
+                     RR = CPV(1)*CPV(1) + CPV(2)*CPV(2) + CPV(3)*CPV(3)
+                  DUM0 = ss_DUM0_PRE(LOCss(iijj)+JI)
+
+                     DUM2 = DUM0*CCS(IG,III)
+                     DB = DUM2*CCS(JG,JJJ)
+
+                     ! PRIMITIVE IN K-SHELL
+                     DO KG = 1, NGK
+                        AK = EXAUX(K1+KG-1)
+                        RHO = AB*AK/(AB+AK)
+                        XX = RHO*RR
+
+                        ! RYS ROOTS AND WEIGHT
+                        IF(NROOTS.EQ.1) THEN
+                           CALL RT1_gpu(XX,U,W,NROOTS)
+                        ELSEIF(NROOTS.EQ.2) THEN
+                           CALL RT2_gpu(XX,U,W,NROOTS)
+                        ELSEIF(NROOTS.EQ.3) THEN
+                           CALL RT3_gpu(XX,U,W,NROOTS)
+                        ELSEIF(NROOTS.EQ.4) THEN
+                           CALL ROOT4_gpu(XX,U,W,NROOTS)
+                        ELSEIF(NROOTS.EQ.5) THEN
+                           CALL ROOT5_gpu(XX,U,W,NROOTS)                     
+                        ELSEIF(NROOTS.GE.6) THEN
+                           CALL ROOT6_gpu(XX,U,W,NROOTS)                     
+                        ENDIF
+! I32_AO_BOYS_gpu
+                        AIJINV = one/(AB+AK)
+                        RHO = AB*AK*AIJINV
+                        AJINV  = one/AK
+                        AJINV2 = half*AJINV
+                        AIJINVSQ = SQRT(AIJINV)
+
+                        DO IR = 1, NROOTS
+                           U(IR) = U(IR)*RHO
+                           U(IR) = U(IR)/(RHO+U(IR))
+                           VAL1 = RHO*AJINV*U(IR)
+                           A2(1:3,IR) = -VAL1*CPV(1:3)
+                           B2(IR) = AJINV2-AJINV2*VAL1
+                           F00(IR) = AIJINVSQ*W(IR)
+                           G2ID(1 + 3*(IR-1)) = one
+                           G2ID(2 + 3*(IR-1)) = one
+                           G2ID(3 + 3*(IR-1)) = F00(IR)
+                        ENDDO
+
+
+                        IF (LK.EQ.0) GOTO 333
+                        !!!!!!!!!!!!!!!!!!!!!
+                        N3=3*NROOTS
+
+                        DO IR = 1, NROOTS
+                           G2ID(1+3*(IR-1)+N3) = A2(1,IR)
+                           G2ID(2+3*(IR-1)+N3) = A2(2,IR)
+                           G2ID(3+3*(IR-1)+N3) = A2(3,IR)*F00(IR)
+                        END DO
+
+
+                        IF(LK.EQ.1) GOTO 333
+                        !!!!!!!!!!!!!!!!!!!!
+
+                        DO J=2,LK
+                           DO IR=1,NROOTS
+                              DO K=1,3
+                                 G2ID(K+3*(IR-1)+N3*J) = &
+                                          A2(K,IR)*G2ID(K+3*(IR-1)+N3*(J-1)) &
+                                     +(J-1)*B2(IR)*G2ID(K+3*(IR-1)+N3*(J-2))
+                              ENDDO
+                           ENDDO
+                        ENDDO
+
+  333 CONTINUE
+! I32_AO_PRODXYZ_gpu
+                        N3=3*NROOTS
+                        
+                        DO KK = 0, LK
+                           DO IR=1,NROOTS
+                              DO IA=1,3
+                                 G3ID(IA+3*(IR-1)+N3*KK) = G2ID(IA+3*(IR-1)+N3*KK)
+                              ENDDO
+                           ENDDO                             
+                        ENDDO !KK
+
+
+
+                        IJK = 0
+                        FACTOR=PI252*DB
+                        DO K = 1, NK
+                           NKX = LLK(1,K)
+                           NKY = LLK(2,K)
+                           NKZ = LLK(3,K)
+                           VALL = zero
+                           DO IR = 1, NROOTS
+                              I3=3*(IR-1)
+                              IDX = I3 + N3*NKX
+                              IDY = I3 + N3*NKY
+                              IDZ = I3 + N3*NKZ
+                              VALL = VALL + G3ID(1+IDX)*G3ID(2+IDY)*G3ID(3+IDZ)
+                           ENDDO
+                           IJK = IJK+1
+                           GGID(IJK) = GGID(IJK) + FACTOR*DK(K)*VALL
+                        ENDDO
+
+
+                     ENDDO !KG
+                  ENDDO !JG
+               ENDDO !IG
+
+               ! TRANSFORM TO SPHERICAL
+               DO I=1,NKS               
+                  T1(I) = zero
+                  DO K=1,NK
+                     T1(I) = T1(I) + TLL(K,I,INDEX)*GGID(K)
+                  ENDDO
+               ENDDO
+            
+               ! COPY INTEGRAL GG(P|MN) TO I32
+               ! IBF = LOCI+1
+               ! JBF = LOCJ+1
+               DO LNKS=1,NKS
+                  I32(LOCI,LOCJ,IauxStart+LNKS-1) = T1(LNKS) 
+                  I32(LOCJ,LOCI,IauxStart+LNKS-1) = T1(LNKS) 
+               ENDDO
+
+           ! ENDDO !ISH
+         ENDDO !JSH
+      ENDDO !KSH
+!$omp end parallel do
+
+
+      END SUBROUTINE
+
+
+
+
+
+

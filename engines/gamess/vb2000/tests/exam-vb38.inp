@@ -1,0 +1,69 @@
+! GAMESS/VB2000 Test 38
+!
+!  This test modifies EXAM29 to do a VB run at each point 
+!  of the scan, to test this feature. The VB(2) is essentially
+!  a GVB of the F-N bond.
+!
+!  The scan is done over a 3x3 grid centered on the SCF
+!  transition state for the endothermic SN2 type reaction 
+!      F- + NH2OH -> F-NH2-OH anion -> FNH2 + OH-
+!
+!  Groups 1 and 2 are F and OH, and their distance from
+!  the N is varied antisymmetrically, which is more or
+!  less what the IRC should be like.  
+!
+!  The energies below from EXAM29 are truncated and VB
+!  energies added,
+!  E(RHF)= -229.036832, E(MP2)= -229.387330, E(VB)= -229.06976278
+!  E(RHF)= -229.035638, E(MP2)= -229.386664, E(VB)= -229.06624194
+!  E(RHF)= -229.030927, E(MP2)= -229.382209, E(VB)= -229.05904997
+!  E(RHF)= -229.037215, E(MP2)= -229.392323, E(VB)= -229.07108817
+!  E(RHF)= -229.038544, E(MP2)= -229.393648, E(VB)= -229.06944128
+!  E(RHF)= -229.036737, E(MP2)= -229.391368, E(VB)= -229.06245756
+!  E(RHF)= -229.032860, E(MP2)= -229.391893, E(VB)= -229.06094817
+!  E(RHF)= -229.036464, E(MP2)= -229.394832, E(VB)= -229.06565011
+!  E(RHF)= -229.037248, E(MP2)= -229.394350, E(VB)= -229.06713163
+!
+ $contrl scftyp=rhf runtyp=surface VBTYP=VB2000
+         icharg=-1 coord=zmt mplevl=2 $end
+ $system timlim=1 $end
+ $surf   ivec1(1)=2,1 igrp1=1       
+         ivec2(1)=2,5 igrp2(1)=5,6  
+         disp1= 0.10 ndisp1=3 orig1=-0.10
+         disp2=-0.10 ndisp2=3 orig2= 0.10 $end`
+ $basis  gbasis=n21 ngauss=3 $end
+ $guess  guess=huckel $end
+ $data
+F-NH2-OH exchange (inspired by J.Phys.Chem. 1994,98,7942-4)
+C1
+F
+N 1 rNF
+H 2 rNH   1  aFNH 
+H 2 rNH   1  aFNH   3 aHNH  +1
+O 2 rNO   3  aONH   4 aONH  -1
+H 5 rOH   2  aHON   1 180.0
+
+rNF=1.7125469
+rNH=0.9966981
+rNO=1.9359887
+rOH=0.9828978
+aFNH=90.18493
+aONH=79.34339
+aHON=100.78851
+aHNH=108.57000
+ $end
+ $VB2000
+#! VB(2)/3-21G PRINTALL DIIS
+
+Surface scan as main GAMESS exam29
+
+0 1
+
+ $MACROITER
+ 20
+
+ $ECONV
+ 6
+
+ $END
+
