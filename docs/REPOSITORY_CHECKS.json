@@ -1,0 +1,43 @@
+{
+  "schema": "fmotpiefinal-repository-integration-v1",
+  "date_utc": "2026-10-20",
+  "status": "PASS_LOCAL_VALIDATION",
+  "base_commit": "7b99ca7bbc47a5d66ac4d40daf99cc13f33c390d",
+  "legacy_files_preserved_and_hash_verified": 9141,
+  "legacy_directory": "archive/legacy_fmo87_20261020",
+  "source_production_module_hashes_unchanged": true,
+  "new_runtime_capability": "fmotpiefinal-doctor offline dependency/path diagnostics",
+  "installed_wheel_tests": {
+    "tests": 198,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tested_wheel_sha256": "81312487adac1140b6053d5724b393349dc1a3c22c518153343d3800351ce8c5",
+  "explicit_QM_preflight": "PASS",
+  "fresh_full_QM_smoke_cases": [
+    {
+      "case": "A71EV2A-x1445a",
+      "status": "PASS",
+      "full_pipeline": true,
+      "tpie_kcal_mol": -49.339,
+      "ranking_QM_deck_minimized_pose_identical": true,
+      "carbonyl_repair_triggered": false,
+      "wall_seconds": 45.10335539281368
+    },
+    {
+      "case": "A71EV2A-x4701a",
+      "status": "PASS",
+      "full_pipeline": true,
+      "tpie_kcal_mol": -68.211,
+      "ranking_QM_deck_minimized_pose_identical": true,
+      "carbonyl_repair_triggered": true,
+      "wall_seconds": 54.553203362971544
+    }
+  ],
+  "scientific_scope": "Two repository integration smoke cases; 909-case evidence remains attributed to source version 2004",
+  "clean_remote_conda_solve_verified": false,
+  "github_hosted_CI_status": "PENDING_PUSH",
+  "license_added": false,
+  "repository_visibility_changed": false
+}

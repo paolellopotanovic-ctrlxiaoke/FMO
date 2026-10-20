@@ -1,0 +1,10 @@
+include README.md README.zh-CN.md environment.yml SOURCE_PROVENANCE.json
+recursive-include docs *.md *.json
+recursive-include examples *.csv *.sh
+recursive-include tests *.py
+recursive-include tools *.py
+include .github/workflows/tests.yml
+include CHANGELOG.md
+prune archive
+global-exclude *.pyc
+global-exclude __pycache__

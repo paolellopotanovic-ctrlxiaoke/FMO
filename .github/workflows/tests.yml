@@ -1,0 +1,33 @@
+name: Portable tests and package
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    env:
+      OPENMM_CPU_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            /*
+            !/archive/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e '.[test]' setuptools wheel
+      - run: python tools/check_release.py
+      - run: pytest
+      - run: python tools/build_release.py
+      - run: fmotpiefinal --help
+      - name: Verify installed wheel entry points outside the source tree
+        run: |
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          cd "$RUNNER_TEMP"
+          fmotpiefinal --help
+          fmotpiefinal-doctor --help

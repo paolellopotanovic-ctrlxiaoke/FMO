@@ -1,79 +1,143 @@
-# Independent GAMESS FMO87 / Boltz-2 pipeline
+# FMOtpiefinal
 
-This is a **private, internal research repository**. It contains the exact Boltz-2 four-target FMO cohort, the complete production pipeline, and a bundled GAMESS runtime. Do not redistribute GAMESS or publisher PDFs outside the permitted internal environment.
+[中文说明](README.zh-CN.md)
 
-The frozen benchmark is **87/87 neutral compounds** from CDK2, JNK1, P38, and TYK2—the same four-target cohort used for the Boltz-2 paper's FMO comparison.
+**Current tool:** the installable project at this repository root. The previous
+FMO87 engineering snapshot is retained under `archive/`, not used by this package.
 
-## Pull And Run
+An auditable, label-free structure-preparation and GAMESS FMO full-tPIE ranking
+toolkit. This standalone release candidate contains the maintained computation
+path, not the historical research workspace.
+
+**Status:** packaging/reorganization release candidate, based on validated
+`0.1.0.dev2026102004`. It is not a universal chemistry engine or a binding-free-energy
+estimator. Unsupported chemistry produces an explicit diagnostic rather than a
+fabricated score. Publication still requires the owner's license/authorship review.
+
+## Install
+
+The complete calculation environment needs PDBFixer, PDB2PQR/PROPKA, OpenMM,
+OpenFF, force-field/model assets, and a separately licensed GAMESS installation
+with the DFTB parameter library. These external programs/assets are **not bundled**.
+The conda environment captures versions used locally; a fresh remote environment
+solve is not yet certified. Run from this project directory:
 
 ```bash
-./scripts/bootstrap_engines.sh
-./run_pipeline.sh verify
-./run_pipeline.sh check-inputs
-./run_pipeline.sh download-boltz
-./run_pipeline.sh all
+conda env create -f environment.yml
+conda activate fmotpiefinal
+fmotpiefinal --help
+fmotpiefinal-doctor
+pytest
 ```
 
-No structure download or system GAMESS installation is required. The repository includes the 87-case PDB/SDF inputs, shared MSAs, GAMESS executable/source/parameters, MKL and OpenMPI libraries, frozen protocol, tests, audits, and final tables.
-
-Geometry uses OpenMM/OpenFF directly; the separate OpenFE command-line environment is not required.
-
-Boltz-2 Python is installed by bootstrap. Its official multi-GB checkpoints cannot be committed as ordinary GitHub blobs, so `download-boltz` fetches them from the official release URLs into the ignored `engines/boltz-cache/` directory and preserves their hashes for audit.
-
-For parallel FMO:
+To avoid downloading historical engines/data into a new working tree, clone the
+maintained files with sparse checkout (the archive remains available on GitHub):
 
 ```bash
-./run_pipeline.sh prepare
-FMO_JOBS=8 ./run_pipeline.sh fmo-parallel
+git clone --filter=blob:none --no-checkout https://github.com/paolellopotanovic-ctrlxiaoke/FMO.git
+cd FMO
+git sparse-checkout set --no-cone '/*' '!/archive/'
+git checkout main
 ```
 
-## Documentation
+For parsing, scoring and dependency-light development only:
 
-- Chinese quick start: `START_HERE_CN.md`
-- Pipeline map: `PIPELINE_MAP_CN.md`
-- Engines and data: `docs/ENGINE_SETUP_CN.md`
-- Full reproduction: `docs/REPRODUCTION_CN.md`
-- Frozen protocol: `docs/EXPERIMENT_PROTOCOL_CN.md`
-- Code index: `docs/CODE_REFERENCE_CN.md`
-- Data contract: `docs/DATA_FLOW_CN.md`
-- Final analysis: `docs/FINAL_REPORT_CN.md`
-- Water ablation: `reference_results/final/WATER_ABLATION_CN.md`
-- Provenance/artifacts: `docs/PROVENANCE.md`, `docs/ARTIFACT_MANIFEST.md`
+```bash
+python -m pip install -e '.[test]'
+pytest
+```
 
-## Frozen Protocol
+The second installation is not enough to perform full structure preparation.
+See [installation and troubleshooting](docs/INSTALLATION.md).
 
-- Protein preparation: PDB2PQR 3.6.1, AMBER, PROPKA 3.5.1, pH 7.4, hydrogen-bond optimization, OXT repair; P38 retains 20 prepared waters.
-- Geometry: OpenMM 8.4, AMBER14 `protein.ff14SB`, OpenFF 2.2.0, GNN AM1-BCC ligand charges, flexible receptor/waters, and 100 kJ/mol/Å² ligand restraints.
-- Fragmentation: shifted FACIO-like Cα–C′ partition, neutral ACE/NME terminal caps, internal `$FMOBND HOP_C`, and closed-shell/electron checks.
-- FMO engine: GAMESS FMO2-DFTB3/3OB-3-1/PIEDA, all dimers, `MODORB=3`, water PCM `IFMO=-1`, and strict SCF/PIEDA/TIE gates.
-- Boltz-2: version 2.2.1, seed 0, recycling 3, affinity sampling 200, diffusion samples 5, one shared MSA per target.
+Before a QM batch, inspect the explicit runtime without launching calculations:
 
-The bundled GAMESS runtime passed a real FMO smoke case (`P38_2ee`): `SUCCEEDED`, tPIE `-83.082 kcal/mol`, wall time `43.70 s`.
+```bash
+fmotpiefinal-doctor --gamess-dir /path/to/gamess \
+  --library-dir /path/to/runtime-libraries \
+  --dftb-parameter-dir /path/to/gamess/auxdata/DFTB/3OB-3-1
+```
 
-## Final Comparison
+Exit code 2 means dependencies/configuration need attention. A passing preflight
+does not replace a real QM smoke test or verify every model/parameter asset.
 
-| Model | Pearson | Kendall | Note |
-|---|---:|---:|---|
-| Boltz-2 paper | 0.66 | 0.48 | Published Table 12 reference |
-| Boltz-2 paper FMO | 0.55 | 0.38 | Private in-house protocol |
-| Local Boltz-2 | 0.651763 | 0.509589 | Validates cohort/evaluator reconstruction |
-| Our raw FMO tPIE | 0.479233 | 0.320055 | Label-free retained-water protocol |
-| Our no-water raw tPIE | 0.413778 | 0.276553 | Full preparation-level ablation |
+## One complete target
 
-The fitted `tPIE+clogP` rows are `0.608842/0.499633` with water and `0.557731/0.482793` without explicit water. They are per-target in-sample sensitivity analyses and are not label-free comparisons. Full uncertainty and per-target tables are in `docs/FINAL_REPORT_CN.md`.
+Inputs are a receptor PDB/mmCIF, a label-free CSV with `ligand_id,smiles`, and an
+SDF containing the corresponding receptor-frame poses. SDF names must match the
+CSV IDs exactly, including stereochemistry and formal charge. This tool does not
+predict a binding pose from SMILES. Never include affinity labels in these inputs.
 
-## Repository Layout
+```bash
+fmotpiefinal blind-run \
+  --target MY_TARGET \
+  --protein data/receptor.pdb \
+  --ligands data/ligands.csv \
+  --poses data/poses.sdf \
+  --gamess-dir /path/to/gamess \
+  --library-dir /path/to/runtime-libraries \
+  --dftb-parameter-dir /path/to/gamess/auxdata/DFTB/3OB-3-1 \
+  --workers 4 --ncores 1 --timeout 3600 \
+  --output runs/MY_TARGET
+```
+
+`--workers` controls concurrent ligand work; `--ncores` is the per-GAMESS-job
+request. Account separately for preparation/OpenMM threads and native-library
+threads when allocating CPU resources. Use a new output directory for a new run.
+
+The default command includes intake, chain/connectivity normalization, PDBFixer,
+PDB2PQR/PROPKA, graph/chemistry and water handling, k10 minimization, full-cohort
+pocket construction, FMO2-DFTB3/PCM, convergence checks, and registered label-blind
+rescue. `run` and `adaptive-run` are lower-level staged commands, not alternative
+scientific scoring methods. See [workflow](docs/WORKFLOW.md) for their boundaries.
+
+Completed runs expose `adaptive_status.json`, preparation/audit artifacts, QM
+logs and `ranking/ranking.json`. Do not read a partial directory as a complete
+ranking. Raw score is `-tPIE`; the optional robust soft-cap is a dimensionless
+ranking proxy, **not** a predicted pKd or kcal/mol free energy.
+
+## Repository map
 
 ```text
-src/sophosqm_baseline/       13 production modules
-scripts/                     14 ordered workflow tools
-configs/fmo87_production.yaml
-data/fmo87_structures/       bundled 87-case inputs
-data/boltz_msa/              four frozen shared MSAs
-engines/boltz/               official Boltz source at the frozen commit
-engines/gamess/              complete GAMESS and portable runtime
-reference_results/final/     frozen 87/87 audits, metrics, reports
-tests/                       production regression suite
+src/fmotpiefinal/
+  pipeline/       CLI and staged orchestration
+  core/           parsing, graph audits, preparation, fragmentation and GAMESS
+  references/     frozen retrospective soft-cap references (no molecular assets)
+  scoring.py      complete-cohort checks and robust score transformation
+  diagnostics.py  label-free diagnostics
+  preparation_sensitivity.py  preparation comparison utilities
+tests/            portable regression tests; no research workspace imports
+docs/             methods, installation, validation and publication checklist
+examples/         input-schema example and parameterized launch script
+tools/            release integrity and build helpers
+SOURCE_PROVENANCE.json  source hashes and module-rename mapping
 ```
 
-Generated environments, caches, and raw logs are ignored. The final reproducible summaries are retained under `reference_results/final/`.
+In the maintained source package, no experiment scripts, old HF/three-state/PBSA branches, raw benchmark structures,
+run directories, GAMESS binaries, private machine paths, or environment copies
+are bundled. The historical repository contents remain isolated under `archive/`.
+Retained production rescue code is intentional, not
+an invitation to select results based on affinity labels.
+
+## Evidence and limits
+
+The source computation version completed 909/909 structures across 14 target
+cohorts, including 639 OpenBind crystals aggregated to 490 compounds. Performance
+is heterogeneous: some targets remain weak or anticorrelated. The results are
+retrospective development evidence, not untouched external validation. The
+renamed release's tests and smoke checks are recorded separately; those must not
+be presented as a second 909-structure calculation.
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Scientific workflow](docs/WORKFLOW.md)
+- [Validation and target metrics](docs/VALIDATION.md)
+- [GitHub publication checklist](docs/PUBLISHING.md)
+- [Repository history boundary](docs/REPOSITORY_LAYOUT.md)
+- [Repository integration checks](docs/REPOSITORY_CHECKS.json)
+
+## License
+
+No project license has been selected by the owner. Do not imply an open-source
+grant or publish third-party data/software/models without permission. The archived
+engineering snapshot retains its existing restrictions. Resolve the checklist
+before a public release or repository visibility change.

@@ -1,0 +1,83 @@
+{
+  "schema": "fmotpiefinal-local-release-checks-v1",
+  "date_utc": "2026-10-20",
+  "release": "0.1.0rc1",
+  "status": "PASS_LOCAL_RELEASE_CHECKS",
+  "publication_status": "OWNER_LICENSE_AUTHORSHIP_AND_RIGHTS_REVIEW_REQUIRED",
+  "tested_wheel_sha256": "6dacb25129a8b7b17b389cf8b1fc5b7fd91f69a05d322cdd9b62cd29b3fcafd9",
+  "export_integrity": {
+    "status": "PASS",
+    "runtime_modules": 55,
+    "verified_export_files": 84
+  },
+  "source_transformation_verification": {
+    "status": "PASS",
+    "checks": {
+      "release-metadata": 1,
+      "module-and-output-label-renaming": 81,
+      "exact-function-extraction": 1,
+      "installed-test-path-adaptation": 1
+    },
+    "helper_function_AST_equivalent": true
+  },
+  "installed_module_imports": 55,
+  "installed_console_script": "PASS",
+  "installed_wheel_tests": {
+    "tests": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 195
+  },
+  "research_regression_tests": {
+    "tests": 404,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 404
+  },
+  "optional_dependency_absence_simulation": {
+    "tests": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 29,
+    "passed": 166
+  },
+  "optional_dependency_check_scope": "Import blocking in the existing environment, not a fresh remote installation",
+  "fresh_QM_smoke_cases": [
+    {
+      "case": "A71EV2A-x1445a",
+      "status": "PASS",
+      "full_pipeline_rerun": true,
+      "ranking_identical": true,
+      "QM_deck_identical": true,
+      "minimized_pose_identical": true,
+      "carbonyl_repair_triggered": false,
+      "tpie_kcal_mol": -49.339,
+      "wall_seconds": 31.848941408097744
+    },
+    {
+      "case": "A71EV2A-x4701a",
+      "status": "PASS",
+      "full_pipeline_rerun": true,
+      "ranking_identical": true,
+      "QM_deck_identical": true,
+      "minimized_pose_identical": true,
+      "carbonyl_repair_triggered": true,
+      "tpie_kcal_mol": -68.211,
+      "wall_seconds": 45.49859846383333
+    }
+  ],
+  "protected_production_snapshot_unchanged": true,
+  "clean_conda_solve_verified": false,
+  "github_hosted_CI_executed": false,
+  "source_scientific_validation": {
+    "version": "0.1.0.dev2026102004",
+    "structures": 909,
+    "repeated_all_909_in_this_release_check": false
+  },
+  "packaging_issues_fixed": [
+    "Installed CLI test no longer assumes a neighboring src directory",
+    "Lightweight tests explicitly skip full-compute integration groups"
+  ]
+}

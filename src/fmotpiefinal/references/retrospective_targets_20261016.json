@@ -1,0 +1,50 @@
+{
+  "schema": "label-free-target-local-tpie-softcap-v1",
+  "factor": 3.0,
+  "mad_conversion": 1.4826,
+  "score_inputs_sha256": {
+    "original87": "f487a9574698641d78f98c60d9fe9db08c6230b137991e9f578781b573dcd15d",
+    "galectin3": "b932c5c8bd8dc6256c5cf96c3b9daef7e909daf423525ee22c9d040a0bed6cbf",
+    "fxa": "c15dacce50fe3b6bd2a36160bc40566c02963a2c0784a2f25e9baf0b7ea1cbda",
+    "openbind": "19316e4144c8aea2c6b3ea789ef9848a092e12dbb5f65ea31fd124156a3f4297"
+  },
+  "score_snapshot_sha256": "3792be26aeaf5847155cd2736f15a2d80add17ee2e31bef6158fde575783151d",
+  "score_unit": "dimensionless ranking proxy, not binding free energy",
+  "reference": {
+    "CDK2": {
+      "n": 16,
+      "median": 81.324,
+      "scaled_mad": 10.326309000000004
+    },
+    "FXa": {
+      "n": 27,
+      "median": 109.908,
+      "scaled_mad": 7.705072200000004
+    },
+    "Galectin3": {
+      "n": 26,
+      "median": 103.988,
+      "scaled_mad": 2.399588099999996
+    },
+    "JNK1": {
+      "n": 21,
+      "median": 64.872,
+      "scaled_mad": 5.347738199999998
+    },
+    "OpenBind": {
+      "n": 490,
+      "median": 80.992,
+      "scaled_mad": 10.354478400000001
+    },
+    "P38": {
+      "n": 34,
+      "median": 84.5325,
+      "scaled_mad": 5.415937799999997
+    },
+    "TYK2": {
+      "n": 16,
+      "median": 71.5395,
+      "scaled_mad": 2.461857300000009
+    }
+  }
+}
