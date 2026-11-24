@@ -1,0 +1,18 @@
+{
+  "schema": "pcm-local-strain-components-v1",
+  "target": "BACE",
+  "weights": "All coefficients fixed to one; no label-dependent arm selection",
+  "arms": [
+    "baseline_tpie",
+    "matched_tpie",
+    "baseline_tpie_plus_pcm_strain",
+    "matched_tpie_plus_pcm_strain",
+    "matched_tpie_plus_internal_response",
+    "matched_tpie_plus_solvent_response"
+  ],
+  "evaluation_sha256": "e395861887b3ab4669d2110cd3e788a7c030caff658cf8feda11356cb03723fd",
+  "protocol_sha256": "8254362a84e56ef0bdd4f66672442ea8f4031530eaed3f351f8aa83224d583e2",
+  "registry_sha256": "80c09f704b3caf377de160036281e15e7a4d3ae51cc312c515f34e86d13cc9d4",
+  "driver_sha256": "4f8473d7ad2042b34fceb19d251cf19da67fa4f30bec19db119ce68bdd315bba",
+  "development_warning": "Retrospective diagnostic after complete strain scores were observed; not blind validation"
+}

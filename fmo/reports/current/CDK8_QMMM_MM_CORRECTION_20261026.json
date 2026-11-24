@@ -1,0 +1,34 @@
+{
+  "schema": "same-frame-qmmm-mm-correction-v1",
+  "qm_mm_total_potential_kcal_mol": {
+    "bound_0": -34879.6617748573,
+    "bound_10": -34098.0509596605,
+    "solution_0": -32856.2791661266,
+    "solution_10": -32222.5610357906
+  },
+  "mm_only_potential_kcal_mol": {
+    "bound_0": -644.5200165613,
+    "bound_10": -391.8888789304,
+    "solution_0": -3149.4256966769,
+    "solution_10": -3044.9125681348
+  },
+  "qmmm_binding_difference_kcal_mol": {
+    "0": -2023.3826087306952,
+    "10": -1875.4899238698963
+  },
+  "mm_binding_difference_kcal_mol": {
+    "0": 2504.9056801156,
+    "10": 2653.0236892044
+  },
+  "qmmm_double_difference_kcal_mol": 147.8926848607989,
+  "mm_double_difference_kcal_mol": 148.11800908880014,
+  "qm_minus_mm_double_difference_kcal_mol": -0.2253242280012273,
+  "status": "DIAGNOSTIC_COMPLETE",
+  "interpretation": [
+    "The MM-only values use the corrected LJSIGMA=1 QuanPol export.",
+    "This is a single-frame finite-shell diagnostic, not a free energy.",
+    "On this frame the QM/MM replacement changes the endpoint double difference by only about -0.225 kcal/mol.",
+    "The dominant finite-shell endpoint difference is therefore the MM/environment term, not the DFTB3 QM replacement.",
+    "This does not prove the QM correction is useless across frames; it establishes that multi-frame sampling is required before ranking claims."
+  ]
+}

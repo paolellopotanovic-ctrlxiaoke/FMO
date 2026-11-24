@@ -1,0 +1,348 @@
+{
+  "status": "COMPLETE",
+  "n_expected": 492,
+  "n_received": 492,
+  "failed": [],
+  "targets": {
+    "CDK8": {
+      "tPIE": {
+        "paired_repeat_means": [
+          -3.16729268292683,
+          -6.091121951219512,
+          -2.3530731707317067
+        ],
+        "mean": -3.8704959349593495,
+        "repeat_std": 1.9657373378909062,
+        "all_three_repeats_same_nonzero_sign": true,
+        "leave_one_repeat_out_means": [
+          -4.22209756097561,
+          -2.7601829268292684,
+          -4.629207317073171
+        ],
+        "fixed_windows": {
+          "early_1_to_2p9_ns": {
+            "paired_repeat_means": [
+              -3.6909499999999995,
+              -8.147099999999998,
+              -1.8168499999999994
+            ],
+            "mean": -4.551633333333332,
+            "repeat_std": 3.2517069541755035
+          },
+          "late_3_to_5_ns": {
+            "paired_repeat_means": [
+              -2.6685714285714295,
+              -4.133047619047618,
+              -2.8637619047619034
+            ],
+            "mean": -3.22179365079365,
+            "repeat_std": 0.795180908028367
+          }
+        },
+        "prefix_sensitivity": {
+          "11": {
+            "ending_ns": 2.0,
+            "paired_repeat_means": [
+              -2.5549090909090926,
+              -6.09990909090909,
+              -1.8808181818181817
+            ],
+            "mean": -3.511878787878788,
+            "repeat_std": 2.266500667434733
+          },
+          "21": {
+            "ending_ns": 3.0,
+            "paired_repeat_means": [
+              -3.6089523809523802,
+              -7.924999999999999,
+              -1.3969047619047612
+            ],
+            "mean": -4.310285714285713,
+            "repeat_std": 3.3200765341696212
+          },
+          "31": {
+            "ending_ns": 4.0,
+            "paired_repeat_means": [
+              -2.105548387096774,
+              -7.276096774193549,
+              -2.030483870967741
+            ],
+            "mean": -3.8040430107526877,
+            "repeat_std": 3.00712099400129
+          },
+          "41": {
+            "ending_ns": 5.0,
+            "paired_repeat_means": [
+              -3.16729268292683,
+              -6.091121951219512,
+              -2.3530731707317067
+            ],
+            "mean": -3.8704959349593495,
+            "repeat_std": 1.9657373378909062
+          }
+        },
+        "late_minus_early_by_repeat": [
+          1.02237857142857,
+          4.01405238095238,
+          -1.046911904761904
+        ],
+        "convergence_proven": false,
+        "warning": "Saved frames are correlated; 123 paired observations are not 123 independent repeats."
+      },
+      "retained_water_pair_sum": {
+        "paired_repeat_means": [
+          -0.012609756097560976,
+          0.3474634146341464,
+          -0.11439024390243901
+        ],
+        "mean": 0.07348780487804879,
+        "repeat_std": 0.2426660111766146,
+        "all_three_repeats_same_nonzero_sign": false,
+        "leave_one_repeat_out_means": [
+          0.11653658536585368,
+          -0.0635,
+          0.1674268292682927
+        ],
+        "fixed_windows": {
+          "early_1_to_2p9_ns": {
+            "paired_repeat_means": [
+              -0.03325,
+              0.24395000000000006,
+              0.28495
+            ],
+            "mean": 0.16521666666666668,
+            "repeat_std": 0.17309538796089668
+          },
+          "late_3_to_5_ns": {
+            "paired_repeat_means": [
+              0.007047619047619048,
+              0.446047619047619,
+              -0.49471428571428566
+            ],
+            "mean": -0.01387301587301587,
+            "repeat_std": 0.4707297473996344
+          }
+        },
+        "prefix_sensitivity": {
+          "11": {
+            "ending_ns": 2.0,
+            "paired_repeat_means": [
+              -0.062000000000000006,
+              0.5051818181818182,
+              0.31245454545454554
+            ],
+            "mean": 0.25187878787878787,
+            "repeat_std": 0.28840227204967717
+          },
+          "21": {
+            "ending_ns": 3.0,
+            "paired_repeat_means": [
+              -0.03147619047619048,
+              0.39409523809523817,
+              0.30942857142857144
+            ],
+            "mean": 0.22401587301587303,
+            "repeat_std": 0.2252759574204171
+          },
+          "31": {
+            "ending_ns": 4.0,
+            "paired_repeat_means": [
+              -0.019193548387096773,
+              0.1876774193548387,
+              0.14767741935483863
+            ],
+            "mean": 0.10538709677419351,
+            "repeat_std": 0.10972808601995432
+          },
+          "41": {
+            "ending_ns": 5.0,
+            "paired_repeat_means": [
+              -0.012609756097560976,
+              0.3474634146341464,
+              -0.11439024390243901
+            ],
+            "mean": 0.07348780487804879,
+            "repeat_std": 0.2426660111766146
+          }
+        },
+        "late_minus_early_by_repeat": [
+          0.04029761904761905,
+          0.20209761904761897,
+          -0.7796642857142857
+        ],
+        "convergence_proven": false,
+        "warning": "Saved frames are correlated; 123 paired observations are not 123 independent repeats."
+      }
+    },
+    "BACE": {
+      "tPIE": {
+        "paired_repeat_means": [
+          3.142975609756098,
+          6.809268292682928,
+          2.449048780487805
+        ],
+        "mean": 4.133764227642277,
+        "repeat_std": 2.342888198918457,
+        "all_three_repeats_same_nonzero_sign": true,
+        "leave_one_repeat_out_means": [
+          4.629158536585367,
+          2.7960121951219516,
+          4.976121951219513
+        ],
+        "fixed_windows": {
+          "early_1_to_2p9_ns": {
+            "paired_repeat_means": [
+              7.0623000000000005,
+              10.218400000000003,
+              5.146099999999999
+            ],
+            "mean": 7.4756,
+            "repeat_std": 2.5612827821230537
+          },
+          "late_3_to_5_ns": {
+            "paired_repeat_means": [
+              -0.5897142857142871,
+              3.5624761904761906,
+              -0.11957142857142701
+            ],
+            "mean": 0.9510634920634922,
+            "repeat_std": 2.2737338867167223
+          }
+        },
+        "prefix_sensitivity": {
+          "11": {
+            "ending_ns": 2.0,
+            "paired_repeat_means": [
+              5.514818181818185,
+              11.333363636363641,
+              6.7429090909090865
+            ],
+            "mean": 7.863696969696972,
+            "repeat_std": 3.06691895940882
+          },
+          "21": {
+            "ending_ns": 3.0,
+            "paired_repeat_means": [
+              7.140619047619047,
+              9.861047619047621,
+              4.294190476190475
+            ],
+            "mean": 7.0986190476190485,
+            "repeat_std": 2.783666217822264
+          },
+          "31": {
+            "ending_ns": 4.0,
+            "paired_repeat_means": [
+              4.1250967741935485,
+              7.807419354838711,
+              3.396741935483871
+            ],
+            "mean": 5.109752688172043,
+            "repeat_std": 2.364461730733083
+          },
+          "41": {
+            "ending_ns": 5.0,
+            "paired_repeat_means": [
+              3.142975609756098,
+              6.809268292682928,
+              2.449048780487805
+            ],
+            "mean": 4.133764227642277,
+            "repeat_std": 2.342888198918457
+          }
+        },
+        "late_minus_early_by_repeat": [
+          -7.652014285714287,
+          -6.655923809523812,
+          -5.265671428571426
+        ],
+        "convergence_proven": false,
+        "warning": "Saved frames are correlated; 123 paired observations are not 123 independent repeats."
+      },
+      "retained_water_pair_sum": {
+        "paired_repeat_means": [
+          0.6097317073170732,
+          -1.461536585365854,
+          -1.055219512195122
+        ],
+        "mean": -0.6356747967479676,
+        "repeat_std": 1.0975205744145016,
+        "all_three_repeats_same_nonzero_sign": false,
+        "leave_one_repeat_out_means": [
+          -1.258378048780488,
+          -0.22274390243902442,
+          -0.4259024390243904
+        ],
+        "fixed_windows": {
+          "early_1_to_2p9_ns": {
+            "paired_repeat_means": [
+              1.7016999999999995,
+              -1.0437999999999998,
+              -1.12365
+            ],
+            "mean": -0.1552500000000001,
+            "repeat_std": 1.6086613946073298
+          },
+          "late_3_to_5_ns": {
+            "paired_repeat_means": [
+              -0.4302380952380951,
+              -1.8593809523809526,
+              -0.9900476190476191
+            ],
+            "mean": -1.093222222222222,
+            "repeat_std": 0.720136150728312
+          }
+        },
+        "prefix_sensitivity": {
+          "11": {
+            "ending_ns": 2.0,
+            "paired_repeat_means": [
+              1.1212727272727272,
+              1.565,
+              -1.6539090909090908
+            ],
+            "mean": 0.3441212121212121,
+            "repeat_std": 1.7445106167664957
+          },
+          "21": {
+            "ending_ns": 3.0,
+            "paired_repeat_means": [
+              1.5225238095238092,
+              -1.1332380952380952,
+              -1.407142857142857
+            ],
+            "mean": -0.33928571428571436,
+            "repeat_std": 1.6181801450578392
+          },
+          "31": {
+            "ending_ns": 4.0,
+            "paired_repeat_means": [
+              1.1300000000000001,
+              -1.5360967741935483,
+              -1.4238387096774197
+            ],
+            "mean": -0.6099784946236559,
+            "repeat_std": 1.507910587394634
+          },
+          "41": {
+            "ending_ns": 5.0,
+            "paired_repeat_means": [
+              0.6097317073170732,
+              -1.461536585365854,
+              -1.055219512195122
+            ],
+            "mean": -0.6356747967479676,
+            "repeat_std": 1.0975205744145016
+          }
+        },
+        "late_minus_early_by_repeat": [
+          -2.1319380952380946,
+          -0.8155809523809527,
+          0.13360238095238097
+        ],
+        "convergence_proven": false,
+        "warning": "Saved frames are correlated; 123 paired observations are not 123 independent repeats."
+      }
+    }
+  }
+}

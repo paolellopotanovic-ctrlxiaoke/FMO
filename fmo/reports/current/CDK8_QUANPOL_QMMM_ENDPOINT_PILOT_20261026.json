@@ -1,0 +1,83 @@
+{
+  "schema": "quanpol-endpoint-pilot-audit-v1",
+  "status": "COMPLETE",
+  "rows": {
+    "bound_0": {
+      "log": "../sophosqm-style-fmo-baseline/runs/qmmm_total_potential_pilot_20261026/CDK8/bound/endpoint_00/matched2.stdout",
+      "bond_stretching_kcal_mol": 1074.6898318902,
+      "bond_angle_bending_kcal_mol": 3107.9509131647,
+      "dihedral_rotation_kcal_mol": 4555.1068800202,
+      "lj_repulsion_kcal_mol": 13.2402002012,
+      "lj_dispersion_kcal_mol": -15.583813206,
+      "charge_kcal_mol": -19.8720978508,
+      "potential_kcal_mol": -34879.6617748573,
+      "total_kcal_mol": -34879.6617748573,
+      "total_charge": 5.0,
+      "status": "SUCCEEDED",
+      "warnings_no_bond": 3492,
+      "scf_unconverged": false,
+      "total_potential_closure_kcal_mol": 0.0
+    },
+    "bound_10": {
+      "log": "../sophosqm-style-fmo-baseline/runs/qmmm_total_potential_pilot_20261026/CDK8/bound/endpoint_10/matched.stdout",
+      "bond_stretching_kcal_mol": 1125.4134861115,
+      "bond_angle_bending_kcal_mol": 3123.257417791,
+      "dihedral_rotation_kcal_mol": 4591.2303138834,
+      "lj_repulsion_kcal_mol": 12.9219146521,
+      "lj_dispersion_kcal_mol": -15.3086159143,
+      "charge_kcal_mol": -19.572807889,
+      "potential_kcal_mol": -34098.0509596605,
+      "total_kcal_mol": -34098.0509596605,
+      "total_charge": 5.0,
+      "status": "SUCCEEDED",
+      "warnings_no_bond": 3399,
+      "scf_unconverged": false,
+      "total_potential_closure_kcal_mol": 0.0
+    },
+    "solution_0": {
+      "log": "../sophosqm-style-fmo-baseline/runs/qmmm_total_potential_pilot_20261026/CDK8/solution/endpoint_00/matched.stdout",
+      "bond_stretching_kcal_mol": 0.0,
+      "bond_angle_bending_kcal_mol": 0.0,
+      "dihedral_rotation_kcal_mol": 0.0,
+      "lj_repulsion_kcal_mol": 2.580313796,
+      "lj_dispersion_kcal_mol": -1.7624207477,
+      "charge_kcal_mol": -5.8709138282,
+      "potential_kcal_mol": -32856.2791661266,
+      "total_kcal_mol": -32856.2791661266,
+      "total_charge": 0.0,
+      "status": "SUCCEEDED",
+      "warnings_no_bond": 1163,
+      "scf_unconverged": false,
+      "total_potential_closure_kcal_mol": 0.0
+    },
+    "solution_10": {
+      "log": "../sophosqm-style-fmo-baseline/runs/qmmm_total_potential_pilot_20261026/CDK8/solution/endpoint_10/matched.stdout",
+      "bond_stretching_kcal_mol": 0.0,
+      "bond_angle_bending_kcal_mol": 0.0,
+      "dihedral_rotation_kcal_mol": 0.0,
+      "lj_repulsion_kcal_mol": 2.4749399065,
+      "lj_dispersion_kcal_mol": -1.680047368,
+      "charge_kcal_mol": -5.6699380302,
+      "potential_kcal_mol": -32222.5610357906,
+      "total_kcal_mol": -32222.5610357906,
+      "total_charge": 0.0,
+      "status": "SUCCEEDED",
+      "warnings_no_bond": 1136,
+      "scf_unconverged": false,
+      "total_potential_closure_kcal_mol": 0.0
+    }
+  },
+  "same_frame_endpoint_difference_kcal_mol": {
+    "0": -2023.3826087306952,
+    "10": -1875.4899238698963
+  },
+  "endpoint_double_difference_kcal_mol": 147.8926848607989,
+  "interpretation": [
+    "This is a single-frame finite-shell DFTB3/AMBER QuanPol potential-energy diagnostic, not FEP or a binding free energy.",
+    "The bound and solution shells are different environments; their absolute energies cannot be compared as a calibrated affinity without Hamiltonian and boundary validation.",
+    "All four runs have total-potential closure; SCF convergence and normal termination are required gates.",
+    "No-bond warnings occur for water atoms because the exported force field omits OpenMM water constraints; water-term parity is not yet validated.",
+    "The result is useful to identify QM/MM interface and state-energy terms, but it must not replace tPIE or FEP in the ranking pipeline."
+  ],
+  "next_gate": "validate FFDATA MM-only energy against the same-frame OpenMM endpoint Hamiltonian before any multi-frame QM/MM correction"
+}

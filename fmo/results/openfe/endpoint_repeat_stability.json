@@ -1,0 +1,368 @@
+{
+  "schema": "endpoint-independent-repeat-stability-v1",
+  "targets": {
+    "BACE": {
+      "repeat_counts": {
+        "bound": 2,
+        "solution": 3
+      },
+      "expected_repeats_per_leg": 3,
+      "all_planned_repeats_present": false,
+      "n_independent_bound_solution_combinations": null,
+      "shared_reference_warning": "Bound repeats minus the same solution mean are not independent bound/solution combinations.",
+      "convergence_proven": false,
+      "models": {
+        "MM": {
+          "internal_energy_double_difference_kcal_mol": 2.1210810219511083,
+          "leg_repeat_std_kcal_mol": {
+            "bound": 0.9122955493864419,
+            "solution": 1.091840000869413
+          },
+          "repeat_standard_error_diagnostic_kcal_mol": 0.9019496182610912,
+          "single_bound_repeat_minus_shared_solution_mean_kcal_mol": [
+            2.766171391368568,
+            1.4759906525336484
+          ],
+          "leave_one_repeat_out": [
+            {
+              "removed_leg": "bound",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 1.4759906525336484
+            },
+            {
+              "removed_leg": "bound",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 2.766171391368568
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 1.7709576012094388
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 2.750112818958435
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 1.8421726456854515
+            }
+          ],
+          "centered_repeat_means_kcal_mol": {
+            "bound": [
+              3.4664182328519075,
+              2.1762374940169877
+            ],
+            "solution": [
+              0.0,
+              1.9583104354979923,
+              0.14243008895202536
+            ]
+          },
+          "late_minus_early_by_repeat_kcal_mol": {
+            "bound": [
+              -3.86374173039259,
+              -1.5647742639558544
+            ],
+            "solution": [
+              -0.06461930685365758,
+              -1.8495123500459556,
+              1.218495057103496
+            ]
+          }
+        },
+        "DFTB": {
+          "internal_energy_double_difference_kcal_mol": 1.0713658727934217,
+          "leg_repeat_std_kcal_mol": {
+            "bound": 3.057041295603517,
+            "solution": 1.531005518978034
+          },
+          "repeat_standard_error_diagnostic_kcal_mol": 2.3353964776656264,
+          "single_bound_repeat_minus_shared_solution_mean_kcal_mol": [
+            3.2330205032819777,
+            -1.0902887576951343
+          ],
+          "leave_one_repeat_out": [
+            {
+              "removed_leg": "bound",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -1.0902887576951343
+            },
+            {
+              "removed_leg": "bound",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 3.2330205032819777
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 0.30364582724428146
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 1.8346319096634716
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 1.075819881472512
+            }
+          ],
+          "centered_repeat_means_kcal_mol": {
+            "bound": [
+              4.768460594380258,
+              0.44515133340314605
+            ],
+            "solution": [
+              0.0,
+              3.06197216483838,
+              1.544348108456461
+            ]
+          },
+          "late_minus_early_by_repeat_kcal_mol": {
+            "bound": [
+              -9.235116828418086,
+              -5.752855343194824
+            ],
+            "solution": [
+              4.198338502150591,
+              -9.388755164167605,
+              0.7647323901567233
+            ]
+          }
+        },
+        "model_difference": {
+          "internal_energy_double_difference_kcal_mol": -1.0497151491576155,
+          "leg_repeat_std_kcal_mol": {
+            "bound": 2.1447457462174775,
+            "solution": 0.7385120356548366
+          },
+          "repeat_standard_error_diagnostic_kcal_mol": 1.575362550936979,
+          "single_bound_repeat_minus_shared_solution_mean_kcal_mol": [
+            0.46684911191376466,
+            -2.566279410228996
+          ],
+          "leave_one_repeat_out": [
+            {
+              "removed_leg": "bound",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -2.566279410228996
+            },
+            {
+              "removed_leg": "bound",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 0.46684911191376466
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -1.4673117739649797
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -0.9154809092948426
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -0.7663527642130248
+            }
+          ],
+          "centered_repeat_means_kcal_mol": {
+            "bound": [
+              1.3020423615284926,
+              -1.731086160614268
+            ],
+            "solution": [
+              0.0,
+              1.1036617293402742,
+              1.4019180195039098
+            ]
+          },
+          "late_minus_early_by_repeat_kcal_mol": {
+            "bound": [
+              -5.371375098024828,
+              -4.188081079239282
+            ],
+            "solution": [
+              4.262957809004092,
+              -7.539242814121508,
+              -0.453762666946659
+            ]
+          }
+        }
+      }
+    },
+    "CDK8": {
+      "repeat_counts": {
+        "bound": 1,
+        "solution": 3
+      },
+      "expected_repeats_per_leg": 3,
+      "all_planned_repeats_present": false,
+      "n_independent_bound_solution_combinations": null,
+      "shared_reference_warning": "Bound repeats minus the same solution mean are not independent bound/solution combinations.",
+      "convergence_proven": false,
+      "models": {
+        "MM": {
+          "internal_energy_double_difference_kcal_mol": 0.14071070627231685,
+          "leg_repeat_std_kcal_mol": {
+            "bound": null,
+            "solution": 1.1671372015588997
+          },
+          "repeat_standard_error_diagnostic_kcal_mol": null,
+          "single_bound_repeat_minus_shared_solution_mean_kcal_mol": [
+            0.14071070627231685
+          ],
+          "leave_one_repeat_out": [
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -0.2460264804717105
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -0.14380988532188255
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": 0.8119684846105435
+            }
+          ],
+          "centered_repeat_means_kcal_mol": {
+            "bound": [
+              0.9141850797603714
+            ],
+            "solution": [
+              0.0,
+              0.2044331902996559,
+              2.115989930164508
+            ]
+          },
+          "late_minus_early_by_repeat_kcal_mol": {
+            "bound": [
+              -3.7407899488497387
+            ],
+            "solution": [
+              -3.9102902551011374,
+              1.4754187280962938,
+              -2.660266192987481
+            ]
+          }
+        },
+        "DFTB": {
+          "internal_energy_double_difference_kcal_mol": -1.560611745954058,
+          "leg_repeat_std_kcal_mol": {
+            "bound": null,
+            "solution": 1.1732508044409289
+          },
+          "repeat_standard_error_diagnostic_kcal_mol": null,
+          "single_bound_repeat_minus_shared_solution_mean_kcal_mol": [
+            -1.560611745954058
+          ],
+          "leave_one_repeat_out": [
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -2.083276845260059
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -1.6724350055897617
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -0.9261233870123533
+            }
+          ],
+          "centered_repeat_means_kcal_mol": {
+            "bound": [
+              -0.515281547342056
+            ],
+            "solution": [
+              0.0,
+              0.8216836793405946,
+              2.3143069164954113
+            ]
+          },
+          "late_minus_early_by_repeat_kcal_mol": {
+            "bound": [
+              -3.439138007331053
+            ],
+            "solution": [
+              -3.724838849445746,
+              1.334672034355549,
+              -1.958188437450417
+            ]
+          }
+        },
+        "model_difference": {
+          "internal_energy_double_difference_kcal_mol": -1.70132245222635,
+          "leg_repeat_std_kcal_mol": {
+            "bound": null,
+            "solution": 0.31512777117163154
+          },
+          "repeat_standard_error_diagnostic_kcal_mol": null,
+          "single_bound_repeat_minus_shared_solution_mean_kcal_mol": [
+            -1.70132245222635
+          ],
+          "leave_one_repeat_out": [
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -1.8372503647883605
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -1.5286251202678613
+            },
+            {
+              "removed_leg": "solution",
+              "removed_trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+              "double_difference_kcal_mol": -1.738091871622828
+            }
+          ],
+          "centered_repeat_means_kcal_mol": {
+            "bound": [
+              -1.4294666271023289
+            ],
+            "solution": [
+              0.0,
+              0.6172504890409982,
+              0.19831698633106498
+            ]
+          },
+          "late_minus_early_by_repeat_kcal_mol": {
+            "bound": [
+              0.3016519415185712
+            ],
+            "solution": [
+              0.1854514056556127,
+              -0.1407466937407662,
+              0.702077755536834
+            ]
+          }
+        }
+      }
+    }
+  },
+  "comparison_sha256": "7050145dd39661a03269b1b60be029e225489ef84430b4ecac52cf1a6509857b",
+  "driver_sha256": "7cb93eb4a795a8969c095ac670d96573ca8719abfcb4db3d6738f2a6d417c223",
+  "labels_used": false,
+  "main_pipeline_changed": false,
+  "limitations": [
+    "Within-repeat frames and the two endpoint observations are not independent repeats.",
+    "Repeat standard error is only a small-sample diagnostic, not total uncertainty or a confidence interval.",
+    "One bound repeat cannot estimate bound repeat variability; no zero uncertainty substitution.",
+    "Neither a binding free energy nor a valid MM-to-QM free-energy correction is estimated."
+  ]
+}

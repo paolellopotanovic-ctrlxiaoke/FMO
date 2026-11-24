@@ -1,0 +1,913 @@
+{
+  "schema": "cycle-chemistry-geometry-screen-v1",
+  "target": "BACE",
+  "n": 36,
+  "n_flagged": 0,
+  "rows": {
+    "CAT-13n": {
+      "input_stereochemistry_3d": {
+        "5": "S"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13e": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4a": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4m": {
+      "input_stereochemistry_3d": {
+        "11": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17b": {
+      "input_stereochemistry_3d": {
+        "12": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13j": {
+      "input_stereochemistry_3d": {
+        "5": "S"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13d": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13b": {
+      "input_stereochemistry_3d": {
+        "2": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "2": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "2": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13a": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13h": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13o": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13g": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4k": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17g": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4l": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4j": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4n": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13i": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17f": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4p": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13c": {
+      "input_stereochemistry_3d": {
+        "3": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "3": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "3": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-24": {
+      "input_stereochemistry_3d": {
+        "13": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "13": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "13": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4i": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4c": {
+      "input_stereochemistry_3d": {
+        "11": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17i": {
+      "input_stereochemistry_3d": {
+        "11": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13k": {
+      "input_stereochemistry_3d": {
+        "5": "S"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17a": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17c": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4o": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17d": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4b": {
+      "input_stereochemistry_3d": {
+        "12": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13f": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-4d": {
+      "input_stereochemistry_3d": {
+        "13": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "13": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "13": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-13m": {
+      "input_stereochemistry_3d": {
+        "5": "S"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17h": {
+      "input_stereochemistry_3d": {
+        "5": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    },
+    "CAT-17e": {
+      "input_stereochemistry_3d": {
+        "12": "R"
+      },
+      "bound_k10": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "free_pcm_minimum": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      }
+    }
+  },
+  "driver_sha256": "165184b92a525be0e9dfde15883609161d80f8de5c75480de41489b98ea4e828",
+  "registry_sha256": "80c09f704b3caf377de160036281e15e7a4d3ae51cc312c515f34e86d13cc9d4",
+  "evaluation_sha256": "e395861887b3ab4669d2110cd3e788a7c030caff658cf8feda11356cb03723fd",
+  "labels_used": false,
+  "warning": "Passing these screens is not proof of the correct solution microstate or a true global minimum"
+}

@@ -1,0 +1,717 @@
+{
+  "action": "ACCEPT_LOCAL_REPAIR",
+  "checks": {
+    "baseline_preparation_artifact_detected": true,
+    "all_triggered_amides_repaired": true,
+    "no_new_amide_flags": true,
+    "no_case_increases_severe_overlaps": true,
+    "complete_geometry_verified": true,
+    "complete_qm_verified": true
+  },
+  "policy": {
+    "contact_radius_angstrom": 4.0,
+    "amide_contact_radius_angstrom": 3.5,
+    "heavy_overlap_angstrom": 0.6,
+    "polar_pair_min_distance_angstrom": 2.2,
+    "amide_departure_degrees": 30.0,
+    "amide_departure_increase_degrees": 20.0,
+    "disulfide_distance_angstrom": 2.3
+  },
+  "affinity_labels_used": false,
+  "scores_used": false,
+  "scope": "new k10-induced amide deformation only, not a general affinity-quality classifier",
+  "production_default_changed": true,
+  "schema": "induced-amide-response-v1",
+  "candidate_executed": true,
+  "accepted": true,
+  "error": null,
+  "cases": {
+    "12": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [],
+      "candidate_amides": []
+    },
+    "13": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            27
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.823469120180331,
+          "bound_departure_deg": 11.485700676289792,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 8.620850152866836,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ],
+      "candidate_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            27
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.823469120180331,
+          "bound_departure_deg": 20.31574940282072,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 9.378555339294536,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ]
+    },
+    "14": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            9
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8253361412311746,
+          "bound_departure_deg": 6.22941286092423,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            24
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 8.827047848969102,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ],
+      "candidate_amides": [
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            9
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8253361412311746,
+          "bound_departure_deg": 1.133876886269469,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            24
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 3.685709128584932,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ]
+    },
+    "15": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            23
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8156235795716782,
+          "bound_departure_deg": 4.060987307955941,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8265265169581468,
+          "bound_departure_deg": 1.463583133981487,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ],
+      "candidate_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            23
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8156235795716782,
+          "bound_departure_deg": 0.8321611242170377,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8265265169581468,
+          "bound_departure_deg": 3.9641171669441078,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ]
+    },
+    "16": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 2.6174027970148472,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            29
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.4779253402134662,
+          "bound_departure_deg": 11.42704405303597,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ],
+      "candidate_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 4.06720715731899,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            29
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.4779253402134662,
+          "bound_departure_deg": 6.12774552146243,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ]
+    },
+    "17": {
+      "baseline_new_amide_flags": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            29
+          ],
+          "baseline_departure_deg": 54.95669457113352,
+          "candidate_departure_deg": 7.4385827483682485,
+          "improvement_deg": 47.51811182276527,
+          "repaired": true
+        }
+      ],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 6.289410339894573,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            29
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.4779253402134662,
+          "bound_departure_deg": 54.95669457113352,
+          "new_deformation_flag": true,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ],
+      "candidate_amides": [
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            28
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 1.9127680202924182,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            9,
+            8,
+            7,
+            29
+          ],
+          "amide_atoms_zero_based": [
+            9,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.4779253402134662,
+          "bound_departure_deg": 7.4385827483682485,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ]
+    },
+    "19": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [],
+      "candidate_amides": []
+    },
+    "20": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [],
+      "candidate_amides": []
+    },
+    "21": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [],
+      "candidate_amides": []
+    },
+    "22": {
+      "baseline_new_amide_flags": [],
+      "new_candidate_amide_flags": [],
+      "baseline_severe_overlaps": [],
+      "candidate_severe_overlaps": [],
+      "severe_overlap_count_not_increased": true,
+      "baseline_amides": [
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            9
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8253361412311746,
+          "bound_departure_deg": 5.983135343902956,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            24
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 9.30780303310317,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ],
+      "candidate_amides": [
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            9
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.8253361412311746,
+          "bound_departure_deg": 1.4020136560098022,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        },
+        {
+          "atoms_zero_based": [
+            10,
+            8,
+            7,
+            24
+          ],
+          "amide_atoms_zero_based": [
+            10,
+            8,
+            7
+          ],
+          "original_departure_deg": 1.813581239501076,
+          "bound_departure_deg": 4.300217909349897,
+          "new_deformation_flag": false,
+          "interpretation": "geometry screen, not a rotamer probability or strain energy"
+        }
+      ]
+    }
+  },
+  "candidate_predictions": [
+    {
+      "ligand": "12",
+      "input_sha256": "3daefd2c31587f11120728f688e2c28f7feabd721faf3a9f231b24e7c88b732e",
+      "log_sha256": "eb3fddcc4c372deb9de1bfe4a77445d917496d2bcbb07e2b26e17f3825c2358d",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -62.586999999999996,
+      "ES": -16.192,
+      "ES+SOLV": -16.998,
+      "ES+CT+SOLV": -18.214000000000002
+    },
+    {
+      "ligand": "13",
+      "input_sha256": "9393b69fe2ac1750706b559a8657a7c7d74795356b2c1535d3a188179bc20302",
+      "log_sha256": "a71ea3f5a63fa8ab8c7f4ea0bcc964a7e7ac2214ffe97b95981107060b267a32",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -71.267,
+      "ES": -24.721999999999998,
+      "ES+SOLV": -26.445999999999998,
+      "ES+CT+SOLV": -29.322999999999997
+    },
+    {
+      "ligand": "14",
+      "input_sha256": "c8af34eba534913b8e814cda4321b57a423c2073ba037412e77676d6f6e455a9",
+      "log_sha256": "4b60fa67a8f7f9500195dcc63da597f853b012e1d5b4f83c42e653e769711720",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -65.995,
+      "ES": -17.599999999999998,
+      "ES+SOLV": -19.005999999999997,
+      "ES+CT+SOLV": -20.519
+    },
+    {
+      "ligand": "15",
+      "input_sha256": "cd6425512c2776a1e4f81b887cd40917feb37b4b48e1375e8162a89df16c8d07",
+      "log_sha256": "cab27a3b19a99cafb9b0066a72fdf27bf01e58393a34252909f1cf08b02f4b57",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -65.819,
+      "ES": -16.497,
+      "ES+SOLV": -18.015,
+      "ES+CT+SOLV": -19.082
+    },
+    {
+      "ligand": "16",
+      "input_sha256": "918612b8aa6b18a2901906bc56b5b1af762f269c08e81b4d5c0af0f4268dc3eb",
+      "log_sha256": "da9d02898cbd08e27c719b479dbc6d2f2320684e06b171ae8b931815b4312597",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -68.931,
+      "ES": -18.346,
+      "ES+SOLV": -20.059,
+      "ES+CT+SOLV": -21.656000000000002
+    },
+    {
+      "ligand": "17",
+      "input_sha256": "cc5c8901802a74b6b19bae23f2b68f6a6afe36b9b61903a879c5875c19c8e73d",
+      "log_sha256": "48533561524706470d95b1b51baf5fd994290c549fbb5a15d25feda34ad465b7",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -65.145,
+      "ES": -15.819,
+      "ES+SOLV": -17.241,
+      "ES+CT+SOLV": -18.241000000000003
+    },
+    {
+      "ligand": "19",
+      "input_sha256": "04c300bbc3bfac6cea53a0f4bbc2c2273b09ce9bc85f703bc89f583d81867c40",
+      "log_sha256": "385b3058c7e00e03edf34184282bf47b2857f7091b40fa477e6ede71611a28ae",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -60.3,
+      "ES": -13.288,
+      "ES+SOLV": -14.478,
+      "ES+CT+SOLV": -15.874
+    },
+    {
+      "ligand": "20",
+      "input_sha256": "9889dd3329f6a754d3ef9d6d4b44c2765cb7ea03e6abc768241d36ba76a6d7c7",
+      "log_sha256": "72995641f6dbe25611bb9b740280c25af79c494439e4406a39294611dac6dfa8",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -60.621,
+      "ES": -12.831999999999999,
+      "ES+SOLV": -13.994,
+      "ES+CT+SOLV": -14.898999999999997
+    },
+    {
+      "ligand": "21",
+      "input_sha256": "6bafd98da4152c75bf3ac839e6d8866903d31789d480516a09b0c39267fc456a",
+      "log_sha256": "cd9ec02d30e2d5d0ca4dfd806120d1643b3b8e8aee07221b942b67271fb6448f",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -62.74,
+      "ES": -14.232,
+      "ES+SOLV": -15.834999999999999,
+      "ES+CT+SOLV": -16.916
+    },
+    {
+      "ligand": "22",
+      "input_sha256": "001f6acabb60bafc9de6c7d6ffaff848788a4e176b2f4110c2b6753939361078",
+      "log_sha256": "3290ae594309f5f04e5fe69a489225aef3f729a684c5e4de59b90ee6e5779ae5",
+      "status": "SUCCEEDED",
+      "n_receptor_fragments": 32,
+      "tpie": -69.568,
+      "ES": -17.895999999999997,
+      "ES+SOLV": -19.293999999999997,
+      "ES+CT+SOLV": -21.24
+    }
+  ],
+  "candidate_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/17/minimization.json": "b4a2fc976f67828b24fb4a183476238d766d056b37202d2ff2f61292df0cc6c9",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/17/minimized_complex.pdb": "fdbc9d35b43084d7ddb762b2ce238a15263881a92a9df22a8f62e96178254562",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/22/minimization.json": "e82c8b231e0c23e5127118c4bf29f450ceedb26be23a2700e55ee06938feb3c5",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/22/minimized_complex.pdb": "a1a661ece6d91173cac16f4419e6df6e15fd14080eab3080a727e8213c068624",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/21/minimization.json": "2ac7fa53d78c229aa61fb00612983706082dbddec0e7f1679e1bc65cdff95688",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/21/minimized_complex.pdb": "fcfccd816420eea219d2f1e790e8386c589da664cf6ee7e2f35eefe19bddffd3",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/13/minimization.json": "b8fcfb95be6ef3f4c66a36f7eccd094b678f757e8672d11fd9d9865d9c7d6f18",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/13/minimized_complex.pdb": "f998f78cbbdd33b5418099fd3d2614f7678aeda23772e9f051fccaafd2bbeafb",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/20/minimization.json": "b96582c2718d7b2641b469d888445363399985309569e8f70d8a3537606676bf",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/20/minimized_complex.pdb": "9a8c9afd857e33b135d94837892a20e3acf9f96d5f180221ff82cc3d15e5c783",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/19/minimization.json": "407c773a74ff98855cda9966d56b6a7a590554707d9dfe2af395e679c6537b89",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/19/minimized_complex.pdb": "27d796b718526209205bfb48ac29af0eca33cd65b69fa404a881f6698e00dfe4",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/14/minimization.json": "a66d03a41d5c6c1bd98159fc79230e3d5cb76e6b7943815a380286475c8e7837",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/14/minimized_complex.pdb": "5b0bdaa538b24bc000873e61d79d8814192fce34cc7cc2ffbe0158d879628b12",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/16/minimization.json": "888b7442a23bf6e2600d97f95067057a4b45a964d635afad6f9774ef259d63b3",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/16/minimized_complex.pdb": "8c7504c2ca2432f062f69d568139d24b9af330884685a59394be9729a33d5ea7",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/12/minimization.json": "1d2227073a3d22b4371c484d0d85623f6a7422c324402620ffcb0960038600c0",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/12/minimized_complex.pdb": "555a7c13199ceff0ccc25284b4398db9be0a087cd69a5c3310466f6533924ff2",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/15/minimization.json": "8b348b6cc9b2a7240c7a964adcc74a74d41195fbb0794c38ca72bfd961e7f566",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/minimized/15/minimized_complex.pdb": "9233fd1b771be1787f618c481593f9d258cb4d77efbcac2cc26613b3cfb8e817",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/17/input.inp": "cc5c8901802a74b6b19bae23f2b68f6a6afe36b9b61903a879c5875c19c8e73d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/22/input.inp": "001f6acabb60bafc9de6c7d6ffaff848788a4e176b2f4110c2b6753939361078",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/21/input.inp": "6bafd98da4152c75bf3ac839e6d8866903d31789d480516a09b0c39267fc456a",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/13/input.inp": "9393b69fe2ac1750706b559a8657a7c7d74795356b2c1535d3a188179bc20302",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/20/input.inp": "9889dd3329f6a754d3ef9d6d4b44c2765cb7ea03e6abc768241d36ba76a6d7c7",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/19/input.inp": "04c300bbc3bfac6cea53a0f4bbc2c2273b09ce9bc85f703bc89f583d81867c40",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/14/input.inp": "c8af34eba534913b8e814cda4321b57a423c2073ba037412e77676d6f6e455a9",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/16/input.inp": "918612b8aa6b18a2901906bc56b5b1af762f269c08e81b4d5c0af0f4268dc3eb",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/12/input.inp": "3daefd2c31587f11120728f688e2c28f7feabd721faf3a9f231b24e7c88b732e",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/15/input.inp": "cd6425512c2776a1e4f81b887cd40917feb37b4b48e1375e8162a89df16c8d07",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/17/run/result.json": "a828454ffe48cd4bd78698010cbbabe7d1e8801963dca313441b0fff7e9c33d7",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/17/run/gamess.log": "48533561524706470d95b1b51baf5fd994290c549fbb5a15d25feda34ad465b7",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/22/run/result.json": "139cdf0d32bc57c0a3552f6b9195c95ba50d220a54b0d6b5b22482fd7b8296a7",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/22/run/gamess.log": "3290ae594309f5f04e5fe69a489225aef3f729a684c5e4de59b90ee6e5779ae5",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/21/run/result.json": "5d95ee7cabf0ddaa6039cdadba87cd802c528afbaeb4569d74da7d116fcef0ae",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/21/run/gamess.log": "cd9ec02d30e2d5d0ca4dfd806120d1643b3b8e8aee07221b942b67271fb6448f",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/13/run/result.json": "74c0244f57374439ddc12819a1828bf23a3f3511282304ad99bf04821fb29d70",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/13/run/gamess.log": "a71ea3f5a63fa8ab8c7f4ea0bcc964a7e7ac2214ffe97b95981107060b267a32",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/20/run/result.json": "a108ed3efbc0c2a960bf26f84097fba07f1e15bd7eae4c15675cdd80fdfda95e",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/20/run/gamess.log": "72995641f6dbe25611bb9b740280c25af79c494439e4406a39294611dac6dfa8",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/19/run/result.json": "cf0122fb63e9eca052eb78c579dec72adb658752212d116e5b26ead07009a13a",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/19/run/gamess.log": "385b3058c7e00e03edf34184282bf47b2857f7091b40fa477e6ede71611a28ae",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/14/run/result.json": "7e26278cf89696e8414ec133fb3573c02f6d406b415884dbde624e7d67e57c3e",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/14/run/gamess.log": "4b60fa67a8f7f9500195dcc63da597f853b012e1d5b4f83c42e653e769711720",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/16/run/result.json": "d8692a0bf4dd85ae41e1bda3eecd31912080250715276efe91e433b30cd895a3",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/16/run/gamess.log": "da9d02898cbd08e27c719b479dbc6d2f2320684e06b171ae8b931815b4312597",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/12/run/result.json": "1074bfd778ea93ef434c10d614def9a78bc53c33566b4d621ced4612b1f448d8",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/12/run/gamess.log": "eb3fddcc4c372deb9de1bfe4a77445d917496d2bcbb07e2b26e17f3825c2358d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/15/run/result.json": "448f399e568510946a79abd796d31615a3e3a69fd69101118e090fec2f5bad77",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/main_response_regression_20261021/CDK8/sidechain_response/qm/15/run/gamess.log": "cab27a3b19a99cafb9b0066a72fdf27bf01e58393a34252909f1cf08b02f4b57"
+  }
+}

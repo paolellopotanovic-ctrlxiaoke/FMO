@@ -1,0 +1,3623 @@
+{
+  "status": "COMPLETE",
+  "targets": {
+    "BACE": [
+      {
+        "name": "CAT-13n",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "ALYS70": {
+            "mean_contact_distance_angstrom": 5.726587136586507,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 10.499666666666668,
+            "within_repeat_pie_std_kcal_mol": 0.9301969325542484,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ASER71": {
+            "mean_contact_distance_angstrom": 3.5183281898498535,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -3.074,
+            "within_repeat_pie_std_kcal_mol": 0.6022765145678519,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AGLY72": {
+            "mean_contact_distance_angstrom": 3.7168424129486084,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.716666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.14453142680169376,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AGLN73": {
+            "mean_contact_distance_angstrom": 3.9307119846343994,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.7106666666666667,
+            "within_repeat_pie_std_kcal_mol": 3.6111848932633364,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "AGLY74": {
+            "mean_contact_distance_angstrom": 3.6885266304016113,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.8453333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.4453229166291295,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATYR75": {
+            "mean_contact_distance_angstrom": 5.350425084431966,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -7.981999999999999,
+            "within_repeat_pie_std_kcal_mol": 1.2551195162214634,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU91": {
+            "mean_contact_distance_angstrom": 3.681692679723104,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 0.7416666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.6443169509902199,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP93": {
+            "mean_contact_distance_angstrom": 2.7386887073516846,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -101.61666666666667,
+            "within_repeat_pie_std_kcal_mol": 3.1498479857499966,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ATHR94": {
+            "mean_contact_distance_angstrom": 5.728483994801839,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.801,
+            "within_repeat_pie_std_kcal_mol": 1.6600629506136206,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY95": {
+            "mean_contact_distance_angstrom": 3.812965234120687,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 12.734666666666667,
+            "within_repeat_pie_std_kcal_mol": 2.0202188825306364,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "ASER96": {
+            "mean_contact_distance_angstrom": 3.5868279139200845,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.0456666666666665,
+            "within_repeat_pie_std_kcal_mol": 3.0000735546538406,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL130": {
+            "mean_contact_distance_angstrom": 4.474105517069499,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 3.1486666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.4149485911933348,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APRO131": {
+            "mean_contact_distance_angstrom": 5.986063321431478,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.012666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.29881822791344786,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR132": {
+            "mean_contact_distance_angstrom": 3.2906277179718018,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -2.8049999999999997,
+            "within_repeat_pie_std_kcal_mol": 1.0229975562043145,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP137": {
+            "mean_contact_distance_angstrom": 4.747890154520671,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 2.0429999999999997,
+            "within_repeat_pie_std_kcal_mol": 0.42354338620736354,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALYS168": {
+            "mean_contact_distance_angstrom": 6.419124126434326,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 8.125333333333332,
+            "within_repeat_pie_std_kcal_mol": 1.381955257355799,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "APHE169": {
+            "mean_contact_distance_angstrom": 3.5149315198262534,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -0.015000000000000013,
+            "within_repeat_pie_std_kcal_mol": 0.994436021069229,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE170": {
+            "mean_contact_distance_angstrom": 6.352414449055989,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -5.4173333333333344,
+            "within_repeat_pie_std_kcal_mol": 1.9729547215618841,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AILE171": {
+            "mean_contact_distance_angstrom": 4.02229110399882,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.4713333333333334,
+            "within_repeat_pie_std_kcal_mol": 2.364693919587339,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP176": {
+            "mean_contact_distance_angstrom": 4.041128555933635,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.47,
+            "within_repeat_pie_std_kcal_mol": 0.7595123435468313,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AILE179": {
+            "mean_contact_distance_angstrom": 3.4208106994628906,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.469,
+            "within_repeat_pie_std_kcal_mol": 0.3872479825641445,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP289": {
+            "mean_contact_distance_angstrom": 3.0635239283243814,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -1.202,
+            "within_repeat_pie_std_kcal_mol": 1.6556316015345927,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ASER290": {
+            "mean_contact_distance_angstrom": 3.7495714028676352,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -5.433,
+            "within_repeat_pie_std_kcal_mol": 1.704257316252449,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY291": {
+            "mean_contact_distance_angstrom": 3.1013835271199546,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": 13.220333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.1606245445161552,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATHR292": {
+            "mean_contact_distance_angstrom": 3.486010471979777,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -15.329666666666666,
+            "within_repeat_pie_std_kcal_mol": 2.6470742969046657,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATHR293": {
+            "mean_contact_distance_angstrom": 3.6331960360209146,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -13.755,
+            "within_repeat_pie_std_kcal_mol": 0.7544275975864092,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "AALA396": {
+            "mean_contact_distance_angstrom": 4.888696352640788,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.480333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.7535465037629284,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 1.0773760688026497,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.7496649531449778,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 3.0,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 2.6666666666666665,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          }
+        }
+      },
+      {
+        "name": "CAT-13n",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "ALYS70": {
+            "mean_contact_distance_angstrom": 5.431943575541179,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 10.474666666666666,
+            "within_repeat_pie_std_kcal_mol": 1.2772068482956604,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ASER71": {
+            "mean_contact_distance_angstrom": 3.053423007329305,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -2.423,
+            "within_repeat_pie_std_kcal_mol": 0.9614275843764833,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.0
+            }
+          },
+          "AGLY72": {
+            "mean_contact_distance_angstrom": 3.9356533686319985,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -5.830666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.8878746157725949,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "AGLN73": {
+            "mean_contact_distance_angstrom": 3.8481949170430503,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 2.3283333333333336,
+            "within_repeat_pie_std_kcal_mol": 1.3988571525832556,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY74": {
+            "mean_contact_distance_angstrom": 3.3318516413370767,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -1.1313333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.444780095477904,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATYR75": {
+            "mean_contact_distance_angstrom": 5.558791796366374,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -8.216,
+            "within_repeat_pie_std_kcal_mol": 0.5672283490799807,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU91": {
+            "mean_contact_distance_angstrom": 3.759317715962728,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.6943333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.46351950696096206,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP93": {
+            "mean_contact_distance_angstrom": 2.788764476776123,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -100.20333333333333,
+            "within_repeat_pie_std_kcal_mol": 5.824563274043243,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ATHR94": {
+            "mean_contact_distance_angstrom": 5.651590506235759,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.811,
+            "within_repeat_pie_std_kcal_mol": 0.9062455517132209,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY95": {
+            "mean_contact_distance_angstrom": 3.7568136056264243,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 14.604666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.6768237091985868,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ASER96": {
+            "mean_contact_distance_angstrom": 3.6707988580067954,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 4.046,
+            "within_repeat_pie_std_kcal_mol": 1.1323166518249212,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL130": {
+            "mean_contact_distance_angstrom": 3.9646246433258057,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 2.59,
+            "within_repeat_pie_std_kcal_mol": 0.45548765076563824,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APRO131": {
+            "mean_contact_distance_angstrom": 4.711568196614583,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.8093333333333335,
+            "within_repeat_pie_std_kcal_mol": 0.18469524447947577,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.0
+            }
+          },
+          "ATYR132": {
+            "mean_contact_distance_angstrom": 3.3873852094014487,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -6.8773333333333335,
+            "within_repeat_pie_std_kcal_mol": 2.3938532397232155,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.6666666666666666
+            }
+          },
+          "ATRP137": {
+            "mean_contact_distance_angstrom": 4.473905801773071,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 1.4066666666666665,
+            "within_repeat_pie_std_kcal_mol": 0.2926300280786873,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALYS168": {
+            "mean_contact_distance_angstrom": 6.6411356925964355,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 7.682333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.2278625058748776,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "APHE169": {
+            "mean_contact_distance_angstrom": 3.643103758494059,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -0.06533333333333331,
+            "within_repeat_pie_std_kcal_mol": 1.2731733320068142,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE170": {
+            "mean_contact_distance_angstrom": 6.3604756991068525,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.926,
+            "within_repeat_pie_std_kcal_mol": 1.4429369355588624,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AILE171": {
+            "mean_contact_distance_angstrom": 4.101186593373616,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.5933333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.6494092187006073,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "ATRP176": {
+            "mean_contact_distance_angstrom": 3.819732745488485,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.043,
+            "within_repeat_pie_std_kcal_mol": 0.5995223098434286,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AILE179": {
+            "mean_contact_distance_angstrom": 3.45796537399292,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -2.6856666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.6290702133572479,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP289": {
+            "mean_contact_distance_angstrom": 2.94566011428833,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.965,
+            "within_repeat_pie_std_kcal_mol": 3.248378518584311,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ASER290": {
+            "mean_contact_distance_angstrom": 3.938729683558146,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -6.073333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.8621335936694109,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY291": {
+            "mean_contact_distance_angstrom": 3.1087725162506104,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": 13.969666666666669,
+            "within_repeat_pie_std_kcal_mol": 2.9855000139563455,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "ATHR292": {
+            "mean_contact_distance_angstrom": 3.7671593030293784,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -11.176333333333332,
+            "within_repeat_pie_std_kcal_mol": 2.6270862820496266,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATHR293": {
+            "mean_contact_distance_angstrom": 3.2808574040730796,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -14.719999999999999,
+            "within_repeat_pie_std_kcal_mol": 2.975192598807681,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA396": {
+            "mean_contact_distance_angstrom": 4.7064595222473145,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.913333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.241044255964197,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.954176401143183,
+            "within_repeat_tpie_spearman_descriptive": 1.0
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.6850593451727022,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 1.6666666666666667,
+            "within_repeat_tpie_spearman_descriptive": 0.0
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 1.6666666666666667,
+            "within_repeat_tpie_spearman_descriptive": 0.0
+          }
+        }
+      },
+      {
+        "name": "CAT-13n",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "ALYS70": {
+            "mean_contact_distance_angstrom": 5.392296473185222,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 11.082666666666666,
+            "within_repeat_pie_std_kcal_mol": 1.2233304268811973,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ASER71": {
+            "mean_contact_distance_angstrom": 3.604922374089559,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.7550000000000001,
+            "within_repeat_pie_std_kcal_mol": 0.5225925755308816,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AGLY72": {
+            "mean_contact_distance_angstrom": 4.021583477656047,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.883,
+            "within_repeat_pie_std_kcal_mol": 1.718981966164858,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AGLN73": {
+            "mean_contact_distance_angstrom": 3.7477873961130777,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -0.029666666666666657,
+            "within_repeat_pie_std_kcal_mol": 1.2395714313154096,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.6666666666666666
+            }
+          },
+          "AGLY74": {
+            "mean_contact_distance_angstrom": 3.4947832425435386,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.555,
+            "within_repeat_pie_std_kcal_mol": 2.2648437032166258,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ATYR75": {
+            "mean_contact_distance_angstrom": 5.007340908050537,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -7.937666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.6152010511477797,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU91": {
+            "mean_contact_distance_angstrom": 3.778676986694336,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 0.6473333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.6260386037085359,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP93": {
+            "mean_contact_distance_angstrom": 2.7385860284169516,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -100.67099999999999,
+            "within_repeat_pie_std_kcal_mol": 8.299864818176255,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ATHR94": {
+            "mean_contact_distance_angstrom": 5.893109321594238,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.565,
+            "within_repeat_pie_std_kcal_mol": 0.36506574750310383,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY95": {
+            "mean_contact_distance_angstrom": 4.227694193522136,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 14.549666666666667,
+            "within_repeat_pie_std_kcal_mol": 1.8500411707130546,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "ASER96": {
+            "mean_contact_distance_angstrom": 3.98453696568807,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 3.531,
+            "within_repeat_pie_std_kcal_mol": 0.9956646021627965,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL130": {
+            "mean_contact_distance_angstrom": 4.01844048500061,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 1.969,
+            "within_repeat_pie_std_kcal_mol": 0.5245121542919667,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APRO131": {
+            "mean_contact_distance_angstrom": 4.479059298833211,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -3.6183333333333336,
+            "within_repeat_pie_std_kcal_mol": 0.793552980797964,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR132": {
+            "mean_contact_distance_angstrom": 3.4243691762288413,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -7.3919999999999995,
+            "within_repeat_pie_std_kcal_mol": 6.627273270357877,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.6666666666666666
+            }
+          },
+          "ATRP137": {
+            "mean_contact_distance_angstrom": 4.090484698613484,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.5713333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.8981588575153804,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALYS168": {
+            "mean_contact_distance_angstrom": 6.681808153788249,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 7.704999999999999,
+            "within_repeat_pie_std_kcal_mol": 0.8953234052564465,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "APHE169": {
+            "mean_contact_distance_angstrom": 3.604281187057495,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -0.04633333333333326,
+            "within_repeat_pie_std_kcal_mol": 1.5612092535382096,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE170": {
+            "mean_contact_distance_angstrom": 6.28808069229126,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.714333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.5758141810928512,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AILE171": {
+            "mean_contact_distance_angstrom": 4.228343725204468,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.0873333333333335,
+            "within_repeat_pie_std_kcal_mol": 0.3478007092191351,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP176": {
+            "mean_contact_distance_angstrom": 3.793339967727661,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -0.49666666666666665,
+            "within_repeat_pie_std_kcal_mol": 0.8265181990333506,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AILE179": {
+            "mean_contact_distance_angstrom": 3.691514571507772,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.816,
+            "within_repeat_pie_std_kcal_mol": 1.2848575796562045,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP289": {
+            "mean_contact_distance_angstrom": 2.956775426864624,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -6.3486666666666665,
+            "within_repeat_pie_std_kcal_mol": 1.240101743137769,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ASER290": {
+            "mean_contact_distance_angstrom": 3.913626273473104,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -6.788333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.2048088368423153,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY291": {
+            "mean_contact_distance_angstrom": 3.152179718017578,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": 12.588,
+            "within_repeat_pie_std_kcal_mol": 1.3551645656524525,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "ATHR292": {
+            "mean_contact_distance_angstrom": 3.427412271499634,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -13.446333333333333,
+            "within_repeat_pie_std_kcal_mol": 5.430424139359038,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATHR293": {
+            "mean_contact_distance_angstrom": 3.415605147679647,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -13.771333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.0576768567636026,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA396": {
+            "mean_contact_distance_angstrom": 4.746317704518636,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.466333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.2552124654150518,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 1.084143698225323,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.7215172499799111,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 3.6666666666666665,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 2.6666666666666665,
+            "within_repeat_tpie_spearman_descriptive": 0.8660254037844387
+          }
+        }
+      },
+      {
+        "name": "CAT-4i",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "ALYS70": {
+            "mean_contact_distance_angstrom": 6.033202330271403,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 11.724333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.37324567423257976,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ASER71": {
+            "mean_contact_distance_angstrom": 4.487690687179565,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.0883333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.166096622640394,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY72": {
+            "mean_contact_distance_angstrom": 4.3829398949941,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -3.297,
+            "within_repeat_pie_std_kcal_mol": 1.5201233502581295,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "AGLN73": {
+            "mean_contact_distance_angstrom": 3.520761807759603,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.866666666666667,
+            "within_repeat_pie_std_kcal_mol": 1.064767736801474,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY74": {
+            "mean_contact_distance_angstrom": 3.679851214090983,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 0.26833333333333337,
+            "within_repeat_pie_std_kcal_mol": 0.7923359977517955,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "ATYR75": {
+            "mean_contact_distance_angstrom": 5.63338057200114,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -7.324666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.9770042647467482,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU91": {
+            "mean_contact_distance_angstrom": 3.7067755858103433,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 1.3236666666666668,
+            "within_repeat_pie_std_kcal_mol": 0.03527510926040258,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP93": {
+            "mean_contact_distance_angstrom": 2.7813878059387207,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -107.36833333333334,
+            "within_repeat_pie_std_kcal_mol": 5.218309815767304,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ATHR94": {
+            "mean_contact_distance_angstrom": 5.774817148844401,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.674333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.7780059992399724,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY95": {
+            "mean_contact_distance_angstrom": 3.9508089224497476,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 12.983333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.2733174519079424,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ASER96": {
+            "mean_contact_distance_angstrom": 4.451471408208211,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 2.5380000000000003,
+            "within_repeat_pie_std_kcal_mol": 1.9391330537124059,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL130": {
+            "mean_contact_distance_angstrom": 4.281359036763509,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 2.4759999999999995,
+            "within_repeat_pie_std_kcal_mol": 0.7666948545542743,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APRO131": {
+            "mean_contact_distance_angstrom": 5.373350461324056,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.2059999999999995,
+            "within_repeat_pie_std_kcal_mol": 0.5794376584240966,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR132": {
+            "mean_contact_distance_angstrom": 3.297436316808065,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.224,
+            "within_repeat_pie_std_kcal_mol": 0.11665761869676579,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP137": {
+            "mean_contact_distance_angstrom": 4.356059392293294,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.17100000000000004,
+            "within_repeat_pie_std_kcal_mol": 0.9931223489580727,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALYS168": {
+            "mean_contact_distance_angstrom": 6.646005471547444,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.776666666666666,
+            "within_repeat_pie_std_kcal_mol": 1.1902341506331153,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "APHE169": {
+            "mean_contact_distance_angstrom": 3.4109175205230713,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.4803333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.8824722847394886,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE170": {
+            "mean_contact_distance_angstrom": 6.567979017893474,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.841666666666667,
+            "within_repeat_pie_std_kcal_mol": 2.0476064888872894,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AILE171": {
+            "mean_contact_distance_angstrom": 4.106022675832112,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.396666666666667,
+            "within_repeat_pie_std_kcal_mol": 2.1377283113935066,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP176": {
+            "mean_contact_distance_angstrom": 4.225216547648112,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.4613333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.1842252038076766,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AILE179": {
+            "mean_contact_distance_angstrom": 4.1529513994852705,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.5643333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.2999355486322576,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP289": {
+            "mean_contact_distance_angstrom": 2.967952330907186,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -7.753,
+            "within_repeat_pie_std_kcal_mol": 6.161966244633283,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ASER290": {
+            "mean_contact_distance_angstrom": 4.495815436045329,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.9656666666666665,
+            "within_repeat_pie_std_kcal_mol": 1.0165108623784271,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY291": {
+            "mean_contact_distance_angstrom": 3.132548967997233,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": 13.770333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.3553657562936037,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATHR292": {
+            "mean_contact_distance_angstrom": 3.604585568110148,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -16.951333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.630393919681171,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATHR293": {
+            "mean_contact_distance_angstrom": 3.8741148312886557,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -12.299333333333331,
+            "within_repeat_pie_std_kcal_mol": 0.3679053320262339,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA396": {
+            "mean_contact_distance_angstrom": 6.7277725537618,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.378,
+            "within_repeat_pie_std_kcal_mol": 0.4303905203417006,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 1.2864376759292069,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 1.004304624911692,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 5.333333333333333,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 3.6666666666666665,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          }
+        }
+      },
+      {
+        "name": "CAT-4i",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "ALYS70": {
+            "mean_contact_distance_angstrom": 7.802617232004802,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 8.974666666666666,
+            "within_repeat_pie_std_kcal_mol": 1.2373085037020206,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "ASER71": {
+            "mean_contact_distance_angstrom": 6.804097970326741,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.8326666666666664,
+            "within_repeat_pie_std_kcal_mol": 0.5298606735108139,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY72": {
+            "mean_contact_distance_angstrom": 5.744866371154785,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.191333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.3231543119883384,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "AGLN73": {
+            "mean_contact_distance_angstrom": 4.678094863891602,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.02699999999999984,
+            "within_repeat_pie_std_kcal_mol": 2.132959446403049,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "AGLY74": {
+            "mean_contact_distance_angstrom": 4.891473452250163,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 1.821,
+            "within_repeat_pie_std_kcal_mol": 0.5372634363140674,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATYR75": {
+            "mean_contact_distance_angstrom": 6.968241214752197,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -7.107,
+            "within_repeat_pie_std_kcal_mol": 0.9346373628311677,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU91": {
+            "mean_contact_distance_angstrom": 3.709000905354818,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 0.6193333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.1775331559380116,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP93": {
+            "mean_contact_distance_angstrom": 2.7476107279459634,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -104.467,
+            "within_repeat_pie_std_kcal_mol": 4.227863763178752,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ATHR94": {
+            "mean_contact_distance_angstrom": 5.596505482991536,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.4766666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.6105868761555011,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY95": {
+            "mean_contact_distance_angstrom": 3.63177752494812,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": 14.222666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.4867538734651557,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ASER96": {
+            "mean_contact_distance_angstrom": 3.492316961288452,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 1.0023333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.05995534497135,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL130": {
+            "mean_contact_distance_angstrom": 3.9332854747772217,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.4013333333333334,
+            "within_repeat_pie_std_kcal_mol": 2.1442948335836034,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APRO131": {
+            "mean_contact_distance_angstrom": 5.254367669423421,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.9883333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.5038475298474069,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR132": {
+            "mean_contact_distance_angstrom": 3.3928496837615967,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -4.602,
+            "within_repeat_pie_std_kcal_mol": 2.008767781501884,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ATRP137": {
+            "mean_contact_distance_angstrom": 3.693632443745931,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.9813333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.3700936818338477,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALYS168": {
+            "mean_contact_distance_angstrom": 5.968179702758789,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.833333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.532843871153659,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "APHE169": {
+            "mean_contact_distance_angstrom": 3.7201972007751465,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -0.21633333333333335,
+            "within_repeat_pie_std_kcal_mol": 1.5171263405970292,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE170": {
+            "mean_contact_distance_angstrom": 7.146737257639567,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.496,
+            "within_repeat_pie_std_kcal_mol": 1.2424829978716005,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AILE171": {
+            "mean_contact_distance_angstrom": 5.591188112894694,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.0503333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.9273296788808894,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ATRP176": {
+            "mean_contact_distance_angstrom": 3.9967358112335205,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 1.359,
+            "within_repeat_pie_std_kcal_mol": 0.75160694515152,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AILE179": {
+            "mean_contact_distance_angstrom": 3.713097333908081,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -2.04,
+            "within_repeat_pie_std_kcal_mol": 1.0269308642747086,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AASP289": {
+            "mean_contact_distance_angstrom": 2.9998331864674888,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.505666666666667,
+            "within_repeat_pie_std_kcal_mol": 9.474048465853093,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ASER290": {
+            "mean_contact_distance_angstrom": 5.735888799031575,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -6.31,
+            "within_repeat_pie_std_kcal_mol": 1.223117328795566,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY291": {
+            "mean_contact_distance_angstrom": 3.5413804054260254,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 13.525666666666666,
+            "within_repeat_pie_std_kcal_mol": 3.1134730339820416,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATHR292": {
+            "mean_contact_distance_angstrom": 4.657373428344727,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -5.496666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.5999511091191791,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATHR293": {
+            "mean_contact_distance_angstrom": 6.5114444096883135,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -10.507666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.7866932905099255,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA396": {
+            "mean_contact_distance_angstrom": 8.6448761622111,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.283,
+            "within_repeat_pie_std_kcal_mol": 0.4491937221288831,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 2.5692065764658767,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.4163614036183317,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 2.6666666666666665,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 1.3333333333333333,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          }
+        }
+      },
+      {
+        "name": "CAT-4i",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "ALYS70": {
+            "mean_contact_distance_angstrom": 5.897351900736491,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 9.721333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.6484414648473166,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ASER71": {
+            "mean_contact_distance_angstrom": 4.894629716873169,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.2146666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.5130461317789398,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY72": {
+            "mean_contact_distance_angstrom": 3.9279797871907554,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -3.721,
+            "within_repeat_pie_std_kcal_mol": 1.265194056261726,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "AGLN73": {
+            "mean_contact_distance_angstrom": 3.6640942891438804,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.4583333333333333,
+            "within_repeat_pie_std_kcal_mol": 2.378668815395143,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AGLY74": {
+            "mean_contact_distance_angstrom": 3.6706432501475015,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": 0.9236666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.44536988372961783,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATYR75": {
+            "mean_contact_distance_angstrom": 5.850834369659424,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -7.940333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.5811026874256676,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU91": {
+            "mean_contact_distance_angstrom": 3.837818225224813,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 1.5106666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.18123557413855965,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AASP93": {
+            "mean_contact_distance_angstrom": 2.7298806508382163,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -106.88066666666667,
+            "within_repeat_pie_std_kcal_mol": 2.8037339983196237,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ATHR94": {
+            "mean_contact_distance_angstrom": 5.541197617848714,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.1229999999999998,
+            "within_repeat_pie_std_kcal_mol": 2.4116649850259053,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY95": {
+            "mean_contact_distance_angstrom": 3.6559201876322427,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 14.252333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.9926743339753139,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "ASER96": {
+            "mean_contact_distance_angstrom": 3.7941172122955322,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 3.6680000000000006,
+            "within_repeat_pie_std_kcal_mol": 1.0070744758954029,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL130": {
+            "mean_contact_distance_angstrom": 4.073475360870361,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 1.9476666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.5301182258075393,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APRO131": {
+            "mean_contact_distance_angstrom": 6.034783522288005,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.032,
+            "within_repeat_pie_std_kcal_mol": 0.7810172853400873,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR132": {
+            "mean_contact_distance_angstrom": 3.4302817980448403,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -5.461666666666666,
+            "within_repeat_pie_std_kcal_mol": 2.955559563489346,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP137": {
+            "mean_contact_distance_angstrom": 3.913516044616699,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.2926666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.40353727626247043,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALYS168": {
+            "mean_contact_distance_angstrom": 5.999083995819092,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.623333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.409929668764452,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "APHE169": {
+            "mean_contact_distance_angstrom": 3.845954736073812,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.12433333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.7495013898141439,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE170": {
+            "mean_contact_distance_angstrom": 6.477073510487874,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.607333333333333,
+            "within_repeat_pie_std_kcal_mol": 2.2166475437771638,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AILE171": {
+            "mean_contact_distance_angstrom": 4.762744903564453,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.425666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.895640738987086,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "ATRP176": {
+            "mean_contact_distance_angstrom": 3.8872450987497964,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.4756666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.40541871359538073,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AILE179": {
+            "mean_contact_distance_angstrom": 3.7252689202626548,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.6263333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.8850425601819006,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP289": {
+            "mean_contact_distance_angstrom": 2.9691175619761148,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -13.827333333333334,
+            "within_repeat_pie_std_kcal_mol": 2.0834328242910396,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "ASER290": {
+            "mean_contact_distance_angstrom": 4.948295434315999,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.819,
+            "within_repeat_pie_std_kcal_mol": 0.9049182283499433,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY291": {
+            "mean_contact_distance_angstrom": 3.226843992869059,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": 15.043333333333335,
+            "within_repeat_pie_std_kcal_mol": 1.109573041008718,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "ATHR292": {
+            "mean_contact_distance_angstrom": 4.37171999613444,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -14.892333333333333,
+            "within_repeat_pie_std_kcal_mol": 4.496197319216911,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.0,
+              "trans": 0.6666666666666666
+            }
+          },
+          "ATHR293": {
+            "mean_contact_distance_angstrom": 4.754100561141968,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -11.566,
+            "within_repeat_pie_std_kcal_mol": 0.7065769597149344,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA396": {
+            "mean_contact_distance_angstrom": 7.084845383961995,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.267666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.4628977568895029,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 1.042504953349998,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.5940449937046753,
+            "within_repeat_tpie_spearman_descriptive": 1.0
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 2.6666666666666665,
+            "within_repeat_tpie_spearman_descriptive": -0.8660254037844387
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 1.6666666666666667,
+            "within_repeat_tpie_spearman_descriptive": 0.8660254037844387
+          }
+        }
+      }
+    ],
+    "CDK8": [
+      {
+        "name": "12",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "AVAL27": {
+            "mean_contact_distance_angstrom": 3.5307830174764,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.9833333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.6638948209869793,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "AGLY28": {
+            "mean_contact_distance_angstrom": 4.2801408767700195,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.5363333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.4309876254990776,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ATYR32": {
+            "mean_contact_distance_angstrom": 3.3972949186960855,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -2.013,
+            "within_repeat_pie_std_kcal_mol": 1.1954530521940208,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL35": {
+            "mean_contact_distance_angstrom": 3.702442487080892,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.059,
+            "within_repeat_pie_std_kcal_mol": 0.4096303211433451,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AALA50": {
+            "mean_contact_distance_angstrom": 3.5747809410095215,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.9196666666666669,
+            "within_repeat_pie_std_kcal_mol": 0.4834194176213172,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ALYS52": {
+            "mean_contact_distance_angstrom": 4.039234479268392,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -12.689333333333332,
+            "within_repeat_pie_std_kcal_mol": 10.551144219151462,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AGLU66": {
+            "mean_contact_distance_angstrom": 5.521971861521403,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.885000000000001,
+            "within_repeat_pie_std_kcal_mol": 3.557680143014546,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AILE79": {
+            "mean_contact_distance_angstrom": 3.7229485511779785,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.6243333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.22388017628484522,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE97": {
+            "mean_contact_distance_angstrom": 4.184940814971924,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.591,
+            "within_repeat_pie_std_kcal_mol": 0.4769287158475572,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP98": {
+            "mean_contact_distance_angstrom": 3.549773852030436,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 1.322,
+            "within_repeat_pie_std_kcal_mol": 0.5955871053003079,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR99": {
+            "mean_contact_distance_angstrom": 3.3803789615631104,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -4.957,
+            "within_repeat_pie_std_kcal_mol": 0.5263050446271628,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA100": {
+            "mean_contact_distance_angstrom": 2.8973848819732666,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.25,
+            "within_repeat_pie_std_kcal_mol": 0.5348682080662487,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "AGLU101": {
+            "mean_contact_distance_angstrom": 5.258570830027263,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.4683333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.670106210487064,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS102": {
+            "mean_contact_distance_angstrom": 5.634843031565349,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.21766666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.20906059727584567,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP103": {
+            "mean_contact_distance_angstrom": 3.4769291083017984,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -2.651,
+            "within_repeat_pie_std_kcal_mol": 2.844234167574815,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP105": {
+            "mean_contact_distance_angstrom": 5.3670609792073565,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.18900000000000003,
+            "within_repeat_pie_std_kcal_mol": 0.36362480663453095,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS106": {
+            "mean_contact_distance_angstrom": 5.327301502227783,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.5053333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.737015829771202,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AALA155": {
+            "mean_contact_distance_angstrom": 4.885645310084025,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -0.8610000000000001,
+            "within_repeat_pie_std_kcal_mol": 1.054382757825639,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "AASN156": {
+            "mean_contact_distance_angstrom": 6.72244119644165,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.5493333333333332,
+            "within_repeat_pie_std_kcal_mol": 1.787581140349532,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.0
+            }
+          },
+          "ALEU158": {
+            "mean_contact_distance_angstrom": 3.707204898198446,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.6360000000000006,
+            "within_repeat_pie_std_kcal_mol": 0.5852999231163456,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA172": {
+            "mean_contact_distance_angstrom": 5.365464051564534,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.3223333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.06615386106141753,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AASP173": {
+            "mean_contact_distance_angstrom": 4.647986491521199,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.6803333333333331,
+            "within_repeat_pie_std_kcal_mol": 3.700812928713546,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AARG356": {
+            "mean_contact_distance_angstrom": 3.26310133934021,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.733999999999999,
+            "within_repeat_pie_std_kcal_mol": 1.0681142261013097,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.8694065380963497,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.32593827418357396,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 2.0,
+            "within_repeat_tpie_spearman_descriptive": 0.8660254037844387
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 0.6666666666666666,
+            "within_repeat_tpie_spearman_descriptive": 0.0
+          }
+        }
+      },
+      {
+        "name": "12",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "AVAL27": {
+            "mean_contact_distance_angstrom": 3.3391884167989097,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -1.6829999999999998,
+            "within_repeat_pie_std_kcal_mol": 0.28250132743050954,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY28": {
+            "mean_contact_distance_angstrom": 4.189185380935669,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.9846666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.05714309523759926,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "ATYR32": {
+            "mean_contact_distance_angstrom": 3.7987314065297446,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.6366666666666667,
+            "within_repeat_pie_std_kcal_mol": 1.427061783292277,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL35": {
+            "mean_contact_distance_angstrom": 3.828171173731486,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.968666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.9157315836714016,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA50": {
+            "mean_contact_distance_angstrom": 3.734074592590332,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.7713333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.6659326792802208,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ALYS52": {
+            "mean_contact_distance_angstrom": 4.059268395105998,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.1276666666666664,
+            "within_repeat_pie_std_kcal_mol": 3.6806347731516817,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AGLU66": {
+            "mean_contact_distance_angstrom": 6.3663716316223145,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 2.8113333333333337,
+            "within_repeat_pie_std_kcal_mol": 3.6578305501120925,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.0,
+              "trans": 0.6666666666666666
+            }
+          },
+          "AILE79": {
+            "mean_contact_distance_angstrom": 3.6283109982808432,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.4296666666666664,
+            "within_repeat_pie_std_kcal_mol": 0.6322865911383329,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE97": {
+            "mean_contact_distance_angstrom": 4.257215976715088,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.176,
+            "within_repeat_pie_std_kcal_mol": 0.0771751255262989,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP98": {
+            "mean_contact_distance_angstrom": 3.359631617863973,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": 0.8026666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.6152758189083439,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "ATYR99": {
+            "mean_contact_distance_angstrom": 3.673055330912272,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -4.649,
+            "within_repeat_pie_std_kcal_mol": 1.3403122770459128,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA100": {
+            "mean_contact_distance_angstrom": 2.9849541982014975,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.257000000000001,
+            "within_repeat_pie_std_kcal_mol": 0.8957237297292062,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AGLU101": {
+            "mean_contact_distance_angstrom": 5.371028900146484,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.5443333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.19580943116544036,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS102": {
+            "mean_contact_distance_angstrom": 5.859473705291748,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.12333333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.08120550063470659,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP103": {
+            "mean_contact_distance_angstrom": 3.629568338394165,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -2.169333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.6433423142723735,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP105": {
+            "mean_contact_distance_angstrom": 5.504408439000447,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.464,
+            "within_repeat_pie_std_kcal_mol": 0.8582954036926914,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS106": {
+            "mean_contact_distance_angstrom": 5.246787389119466,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.7203333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.1662492586635729,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA155": {
+            "mean_contact_distance_angstrom": 3.4367382526397705,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.3563333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.15428004839684667,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AASN156": {
+            "mean_contact_distance_angstrom": 5.563587824503581,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.3926666666666665,
+            "within_repeat_pie_std_kcal_mol": 1.7658947684766872,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU158": {
+            "mean_contact_distance_angstrom": 3.5363553365071616,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -3.6056666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.6811052292658845,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA172": {
+            "mean_contact_distance_angstrom": 4.088670253753662,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.1626666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.1979755877206413,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "AASP173": {
+            "mean_contact_distance_angstrom": 3.982540766398112,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.676666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.9894484995861754,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AARG356": {
+            "mean_contact_distance_angstrom": 3.3768485387166343,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -3.8336666666666672,
+            "within_repeat_pie_std_kcal_mol": 1.209355337910795,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.9340796105452686,
+            "within_repeat_tpie_spearman_descriptive": -1.0
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.46207904975541764,
+            "within_repeat_tpie_spearman_descriptive": -1.0
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 1.0,
+            "within_repeat_tpie_spearman_descriptive": null
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 1.0,
+            "within_repeat_tpie_spearman_descriptive": null
+          }
+        }
+      },
+      {
+        "name": "12",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "AVAL27": {
+            "mean_contact_distance_angstrom": 3.441446224848429,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -2.0669999999999997,
+            "within_repeat_pie_std_kcal_mol": 0.4774756538295957,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY28": {
+            "mean_contact_distance_angstrom": 4.098100821177165,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.3839999999999997,
+            "within_repeat_pie_std_kcal_mol": 0.492369779738765,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "ATYR32": {
+            "mean_contact_distance_angstrom": 3.544814189275106,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.7553333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.23492622955586143,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL35": {
+            "mean_contact_distance_angstrom": 3.6032647291819253,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -4.217,
+            "within_repeat_pie_std_kcal_mol": 0.8891563417082509,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.3333333333333333
+            }
+          },
+          "AALA50": {
+            "mean_contact_distance_angstrom": 3.7447214126586914,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.7656666666666665,
+            "within_repeat_pie_std_kcal_mol": 0.53360128685502,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ALYS52": {
+            "mean_contact_distance_angstrom": 3.2026962439219155,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -17.42866666666667,
+            "within_repeat_pie_std_kcal_mol": 4.274402453365069,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AGLU66": {
+            "mean_contact_distance_angstrom": 5.137577215830485,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.655333333333334,
+            "within_repeat_pie_std_kcal_mol": 1.0954516572324555,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AILE79": {
+            "mean_contact_distance_angstrom": 4.44289755821228,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.3853333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.7111521168732702,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE97": {
+            "mean_contact_distance_angstrom": 4.911912441253662,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.964,
+            "within_repeat_pie_std_kcal_mol": 0.20727035485085657,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP98": {
+            "mean_contact_distance_angstrom": 3.7080469131469727,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 1.2209999999999999,
+            "within_repeat_pie_std_kcal_mol": 0.379846021435002,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ATYR99": {
+            "mean_contact_distance_angstrom": 3.6001598834991455,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -4.122333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.091016192974849,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA100": {
+            "mean_contact_distance_angstrom": 3.0051299730936685,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.728333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.30803625327765105,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "AGLU101": {
+            "mean_contact_distance_angstrom": 5.376497109731038,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.3373333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.5141209325959539,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS102": {
+            "mean_contact_distance_angstrom": 5.4286759694417315,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.07033333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.09360199428074882,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP103": {
+            "mean_contact_distance_angstrom": 3.3188302516937256,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.155,
+            "within_repeat_pie_std_kcal_mol": 1.6240101600667407,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP105": {
+            "mean_contact_distance_angstrom": 4.229676326115926,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.0519999999999998,
+            "within_repeat_pie_std_kcal_mol": 0.32701529016240205,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS106": {
+            "mean_contact_distance_angstrom": 3.9273125330607095,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.7523333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.3426665045395207,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA155": {
+            "mean_contact_distance_angstrom": 3.656077226003011,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.8970000000000002,
+            "within_repeat_pie_std_kcal_mol": 0.3073174254740528,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "AASN156": {
+            "mean_contact_distance_angstrom": 5.693314711252849,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.1586666666666665,
+            "within_repeat_pie_std_kcal_mol": 0.6089501895338677,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU158": {
+            "mean_contact_distance_angstrom": 3.7221123377482095,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.836,
+            "within_repeat_pie_std_kcal_mol": 0.0915259526036194,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA172": {
+            "mean_contact_distance_angstrom": 4.40556263923645,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.793,
+            "within_repeat_pie_std_kcal_mol": 0.5911886331789542,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "AASP173": {
+            "mean_contact_distance_angstrom": 3.6619006792704263,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -5.254999999999999,
+            "within_repeat_pie_std_kcal_mol": 0.42464691215173106,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AARG356": {
+            "mean_contact_distance_angstrom": 3.3558384577433267,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -3.198333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.9901940887186376,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.5992638826217122,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.20584387705343662,
+            "within_repeat_tpie_spearman_descriptive": -1.0
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 1.0,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 1.0,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          }
+        }
+      },
+      {
+        "name": "20",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "AVAL27": {
+            "mean_contact_distance_angstrom": 3.3908872604370117,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.6236666666666668,
+            "within_repeat_pie_std_kcal_mol": 0.7931616060635648,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY28": {
+            "mean_contact_distance_angstrom": 4.234886646270752,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.342666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.8809320821342208,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ATYR32": {
+            "mean_contact_distance_angstrom": 3.7537999153137207,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -2.391,
+            "within_repeat_pie_std_kcal_mol": 0.4685008004262106,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL35": {
+            "mean_contact_distance_angstrom": 3.6633286476135254,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.511333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.27545659065147327,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AALA50": {
+            "mean_contact_distance_angstrom": 3.6580427487691245,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.5643333333333331,
+            "within_repeat_pie_std_kcal_mol": 0.2767748784361278,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5
+          },
+          "ALYS52": {
+            "mean_contact_distance_angstrom": 3.252194801966349,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -14.124333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.8683641709175557,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AGLU66": {
+            "mean_contact_distance_angstrom": 5.002559343973796,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.721,
+            "within_repeat_pie_std_kcal_mol": 1.097634274246208,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AILE79": {
+            "mean_contact_distance_angstrom": 3.7308144569396973,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.6523333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.12015545486299542,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE97": {
+            "mean_contact_distance_angstrom": 4.719799200693767,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.932,
+            "within_repeat_pie_std_kcal_mol": 0.41972967490993535,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP98": {
+            "mean_contact_distance_angstrom": 3.721029361089071,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 0.8290000000000001,
+            "within_repeat_pie_std_kcal_mol": 0.2942040108496144,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.0,
+              "trans": 0.6666666666666666
+            }
+          },
+          "ATYR99": {
+            "mean_contact_distance_angstrom": 3.7206528981526694,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.576333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.2708529736468355,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA100": {
+            "mean_contact_distance_angstrom": 2.9886861642201743,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.791333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.8455964364478682,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AGLU101": {
+            "mean_contact_distance_angstrom": 5.36745039621989,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.01833333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.3695379998502635,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS102": {
+            "mean_contact_distance_angstrom": 5.416237195332845,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.09999999999999999,
+            "within_repeat_pie_std_kcal_mol": 0.03207802986469088,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP103": {
+            "mean_contact_distance_angstrom": 3.375310023625692,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -3.0836666666666663,
+            "within_repeat_pie_std_kcal_mol": 0.2091538508690034,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP105": {
+            "mean_contact_distance_angstrom": 4.757101376851399,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.6086666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.9050880251850276,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS106": {
+            "mean_contact_distance_angstrom": 4.826361338297526,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.5183333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.2283535270875695,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA155": {
+            "mean_contact_distance_angstrom": 3.729829947153727,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.8920000000000001,
+            "within_repeat_pie_std_kcal_mol": 0.21611108254784167,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "AASN156": {
+            "mean_contact_distance_angstrom": 4.441462993621826,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -2.9160000000000004,
+            "within_repeat_pie_std_kcal_mol": 0.5338342439371982,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.3333333333333333,
+              "gauche_plus": 0.6666666666666666,
+              "trans": 0.0
+            }
+          },
+          "ALEU158": {
+            "mean_contact_distance_angstrom": 3.5014829635620117,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -4.666,
+            "within_repeat_pie_std_kcal_mol": 0.6371530428397872,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA172": {
+            "mean_contact_distance_angstrom": 4.688250541687012,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.5596666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.1556448949799939,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "AASP173": {
+            "mean_contact_distance_angstrom": 3.6026100317637124,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -2.0686666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.3240437213299053,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AARG356": {
+            "mean_contact_distance_angstrom": 3.3356826305389404,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -3.5879999999999996,
+            "within_repeat_pie_std_kcal_mol": 1.133142532958674,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.7057151032243872,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.5054429845692018,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 0.0,
+            "within_repeat_tpie_spearman_descriptive": null
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 0.0,
+            "within_repeat_tpie_spearman_descriptive": null
+          }
+        }
+      },
+      {
+        "name": "20",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "AVAL27": {
+            "mean_contact_distance_angstrom": 3.728185494740804,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.9156666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.5082217363841627,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY28": {
+            "mean_contact_distance_angstrom": 4.314427614212036,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.7593333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.11629416723693985,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "ATYR32": {
+            "mean_contact_distance_angstrom": 3.639490763346354,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.4636666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.9521272674035405,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL35": {
+            "mean_contact_distance_angstrom": 3.7439770698547363,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.179333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.0517111453879975,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.3333333333333333,
+              "trans": 0.6666666666666666
+            }
+          },
+          "AALA50": {
+            "mean_contact_distance_angstrom": 3.475616216659546,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -2.3489999999999998,
+            "within_repeat_pie_std_kcal_mol": 0.1689704116110274,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ALYS52": {
+            "mean_contact_distance_angstrom": 3.6587769985198975,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -10.476,
+            "within_repeat_pie_std_kcal_mol": 0.909163901615105,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AGLU66": {
+            "mean_contact_distance_angstrom": 4.737563610076904,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 5.995666666666668,
+            "within_repeat_pie_std_kcal_mol": 0.6910791078692318,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AILE79": {
+            "mean_contact_distance_angstrom": 3.619395653406779,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.9616666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.2519232687413636,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE97": {
+            "mean_contact_distance_angstrom": 4.053507884343465,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.9203333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.6547475340414299,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP98": {
+            "mean_contact_distance_angstrom": 3.734711170196533,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.9393333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.41171025410272855,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ATYR99": {
+            "mean_contact_distance_angstrom": 3.5827578703562417,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -4.168333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.3276160338491445,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA100": {
+            "mean_contact_distance_angstrom": 2.943396727244059,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -4.8870000000000005,
+            "within_repeat_pie_std_kcal_mol": 0.7515044910045444,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AGLU101": {
+            "mean_contact_distance_angstrom": 5.4809238115946455,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.072,
+            "within_repeat_pie_std_kcal_mol": 0.6396319254071047,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS102": {
+            "mean_contact_distance_angstrom": 5.766089757283528,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.08733333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.11554364254831737,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP103": {
+            "mean_contact_distance_angstrom": 3.5530141989390054,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -4.428666666666667,
+            "within_repeat_pie_std_kcal_mol": 2.652698311782426,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP105": {
+            "mean_contact_distance_angstrom": 6.07932710647583,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 0.014999999999999994,
+            "within_repeat_pie_std_kcal_mol": 0.7987690529808975,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS106": {
+            "mean_contact_distance_angstrom": 4.967545032501221,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.5043333333333333,
+            "within_repeat_pie_std_kcal_mol": 1.6061420651154532,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA155": {
+            "mean_contact_distance_angstrom": 3.5316567420959473,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -1.8803333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.40302026417208037,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "AASN156": {
+            "mean_contact_distance_angstrom": 4.1807066599528,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.011666666666667,
+            "within_repeat_pie_std_kcal_mol": 1.5678935975803119,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU158": {
+            "mean_contact_distance_angstrom": 3.58069109916687,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -4.836666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.7210369847194618,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA172": {
+            "mean_contact_distance_angstrom": 4.038059711456299,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.952,
+            "within_repeat_pie_std_kcal_mol": 0.08560957890329798,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AASP173": {
+            "mean_contact_distance_angstrom": 3.7442991733551025,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.205666666666666,
+            "within_repeat_pie_std_kcal_mol": 2.213907480752828,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AARG356": {
+            "mean_contact_distance_angstrom": 3.453456481297811,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -2.493,
+            "within_repeat_pie_std_kcal_mol": 2.8355604384318807,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.9816965039417974,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.6130394316824039,
+            "within_repeat_tpie_spearman_descriptive": -0.5
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 0.6666666666666666,
+            "within_repeat_tpie_spearman_descriptive": 0.0
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 0.6666666666666666,
+            "within_repeat_tpie_spearman_descriptive": 0.0
+          }
+        }
+      },
+      {
+        "name": "20",
+        "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+        "n_frames": 3,
+        "residue_contacts": {
+          "AVAL27": {
+            "mean_contact_distance_angstrom": 3.725618521372477,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.4873333333333332,
+            "within_repeat_pie_std_kcal_mol": 0.17954479478206367,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AGLY28": {
+            "mean_contact_distance_angstrom": 4.260237216949463,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.8873333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.30127119565821986,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ATYR32": {
+            "mean_contact_distance_angstrom": 3.8327858448028564,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.9033333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.4340994509710112,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AVAL35": {
+            "mean_contact_distance_angstrom": 3.660440762837728,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.015666666666666,
+            "within_repeat_pie_std_kcal_mol": 0.6427630460234421,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "AALA50": {
+            "mean_contact_distance_angstrom": 3.478262503941854,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.6529999999999998,
+            "within_repeat_pie_std_kcal_mol": 0.36674650645916185,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "ALYS52": {
+            "mean_contact_distance_angstrom": 3.104898691177368,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -16.073333333333334,
+            "within_repeat_pie_std_kcal_mol": 5.982619353872796,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AGLU66": {
+            "mean_contact_distance_angstrom": 4.7905856768290205,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": 6.371666666666667,
+            "within_repeat_pie_std_kcal_mol": 1.7729608944737993,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AILE79": {
+            "mean_contact_distance_angstrom": 4.192092577616374,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.1366666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.38641989251762565,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "APHE97": {
+            "mean_contact_distance_angstrom": 4.122310479482015,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.5756666666666668,
+            "within_repeat_pie_std_kcal_mol": 0.6137054125012531,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP98": {
+            "mean_contact_distance_angstrom": 3.504230578740438,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": 0.8433333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.2669912607808228,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.6666666666666666,
+              "gauche_plus": 0.0,
+              "trans": 0.3333333333333333
+            }
+          },
+          "ATYR99": {
+            "mean_contact_distance_angstrom": 3.6623334089914956,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -4.380333333333334,
+            "within_repeat_pie_std_kcal_mol": 0.5215901967381417,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AALA100": {
+            "mean_contact_distance_angstrom": 2.9789841969807944,
+            "fraction_below_3p5_angstrom": 1.0,
+            "mean_fragment_pie_kcal_mol": -5.115333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.49129047755206207,
+            "within_repeat_distance_pie_spearman_descriptive": -1.0
+          },
+          "AGLU101": {
+            "mean_contact_distance_angstrom": 5.329516887664795,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.16433333333333333,
+            "within_repeat_pie_std_kcal_mol": 0.6312165502688704,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS102": {
+            "mean_contact_distance_angstrom": 5.47123908996582,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.128,
+            "within_repeat_pie_std_kcal_mol": 0.05370288632839021,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AASP103": {
+            "mean_contact_distance_angstrom": 3.4994734128316245,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -3.882,
+            "within_repeat_pie_std_kcal_mol": 0.9931183212487826,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ATRP105": {
+            "mean_contact_distance_angstrom": 5.000457843144734,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.602,
+            "within_repeat_pie_std_kcal_mol": 0.8261434500133739,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AHIS106": {
+            "mean_contact_distance_angstrom": 4.289044936498006,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.2183333333333335,
+            "within_repeat_pie_std_kcal_mol": 1.307207073624272,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA155": {
+            "mean_contact_distance_angstrom": 3.5260650316874185,
+            "fraction_below_3p5_angstrom": 0.3333333333333333,
+            "mean_fragment_pie_kcal_mol": -1.6226666666666667,
+            "within_repeat_pie_std_kcal_mol": 0.5000563301602464,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5
+          },
+          "AASN156": {
+            "mean_contact_distance_angstrom": 4.5904974937438965,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -3.9510000000000005,
+            "within_repeat_pie_std_kcal_mol": 1.3103423216854444,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 1.0,
+              "trans": 0.0
+            }
+          },
+          "ALEU158": {
+            "mean_contact_distance_angstrom": 3.720962921778361,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -5.079,
+            "within_repeat_pie_std_kcal_mol": 0.782316432142391,
+            "within_repeat_distance_pie_spearman_descriptive": 0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          },
+          "AALA172": {
+            "mean_contact_distance_angstrom": 4.789749940236409,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -0.45999999999999996,
+            "within_repeat_pie_std_kcal_mol": 0.3505937820327109,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0
+          },
+          "AASP173": {
+            "mean_contact_distance_angstrom": 3.9229400157928467,
+            "fraction_below_3p5_angstrom": 0.0,
+            "mean_fragment_pie_kcal_mol": -1.4733333333333334,
+            "within_repeat_pie_std_kcal_mol": 2.152415000257463,
+            "within_repeat_distance_pie_spearman_descriptive": 1.0,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 0.0,
+              "gauche_plus": 0.0,
+              "trans": 1.0
+            }
+          },
+          "AARG356": {
+            "mean_contact_distance_angstrom": 3.379418055216471,
+            "fraction_below_3p5_angstrom": 0.6666666666666666,
+            "mean_fragment_pie_kcal_mol": -3.5869999999999997,
+            "within_repeat_pie_std_kcal_mol": 1.4601263643945346,
+            "within_repeat_distance_pie_spearman_descriptive": -0.5,
+            "chi1_rotamer_fractions": {
+              "gauche_minus": 1.0,
+              "gauche_plus": 0.0,
+              "trans": 0.0
+            }
+          }
+        },
+        "descriptors": {
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": {
+            "mean": 0.8505660613669098,
+            "within_repeat_tpie_spearman_descriptive": 0.5
+          },
+          "ligand_self_fit_rmsd_angstrom": {
+            "mean": 0.6526994509821105,
+            "within_repeat_tpie_spearman_descriptive": 1.0
+          },
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": {
+            "mean": 0.3333333333333333,
+            "within_repeat_tpie_spearman_descriptive": -0.8660254037844387
+          },
+          "distance_only_water_bridge_count": {
+            "mean": 0.3333333333333333,
+            "within_repeat_tpie_spearman_descriptive": -0.8660254037844387
+          }
+        }
+      }
+    ]
+  },
+  "labels_used": false,
+  "main_pipeline_changed": false,
+  "source_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/frozen_protocol.json": "6005d2ee8ce06293c70c7f7d33ca5869ff7d39ca22ed440720ab392e6eb6cae5",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/progress.json": "e64641c2eb8719018cbf211a2e709fb455127080f2c9c786c6941334897f2cd1",
+    "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/endpoint_structure.json": "45bfb3a9b02100c9c32723559588816cc3d952e2c68684f4acfe936292b62d47"
+  },
+  "driver_sha256": "70fae6d0a538fbc718143ce6f368d339949c1adf0b500975d2a1926f69309521",
+  "limitations": [
+    "Within-repeat correlations are descriptive; adjacent frames are correlated and no significance claim is made.",
+    "Whole-residue contacts and FACIO fragment atom memberships are not identical.",
+    "Distance contacts and three-bin rotamer summaries do not prove a hydrogen bond or causal affinity mechanism.",
+    "No regression coefficient, score weight or frame selection is learned from experimental affinity."
+  ]
+}

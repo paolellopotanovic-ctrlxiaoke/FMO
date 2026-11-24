@@ -1,0 +1,37 @@
+{
+  "retained_registered_components": [
+    {
+      "id": "A:TLA:502",
+      "formal_charge": -2,
+      "aliases": [
+        {
+          "source_index": 10,
+          "source_name": "H2",
+          "prepared_name": "H11",
+          "parent": "C2"
+        },
+        {
+          "source_index": 11,
+          "source_name": "HO",
+          "prepared_name": "H12",
+          "parent": "O2"
+        },
+        {
+          "source_index": 12,
+          "source_name": "H3",
+          "prepared_name": "H13",
+          "parent": "C3"
+        },
+        {
+          "source_index": 13,
+          "source_name": "HO",
+          "prepared_name": "H14",
+          "parent": "O3"
+        }
+      ],
+      "source_state_preserved_not_assay_population": true
+    }
+  ],
+  "source_receptor_sha256": "9b17ed00d0fbfd66802a3ef4f88dc6d428a9b86e40337891eec4e5612449877d",
+  "silent_component_deletion": false
+}

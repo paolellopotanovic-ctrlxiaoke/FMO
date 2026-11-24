@@ -1,0 +1,451 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "kind": "qm_heavy",
+      "step_angstrom": 0.001,
+      "analytic": -43.521905771029694,
+      "numerical": -43.52016924531199,
+      "raw_absolute_error": 0.00173652571770333,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -43.52016924531199,
+      "absolute_error": 0.00173652571770333,
+      "passed": true
+    },
+    {
+      "kind": "qm_heavy",
+      "step_angstrom": 0.0002,
+      "analytic": -43.521905771029694,
+      "numerical": -43.52195232058875,
+      "raw_absolute_error": 4.654955905891711e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -43.52195232058875,
+      "absolute_error": 4.654955905891711e-05,
+      "passed": true
+    },
+    {
+      "kind": "qm_hydrogen",
+      "step_angstrom": 0.001,
+      "analytic": 3.5176543376565963,
+      "numerical": 3.5174709337297827,
+      "raw_absolute_error": 0.00018340392681359674,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": 3.5174709337297827,
+      "absolute_error": 0.00018340392681359674,
+      "passed": true
+    },
+    {
+      "kind": "qm_hydrogen",
+      "step_angstrom": 0.0002,
+      "analytic": 3.5176543376565963,
+      "numerical": 3.5175766970496625,
+      "raw_absolute_error": 7.764060693382646e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": 3.5175766970496625,
+      "absolute_error": 7.764060693382646e-05,
+      "passed": true
+    },
+    {
+      "kind": "mm_water_oxygen",
+      "step_angstrom": 0.001,
+      "analytic": -17.54668498918991,
+      "numerical": -17.546746268635616,
+      "raw_absolute_error": 6.127944570621935e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -17.546746268635616,
+      "absolute_error": 6.127944570621935e-05,
+      "passed": true
+    },
+    {
+      "kind": "mm_water_oxygen",
+      "step_angstrom": 0.0002,
+      "analytic": -17.54668498918991,
+      "numerical": -17.546691960887983,
+      "raw_absolute_error": 6.971698073954258e-06,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -17.546691960887983,
+      "absolute_error": 6.971698073954258e-06,
+      "passed": true
+    },
+    {
+      "kind": "mm_nonwater_heavy",
+      "step_angstrom": 0.001,
+      "analytic": 8.059029661936028,
+      "numerical": 8.2028187753167,
+      "raw_absolute_error": 0.1437891133806719,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": 0.14379236463865475,
+        "pairs": [
+          {
+            "first": 2625,
+            "second": 2654,
+            "crossing": -1,
+            "jump_kcal_mol": -0.0002875847292773095,
+            "distance_nm": 0.9000259534962204
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": 8.059026410678046,
+      "absolute_error": 3.2512579828392063e-06,
+      "passed": true
+    },
+    {
+      "kind": "mm_nonwater_heavy",
+      "step_angstrom": 0.0002,
+      "analytic": 8.059029661936028,
+      "numerical": 8.058959792833775,
+      "raw_absolute_error": 6.986910225315057e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": 8.058959792833775,
+      "absolute_error": 6.986910225315057e-05,
+      "passed": true
+    },
+    {
+      "kind": "collective_all",
+      "step_angstrom": 0.001,
+      "analytic": -38.626625181654276,
+      "numerical": -34.91331325494684,
+      "raw_absolute_error": 3.7133119267074335,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 13,
+        "predicted_gradient_discontinuity": 3.769646087429819,
+        "pairs": [
+          {
+            "first": 198,
+            "second": 83909,
+            "crossing": -1,
+            "jump_kcal_mol": -0.0047662712095242294,
+            "distance_nm": 0.8999999189247031
+          },
+          {
+            "first": 310,
+            "second": 38330,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0018543586180242082,
+            "distance_nm": 0.8999995810295479
+          },
+          {
+            "first": 630,
+            "second": 5904,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0012627878170121806,
+            "distance_nm": 0.9000009313842101
+          },
+          {
+            "first": 911,
+            "second": 1575,
+            "crossing": 1,
+            "jump_kcal_mol": -6.45453246225378e-05,
+            "distance_nm": 0.900001250867585
+          },
+          {
+            "first": 1239,
+            "second": 2785,
+            "crossing": -1,
+            "jump_kcal_mol": -0.0007458624860087405,
+            "distance_nm": 0.8999998947307519
+          },
+          {
+            "first": 2447,
+            "second": 2463,
+            "crossing": 1,
+            "jump_kcal_mol": 6.232273488920562e-05,
+            "distance_nm": 0.9000001508664329
+          },
+          {
+            "first": 2576,
+            "second": 6325,
+            "crossing": 1,
+            "jump_kcal_mol": -8.959502120424436e-05,
+            "distance_nm": 0.9000014356057686
+          },
+          {
+            "first": 3459,
+            "second": 55192,
+            "crossing": 1,
+            "jump_kcal_mol": 0.00021315778413621918,
+            "distance_nm": 0.9000002916292722
+          },
+          {
+            "first": 3815,
+            "second": 4137,
+            "crossing": -1,
+            "jump_kcal_mol": -0.005353123928335127,
+            "distance_nm": 0.9000005390439275
+          },
+          {
+            "first": 3923,
+            "second": 90694,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0002001263038833499,
+            "distance_nm": 0.8999995995366044
+          },
+          {
+            "first": 5056,
+            "second": 5085,
+            "crossing": 1,
+            "jump_kcal_mol": -0.00010179800940614502,
+            "distance_nm": 0.8999987080034598
+          },
+          {
+            "first": 5503,
+            "second": 21823,
+            "crossing": -1,
+            "jump_kcal_mol": -3.785334740119177e-05,
+            "distance_nm": 0.8999989370903158
+          },
+          {
+            "first": 5799,
+            "second": 67522,
+            "crossing": -1,
+            "jump_kcal_mol": 6.608822128240856e-05,
+            "distance_nm": 0.9000005053080183
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": -38.68295934237666,
+      "absolute_error": 0.05633416072238617,
+      "passed": false
+    },
+    {
+      "kind": "collective_all",
+      "step_angstrom": 0.0002,
+      "analytic": -38.626625181654276,
+      "numerical": -26.71008274774067,
+      "raw_absolute_error": 11.916542433913605,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": 11.915678023810573,
+        "pairs": [
+          {
+            "first": 198,
+            "second": 83909,
+            "crossing": -1,
+            "jump_kcal_mol": -0.0047662712095242294,
+            "distance_nm": 0.8999999189247031
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": -38.62576077155124,
+      "absolute_error": 0.0008644101030341744,
+      "passed": true
+    },
+    {
+      "kind": "collective_environment",
+      "step_angstrom": 0.001,
+      "analytic": -10.704030724017876,
+      "numerical": -16.05505679617636,
+      "raw_absolute_error": 5.351026072158483,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 12,
+        "predicted_gradient_discontinuity": -5.351194184373526,
+        "pairs": [
+          {
+            "first": 198,
+            "second": 83909,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0047662712095242294,
+            "distance_nm": 0.8999999189247031
+          },
+          {
+            "first": 310,
+            "second": 38330,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0018543586180242082,
+            "distance_nm": 0.8999995810295479
+          },
+          {
+            "first": 482,
+            "second": 3157,
+            "crossing": -1,
+            "jump_kcal_mol": -0.0026923722055245524,
+            "distance_nm": 0.9000003113176785
+          },
+          {
+            "first": 911,
+            "second": 1575,
+            "crossing": 1,
+            "jump_kcal_mol": -6.45453246225378e-05,
+            "distance_nm": 0.900001250867585
+          },
+          {
+            "first": 1239,
+            "second": 2785,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0007458624860087405,
+            "distance_nm": 0.8999998947307519
+          },
+          {
+            "first": 2447,
+            "second": 2463,
+            "crossing": -1,
+            "jump_kcal_mol": 6.232273488920562e-05,
+            "distance_nm": 0.9000001508664329
+          },
+          {
+            "first": 3459,
+            "second": 55192,
+            "crossing": -1,
+            "jump_kcal_mol": 0.00021315778413621918,
+            "distance_nm": 0.9000002916292722
+          },
+          {
+            "first": 3815,
+            "second": 4137,
+            "crossing": 1,
+            "jump_kcal_mol": -0.005353123928335127,
+            "distance_nm": 0.9000005390439275
+          },
+          {
+            "first": 4837,
+            "second": 95835,
+            "crossing": 1,
+            "jump_kcal_mol": -0.00018523318359435644,
+            "distance_nm": 0.8999995820646988
+          },
+          {
+            "first": 5002,
+            "second": 5169,
+            "crossing": 1,
+            "jump_kcal_mol": 1.800092555157266e-05,
+            "distance_nm": 0.9000022532707779
+          },
+          {
+            "first": 5056,
+            "second": 5085,
+            "crossing": 1,
+            "jump_kcal_mol": -0.00010179800940614502,
+            "distance_nm": 0.8999987080034598
+          },
+          {
+            "first": 5799,
+            "second": 67522,
+            "crossing": -1,
+            "jump_kcal_mol": 6.608822128240856e-05,
+            "distance_nm": 0.9000005053080183
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": -10.703862611802833,
+      "absolute_error": 0.00016811221504298146,
+      "passed": true
+    },
+    {
+      "kind": "collective_environment",
+      "step_angstrom": 0.0002,
+      "analytic": -10.704030724017876,
+      "numerical": -22.61675792397,
+      "raw_absolute_error": 11.912727199952123,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": -11.915678023810573,
+        "pairs": [
+          {
+            "first": 198,
+            "second": 83909,
+            "crossing": 1,
+            "jump_kcal_mol": -0.0047662712095242294,
+            "distance_nm": 0.8999999189247031
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": -10.701079900159426,
+      "absolute_error": 0.0029508238584501356,
+      "passed": true
+    },
+    {
+      "kind": "collective_qm_translation",
+      "step_angstrom": 0.001,
+      "analytic": 0.11339821014531992,
+      "numerical": 0.012313248589634895,
+      "raw_absolute_error": 0.10108496155568503,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": -0.04479751060212218,
+        "pairs": [
+          {
+            "first": 2576,
+            "second": 6325,
+            "crossing": 1,
+            "jump_kcal_mol": -8.959502120424436e-05,
+            "distance_nm": 0.9000014356057686
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": 0.05711075919175707,
+      "absolute_error": 0.05628745095356285,
+      "passed": false
+    },
+    {
+      "kind": "collective_qm_translation",
+      "step_angstrom": 0.0002,
+      "analytic": 0.11339821014531992,
+      "numerical": -0.39198363083414733,
+      "raw_absolute_error": 0.5053818409794673,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": -0.22398755301061088,
+        "pairs": [
+          {
+            "first": 2576,
+            "second": 6325,
+            "crossing": 1,
+            "jump_kcal_mol": -8.959502120424436e-05,
+            "distance_nm": 0.9000014356057686
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": -0.16799607782353645,
+      "absolute_error": 0.28139428796885635,
+      "passed": false
+    }
+  ],
+  "reference_pme_net_gradient_kcal_mol_angstrom": 1.4625229298947224,
+  "reference_hamiltonian_modified": false,
+  "sampling_energy_or_force_shifted_to_pass_gate": false,
+  "cutoff_discontinuities": "analytic known pair potential jumps accounted ONLY for finite-difference verification; all unmodified energies used in Metropolis acceptance",
+  "net_target_gradient_kcal_mol_angstrom": 1.4629449921990871
+}

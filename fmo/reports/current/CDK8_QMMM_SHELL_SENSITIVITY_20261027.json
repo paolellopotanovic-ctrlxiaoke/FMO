@@ -1,0 +1,2561 @@
+{
+  "schema": "quanpol-shell-sensitivity-v1",
+  "status": "COMPLETE",
+  "target": "CDK8",
+  "labels_used": false,
+  "swrb_angstrom": [
+    6000.0,
+    6000.0,
+    6000.0
+  ],
+  "shell_radii_angstrom": [
+    8.0,
+    12.0,
+    16.0
+  ],
+  "cycle_summary_by_shell_kcal_mol": {
+    "8.0": {
+      "n": 15,
+      "mean_kcal_mol": -3.458407998193434,
+      "sample_sd_kcal_mol": 3.619353754026109,
+      "median_kcal_mol": -4.01979723329714,
+      "min_kcal_mol": -8.983195801796683,
+      "max_kcal_mol": 4.716447489499842
+    },
+    "12.0": {
+      "n": 15,
+      "mean_kcal_mol": -3.20329861240607,
+      "sample_sd_kcal_mol": 3.5949826939158482,
+      "median_kcal_mol": -3.335345027393487,
+      "min_kcal_mol": -8.32536894760051,
+      "max_kcal_mol": 4.532183684495976
+    },
+    "16.0": {
+      "n": 15,
+      "mean_kcal_mol": -3.3677932548596194,
+      "sample_sd_kcal_mol": 3.897963976536583,
+      "median_kcal_mol": -4.12966115800009,
+      "min_kcal_mol": -9.279409293398203,
+      "max_kcal_mol": 5.58476389939824
+    }
+  },
+  "paired_difference_vs_reference_shell_kcal_mol": {
+    "8.0": {
+      "reference_shell_angstrom": 12.0,
+      "n": 15,
+      "mean_difference_kcal_mol": -0.25510938578736386,
+      "sample_sd_kcal_mol": 0.6477596563704282,
+      "min_kcal_mol": -1.500538618896826,
+      "max_kcal_mol": 0.6432638697006041
+    },
+    "16.0": {
+      "reference_shell_angstrom": 12.0,
+      "n": 15,
+      "mean_difference_kcal_mol": -0.1644946424535495,
+      "sample_sd_kcal_mol": 0.6476860550276734,
+      "min_kcal_mol": -1.4892745092984114,
+      "max_kcal_mol": 1.0525802149022638
+    }
+  },
+  "reference_shell_angstrom": 12.0,
+  "fixed_four_state_cycles": 15,
+  "frame_states": [
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6121,
+          "water_residues": 46,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29699.369737716595,
+          "mm_parity_difference_kcal_mol": -0.025651956840192724
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6382,
+          "water_residues": 133,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29699.2577606092,
+          "mm_parity_difference_kcal_mol": -0.028301043648752966
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7103,
+          "water_residues": 373,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29699.333950783097,
+          "mm_parity_difference_kcal_mol": -0.03541433717964537
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 8,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6127,
+          "water_residues": 48,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29172.222515825495,
+          "mm_parity_difference_kcal_mol": -0.024507609706688527
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6409,
+          "water_residues": 142,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29171.873572476597,
+          "mm_parity_difference_kcal_mol": -0.02677301323001302
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7124,
+          "water_residues": 380,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29172.0959212956,
+          "mm_parity_difference_kcal_mol": -0.03559105524891493
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 9,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 584,
+          "water_residues": 194,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29696.5523842861,
+          "mm_parity_difference_kcal_mol": 0.0015583593369683513
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1134,
+          "water_residues": 377,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29695.7692331731,
+          "mm_parity_difference_kcal_mol": 0.0003069746235269122
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1530,
+          "water_residues": 509,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29695.8158826836,
+          "mm_parity_difference_kcal_mol": 9.516463433101308e-05
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 10,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 590,
+          "water_residues": 196,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29168.2584818448,
+          "mm_parity_difference_kcal_mol": -0.0018031244958365278
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1112,
+          "water_residues": 370,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29168.2721432631,
+          "mm_parity_difference_kcal_mol": -0.0025778332183108432
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1467,
+          "water_residues": 488,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29168.0994568154,
+          "mm_parity_difference_kcal_mol": -0.0024849964379427547
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6118,
+          "water_residues": 45,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.5513050447,
+          "mm_parity_difference_kcal_mol": -0.022043679437956598
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6442,
+          "water_residues": 153,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.552329845603,
+          "mm_parity_difference_kcal_mol": -0.023572023655106022
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7184,
+          "water_residues": 400,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29694.6628588466,
+          "mm_parity_difference_kcal_mol": -0.03283992290016613
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6142,
+          "water_residues": 53,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29179.113913156798,
+          "mm_parity_difference_kcal_mol": -0.023487632353862864
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6410,
+          "water_residues": 142,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29178.822351561197,
+          "mm_parity_difference_kcal_mol": -0.024142087955624447
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7175,
+          "water_residues": 397,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29178.815712786498,
+          "mm_parity_difference_kcal_mol": -0.03252467588754371
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 609,
+          "water_residues": 203,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29701.178216711,
+          "mm_parity_difference_kcal_mol": 1.5983681578290998e-05
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1165,
+          "water_residues": 388,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29701.1347661933,
+          "mm_parity_difference_kcal_mol": 0.0004170115439592337
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1507,
+          "water_residues": 501,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29701.291770367505,
+          "mm_parity_difference_kcal_mol": 0.00019525724383129273
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 2,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 588,
+          "water_residues": 196,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.782017236,
+          "mm_parity_difference_kcal_mol": -0.0019365570979061886
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1095,
+          "water_residues": 365,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.4174045288,
+          "mm_parity_difference_kcal_mol": -0.0020141907798461034
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1469,
+          "water_residues": 489,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29177.8825513031,
+          "mm_parity_difference_kcal_mol": -0.0027308751209602633
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6184,
+          "water_residues": 67,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29691.8956422743,
+          "mm_parity_difference_kcal_mol": -0.019245422287895053
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6505,
+          "water_residues": 174,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29691.6071796409,
+          "mm_parity_difference_kcal_mol": -0.02296968150039902
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7290,
+          "water_residues": 435,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29691.6464303129,
+          "mm_parity_difference_kcal_mol": -0.031814864498301176
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 5,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6115,
+          "water_residues": 44,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29172.6376544232,
+          "mm_parity_difference_kcal_mol": -0.021871930036923004
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6406,
+          "water_residues": 141,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29172.448845238698,
+          "mm_parity_difference_kcal_mol": -0.024796069832518697
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7087,
+          "water_residues": 368,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29172.326950349703,
+          "mm_parity_difference_kcal_mol": -0.03344390792790364
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 560,
+          "water_residues": 186,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29695.648419293502,
+          "mm_parity_difference_kcal_mol": -0.0006678488318812015
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1087,
+          "water_residues": 361,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29695.935867648,
+          "mm_parity_difference_kcal_mol": -0.000736766438876657
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1468,
+          "water_residues": 488,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29696.2774184057,
+          "mm_parity_difference_kcal_mol": -0.001344021232398518
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 0,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 619,
+          "water_residues": 206,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29170.0380414625,
+          "mm_parity_difference_kcal_mol": -0.0007995469834440883
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1121,
+          "water_residues": 373,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29170.4062168763,
+          "mm_parity_difference_kcal_mol": -0.0009202754790749168
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1470,
+          "water_residues": 489,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29170.356135345897,
+          "mm_parity_difference_kcal_mol": -0.0008448277067145682
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 10,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6136,
+          "water_residues": 51,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29700.0837982315,
+          "mm_parity_difference_kcal_mol": -0.02654608574721351
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6472,
+          "water_residues": 163,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29699.009971531697,
+          "mm_parity_difference_kcal_mol": -0.029881184482292156
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7191,
+          "water_residues": 402,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29698.952181701996,
+          "mm_parity_difference_kcal_mol": -0.03721152125217486
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 8,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6157,
+          "water_residues": 58,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.24819354,
+          "mm_parity_difference_kcal_mol": -0.02264229299953513
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6484,
+          "water_residues": 167,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.623134091904,
+          "mm_parity_difference_kcal_mol": -0.025567882031282352
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7241,
+          "water_residues": 418,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29176.3393320679,
+          "mm_parity_difference_kcal_mol": -0.03572684101345658
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 10,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 531,
+          "water_residues": 177,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.9039492613,
+          "mm_parity_difference_kcal_mol": -0.000997951096678662
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1040,
+          "water_residues": 346,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29694.1940977348,
+          "mm_parity_difference_kcal_mol": -0.00018469875158189097
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1449,
+          "water_residues": 482,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29694.331041910802,
+          "mm_parity_difference_kcal_mol": 0.00016329769550793571
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 592,
+          "water_residues": 197,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29176.7847920593,
+          "mm_parity_difference_kcal_mol": -0.001797002774083012
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1106,
+          "water_residues": 368,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29177.3394439795,
+          "mm_parity_difference_kcal_mol": -0.0018988962856383296
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1448,
+          "water_residues": 482,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29177.302956176103,
+          "mm_parity_difference_kcal_mol": -0.0017563930946380424
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6109,
+          "water_residues": 42,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.527191560097,
+          "mm_parity_difference_kcal_mol": -0.021685234879896598
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6478,
+          "water_residues": 165,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.831687198497,
+          "mm_parity_difference_kcal_mol": -0.024258255184577138
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7270,
+          "water_residues": 429,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.836627102603,
+          "mm_parity_difference_kcal_mol": -0.03021792717026983
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+      "replica": 5,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6100,
+          "water_residues": 39,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29174.668572188202,
+          "mm_parity_difference_kcal_mol": -0.022717295971688145
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6385,
+          "water_residues": 134,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29174.524469382897,
+          "mm_parity_difference_kcal_mol": -0.02447639194178919
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7106,
+          "water_residues": 374,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29174.687173761304,
+          "mm_parity_difference_kcal_mol": -0.03140268770039256
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 612,
+          "water_residues": 204,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29692.8894432358,
+          "mm_parity_difference_kcal_mol": -0.0009677570260464563
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1163,
+          "water_residues": 387,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29692.913920060302,
+          "mm_parity_difference_kcal_mol": -0.0001349038661828672
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1528,
+          "water_residues": 508,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29692.814483396698,
+          "mm_parity_difference_kcal_mol": -4.4180697841511574e-05
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+      "replica": 4,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 606,
+          "water_residues": 202,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29166.7775313308,
+          "mm_parity_difference_kcal_mol": -0.0011627139190295566
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1136,
+          "water_residues": 378,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29166.783350107,
+          "mm_parity_difference_kcal_mol": -0.00202832556942667
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1495,
+          "water_residues": 497,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29166.894708556898,
+          "mm_parity_difference_kcal_mol": -0.0014704169543620083
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6112,
+          "water_residues": 43,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29701.4490384981,
+          "mm_parity_difference_kcal_mol": -0.02842659263069436
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6382,
+          "water_residues": 133,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29701.450760672302,
+          "mm_parity_difference_kcal_mol": -0.029870142147956358
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7115,
+          "water_residues": 377,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29701.685678432696,
+          "mm_parity_difference_kcal_mol": -0.03907132284166437
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 9,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6100,
+          "water_residues": 39,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.373407621202,
+          "mm_parity_difference_kcal_mol": -0.01939997407316696
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6394,
+          "water_residues": 137,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.6293876665,
+          "mm_parity_difference_kcal_mol": -0.022363863528880756
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7111,
+          "water_residues": 375,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29178.6766719379,
+          "mm_parity_difference_kcal_mol": -0.030736352734493266
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 556,
+          "water_residues": 185,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29697.691038525398,
+          "mm_parity_difference_kcal_mol": 0.0007443814306498098
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1160,
+          "water_residues": 386,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29698.8610709649,
+          "mm_parity_difference_kcal_mol": 0.0015881265308053116
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1517,
+          "water_residues": 505,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29699.067696064994,
+          "mm_parity_difference_kcal_mol": 0.0011818903899438737
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 7,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 588,
+          "water_residues": 196,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29171.6182848695,
+          "mm_parity_difference_kcal_mol": -0.0007829130126992823
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1072,
+          "water_residues": 357,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29172.399311310397,
+          "mm_parity_difference_kcal_mol": -0.0026435516151650518
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1459,
+          "water_residues": 485,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29171.9290284122,
+          "mm_parity_difference_kcal_mol": -0.002224049089818436
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 7,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6157,
+          "water_residues": 58,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29702.5700556732,
+          "mm_parity_difference_kcal_mol": -0.023364425034742453
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6490,
+          "water_residues": 169,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29702.1590088706,
+          "mm_parity_difference_kcal_mol": -0.026030977621303464
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7270,
+          "water_residues": 429,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29701.9286492835,
+          "mm_parity_difference_kcal_mol": -0.03572266577702976
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 9,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6109,
+          "water_residues": 42,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.0797706788,
+          "mm_parity_difference_kcal_mol": -0.023875908084391995
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6422,
+          "water_residues": 146,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29177.152078810203,
+          "mm_parity_difference_kcal_mol": -0.029971913400913763
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7135,
+          "water_residues": 383,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29178.0120575433,
+          "mm_parity_difference_kcal_mol": -0.037742102722404525
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 5,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 565,
+          "water_residues": 188,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29698.148809001097,
+          "mm_parity_difference_kcal_mol": 0.0008508369191986276
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1115,
+          "water_residues": 371,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29697.655939802098,
+          "mm_parity_difference_kcal_mol": -0.0002710364647100505
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1479,
+          "water_residues": 492,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29697.512999079005,
+          "mm_parity_difference_kcal_mol": -0.0011334331879879755
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 10,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 605,
+          "water_residues": 201,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29168.6387267734,
+          "mm_parity_difference_kcal_mol": -0.0007910462456948153
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1195,
+          "water_residues": 397,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29168.748974481503,
+          "mm_parity_difference_kcal_mol": -0.0002804604569064395
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1546,
+          "water_residues": 514,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29168.7151472923,
+          "mm_parity_difference_kcal_mol": -0.0014403134136955487
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6115,
+          "water_residues": 44,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29696.0149303685,
+          "mm_parity_difference_kcal_mol": -0.01912732060191047
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6415,
+          "water_residues": 144,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29695.835759911504,
+          "mm_parity_difference_kcal_mol": -0.022449999747550464
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7147,
+          "water_residues": 387,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29695.941273426903,
+          "mm_parity_difference_kcal_mol": -0.02926949995526229
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6115,
+          "water_residues": 44,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29173.588266984098,
+          "mm_parity_difference_kcal_mol": -0.017891644243263727
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6376,
+          "water_residues": 131,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29173.2949697579,
+          "mm_parity_difference_kcal_mol": -0.021062375658402743
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7033,
+          "water_residues": 349,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29173.1826229714,
+          "mm_parity_difference_kcal_mol": -0.02597615545073495
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 9,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 572,
+          "water_residues": 190,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29698.4673445191,
+          "mm_parity_difference_kcal_mol": -0.0008056117601427104
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1089,
+          "water_residues": 362,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29698.1560269634,
+          "mm_parity_difference_kcal_mol": 9.173112039206899e-05
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1479,
+          "water_residues": 492,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29698.2453983774,
+          "mm_parity_difference_kcal_mol": 0.0006469051368185319
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 10,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 565,
+          "water_residues": 188,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29171.9032530828,
+          "mm_parity_difference_kcal_mol": -0.0019880485792782565
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1081,
+          "water_residues": 360,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29172.2798917824,
+          "mm_parity_difference_kcal_mol": -0.0018773559736473544
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1449,
+          "water_residues": 482,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29172.0543567953,
+          "mm_parity_difference_kcal_mol": -0.003747078464130027
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 5,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6124,
+          "water_residues": 47,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29697.251696295298,
+          "mm_parity_difference_kcal_mol": -0.02187971680314149
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6445,
+          "water_residues": 154,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29697.0712934794,
+          "mm_parity_difference_kcal_mol": -0.02452069130322343
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7214,
+          "water_residues": 410,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29696.9516782688,
+          "mm_parity_difference_kcal_mol": -0.03280352613001014
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6133,
+          "water_residues": 50,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.2014172439,
+          "mm_parity_difference_kcal_mol": -0.018200649769369193
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6436,
+          "water_residues": 151,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.339818457203,
+          "mm_parity_difference_kcal_mol": -0.021189187530580966
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7166,
+          "water_residues": 394,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29175.9166104952,
+          "mm_parity_difference_kcal_mol": -0.03016319631933584
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 577,
+          "water_residues": 192,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29699.5143401841,
+          "mm_parity_difference_kcal_mol": 0.0007155758005410462
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1046,
+          "water_residues": 348,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29699.2879986587,
+          "mm_parity_difference_kcal_mol": 0.0007775972653689678
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1432,
+          "water_residues": 476,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29699.1819497701,
+          "mm_parity_difference_kcal_mol": -0.0014420187808354967
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 0,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 592,
+          "water_residues": 197,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29176.039358196398,
+          "mm_parity_difference_kcal_mol": -0.0002248100745418924
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1133,
+          "water_residues": 377,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29175.7764172608,
+          "mm_parity_difference_kcal_mol": -0.0008178447515092557
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1488,
+          "water_residues": 495,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29175.4756505472,
+          "mm_parity_difference_kcal_mol": -0.0016491399642291071
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 5,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6112,
+          "water_residues": 43,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29698.872428757903,
+          "mm_parity_difference_kcal_mol": -0.022563974185686675
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6448,
+          "water_residues": 155,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29698.3089404124,
+          "mm_parity_difference_kcal_mol": -0.026443044574079977
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7188,
+          "water_residues": 401,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29697.9591263404,
+          "mm_parity_difference_kcal_mol": -0.03382852154663851
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6124,
+          "water_residues": 47,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29175.637264355897,
+          "mm_parity_difference_kcal_mol": -0.026122935035346018
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6415,
+          "water_residues": 144,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29175.3392580733,
+          "mm_parity_difference_kcal_mol": -0.028382807893649442
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7162,
+          "water_residues": 393,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29175.3514547605,
+          "mm_parity_difference_kcal_mol": -0.03708289238784346
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 8,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 606,
+          "water_residues": 202,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29701.5947862116,
+          "mm_parity_difference_kcal_mol": -0.0006428397623494675
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1110,
+          "water_residues": 369,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29701.5803587962,
+          "mm_parity_difference_kcal_mol": 0.0007272449274751125
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1488,
+          "water_residues": 495,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29701.6400019427,
+          "mm_parity_difference_kcal_mol": 0.0012151449927841895
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+      "replica": 7,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 601,
+          "water_residues": 200,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29174.0042693284,
+          "mm_parity_difference_kcal_mol": -0.0010980010199546086
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1187,
+          "water_residues": 395,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29173.9348267018,
+          "mm_parity_difference_kcal_mol": -0.0010184767529608507
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1523,
+          "water_residues": 507,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29173.8338475043,
+          "mm_parity_difference_kcal_mol": -0.0015855743149586488
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 4,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6088,
+          "water_residues": 35,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29699.6161929597,
+          "mm_parity_difference_kcal_mol": -0.014844508631995268
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6385,
+          "water_residues": 134,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29699.7335622398,
+          "mm_parity_difference_kcal_mol": -0.01693548815273971
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7062,
+          "water_residues": 359,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29699.205181021698,
+          "mm_parity_difference_kcal_mol": -0.02537161979216762
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 8,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6106,
+          "water_residues": 41,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29173.6915763689,
+          "mm_parity_difference_kcal_mol": -0.02688486280521829
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6382,
+          "water_residues": 133,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29173.492839576804,
+          "mm_parity_difference_kcal_mol": -0.028087956235140155
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7129,
+          "water_residues": 381,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29173.2717976252,
+          "mm_parity_difference_kcal_mol": -0.035325077717971
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 0,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 574,
+          "water_residues": 191,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29698.928511114,
+          "mm_parity_difference_kcal_mol": -0.00015406672901008278
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1118,
+          "water_residues": 372,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29698.1829351663,
+          "mm_parity_difference_kcal_mol": -0.0007798512492627196
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1488,
+          "water_residues": 495,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29698.540631006297,
+          "mm_parity_difference_kcal_mol": 0.0003217984158254694
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 538,
+          "water_residues": 179,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29174.0027062222,
+          "mm_parity_difference_kcal_mol": -0.0003985940336406202
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1031,
+          "water_residues": 343,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29174.4415628212,
+          "mm_parity_difference_kcal_mol": -0.001287687724470743
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1425,
+          "water_residues": 474,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29175.524841896004,
+          "mm_parity_difference_kcal_mol": -0.001400140157329588
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6118,
+          "water_residues": 45,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29693.320646995002,
+          "mm_parity_difference_kcal_mol": -0.02422338620726805
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6397,
+          "water_residues": 138,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29693.2256569679,
+          "mm_parity_difference_kcal_mol": -0.02788119354772789
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7148,
+          "water_residues": 388,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29693.1685841653,
+          "mm_parity_difference_kcal_mol": -0.03626784423522622
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 9,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6112,
+          "water_residues": 43,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29173.945265696802,
+          "mm_parity_difference_kcal_mol": -0.025237722493329784
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6419,
+          "water_residues": 145,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29173.9450183598,
+          "mm_parity_difference_kcal_mol": -0.028932602982422395
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7106,
+          "water_residues": 374,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29174.0578705477,
+          "mm_parity_difference_kcal_mol": -0.03512011841758067
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 595,
+          "water_residues": 198,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29690.1651345875,
+          "mm_parity_difference_kcal_mol": 0.0006797287578592659
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1165,
+          "water_residues": 387,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29690.6738551377,
+          "mm_parity_difference_kcal_mol": -0.00013483153452398255
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1531,
+          "water_residues": 509,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29690.6175177332,
+          "mm_parity_difference_kcal_mol": -0.0011839677958960237
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 8,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 562,
+          "water_residues": 187,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29168.735909593997,
+          "mm_parity_difference_kcal_mol": -0.0007446503987011965
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1052,
+          "water_residues": 350,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29168.6979163532,
+          "mm_parity_difference_kcal_mol": -0.0006366704369611398
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1435,
+          "water_residues": 477,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29168.465982381498,
+          "mm_parity_difference_kcal_mol": -0.00016140109437401406
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6103,
+          "water_residues": 40,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29697.6883845089,
+          "mm_parity_difference_kcal_mol": -0.020990496891954535
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6395,
+          "water_residues": 137,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29697.4071966364,
+          "mm_parity_difference_kcal_mol": -0.02460489981331193
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7128,
+          "water_residues": 381,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29697.392769367998,
+          "mm_parity_difference_kcal_mol": -0.029412821761980013
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6103,
+          "water_residues": 40,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.2117485757,
+          "mm_parity_difference_kcal_mol": -0.02329641004007499
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6412,
+          "water_residues": 143,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.0558027737,
+          "mm_parity_difference_kcal_mol": -0.025445829960517585
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7121,
+          "water_residues": 378,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29176.036737637398,
+          "mm_parity_difference_kcal_mol": -0.03157845497389644
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 10,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 582,
+          "water_residues": 193,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29700.210026439698,
+          "mm_parity_difference_kcal_mol": -0.0004517840063726908
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1077,
+          "water_residues": 358,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29699.7205311916,
+          "mm_parity_difference_kcal_mol": 6.094769560149871e-07
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1402,
+          "water_residues": 466,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29699.9024367639,
+          "mm_parity_difference_kcal_mol": -0.0012798662846762454
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 596,
+          "water_residues": 198,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29173.3251279774,
+          "mm_parity_difference_kcal_mol": 0.00021347908932511928
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1128,
+          "water_residues": 375,
+          "ion_residues": 3,
+          "delta_u_kcal_mol": -29172.9641080378,
+          "mm_parity_difference_kcal_mol": -0.00040460406125930604
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1483,
+          "water_residues": 493,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29173.4578704255,
+          "mm_parity_difference_kcal_mol": -0.0009533086627016019
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6088,
+          "water_residues": 35,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29695.0200648608,
+          "mm_parity_difference_kcal_mol": -0.02512913003010908
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6368,
+          "water_residues": 128,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29695.138729871698,
+          "mm_parity_difference_kcal_mol": -0.02843433856651245
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7032,
+          "water_residues": 349,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29695.1622014525,
+          "mm_parity_difference_kcal_mol": -0.03922675103694928
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6103,
+          "water_residues": 40,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29178.2126820025,
+          "mm_parity_difference_kcal_mol": -0.0169901895123985
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6430,
+          "water_residues": 149,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29177.960970133,
+          "mm_parity_difference_kcal_mol": -0.02196975404058321
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7151,
+          "water_residues": 389,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29178.031360014596,
+          "mm_parity_difference_kcal_mol": -0.02775071550058783
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 3,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 552,
+          "water_residues": 184,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29694.980083234797,
+          "mm_parity_difference_kcal_mol": 0.00035624399356493086
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1067,
+          "water_residues": 355,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29694.6872360308,
+          "mm_parity_difference_kcal_mol": -0.0021267269030431635
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1456,
+          "water_residues": 484,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29695.5337549423,
+          "mm_parity_difference_kcal_mol": -0.0014749915139873337
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 583,
+          "water_residues": 194,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29169.1895045747,
+          "mm_parity_difference_kcal_mol": -0.001354255472733712
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1051,
+          "water_residues": 350,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29169.184107344503,
+          "mm_parity_difference_kcal_mol": -0.0011407562228669121
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1418,
+          "water_residues": 472,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29169.123504211,
+          "mm_parity_difference_kcal_mol": -0.0014672430415885174
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "leg": "bound",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 6,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6106,
+          "water_residues": 41,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29700.226050786398,
+          "mm_parity_difference_kcal_mol": -0.024174203132588445
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 6369,
+          "water_residues": 128,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29700.1602547175,
+          "mm_parity_difference_kcal_mol": -0.024563815055444138
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 7107,
+          "water_residues": 373,
+          "ion_residues": 5,
+          "delta_u_kcal_mol": -29700.328033028603,
+          "mm_parity_difference_kcal_mol": -0.03554667937078193
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "leg": "bound",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+      "replica": 1,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6118,
+          "water_residues": 45,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.8162545373,
+          "mm_parity_difference_kcal_mol": -0.021342297058708937
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 6400,
+          "water_residues": 139,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.1175691801,
+          "mm_parity_difference_kcal_mol": -0.022676941498502856
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 7135,
+          "water_residues": 384,
+          "ion_residues": 0,
+          "delta_u_kcal_mol": -29176.086565880898,
+          "mm_parity_difference_kcal_mol": -0.030351704805980262
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "leg": "solution",
+      "endpoint": 0,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 9,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 31,
+          "mm_atoms": 604,
+          "water_residues": 201,
+          "ion_residues": 1,
+          "delta_u_kcal_mol": -29696.3505443473,
+          "mm_parity_difference_kcal_mol": -0.0018960728064030263
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1171,
+          "water_residues": 389,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29696.5252109457,
+          "mm_parity_difference_kcal_mol": -0.0013454307554638945
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 31,
+          "mm_atoms": 1486,
+          "water_residues": 494,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29696.509226368096,
+          "mm_parity_difference_kcal_mol": -0.001097989889785822
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "leg": "solution",
+      "endpoint": 10,
+      "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+      "replica": 2,
+      "shell_results": [
+        {
+          "shell_angstrom": 8.0,
+          "qm_atoms": 33,
+          "mm_atoms": 566,
+          "water_residues": 188,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29171.440245095,
+          "mm_parity_difference_kcal_mol": -0.0010558969345311198
+        },
+        {
+          "shell_angstrom": 12.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1067,
+          "water_residues": 355,
+          "ion_residues": 2,
+          "delta_u_kcal_mol": -29171.4538873669,
+          "mm_parity_difference_kcal_mol": -0.001620804367121309
+        },
+        {
+          "shell_angstrom": 16.0,
+          "qm_atoms": 33,
+          "mm_atoms": 1447,
+          "water_residues": 481,
+          "ion_residues": 4,
+          "delta_u_kcal_mol": -29171.382888466203,
+          "mm_parity_difference_kcal_mol": -0.0021438489088723145
+        }
+      ]
+    }
+  ],
+  "cycles": [
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -1.1466805501986528
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -0.11290177739647334
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -0.47839638070581714
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -8.95880758709609
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -7.987383380095707
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -7.562073004301055
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -6.352389979903819
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -6.3713163694956165
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -6.6018030966079095
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": 4.716447489499842
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": 4.532183684495976
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": 5.58476389939824
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -6.253292533103377
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -5.823352137700567
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -5.770321498501289
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -1.9971227790010744
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -2.6403866487016785
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -4.12966115800009
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -4.01979723329714
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -3.9000352601979102
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -4.881260046502575
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -4.137428051897587
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -3.335345027393487
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -3.4323911265964853
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -2.4247029363068577
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -2.780106375703326
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -2.6712314492979203
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -4.3553524811941315
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -4.675849755301897
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -5.198482858500938
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": 0.9988116989989066
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": 2.4993503178957326
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": 2.9175942862057127
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -2.0538436953029304
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -2.6953001763940847
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -3.040821734099154
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -5.408262529097556
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -5.405029291101528
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -5.0885346077993745
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -8.983195801796683
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -8.32536894760051
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -9.279409293398203
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "shell_corrections": [
+        {
+          "shell_angstrom": 8.0,
+          "correction_kcal_mol": -1.5005030032043578
+        },
+        {
+          "shell_angstrom": 12.0,
+          "correction_kcal_mol": -1.0286380413999723
+        },
+        {
+          "shell_angstrom": 16.0,
+          "correction_kcal_mol": -0.8848707541874319
+        }
+      ]
+    }
+  ],
+  "interpretation_limits": [
+    "This is a finite explicit-water/ion shell sensitivity test; protein residues and QM ligand coordinates are held fixed.",
+    "It does not restore PME, periodic long-range electrostatics, mutual polarization, or missing conformational sampling.",
+    "Sparse fixed-frame results are diagnostic only and cannot establish affinity ranking or a converged free-energy correction."
+  ]
+}

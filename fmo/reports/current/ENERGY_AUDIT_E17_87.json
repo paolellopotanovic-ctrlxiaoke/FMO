@@ -1,0 +1,142 @@
+{
+  "schema": "fmotpiefinal-interaction-energy-audit-v1",
+  "status": "PASS_BOOKKEEPING",
+  "ranking_eligible": false,
+  "n_rows": 87,
+  "component_closure": {
+    "n_complete": 87,
+    "n_unchecked": 0,
+    "n_pass": 87,
+    "n_fail": 0,
+    "tolerance_kcal_mol": 0.05,
+    "max_abs_residual_kcal_mol": 0.012000000000000455,
+    "failures": []
+  },
+  "label_free_diagnostics": {
+    "summaries_kcal_mol": {
+      "tpie": {
+        "n": 87,
+        "mean": -73.34031034482759,
+        "std": 9.554101981547038,
+        "min": -97.596,
+        "max": -57.273,
+        "range": 40.323
+      },
+      "ES": {
+        "n": 87,
+        "mean": -29.89612643678161,
+        "std": 9.744662426764712,
+        "min": -61.936,
+        "max": -13.725000000000001,
+        "range": 48.211
+      },
+      "EX": {
+        "n": 87,
+        "mean": 9.99751724137931,
+        "std": 14.487888412067072,
+        "min": -1.6589999999999998,
+        "max": 54.94,
+        "range": 56.599
+      },
+      "CT": {
+        "n": 87,
+        "mean": -1.5663563218390804,
+        "std": 1.8175155518126176,
+        "min": -9.538,
+        "max": 2.593,
+        "range": 12.131
+      },
+      "DI": {
+        "n": 87,
+        "mean": -51.81787356321839,
+        "std": 6.982342775830055,
+        "min": -71.534,
+        "max": -40.277,
+        "range": 31.257000000000005
+      },
+      "SOLV": {
+        "n": 87,
+        "mean": -0.057367816091954,
+        "std": 3.6595884735507904,
+        "min": -13.014,
+        "max": 8.076,
+        "range": 21.09
+      },
+      "three_state": {
+        "n": 87,
+        "mean": -25.69874787497203,
+        "std": 7.999528307054152,
+        "min": -41.28734352221605,
+        "max": -1.8349606938119625,
+        "range": 39.45238282840408
+      },
+      "pb_polar": {
+        "n": 87,
+        "mean": 49.17383333333334,
+        "std": 9.689906755688956,
+        "min": 31.869499999999977,
+        "max": 73.70319999999998,
+        "range": 41.83370000000001
+      },
+      "sa_nonpolar": {
+        "n": 87,
+        "mean": -5.384010344827586,
+        "std": 0.2624565947844673,
+        "min": -6.185800000000001,
+        "max": -4.701400000000002,
+        "range": 1.484399999999999
+      },
+      "total_potential": {
+        "n": 0,
+        "mean": null,
+        "std": null,
+        "min": null,
+        "max": null,
+        "range": null
+      }
+    },
+    "net_to_gross_component_ratio": {
+      "n": 87,
+      "mean": 0.8113697226008563,
+      "std": 0.1838286030925466,
+      "min": 0.3471091457618713,
+      "max": 1.0,
+      "range": 0.6528908542381286
+    },
+    "dominant_component_counts": {
+      "ES": 0,
+      "EX": 0,
+      "CT": 0,
+      "DI": 87,
+      "SOLV": 0
+    },
+    "optional_observable_coverage": {
+      "three_state": 87,
+      "pb_polar": 87,
+      "sa_nonpolar": 87,
+      "total_potential": 0
+    }
+  },
+  "fep_gap": {
+    "missing_from_endpoint_table": [
+      "bound_state_ensemble",
+      "solution_state_ensemble",
+      "matched_total_potential_delta_u",
+      "alchemical_or_free_energy_estimator",
+      "overlap_and_effective_sample_size",
+      "independent_repeat_convergence",
+      "chemical_state_population_model"
+    ],
+    "ranking_eligible": false
+  },
+  "overlap_warnings": [
+    "PIEDA components are a decomposition of tPIE; adding tPIE to its components double-counts the same interface energy.",
+    "Three-state, PB polar, and nonpolar surface terms are separate observables; they are not additive corrections without a declared thermodynamic cycle.",
+    "A single endpoint interaction score is not a total Hamiltonian difference and cannot be passed to a perturbation estimator as delta-U.",
+    "Experimental columns are not accessed, used, or fitted by this audit."
+  ],
+  "source": {
+    "path": "../sophosqm-style-fmo-baseline/runs/fmo87/ablation/E17_shared_pocket_ablation/matched_87_cases.csv",
+    "sha256": "67e8d019df9aa6d21e6e3b0a20caca184177a3942506109b7d05a749fc3d283c"
+  }
+}

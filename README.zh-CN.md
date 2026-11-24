@@ -1,5 +1,9 @@
 # FMOtpiefinal：独立发布候选版
 
+新增 [FEP / MD / QM-MM 完整研究档案](fmo/README.md)，汇总已完成计算、
+benchmark、动力学轨迹性质分析、结果与未完成项；全部原始研究报告见
+[172 篇报告索引](fmo/reports/INDEX.md)。档案内分析代码为研究快照。
+
 这是从研究工作区中分离出的完整主流程代码包，名称和命令均为
 `FMOtpiefinal` / `fmotpiefinal`。不要把外层研究目录一起上传。
 

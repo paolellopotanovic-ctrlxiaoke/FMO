@@ -1,0 +1,3287 @@
+{
+  "final_status": {
+    "status": "INCOMPLETE_WITH_FAILURES",
+    "wall_seconds": 1361.4614753499627,
+    "n_requested": 260,
+    "evaluation_sha256": "2c87c00359beeff59b9d1be35d562a61772d644c221ac03e078c6234e2c84315"
+  },
+  "groups": {
+    "Galectin3": {
+      "n_expected": 26,
+      "n_succeeded": 26,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.5619957128130779,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "local_sidechains": {
+        "pearson": 0.3786152231138898,
+        "spearman": 0.3274034293598338,
+        "kendall": 0.2260105246420652
+      },
+      "baseline_softcap": {
+        "pearson": 0.5684834762542199,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "local_softcap": {
+        "pearson": 0.39948243320771915,
+        "spearman": 0.3274034293598338,
+        "kendall": 0.2260105246420652
+      },
+      "softcap_reference": {
+        "mode": "bundled_retrospective_target_reference",
+        "target": "Galectin3",
+        "reference_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+        "prospective_reference": false,
+        "reference_development_set_retrospective": true
+      },
+      "geometry_audit": {
+        "18a": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9326188932248802,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18b": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9526578609343442,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18d": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.931055315220315,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18e": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9507444451586349,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18f": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.955471611299886,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18g": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9401792382306686,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18h": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.913364053179634,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "18i": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.049749493927004,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17m": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9613064027665686,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17q": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9563629018317266,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17r": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9468801402500744,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17n": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9541975686407927,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17p": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9510751810451161,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17o": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9478639142830579,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17f": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9406322341914508,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17e": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9590067778696875,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17g": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9539124697790675,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17a": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9487259878384275,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17j": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9621938474132956,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17l": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9609229937929471,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17c": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9383570748920693,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17k": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9520152309705978,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17b": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9434224928418871,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17h flip": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9643116716083034,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17i": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9411657664832482,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        },
+        "17d": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 0.9650227976581695,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 112
+        }
+      },
+      "rows": [
+        {
+          "ligand": "18a",
+          "experimental_minus_dG": 6.32775,
+          "baseline_minus_tpie": 104.115,
+          "local_minus_tpie": 106.832
+        },
+        {
+          "ligand": "18b",
+          "experimental_minus_dG": 7.46041,
+          "baseline_minus_tpie": 101.96300000000001,
+          "local_minus_tpie": 102.984
+        },
+        {
+          "ligand": "18d",
+          "experimental_minus_dG": 6.76476,
+          "baseline_minus_tpie": 104.035,
+          "local_minus_tpie": 106.352
+        },
+        {
+          "ligand": "18e",
+          "experimental_minus_dG": 6.47298,
+          "baseline_minus_tpie": 104.19200000000001,
+          "local_minus_tpie": 105.143
+        },
+        {
+          "ligand": "18f",
+          "experimental_minus_dG": 5.53273,
+          "baseline_minus_tpie": 105.80799999999999,
+          "local_minus_tpie": 106.828
+        },
+        {
+          "ligand": "18g",
+          "experimental_minus_dG": 6.47298,
+          "baseline_minus_tpie": 105.353,
+          "local_minus_tpie": 107.51
+        },
+        {
+          "ligand": "18h",
+          "experimental_minus_dG": 5.99988,
+          "baseline_minus_tpie": 100.165,
+          "local_minus_tpie": 103.86699999999999
+        },
+        {
+          "ligand": "18i",
+          "experimental_minus_dG": 4.80608,
+          "baseline_minus_tpie": 103.874,
+          "local_minus_tpie": 107.785
+        },
+        {
+          "ligand": "17m",
+          "experimental_minus_dG": 4.10471,
+          "baseline_minus_tpie": 96.573,
+          "local_minus_tpie": 100.108
+        },
+        {
+          "ligand": "17q",
+          "experimental_minus_dG": 4.98984,
+          "baseline_minus_tpie": 101.787,
+          "local_minus_tpie": 105.356
+        },
+        {
+          "ligand": "17r",
+          "experimental_minus_dG": 4.74961,
+          "baseline_minus_tpie": 100.596,
+          "local_minus_tpie": 104.986
+        },
+        {
+          "ligand": "17n",
+          "experimental_minus_dG": 4.9141,
+          "baseline_minus_tpie": 99.345,
+          "local_minus_tpie": 101.498
+        },
+        {
+          "ligand": "17p",
+          "experimental_minus_dG": 5.04631,
+          "baseline_minus_tpie": 102.185,
+          "local_minus_tpie": 104.156
+        },
+        {
+          "ligand": "17o",
+          "experimental_minus_dG": 5.10873,
+          "baseline_minus_tpie": 101.984,
+          "local_minus_tpie": 104.259
+        },
+        {
+          "ligand": "17f",
+          "experimental_minus_dG": 6.581,
+          "baseline_minus_tpie": 104.327,
+          "local_minus_tpie": 105.516
+        },
+        {
+          "ligand": "17e",
+          "experimental_minus_dG": 6.89697,
+          "baseline_minus_tpie": 104.998,
+          "local_minus_tpie": 105.88
+        },
+        {
+          "ligand": "17g",
+          "experimental_minus_dG": 7.20868,
+          "baseline_minus_tpie": 104.865,
+          "local_minus_tpie": 105.547
+        },
+        {
+          "ligand": "17a",
+          "experimental_minus_dG": 5.53273,
+          "baseline_minus_tpie": 103.427,
+          "local_minus_tpie": 105.316
+        },
+        {
+          "ligand": "17j",
+          "experimental_minus_dG": 6.44095,
+          "baseline_minus_tpie": 107.753,
+          "local_minus_tpie": 109.179
+        },
+        {
+          "ligand": "17l",
+          "experimental_minus_dG": 5.94341,
+          "baseline_minus_tpie": 105.278,
+          "local_minus_tpie": 106.984
+        },
+        {
+          "ligand": "17c",
+          "experimental_minus_dG": 6.35409,
+          "baseline_minus_tpie": 104.587,
+          "local_minus_tpie": 105.986
+        },
+        {
+          "ligand": "17k",
+          "experimental_minus_dG": 6.62188,
+          "baseline_minus_tpie": 112.835,
+          "local_minus_tpie": 114.078
+        },
+        {
+          "ligand": "17b",
+          "experimental_minus_dG": 5.50639,
+          "baseline_minus_tpie": 100.917,
+          "local_minus_tpie": 103.333
+        },
+        {
+          "ligand": "17h flip",
+          "experimental_minus_dG": 6.32775,
+          "baseline_minus_tpie": 105.259,
+          "local_minus_tpie": 106.526
+        },
+        {
+          "ligand": "17i",
+          "experimental_minus_dG": 5.94341,
+          "baseline_minus_tpie": 108.043,
+          "local_minus_tpie": 110.155
+        },
+        {
+          "ligand": "17d",
+          "experimental_minus_dG": 6.1509,
+          "baseline_minus_tpie": 103.8,
+          "local_minus_tpie": 105.123
+        }
+      ]
+    },
+    "CHK1": {
+      "n_expected": 13,
+      "n_succeeded": 13,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.4636220821244891,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "local_sidechains": {
+        "pearson": 0.5943604755444348,
+        "spearman": 0.4401654783045836,
+        "kendall": 0.34839434751244364
+      },
+      "baseline_softcap": {
+        "pearson": 0.4415700416098103,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "local_softcap": {
+        "pearson": 0.5262705537404051,
+        "spearman": 0.4401654783045836,
+        "kendall": 0.34839434751244364
+      },
+      "softcap_reference": {
+        "mode": "cohort_local_descriptive_only",
+        "factor": 3.0,
+        "mad_conversion": 1.4826,
+        "target": "CHK1",
+        "reference": {
+          "CHK1": {
+            "n": 13,
+            "median": 104.557,
+            "scaled_mad": 3.9451986000000017
+          }
+        },
+        "prospective_reference": false
+      },
+      "geometry_audit": {
+        "21 (Xtal)": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.5109054143874068,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "22": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.5048604751562498,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "24 pose 2": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.805506300182859,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "14 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.5861932416953475,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "18 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6930262844976727,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "13 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.792979921806152,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "20": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9859035726842322,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "12 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.365034883463666,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "16 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.694126913781844,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "19": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6860738417993435,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "17 torsion adjust": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.7784954315375667,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "15 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6564546477341289,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        },
+        "11 docked": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8462264216503874,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 170
+        }
+      },
+      "rows": [
+        {
+          "ligand": "21 (Xtal)",
+          "experimental_minus_dG": 13.0686,
+          "baseline_minus_tpie": 112.976,
+          "local_minus_tpie": 112.7
+        },
+        {
+          "ligand": "22",
+          "experimental_minus_dG": 13.0686,
+          "baseline_minus_tpie": 109.257,
+          "local_minus_tpie": 117.677
+        },
+        {
+          "ligand": "24 pose 2",
+          "experimental_minus_dG": 13.1773,
+          "baseline_minus_tpie": 113.768,
+          "local_minus_tpie": 124.096
+        },
+        {
+          "ligand": "14 docked",
+          "experimental_minus_dG": 10.8701,
+          "baseline_minus_tpie": 102.492,
+          "local_minus_tpie": 105.876
+        },
+        {
+          "ligand": "18 docked",
+          "experimental_minus_dG": 9.54958,
+          "baseline_minus_tpie": 102.886,
+          "local_minus_tpie": 100.818
+        },
+        {
+          "ligand": "13 docked",
+          "experimental_minus_dG": 9.92085,
+          "baseline_minus_tpie": 108.765,
+          "local_minus_tpie": 106.938
+        },
+        {
+          "ligand": "20",
+          "experimental_minus_dG": 10.0823,
+          "baseline_minus_tpie": 102.427,
+          "local_minus_tpie": 106.215
+        },
+        {
+          "ligand": "12 docked",
+          "experimental_minus_dG": 8.61243,
+          "baseline_minus_tpie": 110.184,
+          "local_minus_tpie": 112.97
+        },
+        {
+          "ligand": "16 docked",
+          "experimental_minus_dG": 11.7816,
+          "baseline_minus_tpie": 104.328,
+          "local_minus_tpie": 101.764
+        },
+        {
+          "ligand": "19",
+          "experimental_minus_dG": 10.2494,
+          "baseline_minus_tpie": 102.012,
+          "local_minus_tpie": 100.78
+        },
+        {
+          "ligand": "17 torsion adjust",
+          "experimental_minus_dG": 10.3239,
+          "baseline_minus_tpie": 111.33,
+          "local_minus_tpie": 107.224
+        },
+        {
+          "ligand": "15 docked",
+          "experimental_minus_dG": 10.0438,
+          "baseline_minus_tpie": 101.896,
+          "local_minus_tpie": 104.818
+        },
+        {
+          "ligand": "11 docked",
+          "experimental_minus_dG": 10.9787,
+          "baseline_minus_tpie": 104.557,
+          "local_minus_tpie": 107.645
+        }
+      ]
+    },
+    "BACE": {
+      "n_expected": 36,
+      "n_succeeded": 36,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.21174767344688275,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "local_sidechains": {
+        "pearson": 0.06694088832028336,
+        "spearman": 0.009786879500426818,
+        "kendall": 0.009584860210026594
+      },
+      "baseline_softcap": {
+        "pearson": 0.22511709896480894,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "local_softcap": {
+        "pearson": 0.07778041836418062,
+        "spearman": 0.009786879500426818,
+        "kendall": 0.009584860210026594
+      },
+      "softcap_reference": {
+        "mode": "cohort_local_descriptive_only",
+        "factor": 3.0,
+        "mad_conversion": 1.4826,
+        "target": "BACE",
+        "reference": {
+          "BACE": {
+            "n": 36,
+            "median": 106.951,
+            "scaled_mad": 3.086031900000008
+          }
+        },
+        "prospective_reference": false
+      },
+      "geometry_audit": {
+        "CAT-13n": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.0443661609408417,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13e": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8170572363026982,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4a": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.004541593482159,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4m": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8695031425488433,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17b": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.0459699411281687,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13j": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.998373338493086,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13d": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9815231515175376,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13b": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.008753095828355,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13a": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.967505273182261,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13h": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8488796607675704,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13o": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9218514510752382,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13g": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.7733744669414857,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4k": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9737145183637868,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17g": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8752373183146716,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4l": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9408168383441033,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4j": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9093669107848303,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4n": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9606876344792932,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13i": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.026049851311661,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17f": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.91254647002367,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4p": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9724284524413065,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13c": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.0335491142335362,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-24": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8652302806892238,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4i": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.948778591836436,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4c": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.1086064118274885,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17i": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.84613027709314,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13k": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.0409284651844133,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17a": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.8427376373211686,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17c": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.0650099273369116,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4o": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9089371388288316,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17d": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.857132467003901,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4b": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6849976261110873,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13f": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.782333582694329,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-4d": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.031520120500901,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-13m": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.859104354252336,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17h": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.874571150956932,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        },
+        "CAT-17e": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9994939359748007,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 173
+        }
+      },
+      "rows": [
+        {
+          "ligand": "CAT-13n",
+          "experimental_minus_dG": 8.543,
+          "baseline_minus_tpie": 106.261,
+          "local_minus_tpie": 115.60000000000001
+        },
+        {
+          "ligand": "CAT-13e",
+          "experimental_minus_dG": 9.963,
+          "baseline_minus_tpie": 108.52600000000001,
+          "local_minus_tpie": 114.57600000000001
+        },
+        {
+          "ligand": "CAT-4a",
+          "experimental_minus_dG": 7.933,
+          "baseline_minus_tpie": 104.91199999999999,
+          "local_minus_tpie": 113.018
+        },
+        {
+          "ligand": "CAT-4m",
+          "experimental_minus_dG": 9.153,
+          "baseline_minus_tpie": 109.015,
+          "local_minus_tpie": 117.99799999999999
+        },
+        {
+          "ligand": "CAT-17b",
+          "experimental_minus_dG": 10.023,
+          "baseline_minus_tpie": 102.976,
+          "local_minus_tpie": 109.516
+        },
+        {
+          "ligand": "CAT-13j",
+          "experimental_minus_dG": 8.733,
+          "baseline_minus_tpie": 108.39,
+          "local_minus_tpie": 117.675
+        },
+        {
+          "ligand": "CAT-13d",
+          "experimental_minus_dG": 10.473,
+          "baseline_minus_tpie": 108.854,
+          "local_minus_tpie": 115.742
+        },
+        {
+          "ligand": "CAT-13b",
+          "experimental_minus_dG": 9.123,
+          "baseline_minus_tpie": 105.669,
+          "local_minus_tpie": 112.666
+        },
+        {
+          "ligand": "CAT-13a",
+          "experimental_minus_dG": 8.843,
+          "baseline_minus_tpie": 103.10900000000001,
+          "local_minus_tpie": 108.22200000000001
+        },
+        {
+          "ligand": "CAT-13h",
+          "experimental_minus_dG": 9.633,
+          "baseline_minus_tpie": 108.654,
+          "local_minus_tpie": 113.784
+        },
+        {
+          "ligand": "CAT-13o",
+          "experimental_minus_dG": 8.543,
+          "baseline_minus_tpie": 109.05,
+          "local_minus_tpie": 114.723
+        },
+        {
+          "ligand": "CAT-13g",
+          "experimental_minus_dG": 9.093,
+          "baseline_minus_tpie": 112.36800000000001,
+          "local_minus_tpie": 120.08500000000001
+        },
+        {
+          "ligand": "CAT-4k",
+          "experimental_minus_dG": 7.853,
+          "baseline_minus_tpie": 105.419,
+          "local_minus_tpie": 113.996
+        },
+        {
+          "ligand": "CAT-17g",
+          "experimental_minus_dG": 9.743,
+          "baseline_minus_tpie": 101.938,
+          "local_minus_tpie": 108.718
+        },
+        {
+          "ligand": "CAT-4l",
+          "experimental_minus_dG": 9.343,
+          "baseline_minus_tpie": 104.90700000000001,
+          "local_minus_tpie": 112.276
+        },
+        {
+          "ligand": "CAT-4j",
+          "experimental_minus_dG": 9.023,
+          "baseline_minus_tpie": 105.113,
+          "local_minus_tpie": 114.37100000000001
+        },
+        {
+          "ligand": "CAT-4n",
+          "experimental_minus_dG": 9.093,
+          "baseline_minus_tpie": 106.96,
+          "local_minus_tpie": 118.337
+        },
+        {
+          "ligand": "CAT-13i",
+          "experimental_minus_dG": 9.273,
+          "baseline_minus_tpie": 106.931,
+          "local_minus_tpie": 125.24
+        },
+        {
+          "ligand": "CAT-17f",
+          "experimental_minus_dG": 9.423,
+          "baseline_minus_tpie": 106.434,
+          "local_minus_tpie": 114.764
+        },
+        {
+          "ligand": "CAT-4p",
+          "experimental_minus_dG": 10.083,
+          "baseline_minus_tpie": 109.39800000000001,
+          "local_minus_tpie": 119.10600000000001
+        },
+        {
+          "ligand": "CAT-13c",
+          "experimental_minus_dG": 9.323,
+          "baseline_minus_tpie": 109.423,
+          "local_minus_tpie": 116.266
+        },
+        {
+          "ligand": "CAT-24",
+          "experimental_minus_dG": 11.35,
+          "baseline_minus_tpie": 107.777,
+          "local_minus_tpie": 112.79899999999999
+        },
+        {
+          "ligand": "CAT-4i",
+          "experimental_minus_dG": 8.263,
+          "baseline_minus_tpie": 100.156,
+          "local_minus_tpie": 110.564
+        },
+        {
+          "ligand": "CAT-4c",
+          "experimental_minus_dG": 7.853,
+          "baseline_minus_tpie": 102.24,
+          "local_minus_tpie": 109.98299999999999
+        },
+        {
+          "ligand": "CAT-17i",
+          "experimental_minus_dG": 9.473,
+          "baseline_minus_tpie": 102.757,
+          "local_minus_tpie": 111.382
+        },
+        {
+          "ligand": "CAT-13k",
+          "experimental_minus_dG": 9.703,
+          "baseline_minus_tpie": 114.911,
+          "local_minus_tpie": 123.477
+        },
+        {
+          "ligand": "CAT-17a",
+          "experimental_minus_dG": 10.733,
+          "baseline_minus_tpie": 109.42699999999999,
+          "local_minus_tpie": 117.642
+        },
+        {
+          "ligand": "CAT-17c",
+          "experimental_minus_dG": 9.863,
+          "baseline_minus_tpie": 106.255,
+          "local_minus_tpie": 114.04
+        },
+        {
+          "ligand": "CAT-4o",
+          "experimental_minus_dG": 9.383,
+          "baseline_minus_tpie": 106.942,
+          "local_minus_tpie": 115.702
+        },
+        {
+          "ligand": "CAT-17d",
+          "experimental_minus_dG": 9.423,
+          "baseline_minus_tpie": 99.616,
+          "local_minus_tpie": 107.242
+        },
+        {
+          "ligand": "CAT-4b",
+          "experimental_minus_dG": 9.633,
+          "baseline_minus_tpie": 109.483,
+          "local_minus_tpie": 115.943
+        },
+        {
+          "ligand": "CAT-13f",
+          "experimental_minus_dG": 9.093,
+          "baseline_minus_tpie": 109.276,
+          "local_minus_tpie": 116.11500000000001
+        },
+        {
+          "ligand": "CAT-4d",
+          "experimental_minus_dG": 9.113,
+          "baseline_minus_tpie": 111.016,
+          "local_minus_tpie": 118.869
+        },
+        {
+          "ligand": "CAT-13m",
+          "experimental_minus_dG": 8.763,
+          "baseline_minus_tpie": 114.235,
+          "local_minus_tpie": 120.489
+        },
+        {
+          "ligand": "CAT-17h",
+          "experimental_minus_dG": 10.333,
+          "baseline_minus_tpie": 108.86099999999999,
+          "local_minus_tpie": 116.07300000000001
+        },
+        {
+          "ligand": "CAT-17e",
+          "experimental_minus_dG": 10.023,
+          "baseline_minus_tpie": 103.763,
+          "local_minus_tpie": 111.072
+        }
+      ]
+    },
+    "FXa": {
+      "n_expected": 27,
+      "n_succeeded": 24,
+      "failures": {
+        "5e": {
+          "status": "FAILED",
+          "error": "ValueError: QM status: FAILED_SCF_CONVERGENCE"
+        },
+        "5i": {
+          "status": "FAILED",
+          "error": "ValueError: QM status: FAILED_SCF_CONVERGENCE"
+        },
+        "5b": {
+          "status": "FAILED",
+          "error": "ValueError: QM status: FAILED_SCF_CONVERGENCE"
+        }
+      }
+    },
+    "CDK2": {
+      "n_expected": 16,
+      "n_succeeded": 16,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.8678583920310965,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "local_sidechains": {
+        "pearson": 0.8438793198719471,
+        "spearman": 0.7970588235294117,
+        "kendall": 0.6166666666666666
+      },
+      "baseline_softcap": {
+        "pearson": 0.866235110852543,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "local_softcap": {
+        "pearson": 0.8321288776192673,
+        "spearman": 0.7970588235294117,
+        "kendall": 0.6166666666666666
+      },
+      "softcap_reference": {
+        "mode": "bundled_retrospective_target_reference",
+        "target": "CDK2",
+        "reference_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+        "prospective_reference": false,
+        "reference_development_set_retrospective": true
+      },
+      "geometry_audit": {
+        "17": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.884911263799981,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "29": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.4229521249913306,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "28": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.882067834038609,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "32": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.7408803330317064,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "26": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.356488790387954,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "21": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.3430582579184835,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "30": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 6.036256290118901,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "22": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.659034845420306,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "31": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.702863891638471,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "1h1r": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.868849769506936,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "1oiy": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.0007662354805302,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "1h1s": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.0218491027845866,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "1oiu": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 4.266334961064356,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "20": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.3392293602808594,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "1oi9": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.79896945320952,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        },
+        "1h1q": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.8814990890159935,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 181
+        }
+      },
+      "rows": [
+        {
+          "ligand": "17",
+          "experimental_minus_dG": 7.04,
+          "baseline_minus_tpie": 71.824,
+          "local_minus_tpie": 72.728
+        },
+        {
+          "ligand": "29",
+          "experimental_minus_dG": 9.88,
+          "baseline_minus_tpie": 90.278,
+          "local_minus_tpie": 93.275
+        },
+        {
+          "ligand": "28",
+          "experimental_minus_dG": 11.11,
+          "baseline_minus_tpie": 93.426,
+          "local_minus_tpie": 110.769
+        },
+        {
+          "ligand": "32",
+          "experimental_minus_dG": 9.75,
+          "baseline_minus_tpie": 91.758,
+          "local_minus_tpie": 106.843
+        },
+        {
+          "ligand": "26",
+          "experimental_minus_dG": 8.43,
+          "baseline_minus_tpie": 81.002,
+          "local_minus_tpie": 82.181
+        },
+        {
+          "ligand": "21",
+          "experimental_minus_dG": 7.83,
+          "baseline_minus_tpie": 74.275,
+          "local_minus_tpie": 80.123
+        },
+        {
+          "ligand": "30",
+          "experimental_minus_dG": 9.81,
+          "baseline_minus_tpie": 82.377,
+          "local_minus_tpie": 97.158
+        },
+        {
+          "ligand": "22",
+          "experimental_minus_dG": 7.86,
+          "baseline_minus_tpie": 76.506,
+          "local_minus_tpie": 79.208
+        },
+        {
+          "ligand": "31",
+          "experimental_minus_dG": 9.54,
+          "baseline_minus_tpie": 87.359,
+          "local_minus_tpie": 85.226
+        },
+        {
+          "ligand": "1h1r",
+          "experimental_minus_dG": 7.67,
+          "baseline_minus_tpie": 71.783,
+          "local_minus_tpie": 72.781
+        },
+        {
+          "ligand": "1oiy",
+          "experimental_minus_dG": 9.79,
+          "baseline_minus_tpie": 83.454,
+          "local_minus_tpie": 96.626
+        },
+        {
+          "ligand": "1h1s",
+          "experimental_minus_dG": 11.25,
+          "baseline_minus_tpie": 95.012,
+          "local_minus_tpie": 110.358
+        },
+        {
+          "ligand": "1oiu",
+          "experimental_minus_dG": 9.08,
+          "baseline_minus_tpie": 80.14,
+          "local_minus_tpie": 98.376
+        },
+        {
+          "ligand": "20",
+          "experimental_minus_dG": 8.72,
+          "baseline_minus_tpie": 85.007,
+          "local_minus_tpie": 94.257
+        },
+        {
+          "ligand": "1oi9",
+          "experimental_minus_dG": 9.74,
+          "baseline_minus_tpie": 77.727,
+          "local_minus_tpie": 78.537
+        },
+        {
+          "ligand": "1h1q",
+          "experimental_minus_dG": 8.18,
+          "baseline_minus_tpie": 69.509,
+          "local_minus_tpie": 71.249
+        }
+      ]
+    },
+    "JNK1": {
+      "n_expected": 21,
+      "n_succeeded": 21,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.6141593425214715,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "local_sidechains": {
+        "pearson": 0.5909982318826277,
+        "spearman": 0.6209808706857182,
+        "kendall": 0.46300847856055133
+      },
+      "baseline_softcap": {
+        "pearson": 0.6112891291628504,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "local_softcap": {
+        "pearson": 0.5878295509508072,
+        "spearman": 0.6209808706857182,
+        "kendall": 0.46300847856055133
+      },
+      "softcap_reference": {
+        "mode": "bundled_retrospective_target_reference",
+        "target": "JNK1",
+        "reference_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+        "prospective_reference": false,
+        "reference_development_set_retrospective": true
+      },
+      "geometry_audit": {
+        "18636-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6632844014178678,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18635-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.577909424320413,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "17124-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.667111873870496,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18637-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6840766015831952,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18638-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.686930051899011,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18639-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6853397283633955,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18634-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6593134122280802,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18630-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.668196930820819,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18627-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6716357258685277,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18633-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.662791929256332,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18629-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6579632082769513,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18626-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6405011429438259,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18632-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6615908040188474,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18624-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6647152909732048,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18628-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6603174395277562,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18625-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6796062038466057,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18631-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.660595977352712,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18659-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6967324479716912,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18652-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6799529755323512,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18658-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6954323932259874,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        },
+        "18660-1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6386366284201004,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 159
+        }
+      },
+      "rows": [
+        {
+          "ligand": "18636-1",
+          "experimental_minus_dG": 7.51,
+          "baseline_minus_tpie": 66.774,
+          "local_minus_tpie": 67.75
+        },
+        {
+          "ligand": "18635-1",
+          "experimental_minus_dG": 7.29,
+          "baseline_minus_tpie": 64.844,
+          "local_minus_tpie": 65.043
+        },
+        {
+          "ligand": "17124-1",
+          "experimental_minus_dG": 9.68,
+          "baseline_minus_tpie": 71.838,
+          "local_minus_tpie": 71.41799999999999
+        },
+        {
+          "ligand": "18637-1",
+          "experimental_minus_dG": 10.14,
+          "baseline_minus_tpie": 71.899,
+          "local_minus_tpie": 72.224
+        },
+        {
+          "ligand": "18638-1",
+          "experimental_minus_dG": 10.09,
+          "baseline_minus_tpie": 76.337,
+          "local_minus_tpie": 76.552
+        },
+        {
+          "ligand": "18639-1",
+          "experimental_minus_dG": 9.74,
+          "baseline_minus_tpie": 75.149,
+          "local_minus_tpie": 74.698
+        },
+        {
+          "ligand": "18634-1",
+          "experimental_minus_dG": 9.99,
+          "baseline_minus_tpie": 70.328,
+          "local_minus_tpie": 70.415
+        },
+        {
+          "ligand": "18630-1",
+          "experimental_minus_dG": 9.14,
+          "baseline_minus_tpie": 61.32,
+          "local_minus_tpie": 61.39
+        },
+        {
+          "ligand": "18627-1",
+          "experimental_minus_dG": 8.48,
+          "baseline_minus_tpie": 61.284,
+          "local_minus_tpie": 60.75
+        },
+        {
+          "ligand": "18633-1",
+          "experimental_minus_dG": 9.17,
+          "baseline_minus_tpie": 62.675000000000004,
+          "local_minus_tpie": 62.566
+        },
+        {
+          "ligand": "18629-1",
+          "experimental_minus_dG": 8.67,
+          "baseline_minus_tpie": 61.68,
+          "local_minus_tpie": 61.704
+        },
+        {
+          "ligand": "18626-1",
+          "experimental_minus_dG": 8.87,
+          "baseline_minus_tpie": 62.18,
+          "local_minus_tpie": 61.963
+        },
+        {
+          "ligand": "18632-1",
+          "experimental_minus_dG": 9.08,
+          "baseline_minus_tpie": 63.7,
+          "local_minus_tpie": 63.606
+        },
+        {
+          "ligand": "18624-1",
+          "experimental_minus_dG": 8.49,
+          "baseline_minus_tpie": 59.518,
+          "local_minus_tpie": 59.495
+        },
+        {
+          "ligand": "18628-1",
+          "experimental_minus_dG": 8.7,
+          "baseline_minus_tpie": 62.035000000000004,
+          "local_minus_tpie": 62.177
+        },
+        {
+          "ligand": "18625-1",
+          "experimental_minus_dG": 8.11,
+          "baseline_minus_tpie": 63.421,
+          "local_minus_tpie": 64.375
+        },
+        {
+          "ligand": "18631-1",
+          "experimental_minus_dG": 9.41,
+          "baseline_minus_tpie": 64.069,
+          "local_minus_tpie": 64.863
+        },
+        {
+          "ligand": "18659-1",
+          "experimental_minus_dG": 9.47,
+          "baseline_minus_tpie": 71.85,
+          "local_minus_tpie": 72.141
+        },
+        {
+          "ligand": "18652-1",
+          "experimental_minus_dG": 10.68,
+          "baseline_minus_tpie": 79.55,
+          "local_minus_tpie": 79.673
+        },
+        {
+          "ligand": "18658-1",
+          "experimental_minus_dG": 9.7,
+          "baseline_minus_tpie": 77.05199999999999,
+          "local_minus_tpie": 76.524
+        },
+        {
+          "ligand": "18660-1",
+          "experimental_minus_dG": 8.7,
+          "baseline_minus_tpie": 77.629,
+          "local_minus_tpie": 78.38
+        }
+      ]
+    },
+    "P38": {
+      "n_expected": 34,
+      "n_succeeded": 34,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.5033110695877683,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "local_sidechains": {
+        "pearson": 0.5070366670627735,
+        "spearman": 0.491665599237697,
+        "kendall": 0.35368955114405104
+      },
+      "baseline_softcap": {
+        "pearson": 0.49982860099833504,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "local_softcap": {
+        "pearson": 0.5052278770803661,
+        "spearman": 0.491665599237697,
+        "kendall": 0.35368955114405104
+      },
+      "softcap_reference": {
+        "mode": "bundled_retrospective_target_reference",
+        "target": "P38",
+        "reference_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+        "prospective_reference": false,
+        "reference_development_set_retrospective": true
+      },
+      "geometry_audit": {
+        "2ee": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.4502188336393966,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2r": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3543230315519708,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3fly": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.332666349936641,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2l": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.370628724733711,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2v": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3337349924671607,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2p": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4615159937544302,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2o": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3304790946649128,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2u": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3438259524084106,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3flq": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.5435860844151201,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3fmk": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.5432102902715499,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3fmh": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.343008525265831,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2c": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.340864858086902,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2j": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.364971768083653,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2i": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3492388687580945,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2e": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.357478369252734,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2z": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.315333014947367,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3flw": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3259577567972847,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2aa": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.496987585071262,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3fln": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3590053587334485,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2gg": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.537149634876187,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2y": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.344129333623331,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2bb": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.425733085069339,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2x": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3721292976397006,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2ff": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.393233413722084,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2f": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.353790392973304,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "3flz": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.346752754536854,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2g": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3670433617641455,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2h": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3541779916993093,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2t": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.5751047584208502,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2k": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.358809461699188,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2m": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3570321714276123,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2q": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.332663199304724,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2n": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3613982209788844,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2s": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.339006139557102,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        }
+      },
+      "rows": [
+        {
+          "ligand": "2ee",
+          "experimental_minus_dG": 12.26,
+          "baseline_minus_tpie": 81.76,
+          "local_minus_tpie": 85.979
+        },
+        {
+          "ligand": "2r",
+          "experimental_minus_dG": 10.79,
+          "baseline_minus_tpie": 94.484,
+          "local_minus_tpie": 92.216
+        },
+        {
+          "ligand": "3fly",
+          "experimental_minus_dG": 11.42,
+          "baseline_minus_tpie": 76.786,
+          "local_minus_tpie": 76.41799999999999
+        },
+        {
+          "ligand": "2l",
+          "experimental_minus_dG": 12.26,
+          "baseline_minus_tpie": 85.539,
+          "local_minus_tpie": 84.301
+        },
+        {
+          "ligand": "2v",
+          "experimental_minus_dG": 8.97,
+          "baseline_minus_tpie": 70.426,
+          "local_minus_tpie": 70.441
+        },
+        {
+          "ligand": "2p",
+          "experimental_minus_dG": 11.2,
+          "baseline_minus_tpie": 101.70700000000001,
+          "local_minus_tpie": 100.859
+        },
+        {
+          "ligand": "2o",
+          "experimental_minus_dG": 10.49,
+          "baseline_minus_tpie": 86.8,
+          "local_minus_tpie": 85.246
+        },
+        {
+          "ligand": "2u",
+          "experimental_minus_dG": 12.26,
+          "baseline_minus_tpie": 99.156,
+          "local_minus_tpie": 97.751
+        },
+        {
+          "ligand": "3flq",
+          "experimental_minus_dG": 9.93,
+          "baseline_minus_tpie": 90.422,
+          "local_minus_tpie": 89.571
+        },
+        {
+          "ligand": "3fmk",
+          "experimental_minus_dG": 11.83,
+          "baseline_minus_tpie": 85.583,
+          "local_minus_tpie": 85.795
+        },
+        {
+          "ligand": "3fmh",
+          "experimental_minus_dG": 10.83,
+          "baseline_minus_tpie": 84.999,
+          "local_minus_tpie": 82.148
+        },
+        {
+          "ligand": "2c",
+          "experimental_minus_dG": 10.46,
+          "baseline_minus_tpie": 80.703,
+          "local_minus_tpie": 80.877
+        },
+        {
+          "ligand": "2j",
+          "experimental_minus_dG": 10.08,
+          "baseline_minus_tpie": 81.215,
+          "local_minus_tpie": 80.46
+        },
+        {
+          "ligand": "2i",
+          "experimental_minus_dG": 10.05,
+          "baseline_minus_tpie": 82.141,
+          "local_minus_tpie": 81.391
+        },
+        {
+          "ligand": "2e",
+          "experimental_minus_dG": 10.7,
+          "baseline_minus_tpie": 80.016,
+          "local_minus_tpie": 79.52
+        },
+        {
+          "ligand": "2z",
+          "experimental_minus_dG": 10.36,
+          "baseline_minus_tpie": 82.162,
+          "local_minus_tpie": 81.185
+        },
+        {
+          "ligand": "3flw",
+          "experimental_minus_dG": 10.68,
+          "baseline_minus_tpie": 86.796,
+          "local_minus_tpie": 85.185
+        },
+        {
+          "ligand": "2aa",
+          "experimental_minus_dG": 9.27,
+          "baseline_minus_tpie": 87.57000000000001,
+          "local_minus_tpie": 87.379
+        },
+        {
+          "ligand": "3fln",
+          "experimental_minus_dG": 10.88,
+          "baseline_minus_tpie": 81.764,
+          "local_minus_tpie": 80.938
+        },
+        {
+          "ligand": "2gg",
+          "experimental_minus_dG": 10.66,
+          "baseline_minus_tpie": 87.968,
+          "local_minus_tpie": 87.041
+        },
+        {
+          "ligand": "2y",
+          "experimental_minus_dG": 9.78,
+          "baseline_minus_tpie": 78.185,
+          "local_minus_tpie": 76.965
+        },
+        {
+          "ligand": "2bb",
+          "experimental_minus_dG": 9.06,
+          "baseline_minus_tpie": 84.707,
+          "local_minus_tpie": 86.966
+        },
+        {
+          "ligand": "2x",
+          "experimental_minus_dG": 10.23,
+          "baseline_minus_tpie": 78.506,
+          "local_minus_tpie": 79.532
+        },
+        {
+          "ligand": "2ff",
+          "experimental_minus_dG": 11.44,
+          "baseline_minus_tpie": 99.847,
+          "local_minus_tpie": 96.176
+        },
+        {
+          "ligand": "2f",
+          "experimental_minus_dG": 8.48,
+          "baseline_minus_tpie": 77.32600000000001,
+          "local_minus_tpie": 76.649
+        },
+        {
+          "ligand": "3flz",
+          "experimental_minus_dG": 9.49,
+          "baseline_minus_tpie": 79.663,
+          "local_minus_tpie": 79.483
+        },
+        {
+          "ligand": "2g",
+          "experimental_minus_dG": 10.66,
+          "baseline_minus_tpie": 81.923,
+          "local_minus_tpie": 81.206
+        },
+        {
+          "ligand": "2h",
+          "experimental_minus_dG": 9.48,
+          "baseline_minus_tpie": 83.82,
+          "local_minus_tpie": 82.871
+        },
+        {
+          "ligand": "2t",
+          "experimental_minus_dG": 11.85,
+          "baseline_minus_tpie": 84.733,
+          "local_minus_tpie": 83.932
+        },
+        {
+          "ligand": "2k",
+          "experimental_minus_dG": 10.55,
+          "baseline_minus_tpie": 78.993,
+          "local_minus_tpie": 77.804
+        },
+        {
+          "ligand": "2m",
+          "experimental_minus_dG": 10.96,
+          "baseline_minus_tpie": 84.388,
+          "local_minus_tpie": 83.38
+        },
+        {
+          "ligand": "2q",
+          "experimental_minus_dG": 12.26,
+          "baseline_minus_tpie": 96.377,
+          "local_minus_tpie": 94.276
+        },
+        {
+          "ligand": "2n",
+          "experimental_minus_dG": 11.85,
+          "baseline_minus_tpie": 94.681,
+          "local_minus_tpie": 91.955
+        },
+        {
+          "ligand": "2s",
+          "experimental_minus_dG": 11.11,
+          "baseline_minus_tpie": 100.235,
+          "local_minus_tpie": 98.825
+        }
+      ]
+    },
+    "TYK2": {
+      "n_expected": 16,
+      "n_succeeded": 16,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.7076479666324702,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "local_sidechains": {
+        "pearson": 0.5321741095331591,
+        "spearman": 0.4852941176470588,
+        "kendall": 0.38333333333333336
+      },
+      "baseline_softcap": {
+        "pearson": 0.7606637595829229,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "local_softcap": {
+        "pearson": 0.5178139035309199,
+        "spearman": 0.4852941176470588,
+        "kendall": 0.38333333333333336
+      },
+      "softcap_reference": {
+        "mode": "bundled_retrospective_target_reference",
+        "target": "TYK2",
+        "reference_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+        "prospective_reference": false,
+        "reference_development_set_retrospective": true
+      },
+      "geometry_audit": {
+        "ejm_31": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.335712667482019,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_44": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.308306062020261,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_43": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3255572465377896,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_42": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.312076086082564,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_54": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3268917926497097,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_55": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3162906989587015,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "jmc_28": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3234801037466735,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "jmc_30": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3145432566192286,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_45": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.315843180851592,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_50": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.319111477489119,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_49": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3225305115228077,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_46": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3174363596005896,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_47": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3111697328889678,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "ejm_48": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.333907167273859,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "jmc_27": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3317708504637618,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        },
+        "jmc_23": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 3.3142192142343267,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 179
+        }
+      },
+      "rows": [
+        {
+          "ligand": "ejm_31",
+          "experimental_minus_dG": 9.54,
+          "baseline_minus_tpie": 69.894,
+          "local_minus_tpie": 67.771
+        },
+        {
+          "ligand": "ejm_44",
+          "experimental_minus_dG": 7.42,
+          "baseline_minus_tpie": 67.365,
+          "local_minus_tpie": 64.595
+        },
+        {
+          "ligand": "ejm_43",
+          "experimental_minus_dG": 8.26,
+          "baseline_minus_tpie": 68.4,
+          "local_minus_tpie": 64.929
+        },
+        {
+          "ligand": "ejm_42",
+          "experimental_minus_dG": 9.78,
+          "baseline_minus_tpie": 70.833,
+          "local_minus_tpie": 66.333
+        },
+        {
+          "ligand": "ejm_54",
+          "experimental_minus_dG": 10.53,
+          "baseline_minus_tpie": 72.895,
+          "local_minus_tpie": 70.911
+        },
+        {
+          "ligand": "ejm_55",
+          "experimental_minus_dG": 9.21,
+          "baseline_minus_tpie": 67.062,
+          "local_minus_tpie": 64.764
+        },
+        {
+          "ligand": "jmc_28",
+          "experimental_minus_dG": 10.98,
+          "baseline_minus_tpie": 73.118,
+          "local_minus_tpie": 69.079
+        },
+        {
+          "ligand": "jmc_30",
+          "experimental_minus_dG": 10.94,
+          "baseline_minus_tpie": 82.093,
+          "local_minus_tpie": 80.066
+        },
+        {
+          "ligand": "ejm_45",
+          "experimental_minus_dG": 9.56,
+          "baseline_minus_tpie": 71.89,
+          "local_minus_tpie": 68.126
+        },
+        {
+          "ligand": "ejm_50",
+          "experimental_minus_dG": 8.98,
+          "baseline_minus_tpie": 73.031,
+          "local_minus_tpie": 75.017
+        },
+        {
+          "ligand": "ejm_49",
+          "experimental_minus_dG": 7.75,
+          "baseline_minus_tpie": 69.854,
+          "local_minus_tpie": 69.815
+        },
+        {
+          "ligand": "ejm_46",
+          "experimental_minus_dG": 11.31,
+          "baseline_minus_tpie": 71.425,
+          "local_minus_tpie": 67.575
+        },
+        {
+          "ligand": "ejm_47",
+          "experimental_minus_dG": 9.7,
+          "baseline_minus_tpie": 71.654,
+          "local_minus_tpie": 67.314
+        },
+        {
+          "ligand": "ejm_48",
+          "experimental_minus_dG": 9.0,
+          "baseline_minus_tpie": 69.265,
+          "local_minus_tpie": 65.551
+        },
+        {
+          "ligand": "jmc_27",
+          "experimental_minus_dG": 11.28,
+          "baseline_minus_tpie": 77.804,
+          "local_minus_tpie": 73.944
+        },
+        {
+          "ligand": "jmc_23",
+          "experimental_minus_dG": 11.7,
+          "baseline_minus_tpie": 75.529,
+          "local_minus_tpie": 74.309
+        }
+      ]
+    },
+    "HSP90": {
+      "n_expected": 11,
+      "n_succeeded": 11,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.749334755496728,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "local_sidechains": {
+        "pearson": 0.6687389322768402,
+        "spearman": 0.6697529571185361,
+        "kendall": 0.5235703144047361
+      },
+      "baseline_softcap": {
+        "pearson": 0.7497473021592997,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "local_softcap": {
+        "pearson": 0.6678912847455678,
+        "spearman": 0.6697529571185361,
+        "kendall": 0.5235703144047361
+      },
+      "softcap_reference": {
+        "mode": "cohort_local_descriptive_only",
+        "factor": 3.0,
+        "mad_conversion": 1.4826,
+        "target": "HSP90",
+        "reference": {
+          "HSP90": {
+            "n": 11,
+            "median": 78.369,
+            "scaled_mad": 7.7065547999999895
+          }
+        },
+        "prospective_reference": false
+      },
+      "geometry_audit": {
+        "cmpd 16": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.9289501532118996,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 9": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.937721055512246,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 13": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.906591990630952,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 14": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.949525724586919,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 15": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.893098684801472,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 7": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.8888828290534736,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 17": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.9112562580439376,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 11": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.8670727231795152,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 12": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.940710968456436,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 10": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.912760374627475,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        },
+        "cmpd 8": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 2.938102278682617,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 151
+        }
+      },
+      "rows": [
+        {
+          "ligand": "cmpd 16",
+          "experimental_minus_dG": 10.33,
+          "baseline_minus_tpie": 88.001,
+          "local_minus_tpie": 88.448
+        },
+        {
+          "ligand": "cmpd 9",
+          "experimental_minus_dG": 7.92,
+          "baseline_minus_tpie": 72.478,
+          "local_minus_tpie": 74.807
+        },
+        {
+          "ligand": "cmpd 13",
+          "experimental_minus_dG": 10.15,
+          "baseline_minus_tpie": 82.699,
+          "local_minus_tpie": 81.757
+        },
+        {
+          "ligand": "cmpd 14",
+          "experimental_minus_dG": 7.82,
+          "baseline_minus_tpie": 78.369,
+          "local_minus_tpie": 80.991
+        },
+        {
+          "ligand": "cmpd 15",
+          "experimental_minus_dG": 9.61,
+          "baseline_minus_tpie": 81.958,
+          "local_minus_tpie": 85.602
+        },
+        {
+          "ligand": "cmpd 7",
+          "experimental_minus_dG": 9.41,
+          "baseline_minus_tpie": 65.927,
+          "local_minus_tpie": 70.983
+        },
+        {
+          "ligand": "cmpd 17",
+          "experimental_minus_dG": 10.74,
+          "baseline_minus_tpie": 93.173,
+          "local_minus_tpie": 93.44
+        },
+        {
+          "ligand": "cmpd 11",
+          "experimental_minus_dG": 9.19,
+          "baseline_minus_tpie": 76.17,
+          "local_minus_tpie": 76.393
+        },
+        {
+          "ligand": "cmpd 12",
+          "experimental_minus_dG": 9.19,
+          "baseline_minus_tpie": 77.232,
+          "local_minus_tpie": 79.472
+        },
+        {
+          "ligand": "cmpd 10",
+          "experimental_minus_dG": 9.19,
+          "baseline_minus_tpie": 83.567,
+          "local_minus_tpie": 90.952
+        },
+        {
+          "ligand": "cmpd 8",
+          "experimental_minus_dG": 6.86,
+          "baseline_minus_tpie": 64.886,
+          "local_minus_tpie": 70.396
+        }
+      ]
+    },
+    "PTP1B": {
+      "n_expected": 23,
+      "n_succeeded": 23,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.74537975262075,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "local_sidechains": {
+        "pearson": 0.7154357428894083,
+        "spearman": 0.7011388229445452,
+        "kendall": 0.5509256407026067
+      },
+      "baseline_softcap": {
+        "pearson": 0.7408598337000867,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "local_softcap": {
+        "pearson": 0.7249991940434437,
+        "spearman": 0.7011388229445452,
+        "kendall": 0.5509256407026067
+      },
+      "softcap_reference": {
+        "mode": "cohort_local_descriptive_only",
+        "factor": 3.0,
+        "mad_conversion": 1.4826,
+        "target": "PTP1B",
+        "reference": {
+          "PTP1B": {
+            "n": 23,
+            "median": 401.915,
+            "scaled_mad": 13.792627799999995
+          }
+        },
+        "prospective_reference": false
+      },
+      "geometry_audit": {
+        "23477": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2138360680091855,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23484": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1259862343741156,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23467": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4063289088972026,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "20667": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1274404640600784,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23469": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3777205812500577,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23483": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1311706325749487,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23480": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.130973916586941,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23474": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.231435747410313,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23473": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.5106568107945608,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23471": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3344500740005198,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "20669": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3180899058865414,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23476": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3135147505833336,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23466": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3291892265588021,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23472": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.23484250007845,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23482": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1289224951253298,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23486": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1281857116627567,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23470": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.321748463210757,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23468": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3259641774950022,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23485": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1248439891825037,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23330": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.267131405971767,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "20670": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2867699872160505,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23479": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.287049727089051,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        },
+        "23475": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3172125872462621,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 191
+        }
+      },
+      "rows": [
+        {
+          "ligand": "23477",
+          "experimental_minus_dG": 8.85,
+          "baseline_minus_tpie": 401.122,
+          "local_minus_tpie": 412.409
+        },
+        {
+          "ligand": "23484",
+          "experimental_minus_dG": 7.75,
+          "baseline_minus_tpie": 434.88,
+          "local_minus_tpie": 447.771
+        },
+        {
+          "ligand": "23467",
+          "experimental_minus_dG": 7.34,
+          "baseline_minus_tpie": 386.37399999999997,
+          "local_minus_tpie": 406.167
+        },
+        {
+          "ligand": "20667",
+          "experimental_minus_dG": 11.42,
+          "baseline_minus_tpie": 437.274,
+          "local_minus_tpie": 446.869
+        },
+        {
+          "ligand": "23469",
+          "experimental_minus_dG": 7.72,
+          "baseline_minus_tpie": 392.72700000000003,
+          "local_minus_tpie": 403.152
+        },
+        {
+          "ligand": "23483",
+          "experimental_minus_dG": 9.87,
+          "baseline_minus_tpie": 422.471,
+          "local_minus_tpie": 430.565
+        },
+        {
+          "ligand": "23480",
+          "experimental_minus_dG": 8.72,
+          "baseline_minus_tpie": 426.56100000000004,
+          "local_minus_tpie": 437.52
+        },
+        {
+          "ligand": "23474",
+          "experimental_minus_dG": 9.11,
+          "baseline_minus_tpie": 401.915,
+          "local_minus_tpie": 413.276
+        },
+        {
+          "ligand": "23473",
+          "experimental_minus_dG": 8.39,
+          "baseline_minus_tpie": 396.498,
+          "local_minus_tpie": 412.504
+        },
+        {
+          "ligand": "23471",
+          "experimental_minus_dG": 7.75,
+          "baseline_minus_tpie": 388.778,
+          "local_minus_tpie": 401.887
+        },
+        {
+          "ligand": "20669",
+          "experimental_minus_dG": 8.61,
+          "baseline_minus_tpie": 405.572,
+          "local_minus_tpie": 417.205
+        },
+        {
+          "ligand": "23476",
+          "experimental_minus_dG": 9.41,
+          "baseline_minus_tpie": 398.13100000000003,
+          "local_minus_tpie": 411.24600000000004
+        },
+        {
+          "ligand": "23466",
+          "experimental_minus_dG": 7.85,
+          "baseline_minus_tpie": 390.992,
+          "local_minus_tpie": 407.77399999999994
+        },
+        {
+          "ligand": "23472",
+          "experimental_minus_dG": 8.65,
+          "baseline_minus_tpie": 400.084,
+          "local_minus_tpie": 414.106
+        },
+        {
+          "ligand": "23482",
+          "experimental_minus_dG": 10.01,
+          "baseline_minus_tpie": 423.03900000000004,
+          "local_minus_tpie": 432.679
+        },
+        {
+          "ligand": "23486",
+          "experimental_minus_dG": 12.47,
+          "baseline_minus_tpie": 437.79200000000003,
+          "local_minus_tpie": 447.596
+        },
+        {
+          "ligand": "23470",
+          "experimental_minus_dG": 7.72,
+          "baseline_minus_tpie": 396.69100000000003,
+          "local_minus_tpie": 407.174
+        },
+        {
+          "ligand": "23468",
+          "experimental_minus_dG": 7.75,
+          "baseline_minus_tpie": 388.202,
+          "local_minus_tpie": 399.91999999999996
+        },
+        {
+          "ligand": "23485",
+          "experimental_minus_dG": 11.01,
+          "baseline_minus_tpie": 437.984,
+          "local_minus_tpie": 450.771
+        },
+        {
+          "ligand": "23330",
+          "experimental_minus_dG": 10.13,
+          "baseline_minus_tpie": 407.80899999999997,
+          "local_minus_tpie": 418.688
+        },
+        {
+          "ligand": "20670",
+          "experimental_minus_dG": 9.08,
+          "baseline_minus_tpie": 403.40299999999996,
+          "local_minus_tpie": 414.294
+        },
+        {
+          "ligand": "23479",
+          "experimental_minus_dG": 9.14,
+          "baseline_minus_tpie": 411.218,
+          "local_minus_tpie": 420.387
+        },
+        {
+          "ligand": "23475",
+          "experimental_minus_dG": 8.72,
+          "baseline_minus_tpie": 400.122,
+          "local_minus_tpie": 411.998
+        }
+      ]
+    },
+    "FAAH": {
+      "n_expected": 24,
+      "n_succeeded": 24,
+      "failures": {},
+      "baseline": {
+        "pearson": 0.7368320105673787,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "local_sidechains": {
+        "pearson": 0.7063702298950877,
+        "spearman": 0.6866710316708817,
+        "kendall": 0.5480952765236738
+      },
+      "baseline_softcap": {
+        "pearson": 0.7319914244754567,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "local_softcap": {
+        "pearson": 0.7097416032663582,
+        "spearman": 0.6866710316708817,
+        "kendall": 0.5480952765236738
+      },
+      "softcap_reference": {
+        "mode": "cohort_local_descriptive_only",
+        "factor": 3.0,
+        "mad_conversion": 1.4826,
+        "target": "FAAH",
+        "reference": {
+          "FAAH": {
+            "n": 24,
+            "median": 49.2565,
+            "scaled_mad": 4.195016699999999
+          }
+        },
+        "prospective_reference": false
+      },
+      "geometry_audit": {
+        "6MRG ligand": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.398572486501859,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "fig 3": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1275034368018566,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "2": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.429184732636057,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "4": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.399184405287596,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "6": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4153451875779286,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "9": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3564298728647948,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "11": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4741472111020637,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "12": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.1356663242343676,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "15": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4718783917158385,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "14": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.3992805294150266,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "19": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4470870740905675,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "20": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.430255221979629,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "22": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4437634847855103,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "23": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.0533627105608014,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "24": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.9351994729226238,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "25": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4925561965969667,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "26": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4992494789060302,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "27": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4988655710236327,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "28": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.337599342105102,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "29": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4073428864352828,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "30": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4229269130914632,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "31": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4117825611615955,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "33 (Saha 2018)": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4132706747116748,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        },
+        "39": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4098031777521265,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 233
+        }
+      },
+      "rows": [
+        {
+          "ligand": "6MRG ligand",
+          "experimental_minus_dG": 10.2873,
+          "baseline_minus_tpie": 52.266,
+          "local_minus_tpie": 56.984
+        },
+        {
+          "ligand": "fig 3",
+          "experimental_minus_dG": 10.5996,
+          "baseline_minus_tpie": 48.155,
+          "local_minus_tpie": 51.255
+        },
+        {
+          "ligand": "2",
+          "experimental_minus_dG": 8.66521,
+          "baseline_minus_tpie": 46.607,
+          "local_minus_tpie": 50.324
+        },
+        {
+          "ligand": "4",
+          "experimental_minus_dG": 11.3247,
+          "baseline_minus_tpie": 54.95,
+          "local_minus_tpie": 58.306
+        },
+        {
+          "ligand": "6",
+          "experimental_minus_dG": 10.4205,
+          "baseline_minus_tpie": 45.87,
+          "local_minus_tpie": 48.889
+        },
+        {
+          "ligand": "9",
+          "experimental_minus_dG": 10.5657,
+          "baseline_minus_tpie": 53.335,
+          "local_minus_tpie": 57.613
+        },
+        {
+          "ligand": "11",
+          "experimental_minus_dG": 12.1228,
+          "baseline_minus_tpie": 55.853,
+          "local_minus_tpie": 58.918
+        },
+        {
+          "ligand": "12",
+          "experimental_minus_dG": 11.0462,
+          "baseline_minus_tpie": 50.435,
+          "local_minus_tpie": 54.973
+        },
+        {
+          "ligand": "15",
+          "experimental_minus_dG": 8.59027,
+          "baseline_minus_tpie": 46.160000000000004,
+          "local_minus_tpie": 49.977
+        },
+        {
+          "ligand": "14",
+          "experimental_minus_dG": 7.84252,
+          "baseline_minus_tpie": 43.911,
+          "local_minus_tpie": 46.967999999999996
+        },
+        {
+          "ligand": "19",
+          "experimental_minus_dG": 7.97232,
+          "baseline_minus_tpie": 48.751,
+          "local_minus_tpie": 52.806
+        },
+        {
+          "ligand": "20",
+          "experimental_minus_dG": 6.82123,
+          "baseline_minus_tpie": 42.772999999999996,
+          "local_minus_tpie": 48.021
+        },
+        {
+          "ligand": "22",
+          "experimental_minus_dG": 9.97238,
+          "baseline_minus_tpie": 49.308,
+          "local_minus_tpie": 54.897
+        },
+        {
+          "ligand": "23",
+          "experimental_minus_dG": 10.6737,
+          "baseline_minus_tpie": 47.363,
+          "local_minus_tpie": 50.201
+        },
+        {
+          "ligand": "24",
+          "experimental_minus_dG": 11.6273,
+          "baseline_minus_tpie": 53.397999999999996,
+          "local_minus_tpie": 56.312
+        },
+        {
+          "ligand": "25",
+          "experimental_minus_dG": 12.038,
+          "baseline_minus_tpie": 57.77,
+          "local_minus_tpie": 61.242
+        },
+        {
+          "ligand": "26",
+          "experimental_minus_dG": 10.6737,
+          "baseline_minus_tpie": 54.749,
+          "local_minus_tpie": 57.686
+        },
+        {
+          "ligand": "27",
+          "experimental_minus_dG": 11.1877,
+          "baseline_minus_tpie": 47.019999999999996,
+          "local_minus_tpie": 53.234
+        },
+        {
+          "ligand": "28",
+          "experimental_minus_dG": 11.5891,
+          "baseline_minus_tpie": 55.88,
+          "local_minus_tpie": 58.612
+        },
+        {
+          "ligand": "29",
+          "experimental_minus_dG": 10.806,
+          "baseline_minus_tpie": 46.97,
+          "local_minus_tpie": 50.288
+        },
+        {
+          "ligand": "30",
+          "experimental_minus_dG": 9.90394,
+          "baseline_minus_tpie": 49.349000000000004,
+          "local_minus_tpie": 53.889
+        },
+        {
+          "ligand": "31",
+          "experimental_minus_dG": 11.2901,
+          "baseline_minus_tpie": 49.205,
+          "local_minus_tpie": 53.307
+        },
+        {
+          "ligand": "33 (Saha 2018)",
+          "experimental_minus_dG": 9.73619,
+          "baseline_minus_tpie": 49.035000000000004,
+          "local_minus_tpie": 53.249
+        },
+        {
+          "ligand": "39",
+          "experimental_minus_dG": 10.7146,
+          "baseline_minus_tpie": 50.638,
+          "local_minus_tpie": 54.682
+        }
+      ]
+    },
+    "HIV1PROT": {
+      "n_expected": 13,
+      "n_succeeded": 13,
+      "failures": {},
+      "baseline": {
+        "pearson": -0.14666558742438307,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "local_sidechains": {
+        "pearson": -0.18150837173232434,
+        "spearman": -0.10729033533674225,
+        "kendall": -0.012903494352312727
+      },
+      "baseline_softcap": {
+        "pearson": -0.14803742784405294,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "local_softcap": {
+        "pearson": -0.20795225148632368,
+        "spearman": -0.10729033533674225,
+        "kendall": -0.012903494352312727
+      },
+      "softcap_reference": {
+        "mode": "cohort_local_descriptive_only",
+        "factor": 3.0,
+        "mad_conversion": 1.4826,
+        "target": "HIV1PROT",
+        "reference": {
+          "HIV1PROT": {
+            "n": 13,
+            "median": 200.751,
+            "scaled_mad": 1.8295284000000132
+          }
+        },
+        "prospective_reference": false
+      },
+      "geometry_audit": {
+        "1": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2883066405169223,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "9": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2903162403070025,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "10": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2883066405169223,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "11 (2cen)": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.4422316041468517,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "12": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2869988344983059,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "13": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2833195237352215,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "14": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2850143968065117,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "15": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.6079244385231533,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "16": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2775621315615155,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "17": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2943110136284866,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "18": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2912296464998008,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "19": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2895344121038417,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        },
+        "20": {
+          "max_fixed_PDB_displacement_A": 0.0,
+          "max_receptor_PDB_displacement_A": 1.2909690158946496,
+          "max_fixed_full_precision_A": 0.0,
+          "n_mobile_receptor_atoms": 216
+        }
+      },
+      "rows": [
+        {
+          "ligand": "1",
+          "experimental_minus_dG": 11.7595,
+          "baseline_minus_tpie": 195.974,
+          "local_minus_tpie": 195.856
+        },
+        {
+          "ligand": "9",
+          "experimental_minus_dG": 10.5033,
+          "baseline_minus_tpie": 200.751,
+          "local_minus_tpie": 201.226
+        },
+        {
+          "ligand": "10",
+          "experimental_minus_dG": 10.806,
+          "baseline_minus_tpie": 198.903,
+          "local_minus_tpie": 199.36599999999999
+        },
+        {
+          "ligand": "11 (2cen)",
+          "experimental_minus_dG": 11.3247,
+          "baseline_minus_tpie": 200.192,
+          "local_minus_tpie": 200.85999999999999
+        },
+        {
+          "ligand": "12",
+          "experimental_minus_dG": 11.2682,
+          "baseline_minus_tpie": 202.031,
+          "local_minus_tpie": 202.544
+        },
+        {
+          "ligand": "13",
+          "experimental_minus_dG": 10.8575,
+          "baseline_minus_tpie": 201.985,
+          "local_minus_tpie": 202.932
+        },
+        {
+          "ligand": "14",
+          "experimental_minus_dG": 10.6737,
+          "baseline_minus_tpie": 201.876,
+          "local_minus_tpie": 202.385
+        },
+        {
+          "ligand": "15",
+          "experimental_minus_dG": 10.9764,
+          "baseline_minus_tpie": 200.461,
+          "local_minus_tpie": 200.502
+        },
+        {
+          "ligand": "16",
+          "experimental_minus_dG": 11.0612,
+          "baseline_minus_tpie": 201.339,
+          "local_minus_tpie": 201.911
+        },
+        {
+          "ligand": "17",
+          "experimental_minus_dG": 11.4873,
+          "baseline_minus_tpie": 202.663,
+          "local_minus_tpie": 204.337
+        },
+        {
+          "ligand": "18",
+          "experimental_minus_dG": 11.8386,
+          "baseline_minus_tpie": 199.252,
+          "local_minus_tpie": 199.24
+        },
+        {
+          "ligand": "19",
+          "experimental_minus_dG": 10.8575,
+          "baseline_minus_tpie": 200.432,
+          "local_minus_tpie": 202.14600000000002
+        },
+        {
+          "ligand": "20",
+          "experimental_minus_dG": 11.536,
+          "baseline_minus_tpie": 205.361,
+          "local_minus_tpie": 205.939
+        }
+      ]
+    }
+  },
+  "production_default_changed": false,
+  "parameter_selection_used_labels": false,
+  "baseline_reused_not_recomputed": true,
+  "original87_weighted": {
+    "baseline": {
+      "pearson": 0.6346899344546217,
+      "spearman": 0.6312461176393578,
+      "kendall": 0.46928544696790003
+    },
+    "local_sidechains": {
+      "pearson": 0.5938743036798986,
+      "spearman": 0.5778721346816702,
+      "kendall": 0.4338922159617163
+    },
+    "baseline_softcap": {
+      "pearson": 0.6420876560152955,
+      "spearman": 0.6312461176393578,
+      "kendall": 0.46928544696790003
+    },
+    "local_softcap": {
+      "pearson": 0.5876006079207172,
+      "spearman": 0.5778721346816702,
+      "kendall": 0.4338922159617163
+    }
+  }
+}

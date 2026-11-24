@@ -1,0 +1,80 @@
+{
+  "schema": "first-edge-post-production-audit-v1",
+  "commands": [
+    [
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/report_partial_openfe.py",
+      "--workspace",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline",
+      "--run",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128",
+      "--output",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/free_energy_snapshot.json"
+    ],
+    [
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/analyze_openfe_endpoints.py",
+      "--run",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128",
+      "--output",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/endpoint_structure.json"
+    ],
+    [
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/analyze_endpoint_internal_energy.py",
+      "--run",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128",
+      "--diagnostics",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/endpoint_structure.json",
+      "--output",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/endpoint_internal_energy.json"
+    ],
+    [
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/run_endpoint_dftb_internal.py",
+      "--run",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128",
+      "--diagnostics",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/endpoint_structure.json",
+      "--workspace",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline",
+      "--output",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/qm",
+      "--stride",
+      "40",
+      "--workers",
+      "8",
+      "--reuse",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_dftb_internal_dense_v1"
+    ],
+    [
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/report_endpoint_energy_comparison.py",
+      "--mm",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/endpoint_internal_energy.json",
+      "--qm",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/qm/status.json",
+      "--output",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/energy_comparison.json"
+    ],
+    [
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/report_endpoint_repeat_stability.py",
+      "--comparison",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/energy_comparison.json",
+      "--output",
+      "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/repeat_stability.json"
+    ]
+  ],
+  "scripts_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/report_partial_openfe.py": "5fc617eb63d657ac9b9c8bacf2d6ad4d8d88e0d81397a961fefdb77222231d39",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/analyze_openfe_endpoints.py": "6f7321f6b80a3c0a71939bff7f0f17686990b6d22b96239d7c3f42a8e2e2c51e",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/analyze_endpoint_internal_energy.py": "03f8f7e38abe173dde6ab03860a992b9d0f968f3fe7a3b8f56c0af80e9f28154",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/run_endpoint_dftb_internal.py": "5dbc049d1fa78549c91f30642135db43e6d8772c1a2d46710fe668e1f2373ce9",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/report_endpoint_energy_comparison.py": "04267564709c9b00c2a72e7e3047677379b7803c688ab29c9ed4e559b8fc76bf",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/report_endpoint_repeat_stability.py": "7cb93eb4a795a8969c095ac670d96573ca8719abfcb4db3d6738f2a6d417c223",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/tools/finalize_openfe_endpoint_audit.py": "b7e11059c5bd08030a9935ef56cf6caa81e8a79270d1ca83467af2218224da15"
+  },
+  "source_qm_sha256": "562e8aa3426a961a5d49e85e8b37d502e270cac012833c6ee9373df665a6be80",
+  "production_protocol_sha256": "41be938a7dbd80721581fbec6bc1a866e8c5b4e66e2ccc782097c243a686cdf4",
+  "maximum_endpoint_singlepoints": 984,
+  "expected_reusable_singlepoints": 738,
+  "new_MD_scheduled": false,
+  "new_network_edges_scheduled": false,
+  "GPU_required": false,
+  "main_pipeline_changed": false
+}

@@ -1,0 +1,533 @@
+{
+  "convergence_proven": false,
+  "interpretation": "This is a four-leg free-energy perturbation of the ligand intramolecular potential component only. It is not an FMO interaction score and not a full QM/MM total-potential correction.",
+  "labels_used": false,
+  "limitations": [
+    "The high-level term is isolated gas-phase ligand FMO1-DFTB3; receptor/water electronic polarization, ligand-environment QM/MM coupling, and environment Hamiltonian corrections are absent.",
+    "One-sided exponential averaging has poor weight ESS in several endpoint ensembles and does not establish overlap or convergence.",
+    "Saved frames are time-correlated; weight ESS is not an independent-sample count.",
+    "CDK8 has only one complete bound repeat in this saved production set; one additional repeat was incomplete and was not included.",
+    "The pre-existing OpenFE edge estimates are marked as not eligible for equilibrium-affinity claims; adjusted edge values are diagnostic only.",
+    "A two-ligand edge cannot yield a meaningful cohort ranking statistic such as Spearman correlation."
+  ],
+  "main_pipeline_changed": false,
+  "n_endpoint_trajectory_groups": 24,
+  "n_mm_qm_frames_matched": 984,
+  "n_qm_successful": 984,
+  "n_unique_simulation_trajectories": 12,
+  "ranking_eligible": false,
+  "schema": "isolated-ligand-intramolecular-dftb-mm-four-leg-correction-v1",
+  "selection": "All existing completed OpenFE repeats and all 41 pre-registered frames from 1.0 to 5.0 ns at 0.1 ns spacing; no affinity-guided frame selection; no new MD.",
+  "sources": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_dftb_internal_complete_20261026/frozen_protocol.json": "5bd79b3d49b481438bb0a5aa28df42c4438e45862a74a29041fff69c20432c68",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_dftb_internal_complete_20261026/status.json": "eb5ebe57e46fd35077521831cf26f1852e723dfa0233db3c11bb5939d69aef21",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_internal_energy_complete_20261026.json": "22bcec968c71e383841c5847852ca807545e031dca95b5ab835f9b3c4f39bb32"
+  },
+  "targets": {
+    "BACE": {
+      "component_definition": "gas-phase isolated-ligand DFTB3 internal potential minus the matched isolated-ligand OpenFF MM internal potential; added as a replacement of only that intramolecular term while retaining the original MM environment Hamiltonian",
+      "convergence_proven": false,
+      "edge": [
+        "CAT-13n",
+        "CAT-4i"
+      ],
+      "endpoint_component_corrections": {
+        "bound_A": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -9.378586172766985,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -7.710808779463185,
+            "largest_normalized_weight": 0.47075852071328617,
+            "mean_delta_u_kcal_mol": -0.24481644387248838,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 4.683433180060788,
+            "weight_ess": 3.17254838263867,
+            "weight_ess_fraction": 0.050357910835534446
+          },
+          "largest_normalized_weight": 0.7889302729118207,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -9.785429408710307,
+            "largest_normalized_weight": 0.8139061326133976,
+            "mean_delta_u_kcal_mol": 0.643336590922263,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 5.606659554593427,
+            "weight_ess": 1.4351370409077913,
+            "weight_ess_fraction": 0.02391895068179652
+          },
+          "ligand": "CAT-13n",
+          "mean_delta_u_kcal_mol": 0.1884289389542196,
+          "median_reference_shift_kcal_mol": -36863.188788777654,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -9.889201181973954,
+              "largest_normalized_weight": 0.9997156178187826,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.024404120825803156
+            },
+            {
+              "delta_f_kcal_mol": -9.074504020051954,
+              "largest_normalized_weight": 0.9004704332110064,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.029865263854066286
+            },
+            {
+              "delta_f_kcal_mol": -7.37477582814183,
+              "largest_normalized_weight": 0.6326819167393928,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.04822851797462951
+            }
+          ],
+          "sd_delta_u_kcal_mol": 5.152451891928962,
+          "weight_ess": 1.5267499813381338,
+          "weight_ess_fraction": 0.01241260147429377
+        },
+        "bound_B": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -8.633072081209434,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -9.026401000246297,
+            "largest_normalized_weight": 0.6888854297749446,
+            "mean_delta_u_kcal_mol": -1.0038749779181209,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 4.1668281946042915,
+            "weight_ess": 1.7669798429374752,
+            "weight_ess_fraction": 0.02804729909424564
+          },
+          "largest_normalized_weight": 0.6853217823856016,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -5.939368519398561,
+            "largest_normalized_weight": 0.21569530916073892,
+            "mean_delta_u_kcal_mol": -1.0042965100141978,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 4.210283668819658,
+            "weight_ess": 6.090618549899268,
+            "weight_ess_fraction": 0.10151030916498781
+          },
+          "ligand": "CAT-4i",
+          "mean_delta_u_kcal_mol": -1.0040806033308414,
+          "median_reference_shift_kcal_mol": -35013.36953827385,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -9.066412402984772,
+              "largest_normalized_weight": 0.9894073455724618,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.02491433182788613
+            },
+            {
+              "delta_f_kcal_mol": -8.575568780695212,
+              "largest_normalized_weight": 0.9939818796105769,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.024686067845335415
+            },
+            {
+              "delta_f_kcal_mol": -6.125408825829591,
+              "largest_normalized_weight": 0.4331632801283236,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.0846250295605099
+            }
+          ],
+          "sd_delta_u_kcal_mol": 4.170874006975893,
+          "weight_ess": 1.7853900726324026,
+          "weight_ess_fraction": 0.014515366444165874
+        },
+        "solution_A": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -8.575718300561466,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -6.901458563911338,
+            "largest_normalized_weight": 0.6933477413745956,
+            "mean_delta_u_kcal_mol": -0.3581339430825282,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 4.4198185290574905,
+            "weight_ess": 1.943359277659675,
+            "weight_ess_fraction": 0.030846972661264686
+          },
+          "largest_normalized_weight": 0.9625871502943675,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -8.98276560005315,
+            "largest_normalized_weight": 0.9927186476895289,
+            "mean_delta_u_kcal_mol": 0.15500803078745473,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 4.4744708821629615,
+            "weight_ess": 1.0146857548137864,
+            "weight_ess_fraction": 0.01691142924689644
+          },
+          "ligand": "CAT-13n",
+          "mean_delta_u_kcal_mol": -0.10782078509717069,
+          "median_reference_shift_kcal_mol": -36863.188788777654,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -6.986252380376805,
+              "largest_normalized_weight": 0.9233226707091101,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.02844100355220668
+            },
+            {
+              "delta_f_kcal_mol": -6.233303208345345,
+              "largest_normalized_weight": 0.7487128735418193,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.042065199757427056
+            },
+            {
+              "delta_f_kcal_mol": -9.209078670535407,
+              "largest_normalized_weight": 0.9915279061869477,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.02480778076044197
+            }
+          ],
+          "sd_delta_u_kcal_mol": 4.4357729307193425,
+          "weight_ess": 1.0786527882363894,
+          "weight_ess_fraction": 0.008769534863710484
+        },
+        "solution_B": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -9.91255719771822,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -6.7042366893120215,
+            "largest_normalized_weight": 0.9854407041612226,
+            "mean_delta_u_kcal_mol": 0.39371922058432124,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 3.588733478981708,
+            "weight_ess": 1.0297158968795788,
+            "weight_ess_fraction": 0.01634469677586633
+          },
+          "largest_normalized_weight": 0.9972162533490215,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -10.336514732508704,
+            "largest_normalized_weight": 0.9994939735084064,
+            "mean_delta_u_kcal_mol": 0.08806683460510006,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 4.6334700703830345,
+            "weight_ess": 1.0010126816864664,
+            "weight_ess_fraction": 0.01668354469477444
+          },
+          "ligand": "CAT-4i",
+          "mean_delta_u_kcal_mol": 0.24462049571640848,
+          "median_reference_shift_kcal_mol": -35013.36953827385,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -4.30962963657875,
+              "largest_normalized_weight": 0.38706603976114157,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.07521943099811203
+            },
+            {
+              "delta_f_kcal_mol": -10.562043184132454,
+              "largest_normalized_weight": 0.9996180080367565,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.024408885215098926
+            },
+            {
+              "delta_f_kcal_mol": -6.98362854349625,
+              "largest_normalized_weight": 0.9449123810541153,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.027253018567886717
+            }
+          ],
+          "sd_delta_u_kcal_mol": 4.117180321584807,
+          "weight_ess": 1.005585587064635,
+          "weight_ess_fraction": 0.00817549257776126
+        }
+      },
+      "openfe_bound_status_claim_allowed": false,
+      "openfe_mm_edge_estimate_bound_minus_solution_kcal_mol": 2.513971454629555,
+      "openfe_solution_status_claim_allowed": false,
+      "partial_component_adjusted_edge_estimate_kcal_mol": 4.59632444334386,
+      "ranking_eligible": false,
+      "relative_component_correction_kcal_mol": 2.0823529887143053,
+      "time_window_drift_kcal_mol": 6.712624117149728,
+      "time_window_relative_component_correction_kcal_mol": {
+        "early_1_to_3ns": -1.5128140953824287,
+        "late_3p1_to_5ns": 5.199810021767299
+      }
+    },
+    "CDK8": {
+      "component_definition": "gas-phase isolated-ligand DFTB3 internal potential minus the matched isolated-ligand OpenFF MM internal potential; added as a replacement of only that intramolecular term while retaining the original MM environment Hamiltonian",
+      "convergence_proven": false,
+      "edge": [
+        "12",
+        "20"
+      ],
+      "endpoint_component_corrections": {
+        "bound_A": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -5.54981796303992,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -5.900183259391358,
+            "largest_normalized_weight": 0.9872989079118426,
+            "mean_delta_u_kcal_mol": -0.6390613036116216,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 2.7923673817207666,
+            "weight_ess": 1.025849925267796,
+            "weight_ess_fraction": 0.016283332147107872
+          },
+          "largest_normalized_weight": 0.9134896667582971,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -4.4385240987576235,
+            "largest_normalized_weight": 0.8487289717581855,
+            "mean_delta_u_kcal_mol": -0.12431920149768606,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 2.768423955003339,
+            "weight_ess": 1.3731669755728277,
+            "weight_ess_fraction": 0.02288611625954713
+          },
+          "ligand": "12",
+          "mean_delta_u_kcal_mol": -0.3879675952633604,
+          "median_reference_shift_kcal_mol": -29728.110806883346,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -4.634164865950464,
+              "largest_normalized_weight": 0.8927518183419056,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.0303546219693377
+            },
+            {
+              "delta_f_kcal_mol": -2.9747093578073174,
+              "largest_normalized_weight": 0.2976757041469056,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.13754289223565055
+            },
+            {
+              "delta_f_kcal_mol": -6.154287939603471,
+              "largest_normalized_weight": 0.9879735691053166,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.02498632985079951
+            }
+          ],
+          "sd_delta_u_kcal_mol": 2.7813228410766904,
+          "weight_ess": 1.1925067715664024,
+          "weight_ess_fraction": 0.009695177004604897
+        },
+        "bound_B": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -6.333932856549585,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -6.576428095241747,
+            "largest_normalized_weight": 0.920702490337586,
+            "mean_delta_u_kcal_mol": -1.6147456852453441,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 2.9673793923966603,
+            "weight_ess": 1.1776088355026706,
+            "weight_ess_fraction": 0.01869220373813763
+          },
+          "largest_normalized_weight": 0.7100762701290448,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -5.885296102751586,
+            "largest_normalized_weight": 0.3578146389991392,
+            "mean_delta_u_kcal_mol": -1.7812150071541812,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 2.9608648152347987,
+            "weight_ess": 3.753917684623555,
+            "weight_ess_fraction": 0.06256529474372592
+          },
+          "ligand": "20",
+          "mean_delta_u_kcal_mol": -1.6959502325179476,
+          "median_reference_shift_kcal_mol": -29208.440007443365,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -6.942951369661737,
+              "largest_normalized_weight": 0.7621010957417695,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.04096728717944698
+            },
+            {
+              "delta_f_kcal_mol": -5.3457365066074,
+              "largest_normalized_weight": 0.7292662192057098,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.044279704065639025
+            },
+            {
+              "delta_f_kcal_mol": -3.889408867455114,
+              "largest_normalized_weight": 0.30798052895177364,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.11967578036022485
+            }
+          ],
+          "sd_delta_u_kcal_mol": 2.95321338373826,
+          "weight_ess": 1.9266596560699722,
+          "weight_ess_fraction": 0.015663899642845303
+        },
+        "solution_A": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -4.267555788902237,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -2.3079318713158954,
+            "largest_normalized_weight": 0.45914136151882906,
+            "mean_delta_u_kcal_mol": 0.8929003896158801,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 2.811130813319194,
+            "weight_ess": 3.7791014346773206,
+            "weight_ess_fraction": 0.05998573705837017
+          },
+          "largest_normalized_weight": 0.8228163354953058,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -4.681649983765569,
+            "largest_normalized_weight": 0.838539673610087,
+            "mean_delta_u_kcal_mol": 0.5366935714134039,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 3.064487934068647,
+            "weight_ess": 1.3966062642846846,
+            "weight_ess_fraction": 0.02327677107141141
+          },
+          "ligand": "12",
+          "mean_delta_u_kcal_mol": 0.7191409661024771,
+          "median_reference_shift_kcal_mol": -29728.110806883346,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -4.811479618713458,
+              "largest_normalized_weight": 0.9856556731781819,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.02510245389655142
+            },
+            {
+              "delta_f_kcal_mol": -3.8108582842129395,
+              "largest_normalized_weight": 0.6778404210142938,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.046870232277370395
+            },
+            {
+              "delta_f_kcal_mol": -2.246308904895587,
+              "largest_normalized_weight": 0.5100746138980544,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.08421252952385719
+            }
+          ],
+          "sd_delta_u_kcal_mol": 2.9307942914553435,
+          "weight_ess": 1.4502965098371108,
+          "weight_ess_fraction": 0.011791028535261063
+        },
+        "solution_B": {
+          "convergence_proven": false,
+          "delta_f_kcal_mol": -1.6490088462068442,
+          "early_1_to_3ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -1.2399930987832537,
+            "largest_normalized_weight": 0.20716911531375468,
+            "mean_delta_u_kcal_mol": 1.6046011288478714,
+            "n_frames": 63,
+            "sd_delta_u_kcal_mol": 2.7961621694043095,
+            "weight_ess": 9.15999377134159,
+            "weight_ess_fraction": 0.14539672652923158
+          },
+          "largest_normalized_weight": 0.2549953363803936,
+          "late_3p1_to_5ns": {
+            "convergence_proven": false,
+            "delta_f_kcal_mol": -1.898460411638227,
+            "largest_normalized_weight": 0.3431127308407985,
+            "mean_delta_u_kcal_mol": 1.2610327844579539,
+            "n_frames": 60,
+            "sd_delta_u_kcal_mol": 2.524707539860641,
+            "weight_ess": 4.257561418308047,
+            "weight_ess_fraction": 0.07095935697180078
+          },
+          "ligand": "20",
+          "mean_delta_u_kcal_mol": 1.4370068145113262,
+          "median_reference_shift_kcal_mol": -29208.440007443365,
+          "n_frames": 123,
+          "n_trajectories": 3,
+          "replicates": [
+            {
+              "delta_f_kcal_mol": -1.486989538636738,
+              "largest_normalized_weight": 0.3903026082654073,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.11513484984722905
+            },
+            {
+              "delta_f_kcal_mol": -1.7208326553290296,
+              "largest_normalized_weight": 0.6776512986856992,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.05060679231147569
+            },
+            {
+              "delta_f_kcal_mol": -1.711041571139122,
+              "largest_normalized_weight": 0.6025448346631584,
+              "n_frames": 41,
+              "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+              "weight_ess_fraction": 0.06068242744387612
+            }
+          ],
+          "sd_delta_u_kcal_mol": 2.6618905926594896,
+          "weight_ess": 7.30314986897664,
+          "weight_ess_fraction": 0.05937520218680195
+        }
+      },
+      "openfe_bound_status_claim_allowed": false,
+      "openfe_mm_edge_estimate_bound_minus_solution_kcal_mol": -0.5682875968365346,
+      "openfe_solution_status_claim_allowed": false,
+      "partial_component_adjusted_edge_estimate_kcal_mol": -3.970949433041592,
+      "ranking_eligible": false,
+      "relative_component_correction_kcal_mol": -3.4026618362050574,
+      "time_window_drift_kcal_mol": -2.4857779677382745,
+      "time_window_relative_component_correction_kcal_mol": {
+        "early_1_to_3ns": -1.7441836083830302,
+        "late_3p1_to_5ns": -4.229961576121305
+      }
+    }
+  },
+  "temperature_kelvin": 298.15,
+  "trajectory_temperature_audit_kelvin": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc": 298.15,
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc": 298.15
+  }
+}

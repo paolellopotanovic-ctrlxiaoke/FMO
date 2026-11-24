@@ -1,0 +1,15 @@
+{
+  "schema": "pair-solv-replaced-by-cycle-solvation-v1",
+  "driver_sha256": "bb1560b14dee7f386bbd0291b24d74cc7a082f7a9b63ebc4f96d614408365e80",
+  "evaluation_sha256": "e395861887b3ab4669d2110cd3e788a7c030caff658cf8feda11356cb03723fd",
+  "protocol_sha256": "8254362a84e56ef0bdd4f66672442ea8f4031530eaed3f351f8aa83224d583e2",
+  "arms": [
+    "electronic_pair_plus_cycle_electrostatic",
+    "electronic_pair_plus_cycle_total_solvation",
+    "electronic_pair_plus_cycle_total_solvation_and_strain"
+  ],
+  "equation": "electronic_pair = full tPIE - sum(pair SOLV); add matched A/B/AB PCM increment once, optionally add bound-minus-free-ligand-local-minimum energy at coefficient 1",
+  "labels_used_for_fit": false,
+  "production_default_changed": false,
+  "scope": "Exploratory matched-geometry decomposition; pair term without SOLV is not itself full tPIE, no entropy or ensemble. After observed poor earlier controls, not a new blind test."
+}

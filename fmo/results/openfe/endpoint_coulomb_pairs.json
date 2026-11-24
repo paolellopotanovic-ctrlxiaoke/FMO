@@ -1,0 +1,1188 @@
+{
+  "schema": "endpoint-isolated-coulomb-pair-diagnostic-v1",
+  "targets": {
+    "BACE": {
+      "0": {
+        "name": "CAT-13n",
+        "total_bound_minus_solution_coulomb_kcal_mol": -0.9753828703755767,
+        "maximum_pair_sum_closure_error_kcal_mol": 3.126388037344441e-13,
+        "top_15_absolute_internal_pair_changes": [
+          {
+            "atom_indices_zero_based": [
+              24,
+              31
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              0.34000855921344325
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -4.084186216799576,
+            "mean_distance_angstrom": {
+              "solution": 3.4974643152508893,
+              "bound": 2.9794528336445287
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              20,
+              32
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              0.12948632477359337
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -3.0846489973328115,
+            "mean_distance_angstrom": {
+              "solution": 4.168376743021154,
+              "bound": 2.8192236121348113
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              24
+            ],
+            "elements": [
+              "C",
+              "N"
+            ],
+            "charges_e": [
+              0.4986501955850558,
+              -0.6631019687788053
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -2.6670389188262824,
+            "mean_distance_angstrom": {
+              "solution": 4.0355825588367376,
+              "bound": 3.6616372298780813
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              3,
+              24
+            ],
+            "elements": [
+              "N",
+              "N"
+            ],
+            "charges_e": [
+              -0.4793587303297086,
+              -0.6631019687788053
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 2.610645250610375,
+            "mean_distance_angstrom": {
+              "solution": 5.13953523921079,
+              "bound": 4.55147496416845
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              26
+            ],
+            "elements": [
+              "N",
+              "O"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              -0.4808449125425382
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -2.5747682814083923,
+            "mean_distance_angstrom": {
+              "solution": 3.644453011575182,
+              "bound": 3.9873433159994827
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              19,
+              32
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6098864102228121,
+              0.12948632477359337
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 2.4088944331676423,
+            "mean_distance_angstrom": {
+              "solution": 3.5896913032432116,
+              "bound": 2.6410098694292854
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              20,
+              39
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              0.14280337332324547
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 2.3191010367967744,
+            "mean_distance_angstrom": {
+              "solution": 3.8298490559477885,
+              "bound": 5.003628242550237
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              19,
+              39
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6098864102228121,
+              0.14280337332324547
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -2.237249193684139,
+            "mean_distance_angstrom": {
+              "solution": 3.3112890058830327,
+              "bound": 4.2640403589256435
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              39
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              0.14280337332324547
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 2.2117682686006335,
+            "mean_distance_angstrom": {
+              "solution": 3.917886910587817,
+              "bound": 5.103143550892591
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              30
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              0.32703322409228847
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -2.0276279891410542,
+            "mean_distance_angstrom": {
+              "solution": 5.408426919416047,
+              "bound": 4.696075566499704
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              25,
+              32
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.7154144072397188,
+              0.12948632477359337
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.9768221599021443,
+            "mean_distance_angstrom": {
+              "solution": 3.2658861040651894,
+              "bound": 3.943385022256901
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              25,
+              39
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.7154144072397188,
+              0.14280337332324547
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.9747300776437147,
+            "mean_distance_angstrom": {
+              "solution": 3.6016680358416995,
+              "bound": 2.9087141958562936
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              20,
+              26
+            ],
+            "elements": [
+              "N",
+              "O"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              -0.4808449125425382
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.901310412786117,
+            "mean_distance_angstrom": {
+              "solution": 3.67099630397174,
+              "bound": 3.470317210943715
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              4,
+              24
+            ],
+            "elements": [
+              "N",
+              "N"
+            ],
+            "charges_e": [
+              -0.386554268612103,
+              -0.6631019687788053
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.897861935953415,
+            "mean_distance_angstrom": {
+              "solution": 3.2268429331145008,
+              "bound": 2.9667403868362046
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              32
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6631019687788053,
+              0.12948632477359337
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.8622115738810239,
+            "mean_distance_angstrom": {
+              "solution": 4.241860230848034,
+              "bound": 3.2815578003116714
+            }
+          }
+        ],
+        "cancellation_warning": "Large individual pair changes can cancel; do not select only favorable pairs."
+      },
+      "10": {
+        "name": "CAT-4i",
+        "total_bound_minus_solution_coulomb_kcal_mol": 1.9515684191290505,
+        "maximum_pair_sum_closure_error_kcal_mol": 3.552713678800501e-13,
+        "top_15_absolute_internal_pair_changes": [
+          {
+            "atom_indices_zero_based": [
+              2,
+              43
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.4934418852544493,
+              0.1460515911794371
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.911936531192076,
+            "mean_distance_angstrom": {
+              "solution": 4.174119662129396,
+              "bound": 3.086355393856594
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              31
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6952695901609129,
+              0.1369430775857634
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.8376986691464996,
+            "mean_distance_angstrom": {
+              "solution": 3.4518396718066287,
+              "bound": 2.8793606204113043
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              25,
+              31
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.4751874451422029,
+              0.1369430775857634
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.5508593437934168,
+            "mean_distance_angstrom": {
+              "solution": 3.813431830657768,
+              "bound": 3.002695084587303
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              30,
+              35
+            ],
+            "elements": [
+              "H",
+              "H"
+            ],
+            "charges_e": [
+              0.3358782882905669,
+              0.1369430775857634
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.455624488453302,
+            "mean_distance_angstrom": {
+              "solution": 3.5972534908493934,
+              "bound": 2.6967921832036925
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              35
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6952695901609129,
+              0.1369430775857634
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.448175115500506,
+            "mean_distance_angstrom": {
+              "solution": 3.4445611222602452,
+              "bound": 4.047734946698183
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              36
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.4934418852544493,
+              0.1277180816150374
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.4009680365955584,
+            "mean_distance_angstrom": {
+              "solution": 3.8773382083913766,
+              "bound": 5.046484890398816
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              22,
+              24
+            ],
+            "elements": [
+              "N",
+              "C"
+            ],
+            "charges_e": [
+              -0.6455379669451051,
+              0.6952695901609129
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.3976964677065382,
+            "mean_distance_angstrom": {
+              "solution": 6.95457687646982,
+              "bound": 6.496466994693529
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              3,
+              43
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.48029562280409865,
+              0.1460515911794371
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.3471281067769354,
+            "mean_distance_angstrom": {
+              "solution": 5.176700492317991,
+              "bound": 3.9236989047684907
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              1,
+              43
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.4063817207598024,
+              0.1460515911794371
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.3175760601114561,
+            "mean_distance_angstrom": {
+              "solution": 4.344465390376869,
+              "bound": 3.3300820991498052
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              25,
+              35
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.4751874451422029,
+              0.1369430775857634
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.3106612677064806,
+            "mean_distance_angstrom": {
+              "solution": 3.8109049842111173,
+              "bound": 4.795244318514113
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              4,
+              43
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.3873850052141481,
+              0.1460515911794371
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.264053487261842,
+            "mean_distance_angstrom": {
+              "solution": 3.3339476306297593,
+              "bound": 2.6492971931951277
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              17
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.4934418852544493,
+              0.4239962454057402
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.240963002877482,
+            "mean_distance_angstrom": {
+              "solution": 6.493904361091233,
+              "bound": 5.797951502096576
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              24,
+              36
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6952695901609129,
+              0.1277180816150374
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.2354606821633638,
+            "mean_distance_angstrom": {
+              "solution": 3.2621200866839506,
+              "bound": 3.637185360663466
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              17,
+              24
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.4239962454057402,
+              0.6952695901609129
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.197499503674365,
+            "mean_distance_angstrom": {
+              "solution": 5.924132978410872,
+              "bound": 5.495156289122937
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              3,
+              39
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.48029562280409865,
+              0.15635794951683946
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.1715845468958426,
+            "mean_distance_angstrom": {
+              "solution": 7.013765227291495,
+              "bound": 5.176934546420535
+            }
+          }
+        ],
+        "cancellation_warning": "Large individual pair changes can cancel; do not select only favorable pairs."
+      }
+    },
+    "CDK8": {
+      "0": {
+        "name": "12",
+        "total_bound_minus_solution_coulomb_kcal_mol": 0.17185457114844344,
+        "maximum_pair_sum_closure_error_kcal_mol": 7.815970093361102e-14,
+        "top_15_absolute_internal_pair_changes": [
+          {
+            "atom_indices_zero_based": [
+              10,
+              23
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6287541485601856,
+              0.15222394995151028
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.7486769529201531,
+            "mean_distance_angstrom": {
+              "solution": 4.781694665189927,
+              "bound": 6.215329378581249
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              25
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.66884647838531,
+              0.14979357056079373
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.6177304778459476,
+            "mean_distance_angstrom": {
+              "solution": 8.940255518898201,
+              "bound": 6.1832095112701415
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              26
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.66884647838531,
+              0.15222394995151028
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.4096546734619615,
+            "mean_distance_angstrom": {
+              "solution": 6.996394679113001,
+              "bound": 5.371653877769506
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              5,
+              23
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.3201810025399731,
+              0.15222394995151028
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.2262398394241942,
+            "mean_distance_angstrom": {
+              "solution": 3.712047440836759,
+              "bound": 4.944304122207005
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              18
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.66884647838531,
+              -0.1251261032396747
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.2001079334992188,
+            "mean_distance_angstrom": {
+              "solution": 7.153669728610732,
+              "bound": 5.426640898493549
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              7,
+              25
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.43063167698921695,
+              0.14979357056079373
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.1484930442850363,
+            "mean_distance_angstrom": {
+              "solution": 8.760416873976888,
+              "bound": 5.92110029788195
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              17
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.66884647838531,
+              -0.10592524178566472
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.115733064103297,
+            "mean_distance_angstrom": {
+              "solution": 8.283660389745588,
+              "bound": 5.899365597340003
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              10,
+              14
+            ],
+            "elements": [
+              "N",
+              "C"
+            ],
+            "charges_e": [
+              -0.6287541485601856,
+              -0.1251261032396747
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.0421265635623955,
+            "mean_distance_angstrom": {
+              "solution": 4.852444894378831,
+              "bound": 5.93469489962927
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              10,
+              26
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6287541485601856,
+              0.15222394995151028
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.027100734589192,
+            "mean_distance_angstrom": {
+              "solution": 4.931173087887969,
+              "bound": 4.146118408783848
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              9,
+              25
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.5151918626600697,
+              0.14979357056079373
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.9846813263313732,
+            "mean_distance_angstrom": {
+              "solution": 10.010326718873753,
+              "bound": 7.171240318103324
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              26
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.4120251738256024,
+              0.15222394995151028
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 0.9650915272411349,
+            "mean_distance_angstrom": {
+              "solution": 5.558560229632969,
+              "bound": 4.318362408891777
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              10,
+              24
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6287541485601856,
+              0.14979357056079373
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 0.938930845255797,
+            "mean_distance_angstrom": {
+              "solution": 6.542924563840054,
+              "bound": 8.035406399086083
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              23
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.4120251738256024,
+              0.15222394995151028
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.8695960473096904,
+            "mean_distance_angstrom": {
+              "solution": 5.374744769412979,
+              "bound": 6.65133143592161
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              5,
+              14
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.3201810025399731,
+              -0.1251261032396747
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 0.859117553085397,
+            "mean_distance_angstrom": {
+              "solution": 3.6589979793308967,
+              "bound": 4.700711850690839
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              7,
+              24
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.43063167698921695,
+              0.14979357056079373
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.8479257865415541,
+            "mean_distance_angstrom": {
+              "solution": 8.647805986776447,
+              "bound": 6.416409195583336
+            }
+          }
+        ],
+        "cancellation_warning": "Large individual pair changes can cancel; do not select only favorable pairs."
+      },
+      "10": {
+        "name": "20",
+        "total_bound_minus_solution_coulomb_kcal_mol": 0.011787033390019186,
+        "maximum_pair_sum_closure_error_kcal_mol": 4.796163466380676e-14,
+        "top_15_absolute_internal_pair_changes": [
+          {
+            "atom_indices_zero_based": [
+              10,
+              23
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6299896834023071,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.6418569248394572,
+            "mean_distance_angstrom": {
+              "solution": 4.8294706857564735,
+              "bound": 6.175415741519714
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              25
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6000678541533875,
+              0.14962753676103824
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.4010233524333082,
+            "mean_distance_angstrom": {
+              "solution": 8.804729699004536,
+              "bound": 6.167868373581781
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              26
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.6000678541533875,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 1.2353971975293616,
+            "mean_distance_angstrom": {
+              "solution": 6.898226764508803,
+              "bound": 5.342470282294996
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              5,
+              23
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.3206878306739258,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.1434391427029587,
+            "mean_distance_angstrom": {
+              "solution": 3.7542291771073217,
+              "bound": 4.909640799686459
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              18
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.6000678541533875,
+              -0.125292122138269
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.0411177963354374,
+            "mean_distance_angstrom": {
+              "solution": 7.076951081922894,
+              "bound": 5.425869034958868
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              10,
+              14
+            ],
+            "elements": [
+              "N",
+              "C"
+            ],
+            "charges_e": [
+              -0.6299896834023071,
+              -0.125292122138269
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -1.0061923904587902,
+            "mean_distance_angstrom": {
+              "solution": 4.889768774701581,
+              "bound": 5.945360455650032
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              8,
+              17
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.6000678541533875,
+              -0.106091260684259
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.97654854246476,
+            "mean_distance_angstrom": {
+              "solution": 8.176528449699934,
+              "bound": 5.881104388684689
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              9,
+              25
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.5251893994934631,
+              0.14962753676103824
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.9350965902638908,
+            "mean_distance_angstrom": {
+              "solution": 9.851198293564568,
+              "bound": 7.212065206102018
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              10,
+              24
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6299896834023071,
+              0.14962753676103824
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 0.9027847365453221,
+            "mean_distance_angstrom": {
+              "solution": 6.592043287498218,
+              "bound": 8.041747492802514
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              5,
+              14
+            ],
+            "elements": [
+              "C",
+              "C"
+            ],
+            "charges_e": [
+              0.3206878306739258,
+              -0.125292122138269
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 0.817675268215261,
+            "mean_distance_angstrom": {
+              "solution": 3.699938083754105,
+              "bound": 4.704952057946787
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              23
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.413785904871695,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.8145777922064825,
+            "mean_distance_angstrom": {
+              "solution": 5.422159950284462,
+              "bound": 6.602905971578485
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              10,
+              26
+            ],
+            "elements": [
+              "N",
+              "H"
+            ],
+            "charges_e": [
+              -0.6299896834023071,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.7901495791801514,
+            "mean_distance_angstrom": {
+              "solution": 4.8739491054763056,
+              "bound": 4.247832026529214
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              9,
+              26
+            ],
+            "elements": [
+              "O",
+              "H"
+            ],
+            "charges_e": [
+              -0.5251893994934631,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.7853306943206801,
+            "mean_distance_angstrom": {
+              "solution": 7.949892563051596,
+              "bound": 6.386495087946334
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              2,
+              26
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              0.413785904871695,
+              0.1520579161517548
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": 0.768077546104371,
+            "mean_distance_angstrom": {
+              "solution": 5.465054567879698,
+              "bound": 4.450721147473512
+            }
+          },
+          {
+            "atom_indices_zero_based": [
+              18,
+              20
+            ],
+            "elements": [
+              "C",
+              "H"
+            ],
+            "charges_e": [
+              -0.125292122138269,
+              0.1649544688336777
+            ],
+            "bound_minus_solution_coulomb_kcal_mol": -0.736093618885594,
+            "mean_distance_angstrom": {
+              "solution": 4.471759507636877,
+              "bound": 2.9949719689462904
+            }
+          }
+        ],
+        "cancellation_warning": "Large individual pair changes can cancel; do not select only favorable pairs."
+      }
+    }
+  },
+  "sources": {
+    "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_dftb_internal_dense_v1/frozen_protocol.json": "5ee38e75a4b4075d4d075906b689e55afe9f06309a68583d55e9380feebd24a2",
+    "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_internal_energy.json": "3c722e21504cb8d56a9743e1003870e8310352f482a4a5fcd8c5e79659b34a56"
+  },
+  "driver_sha256": "c0355d5c6a5521340c1544dffaf624018c44b59f074afa4180ccc3982095a796",
+  "labels_used": false,
+  "warning": "Intramolecular isolated-vacuum Coulomb energy, not protein-ligand tPIE or binding free energy; no score changed."
+}

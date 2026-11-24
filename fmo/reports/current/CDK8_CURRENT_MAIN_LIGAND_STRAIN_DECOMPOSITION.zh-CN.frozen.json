@@ -1,0 +1,18 @@
+{
+  "schema": "pcm-local-strain-components-v1",
+  "target": "CDK8",
+  "weights": "All coefficients fixed to one; no label-dependent arm selection",
+  "arms": [
+    "baseline_tpie",
+    "matched_tpie",
+    "baseline_tpie_plus_pcm_strain",
+    "matched_tpie_plus_pcm_strain",
+    "matched_tpie_plus_internal_response",
+    "matched_tpie_plus_solvent_response"
+  ],
+  "evaluation_sha256": "a701a2b4053084c4b68a29a88929664e0b11a713bb9d6ecd98c1ec5862682c27",
+  "protocol_sha256": "03af90a7910ef52e46e2fa96e944675cf3353149d12aff61e1f197dff1eeddd3",
+  "registry_sha256": "d0e2d7ad944a3a12c3aafb6b5f8a0cfc6a5ee83fbcbe6edffee377368f362186",
+  "driver_sha256": "4f8473d7ad2042b34fceb19d251cf19da67fa4f30bec19db119ce68bdd315bba",
+  "development_warning": "Retrospective diagnostic after complete strain scores were observed; not blind validation"
+}

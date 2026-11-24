@@ -2,6 +2,10 @@
 
 [中文说明](README.zh-CN.md)
 
+[FEP / MD / QM-MM research archive (中文)](fmo/README.md): completed calculations,
+benchmark references, trajectory analyses, numerical results, and remaining gaps.
+See the [complete research report index](fmo/reports/INDEX.md).
+
 **Current tool:** the installable project at this repository root. The previous
 FMO87 engineering snapshot is retained under `archive/`, not used by this package.
 

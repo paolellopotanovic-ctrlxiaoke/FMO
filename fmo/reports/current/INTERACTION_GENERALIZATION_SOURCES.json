@@ -1,0 +1,123 @@
+{
+  "schema": "interaction-generalization-sources-v1",
+  "checked_on": "2026-10-21",
+  "purpose": "Feasibility analysis, not validation of current pipeline on these interaction classes",
+  "papers": [
+    {
+      "id": "FMO_RNA",
+      "doi": "10.1016/j.jmgm.2020.107695",
+      "title": "Intermolecular interaction among Remdesivir, RNA and RNA-dependent RNA polymerase of SARS-CoV-2 analyzed by fragment molecular orbital calculation.",
+      "first_publication_date": "2020-07-15",
+      "pmcid": "PMC7363421",
+      "publication_type": [
+        "brief-report",
+        "Research Support, Non-U.S. Gov't",
+        "Journal Article"
+      ],
+      "abstract": "COVID-19, a disease caused by a new strain of coronavirus (SARS-CoV-2) originating from Wuhan, China, has now spread around the world, triggering a global pandemic, leaving the public eagerly awaiting the development of a specific medicine and vaccine. In response, aggressive efforts are underway around the world to overcome COVID-19. In this study, referencing the data published on the Protein Data Bank (PDB ID: 7BV2) on April 22, we conducted a detailed analysis of the interaction between the complex structures of the RNA-dependent RNA polymerase (RdRp) of SARS-CoV-2 and Remdesivir, an antiviral drug, from the quantum chemical perspective based on the fragment molecular orbital (FMO) method. In addition to the hydrogen bonding and intra-strand stacking between complementary strands as seen in normal base pairs, Remdesivir bound to the terminus of an primer-RNA strand was further stabilized by diagonal π-π stacking with the -1A' base of the complementary strand and an additional hydrogen bond with an intra-strand base, due to the effect of chemically modified functional group. Moreover, stable OH/π interaction is also formed with Thr687 of the RdRp. We quantitatively revealed the exhaustive interaction within the complex among Remdesivir, template-primer-RNA, RdRp and co-factors, and published the results in the FMODB database.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "DFTB3_P_S",
+      "doi": "10.1021/ct401002w",
+      "title": "Parameterization of DFTB3/3OB for Sulfur and Phosphorus for Chemical and Biological Applications.",
+      "first_publication_date": "2014-03-12",
+      "pmcid": "PMC3985940",
+      "publication_type": [
+        "research-article",
+        "Journal Article"
+      ],
+      "abstract": "We report the parametrization of the approximate density functional tight binding method, DFTB3, for sulfur and phosphorus. The parametrization is done in a framework consistent with our previous 3OB set established for O, N, C, and H, thus the resulting parameters can be used to describe a broad set of organic and biologically relevant molecules. The 3d orbitals are included in the parametrization, and the electronic parameters are chosen to minimize errors in the atomization energies. The parameters are tested using a fairly diverse set of molecules of biological relevance, focusing on the geometries, reaction energies, proton affinities, and hydrogen bonding interactions of these molecules; vibrational frequencies are also examined, although less systematically. The results of DFTB3/3OB are compared to those from DFT (B3LYP and PBE), <i>ab initio</i> (MP2, G3B3), and several popular semiempirical methods (PM6 and PDDG), as well as predictions of DFTB3 with the older parametrization (the MIO set). In general, DFTB3/3OB is a major improvement over the previous parametrization (DFTB3/MIO), and for the majority cases tested here, it also outperforms PM6 and PDDG, especially for structural properties, vibrational frequencies, hydrogen bonding interactions, and proton affinities. For reaction energies, DFTB3/3OB exhibits major improvement over DFTB3/MIO, due mainly to significant reduction of errors in atomization energies; compared to PM6 and PDDG, DFTB3/3OB also generally performs better, although the magnitude of improvement is more modest. Compared to high-level calculations, DFTB3/3OB is most successful at predicting geometries; larger errors are found in the energies, although the results can be greatly improved by computing single point energies at a high level with DFTB3 geometries. There are several remaining issues with the DFTB3/3OB approach, most notably its difficulty in describing phosphate hydrolysis reactions involving a change in the coordination number of the phosphorus, for which a specific parametrization (3OB/OPhyd) is developed as a temporary solution; this suggests that the current DFTB3 methodology has limited transferability for complex phosphorus chemistry at the level of accuracy required for detailed mechanistic investigations. Therefore, fundamental improvements in the DFTB3 methodology are needed for a reliable method that describes phosphorus chemistry without <i>ad hoc</i> parameters. Nevertheless, DFTB3/3OB is expected to be a competitive QM method in QM/MM calculations for studying phosphorus/sulfur chemistry in condensed phase systems, especially as a low-level method that drives the sampling in a dual-level QM/MM framework.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "DFTB3_MG_ZN",
+      "doi": "10.1021/jp506557r",
+      "title": "Parametrization of DFTB3/3OB for magnesium and zinc for chemical and biological applications.",
+      "first_publication_date": "2014-09-16",
+      "pmcid": "PMC4306495",
+      "publication_type": [
+        "research-article",
+        "Research Support, U.S. Gov't, Non-P.H.S.",
+        "Journal Article",
+        "Research Support, N.I.H., Extramural"
+      ],
+      "abstract": "We report the parametrization of the approximate density functional theory, DFTB3, for magnesium and zinc for chemical and biological applications. The parametrization strategy follows that established in previous work that parametrized several key main group elements (O, N, C, H, P, and S). This 3OB set of parameters can thus be used to study many chemical and biochemical systems. The parameters are benchmarked using both gas-phase and condensed-phase systems. The gas-phase results are compared to DFT (mostly B3LYP), ab initio (MP2 and G3B3), and PM6, as well as to a previous DFTB parametrization (MIO). The results indicate that DFTB3/3OB is particularly successful at predicting structures, including rather complex dinuclear metalloenzyme active sites, while being semiquantitative (with a typical mean absolute deviation (MAD) of ∼3-5 kcal/mol) for energetics. Single-point calculations with high-level quantum mechanics (QM) methods generally lead to very satisfying (a typical MAD of ∼1 kcal/mol) energetic properties. DFTB3/MM simulations for solution and two enzyme systems also lead to encouraging structural and energetic properties in comparison to available experimental data. The remaining limitations of DFTB3, such as the treatment of interaction between metal ions and highly charged/polarizable ligands, are also discussed.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "PPI_AFFINITY_V2",
+      "doi": "10.1016/j.jmb.2015.07.016",
+      "title": "Updates to the Integrated Protein-Protein Interaction Benchmarks: Docking Benchmark Version 5 and Affinity Benchmark Version 2.",
+      "first_publication_date": "2015-07-29",
+      "pmcid": "PMC4677049",
+      "publication_type": [
+        "research-article",
+        "Journal Article"
+      ],
+      "abstract": "We present an updated and integrated version of our widely used protein-protein docking and binding affinity benchmarks. The benchmarks consist of non-redundant, high-quality structures of protein-protein complexes along with the unbound structures of their components. Fifty-five new complexes were added to the docking benchmark, 35 of which have experimentally measured binding affinities. These updated docking and affinity benchmarks now contain 230 and 179 entries, respectively. In particular, the number of antibody-antigen complexes has increased significantly, by 67% and 74% in the docking and affinity benchmarks, respectively. We tested previously developed docking and affinity prediction algorithms on the new cases. Considering only the top 10 docking predictions per benchmark case, a prediction accuracy of 38% is achieved on all 55 cases and up to 50% for the 32 rigid-body cases only. Predicted affinity scores are found to correlate with experimental binding energies up to r=0.52 overall and r=0.72 for the rigid complexes.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "SKEMPI2",
+      "doi": "10.1093/bioinformatics/bty635",
+      "title": "SKEMPI 2.0: an updated benchmark of changes in protein-protein binding energy, kinetics and thermodynamics upon mutation.",
+      "first_publication_date": "2019-02-01",
+      "pmcid": "PMC6361233",
+      "publication_type": [
+        "Research Support, Non-U.S. Gov't",
+        "research-article",
+        "Journal Article"
+      ],
+      "abstract": "<h4>Motivation</h4>Understanding the relationship between the sequence, structure, binding energy, binding kinetics and binding thermodynamics of protein-protein interactions is crucial to understanding cellular signaling, the assembly and regulation of molecular complexes, the mechanisms through which mutations lead to disease, and protein engineering.<h4>Results</h4>We present SKEMPI 2.0, a major update to our database of binding free energy changes upon mutation for structurally resolved protein-protein interactions. This version now contains manually curated binding data for 7085 mutations, an increase of 133%, including changes in kinetics for 1844 mutations, enthalpy and entropy changes for 443 mutations, and 440 mutations, which abolish detectable binding.<h4>Availability and implementation</h4>The database is available as supplementary data and at https://life.bsc.es/pid/skempi2/.<h4>Supplementary information</h4>Supplementary data are available at Bioinformatics online.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "PRONAB",
+      "doi": "10.1093/nar/gkab848",
+      "title": "ProNAB: database for binding affinities of protein-nucleic acid complexes and their mutants.",
+      "first_publication_date": "2022-01-01",
+      "pmcid": "PMC8728258",
+      "publication_type": [
+        "Research Support, Non-U.S. Gov't",
+        "research-article",
+        "Journal Article"
+      ],
+      "abstract": "Protein-nucleic acid interactions are involved in various biological processes such as gene expression, replication, transcription, translation and packaging. The binding affinities of protein-DNA and protein-RNA complexes are important for elucidating the mechanism of protein-nucleic acid recognition. Although experimental data on binding affinity are reported abundantly in the literature, no well-curated database is currently available for protein-nucleic acid binding affinity. We have developed a database, ProNAB, which contains more than 20 000 experimental data for the binding affinities of protein-DNA and protein-RNA complexes. Each entry provides comprehensive information on sequence and structural features of a protein, nucleic acid and its complex, experimental conditions, thermodynamic parameters such as dissociation constant (Kd), binding free energy (ΔG) and change in binding free energy upon mutation (ΔΔG), and literature information. ProNAB is cross-linked with GenBank, UniProt, PDB, ProThermDB, PROSITE, DisProt and Pubmed. It provides a user-friendly web interface with options for search, display, sorting, visualization, download and upload the data. ProNAB is freely available at https://web.iitm.ac.in/bioinfo2/pronab/ and it has potential applications such as understanding the factors influencing the affinity, development of prediction tools, binding affinity change upon mutation and design complexes with the desired affinity.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "HARIBOSS",
+      "doi": "10.1093/bioinformatics/btac483",
+      "title": "HARIBOSS: a curated database of RNA-small molecules structures to aid rational drug design.",
+      "first_publication_date": "2022-09-01",
+      "pmcid": null,
+      "publication_type": [
+        "Journal Article"
+      ],
+      "abstract": "<h4>Motivation</h4>RNA molecules are implicated in numerous fundamental biological processes and many human pathologies, such as cancer, neurodegenerative disorders, muscular diseases and bacterial infections. Modulating the mode of action of disease-implicated RNA molecules can lead to the discovery of new therapeutical agents and even address pathologies linked to 'undruggable' protein targets. This modulation can be achieved by direct targeting of RNA with small molecules. As of today, only a few RNA-targeting small molecules are used clinically. One of the main obstacles that have hampered the development of a rational drug design protocol to target RNA with small molecules is the lack of a comprehensive understanding of the molecular mechanisms at the basis of RNA-small molecule (RNA-SM) recognition.<h4>Results</h4>Here, we present Harnessing RIBOnucleic acid-Small molecule Structures (HARIBOSS), a curated collection of RNA-SM structures determined by X-ray crystallography, nuclear magnetic resonance spectroscopy and cryo-electron microscopy. HARIBOSS facilitates the exploration of drug-like compounds known to bind RNA, the analysis of ligands and pockets properties and ultimately the development of in silico strategies to identify RNA-targeting small molecules.<h4>Availability and implementation</h4>HARIBOSS can be explored via a web interface available at http://hariboss.pasteur.cloud.<h4>Supplementary information</h4>Supplementary data are available at Bioinformatics online.",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    },
+    {
+      "id": "HARIBOSS_PLUS_PLUS",
+      "doi": "10.64898/2026.09.07.749797",
+      "title": "HARIBOSS++: An Integrated Platform for RNA-Targeted Drug Design",
+      "first_publication_date": "2026-09-13",
+      "pmcid": null,
+      "publication_type": [
+        "Preprint"
+      ],
+      "abstract": "Targeting RNA with small molecules is increasingly viewed as a pivotal strategy for future therapeutics. A major limitation in studying RNA-small molecule (RNA-SM) interactions is the lack of available experimental structures. HARIBOSS established a milestone as a curated database of RNA-SM complexes derived from the Protein Data Bank. Building on its community engagement, we present HARIBOSS++, an updated and next-generation platform designed to facilitate the study of future RNA-targeted drugs. Major updates include an extension of the pocketome to encompass binding sites where small molecules interact not only with RNA but also with other biomolecules, enhanced analysis of RNA molecules by family, detailed 3D structural characterization, improved analysis of ligands chemical space, addition of experimental binding affinity as well as molecular dynamics data, when available. HARIBOSS++ opens new avenues for biologists, bioinformaticians, and machine learning researchers to investigate RNA-SM interactions on a new scale. HARIBOSS++ can be explored using a web interface freely available at  https://hariboss.pasteur.cloud .",
+      "metadata_source": "Europe PMC REST API (primary publication metadata and author abstract)"
+    }
+  ],
+  "official_documentation": [
+    {
+      "id": "BOLTZ_AFFINITY_SCOPE",
+      "path": "../boltz/docs/prediction.md",
+      "section": "Properties (affinity)",
+      "repository": "jwohlwend/boltz",
+      "finding": "Only small-molecule to protein affinity is supported; RNA/DNA/cofactor target outputs are unreliable."
+    }
+  ]
+}

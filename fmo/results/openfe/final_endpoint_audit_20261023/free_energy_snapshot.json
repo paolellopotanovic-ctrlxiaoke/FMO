@@ -1,0 +1,239 @@
+{
+  "schema": "partial-openfe-pilot-diagnostics-v1",
+  "targets": {
+    "CDK8": {
+      "first": "12",
+      "second": "20",
+      "experimental_dG_B_minus_A_kcal_mol": -0.4501399999999993,
+      "solution_estimate_kcal_mol": 5.102149205212386,
+      "solution_repeat_std_kcal_mol": 0.03331754250872938,
+      "solution_status_sha256": "cb0d5e86ff59a6c4d147ef5299d566d2439ae198d2420b75ac146e3329fa53f3",
+      "bound_snapshots": [
+        {
+          "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation_real_time_analysis.yaml",
+          "sha256": "7ae48d2514c1b57e5fa9793e9ef2a1321a7f906a851d72e147973e460341ab3f",
+          "iteration": 2000,
+          "production_complete": true,
+          "bound_estimate_kcal_mol": 4.5317051512309705,
+          "binding_B_minus_A_kcal_mol": -0.5704440539814151,
+          "bound_internal_mbar_se_kcal_mol": 0.0469564473475432,
+          "reported_uncorrelated_samples": 778.1067504882812,
+          "reported_equilibrium_discard_iterations": 61,
+          "history": [
+            {
+              "iteration": 400,
+              "binding_B_minus_A_kcal_mol": -0.6763827112713301
+            },
+            {
+              "iteration": 800,
+              "binding_B_minus_A_kcal_mol": -0.5864084036605881
+            },
+            {
+              "iteration": 1200,
+              "binding_B_minus_A_kcal_mol": -0.7289608129957408
+            },
+            {
+              "iteration": 1600,
+              "binding_B_minus_A_kcal_mol": -0.6372195600539916
+            },
+            {
+              "iteration": 2000,
+              "binding_B_minus_A_kcal_mol": -0.5704440539814151
+            }
+          ],
+          "full_uncertainty_estimated": false,
+          "warning": "Single-history MBAR error is not independent-repeat, chemical-state or model uncertainty."
+        },
+        {
+          "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation_real_time_analysis.yaml",
+          "sha256": "425c986c36b981b32902490610342478126a787d7e95aab6dd49b3270833b8b7",
+          "iteration": 2000,
+          "production_complete": true,
+          "bound_estimate_kcal_mol": 4.464010589157269,
+          "binding_B_minus_A_kcal_mol": -0.6381386160551168,
+          "bound_internal_mbar_se_kcal_mol": 0.04513870236611655,
+          "reported_uncorrelated_samples": 908.6876220703125,
+          "reported_equilibrium_discard_iterations": 81,
+          "history": [
+            {
+              "iteration": 400,
+              "binding_B_minus_A_kcal_mol": -1.0057678818475209
+            },
+            {
+              "iteration": 800,
+              "binding_B_minus_A_kcal_mol": -0.939209783634869
+            },
+            {
+              "iteration": 1200,
+              "binding_B_minus_A_kcal_mol": -0.8062358930314746
+            },
+            {
+              "iteration": 1600,
+              "binding_B_minus_A_kcal_mol": -0.7962785528642771
+            },
+            {
+              "iteration": 2000,
+              "binding_B_minus_A_kcal_mol": -0.6381386160551168
+            }
+          ],
+          "full_uncertainty_estimated": false,
+          "warning": "Single-history MBAR error is not independent-repeat, chemical-state or model uncertainty."
+        },
+        {
+          "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation_real_time_analysis.yaml",
+          "sha256": "c3981c48b33c86cb475dae0972ba80f32fdebb5d8f8f25d263a52ff53c77c220",
+          "iteration": 2000,
+          "production_complete": true,
+          "bound_estimate_kcal_mol": 4.605869084739303,
+          "binding_B_minus_A_kcal_mol": -0.4962801204730827,
+          "bound_internal_mbar_se_kcal_mol": 0.04739002296410923,
+          "reported_uncorrelated_samples": 767.3591918945312,
+          "reported_equilibrium_discard_iterations": 761,
+          "history": [
+            {
+              "iteration": 400,
+              "binding_B_minus_A_kcal_mol": -1.2010450002548518
+            },
+            {
+              "iteration": 800,
+              "binding_B_minus_A_kcal_mol": -0.8244670924138591
+            },
+            {
+              "iteration": 1200,
+              "binding_B_minus_A_kcal_mol": -0.5320818009993777
+            },
+            {
+              "iteration": 1600,
+              "binding_B_minus_A_kcal_mol": -0.4989637336129418
+            },
+            {
+              "iteration": 2000,
+              "binding_B_minus_A_kcal_mol": -0.4962801204730827
+            }
+          ],
+          "full_uncertainty_estimated": false,
+          "warning": "Single-history MBAR error is not independent-repeat, chemical-state or model uncertainty."
+        }
+      ]
+    },
+    "BACE": {
+      "first": "CAT-13n",
+      "second": "CAT-4i",
+      "experimental_dG_B_minus_A_kcal_mol": 0.27999999999999936,
+      "solution_estimate_kcal_mol": 90.80244207997133,
+      "solution_repeat_std_kcal_mol": 0.08658039972679384,
+      "solution_status_sha256": "75ce62ea60b6e61623f595147d8dbcd8b33a496ff02cf649008e03eaef1f7ede",
+      "bound_snapshots": [
+        {
+          "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation_real_time_analysis.yaml",
+          "sha256": "d645ef8c35573ea1a2addff7193017b1221f5b01ae5fa8d00025016023637bfa",
+          "iteration": 2000,
+          "production_complete": true,
+          "bound_estimate_kcal_mol": 92.82101070016391,
+          "binding_B_minus_A_kcal_mol": 2.018568620192582,
+          "bound_internal_mbar_se_kcal_mol": 0.11767839648285484,
+          "reported_uncorrelated_samples": 927.8845825195312,
+          "reported_equilibrium_discard_iterations": 241,
+          "history": [
+            {
+              "iteration": 400,
+              "binding_B_minus_A_kcal_mol": 0.9383154332239343
+            },
+            {
+              "iteration": 800,
+              "binding_B_minus_A_kcal_mol": 1.3226679602883706
+            },
+            {
+              "iteration": 1200,
+              "binding_B_minus_A_kcal_mol": 1.7409338704953115
+            },
+            {
+              "iteration": 1600,
+              "binding_B_minus_A_kcal_mol": 1.7430982035668592
+            },
+            {
+              "iteration": 2000,
+              "binding_B_minus_A_kcal_mol": 2.018568620192582
+            }
+          ],
+          "full_uncertainty_estimated": false,
+          "warning": "Single-history MBAR error is not independent-repeat, chemical-state or model uncertainty."
+        },
+        {
+          "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation_real_time_analysis.yaml",
+          "sha256": "ae1ec62b9ab4212dfcd341456993f2b98f25509f7025afa0f4a0943c693c2b32",
+          "iteration": 2000,
+          "production_complete": true,
+          "bound_estimate_kcal_mol": 93.52603152345935,
+          "binding_B_minus_A_kcal_mol": 2.7235894434880237,
+          "bound_internal_mbar_se_kcal_mol": 0.11622077986658097,
+          "reported_uncorrelated_samples": 981.8494262695312,
+          "reported_equilibrium_discard_iterations": 21,
+          "history": [
+            {
+              "iteration": 400,
+              "binding_B_minus_A_kcal_mol": 2.7029933520873612
+            },
+            {
+              "iteration": 800,
+              "binding_B_minus_A_kcal_mol": 2.7083606963110896
+            },
+            {
+              "iteration": 1200,
+              "binding_B_minus_A_kcal_mol": 2.870458206171321
+            },
+            {
+              "iteration": 1600,
+              "binding_B_minus_A_kcal_mol": 2.6377166348494114
+            },
+            {
+              "iteration": 2000,
+              "binding_B_minus_A_kcal_mol": 2.7235894434880237
+            }
+          ],
+          "full_uncertainty_estimated": false,
+          "warning": "Single-history MBAR error is not independent-repeat, chemical-state or model uncertainty."
+        },
+        {
+          "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation_real_time_analysis.yaml",
+          "sha256": "d0628b26e623a14356fb777e75a37f9b9fd0e52364f137ebdd9ba67fc67ced1a",
+          "iteration": 2000,
+          "production_complete": true,
+          "bound_estimate_kcal_mol": 93.60219838016809,
+          "binding_B_minus_A_kcal_mol": 2.799756300196762,
+          "bound_internal_mbar_se_kcal_mol": 0.11741440221069803,
+          "reported_uncorrelated_samples": 940.1596069335938,
+          "reported_equilibrium_discard_iterations": 241,
+          "history": [
+            {
+              "iteration": 400,
+              "binding_B_minus_A_kcal_mol": 2.367606841333327
+            },
+            {
+              "iteration": 800,
+              "binding_B_minus_A_kcal_mol": 1.965217484093344
+            },
+            {
+              "iteration": 1200,
+              "binding_B_minus_A_kcal_mol": 2.674338354191846
+            },
+            {
+              "iteration": 1600,
+              "binding_B_minus_A_kcal_mol": 2.785470427648292
+            },
+            {
+              "iteration": 2000,
+              "binding_B_minus_A_kcal_mol": 2.799756300196762
+            }
+          ],
+          "full_uncertainty_estimated": false,
+          "warning": "Single-history MBAR error is not independent-repeat, chemical-state or model uncertainty."
+        }
+      ]
+    }
+  },
+  "temperature_kelvin": 298.15,
+  "full_cohort_metrics_available": false,
+  "scope": "first predefined edge per target only; not validation of a QM correction or cohort ranking",
+  "network_expansion_approved": false
+}

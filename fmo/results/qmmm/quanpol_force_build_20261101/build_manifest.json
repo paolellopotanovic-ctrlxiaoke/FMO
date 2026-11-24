@@ -1,0 +1,26 @@
+{
+  "status": "BUILT",
+  "original_source_sha256": "5278bbe2f9eff71e7a4ad9217091e22393324bd7c2f2d6e37494bebebe289a21",
+  "instrumented_source_sha256": "90e3c32e3726b42e305bffc635fc168ba84dadb889b82464b4a689e378385965",
+  "original_binary_sha256": "5c57251762629e8884f898e268553b6ddb93fa5bda7dd9a5cb3a290feeda7bce",
+  "binary_sha256": "4f8b452da303d6d449a993f39982bf3abfe5b7ddd05c471da4da9175c5440059",
+  "gradient_units": "hartree/bohr",
+  "energy_units": "hartree",
+  "instrumentation": "FFOPT2: after QM/MM gradient merge, before masking/fixing",
+  "original_installation_modified": false,
+  "compile_command": [
+    "gfortran",
+    "-c",
+    "-fdefault-integer-8",
+    "-g",
+    "-O2",
+    "-fno-aggressive-loop-optimizations",
+    "-funconstrained-commons",
+    "-fallow-argument-mismatch",
+    "-I",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/runs/quanpol_force_build_20261101/object",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/runs/quanpol_force_build_20261101/quanpoc_force.f",
+    "-o",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/runs/quanpol_force_build_20261101/object/quanpoc.o"
+  ]
+}

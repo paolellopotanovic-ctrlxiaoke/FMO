@@ -1,0 +1,273 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "kind": "qm_heavy",
+      "step_angstrom": 0.001,
+      "analytic": -42.185751795154424,
+      "numerical": -42.18172875698656,
+      "raw_absolute_error": 0.0040230381678654226,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -42.18172875698656,
+      "absolute_error": 0.0040230381678654226,
+      "passed": true
+    },
+    {
+      "kind": "qm_heavy",
+      "step_angstrom": 0.0002,
+      "analytic": -42.185751795154424,
+      "numerical": -42.183469340670854,
+      "raw_absolute_error": 0.0022824544835700067,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -42.183469340670854,
+      "absolute_error": 0.0022824544835700067,
+      "passed": true
+    },
+    {
+      "kind": "qm_hydrogen",
+      "step_angstrom": 0.001,
+      "analytic": 5.479055123926573,
+      "numerical": 5.478960301843472,
+      "raw_absolute_error": 9.482208310096496e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": 5.478960301843472,
+      "absolute_error": 9.482208310096496e-05,
+      "passed": true
+    },
+    {
+      "kind": "qm_hydrogen",
+      "step_angstrom": 0.0002,
+      "analytic": 5.479055123926573,
+      "numerical": 5.479052124428563,
+      "raw_absolute_error": 2.999498009970125e-06,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": 5.479052124428563,
+      "absolute_error": 2.999498009970125e-06,
+      "passed": true
+    },
+    {
+      "kind": "mm_water_oxygen",
+      "step_angstrom": 0.001,
+      "analytic": -12.172578888425571,
+      "numerical": -14.199319535691757,
+      "raw_absolute_error": 2.0267406472661857,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": -2.029075759063253,
+        "pairs": [
+          {
+            "first": 283,
+            "second": 805,
+            "crossing": -1,
+            "jump_kcal_mol": 0.0040581515181265055,
+            "native_jump_kcal_mol": 0.0040581515181265055,
+            "custom_jump_kcal_mol": 0.0,
+            "distance_nm": 0.8999764045319405
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": -12.170243776628503,
+      "absolute_error": 0.0023351117970680235,
+      "passed": true
+    },
+    {
+      "kind": "mm_water_oxygen",
+      "step_angstrom": 0.0002,
+      "analytic": -12.172578888425571,
+      "numerical": -12.172560491308104,
+      "raw_absolute_error": 1.839711746676187e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -12.172560491308104,
+      "absolute_error": 1.839711746676187e-05,
+      "passed": true
+    },
+    {
+      "kind": "mm_nonwater_heavy",
+      "step_angstrom": 0.001,
+      "analytic": -5.7672224961655525,
+      "numerical": -5.767240803834284,
+      "raw_absolute_error": 1.830766873123224e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -5.767240803834284,
+      "absolute_error": 1.830766873123224e-05,
+      "passed": true
+    },
+    {
+      "kind": "mm_nonwater_heavy",
+      "step_angstrom": 0.0002,
+      "analytic": -5.7672224961655525,
+      "numerical": -5.767236943938769,
+      "raw_absolute_error": 1.4447773216907933e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -5.767236943938769,
+      "absolute_error": 1.4447773216907933e-05,
+      "passed": true
+    },
+    {
+      "kind": "collective_all",
+      "step_angstrom": 0.001,
+      "analytic": -4.071516517993702,
+      "numerical": -4.071508192282636,
+      "raw_absolute_error": 8.325711066348163e-06,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -4.071508192282636,
+      "absolute_error": 8.325711066348163e-06,
+      "passed": true
+    },
+    {
+      "kind": "collective_all",
+      "step_angstrom": 0.0002,
+      "analytic": -4.071516517993702,
+      "numerical": -4.071473522344604,
+      "raw_absolute_error": 4.299564909793219e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -4.071473522344604,
+      "absolute_error": 4.299564909793219e-05,
+      "passed": true
+    },
+    {
+      "kind": "collective_environment",
+      "step_angstrom": 0.001,
+      "analytic": 5.134306523884308,
+      "numerical": 4.4873751103295945,
+      "raw_absolute_error": 0.6469314135547135,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 2,
+        "predicted_gradient_discontinuity": -0.6469199125531545,
+        "pairs": [
+          {
+            "first": 785,
+            "second": 1047,
+            "crossing": 1,
+            "jump_kcal_mol": 0.001293839825106309,
+            "native_jump_kcal_mol": 0.001293839825106309,
+            "custom_jump_kcal_mol": 0.0,
+            "distance_nm": 0.9000011212276575
+          },
+          {
+            "first": 1664,
+            "second": 331,
+            "crossing": 1,
+            "jump_kcal_mol": -0.002587679650212618,
+            "native_jump_kcal_mol": -0.002587679650212618,
+            "custom_jump_kcal_mol": 0.0,
+            "distance_nm": 0.9000000398485081
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": 5.134295022882749,
+      "absolute_error": 1.1501001559111046e-05,
+      "passed": true
+    },
+    {
+      "kind": "collective_environment",
+      "step_angstrom": 0.0002,
+      "analytic": 5.134306523884308,
+      "numerical": -1.3349720757105388,
+      "raw_absolute_error": 6.469278599594847,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 1,
+        "predicted_gradient_discontinuity": -6.469199125531545,
+        "pairs": [
+          {
+            "first": 1664,
+            "second": 331,
+            "crossing": 1,
+            "jump_kcal_mol": -0.002587679650212618,
+            "native_jump_kcal_mol": -0.002587679650212618,
+            "custom_jump_kcal_mol": 0.0,
+            "distance_nm": 0.9000000398485081
+          }
+        ]
+      },
+      "numerical_with_reference_cutoff_jump_removed": 5.134227049821006,
+      "absolute_error": 7.947406330188755e-05,
+      "passed": true
+    },
+    {
+      "kind": "collective_qm_translation",
+      "step_angstrom": 0.001,
+      "analytic": -0.2698882573856176,
+      "numerical": -0.2698847783904057,
+      "raw_absolute_error": 3.478995211914082e-06,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.001,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -0.2698847783904057,
+      "absolute_error": 3.478995211914082e-06,
+      "passed": true
+    },
+    {
+      "kind": "collective_qm_translation",
+      "step_angstrom": 0.0002,
+      "analytic": -0.2698882573856176,
+      "numerical": -0.2698721073102206,
+      "raw_absolute_error": 1.615007539701452e-05,
+      "reference_cutoff_jump": {
+        "step_angstrom": 0.0002,
+        "crossing_pairs": 0,
+        "predicted_gradient_discontinuity": 0.0,
+        "pairs": []
+      },
+      "numerical_with_reference_cutoff_jump_removed": -0.2698721073102206,
+      "absolute_error": 1.615007539701452e-05,
+      "passed": true
+    }
+  ],
+  "reference_pme_net_gradient_kcal_mol_angstrom": 0.027416145049297524,
+  "reference_hamiltonian_modified": false,
+  "sampling_energy_or_force_shifted_to_pass_gate": false,
+  "cutoff_discontinuities": "analytic known pair potential jumps accounted ONLY for finite-difference verification; all unmodified energies used in Metropolis acceptance",
+  "net_target_gradient_kcal_mol_angstrom": 0.027147108314282343
+}

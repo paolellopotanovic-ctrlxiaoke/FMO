@@ -1,0 +1,698 @@
+{
+  "date_utc": "2026-10-21",
+  "n": 10,
+  "goal_spearman": 0.6,
+  "goal_achieved": false,
+  "production_changed": false,
+  "metrics": {
+    "tpie_pcm": {
+      "pearson": 0.27411894151891825,
+      "spearman": 0.23636363636363633,
+      "kendall": 0.15555555555555553
+    },
+    "three_state_pcm_bound": {
+      "pearson": -0.15451300149090447,
+      "spearman": 0.06666666666666665,
+      "kendall": 0.06666666666666667
+    },
+    "three_state_pcm_free_min": {
+      "pearson": -0.07572848829620513,
+      "spearman": 0.05454545454545454,
+      "kendall": 0.022222222222222223
+    },
+    "tpie_plus_ligand_strain": {
+      "pearson": 0.18361507359101842,
+      "spearman": 0.17575757575757575,
+      "kendall": 0.06666666666666667
+    },
+    "native_interaction": {
+      "pearson": 0.27414983790667513,
+      "spearman": 0.23636363636363633,
+      "kendall": 0.15555555555555553
+    },
+    "native_interaction_plus_desolvation": {
+      "pearson": -0.2793184213091217,
+      "spearman": -0.07878787878787878,
+      "kendall": -0.022222222222222223
+    },
+    "native_binding": {
+      "pearson": -0.15454975344586075,
+      "spearman": 0.06666666666666665,
+      "kendall": 0.06666666666666667
+    },
+    "tpie_plus_native_desolvation": {
+      "pearson": -0.2793139730778983,
+      "spearman": -0.07878787878787878,
+      "kendall": -0.022222222222222223
+    },
+    "three_state_pcm_multistart": {
+      "pearson": 0.009719467095454598,
+      "spearman": -0.0303030303030303,
+      "kendall": -0.022222222222222223
+    },
+    "tpie_plus_multistart_strain": {
+      "pearson": 0.25980986572114784,
+      "spearman": 0.2606060606060606,
+      "kendall": 0.15555555555555553
+    }
+  },
+  "posthoc_component_diagnostic_metrics": {
+    "three_state_electrostatic_only": {
+      "pearson": 0.10992429151800456,
+      "spearman": 0.006060606060606061,
+      "kendall": -0.06666666666666667
+    },
+    "three_state_electrostatic_free": {
+      "pearson": 0.05815786515450404,
+      "spearman": 0.006060606060606061,
+      "kendall": -0.022222222222222223
+    },
+    "tpie_plus_delta_electrostatic_solv": {
+      "pearson": -0.015045585741438106,
+      "spearman": 0.0303030303030303,
+      "kendall": -0.022222222222222223
+    },
+    "tpie_plus_cavity": {
+      "pearson": 0.006550744192846042,
+      "spearman": 0.18787878787878787,
+      "kendall": 0.1111111111111111
+    },
+    "tpie_plus_es_cavity": {
+      "pearson": -0.18442557513086982,
+      "spearman": -0.006060606060606061,
+      "kendall": 0.022222222222222223
+    }
+  },
+  "rows": [
+    {
+      "ligand": "12",
+      "experimental_dg": -9.83296,
+      "tpie_pcm": -63.571,
+      "three_state_pcm_bound": -68.4791061443418,
+      "three_state_pcm_free_min": -61.57750845484091,
+      "tpie_plus_ligand_strain": -56.66940231049911,
+      "strain_kcal_mol": 6.901597689500886,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.24216044853138732,
+      "cavity_delta": -24.66399999999995,
+      "electrostatic_solvation_delta": 20.284000000000013,
+      "three_state_electrostatic_only": -43.81510614434185,
+      "three_state_electrostatic_free": -38.10450845484097,
+      "tpie_plus_delta_electrostatic_solv": -43.286999999999985,
+      "tpie_plus_cavity": -88.23499999999996,
+      "tpie_plus_es_cavity": -67.95099999999994,
+      "native_interaction": -63.571,
+      "native_interaction_plus_desolvation": -44.715999999999994,
+      "native_binding": -68.479,
+      "tpie_plus_native_desolvation": -44.715999999999994,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -23.763,
+        "desolvation_kcal_mol": 18.855,
+        "interaction_kcal_mol": -63.571,
+        "binding_kcal_mol": -68.479,
+        "check_binding_kcal_mol": -68.479113,
+        "native_pair_table_sum_kcal_mol": -63.571,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "13",
+      "experimental_dg": -11.1972,
+      "tpie_pcm": -61.230000000000004,
+      "three_state_pcm_bound": -60.89220222063487,
+      "three_state_pcm_free_min": -54.29960713892136,
+      "tpie_plus_ligand_strain": -54.63740491828649,
+      "strain_kcal_mol": 6.5925950817135135,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.19178974026824389,
+      "cavity_delta": -20.059999999999924,
+      "electrostatic_solvation_delta": 21.50700000000003,
+      "three_state_electrostatic_only": -40.83220222063495,
+      "three_state_electrostatic_free": -35.07260713892144,
+      "tpie_plus_delta_electrostatic_solv": -39.72299999999997,
+      "tpie_plus_cavity": -81.28999999999994,
+      "tpie_plus_es_cavity": -59.782999999999895,
+      "native_interaction": -61.231,
+      "native_interaction_plus_desolvation": -36.732,
+      "native_binding": -60.892,
+      "tpie_plus_native_desolvation": -36.73100000000001,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -24.161,
+        "desolvation_kcal_mol": 24.499,
+        "interaction_kcal_mol": -61.231,
+        "binding_kcal_mol": -60.892,
+        "check_binding_kcal_mol": -60.892202,
+        "native_pair_table_sum_kcal_mol": -61.230000000000004,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "14",
+      "experimental_dg": -11.0316,
+      "tpie_pcm": -66.047,
+      "three_state_pcm_bound": -69.42047703202468,
+      "three_state_pcm_free_min": -63.0600121374856,
+      "tpie_plus_ligand_strain": -59.68653510546092,
+      "strain_kcal_mol": 6.360464894539081,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.20685138448745052,
+      "cavity_delta": -25.062999999999924,
+      "electrostatic_solvation_delta": 21.93700000000003,
+      "three_state_electrostatic_only": -44.357477032024754,
+      "three_state_electrostatic_free": -38.87001213748567,
+      "tpie_plus_delta_electrostatic_solv": -44.10999999999997,
+      "tpie_plus_cavity": -91.10999999999993,
+      "tpie_plus_es_cavity": -69.17299999999989,
+      "native_interaction": -66.049,
+      "native_interaction_plus_desolvation": -45.074000000000005,
+      "native_binding": -69.42,
+      "tpie_plus_native_desolvation": -45.071999999999996,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -24.347,
+        "desolvation_kcal_mol": 20.975,
+        "interaction_kcal_mol": -66.049,
+        "binding_kcal_mol": -69.42,
+        "check_binding_kcal_mol": -69.420486,
+        "native_pair_table_sum_kcal_mol": -66.047,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "15",
+      "experimental_dg": -9.72018,
+      "tpie_pcm": -67.029,
+      "three_state_pcm_bound": -74.08381368853523,
+      "three_state_pcm_free_min": -66.94998917540183,
+      "tpie_plus_ligand_strain": -59.89517548686659,
+      "strain_kcal_mol": 7.133824513133403,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.18426772126660756,
+      "cavity_delta": -28.74499999999999,
+      "electrostatic_solvation_delta": 21.399000000000036,
+      "three_state_electrostatic_only": -45.33881368853524,
+      "three_state_electrostatic_free": -38.88098917540183,
+      "tpie_plus_delta_electrostatic_solv": -45.62999999999996,
+      "tpie_plus_cavity": -95.77399999999999,
+      "tpie_plus_es_cavity": -74.37499999999994,
+      "native_interaction": -67.029,
+      "native_interaction_plus_desolvation": -50.599,
+      "native_binding": -74.084,
+      "tpie_plus_native_desolvation": -50.599,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -23.485,
+        "desolvation_kcal_mol": 16.43,
+        "interaction_kcal_mol": -67.029,
+        "binding_kcal_mol": -74.084,
+        "check_binding_kcal_mol": -74.083825,
+        "native_pair_table_sum_kcal_mol": -67.029,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "16",
+      "experimental_dg": -10.6355,
+      "tpie_pcm": -69.058,
+      "three_state_pcm_bound": -73.8700055229622,
+      "three_state_pcm_free_min": -66.16989449760686,
+      "tpie_plus_ligand_strain": -61.357888974644666,
+      "strain_kcal_mol": 7.700111025355343,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.22447550548640524,
+      "cavity_delta": -28.79899999999992,
+      "electrostatic_solvation_delta": 22.63200000000002,
+      "three_state_electrostatic_only": -45.07100552296228,
+      "three_state_electrostatic_free": -37.98389449760694,
+      "tpie_plus_delta_electrostatic_solv": -46.42599999999999,
+      "tpie_plus_cavity": -97.85699999999993,
+      "tpie_plus_es_cavity": -75.22499999999991,
+      "native_interaction": -69.059,
+      "native_interaction_plus_desolvation": -49.736999999999995,
+      "native_binding": -73.87,
+      "tpie_plus_native_desolvation": -49.736000000000004,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -24.133,
+        "desolvation_kcal_mol": 19.322,
+        "interaction_kcal_mol": -69.059,
+        "binding_kcal_mol": -73.87,
+        "check_binding_kcal_mol": -73.870015,
+        "native_pair_table_sum_kcal_mol": -69.058,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "17",
+      "experimental_dg": -10.3953,
+      "tpie_pcm": -64.46,
+      "three_state_pcm_bound": -72.3922502044971,
+      "three_state_pcm_free_min": -47.30946911766232,
+      "tpie_plus_ligand_strain": -39.37721891316521,
+      "strain_kcal_mol": 25.08278108683479,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.930237964510828,
+      "cavity_delta": -30.35899999999991,
+      "electrostatic_solvation_delta": 21.47500000000003,
+      "three_state_electrostatic_only": -42.03325020449719,
+      "three_state_electrostatic_free": -18.4914691176624,
+      "tpie_plus_delta_electrostatic_solv": -42.984999999999964,
+      "tpie_plus_cavity": -94.8189999999999,
+      "tpie_plus_es_cavity": -73.34399999999988,
+      "native_interaction": -64.462,
+      "native_interaction_plus_desolvation": -47.80200000000001,
+      "native_binding": -72.392,
+      "tpie_plus_native_desolvation": -47.8,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -24.59,
+        "desolvation_kcal_mol": 16.66,
+        "interaction_kcal_mol": -64.462,
+        "binding_kcal_mol": -72.392,
+        "check_binding_kcal_mol": -72.39226,
+        "native_pair_table_sum_kcal_mol": -64.46,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "19",
+      "experimental_dg": -10.2248,
+      "tpie_pcm": -58.713,
+      "three_state_pcm_bound": -62.981072700654586,
+      "three_state_pcm_free_min": -57.03931475770275,
+      "tpie_plus_ligand_strain": -52.77124205704816,
+      "strain_kcal_mol": 5.941757942951838,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.2037438065885418,
+      "cavity_delta": -21.505000000000003,
+      "electrostatic_solvation_delta": 17.87599999999999,
+      "three_state_electrostatic_only": -41.47607270065458,
+      "three_state_electrostatic_free": -36.446314757702744,
+      "tpie_plus_delta_electrostatic_solv": -40.83700000000001,
+      "tpie_plus_cavity": -80.218,
+      "tpie_plus_es_cavity": -62.34200000000001,
+      "native_interaction": -58.713,
+      "native_interaction_plus_desolvation": -39.437,
+      "native_binding": -62.981,
+      "tpie_plus_native_desolvation": -39.437,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -23.544,
+        "desolvation_kcal_mol": 19.276,
+        "interaction_kcal_mol": -58.713,
+        "binding_kcal_mol": -62.981,
+        "check_binding_kcal_mol": -62.981082,
+        "native_pair_table_sum_kcal_mol": -58.713,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "20",
+      "experimental_dg": -10.2831,
+      "tpie_pcm": -61.387,
+      "three_state_pcm_bound": -68.8471059378474,
+      "three_state_pcm_free_min": -63.40962653093437,
+      "tpie_plus_ligand_strain": -55.949520593086966,
+      "strain_kcal_mol": 5.437479406913032,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.21278979624194996,
+      "cavity_delta": -25.674999999999997,
+      "electrostatic_solvation_delta": 18.259000000000036,
+      "three_state_electrostatic_only": -43.172105937847405,
+      "three_state_electrostatic_free": -38.641626530934374,
+      "tpie_plus_delta_electrostatic_solv": -43.127999999999965,
+      "tpie_plus_cavity": -87.062,
+      "tpie_plus_es_cavity": -68.80299999999997,
+      "native_interaction": -61.39,
+      "native_interaction_plus_desolvation": -44.996,
+      "native_binding": -68.847,
+      "tpie_plus_native_desolvation": -44.993,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -23.851,
+        "desolvation_kcal_mol": 16.394,
+        "interaction_kcal_mol": -61.39,
+        "binding_kcal_mol": -68.847,
+        "check_binding_kcal_mol": -68.847117,
+        "native_pair_table_sum_kcal_mol": -61.387,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "21",
+      "experimental_dg": -9.86234,
+      "tpie_pcm": -63.02,
+      "three_state_pcm_bound": -70.78350542086305,
+      "three_state_pcm_free_min": -62.99604570422569,
+      "tpie_plus_ligand_strain": -55.232540283362646,
+      "strain_kcal_mol": 7.787459716637356,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.1948170257871406,
+      "cavity_delta": -27.244999999999955,
+      "electrostatic_solvation_delta": 18.437000000000005,
+      "three_state_electrostatic_only": -43.538505420863096,
+      "three_state_electrostatic_free": -37.292045704225735,
+      "tpie_plus_delta_electrostatic_solv": -44.583,
+      "tpie_plus_cavity": -90.26499999999996,
+      "tpie_plus_es_cavity": -71.82799999999995,
+      "native_interaction": -63.021,
+      "native_interaction_plus_desolvation": -49.661,
+      "native_binding": -70.784,
+      "tpie_plus_native_desolvation": -49.660000000000004,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -21.122,
+        "desolvation_kcal_mol": 13.36,
+        "interaction_kcal_mol": -63.021,
+        "binding_kcal_mol": -70.784,
+        "check_binding_kcal_mol": -70.78351,
+        "native_pair_table_sum_kcal_mol": -63.02,
+        "native_pair_count": 32
+      }
+    },
+    {
+      "ligand": "22",
+      "experimental_dg": -11.2901,
+      "tpie_pcm": -69.614,
+      "three_state_pcm_bound": -74.29720832532394,
+      "three_state_pcm_free_min": -66.95653535421954,
+      "tpie_plus_ligand_strain": -62.27332702889561,
+      "strain_kcal_mol": 7.340672971104399,
+      "solvation_increment_kcal_mol": null,
+      "optimized_aligned_allatom_rmsd_angstrom": 0.21255794281804116,
+      "cavity_delta": -26.881999999999948,
+      "electrostatic_solvation_delta": 22.418999999999983,
+      "three_state_electrostatic_only": -47.41520832532399,
+      "three_state_electrostatic_free": -41.143535354219594,
+      "tpie_plus_delta_electrostatic_solv": -47.19500000000002,
+      "tpie_plus_cavity": -96.49599999999995,
+      "tpie_plus_es_cavity": -74.07699999999997,
+      "native_interaction": -69.613,
+      "native_interaction_plus_desolvation": -49.76,
+      "native_binding": -74.297,
+      "tpie_plus_native_desolvation": -49.761,
+      "native_terms": {
+        "monomer_destabilization_kcal_mol": -24.537,
+        "desolvation_kcal_mol": 19.853,
+        "interaction_kcal_mol": -69.613,
+        "binding_kcal_mol": -74.297,
+        "check_binding_kcal_mol": -74.297219,
+        "native_pair_table_sum_kcal_mol": -69.613,
+        "native_pair_count": 32
+      }
+    }
+  ],
+  "failed_gas_jobs": [
+    "gas/17/complex",
+    "gas/22/complex",
+    "gas/21/complex",
+    "gas/13/complex",
+    "gas/20/complex",
+    "gas/19/complex",
+    "gas/14/complex",
+    "gas/16/complex",
+    "gas/12/complex",
+    "gas/15/complex"
+  ],
+  "native_max_abs_reconciliation_kcal_mol": 0.0004945791369550534,
+  "sources_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/final_evaluation.json": "e02af645162ef377958122ba98236a59da0a4e6d1fbefd3efdbaaa50ab846f66",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/native/execution.json": "ea5db65ae1ddf89d6a5dd3f0476c4db6621267d0c9b8035b4fa880d10c3e1103",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/final_evaluation.json": "d9c1d5641aa343a258420edeefd1cb6a4b97e29481f5fff73c31535931e58ca0",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/geometry_audit.json": "6b17bd3ab98acd243061fdc30c6b58f57c73fdb8eb6ecfc4aca35674343231dd"
+  },
+  "limitations": [
+    "Ten-ligand development cohort; no held-out validation",
+    "Single local free-ligand minimum, no entropy or state populations",
+    "Fixed pocket and structural waters, not a full protein free-energy calculation",
+    "Hybrid tPIE corrections are not a closed thermodynamic cycle",
+    "No fitted weights or dropped cases"
+  ],
+  "sampling": {
+    "n": 10,
+    "n_jobs": 40,
+    "failed_starts": [],
+    "rows": [
+      {
+        "ligand": "12",
+        "experimental_dg": -9.83296,
+        "solution_min_strain": 7.566251331859774,
+        "three_state_pcm_multistart": -60.912854812482024,
+        "tpie_plus_multistart_strain": -56.00474866814022,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "13",
+        "experimental_dg": -11.1972,
+        "solution_min_strain": 6.5925950817135135,
+        "three_state_pcm_multistart": -54.29960713892136,
+        "tpie_plus_multistart_strain": -54.63740491828649,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "14",
+        "experimental_dg": -11.0316,
+        "solution_min_strain": 6.614478219600665,
+        "three_state_pcm_multistart": -62.805998812424015,
+        "tpie_plus_multistart_strain": -59.432521780399334,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "15",
+        "experimental_dg": -9.72018,
+        "solution_min_strain": 7.133824513133403,
+        "three_state_pcm_multistart": -66.94998917540183,
+        "tpie_plus_multistart_strain": -59.89517548686659,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "16",
+        "experimental_dg": -10.6355,
+        "solution_min_strain": 7.700111025355343,
+        "three_state_pcm_multistart": -66.16989449760686,
+        "tpie_plus_multistart_strain": -61.357888974644666,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "17",
+        "experimental_dg": -10.3953,
+        "solution_min_strain": 25.08278108683479,
+        "three_state_pcm_multistart": -47.30946911766232,
+        "tpie_plus_multistart_strain": -39.37721891316521,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "19",
+        "experimental_dg": -10.2248,
+        "solution_min_strain": 7.358448431977784,
+        "three_state_pcm_multistart": -55.6226242686768,
+        "tpie_plus_multistart_strain": -51.35455156802222,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "20",
+        "experimental_dg": -10.2831,
+        "solution_min_strain": 6.366345285818842,
+        "three_state_pcm_multistart": -62.48076065202856,
+        "tpie_plus_multistart_strain": -55.020654714181155,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "21",
+        "experimental_dg": -9.86234,
+        "solution_min_strain": 11.838715474510813,
+        "three_state_pcm_multistart": -58.94478994635224,
+        "tpie_plus_multistart_strain": -51.18128452548919,
+        "n_successful_minima_including_bound_start": 5
+      },
+      {
+        "ligand": "22",
+        "experimental_dg": -11.2901,
+        "solution_min_strain": 7.697914742197209,
+        "three_state_pcm_multistart": -66.59929358312672,
+        "tpie_plus_multistart_strain": -61.91608525780279,
+        "n_successful_minima_including_bound_start": 5
+      }
+    ],
+    "metrics": {
+      "three_state_pcm_multistart": {
+        "pearson": 0.009719467095454598,
+        "spearman": -0.0303030303030303,
+        "kendall": -0.022222222222222223
+      },
+      "tpie_plus_multistart_strain": {
+        "pearson": 0.25980986572114784,
+        "spearman": 0.2606060606060606,
+        "kendall": 0.15555555555555553
+      }
+    },
+    "warning": "Multistart minimum-energy proxy, not entropy or free energy; not blind validation"
+  },
+  "sampling_geometry_audit": {
+    "n": 40,
+    "n_flagged": 0,
+    "scope": "Coarse expected-bond distance screen, not proof of unchanged protonation, full bond order or electronic stability",
+    "checks": {
+      "solution_sampling4/12/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/12/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/12/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/12/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/12/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/12/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/12/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/12/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/13/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/13/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/13/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/13/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/13/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/13/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/13/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/13/c3/recovery_perturbed/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/14/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/14/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/14/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/14/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/14/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/14/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/14/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/14/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/15/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/15/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/15/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/15/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/15/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/15/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/15/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/15/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/16/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/16/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/16/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/16/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/16/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/16/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/16/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/16/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/17/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/17/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/17/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/17/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/17/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/17/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/17/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/17/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/19/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/19/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/19/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/19/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/19/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/19/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/19/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/19/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/20/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/20/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/20/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/20/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/20/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/20/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/20/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/20/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/21/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/21/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/21/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/21/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/21/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/21/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/21/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/21/c3/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/22/c0": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/22/c0/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/22/c1": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/22/c1/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/22/c2": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/22/c2/result.json",
+        "elongated_expected_bonds": []
+      },
+      "solution_sampling4/22/c3": {
+        "selected_result": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/22/c3/result.json",
+        "elongated_expected_bonds": []
+      }
+    }
+  },
+  "runtime": {
+    "n_recorded_attempt_results": 208,
+    "sum_recorded_job_wall_seconds": 7760.54848426953,
+    "requested_core_hours_with_recorded_wall_not_measured_cpu": 4.311415824594183,
+    "warning": "Includes failed and exploratory attempts; native driver did not record per-job wall time, so this is incomplete accounting, not end-to-end preparation or measured CPU usage"
+  },
+  "baseline_spearman_permutation_p_two_sided": 0.5044495550444955
+}

@@ -1,0 +1,590 @@
+{
+  "status": "PASSED",
+  "labels_used": false,
+  "production_pipeline_modified": false,
+  "scope": "full embedded ligand-QM/environment-MM finite-shell Cartesian forces, four states; not full periodic QM/MM",
+  "build_manifest": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/runs/quanpol_force_build_20261101/build_manifest.json",
+  "states": [
+    {
+      "state": "b0",
+      "leg": "bound",
+      "endpoint": 0,
+      "n_qm": 31,
+      "n_physical": 6413,
+      "instrumentation_energy_difference_kcal_mol": 0.0,
+      "net_gradient_kcal_mol_angstrom": 1.2905281750905471e-07,
+      "delta_gradient_norm_kcal_mol_angstrom": 113.20598414706323,
+      "finite_differences": [
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -50.8775084233026,
+          "numerical_kcal_mol_angstrom": -50.877958801720524,
+          "absolute_error": 0.00045037841792350264,
+          "passed": true
+        },
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -50.8775084233026,
+          "numerical_kcal_mol_angstrom": -50.877373996627284,
+          "absolute_error": 0.00013442667531649022,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 0,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 4.459766996134771,
+          "numerical_kcal_mol_angstrom": 4.459933152247686,
+          "absolute_error": 0.000166156112914706,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 0,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 4.459766996134771,
+          "numerical_kcal_mol_angstrom": 4.459714491531486,
+          "absolute_error": 5.250460328554141e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 6320,
+          "axis": 1,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -21.21642756021586,
+          "numerical_kcal_mol_angstrom": -21.21647035164642,
+          "absolute_error": 4.279143056251655e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 6320,
+          "axis": 1,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -21.21642756021586,
+          "numerical_kcal_mol_angstrom": -21.216491750237765,
+          "absolute_error": 6.419002190583001e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 1690,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -6.659900061553309,
+          "numerical_kcal_mol_angstrom": -6.65989385015564,
+          "absolute_error": 6.211397668209884e-06,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 1690,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -6.659900061553309,
+          "numerical_kcal_mol_angstrom": -6.659904247499071,
+          "absolute_error": 4.185945762458232e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 0.9644572299793364,
+          "numerical_kcal_mol_angstrom": 0.9645743484725244,
+          "absolute_error": 0.0001171184931880731,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 0.9644572299793364,
+          "numerical_kcal_mol_angstrom": 0.9641462384024635,
+          "absolute_error": 0.0003109915768728655,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 1.977484661948056,
+          "numerical_kcal_mol_angstrom": 1.977321498998208,
+          "absolute_error": 0.00016316294984797253,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 1.977484661948056,
+          "numerical_kcal_mol_angstrom": 1.9769257414736785,
+          "absolute_error": 0.0005589204743774445,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -0.8118231054363645,
+          "numerical_kcal_mol_angstrom": -0.8118270998238586,
+          "absolute_error": 3.994387494099527e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -0.8118231054363645,
+          "numerical_kcal_mol_angstrom": -0.8118184996419586,
+          "absolute_error": 4.605794405865282e-06,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "state": "b10",
+      "leg": "bound",
+      "endpoint": 10,
+      "n_qm": 33,
+      "n_physical": 6442,
+      "instrumentation_energy_difference_kcal_mol": 0.0,
+      "net_gradient_kcal_mol_angstrom": 2.4134123233958846e-07,
+      "delta_gradient_norm_kcal_mol_angstrom": 108.51099589399576,
+      "finite_differences": [
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -43.56505205348424,
+          "numerical_kcal_mol_angstrom": -43.56330155133037,
+          "absolute_error": 0.001750502153868183,
+          "passed": true
+        },
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -43.56505205348424,
+          "numerical_kcal_mol_angstrom": -43.56509749413817,
+          "absolute_error": 4.544065393474739e-05,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 3.1901640068717736,
+          "numerical_kcal_mol_angstrom": 3.1901057009235956,
+          "absolute_error": 5.830594817801682e-05,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 3.1901640068717736,
+          "numerical_kcal_mol_angstrom": 3.1900857356959023,
+          "absolute_error": 7.827117587133614e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 6355,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -16.28976181005508,
+          "numerical_kcal_mol_angstrom": -16.289832350594224,
+          "absolute_error": 7.054053914501424e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 6355,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -16.28976181005508,
+          "numerical_kcal_mol_angstrom": -16.289777249767212,
+          "absolute_error": 1.543971213280315e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 2687,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 8.027429961276864,
+          "numerical_kcal_mol_angstrom": 8.027417348785093,
+          "absolute_error": 1.2612491770980228e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 2687,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 8.027429961276864,
+          "numerical_kcal_mol_angstrom": 8.027365256566554,
+          "absolute_error": 6.470471030972647e-05,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -37.276027808545514,
+          "numerical_kcal_mol_angstrom": -37.27608330154908,
+          "absolute_error": 5.5493003564777155e-05,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -37.276027808545514,
+          "numerical_kcal_mol_angstrom": -37.275175000104355,
+          "absolute_error": 0.000852808441159425,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -12.650703248826959,
+          "numerical_kcal_mol_angstrom": -12.650542452320224,
+          "absolute_error": 0.00016079650673539447,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -12.650703248826959,
+          "numerical_kcal_mol_angstrom": -12.647729490709025,
+          "absolute_error": 0.002973758117933656,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 1.0864013458879969,
+          "numerical_kcal_mol_angstrom": 1.086404750822112,
+          "absolute_error": 3.404934115103231e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 1.0864013458879969,
+          "numerical_kcal_mol_angstrom": 1.0864087380468845,
+          "absolute_error": 7.392158887675748e-06,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "state": "s0",
+      "leg": "solution",
+      "endpoint": 0,
+      "n_qm": 31,
+      "n_physical": 1165,
+      "instrumentation_energy_difference_kcal_mol": 0.0,
+      "net_gradient_kcal_mol_angstrom": 1.3830528793105006e-09,
+      "delta_gradient_norm_kcal_mol_angstrom": 97.05855266905355,
+      "finite_differences": [
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -41.925839216343746,
+          "numerical_kcal_mol_angstrom": -41.9217952494364,
+          "absolute_error": 0.00404396690734643,
+          "passed": true
+        },
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -41.925839216343746,
+          "numerical_kcal_mol_angstrom": -41.92355075247178,
+          "absolute_error": 0.002288463871963131,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 6.017537431048571,
+          "numerical_kcal_mol_angstrom": 6.017579200488399,
+          "absolute_error": 4.176943982781012e-05,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 6.017537431048571,
+          "numerical_kcal_mol_angstrom": 6.01754174567759,
+          "absolute_error": 4.314629019397387e-06,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 532,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -13.505983818477384,
+          "numerical_kcal_mol_angstrom": -13.50596964948636,
+          "absolute_error": 1.4168991024021693e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 532,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -13.505983818477384,
+          "numerical_kcal_mol_angstrom": -13.505968499885057,
+          "absolute_error": 1.5318592327062674e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 33,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -16.50629035362956,
+          "numerical_kcal_mol_angstrom": -16.506274550920352,
+          "absolute_error": 1.5802709206980126e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 33,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -16.50629035362956,
+          "numerical_kcal_mol_angstrom": -16.50628999414039,
+          "absolute_error": 3.594891708758041e-07,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -7.328844657182652,
+          "numerical_kcal_mol_angstrom": -7.328846499149222,
+          "absolute_error": 1.841966569493536e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -7.328844657182652,
+          "numerical_kcal_mol_angstrom": -7.328856245294446,
+          "absolute_error": 1.1588111793692235e-05,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 1.5604934113950613,
+          "numerical_kcal_mol_angstrom": 1.5604915006406372,
+          "absolute_error": 1.9107544240171137e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 1.5604934113950613,
+          "numerical_kcal_mol_angstrom": 1.5604997497575823,
+          "absolute_error": 6.338362521063345e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -1.2854512654888843,
+          "numerical_kcal_mol_angstrom": -1.2854501001129393,
+          "absolute_error": 1.1653759450780399e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -1.2854512654888843,
+          "numerical_kcal_mol_angstrom": -1.2854480064561358,
+          "absolute_error": 3.2590327485593207e-06,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "state": "s10",
+      "leg": "solution",
+      "endpoint": 10,
+      "n_qm": 33,
+      "n_physical": 1145,
+      "instrumentation_energy_difference_kcal_mol": 0.0,
+      "net_gradient_kcal_mol_angstrom": 1.1051422674704905e-09,
+      "delta_gradient_norm_kcal_mol_angstrom": 117.72669680170797,
+      "finite_differences": [
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 0,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 29.138498285762864,
+          "numerical_kcal_mol_angstrom": 29.137923000234878,
+          "absolute_error": 0.0005752855279865798,
+          "passed": true
+        },
+        {
+          "kind": "qm_heavy",
+          "atom": 0,
+          "axis": 0,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 29.138498285762864,
+          "numerical_kcal_mol_angstrom": 29.138607505956315,
+          "absolute_error": 0.00010922019345116496,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 18.498453294523838,
+          "numerical_kcal_mol_angstrom": 18.498610599635867,
+          "absolute_error": 0.0001573051120296043,
+          "passed": true
+        },
+        {
+          "kind": "qm_hydrogen",
+          "atom": 20,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 18.498453294523838,
+          "numerical_kcal_mol_angstrom": 18.498470253689447,
+          "absolute_error": 1.6959165609620186e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 569,
+          "axis": 1,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 8.215322409229653,
+          "numerical_kcal_mol_angstrom": 8.215346349970787,
+          "absolute_error": 2.3940741133543497e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_water_oxygen",
+          "atom": 569,
+          "axis": 1,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 8.215322409229653,
+          "numerical_kcal_mol_angstrom": 8.215334255510243,
+          "absolute_error": 1.1846280589367097e-05,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 33,
+          "axis": 2,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 8.433073595518113,
+          "numerical_kcal_mol_angstrom": 8.43307759896561,
+          "absolute_error": 4.003447497069601e-06,
+          "passed": true
+        },
+        {
+          "kind": "mm_nonwater_heavy",
+          "atom": 33,
+          "axis": 2,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 8.433073595518113,
+          "numerical_kcal_mol_angstrom": 8.433076245637494,
+          "absolute_error": 2.650119380831484e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": 26.516666377508646,
+          "numerical_kcal_mol_angstrom": 26.516734151300625,
+          "absolute_error": 6.777379197941968e-05,
+          "passed": true
+        },
+        {
+          "kind": "collective_all",
+          "seed": 47103,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": 26.516666377508646,
+          "numerical_kcal_mol_angstrom": 26.51674350090616,
+          "absolute_error": 7.712339751364539e-05,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -7.435640282614348,
+          "numerical_kcal_mol_angstrom": -7.435651850755676,
+          "absolute_error": 1.1568141327522596e-05,
+          "passed": true
+        },
+        {
+          "kind": "collective_environment",
+          "seed": 47104,
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -7.435640282614348,
+          "numerical_kcal_mol_angstrom": -7.435649504259345,
+          "absolute_error": 9.221644996948442e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.001,
+          "analytic_kcal_mol_angstrom": -2.4760823947123143,
+          "numerical_kcal_mol_angstrom": -2.47608120116638,
+          "absolute_error": 1.1935459340861598e-06,
+          "passed": true
+        },
+        {
+          "kind": "collective_qm_translation",
+          "step_angstrom": 0.0002,
+          "analytic_kcal_mol_angstrom": -2.4760823947123143,
+          "numerical_kcal_mol_angstrom": -2.4760857468208997,
+          "absolute_error": 3.3521085853749355e-06,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "bridge_sampling_permitted": true
+}

@@ -1,0 +1,508 @@
+{
+  "status": "COMPLETE",
+  "labels_used": false,
+  "main_pipeline_changed": false,
+  "cohort_ranking_available": false,
+  "binding_free_energy_claim_allowed": false,
+  "targets": {
+    "CDK8": {
+      "paired_repeats": [
+        {
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "original_B_minus_A": -2.2449999999999903,
+          "control_B_minus_A": 2.2293333333333294,
+          "control_minus_original": 4.47433333333332
+        },
+        {
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "original_B_minus_A": -3.6976666666666773,
+          "control_B_minus_A": -5.6026666666666785,
+          "control_minus_original": -1.9050000000000011
+        },
+        {
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "original_B_minus_A": 2.3766666666666723,
+          "control_B_minus_A": 3.320999999999998,
+          "control_minus_original": 0.9443333333333257
+        }
+      ],
+      "original_mean_B_minus_A": -1.1886666666666652,
+      "control_mean_B_minus_A": -0.01744444444445037,
+      "original_repeat_std": 3.1719491554002692,
+      "control_repeat_std": 4.867644654397189,
+      "mean_control_minus_original": 1.1712222222222148,
+      "water_coverage_by_frame": [
+        {
+          "name": "12",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "omitted_before": 4,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "12",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "omitted_before": 2,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        },
+        {
+          "name": "20",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "omitted_before": 0,
+          "omitted_after": 0
+        }
+      ]
+    },
+    "BACE": {
+      "paired_repeats": [
+        {
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "original_B_minus_A": -3.559666666666658,
+          "control_B_minus_A": -1.772000000000034,
+          "control_minus_original": 1.7876666666666239
+        },
+        {
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "original_B_minus_A": 5.678999999999988,
+          "control_B_minus_A": 1.2473333333333585,
+          "control_minus_original": -4.431666666666629
+        },
+        {
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "original_B_minus_A": -0.7666666666666515,
+          "control_B_minus_A": 8.03500000000001,
+          "control_minus_original": 8.801666666666662
+        }
+      ],
+      "original_mean_B_minus_A": 0.45088888888889284,
+      "control_mean_B_minus_A": 2.5034444444444452,
+      "original_repeat_std": 4.738150651107716,
+      "control_repeat_std": 5.022715758689991,
+      "mean_control_minus_original": 2.052555555555552,
+      "water_coverage_by_frame": [
+        {
+          "name": "CAT-13n",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "omitted_before": 4,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "omitted_before": 3,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "omitted_before": 2,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "omitted_before": 5,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "omitted_before": 8,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc",
+          "omitted_before": 3,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "omitted_before": 2,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "omitted_before": 2,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "omitted_before": 4,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "omitted_before": 3,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "omitted_before": 1,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "omitted_before": 2,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "omitted_before": 4,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-13n",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "omitted_before": 5,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 400,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "omitted_before": 3,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 1200,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "omitted_before": 3,
+          "omitted_after": 0
+        },
+        {
+          "name": "CAT-4i",
+          "iteration": 2000,
+          "trajectory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "omitted_before": 2,
+          "omitted_after": 0
+        }
+      ]
+    }
+  },
+  "driver_sha256": "451f5c2db6057713ddc09cf2d1657699f2d1719b20c4415f3998ac1b8ead7c9b",
+  "warning": "Fixed-count nearest-water replacement is a diagnostic control, not a validated default or solvent free energy.",
+  "input_checks": [
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_400",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 4
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_1200",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 3
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_2000",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 2
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_400",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 5
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_1200",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 8
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_2000",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 3
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_400",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 2
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_1200",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 2
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_2000",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_400",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 4
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_1200",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 3
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_2000",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/iteration_400",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 2
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/iteration_1200",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 4
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-13n/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/iteration_2000",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 5
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/iteration_400",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 3
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/iteration_1200",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 3
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/iteration_2000",
+      "water_atom_slots": 24,
+      "n_selected_nearby_water_oxygens": 2
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/iteration_400",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/iteration_1200",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 4
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/iteration_2000",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/iteration_400",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/iteration_1200",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/iteration_2000",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_400",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_1200",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_2000",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_400",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_1200",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_2000",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_400",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_1200",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/12/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_2000",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 2
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_400",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_1200",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 0
+    },
+    {
+      "directory": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_2000",
+      "water_atom_slots": 15,
+      "n_selected_nearby_water_oxygens": 1
+    }
+  ],
+  "source_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/same_frame_tpie_20261024_v4/evaluation.json": "fdd2da5620000afdb0f94bd7756a9d40ead9cb485eb76c856310a93a81c60c8b",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/evaluation.json": "1612e6efe27cb6d73f34190b52ddbe8f98d1d71305eb353dcccf1aba4e821631",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/dense_same_frame_tpie_20261024_v2/water_coverage.json": "4b8c68b041bbf33e0d1d4842144b1e9d9889cca907151d2b77f1db79ccae77cb"
+  }
+}

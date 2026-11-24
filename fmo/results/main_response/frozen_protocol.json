@@ -1,0 +1,22 @@
+{
+  "schema": "main-response-prepared-regression-v1",
+  "source_sha256": "f41f1814ba595953d7528b17e2c6f2b746552f74f716bf163d457f5c2aeebe79",
+  "targets": [
+    "Galectin3",
+    "CHK1",
+    "BACE",
+    "FXa",
+    "CDK2",
+    "JNK1",
+    "P38",
+    "TYK2",
+    "HSP90",
+    "PTP1B",
+    "FAAH",
+    "HIV1PROT",
+    "CDK8"
+  ],
+  "n": 270,
+  "scope": "Actual production response hook; reuse verified baseline preparation/QM, not a raw PDB-to-QM rerun",
+  "labels_used_for_routing": false
+}

@@ -1,0 +1,858 @@
+{
+  "status": "COMPLETE_INDEPENDENTLY_VERIFIED",
+  "target": "Galectin3",
+  "n": 26,
+  "metrics": {
+    "matched_tpie": {
+      "pearson": 0.5105937659202764,
+      "spearman": 0.4885392864428868,
+      "kendall": 0.3374677696710288
+    },
+    "original_total_strain_score": {
+      "pearson": 0.6387470382506641,
+      "spearman": 0.6438591996397149,
+      "kendall": 0.46750122220481977
+    },
+    "radial_tpie": {
+      "pearson": 0.5117164961209288,
+      "spearman": 0.4909340868666264,
+      "kendall": 0.34365983883930457
+    },
+    "radial_tpie_plus_residual_strain": {
+      "pearson": 0.6367965647228832,
+      "spearman": 0.6312009688285196,
+      "kendall": 0.45511708386826827
+    },
+    "original_tpie_plus_radial_component": {
+      "pearson": 0.51998438317246,
+      "spearman": 0.492644658597869,
+      "kendall": 0.34365983883930457
+    },
+    "original_tpie_plus_radial_residual": {
+      "pearson": 0.6401747166298428,
+      "spearman": 0.6455697713709575,
+      "kendall": 0.47988536054137126
+    }
+  },
+  "scores": {
+    "17a": {
+      "matched_tpie": -98.85,
+      "original_total_strain_score": -83.28196371814731,
+      "radial_component": 1.8697711545828448,
+      "radial_residual": 13.698265127269842,
+      "radial_tpie": -95.346,
+      "radial_tpie_plus_residual_strain": -81.64773487273015,
+      "original_tpie_plus_radial_component": -96.98022884541714,
+      "original_tpie_plus_radial_residual": -85.15173487273015
+    },
+    "17b": {
+      "matched_tpie": -96.151,
+      "original_total_strain_score": -80.71805395771855,
+      "radial_component": 1.8999593803619725,
+      "radial_residual": 13.53298666191947,
+      "radial_tpie": -92.622,
+      "radial_tpie_plus_residual_strain": -79.08901333808053,
+      "original_tpie_plus_radial_component": -94.25104061963802,
+      "original_tpie_plus_radial_residual": -82.61801333808053
+    },
+    "17c": {
+      "matched_tpie": -99.789,
+      "original_total_strain_score": -82.37051985536854,
+      "radial_component": 1.8885142350561213,
+      "radial_residual": 15.529965909575342,
+      "radial_tpie": -96.236,
+      "radial_tpie_plus_residual_strain": -80.70603409042467,
+      "original_tpie_plus_radial_component": -97.90048576494388,
+      "original_tpie_plus_radial_residual": -84.25903409042466
+    },
+    "17d": {
+      "matched_tpie": -98.79899999999999,
+      "original_total_strain_score": -83.36803877018649,
+      "radial_component": 1.8822027447743677,
+      "radial_residual": 13.548758485039132,
+      "radial_tpie": -95.259,
+      "radial_tpie_plus_residual_strain": -81.71024151496087,
+      "original_tpie_plus_radial_component": -96.91679725522563,
+      "original_tpie_plus_radial_residual": -85.25024151496086
+    },
+    "17e": {
+      "matched_tpie": -99.785,
+      "original_total_strain_score": -84.53578559418133,
+      "radial_component": 1.8894002784354704,
+      "radial_residual": 13.3598141273832,
+      "radial_tpie": -96.23100000000001,
+      "radial_tpie_plus_residual_strain": -82.8711858726168,
+      "original_tpie_plus_radial_component": -97.89559972156452,
+      "original_tpie_plus_radial_residual": -86.4251858726168
+    },
+    "17f": {
+      "matched_tpie": -99.418,
+      "original_total_strain_score": -83.37262416382963,
+      "radial_component": 1.9416234993981192,
+      "radial_residual": 14.103752336772263,
+      "radial_tpie": -95.74600000000001,
+      "radial_tpie_plus_residual_strain": -81.64224766322775,
+      "original_tpie_plus_radial_component": -97.47637650060189,
+      "original_tpie_plus_radial_residual": -85.31424766322775
+    },
+    "17g": {
+      "matched_tpie": -99.599,
+      "original_total_strain_score": -84.49955579039512,
+      "radial_component": 1.9530943725878478,
+      "radial_residual": 13.146349837017034,
+      "radial_tpie": -95.93299999999999,
+      "radial_tpie_plus_residual_strain": -82.78665016298297,
+      "original_tpie_plus_radial_component": -97.64590562741216,
+      "original_tpie_plus_radial_residual": -86.45265016298296
+    },
+    "17h flip": {
+      "matched_tpie": -100.336,
+      "original_total_strain_score": -84.03930724698047,
+      "radial_component": 1.9744271846675274,
+      "radial_residual": 14.322265568351996,
+      "radial_tpie": -96.734,
+      "radial_tpie_plus_residual_strain": -82.411734431648,
+      "original_tpie_plus_radial_component": -98.36157281533247,
+      "original_tpie_plus_radial_residual": -86.013734431648
+    },
+    "17i": {
+      "matched_tpie": -103.275,
+      "original_total_strain_score": -87.51396188423078,
+      "radial_component": 1.8937300938080586,
+      "radial_residual": 13.867308021961165,
+      "radial_tpie": -99.727,
+      "radial_tpie_plus_residual_strain": -85.85969197803884,
+      "original_tpie_plus_radial_component": -101.38126990619195,
+      "original_tpie_plus_radial_residual": -89.40769197803884
+    },
+    "17j": {
+      "matched_tpie": -102.774,
+      "original_total_strain_score": -87.3898497219401,
+      "radial_component": 1.8948533357659356,
+      "radial_residual": 13.489296942293963,
+      "radial_tpie": -99.168,
+      "radial_tpie_plus_residual_strain": -85.67870305770604,
+      "original_tpie_plus_radial_component": -100.87914666423407,
+      "original_tpie_plus_radial_residual": -89.28470305770604
+    },
+    "17k": {
+      "matched_tpie": -107.654,
+      "original_total_strain_score": -92.56881029561025,
+      "radial_component": 1.9185167180333929,
+      "radial_residual": 13.166672986356353,
+      "radial_tpie": -104.054,
+      "radial_tpie_plus_residual_strain": -90.88732701364364,
+      "original_tpie_plus_radial_component": -105.73548328196661,
+      "original_tpie_plus_radial_residual": -94.48732701364364
+    },
+    "17l": {
+      "matched_tpie": -100.38300000000001,
+      "original_total_strain_score": -84.97991587857094,
+      "radial_component": 1.9169266090327712,
+      "radial_residual": 13.486157512396302,
+      "radial_tpie": -96.76,
+      "radial_tpie_plus_residual_strain": -83.2738424876037,
+      "original_tpie_plus_radial_component": -98.46607339096724,
+      "original_tpie_plus_radial_residual": -86.8968424876037
+    },
+    "17m": {
+      "matched_tpie": -91.884,
+      "original_total_strain_score": -71.96157256607735,
+      "radial_component": 2.3214392963104533,
+      "radial_residual": 17.600988137612198,
+      "radial_tpie": -88.234,
+      "radial_tpie_plus_residual_strain": -70.6330118623878,
+      "original_tpie_plus_radial_component": -89.56256070368954,
+      "original_tpie_plus_radial_residual": -74.28301186238781
+    },
+    "17n": {
+      "matched_tpie": -94.966,
+      "original_total_strain_score": -69.6400840923454,
+      "radial_component": 1.9733058252359987,
+      "radial_residual": 23.352610082418582,
+      "radial_tpie": -91.432,
+      "radial_tpie_plus_residual_strain": -68.07938991758142,
+      "original_tpie_plus_radial_component": -92.992694174764,
+      "original_tpie_plus_radial_residual": -71.61338991758142
+    },
+    "17o": {
+      "matched_tpie": -97.535,
+      "original_total_strain_score": -77.73470599002617,
+      "radial_component": 1.904758572815409,
+      "radial_residual": 17.89553543715841,
+      "radial_tpie": -94.021,
+      "radial_tpie_plus_residual_strain": -76.12546456284159,
+      "original_tpie_plus_radial_component": -95.63024142718459,
+      "original_tpie_plus_radial_residual": -79.63946456284158
+    },
+    "17p": {
+      "matched_tpie": -97.744,
+      "original_total_strain_score": -78.82502861362622,
+      "radial_component": 1.9345972758220045,
+      "radial_residual": 16.98437411055178,
+      "radial_tpie": -94.225,
+      "radial_tpie_plus_residual_strain": -77.24062588944821,
+      "original_tpie_plus_radial_component": -95.809402724178,
+      "original_tpie_plus_radial_residual": -80.75962588944822
+    },
+    "17q": {
+      "matched_tpie": -97.367,
+      "original_total_strain_score": -73.50195062082824,
+      "radial_component": 1.9433629556614662,
+      "radial_residual": 21.9216864235103,
+      "radial_tpie": -93.762,
+      "radial_tpie_plus_residual_strain": -71.8403135764897,
+      "original_tpie_plus_radial_component": -95.42363704433853,
+      "original_tpie_plus_radial_residual": -75.4453135764897
+    },
+    "17r": {
+      "matched_tpie": -96.172,
+      "original_total_strain_score": -70.31972475292991,
+      "radial_component": 1.9716441801538738,
+      "radial_residual": 23.880631066916205,
+      "radial_tpie": -92.63,
+      "radial_tpie_plus_residual_strain": -68.74936893308379,
+      "original_tpie_plus_radial_component": -94.20035581984612,
+      "original_tpie_plus_radial_residual": -72.29136893308379
+    },
+    "18a": {
+      "matched_tpie": -98.69500000000001,
+      "original_total_strain_score": -81.50438486064488,
+      "radial_component": 1.9202417415798716,
+      "radial_residual": 15.27037339777526,
+      "radial_tpie": -95.149,
+      "radial_tpie_plus_residual_strain": -79.87862660222474,
+      "original_tpie_plus_radial_component": -96.77475825842014,
+      "original_tpie_plus_radial_residual": -83.42462660222475
+    },
+    "18b": {
+      "matched_tpie": -96.385,
+      "original_total_strain_score": -81.05565137932432,
+      "radial_component": 1.9112972215321926,
+      "radial_residual": 13.418051399143497,
+      "radial_tpie": -92.782,
+      "radial_tpie_plus_residual_strain": -79.3639486008565,
+      "original_tpie_plus_radial_component": -94.47370277846781,
+      "original_tpie_plus_radial_residual": -82.96694860085651
+    },
+    "18d": {
+      "matched_tpie": -98.523,
+      "original_total_strain_score": -82.2696850943961,
+      "radial_component": 1.9578577970049913,
+      "radial_residual": 14.295457108598917,
+      "radial_tpie": -94.99,
+      "radial_tpie_plus_residual_strain": -80.69454289140108,
+      "original_tpie_plus_radial_component": -96.565142202995,
+      "original_tpie_plus_radial_residual": -84.22754289140107
+    },
+    "18e": {
+      "matched_tpie": -98.614,
+      "original_total_strain_score": -81.42203885281643,
+      "radial_component": 1.9579839264130259,
+      "radial_residual": 15.233977220770559,
+      "radial_tpie": -94.92399999999999,
+      "radial_tpie_plus_residual_strain": -79.69002277922944,
+      "original_tpie_plus_radial_component": -96.65601607358698,
+      "original_tpie_plus_radial_residual": -83.38002277922945
+    },
+    "18f": {
+      "matched_tpie": -100.172,
+      "original_total_strain_score": -80.65615540710958,
+      "radial_component": 2.0281689785582118,
+      "radial_residual": 17.4876756143322,
+      "radial_tpie": -96.503,
+      "radial_tpie_plus_residual_strain": -79.0153243856678,
+      "original_tpie_plus_radial_component": -98.14383102144178,
+      "original_tpie_plus_radial_residual": -82.6843243856678
+    },
+    "18g": {
+      "matched_tpie": -99.715,
+      "original_total_strain_score": -81.62598895927084,
+      "radial_component": 1.9488291906942066,
+      "radial_residual": 16.140181850034963,
+      "radial_tpie": -96.13000000000001,
+      "radial_tpie_plus_residual_strain": -79.98981814996505,
+      "original_tpie_plus_radial_component": -97.76617080930579,
+      "original_tpie_plus_radial_residual": -83.57481814996504
+    },
+    "18h": {
+      "matched_tpie": -94.358,
+      "original_total_strain_score": -63.874439397845165,
+      "radial_component": 2.4851696957962144,
+      "radial_residual": 27.998390906358622,
+      "radial_tpie": -90.498,
+      "radial_tpie_plus_residual_strain": -62.49960909364138,
+      "original_tpie_plus_radial_component": -91.87283030420379,
+      "original_tpie_plus_radial_residual": -66.35960909364138
+    },
+    "18i": {
+      "matched_tpie": -97.356,
+      "original_total_strain_score": -68.03091475836686,
+      "radial_component": 2.6257544083221793,
+      "radial_residual": 26.69933083331096,
+      "radial_tpie": -93.241,
+      "radial_tpie_plus_residual_strain": -66.54166916668905,
+      "original_tpie_plus_radial_component": -94.73024559167781,
+      "original_tpie_plus_radial_residual": -70.65666916668903
+    }
+  },
+  "geometry": {
+    "17a": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17b": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17c": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17d": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17e": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17f": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17g": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17h flip": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17i": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17j": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17k": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17l": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17m": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S",
+          "6": "R",
+          "8": "R",
+          "10": "R",
+          "14": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17n": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S",
+          "6": "R",
+          "8": "R",
+          "10": "R",
+          "14": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17o": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S",
+          "6": "R",
+          "8": "R",
+          "10": "R",
+          "14": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17p": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S",
+          "6": "R",
+          "8": "R",
+          "10": "R",
+          "14": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17q": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S",
+          "6": "R",
+          "8": "R",
+          "10": "R",
+          "14": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "17r": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S",
+          "6": "R",
+          "8": "R",
+          "10": "R",
+          "14": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18a": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18b": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18d": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18e": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18f": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18g": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18h": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    },
+    "18i": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "S",
+          "12": "R",
+          "14": "R",
+          "16": "R",
+          "20": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [],
+      "pcm_consistent": true
+    }
+  },
+  "production_default_changed": false,
+  "driver_sha256": "7207005de98c3f2c8f78b0f68ad1d969871d2c394f40c6deadd851886746f6b9",
+  "frozen_protocol_sha256": "80d23b81f69e2f785687052266be2a076341beadf50b7ed930ee173ae1d6c52c",
+  "paired_comparisons": {
+    "pure_vs_matched_tpie": {
+      "pair_changes": {
+        "corrected": 1,
+        "regressed": 0,
+        "unchanged": 320,
+        "tied": 4
+      },
+      "paired_bootstrap_95_percent_delta": {
+        "pearson": [
+          -0.014652455009939431,
+          0.021602264903653176
+        ],
+        "spearman": [
+          0.0,
+          0.018595561451436912
+        ],
+        "kendall": [
+          0.0,
+          0.03852451521065117
+        ]
+      },
+      "bootstrap_valid_samples": 4000,
+      "seed": 20261024,
+      "leave_one_out_spearman_delta_range": [
+        0.0,
+        0.00269438109091491
+      ],
+      "warning": "Development-set paired bootstrap; does not correct repeated method exploration or prove transfer"
+    },
+    "combined_vs_original_strain": {
+      "pair_changes": {
+        "corrected": 0,
+        "regressed": 2,
+        "unchanged": 319,
+        "tied": 4
+      },
+      "paired_bootstrap_95_percent_delta": {
+        "pearson": [
+          -0.005672910026951143,
+          0.0017397360049366502
+        ],
+        "spearman": [
+          -0.060547938141497094,
+          0.0
+        ],
+        "kendall": [
+          -0.057326003622561905,
+          0.0
+        ]
+      },
+      "bootstrap_valid_samples": 4000,
+      "seed": 20261024,
+      "leave_one_out_spearman_delta_range": [
+        -0.014241728623407002,
+        0.0
+      ],
+      "warning": "Development-set paired bootstrap; does not correct repeated method exploration or prove transfer"
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "reference_pdb": "5CEI",
+  "reference_title": [
+    "Crystal structure of CDK8:Cyclin C complex with compound 22"
+  ],
+  "n_matched_protein_ca": 345,
+  "ca_alignment_rmsd_angstrom": 0.004312448541360647,
+  "ligand": "22",
+  "crystal_component": "50R",
+  "n_bijectively_matched_heavy_atoms": 21,
+  "ligand_heavy_rmsd_after_protein_alignment": 0.000505177086406031,
+  "assignments": [
+    {
+      "crystal_atom": "C5",
+      "sdf_atom_zero_based": 0,
+      "element": "C",
+      "distance_angstrom": 0.0004908944848405963
+    },
+    {
+      "crystal_atom": "C6",
+      "sdf_atom_zero_based": 1,
+      "element": "C",
+      "distance_angstrom": 0.000520894129369166
+    },
+    {
+      "crystal_atom": "C11",
+      "sdf_atom_zero_based": 2,
+      "element": "C",
+      "distance_angstrom": 0.0004902187803112008
+    },
+    {
+      "crystal_atom": "C7",
+      "sdf_atom_zero_based": 3,
+      "element": "C",
+      "distance_angstrom": 0.0005139225790198057
+    },
+    {
+      "crystal_atom": "C8",
+      "sdf_atom_zero_based": 4,
+      "element": "C",
+      "distance_angstrom": 0.0005468897762949178
+    },
+    {
+      "crystal_atom": "C9",
+      "sdf_atom_zero_based": 5,
+      "element": "C",
+      "distance_angstrom": 0.000509362167249446
+    },
+    {
+      "crystal_atom": "C12",
+      "sdf_atom_zero_based": 6,
+      "element": "C",
+      "distance_angstrom": 0.0004961621879426578
+    },
+    {
+      "crystal_atom": "C3",
+      "sdf_atom_zero_based": 8,
+      "element": "C",
+      "distance_angstrom": 0.00047362282347917606
+    },
+    {
+      "crystal_atom": "C1",
+      "sdf_atom_zero_based": 9,
+      "element": "C",
+      "distance_angstrom": 0.0005278591563601378
+    },
+    {
+      "crystal_atom": "C15",
+      "sdf_atom_zero_based": 14,
+      "element": "C",
+      "distance_angstrom": 0.0005265868605065915
+    },
+    {
+      "crystal_atom": "C16",
+      "sdf_atom_zero_based": 15,
+      "element": "C",
+      "distance_angstrom": 0.0005283464116879443
+    },
+    {
+      "crystal_atom": "C17",
+      "sdf_atom_zero_based": 16,
+      "element": "C",
+      "distance_angstrom": 0.0005650817682326114
+    },
+    {
+      "crystal_atom": "C18",
+      "sdf_atom_zero_based": 17,
+      "element": "C",
+      "distance_angstrom": 0.0005253314923142574
+    },
+    {
+      "crystal_atom": "C19",
+      "sdf_atom_zero_based": 18,
+      "element": "C",
+      "distance_angstrom": 0.00041843912658553404
+    },
+    {
+      "crystal_atom": "C20",
+      "sdf_atom_zero_based": 19,
+      "element": "C",
+      "distance_angstrom": 0.0004547752787922232
+    },
+    {
+      "crystal_atom": "I21",
+      "sdf_atom_zero_based": 20,
+      "element": "I",
+      "distance_angstrom": 0.00045297362686844427
+    },
+    {
+      "crystal_atom": "N2",
+      "sdf_atom_zero_based": 7,
+      "element": "N",
+      "distance_angstrom": 0.00043654924117723427
+    },
+    {
+      "crystal_atom": "N10",
+      "sdf_atom_zero_based": 11,
+      "element": "N",
+      "distance_angstrom": 0.000526932482984977
+    },
+    {
+      "crystal_atom": "O4",
+      "sdf_atom_zero_based": 10,
+      "element": "O",
+      "distance_angstrom": 0.0005297775223851663
+    },
+    {
+      "crystal_atom": "O14",
+      "sdf_atom_zero_based": 13,
+      "element": "O",
+      "distance_angstrom": 0.0005604676748114985
+    },
+    {
+      "crystal_atom": "S13",
+      "sdf_atom_zero_based": 12,
+      "element": "S",
+      "distance_angstrom": 0.00048272264901891786
+    }
+  ],
+  "sources_sha256": {
+    "projects/sophosqm-style-fmo-baseline/vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/misc/cdk8_koehler_protein.pdb": "f34f90245b13743c7b9eca4e242f9d8ce099d1587ed99060fd72e31a428347e7",
+    "projects/sophosqm-style-fmo-baseline/vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/misc/cdk8_koehler_ligands.sdf": "520115336f16866af6e9fda0ddafb573c109bd368ab712e105249f996d38951c",
+    "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_bound_qm_20261021/literature/5CEI.cif": "9d3693e990b86f76c63d29ec3a01adc148f3d82d4a5ad6b89e90cc2a11fb2971"
+  },
+  "warning": "Demonstrates input22 crystal coordinate consistency, not crystallographic validation of the other nine poses"
+}

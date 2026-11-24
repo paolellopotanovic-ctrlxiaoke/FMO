@@ -1,0 +1,27 @@
+{
+  "retrieved_utc": "2026-10-25T05:16:18.538755+00:00",
+  "paper_doi": "10.1021/ja512751q",
+  "paper_source": "https://www.columbia.edu/cu/chemistry/groups/berne/papers/jacs_137_2695-2703_2015.pdf",
+  "pdb_api": "https://data.rcsb.org/rest/v1/core/entry/4DJW",
+  "evidence": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/literature_evidence_20261025/wang2015_jacs_primary.pdf": "05ac1122f46243dbbbd6b072cec2af84d1c59a7964662db0e540a72f2d7ea0f3",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/literature_evidence_20261025/wang2015_jacs_primary.txt": "ff1746d1b005bcc109873ef3d816b6bde8246b686f2e81836bc5c40da594b2b1",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/literature_evidence_20261025/4DJW_entry.json": "7115ea2d10e7751a24eb226a6124a88462bcfb2f45dd1ef1fb48d9bdd5b2f1e5",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/benchmark_metadata.csv": "cdad4307424417583e8f1e27e195d56e8e5c88cae7354e52f713b16a1f07c07d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/fep_plus_inputs/post_simulation_corrections.md": "87984df5c23db3e75cdbbc6312561910ae16ead5a73fd428fbfde77c38cbe4a4"
+  },
+  "checked_results": {
+    "wang2015_table2_BACE_n": 36,
+    "wang2015_table2_BACE_pearson": 0.78,
+    "wang2015_table2_BACE_MUE": 0.84,
+    "wang2015_table2_BACE_RMSE": 1.03,
+    "wang2015_table2_BACE_Nperturbations": 58,
+    "wang2015_series_reference46_doi": "10.1016/j.bmcl.2012.02.013",
+    "pdb_resolution_A": [
+      1.9
+    ],
+    "assay_pH_confirmed": false,
+    "Janssen_pH45_not_assigned_to_jacs36": true
+  },
+  "warning": "2015 paper, 21-4 rerun results, and current QM protocols are distinct; cannot splice their metrics"
+}

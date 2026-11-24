@@ -1,0 +1,2444 @@
+{
+  "status": "RUNNING_OR_INCOMPLETE",
+  "groups": {
+    "Galectin3": {
+      "n_expected_structures": 26,
+      "n_succeeded_structures": 26,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.5619957128130779,
+            "spearman": 0.5436196961888985,
+            "kendall": 0.38700432301723486
+          },
+          "soft": {
+            "pearson": 0.5664669704625337,
+            "spearman": 0.5436196961888985,
+            "kendall": 0.38700432301723486
+          },
+          "soft_reference": {
+            "n": 26,
+            "median": 104.07499999999999,
+            "scaled_mad": 2.2320543000000073
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.5105937659202764,
+            "spearman": 0.4885392864428868,
+            "kendall": 0.3374677696710288
+          },
+          "soft": {
+            "pearson": 0.5230140208658494,
+            "spearman": 0.4885392864428868,
+            "kendall": 0.3374677696710288
+          },
+          "soft_reference": {
+            "n": 26,
+            "median": 98.747,
+            "scaled_mad": 2.0541423000000005
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.6387470382506641,
+            "spearman": 0.6438591996397149,
+            "kendall": 0.46750122220481977
+          },
+          "soft": {
+            "pearson": 0.6835910265945268,
+            "spearman": 0.6438591996397149,
+            "kendall": 0.46750122220481977
+          },
+          "soft_reference": {
+            "n": 26,
+            "median": 81.56518690995786,
+            "scaled_mad": 4.2065269961387886
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "18a": {
+          "baseline_tpie": -104.115,
+          "matched_tpie": -98.69500000000001,
+          "matched_tpie_plus_ligand_strain": -81.50438486064488
+        },
+        "18b": {
+          "baseline_tpie": -101.96300000000001,
+          "matched_tpie": -96.385,
+          "matched_tpie_plus_ligand_strain": -81.05565137932432
+        },
+        "18d": {
+          "baseline_tpie": -104.035,
+          "matched_tpie": -98.523,
+          "matched_tpie_plus_ligand_strain": -82.2696850943961
+        },
+        "18e": {
+          "baseline_tpie": -104.19200000000001,
+          "matched_tpie": -98.614,
+          "matched_tpie_plus_ligand_strain": -81.42203885281643
+        },
+        "18f": {
+          "baseline_tpie": -105.80799999999999,
+          "matched_tpie": -100.172,
+          "matched_tpie_plus_ligand_strain": -80.65615540710958
+        },
+        "18g": {
+          "baseline_tpie": -105.353,
+          "matched_tpie": -99.715,
+          "matched_tpie_plus_ligand_strain": -81.62598895927084
+        },
+        "18h": {
+          "baseline_tpie": -100.165,
+          "matched_tpie": -94.358,
+          "matched_tpie_plus_ligand_strain": -63.874439397845165
+        },
+        "18i": {
+          "baseline_tpie": -103.874,
+          "matched_tpie": -97.356,
+          "matched_tpie_plus_ligand_strain": -68.03091475836686
+        },
+        "17m": {
+          "baseline_tpie": -96.573,
+          "matched_tpie": -91.884,
+          "matched_tpie_plus_ligand_strain": -71.96157256607735
+        },
+        "17q": {
+          "baseline_tpie": -101.787,
+          "matched_tpie": -97.367,
+          "matched_tpie_plus_ligand_strain": -73.50195062082824
+        },
+        "17r": {
+          "baseline_tpie": -100.596,
+          "matched_tpie": -96.172,
+          "matched_tpie_plus_ligand_strain": -70.31972475292991
+        },
+        "17n": {
+          "baseline_tpie": -99.345,
+          "matched_tpie": -94.966,
+          "matched_tpie_plus_ligand_strain": -69.6400840923454
+        },
+        "17p": {
+          "baseline_tpie": -102.185,
+          "matched_tpie": -97.744,
+          "matched_tpie_plus_ligand_strain": -78.82502861362622
+        },
+        "17o": {
+          "baseline_tpie": -101.984,
+          "matched_tpie": -97.535,
+          "matched_tpie_plus_ligand_strain": -77.73470599002617
+        },
+        "17f": {
+          "baseline_tpie": -104.327,
+          "matched_tpie": -99.418,
+          "matched_tpie_plus_ligand_strain": -83.37262416382963
+        },
+        "17e": {
+          "baseline_tpie": -104.998,
+          "matched_tpie": -99.785,
+          "matched_tpie_plus_ligand_strain": -84.53578559418133
+        },
+        "17g": {
+          "baseline_tpie": -104.865,
+          "matched_tpie": -99.599,
+          "matched_tpie_plus_ligand_strain": -84.49955579039512
+        },
+        "17a": {
+          "baseline_tpie": -103.427,
+          "matched_tpie": -98.85,
+          "matched_tpie_plus_ligand_strain": -83.28196371814731
+        },
+        "17j": {
+          "baseline_tpie": -107.753,
+          "matched_tpie": -102.774,
+          "matched_tpie_plus_ligand_strain": -87.3898497219401
+        },
+        "17l": {
+          "baseline_tpie": -105.278,
+          "matched_tpie": -100.38300000000001,
+          "matched_tpie_plus_ligand_strain": -84.97991587857094
+        },
+        "17c": {
+          "baseline_tpie": -104.587,
+          "matched_tpie": -99.789,
+          "matched_tpie_plus_ligand_strain": -82.37051985536854
+        },
+        "17k": {
+          "baseline_tpie": -112.835,
+          "matched_tpie": -107.654,
+          "matched_tpie_plus_ligand_strain": -92.56881029561025
+        },
+        "17b": {
+          "baseline_tpie": -100.917,
+          "matched_tpie": -96.151,
+          "matched_tpie_plus_ligand_strain": -80.71805395771855
+        },
+        "17h flip": {
+          "baseline_tpie": -105.259,
+          "matched_tpie": -100.336,
+          "matched_tpie_plus_ligand_strain": -84.03930724698047
+        },
+        "17i": {
+          "baseline_tpie": -108.043,
+          "matched_tpie": -103.275,
+          "matched_tpie_plus_ligand_strain": -87.51396188423078
+        },
+        "17d": {
+          "baseline_tpie": -103.8,
+          "matched_tpie": -98.79899999999999,
+          "matched_tpie_plus_ligand_strain": -83.36803877018649
+        }
+      }
+    },
+    "CHK1": {
+      "n_expected_structures": 13,
+      "n_succeeded_structures": 13,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.4636220821244891,
+            "spearman": 0.44291651254398723,
+            "kendall": 0.34839434751244364
+          },
+          "soft": {
+            "pearson": 0.4415700416098103,
+            "spearman": 0.44291651254398723,
+            "kendall": 0.34839434751244364
+          },
+          "soft_reference": {
+            "n": 13,
+            "median": 104.557,
+            "scaled_mad": 3.9451986000000017
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.4450627458991864,
+            "spearman": 0.39614893047412525,
+            "kendall": 0.32258735880781814
+          },
+          "soft": {
+            "pearson": 0.4256050810336073,
+            "spearman": 0.39614893047412525,
+            "kendall": 0.32258735880781814
+          },
+          "soft_reference": {
+            "n": 13,
+            "median": 101.617,
+            "scaled_mad": 4.0119156000000045
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": -0.20627214252170398,
+            "spearman": -0.1458048146883933,
+            "kendall": -0.0903244604661891
+          },
+          "soft": {
+            "pearson": -0.2137839658417539,
+            "spearman": -0.1458048146883933,
+            "kendall": -0.0903244604661891
+          },
+          "soft_reference": {
+            "n": 13,
+            "median": 80.27678021931506,
+            "scaled_mad": 3.1041886351774073
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "21 (Xtal)": {
+          "baseline_tpie": -112.976,
+          "matched_tpie": -109.944,
+          "matched_tpie_plus_ligand_strain": -81.61545125895458
+        },
+        "22": {
+          "baseline_tpie": -109.257,
+          "matched_tpie": -105.963,
+          "matched_tpie_plus_ligand_strain": -75.9846146449141
+        },
+        "24 pose 2": {
+          "baseline_tpie": -113.768,
+          "matched_tpie": -110.586,
+          "matched_tpie_plus_ligand_strain": -77.12412443910165
+        },
+        "14 docked": {
+          "baseline_tpie": -102.492,
+          "matched_tpie": -99.535,
+          "matched_tpie_plus_ligand_strain": -72.13085742802706
+        },
+        "18 docked": {
+          "baseline_tpie": -102.886,
+          "matched_tpie": -99.92,
+          "matched_tpie_plus_ligand_strain": -78.86319294184415
+        },
+        "13 docked": {
+          "baseline_tpie": -108.765,
+          "matched_tpie": -106.05799999999999,
+          "matched_tpie_plus_ligand_strain": -81.799011468185
+        },
+        "20": {
+          "baseline_tpie": -102.427,
+          "matched_tpie": -99.324,
+          "matched_tpie_plus_ligand_strain": -83.18228639933473
+        },
+        "12 docked": {
+          "baseline_tpie": -110.184,
+          "matched_tpie": -107.375,
+          "matched_tpie_plus_ligand_strain": -80.27678021931506
+        },
+        "16 docked": {
+          "baseline_tpie": -104.328,
+          "matched_tpie": -101.395,
+          "matched_tpie_plus_ligand_strain": -81.87315390650245
+        },
+        "19": {
+          "baseline_tpie": -102.012,
+          "matched_tpie": -99.089,
+          "matched_tpie_plus_ligand_strain": -78.18303366921563
+        },
+        "17 torsion adjust": {
+          "baseline_tpie": -111.33,
+          "matched_tpie": -108.211,
+          "matched_tpie_plus_ligand_strain": -88.61244150080749
+        },
+        "15 docked": {
+          "baseline_tpie": -101.896,
+          "matched_tpie": -98.911,
+          "matched_tpie_plus_ligand_strain": -76.9863523592885
+        },
+        "11 docked": {
+          "baseline_tpie": -104.557,
+          "matched_tpie": -101.617,
+          "matched_tpie_plus_ligand_strain": -80.38451350694999
+        }
+      }
+    },
+    "BACE": {
+      "n_expected_structures": 36,
+      "n_succeeded_structures": 36,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.21174767344688275,
+            "spearman": 0.16817979773101874,
+            "kendall": 0.11182336911697692
+          },
+          "soft": {
+            "pearson": 0.22511709896480897,
+            "spearman": 0.16817979773101874,
+            "kendall": 0.11182336911697692
+          },
+          "soft_reference": {
+            "n": 36,
+            "median": 106.951,
+            "scaled_mad": 3.086031900000008
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.23190766913887587,
+            "spearman": 0.17675469183567405,
+            "kendall": 0.11031347756413944
+          },
+          "soft": {
+            "pearson": 0.24336948044517492,
+            "spearman": 0.17675469183567405,
+            "kendall": 0.11031347756413944
+          },
+          "soft_reference": {
+            "n": 36,
+            "median": 104.656,
+            "scaled_mad": 3.163127099999997
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.38468092997452696,
+            "spearman": 0.31845990795467793,
+            "kendall": 0.22045178483061165
+          },
+          "soft": {
+            "pearson": 0.39291429507477915,
+            "spearman": 0.31845990795467793,
+            "kendall": 0.22045178483061165
+          },
+          "soft_reference": {
+            "n": 36,
+            "median": 81.92609859783086,
+            "scaled_mad": 3.3524454316477064
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "CAT-13n": {
+          "baseline_tpie": -106.261,
+          "matched_tpie": -104.018,
+          "matched_tpie_plus_ligand_strain": -78.74922887010793
+        },
+        "CAT-13e": {
+          "baseline_tpie": -108.52600000000001,
+          "matched_tpie": -106.159,
+          "matched_tpie_plus_ligand_strain": -81.93426156278919
+        },
+        "CAT-4a": {
+          "baseline_tpie": -104.91199999999999,
+          "matched_tpie": -102.39,
+          "matched_tpie_plus_ligand_strain": -79.46389492940376
+        },
+        "CAT-4m": {
+          "baseline_tpie": -109.015,
+          "matched_tpie": -106.43900000000001,
+          "matched_tpie_plus_ligand_strain": -83.27455616349201
+        },
+        "CAT-17b": {
+          "baseline_tpie": -102.976,
+          "matched_tpie": -100.651,
+          "matched_tpie_plus_ligand_strain": -79.58870223394212
+        },
+        "CAT-13j": {
+          "baseline_tpie": -108.39,
+          "matched_tpie": -106.062,
+          "matched_tpie_plus_ligand_strain": -81.27247542571679
+        },
+        "CAT-13d": {
+          "baseline_tpie": -108.854,
+          "matched_tpie": -106.502,
+          "matched_tpie_plus_ligand_strain": -85.69500132591767
+        },
+        "CAT-13b": {
+          "baseline_tpie": -105.669,
+          "matched_tpie": -103.35900000000001,
+          "matched_tpie_plus_ligand_strain": -81.91793563287253
+        },
+        "CAT-13a": {
+          "baseline_tpie": -103.10900000000001,
+          "matched_tpie": -101.053,
+          "matched_tpie_plus_ligand_strain": -84.06534087734944
+        },
+        "CAT-13h": {
+          "baseline_tpie": -108.654,
+          "matched_tpie": -106.402,
+          "matched_tpie_plus_ligand_strain": -82.93798000302814
+        },
+        "CAT-13o": {
+          "baseline_tpie": -109.05,
+          "matched_tpie": -106.852,
+          "matched_tpie_plus_ligand_strain": -79.96508273953587
+        },
+        "CAT-13g": {
+          "baseline_tpie": -112.36800000000001,
+          "matched_tpie": -109.81299999999999,
+          "matched_tpie_plus_ligand_strain": -88.76517762249256
+        },
+        "CAT-4k": {
+          "baseline_tpie": -105.419,
+          "matched_tpie": -102.85600000000001,
+          "matched_tpie_plus_ligand_strain": -80.36316763090429
+        },
+        "CAT-17g": {
+          "baseline_tpie": -101.938,
+          "matched_tpie": -99.745,
+          "matched_tpie_plus_ligand_strain": -79.7411080311278
+        },
+        "CAT-4l": {
+          "baseline_tpie": -104.90700000000001,
+          "matched_tpie": -102.51400000000001,
+          "matched_tpie_plus_ligand_strain": -78.15521989154892
+        },
+        "CAT-4j": {
+          "baseline_tpie": -105.113,
+          "matched_tpie": -102.684,
+          "matched_tpie_plus_ligand_strain": -80.51165491708204
+        },
+        "CAT-4n": {
+          "baseline_tpie": -106.96,
+          "matched_tpie": -104.765,
+          "matched_tpie_plus_ligand_strain": -81.74912593407845
+        },
+        "CAT-13i": {
+          "baseline_tpie": -106.931,
+          "matched_tpie": -104.547,
+          "matched_tpie_plus_ligand_strain": -80.50918031986913
+        },
+        "CAT-17f": {
+          "baseline_tpie": -106.434,
+          "matched_tpie": -104.242,
+          "matched_tpie_plus_ligand_strain": -84.38928447607115
+        },
+        "CAT-4p": {
+          "baseline_tpie": -109.39800000000001,
+          "matched_tpie": -107.098,
+          "matched_tpie_plus_ligand_strain": -83.91144963223144
+        },
+        "CAT-13c": {
+          "baseline_tpie": -109.423,
+          "matched_tpie": -107.122,
+          "matched_tpie_plus_ligand_strain": -87.06250880920071
+        },
+        "CAT-24": {
+          "baseline_tpie": -107.777,
+          "matched_tpie": -105.56,
+          "matched_tpie_plus_ligand_strain": -85.11433006621658
+        },
+        "CAT-4i": {
+          "baseline_tpie": -100.156,
+          "matched_tpie": -97.919,
+          "matched_tpie_plus_ligand_strain": -75.34436612337717
+        },
+        "CAT-4c": {
+          "baseline_tpie": -102.24,
+          "matched_tpie": -99.313,
+          "matched_tpie_plus_ligand_strain": -71.52600448525865
+        },
+        "CAT-17i": {
+          "baseline_tpie": -102.757,
+          "matched_tpie": -100.64,
+          "matched_tpie_plus_ligand_strain": -78.26480934204065
+        },
+        "CAT-13k": {
+          "baseline_tpie": -114.911,
+          "matched_tpie": -112.323,
+          "matched_tpie_plus_ligand_strain": -91.36378572528399
+        },
+        "CAT-17a": {
+          "baseline_tpie": -109.42699999999999,
+          "matched_tpie": -107.014,
+          "matched_tpie_plus_ligand_strain": -83.00015557434202
+        },
+        "CAT-17c": {
+          "baseline_tpie": -106.255,
+          "matched_tpie": -103.879,
+          "matched_tpie_plus_ligand_strain": -82.27442423419127
+        },
+        "CAT-4o": {
+          "baseline_tpie": -106.942,
+          "matched_tpie": -104.368,
+          "matched_tpie_plus_ligand_strain": -81.44534811403767
+        },
+        "CAT-17d": {
+          "baseline_tpie": -99.616,
+          "matched_tpie": -97.626,
+          "matched_tpie_plus_ligand_strain": -78.32496758781718
+        },
+        "CAT-4b": {
+          "baseline_tpie": -109.483,
+          "matched_tpie": -106.781,
+          "matched_tpie_plus_ligand_strain": -83.46600911055194
+        },
+        "CAT-13f": {
+          "baseline_tpie": -109.276,
+          "matched_tpie": -106.781,
+          "matched_tpie_plus_ligand_strain": -87.89332627615812
+        },
+        "CAT-4d": {
+          "baseline_tpie": -111.016,
+          "matched_tpie": -108.176,
+          "matched_tpie_plus_ligand_strain": -85.37039243615881
+        },
+        "CAT-13m": {
+          "baseline_tpie": -114.235,
+          "matched_tpie": -111.936,
+          "matched_tpie_plus_ligand_strain": -90.14908441375012
+        },
+        "CAT-17h": {
+          "baseline_tpie": -108.86099999999999,
+          "matched_tpie": -106.631,
+          "matched_tpie_plus_ligand_strain": -86.08269524414789
+        },
+        "CAT-17e": {
+          "baseline_tpie": -103.763,
+          "matched_tpie": -101.575,
+          "matched_tpie_plus_ligand_strain": -81.26004593725004
+        }
+      }
+    },
+    "FXa": {
+      "n_expected_structures": 27,
+      "n_succeeded_structures": 25,
+      "failures": {
+        "5h": {
+          "status": "FAILED",
+          "target": "FXa",
+          "name": "5h",
+          "error": "all registered strict attempts failed for complex",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_soscf",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_diis",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "8e": {
+          "status": "FAILED",
+          "target": "FXa",
+          "name": "8e",
+          "error": "all registered strict attempts failed for complex",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_soscf",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_diis",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        }
+      },
+      "status": "INCOMPLETE",
+      "metrics": {}
+    },
+    "CDK2": {
+      "n_expected_structures": 16,
+      "n_succeeded_structures": 16,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.8678583920310966,
+            "spearman": 0.8558823529411764,
+            "kendall": 0.6833333333333333
+          },
+          "soft": {
+            "pearson": 0.8661586806892017,
+            "spearman": 0.8558823529411764,
+            "kendall": 0.6833333333333333
+          },
+          "soft_reference": {
+            "n": 16,
+            "median": 81.6895,
+            "scaled_mad": 9.699169199999991
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.8682123954012182,
+            "spearman": 0.8558823529411764,
+            "kendall": 0.6833333333333333
+          },
+          "soft": {
+            "pearson": 0.8662372796568144,
+            "spearman": 0.8558823529411764,
+            "kendall": 0.6833333333333333
+          },
+          "soft_reference": {
+            "n": 16,
+            "median": 78.7255,
+            "scaled_mad": 9.35668860000001
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": -0.49994437188224566,
+            "spearman": -0.6617647058823529,
+            "kendall": -0.4666666666666666
+          },
+          "soft": {
+            "pearson": -0.5468692335905148,
+            "spearman": -0.6617647058823529,
+            "kendall": -0.4666666666666666
+          },
+          "soft_reference": {
+            "n": 16,
+            "median": 48.89816801090791,
+            "scaled_mad": 11.708363174128598
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "17": {
+          "baseline_tpie": -71.824,
+          "matched_tpie": -69.342,
+          "matched_tpie_plus_ligand_strain": -51.618105346756465
+        },
+        "29": {
+          "baseline_tpie": -90.278,
+          "matched_tpie": -86.834,
+          "matched_tpie_plus_ligand_strain": -44.93051182364376
+        },
+        "28": {
+          "baseline_tpie": -93.426,
+          "matched_tpie": -90.04599999999999,
+          "matched_tpie_plus_ligand_strain": -40.067989740466345
+        },
+        "32": {
+          "baseline_tpie": -91.758,
+          "matched_tpie": -88.411,
+          "matched_tpie_plus_ligand_strain": -11.932989801638257
+        },
+        "26": {
+          "baseline_tpie": -81.002,
+          "matched_tpie": -78.219,
+          "matched_tpie_plus_ligand_strain": -58.23790733284707
+        },
+        "21": {
+          "baseline_tpie": -74.275,
+          "matched_tpie": -71.582,
+          "matched_tpie_plus_ligand_strain": -53.4472912093316
+        },
+        "30": {
+          "baseline_tpie": -82.377,
+          "matched_tpie": -79.232,
+          "matched_tpie_plus_ligand_strain": -37.490175834418736
+        },
+        "22": {
+          "baseline_tpie": -76.506,
+          "matched_tpie": -73.855,
+          "matched_tpie_plus_ligand_strain": -49.657006644086835
+        },
+        "31": {
+          "baseline_tpie": -87.359,
+          "matched_tpie": -84.20400000000001,
+          "matched_tpie_plus_ligand_strain": -48.70615740031279
+        },
+        "1h1r": {
+          "baseline_tpie": -71.783,
+          "matched_tpie": -69.271,
+          "matched_tpie_plus_ligand_strain": -49.96232389491209
+        },
+        "1oiy": {
+          "baseline_tpie": -83.454,
+          "matched_tpie": -80.657,
+          "matched_tpie_plus_ligand_strain": -40.21389203228629
+        },
+        "1h1s": {
+          "baseline_tpie": -95.012,
+          "matched_tpie": -91.941,
+          "matched_tpie_plus_ligand_strain": -35.927090943693976
+        },
+        "1oiu": {
+          "baseline_tpie": -80.14,
+          "matched_tpie": -77.108,
+          "matched_tpie_plus_ligand_strain": -37.9351105148995
+        },
+        "20": {
+          "baseline_tpie": -85.007,
+          "matched_tpie": -82.287,
+          "matched_tpie_plus_ligand_strain": -60.168293171907635
+        },
+        "1oi9": {
+          "baseline_tpie": -77.727,
+          "matched_tpie": -75.113,
+          "matched_tpie_plus_ligand_strain": -56.00825757137788
+        },
+        "1h1q": {
+          "baseline_tpie": -69.509,
+          "matched_tpie": -67.211,
+          "matched_tpie_plus_ligand_strain": -49.09017862150303
+        }
+      }
+    },
+    "JNK1": {
+      "n_expected_structures": 21,
+      "n_succeeded_structures": 21,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.6141593425214715,
+            "spearman": 0.6281260480680853,
+            "kendall": 0.47255504512881
+          },
+          "soft": {
+            "pearson": 0.6111310436042755,
+            "spearman": 0.6281260480680853,
+            "kendall": 0.47255504512881
+          },
+          "soft_reference": {
+            "n": 21,
+            "median": 64.844,
+            "scaled_mad": 5.278055999999992
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.6259337055544336,
+            "spearman": 0.6313738559691612,
+            "kendall": 0.48210161169706883
+          },
+          "soft": {
+            "pearson": 0.6199264428448755,
+            "spearman": 0.6313738559691612,
+            "kendall": 0.48210161169706883
+          },
+          "soft_reference": {
+            "n": 21,
+            "median": 61.756,
+            "scaled_mad": 4.351431000000003
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.5152352007361174,
+            "spearman": 0.5904514764156045,
+            "kendall": 0.4248222122875161
+          },
+          "soft": {
+            "pearson": 0.5039421131059653,
+            "spearman": 0.5904514764156045,
+            "kendall": 0.4248222122875161
+          },
+          "soft_reference": {
+            "n": 21,
+            "median": 48.36230788524182,
+            "scaled_mad": 3.901408196284013
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "18636-1": {
+          "baseline_tpie": -66.774,
+          "matched_tpie": -63.671,
+          "matched_tpie_plus_ligand_strain": -49.92485903740237
+        },
+        "18635-1": {
+          "baseline_tpie": -64.844,
+          "matched_tpie": -61.756,
+          "matched_tpie_plus_ligand_strain": -49.33963507170707
+        },
+        "17124-1": {
+          "baseline_tpie": -71.838,
+          "matched_tpie": -68.607,
+          "matched_tpie_plus_ligand_strain": -50.993771662581636
+        },
+        "18637-1": {
+          "baseline_tpie": -71.899,
+          "matched_tpie": -68.637,
+          "matched_tpie_plus_ligand_strain": -50.183466195747734
+        },
+        "18638-1": {
+          "baseline_tpie": -76.337,
+          "matched_tpie": -73.199,
+          "matched_tpie_plus_ligand_strain": -56.593613373848676
+        },
+        "18639-1": {
+          "baseline_tpie": -75.149,
+          "matched_tpie": -71.905,
+          "matched_tpie_plus_ligand_strain": -48.36230788524182
+        },
+        "18634-1": {
+          "baseline_tpie": -70.328,
+          "matched_tpie": -67.074,
+          "matched_tpie_plus_ligand_strain": -51.881078214083345
+        },
+        "18630-1": {
+          "baseline_tpie": -61.32,
+          "matched_tpie": -58.821,
+          "matched_tpie_plus_ligand_strain": -45.3705320889401
+        },
+        "18627-1": {
+          "baseline_tpie": -61.284,
+          "matched_tpie": -58.849,
+          "matched_tpie_plus_ligand_strain": -45.289165345234
+        },
+        "18633-1": {
+          "baseline_tpie": -62.675000000000004,
+          "matched_tpie": -60.111000000000004,
+          "matched_tpie_plus_ligand_strain": -46.6593448410195
+        },
+        "18629-1": {
+          "baseline_tpie": -61.68,
+          "matched_tpie": -59.022,
+          "matched_tpie_plus_ligand_strain": -45.91426897854143
+        },
+        "18626-1": {
+          "baseline_tpie": -62.18,
+          "matched_tpie": -59.494,
+          "matched_tpie_plus_ligand_strain": -46.3465752392519
+        },
+        "18632-1": {
+          "baseline_tpie": -63.7,
+          "matched_tpie": -60.833,
+          "matched_tpie_plus_ligand_strain": -47.23816976937982
+        },
+        "18624-1": {
+          "baseline_tpie": -59.518,
+          "matched_tpie": -57.084,
+          "matched_tpie_plus_ligand_strain": -44.0902987451539
+        },
+        "18628-1": {
+          "baseline_tpie": -62.035000000000004,
+          "matched_tpie": -59.338,
+          "matched_tpie_plus_ligand_strain": -43.71293440212422
+        },
+        "18625-1": {
+          "baseline_tpie": -63.421,
+          "matched_tpie": -60.707,
+          "matched_tpie_plus_ligand_strain": -46.758349179937326
+        },
+        "18631-1": {
+          "baseline_tpie": -64.069,
+          "matched_tpie": -61.254,
+          "matched_tpie_plus_ligand_strain": -47.141067199625034
+        },
+        "18659-1": {
+          "baseline_tpie": -71.85,
+          "matched_tpie": -68.152,
+          "matched_tpie_plus_ligand_strain": -52.65854572918214
+        },
+        "18652-1": {
+          "baseline_tpie": -79.55,
+          "matched_tpie": -76.131,
+          "matched_tpie_plus_ligand_strain": -58.53967488077362
+        },
+        "18658-1": {
+          "baseline_tpie": -77.05199999999999,
+          "matched_tpie": -73.77499999999999,
+          "matched_tpie_plus_ligand_strain": -56.8864014054524
+        },
+        "18660-1": {
+          "baseline_tpie": -77.629,
+          "matched_tpie": -73.684,
+          "matched_tpie_plus_ligand_strain": -55.654696485732345
+        }
+      }
+    },
+    "P38": {
+      "n_expected_structures": 34,
+      "n_succeeded_structures": 34,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.5033110695877683,
+            "spearman": 0.48126645126004114,
+            "kendall": 0.3285542530932048
+          },
+          "soft": {
+            "pearson": 0.49973234523060966,
+            "spearman": 0.48126645126004114,
+            "kendall": 0.3285542530932048
+          },
+          "soft_reference": {
+            "n": 34,
+            "median": 84.5475,
+            "scaled_mad": 5.3855445
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.5033138037261757,
+            "spearman": 0.48126645126004114,
+            "kendall": 0.3285542530932048
+          },
+          "soft": {
+            "pearson": 0.49973401375895354,
+            "spearman": 0.48126645126004114,
+            "kendall": 0.3285542530932048
+          },
+          "soft_reference": {
+            "n": 34,
+            "median": 84.5475,
+            "scaled_mad": 5.3855445
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.33935988138130674,
+            "spearman": 0.3125861539165949,
+            "kendall": 0.20646851970338007
+          },
+          "soft": {
+            "pearson": 0.3402695423961089,
+            "spearman": 0.3125861539165949,
+            "kendall": 0.20646851970338007
+          },
+          "soft_reference": {
+            "n": 34,
+            "median": 66.64113807094851,
+            "scaled_mad": 5.247333283528401
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "2ee": {
+          "baseline_tpie": -81.76,
+          "matched_tpie": -81.76,
+          "matched_tpie_plus_ligand_strain": -60.27210460081855
+        },
+        "2r": {
+          "baseline_tpie": -94.484,
+          "matched_tpie": -94.484,
+          "matched_tpie_plus_ligand_strain": -78.40314603318785
+        },
+        "3fly": {
+          "baseline_tpie": -76.786,
+          "matched_tpie": -76.786,
+          "matched_tpie_plus_ligand_strain": -63.362968685677416
+        },
+        "2l": {
+          "baseline_tpie": -85.539,
+          "matched_tpie": -85.539,
+          "matched_tpie_plus_ligand_strain": -70.85960749477839
+        },
+        "2v": {
+          "baseline_tpie": -70.426,
+          "matched_tpie": -70.426,
+          "matched_tpie_plus_ligand_strain": -56.36692822031229
+        },
+        "2p": {
+          "baseline_tpie": -101.70700000000001,
+          "matched_tpie": -101.70700000000001,
+          "matched_tpie_plus_ligand_strain": -82.68564291282374
+        },
+        "2o": {
+          "baseline_tpie": -86.8,
+          "matched_tpie": -86.8,
+          "matched_tpie_plus_ligand_strain": -65.1591912096544
+        },
+        "2u": {
+          "baseline_tpie": -99.156,
+          "matched_tpie": -99.157,
+          "matched_tpie_plus_ligand_strain": -66.76016238391232
+        },
+        "3flq": {
+          "baseline_tpie": -90.422,
+          "matched_tpie": -90.422,
+          "matched_tpie_plus_ligand_strain": -70.47564374729154
+        },
+        "3fmk": {
+          "baseline_tpie": -85.583,
+          "matched_tpie": -85.583,
+          "matched_tpie_plus_ligand_strain": -62.1528454343308
+        },
+        "3fmh": {
+          "baseline_tpie": -84.999,
+          "matched_tpie": -84.999,
+          "matched_tpie_plus_ligand_strain": -64.3724912484412
+        },
+        "2c": {
+          "baseline_tpie": -80.703,
+          "matched_tpie": -80.703,
+          "matched_tpie_plus_ligand_strain": -65.95488830476998
+        },
+        "2j": {
+          "baseline_tpie": -81.215,
+          "matched_tpie": -81.215,
+          "matched_tpie_plus_ligand_strain": -66.80224317291848
+        },
+        "2i": {
+          "baseline_tpie": -82.141,
+          "matched_tpie": -82.141,
+          "matched_tpie_plus_ligand_strain": -67.58832048288224
+        },
+        "2e": {
+          "baseline_tpie": -80.016,
+          "matched_tpie": -80.016,
+          "matched_tpie_plus_ligand_strain": -64.54562427261597
+        },
+        "2z": {
+          "baseline_tpie": -82.162,
+          "matched_tpie": -82.162,
+          "matched_tpie_plus_ligand_strain": -66.15008171397606
+        },
+        "3flw": {
+          "baseline_tpie": -86.796,
+          "matched_tpie": -86.796,
+          "matched_tpie_plus_ligand_strain": -70.94603563412976
+        },
+        "2aa": {
+          "baseline_tpie": -87.57000000000001,
+          "matched_tpie": -87.57000000000001,
+          "matched_tpie_plus_ligand_strain": -70.78988712585985
+        },
+        "3fln": {
+          "baseline_tpie": -81.764,
+          "matched_tpie": -81.764,
+          "matched_tpie_plus_ligand_strain": -66.16135531563278
+        },
+        "2gg": {
+          "baseline_tpie": -87.968,
+          "matched_tpie": -87.968,
+          "matched_tpie_plus_ligand_strain": -71.61086867198138
+        },
+        "2y": {
+          "baseline_tpie": -78.185,
+          "matched_tpie": -78.185,
+          "matched_tpie_plus_ligand_strain": -61.030351193657715
+        },
+        "2bb": {
+          "baseline_tpie": -84.707,
+          "matched_tpie": -84.707,
+          "matched_tpie_plus_ligand_strain": -65.28499756643143
+        },
+        "2x": {
+          "baseline_tpie": -78.506,
+          "matched_tpie": -78.506,
+          "matched_tpie_plus_ligand_strain": -62.84075183295184
+        },
+        "2ff": {
+          "baseline_tpie": -99.847,
+          "matched_tpie": -99.847,
+          "matched_tpie_plus_ligand_strain": -82.8120348206222
+        },
+        "2f": {
+          "baseline_tpie": -77.32600000000001,
+          "matched_tpie": -77.32600000000001,
+          "matched_tpie_plus_ligand_strain": -63.46686654395833
+        },
+        "3flz": {
+          "baseline_tpie": -79.663,
+          "matched_tpie": -79.663,
+          "matched_tpie_plus_ligand_strain": -66.32002508935767
+        },
+        "2g": {
+          "baseline_tpie": -81.923,
+          "matched_tpie": -81.923,
+          "matched_tpie_plus_ligand_strain": -68.53369104480815
+        },
+        "2h": {
+          "baseline_tpie": -83.82,
+          "matched_tpie": -83.82,
+          "matched_tpie_plus_ligand_strain": -66.91398801754653
+        },
+        "2t": {
+          "baseline_tpie": -84.733,
+          "matched_tpie": -84.733,
+          "matched_tpie_plus_ligand_strain": -70.62442901798123
+        },
+        "2k": {
+          "baseline_tpie": -78.993,
+          "matched_tpie": -78.993,
+          "matched_tpie_plus_ligand_strain": -65.8265510345199
+        },
+        "2m": {
+          "baseline_tpie": -84.388,
+          "matched_tpie": -84.388,
+          "matched_tpie_plus_ligand_strain": -66.52211375798471
+        },
+        "2q": {
+          "baseline_tpie": -96.377,
+          "matched_tpie": -96.377,
+          "matched_tpie_plus_ligand_strain": -73.76126990041077
+        },
+        "2n": {
+          "baseline_tpie": -94.681,
+          "matched_tpie": -94.681,
+          "matched_tpie_plus_ligand_strain": -76.93053596811717
+        },
+        "2s": {
+          "baseline_tpie": -100.235,
+          "matched_tpie": -100.235,
+          "matched_tpie_plus_ligand_strain": -80.66026176043415
+        }
+      }
+    },
+    "TYK2": {
+      "n_expected_structures": 16,
+      "n_succeeded_structures": 16,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.7076479666324703,
+            "spearman": 0.7294117647058823,
+            "kendall": 0.5499999999999999
+          },
+          "soft": {
+            "pearson": 0.7604978695478382,
+            "spearman": 0.7294117647058823,
+            "kendall": 0.5499999999999999
+          },
+          "soft_reference": {
+            "n": 16,
+            "median": 71.5395,
+            "scaled_mad": 2.469270300000002
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.6983443042384379,
+            "spearman": 0.7176470588235294,
+            "kendall": 0.5333333333333333
+          },
+          "soft": {
+            "pearson": 0.7453441748580745,
+            "spearman": 0.7176470588235294,
+            "kendall": 0.5333333333333333
+          },
+          "soft_reference": {
+            "n": 16,
+            "median": 68.695,
+            "scaled_mad": 2.4966984000000068
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.6569309885511752,
+            "spearman": 0.611764705882353,
+            "kendall": 0.43333333333333335
+          },
+          "soft": {
+            "pearson": 0.6711172500847902,
+            "spearman": 0.611764705882353,
+            "kendall": 0.43333333333333335
+          },
+          "soft_reference": {
+            "n": 16,
+            "median": 51.46164422453523,
+            "scaled_mad": 4.169062483940921
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "ejm_31": {
+          "baseline_tpie": -69.894,
+          "matched_tpie": -67.225,
+          "matched_tpie_plus_ligand_strain": -52.69280866721127
+        },
+        "ejm_44": {
+          "baseline_tpie": -67.365,
+          "matched_tpie": -64.395,
+          "matched_tpie_plus_ligand_strain": -45.59161146618395
+        },
+        "ejm_43": {
+          "baseline_tpie": -68.4,
+          "matched_tpie": -65.598,
+          "matched_tpie_plus_ligand_strain": -48.32118827675893
+        },
+        "ejm_42": {
+          "baseline_tpie": -70.833,
+          "matched_tpie": -68.282,
+          "matched_tpie_plus_ligand_strain": -53.94775276574425
+        },
+        "ejm_54": {
+          "baseline_tpie": -72.895,
+          "matched_tpie": -70.395,
+          "matched_tpie_plus_ligand_strain": -52.227431048213774
+        },
+        "ejm_55": {
+          "baseline_tpie": -67.062,
+          "matched_tpie": -64.462,
+          "matched_tpie_plus_ligand_strain": -48.67716044988099
+        },
+        "jmc_28": {
+          "baseline_tpie": -73.118,
+          "matched_tpie": -69.942,
+          "matched_tpie_plus_ligand_strain": -50.65393193355389
+        },
+        "jmc_30": {
+          "baseline_tpie": -82.093,
+          "matched_tpie": -78.751,
+          "matched_tpie_plus_ligand_strain": -61.60725479828054
+        },
+        "ejm_45": {
+          "baseline_tpie": -71.89,
+          "matched_tpie": -69.339,
+          "matched_tpie_plus_ligand_strain": -51.67044540727383
+        },
+        "ejm_50": {
+          "baseline_tpie": -73.031,
+          "matched_tpie": -70.363,
+          "matched_tpie_plus_ligand_strain": -54.44391797560131
+        },
+        "ejm_49": {
+          "baseline_tpie": -69.854,
+          "matched_tpie": -67.345,
+          "matched_tpie_plus_ligand_strain": -48.622139756992084
+        },
+        "ejm_46": {
+          "baseline_tpie": -71.425,
+          "matched_tpie": -68.553,
+          "matched_tpie_plus_ligand_strain": -51.25284304179662
+        },
+        "ejm_47": {
+          "baseline_tpie": -71.654,
+          "matched_tpie": -68.837,
+          "matched_tpie_plus_ligand_strain": -47.829452435554124
+        },
+        "ejm_48": {
+          "baseline_tpie": -69.265,
+          "matched_tpie": -66.468,
+          "matched_tpie_plus_ligand_strain": -49.99424540871873
+        },
+        "jmc_27": {
+          "baseline_tpie": -77.804,
+          "matched_tpie": -74.43299999999999,
+          "matched_tpie_plus_ligand_strain": -55.6218535665585
+        },
+        "jmc_23": {
+          "baseline_tpie": -75.529,
+          "matched_tpie": -72.156,
+          "matched_tpie_plus_ligand_strain": -55.49892918353541
+        }
+      }
+    },
+    "HSP90": {
+      "n_expected_structures": 11,
+      "n_succeeded_structures": 11,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.7493347554967278,
+            "spearman": 0.7248011453748541,
+            "kendall": 0.5983660736054126
+          },
+          "soft": {
+            "pearson": 0.7497473021592997,
+            "spearman": 0.7248011453748541,
+            "kendall": 0.5983660736054126
+          },
+          "soft_reference": {
+            "n": 11,
+            "median": 78.369,
+            "scaled_mad": 7.7065547999999895
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.7505848820111377,
+            "spearman": 0.7248011453748541,
+            "kendall": 0.5983660736054126
+          },
+          "soft": {
+            "pearson": 0.7508395825409951,
+            "spearman": 0.7248011453748541,
+            "kendall": 0.5983660736054126
+          },
+          "soft_reference": {
+            "n": 11,
+            "median": 76.102,
+            "scaled_mad": 7.436721599999986
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.5505236453064206,
+            "spearman": 0.7339758434175737,
+            "kendall": 0.6357639532057509
+          },
+          "soft": {
+            "pearson": 0.658413482756103,
+            "spearman": 0.7339758434175737,
+            "kendall": 0.6357639532057509
+          },
+          "soft_reference": {
+            "n": 11,
+            "median": 64.76706921156895,
+            "scaled_mad": 4.621930855794591
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "cmpd 16": {
+          "baseline_tpie": -88.001,
+          "matched_tpie": -85.643,
+          "matched_tpie_plus_ligand_strain": -72.03148805751437
+        },
+        "cmpd 9": {
+          "baseline_tpie": -72.478,
+          "matched_tpie": -70.292,
+          "matched_tpie_plus_ligand_strain": -58.551752057136916
+        },
+        "cmpd 13": {
+          "baseline_tpie": -82.699,
+          "matched_tpie": -80.432,
+          "matched_tpie_plus_ligand_strain": -67.61460506199987
+        },
+        "cmpd 14": {
+          "baseline_tpie": -78.369,
+          "matched_tpie": -76.102,
+          "matched_tpie_plus_ligand_strain": -64.76706921156895
+        },
+        "cmpd 15": {
+          "baseline_tpie": -81.958,
+          "matched_tpie": -79.534,
+          "matched_tpie_plus_ligand_strain": -67.52500543713424
+        },
+        "cmpd 7": {
+          "baseline_tpie": -65.927,
+          "matched_tpie": -63.883,
+          "matched_tpie_plus_ligand_strain": -45.21992823217131
+        },
+        "cmpd 17": {
+          "baseline_tpie": -93.173,
+          "matched_tpie": -90.735,
+          "matched_tpie_plus_ligand_strain": -73.80737721877136
+        },
+        "cmpd 11": {
+          "baseline_tpie": -76.17,
+          "matched_tpie": -73.842,
+          "matched_tpie_plus_ligand_strain": -61.64961955839575
+        },
+        "cmpd 12": {
+          "baseline_tpie": -77.232,
+          "matched_tpie": -74.899,
+          "matched_tpie_plus_ligand_strain": -63.09423780810765
+        },
+        "cmpd 10": {
+          "baseline_tpie": -83.567,
+          "matched_tpie": -81.118,
+          "matched_tpie_plus_ligand_strain": -66.0092975156112
+        },
+        "cmpd 8": {
+          "baseline_tpie": -64.886,
+          "matched_tpie": -62.798,
+          "matched_tpie_plus_ligand_strain": -54.58298482067851
+        }
+      }
+    },
+    "PTP1B": {
+      "n_expected_structures": 23,
+      "n_succeeded_structures": 12,
+      "failures": {
+        "23484": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23484",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "20667": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "20667",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23469": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23469",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23483": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23483",
+          "error": "all registered strict attempts failed for complex",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_soscf",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_diis",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23480": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23480",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "20669": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "20669",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23472": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23472",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23482": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23482",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23486": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23486",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "23485": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "23485",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "20670": {
+          "status": "FAILED",
+          "target": "PTP1B",
+          "name": "20670",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        }
+      },
+      "status": "INCOMPLETE",
+      "metrics": {}
+    },
+    "FAAH": {
+      "n_expected_structures": 24,
+      "n_succeeded_structures": 24,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.7368320105673787,
+            "spearman": 0.7018917321829027,
+            "kendall": 0.5408357364372676
+          },
+          "soft": {
+            "pearson": 0.7319914244754566,
+            "spearman": 0.7018917321829027,
+            "kendall": 0.5408357364372676
+          },
+          "soft_reference": {
+            "n": 24,
+            "median": 49.2565,
+            "scaled_mad": 4.195016699999999
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.7368320105673787,
+            "spearman": 0.7018917321829027,
+            "kendall": 0.5408357364372676
+          },
+          "soft": {
+            "pearson": 0.7319914244754566,
+            "spearman": 0.7018917321829027,
+            "kendall": 0.5408357364372676
+          },
+          "soft_reference": {
+            "n": 24,
+            "median": 49.2565,
+            "scaled_mad": 4.195016699999999
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": -0.08212550637049948,
+            "spearman": 0.31485106202008767,
+            "kendall": 0.21415643254898517
+          },
+          "soft": {
+            "pearson": 0.39508472025792735,
+            "spearman": 0.31485106202008767,
+            "kendall": 0.21415643254898517
+          },
+          "soft_reference": {
+            "n": 24,
+            "median": 35.3422639425397,
+            "scaled_mad": 2.5786402093349112
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "6MRG ligand": {
+          "baseline_tpie": -52.266,
+          "matched_tpie": -52.266,
+          "matched_tpie_plus_ligand_strain": -39.7245034074794
+        },
+        "fig 3": {
+          "baseline_tpie": -48.155,
+          "matched_tpie": -48.155,
+          "matched_tpie_plus_ligand_strain": -33.62261602180686
+        },
+        "2": {
+          "baseline_tpie": -46.607,
+          "matched_tpie": -46.607,
+          "matched_tpie_plus_ligand_strain": -35.0883890308873
+        },
+        "4": {
+          "baseline_tpie": -54.95,
+          "matched_tpie": -54.95,
+          "matched_tpie_plus_ligand_strain": -43.12125188597505
+        },
+        "6": {
+          "baseline_tpie": -45.87,
+          "matched_tpie": -45.87,
+          "matched_tpie_plus_ligand_strain": -33.79131611747444
+        },
+        "9": {
+          "baseline_tpie": -53.335,
+          "matched_tpie": -53.335,
+          "matched_tpie_plus_ligand_strain": -39.04115935579734
+        },
+        "11": {
+          "baseline_tpie": -55.853,
+          "matched_tpie": -55.853,
+          "matched_tpie_plus_ligand_strain": -43.37337082154655
+        },
+        "12": {
+          "baseline_tpie": -50.435,
+          "matched_tpie": -50.435,
+          "matched_tpie_plus_ligand_strain": 219.9158253844713
+        },
+        "15": {
+          "baseline_tpie": -46.160000000000004,
+          "matched_tpie": -46.160000000000004,
+          "matched_tpie_plus_ligand_strain": -34.153733848325814
+        },
+        "14": {
+          "baseline_tpie": -43.911,
+          "matched_tpie": -43.911,
+          "matched_tpie_plus_ligand_strain": -32.30152816908041
+        },
+        "19": {
+          "baseline_tpie": -48.751,
+          "matched_tpie": -48.751,
+          "matched_tpie_plus_ligand_strain": -35.777392853527374
+        },
+        "20": {
+          "baseline_tpie": -42.772999999999996,
+          "matched_tpie": -42.772999999999996,
+          "matched_tpie_plus_ligand_strain": -28.06628384975574
+        },
+        "22": {
+          "baseline_tpie": -49.308,
+          "matched_tpie": -49.308,
+          "matched_tpie_plus_ligand_strain": -36.27778961643898
+        },
+        "23": {
+          "baseline_tpie": -47.363,
+          "matched_tpie": -47.363,
+          "matched_tpie_plus_ligand_strain": -33.58337387685016
+        },
+        "24": {
+          "baseline_tpie": -53.397999999999996,
+          "matched_tpie": -53.397999999999996,
+          "matched_tpie_plus_ligand_strain": -34.3346066806632
+        },
+        "25": {
+          "baseline_tpie": -57.77,
+          "matched_tpie": -57.77,
+          "matched_tpie_plus_ligand_strain": -35.59613885419211
+        },
+        "26": {
+          "baseline_tpie": -54.749,
+          "matched_tpie": -54.749,
+          "matched_tpie_plus_ligand_strain": -43.29976522332261
+        },
+        "27": {
+          "baseline_tpie": -47.019999999999996,
+          "matched_tpie": -47.019999999999996,
+          "matched_tpie_plus_ligand_strain": -32.49921678945732
+        },
+        "28": {
+          "baseline_tpie": -55.88,
+          "matched_tpie": -55.88,
+          "matched_tpie_plus_ligand_strain": -38.10947135268027
+        },
+        "29": {
+          "baseline_tpie": -46.97,
+          "matched_tpie": -46.97,
+          "matched_tpie_plus_ligand_strain": -34.5763527971969
+        },
+        "30": {
+          "baseline_tpie": -49.349000000000004,
+          "matched_tpie": -49.349000000000004,
+          "matched_tpie_plus_ligand_strain": -34.5997995758338
+        },
+        "31": {
+          "baseline_tpie": -49.205,
+          "matched_tpie": -49.205,
+          "matched_tpie_plus_ligand_strain": -36.63026423063463
+        },
+        "33 (Saha 2018)": {
+          "baseline_tpie": -49.035000000000004,
+          "matched_tpie": -49.035000000000004,
+          "matched_tpie_plus_ligand_strain": -36.513106803452615
+        },
+        "39": {
+          "baseline_tpie": -50.638,
+          "matched_tpie": -50.638,
+          "matched_tpie_plus_ligand_strain": -38.65852913038107
+        }
+      }
+    },
+    "HIV1PROT": {
+      "n_expected_structures": 13,
+      "n_succeeded_structures": 13,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": -0.14666558742438307,
+            "spearman": -0.046767582069862,
+            "kendall": 0.03871048305693818
+          },
+          "soft": {
+            "pearson": -0.1480374278440529,
+            "spearman": -0.046767582069862,
+            "kendall": 0.03871048305693818
+          },
+          "soft_reference": {
+            "n": 13,
+            "median": 200.751,
+            "scaled_mad": 1.8295284000000132
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": -0.05322726532547192,
+            "spearman": -0.005502068478807295,
+            "kendall": 0.0903244604661891
+          },
+          "soft": {
+            "pearson": -0.05295200048867177,
+            "spearman": -0.005502068478807295,
+            "kendall": 0.0903244604661891
+          },
+          "soft_reference": {
+            "n": 13,
+            "median": 196.434,
+            "scaled_mad": 1.2794837999999993
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": -0.302067878905785,
+            "spearman": -0.27510342394036474,
+            "kendall": -0.1935524152846909
+          },
+          "soft": {
+            "pearson": -0.29667128342555665,
+            "spearman": -0.27510342394036474,
+            "kendall": -0.1935524152846909
+          },
+          "soft_reference": {
+            "n": 13,
+            "median": 147.6334761024868,
+            "scaled_mad": 1.9432824804984161
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "1": {
+          "baseline_tpie": -195.974,
+          "matched_tpie": -192.665,
+          "matched_tpie_plus_ligand_strain": -144.99947698662373
+        },
+        "9": {
+          "baseline_tpie": -200.751,
+          "matched_tpie": -196.434,
+          "matched_tpie_plus_ligand_strain": -146.32275002633787
+        },
+        "10": {
+          "baseline_tpie": -198.903,
+          "matched_tpie": -194.659,
+          "matched_tpie_plus_ligand_strain": -148.18513442063002
+        },
+        "11 (2cen)": {
+          "baseline_tpie": -200.192,
+          "matched_tpie": -196.016,
+          "matched_tpie_plus_ligand_strain": -145.78515989827713
+        },
+        "12": {
+          "baseline_tpie": -202.031,
+          "matched_tpie": -197.826,
+          "matched_tpie_plus_ligand_strain": -148.25683663568998
+        },
+        "13": {
+          "baseline_tpie": -201.985,
+          "matched_tpie": -197.153,
+          "matched_tpie_plus_ligand_strain": -146.9091459792901
+        },
+        "14": {
+          "baseline_tpie": -201.876,
+          "matched_tpie": -197.058,
+          "matched_tpie_plus_ligand_strain": -152.82510378451605
+        },
+        "15": {
+          "baseline_tpie": -200.461,
+          "matched_tpie": -195.708,
+          "matched_tpie_plus_ligand_strain": -151.6951054685755
+        },
+        "16": {
+          "baseline_tpie": -201.339,
+          "matched_tpie": -196.678,
+          "matched_tpie_plus_ligand_strain": -148.76624164149243
+        },
+        "17": {
+          "baseline_tpie": -202.663,
+          "matched_tpie": -198.294,
+          "matched_tpie_plus_ligand_strain": -140.26965726540396
+        },
+        "18": {
+          "baseline_tpie": -199.252,
+          "matched_tpie": -195.095,
+          "matched_tpie_plus_ligand_strain": -147.34543527027168
+        },
+        "19": {
+          "baseline_tpie": -200.432,
+          "matched_tpie": -195.571,
+          "matched_tpie_plus_ligand_strain": -147.6334761024868
+        },
+        "20": {
+          "baseline_tpie": -205.361,
+          "matched_tpie": -200.406,
+          "matched_tpie_plus_ligand_strain": -152.39043525923904
+        }
+      }
+    },
+    "CDK8": {
+      "n_expected_structures": 10,
+      "n_succeeded_structures": 10,
+      "failures": {},
+      "status": "COMPLETE",
+      "metrics": {
+        "baseline_tpie": {
+          "raw": {
+            "pearson": 0.7072126606977115,
+            "spearman": 0.6969696969696969,
+            "kendall": 0.5111111111111111
+          },
+          "soft": {
+            "pearson": 0.7096381626636576,
+            "spearman": 0.6969696969696969,
+            "kendall": 0.5111111111111111
+          },
+          "soft_reference": {
+            "n": 10,
+            "median": 65.482,
+            "scaled_mad": 4.7028072000000005
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie": {
+          "raw": {
+            "pearson": 0.7072126606977115,
+            "spearman": 0.6969696969696969,
+            "kendall": 0.5111111111111111
+          },
+          "soft": {
+            "pearson": 0.7096381626636576,
+            "spearman": 0.6969696969696969,
+            "kendall": 0.5111111111111111
+          },
+          "soft_reference": {
+            "n": 10,
+            "median": 65.482,
+            "scaled_mad": 4.7028072000000005
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        },
+        "matched_tpie_plus_ligand_strain": {
+          "raw": {
+            "pearson": 0.8001128596073938,
+            "spearman": 0.709090909090909,
+            "kendall": 0.5111111111111111
+          },
+          "soft": {
+            "pearson": 0.7991213640741087,
+            "spearman": 0.709090909090909,
+            "kendall": 0.5111111111111111
+          },
+          "soft_reference": {
+            "n": 10,
+            "median": 57.84517644264872,
+            "scaled_mad": 4.076575429455541
+          },
+          "soft_scope": "Same fixed tanh/3MAD formula, label-free cohort-local scale for each readout; not the bundled pure-tPIE reference or a fitted calibration"
+        }
+      },
+      "scores": {
+        "12": {
+          "baseline_tpie": -62.586999999999996,
+          "matched_tpie": -62.586999999999996,
+          "matched_tpie_plus_ligand_strain": -55.615858573040434
+        },
+        "13": {
+          "baseline_tpie": -71.267,
+          "matched_tpie": -71.267,
+          "matched_tpie_plus_ligand_strain": -64.56046676806481
+        },
+        "14": {
+          "baseline_tpie": -65.995,
+          "matched_tpie": -65.995,
+          "matched_tpie_plus_ligand_strain": -60.026576669458095
+        },
+        "15": {
+          "baseline_tpie": -65.819,
+          "matched_tpie": -65.819,
+          "matched_tpie_plus_ligand_strain": -58.37193844515459
+        },
+        "16": {
+          "baseline_tpie": -68.931,
+          "matched_tpie": -68.931,
+          "matched_tpie_plus_ligand_strain": -62.15118244662271
+        },
+        "17": {
+          "baseline_tpie": -65.145,
+          "matched_tpie": -65.145,
+          "matched_tpie_plus_ligand_strain": -57.318414440142845
+        },
+        "19": {
+          "baseline_tpie": -60.3,
+          "matched_tpie": -60.3,
+          "matched_tpie_plus_ligand_strain": -53.93113212609626
+        },
+        "20": {
+          "baseline_tpie": -60.621,
+          "matched_tpie": -60.621,
+          "matched_tpie_plus_ligand_strain": -55.49455507654559
+        },
+        "21": {
+          "baseline_tpie": -62.74,
+          "matched_tpie": -62.74,
+          "matched_tpie_plus_ligand_strain": -54.696572893797665
+        },
+        "22": {
+          "baseline_tpie": -69.568,
+          "matched_tpie": -69.568,
+          "matched_tpie_plus_ligand_strain": -62.87902699318639
+        }
+      }
+    },
+    "OpenBind": {
+      "n_expected_structures": 639,
+      "n_succeeded_structures": 635,
+      "failures": {
+        "A71EV2A-x4445a": {
+          "status": "FAILED",
+          "target": "OpenBind",
+          "name": "A71EV2A-x4445a",
+          "error": "all registered strict attempts failed for ligand",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "ligand",
+              "profile": "density_soscf",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "ligand",
+              "profile": "density_diis",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "A71EV2A-x4472a": {
+          "status": "FAILED",
+          "target": "OpenBind",
+          "name": "A71EV2A-x4472a",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "optimized ligand changed stereochemistry, bond integrity or H parent"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "optimized ligand changed stereochemistry, bond integrity or H parent"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "optimized ligand changed stereochemistry, bond integrity or H parent"
+            }
+          ]
+        },
+        "A71EV2A-x5836a": {
+          "status": "FAILED",
+          "target": "OpenBind",
+          "name": "A71EV2A-x5836a",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "complex",
+              "profile": "density_soscf",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "ligand",
+              "profile": "density_soscf",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        },
+        "A71EV2A-x6877a": {
+          "status": "FAILED",
+          "target": "OpenBind",
+          "name": "A71EV2A-x6877a",
+          "error": "all registered strict attempts failed for free_ligand_minimum",
+          "attempts": [
+            {
+              "state": "complex",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "ligand",
+              "profile": "original",
+              "status": "SUCCEEDED"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "original_200",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "rfo_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            },
+            {
+              "state": "free_ligand_minimum",
+              "profile": "qa_500",
+              "status": "FAILED",
+              "error": "input/log/executable changed or QM incomplete"
+            }
+          ]
+        }
+      },
+      "status": "INCOMPLETE",
+      "metrics": {}
+    }
+  },
+  "protocol_sha256": "977aea443340832cd952b54929befc814cc9784c0e4dbfe8e2529026a369a945",
+  "driver_sha256": "01d2465f114e647c1a7c1db87ee7e40a2f094a114e2901465c07e09e16ed807a",
+  "logs_reverified_in_this_report": true,
+  "production_default_changed": false,
+  "warning": "Same frozen unit coefficients on all cohorts; no per-target best-arm selection, no new hydrogen normalization, no case deletion; retrospective transfer, not binding free energy",
+  "original87_case_weighted_target_metrics": {
+    "baseline_tpie": {
+      "pearson": 0.6346899344546217,
+      "spearman": 0.6312461176393578,
+      "kendall": 0.46928544696790003
+    },
+    "matched_tpie": {
+      "pearson": 0.6358871762938803,
+      "spearman": 0.6298664472003341,
+      "kendall": 0.4685246565226905
+    },
+    "matched_tpie_plus_ligand_strain": {
+      "pearson": 0.28586162125431913,
+      "spearman": 0.2554874739987577,
+      "kendall": 0.17710187120252216
+    }
+  }
+}

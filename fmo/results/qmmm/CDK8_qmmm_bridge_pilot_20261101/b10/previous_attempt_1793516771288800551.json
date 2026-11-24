@@ -1,0 +1,62 @@
+{
+  "status": "ERROR",
+  "state": "b10",
+  "labels_used": false,
+  "hamiltonian": "U_MM_PME + lambda*(U_DFTB3_QuanPol_fixed_shell - U_OpenMM_matched_finite_MM_shell)",
+  "ensemble": "NVT at the fixed saved periodic box, not NPT",
+  "temperature_kelvin": 298.15,
+  "box_nm": [
+    [
+      11.238832473754883,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      11.238832473754883,
+      0.0
+    ],
+    [
+      5.619416236877441,
+      5.619416236877441,
+      7.947054862976074
+    ]
+  ],
+  "fixed_shell_atom_inventory": true,
+  "continuous_fixed_reference_images": true,
+  "source_constraints_and_HMR_masses_preserved": true,
+  "hybrid_dummy_atoms_retained_in_MM_reference": true,
+  "proposal": "full-system MM velocity-Verlet/RATTLE + refreshed constrained Maxwell velocities; exact target Metropolis correction",
+  "qm_forces_used_for_propagation": false,
+  "embedded_gradient_arrays_and_selected_directions_validated_before_sampling": true,
+  "validation_sha256": "50a3cc3031bf02d3a4d5de9bbbdb28af23ac86fa6183850d52b388ac59409d8f",
+  "driver_sha256": "1101491982e55af8d9865785acb10a72d57f7c5655d7d91d7832a15d756aba4f",
+  "gamess_binary_sha256": "4f8b452da303d6d449a993f39982bf3abfe5b7ddd05c471da4da9175c5440059",
+  "system_xml_sha256": "7206c9bbfbbe311019fdc86a3c9ca121303aabac1dae47d3fa0d78d3b52f110a",
+  "platform": "CUDA",
+  "device": 1,
+  "precision": "double",
+  "cuda_nvrtc_preload": "/usr/local/cuda-12.8/lib64/libnvrtc.so.12",
+  "shell_mm_platform": "Reference",
+  "lambdas": [
+    0.0,
+    0.05,
+    0.1
+  ],
+  "moves_per_window": 12,
+  "burnin_moves_per_window": 4,
+  "md_steps_per_proposal": 100,
+  "timestep_fs": 0.5,
+  "particles": 99988,
+  "shell_particles": 6442,
+  "constraints": 96804,
+  "initial_constraint_projection_max_angstrom": 1.0928339233392012e-05,
+  "production_tpie_unchanged": true,
+  "finite_shell_not_periodic_qm": true,
+  "free_energy_converged": false,
+  "seed": 274102,
+  "composed_periodic_mm_local_qmmm_force_validation_passed": false,
+  "error": "ValueError('periodic MM plus local QM/MM target force composition failed')",
+  "qm_evaluations": 0,
+  "elapsed_seconds": 18.39697551727295
+}

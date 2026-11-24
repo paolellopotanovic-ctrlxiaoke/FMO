@@ -1,0 +1,286 @@
+{
+  "plan": {
+    "schema": "pcm-local-strain-components-v1",
+    "target": "CDK8",
+    "weights": "All coefficients fixed to one; no label-dependent arm selection",
+    "arms": [
+      "baseline_tpie",
+      "matched_tpie",
+      "baseline_tpie_plus_pcm_strain",
+      "matched_tpie_plus_pcm_strain",
+      "matched_tpie_plus_internal_response",
+      "matched_tpie_plus_solvent_response"
+    ],
+    "evaluation_sha256": "a701a2b4053084c4b68a29a88929664e0b11a713bb9d6ecd98c1ec5862682c27",
+    "protocol_sha256": "03af90a7910ef52e46e2fa96e944675cf3353149d12aff61e1f197dff1eeddd3",
+    "registry_sha256": "d0e2d7ad944a3a12c3aafb6b5f8a0cfc6a5ee83fbcbe6edffee377368f362186",
+    "driver_sha256": "4f8473d7ad2042b34fceb19d251cf19da67fa4f30bec19db119ce68bdd315bba",
+    "development_warning": "Retrospective diagnostic after complete strain scores were observed; not blind validation"
+  },
+  "n": 10,
+  "rows": {
+    "12": {
+      "decomposition": {
+        "internal_response": 5.375920099998618,
+        "solvent_response": 1.5949999999999953,
+        "pcm_local_strain": 6.971141426959563,
+        "closure_error": -0.00022132696094967486
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -62.586999999999996,
+        "matched_tpie": -62.586999999999996,
+        "baseline_tpie_plus_pcm_strain": -55.615858573040434,
+        "matched_tpie_plus_pcm_strain": -55.615858573040434,
+        "matched_tpie_plus_internal_response": -57.21107990000138,
+        "matched_tpie_plus_solvent_response": -60.992000000000004
+      }
+    },
+    "13": {
+      "decomposition": {
+        "internal_response": 4.478159865723125,
+        "solvent_response": 2.2280000000000015,
+        "pcm_local_strain": 6.706533231935185,
+        "closure_error": -0.0003733662120586345
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": -3443.6549999999997,
+        "charge_transfer": 3443.6549999999997,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -71.267,
+        "matched_tpie": -71.267,
+        "baseline_tpie_plus_pcm_strain": -64.56046676806481,
+        "matched_tpie_plus_pcm_strain": -64.56046676806481,
+        "matched_tpie_plus_internal_response": -66.78884013427687,
+        "matched_tpie_plus_solvent_response": -69.03899999999999
+      }
+    },
+    "14": {
+      "decomposition": {
+        "internal_response": 3.8034736018921365,
+        "solvent_response": 2.1640000000000015,
+        "pcm_local_strain": 5.9684233305419125,
+        "closure_error": -0.000949728649774606
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -65.995,
+        "matched_tpie": -65.995,
+        "baseline_tpie_plus_pcm_strain": -60.026576669458095,
+        "matched_tpie_plus_pcm_strain": -60.026576669458095,
+        "matched_tpie_plus_internal_response": -62.19152639810787,
+        "matched_tpie_plus_solvent_response": -63.831
+      }
+    },
+    "15": {
+      "decomposition": {
+        "internal_response": 5.059751334021984,
+        "solvent_response": 2.3870000000000005,
+        "pcm_local_strain": 7.447061554845414,
+        "closure_error": -0.00031022082342957447
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -65.819,
+        "matched_tpie": -65.819,
+        "baseline_tpie_plus_pcm_strain": -58.37193844515459,
+        "matched_tpie_plus_pcm_strain": -58.37193844515459,
+        "matched_tpie_plus_internal_response": -60.75924866597802,
+        "matched_tpie_plus_solvent_response": -63.432
+      }
+    },
+    "16": {
+      "decomposition": {
+        "internal_response": 5.053416625881081,
+        "solvent_response": 1.725999999999999,
+        "pcm_local_strain": 6.779817553377286,
+        "closure_error": -0.0004009274962060161
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -68.931,
+        "matched_tpie": -68.931,
+        "baseline_tpie_plus_pcm_strain": -62.15118244662271,
+        "matched_tpie_plus_pcm_strain": -62.15118244662271,
+        "matched_tpie_plus_internal_response": -63.87758337411891,
+        "matched_tpie_plus_solvent_response": -67.205
+      }
+    },
+    "17": {
+      "decomposition": {
+        "internal_response": 5.880381241293882,
+        "solvent_response": 1.9470000000000027,
+        "pcm_local_strain": 7.826585559857147,
+        "closure_error": 0.000795681436737361
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -65.145,
+        "matched_tpie": -65.145,
+        "baseline_tpie_plus_pcm_strain": -57.318414440142845,
+        "matched_tpie_plus_pcm_strain": -57.318414440142845,
+        "matched_tpie_plus_internal_response": -59.26461875870611,
+        "matched_tpie_plus_solvent_response": -63.19799999999999
+      }
+    },
+    "19": {
+      "decomposition": {
+        "internal_response": 4.751130879506953,
+        "solvent_response": 1.6179999999999986,
+        "pcm_local_strain": 6.368867873903736,
+        "closure_error": 0.0002630056032160155
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -60.3,
+        "matched_tpie": -60.3,
+        "baseline_tpie_plus_pcm_strain": -53.93113212609626,
+        "matched_tpie_plus_pcm_strain": -53.93113212609626,
+        "matched_tpie_plus_internal_response": -55.548869120493045,
+        "matched_tpie_plus_solvent_response": -58.682
+      }
+    },
+    "20": {
+      "decomposition": {
+        "internal_response": 4.35043093978812,
+        "solvent_response": 0.7760000000000034,
+        "pcm_local_strain": 5.1264449234544145,
+        "closure_error": -1.398366629157266e-05
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -60.621,
+        "matched_tpie": -60.621,
+        "baseline_tpie_plus_pcm_strain": -55.49455507654559,
+        "matched_tpie_plus_pcm_strain": -55.49455507654559,
+        "matched_tpie_plus_internal_response": -56.27056906021188,
+        "matched_tpie_plus_solvent_response": -59.845
+      }
+    },
+    "21": {
+      "decomposition": {
+        "internal_response": 6.73192791284438,
+        "solvent_response": 1.3120000000000047,
+        "pcm_local_strain": 8.043427106202337,
+        "closure_error": 0.0005008066420479906
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": 0.0,
+        "charge_transfer": 0.0,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -62.74,
+        "matched_tpie": -62.74,
+        "baseline_tpie_plus_pcm_strain": -54.696572893797665,
+        "matched_tpie_plus_pcm_strain": -54.696572893797665,
+        "matched_tpie_plus_internal_response": -56.008072087155625,
+        "matched_tpie_plus_solvent_response": -61.428
+      }
+    },
+    "22": {
+      "decomposition": {
+        "internal_response": 4.705065409016716,
+        "solvent_response": 1.9839999999999982,
+        "pcm_local_strain": 6.688973006813607,
+        "closure_error": 9.240220310680058e-05
+      },
+      "pair_component_delta": {
+        "electrostatic": 0.0,
+        "exchange_repulsion": -3449.4139999999998,
+        "charge_transfer": 3449.413,
+        "dispersion": 0.0,
+        "solvation": 0.0
+      },
+      "scores": {
+        "baseline_tpie": -69.568,
+        "matched_tpie": -69.568,
+        "baseline_tpie_plus_pcm_strain": -62.87902699318639,
+        "matched_tpie_plus_pcm_strain": -62.87902699318639,
+        "matched_tpie_plus_internal_response": -64.86293459098329,
+        "matched_tpie_plus_solvent_response": -67.584
+      }
+    }
+  },
+  "metrics": {
+    "baseline_tpie": {
+      "pearson": 0.7072126606977115,
+      "spearman": 0.6969696969696969,
+      "kendall": 0.5111111111111111
+    },
+    "matched_tpie": {
+      "pearson": 0.7072126606977115,
+      "spearman": 0.6969696969696969,
+      "kendall": 0.5111111111111111
+    },
+    "baseline_tpie_plus_pcm_strain": {
+      "pearson": 0.8001128596073938,
+      "spearman": 0.709090909090909,
+      "kendall": 0.5111111111111111
+    },
+    "matched_tpie_plus_pcm_strain": {
+      "pearson": 0.8001128596073938,
+      "spearman": 0.709090909090909,
+      "kendall": 0.5111111111111111
+    },
+    "matched_tpie_plus_internal_response": {
+      "pearson": 0.7800269317397686,
+      "spearman": 0.709090909090909,
+      "kendall": 0.5111111111111111
+    },
+    "matched_tpie_plus_solvent_response": {
+      "pearson": 0.7222247645268667,
+      "spearman": 0.6969696969696969,
+      "kendall": 0.5111111111111111
+    }
+  },
+  "warning": "Internal response is evaluated in each PCM-polarized state, not a gas-phase strain; these are not free energies"
+}

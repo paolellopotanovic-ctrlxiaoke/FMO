@@ -1,0 +1,356 @@
+{
+  "status": "PILOT_COMPLETE_NOT_CONVERGED_FREE_ENERGY",
+  "labels_used": false,
+  "free_energy_converged": false,
+  "execution_recovered_startup_issues": true,
+  "initial_attempt_status_archive": "initial_orchestrator_before_recovery.json",
+  "initial_attempt_exit_archive": "initial_orchestrator_exit_code",
+  "integrity_audit": "integrity_audit.json",
+  "states": {
+    "b0": {
+      "status": "PILOT_COMPLETE_NOT_CONVERGED_FREE_ENERGY",
+      "state": "b0",
+      "labels_used": false,
+      "hamiltonian": "U_MM_PME + lambda*(U_DFTB3_QuanPol_fixed_shell - U_OpenMM_matched_finite_MM_shell)",
+      "ensemble": "NVT at the fixed saved periodic box, not NPT",
+      "temperature_kelvin": 298.15,
+      "box_nm": [
+        [
+          11.233542442321777,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          11.233542442321777,
+          0.0
+        ],
+        [
+          5.616771221160889,
+          5.616771221160889,
+          7.9433135986328125
+        ]
+      ],
+      "fixed_shell_atom_inventory": true,
+      "continuous_fixed_reference_images": true,
+      "source_constraints_and_HMR_masses_preserved": true,
+      "hybrid_dummy_atoms_retained_in_MM_reference": true,
+      "proposal": "full-system MM velocity-Verlet/RATTLE + refreshed constrained Maxwell velocities; exact target Metropolis correction",
+      "qm_forces_used_for_propagation": false,
+      "embedded_gradient_arrays_and_selected_directions_validated_before_sampling": true,
+      "validation_sha256": "50a3cc3031bf02d3a4d5de9bbbdb28af23ac86fa6183850d52b388ac59409d8f",
+      "driver_sha256": "1101491982e55af8d9865785acb10a72d57f7c5655d7d91d7832a15d756aba4f",
+      "gamess_binary_sha256": "4f8b452da303d6d449a993f39982bf3abfe5b7ddd05c471da4da9175c5440059",
+      "system_xml_sha256": "0eaa21e109ebbc796d6594b2e5888c40691feff67f3c5869428586a5fdfc101e",
+      "platform": "CUDA",
+      "device": 0,
+      "precision": "double",
+      "cuda_nvrtc_preload": "/usr/local/cuda-12.8/lib64/libnvrtc.so.12",
+      "shell_mm_platform": "Reference",
+      "lambdas": [
+        0.0,
+        0.05,
+        0.1
+      ],
+      "moves_per_window": 12,
+      "burnin_moves_per_window": 4,
+      "md_steps_per_proposal": 100,
+      "timestep_fs": 0.5,
+      "particles": 99988,
+      "shell_particles": 6413,
+      "constraints": 96804,
+      "initial_constraint_projection_max_angstrom": 1.1368543522285759e-05,
+      "production_tpie_unchanged": true,
+      "finite_shell_not_periodic_qm": true,
+      "free_energy_converged": false,
+      "seed": 274101,
+      "composed_periodic_mm_local_qmmm_force_validation_passed": true,
+      "proposal_reversibility_max_angstrom": 6.998733419610087e-09,
+      "delta_offset_kcal_mol": -29699.26110099752,
+      "current_window": 2,
+      "current_lambda": 0.1,
+      "completed_move": 16,
+      "qm_evaluations": 49,
+      "elapsed_seconds": 446.4033786468208,
+      "windows": [
+        {
+          "lambda": 0.0,
+          "accepted": 7,
+          "attempted": 16,
+          "acceptance_fraction": 0.4375
+        },
+        {
+          "lambda": 0.05,
+          "accepted": 3,
+          "attempted": 16,
+          "acceptance_fraction": 0.1875
+        },
+        {
+          "lambda": 0.1,
+          "accepted": 1,
+          "attempted": 16,
+          "acceptance_fraction": 0.0625
+        }
+      ]
+    },
+    "b10": {
+      "status": "PILOT_COMPLETE_NOT_CONVERGED_FREE_ENERGY",
+      "state": "b10",
+      "labels_used": false,
+      "hamiltonian": "U_MM_PME + lambda*(U_DFTB3_QuanPol_fixed_shell - U_OpenMM_matched_finite_MM_shell)",
+      "ensemble": "NVT at the fixed saved periodic box, not NPT",
+      "temperature_kelvin": 298.15,
+      "box_nm": [
+        [
+          11.238832473754883,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          11.238832473754883,
+          0.0
+        ],
+        [
+          5.619416236877441,
+          5.619416236877441,
+          7.947054862976074
+        ]
+      ],
+      "fixed_shell_atom_inventory": true,
+      "continuous_fixed_reference_images": true,
+      "source_constraints_and_HMR_masses_preserved": true,
+      "hybrid_dummy_atoms_retained_in_MM_reference": true,
+      "proposal": "full-system MM velocity-Verlet/RATTLE + refreshed constrained Maxwell velocities; exact target Metropolis correction",
+      "qm_forces_used_for_propagation": false,
+      "embedded_gradient_arrays_and_selected_directions_validated_before_sampling": true,
+      "validation_sha256": "50a3cc3031bf02d3a4d5de9bbbdb28af23ac86fa6183850d52b388ac59409d8f",
+      "driver_sha256": "1101491982e55af8d9865785acb10a72d57f7c5655d7d91d7832a15d756aba4f",
+      "gamess_binary_sha256": "4f8b452da303d6d449a993f39982bf3abfe5b7ddd05c471da4da9175c5440059",
+      "system_xml_sha256": "7206c9bbfbbe311019fdc86a3c9ca121303aabac1dae47d3fa0d78d3b52f110a",
+      "platform": "CUDA",
+      "device": 1,
+      "precision": "double",
+      "cuda_nvrtc_preload": "/usr/local/cuda-12.8/lib64/libnvrtc.so.12",
+      "shell_mm_platform": "Reference",
+      "lambdas": [
+        0.0,
+        0.05,
+        0.1
+      ],
+      "moves_per_window": 12,
+      "burnin_moves_per_window": 4,
+      "md_steps_per_proposal": 100,
+      "timestep_fs": 0.5,
+      "particles": 99988,
+      "shell_particles": 6442,
+      "constraints": 96804,
+      "initial_constraint_projection_max_angstrom": 1.0928339233392012e-05,
+      "production_tpie_unchanged": true,
+      "finite_shell_not_periodic_qm": true,
+      "free_energy_converged": false,
+      "seed": 274102,
+      "composed_periodic_mm_local_qmmm_force_validation_passed": true,
+      "proposal_reversibility_max_angstrom": 7.347803793782093e-09,
+      "delta_offset_kcal_mol": -29171.875491693358,
+      "current_window": 2,
+      "current_lambda": 0.1,
+      "completed_move": 16,
+      "qm_evaluations": 49,
+      "elapsed_seconds": 465.17244267091155,
+      "windows": [
+        {
+          "lambda": 0.0,
+          "accepted": 4,
+          "attempted": 16,
+          "acceptance_fraction": 0.25
+        },
+        {
+          "lambda": 0.05,
+          "accepted": 3,
+          "attempted": 16,
+          "acceptance_fraction": 0.1875
+        },
+        {
+          "lambda": 0.1,
+          "accepted": 2,
+          "attempted": 16,
+          "acceptance_fraction": 0.125
+        }
+      ]
+    },
+    "s0": {
+      "status": "PILOT_COMPLETE_NOT_CONVERGED_FREE_ENERGY",
+      "state": "s0",
+      "labels_used": false,
+      "hamiltonian": "U_MM_PME + lambda*(U_DFTB3_QuanPol_fixed_shell - U_OpenMM_matched_finite_MM_shell)",
+      "ensemble": "NVT at the fixed saved periodic box, not NPT",
+      "temperature_kelvin": 298.15,
+      "box_nm": [
+        [
+          2.921229362487793,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          2.921229362487793,
+          0.0
+        ],
+        [
+          1.4606146812438965,
+          1.4606146812438965,
+          2.0656211376190186
+        ]
+      ],
+      "fixed_shell_atom_inventory": true,
+      "continuous_fixed_reference_images": true,
+      "source_constraints_and_HMR_masses_preserved": true,
+      "hybrid_dummy_atoms_retained_in_MM_reference": true,
+      "proposal": "full-system MM velocity-Verlet/RATTLE + refreshed constrained Maxwell velocities; exact target Metropolis correction",
+      "qm_forces_used_for_propagation": false,
+      "embedded_gradient_arrays_and_selected_directions_validated_before_sampling": true,
+      "validation_sha256": "50a3cc3031bf02d3a4d5de9bbbdb28af23ac86fa6183850d52b388ac59409d8f",
+      "driver_sha256": "82f967458fe763dc678afb85e34faa8edefd467d29c74560d156dca1c558a020",
+      "gamess_binary_sha256": "4f8b452da303d6d449a993f39982bf3abfe5b7ddd05c471da4da9175c5440059",
+      "system_xml_sha256": "5c6c04ae035f32e2a5bab971d33ec26c17082373c9cbb8e6b18fe723f3e64027",
+      "platform": "CUDA",
+      "device": 0,
+      "precision": "double",
+      "cuda_nvrtc_preload": "/usr/local/cuda-12.8/lib64/libnvrtc.so.12",
+      "shell_mm_platform": "Reference",
+      "lambdas": [
+        0.0,
+        0.05,
+        0.1
+      ],
+      "moves_per_window": 12,
+      "burnin_moves_per_window": 4,
+      "md_steps_per_proposal": 100,
+      "timestep_fs": 0.5,
+      "particles": 1758,
+      "shell_particles": 1165,
+      "constraints": 1731,
+      "initial_constraint_projection_max_angstrom": 2.3002353216098113e-06,
+      "production_tpie_unchanged": true,
+      "finite_shell_not_periodic_qm": true,
+      "free_energy_converged": false,
+      "seed": 274103,
+      "composed_periodic_mm_local_qmmm_force_validation_passed": true,
+      "proposal_reversibility_max_angstrom": 3.775268910858678e-09,
+      "delta_offset_kcal_mol": -29695.76940834714,
+      "current_window": 2,
+      "current_lambda": 0.1,
+      "completed_move": 16,
+      "qm_evaluations": 49,
+      "elapsed_seconds": 221.94740545004606,
+      "windows": [
+        {
+          "lambda": 0.0,
+          "accepted": 14,
+          "attempted": 16,
+          "acceptance_fraction": 0.875
+        },
+        {
+          "lambda": 0.05,
+          "accepted": 12,
+          "attempted": 16,
+          "acceptance_fraction": 0.75
+        },
+        {
+          "lambda": 0.1,
+          "accepted": 7,
+          "attempted": 16,
+          "acceptance_fraction": 0.4375
+        }
+      ]
+    },
+    "s10": {
+      "status": "PILOT_COMPLETE_NOT_CONVERGED_FREE_ENERGY",
+      "state": "s10",
+      "labels_used": false,
+      "hamiltonian": "U_MM_PME + lambda*(U_DFTB3_QuanPol_fixed_shell - U_OpenMM_matched_finite_MM_shell)",
+      "ensemble": "NVT at the fixed saved periodic box, not NPT",
+      "temperature_kelvin": 298.15,
+      "box_nm": [
+        [
+          2.923797845840454,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          2.923797845840454,
+          0.0
+        ],
+        [
+          1.461898922920227,
+          1.461898922920227,
+          2.067437171936035
+        ]
+      ],
+      "fixed_shell_atom_inventory": true,
+      "continuous_fixed_reference_images": true,
+      "source_constraints_and_HMR_masses_preserved": true,
+      "hybrid_dummy_atoms_retained_in_MM_reference": true,
+      "proposal": "full-system MM velocity-Verlet/RATTLE + refreshed constrained Maxwell velocities; exact target Metropolis correction",
+      "qm_forces_used_for_propagation": false,
+      "embedded_gradient_arrays_and_selected_directions_validated_before_sampling": true,
+      "validation_sha256": "50a3cc3031bf02d3a4d5de9bbbdb28af23ac86fa6183850d52b388ac59409d8f",
+      "driver_sha256": "82f967458fe763dc678afb85e34faa8edefd467d29c74560d156dca1c558a020",
+      "gamess_binary_sha256": "4f8b452da303d6d449a993f39982bf3abfe5b7ddd05c471da4da9175c5440059",
+      "system_xml_sha256": "6085bcd9241dcb73f85f006a4cf163006c9c71a3afa65c2b0a209fccef97c94c",
+      "platform": "CUDA",
+      "device": 1,
+      "precision": "double",
+      "cuda_nvrtc_preload": "/usr/local/cuda-12.8/lib64/libnvrtc.so.12",
+      "shell_mm_platform": "Reference",
+      "lambdas": [
+        0.0,
+        0.05,
+        0.1
+      ],
+      "moves_per_window": 12,
+      "burnin_moves_per_window": 4,
+      "md_steps_per_proposal": 100,
+      "timestep_fs": 0.5,
+      "particles": 1758,
+      "shell_particles": 1145,
+      "constraints": 1731,
+      "initial_constraint_projection_max_angstrom": 2.3584728195700347e-06,
+      "production_tpie_unchanged": true,
+      "finite_shell_not_periodic_qm": true,
+      "free_energy_converged": false,
+      "seed": 274104,
+      "composed_periodic_mm_local_qmmm_force_validation_passed": true,
+      "proposal_reversibility_max_angstrom": 5.622525255798691e-09,
+      "delta_offset_kcal_mol": -29168.27406869135,
+      "current_window": 2,
+      "current_lambda": 0.1,
+      "completed_move": 16,
+      "qm_evaluations": 49,
+      "elapsed_seconds": 205.52610475569963,
+      "windows": [
+        {
+          "lambda": 0.0,
+          "accepted": 16,
+          "attempted": 16,
+          "acceptance_fraction": 1.0
+        },
+        {
+          "lambda": 0.05,
+          "accepted": 14,
+          "attempted": 16,
+          "acceptance_fraction": 0.875
+        },
+        {
+          "lambda": 0.1,
+          "accepted": 13,
+          "attempted": 16,
+          "acceptance_fraction": 0.8125
+        }
+      ]
+    }
+  },
+  "production_tpie_modified": false
+}

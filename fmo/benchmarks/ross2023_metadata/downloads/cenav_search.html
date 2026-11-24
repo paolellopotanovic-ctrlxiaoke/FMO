@@ -1,0 +1,787 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>計算工学ナビ</title>
+<link href="/wp-content/themes/HPCI/css/style.css" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Rokkitt:400,700' rel='stylesheet' type='text/css'>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45284332-1', 'cenav.org');
+  ga('send', 'pageview');
+
+</script>
+<meta name='robots' content='noindex, follow, max-image-preview:large' />
+<link rel='dns-prefetch' href='//s.w.org' />
+<link rel="alternate" type="application/rss+xml" title="計算工学ナビ &raquo; フィード" href="https://www.cenav.org/feed/" />
+<link rel="alternate" type="application/rss+xml" title="計算工学ナビ &raquo; コメントフィード" href="https://www.cenav.org/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="計算工学ナビ &raquo; 検索結果: &#8220;ABINIT-MP Open&#8221; フィード" href="https://www.cenav.org/search/ABINIT-MP+Open/feed/rss2/" />
+		<!-- This site uses the Google Analytics by ExactMetrics plugin v7.10.0 - Using Analytics tracking - https://www.exactmetrics.com/ -->
+							<script
+				src="//www.googletagmanager.com/gtag/js?id=UA-45284332-1"  data-cfasync="false" data-wpfc-render="false" type="text/javascript" async></script>
+			<script data-cfasync="false" data-wpfc-render="false" type="text/javascript">
+				var em_version = '7.10.0';
+				var em_track_user = true;
+				var em_no_track_reason = '';
+				
+								var disableStrs = [
+										'ga-disable-G-M8YD47ZYFB',
+															'ga-disable-UA-45284332-1',
+									];
+
+				/* Function to detect opted out users */
+				function __gtagTrackerIsOptedOut() {
+					for (var index = 0; index < disableStrs.length; index++) {
+						if (document.cookie.indexOf(disableStrs[index] + '=true') > -1) {
+							return true;
+						}
+					}
+
+					return false;
+				}
+
+				/* Disable tracking if the opt-out cookie exists. */
+				if (__gtagTrackerIsOptedOut()) {
+					for (var index = 0; index < disableStrs.length; index++) {
+						window[disableStrs[index]] = true;
+					}
+				}
+
+				/* Opt-out function */
+				function __gtagTrackerOptout() {
+					for (var index = 0; index < disableStrs.length; index++) {
+						document.cookie = disableStrs[index] + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+						window[disableStrs[index]] = true;
+					}
+				}
+
+				if ('undefined' === typeof gaOptout) {
+					function gaOptout() {
+						__gtagTrackerOptout();
+					}
+				}
+								window.dataLayer = window.dataLayer || [];
+
+				window.ExactMetricsDualTracker = {
+					helpers: {},
+					trackers: {},
+				};
+				if (em_track_user) {
+					function __gtagDataLayer() {
+						dataLayer.push(arguments);
+					}
+
+					function __gtagTracker(type, name, parameters) {
+						if (!parameters) {
+							parameters = {};
+						}
+
+						if (parameters.send_to) {
+							__gtagDataLayer.apply(null, arguments);
+							return;
+						}
+
+						if (type === 'event') {
+														parameters.send_to = exactmetrics_frontend.v4_id;
+							var hookName = name;
+							if (typeof parameters['event_category'] !== 'undefined') {
+								hookName = parameters['event_category'] + ':' + name;
+							}
+
+							if (typeof ExactMetricsDualTracker.trackers[hookName] !== 'undefined') {
+								ExactMetricsDualTracker.trackers[hookName](parameters);
+							} else {
+								__gtagDataLayer('event', name, parameters);
+							}
+							
+														parameters.send_to = exactmetrics_frontend.ua;
+							__gtagDataLayer(type, name, parameters);
+													} else {
+							__gtagDataLayer.apply(null, arguments);
+						}
+					}
+
+					__gtagTracker('js', new Date());
+					__gtagTracker('set', {
+						'developer_id.dNDMyYj': true,
+											});
+										__gtagTracker('config', 'G-M8YD47ZYFB', {"forceSSL":"true","page_path":"\/?s=ABINIT-MP%20Open&cat=plus-5-results"} );
+															__gtagTracker('config', 'UA-45284332-1', {"forceSSL":"true","page_path":"\/?s=ABINIT-MP%20Open&cat=plus-5-results"} );
+										window.gtag = __gtagTracker;										(function () {
+						/* https://developers.google.com/analytics/devguides/collection/analyticsjs/ */
+						/* ga and __gaTracker compatibility shim. */
+						var noopfn = function () {
+							return null;
+						};
+						var newtracker = function () {
+							return new Tracker();
+						};
+						var Tracker = function () {
+							return null;
+						};
+						var p = Tracker.prototype;
+						p.get = noopfn;
+						p.set = noopfn;
+						p.send = function () {
+							var args = Array.prototype.slice.call(arguments);
+							args.unshift('send');
+							__gaTracker.apply(null, args);
+						};
+						var __gaTracker = function () {
+							var len = arguments.length;
+							if (len === 0) {
+								return;
+							}
+							var f = arguments[len - 1];
+							if (typeof f !== 'object' || f === null || typeof f.hitCallback !== 'function') {
+								if ('send' === arguments[0]) {
+									var hitConverted, hitObject = false, action;
+									if ('event' === arguments[1]) {
+										if ('undefined' !== typeof arguments[3]) {
+											hitObject = {
+												'eventAction': arguments[3],
+												'eventCategory': arguments[2],
+												'eventLabel': arguments[4],
+												'value': arguments[5] ? arguments[5] : 1,
+											}
+										}
+									}
+									if ('pageview' === arguments[1]) {
+										if ('undefined' !== typeof arguments[2]) {
+											hitObject = {
+												'eventAction': 'page_view',
+												'page_path': arguments[2],
+											}
+										}
+									}
+									if (typeof arguments[2] === 'object') {
+										hitObject = arguments[2];
+									}
+									if (typeof arguments[5] === 'object') {
+										Object.assign(hitObject, arguments[5]);
+									}
+									if ('undefined' !== typeof arguments[1].hitType) {
+										hitObject = arguments[1];
+										if ('pageview' === hitObject.hitType) {
+											hitObject.eventAction = 'page_view';
+										}
+									}
+									if (hitObject) {
+										action = 'timing' === arguments[1].hitType ? 'timing_complete' : hitObject.eventAction;
+										hitConverted = mapArgs(hitObject);
+										__gtagTracker('event', action, hitConverted);
+									}
+								}
+								return;
+							}
+
+							function mapArgs(args) {
+								var arg, hit = {};
+								var gaMap = {
+									'eventCategory': 'event_category',
+									'eventAction': 'event_action',
+									'eventLabel': 'event_label',
+									'eventValue': 'event_value',
+									'nonInteraction': 'non_interaction',
+									'timingCategory': 'event_category',
+									'timingVar': 'name',
+									'timingValue': 'value',
+									'timingLabel': 'event_label',
+									'page': 'page_path',
+									'location': 'page_location',
+									'title': 'page_title',
+								};
+								for (arg in args) {
+																		if (!(!args.hasOwnProperty(arg) || !gaMap.hasOwnProperty(arg))) {
+										hit[gaMap[arg]] = args[arg];
+									} else {
+										hit[arg] = args[arg];
+									}
+								}
+								return hit;
+							}
+
+							try {
+								f.hitCallback();
+							} catch (ex) {
+							}
+						};
+						__gaTracker.create = newtracker;
+						__gaTracker.getByName = newtracker;
+						__gaTracker.getAll = function () {
+							return [];
+						};
+						__gaTracker.remove = noopfn;
+						__gaTracker.loaded = true;
+						window['__gaTracker'] = __gaTracker;
+					})();
+									} else {
+										console.log("");
+					(function () {
+						function __gtagTracker() {
+							return null;
+						}
+
+						window['__gtagTracker'] = __gtagTracker;
+						window['gtag'] = __gtagTracker;
+					})();
+									}
+			</script>
+				<!-- / Google Analytics by ExactMetrics -->
+		<script type="text/javascript">
+window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/14.0.0\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/14.0.0\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/www.cenav.org\/wp-includes\/js\/wp-emoji-release.min.js?ver=6.0.15"}};
+/*! This file is auto-generated */
+!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode,e=(p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0),i.toDataURL());return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])?!1:!s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([129777,127995,8205,129778,127999],[129777,127995,8203,129778,127999])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(e=t.source||{}).concatemoji?c(e.concatemoji):e.wpemoji&&e.twemoji&&(c(e.twemoji),c(e.wpemoji)))}(window,document,window._wpemojiSettings);
+</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 0.07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel='stylesheet' id='wp-block-library-css'  href='https://www.cenav.org/wp-includes/css/dist/block-library/style.min.css?ver=6.0.15' type='text/css' media='all' />
+<style id='global-styles-inline-css' type='text/css'>
+body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--duotone--dark-grayscale: url('#wp-duotone-dark-grayscale');--wp--preset--duotone--grayscale: url('#wp-duotone-grayscale');--wp--preset--duotone--purple-yellow: url('#wp-duotone-purple-yellow');--wp--preset--duotone--blue-red: url('#wp-duotone-blue-red');--wp--preset--duotone--midnight: url('#wp-duotone-midnight');--wp--preset--duotone--magenta-yellow: url('#wp-duotone-magenta-yellow');--wp--preset--duotone--purple-green: url('#wp-duotone-purple-green');--wp--preset--duotone--blue-orange: url('#wp-duotone-blue-orange');--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+</style>
+<script type='text/javascript' src='https://www.cenav.org/wp-content/plugins/simple-content-reveal/js/swap-display.min.js?ver=6.0.15' id='swap_display-js'></script>
+<script type='text/javascript' src='https://www.cenav.org/wp-content/plugins/google-analytics-dashboard-for-wp/assets/js/frontend-gtag.min.js?ver=7.10.0' id='exactmetrics-frontend-script-js'></script>
+<script data-cfasync="false" data-wpfc-render="false" type="text/javascript" id='exactmetrics-frontend-script-js-extra'>/* <![CDATA[ */
+var exactmetrics_frontend = {"js_events_tracking":"true","download_extensions":"zip,mp3,mpeg,pdf,doc,ppt,xls,jpeg,png,gif,tiff","inbound_paths":"[{\"path\":\"\\\/go\\\/\",\"label\":\"affiliate\"},{\"path\":\"\\\/recommend\\\/\",\"label\":\"affiliate\"}]","home_url":"https:\/\/www.cenav.org","hash_tracking":"false","ua":"UA-45284332-1","v4_id":"G-M8YD47ZYFB"};/* ]]> */
+</script>
+<link rel="https://api.w.org/" href="https://www.cenav.org/wp-json/" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.cenav.org/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://www.cenav.org/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 6.0.15" />
+<link rel="icon" type="image/png" href="/favicon.png">
+</head>
+
+<body class="search search-results">
+
+<!--[header]-->
+<header>
+	<div id="page-top">
+    	<a href="/">
+        	<h1>計算工学ナビ</h1>
+        </a>
+<div class="header-summary">
+<p>ものづくりにHPCを活用するための
+ツールとケーススタディー</p>	
+</div>
+    	<div id="header-nav-wrap">
+        	<ul><li><a href="/kdb/wp-login.php">ログイン</a></li></ul>
+		<form id="header-serch" method="get" action="https://www.cenav.org/">
+		<fieldset>
+		<legend>サイト内検索</legend>
+		<input id="header-keyword" type="text" name="s" value="ABINIT-MP Open" placeholder="検索" value="" maxlength="36" tabindex="1" />
+		<img src="/wp-content/themes/HPCI/img/hd_ic_serch.gif" style="margin: 3px 0 0 6px"/>
+		</fieldset>
+		</form>
+	</div>
+	<div id="global-nav"> 
+		<div id="global-nav-inner">
+			<ul>
+				<li><a href="/category/reports/">レポート</a></li>
+				<li><a href="/category/news/">ニュース</a></li>
+				<li><a href="/kdb/">解析事例データベース</a></li>
+				<li><a href="/library">ライブラリ</a></li>
+				<li><a href="/category/qa/">Ｑ＆Ａ</a></li>
+				<li><a href="/community">コミュニティー</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+</header>
+<!--[/header]-->
+<div id="contents-area">
+  <div id="main-contents">
+    <section id="article-area">
+		<article class="post-2786 post type-post status-publish format-standard has-post-thumbnail hentry category-reports">
+		<a href="https://www.cenav.org/abinit-mp-open_ver-2-rev-12/"><h1>ABINIT-MP Openシリーズ (Ver.2 Rev.12)</h1></a>
+				<div class="reports-body">		<p>※2023年8月版(Ver.2 Rev.8)に関するページは<a href="https://www.cenav.org/abinit-mp-open_ver-2-rev-8/">こちら</a>です</p>
+<p>※2020年6月版(Ver.1 Rev.22)に対応するBSV（BioStation Viewer）のWindows用インストーラは<a href="https://www2.rikkyo.ac.jp/web/fullmoon/BioStationViewerOpen1.0Rev.10-setup.exe">こちら</a>からダウンロードできます</p>
+<h2>はじめに</h2>
+<p>ABINIT-MP [1,2]のOpenシリーズのVer. 2系は、2021年9月のRev. 4 [3]、2023年8月のRev. 8 [4,5]に次いで、今回（2026年3月）が3回目のRev. 12 [6,7]となります。Ver. 2系は、2021年度からJHPCN [8]のABINIT-MP関係の課題（代表：望月祐志）の中で計算機科学の高性能計算（HPC）の専門家グループとのコラボレーションの下、特に高速化が進められてきました（速度向上については、Ver. 2 Rev. 8のページを参照）。実は、Rev. 12はRev. 8から高速化に関しては、NECのSX Aurora-TSUBASA（SX-AT）向けベクトル化チューニング以外の進捗はありません。その代わり、タンパク質の液滴モデルへの対応力を大幅に高めています。また、水のクラスターですが4万フラグメントの扱いも可能となりました。機能面でも幾つかの改良が入っており、ネームリストも更新されていますので、旧入力データajfを転換するPythonスクリプトも併せて提供します。</p>
+<hr />
+<p>[1] “Electron-correlated fragment-molecular-orbital calculations for biomolecular and nano systems”, S. Tanaka, Y. Mochizuki, Y. Komeiji, Y. Okiyama, K. Fukuzawa, Phys. Chem. Chem. Phys. 16 (2014) 10310-10344.</p>
+<p>[2] “The ABINIT-MP Program”, Y. Mochizuki, T. Nakano, K. Sakakura, Y. Okiyama, H. Watanabe, K. Kato, Y. Akinaga, S. Sato, J. Yamamoto, K. Yamashita, T. Murase, T. Ishikawa, Y. Komeiji, Y. Kato, N. Watanabe, T. Tsukamoto, H. Mori, K. Okuwaki, S. Tanaka, A. Kato, C. Watanabe, K. Fukuzawa (pp.53-67) in “Recent Advances of the Fragment Molecular Orbital Method &#8211; Enhanced Performance and Applicability”, ed. by Y. Mochizuki, S. Tanaka, K. Fukuzawa, (2021, Springer, Singapore).</p>
+<p>[3] “FMOプログラムABINIT-MPの整備状況2021”, 望月祐志, 中野達也, 佐藤伸哉, 坂倉耕太, 渡邊啓正, 奥脇弘次, 大島聡史, 片桐孝洋, J. Comp. Chem. Jpn., 20 (2021) 132-136.</p>
+<p>[4] “FMOプログラムABINIT-MPの整備状況2022”, 望月祐志, 中野達也, 坂倉耕太, 渡邊啓正, 佐藤伸哉, 奥脇弘次, 秋澤和輝, 土居英男, 大島聡史，片桐孝洋, J. Comp. Chem. Jpn., 21 (2022) 106-110.</p>
+<p>[5] “FMOプログラムABINIT-MPの整備状況2023”, 望月祐志, 中野達也, 坂倉耕太, 奥脇弘次, 土居英男, 加藤季広, 滝沢寛之, 成瀬彰, 大島聡史, 星野哲也, 片桐孝洋, J. Comp. Chem. Jpn., 23 (2024) 4-8.</p>
+<p>[6] “ABINIT-MPプログラムの現状と今後”, 望月祐志, 中野達也, 坂倉耕太, 土居英男, 奥脇弘次, 加藤季広, 滝沢寛之, 大島聡史, 星野哲也, 片桐孝洋, J. Comp. Chem. Jpn., 23 (2024) 85-97.</p>
+<p>[7] “FMOプログラムABINIT-MPの整備状況2025”, 望月祐志, 中野達也, 坂倉耕太, 土居英男, 奥脇弘次, 福澤薫, 加藤季広, 成瀬彰, 星野哲也, 大島聡史, 滝沢寛之, 中島研吾, 片桐孝洋, J. Comp. Chem. Jpn., 25 (2026) 7-14.</p>
+<p>[8] <a href="https://jhpcn-kyoten.itc.u-tokyo.ac.jp/ja/">「学際大規模情報基盤共同利用・共同研究拠点（JHPCN）」</a>, 課題番号： jh210036-NAH, jh220010, jh230001, jh240001, jh250002</p>
+<h2> Open Ver. 2 Rev. 12の特徴</h2>
+<p>Rev. 8に対するRev. 12の更新は，超大規模系の対応力強化と機能の追加が主なところです[7]。以下、説明します。</p>
+<p>先ず、超大規模系についてです。「富岳」の時代になり、分子動力学（MD）シミュレーションの軌跡から切り出される液滴モデルを一括してFMO計算し、相互作用解析を統計的に行えるにようになっています（「富岳」での最初の事例は[8]）。いわゆる、MD-FMO連携計算のアプローチです。この液滴モデルでは、中性化のためのイオンを温存することが通常ですが、交換反発が考慮されない古典力場の「癖」により、イオンと残基の側鎖との距離が近くなり過ぎることがあります。これにより、モノマーやダイマーの段階でのハートリーフォック（HF）の収束不可が発生してしまい、FMOジョブの完走が得られません。そこで、液滴モデルのPDBデータをスキャンして、イオンを抜き出して点電荷で近似する仕組みを導入しました。処理はPythonスクリプトで行います。実証例としては、Rev. 8のページでも紹介しています新型コロナウイルスのスパイクタンパク質の液滴モデルに適用しました。図1は、受容体結合領域（RBD）が閉じたクローズ型（PDB-ID 6XLU）と開いたオープン型（同6XM0）を示していますが、特にオープン型で未完走が多発しました。乱暴にイオンを全て除去すると完走率が上がりますが、タンパク質内の荷電バランスが変わるために残基間の相互作用エネルギーも影響を受けてしまいます。文献[9]では、こうした結果を示すと共に、液滴モデル1つあたり「富岳」の8ラック（3,072ノード）で僅か2時間でFMO-MP2/6-31G(d)ジョブが処理できることを報告しています。MD-FMOの液滴モデルでの点電荷近似は、立教大学での応用計算では2024年度から常用しており、相互作用エネルギーの統計的算定を安定して行えるようになっています。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig1.png"><img class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig1.png" alt="" width="565" height="286" /></a></p>
+<p>Pythonスクリプトに関してはフラグメント分割でも改良が進んでいます。特に、タンパク質にDNAやRNAが共存する系の扱いは、これまでは手動分割が必要でしたが、これが自動化されました。実テストの系では、タンパク質/DNA/RNAが複合するCRISPR系の最小モデルであるCj-Cas9（PDB-ID 5X2H）を選びました。図2左に構造を示しますが、上部にある塩基ユニットが3重鎖を形成する部分が注目領域の1つになります。図2右は、その一例でWatson-Crick型ではなくHoogsteen型の水素結合がA-U間にあることがわかります。水素結合のエネルギーは、FMO-MP2/cc-pVDZで算定したサンプルの平均値ですが、PIEDAの拡張機能[10]を用いて静電項（ES）をFMO-RESP電荷を使った静電エネルギー表式の値で置き換えた値を括弧無しで示しています。文献[10]の中では、スタック塩基対モデルで過大評価の是正を明示していますが、このCRISPR-Cas9の系でも有効であると考えています。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig2.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig2.png" alt="" width="565" height="286" /></a></p>
+<p>ここで、地道なメモリ削減によって超大規模計算が可能になったことを記しておきます。図3に示す立方体状のモデルクラスターですが、40,587個の水分子のFMO-MP2/6-31G(d)ジョブが、「富岳」と同じA64FXの「不老」 Type I（2026年３月に退役）の半ラック（192ノード）の計算資源を使って10時間で完走しました。フラグメントあたり、6スレッド（OpenMP）を立て、1152プロセス（MPI）の混成での実行でした。この事実は、ABINIT-MPが（素で）数万フラグメントのFMO計算を処理できる段階に至ったことを示しています。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig3.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig3.png" alt="" width="565" height="286" /></a></p>
+<p>機能強化に話を移します。1つは、これまでのスカラー相対論的なモデル内殻ポテンシャル（MCP）[11]に加え、石村和也氏のSMASH [12]から有効内殻ポテンシャル（ECP）を移植して利用可能としたことです。これにより、ネームリストは&#038;MCPから&#038;RELPOTに変わりました。ポテンシャルとしては、LANL2DZ [13-15]をデフォルト想定していますが、内蔵セットだけでなくBasis Set Exchangeサイト[16]からダウンロードしたセット（GAMESS-USフォーマット）も読み込み可能です。ただ、hポテンシャルには未だ対応していないためアクチノイドの計算には制限があります。ECPのテストとして、文献[11]で扱った小型DNA片にCisplatinが結合した構造（PDB-ID 1I1P）の水和モデル（図4）を計算し、塩基ユニット間で妥当な相互作用エネルギーが得られることを確認しています。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig4.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig4.png" alt="" width="565" height="286" /></a></p>
+<p>機能強化の2つめは多層FMOの扱いで、Rev. 8でのCIS/CIS(D)による励起エネルギー算定[17,18]についてです。差分相関エネルギーに対するMP2振幅の部分再規格化と相関導入に依る差分緩和エネルギーの補正[19]、軌道緩和エネルギーに対する自己エネルギー修飾[20]に加え、MP2振幅にも自己エネルギー修飾[21]を追加したことです。CIS系の「対角化→摂動」の範囲内ですが、若干の近接縮退を伴う励起状態のエネルギー算定の信頼性が向上しています。</p>
+<p>速度向上に関しては、SX-ATでのMP3計算[22]の改良があります。MP3計算では、&#8221;4粒子-2空孔&#8221;の寄与の処理の最深部でDAXPYを用いますが、これをインライン展開としました。SX-ATのVE20BとVE30Aの新旧のベクトルエンジンを比較で用い、新型コロナウイルスのメインプロテアーゼとN3リガンドの複合体(PDB-ID 6LU7)の6-31G(d)基底で測定した結果を図5に示します。VE30Aはコア数16とVE20Bの8の2倍となり、さらにL3キャッシュが追加されていますが、FMO-MP2での加速は2.2倍となって両者の相乗効果が見えます。FMO-MP3でも2.0倍の加速が得られていますが、インライン展開前のコードでは1.6倍に留まってしまいます。相対コストはVE30Aで2.7倍ですので、SX-AT上でのMP3計算の実用性が高まりました。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig5.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig5.png" alt="" width="565" height="286" /></a></p>
+<p>MD-FMO連携計算では、入力データの作成～ジョブの実行～結果データの解析で様々なPythonスクリプトが使われており、液滴モデルの点電荷近似とフラグメント分割については上記していますが、その他のスクリプトについても触れておきます。１つめは、いわゆるサロゲートモデリング用のスクリプト（仮名称はSSIFIEE）[23]です。これは、6-31G(d)やcc-pVDZ基底での相互作用エネルギーをsp関数のみの3-21G基底での結果を機械学習で「補完」して定量的に予測しようというものです。図6に、Chignolin（PDB-ID 1UAO）での6-31G(d)の結果を予測した決定係数（R<sup>2</sup>）をヒートマップ的に示します。多くの残基対に関して十分な精度が出ていることがわかります。ただ、cc-pVDZについては改良の余地があります。２つめは、フラグメント分割がペプチド結合ではなく、側鎖を持つCαとカルボニル炭素の間で行われることに伴って生じ得る水素結合に関わる残基の「帰属ずれ」の自動検出ツール（名称はSARASA）[24]です。図7は、Chignolinでのテストの結果で、赤く図示されている残基対は「帰属ずれ」がアラートされています。この「ずれ」は、FMOの初心者ではしばしば混乱を招くだけでなく、自動データ解析の際にも問題となりますが、SARASAを使えば回避できます。現在、配位結合に対する「帰属ずれ」にも対応しつつあります。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig6.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig6.png" alt="" width="565" height="286" /></a></p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig7.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig7.png" alt="" width="565" height="286" /></a></p>
+<p>最後にお断りになりますが、これまで同様、入力データのajfのコンバータを除くPythonツール群は（諸事情から）オンデマンドでの提供とさせていただきます。</p>
+<hr />
+<p>[8] “Statistical interaction analyses between SARS-CoV-2 main protease and inhibitor N3 by combining of molecular dynamics simulation and fragment molecular orbital calculation”, R. Hatada, K. Okuwaki, K. Akisawa, Y. Mochizuki, Y. Handa, K. Fukuzawa, Y. Komeiji, Y. Okiyama, and S. Tanaka, Appl. Phys. Express 14 (2021) 027003-1-5.</p>
+<p>[9] “Large-scale FMO-MP2 calculations of the spike protein droplet model”, H. Doi, T. Nakano, K. Sakakura, K. Akisawa, K. Okuwaki, Y. Hirano, E. Yamamoto, K. Yasuoka, S. Ohshima, T. Katagiri, and Y. Mochizuki, J. Comp. Chem., 46 (2025) e70052-1-6.</p>
+<p>[10] “Enhancement of energy decomposition analysis in fragment molecular orbital calculations”, S. Matsuoka, K. Sakakura, Y. Akinaga, K. Akisawa, K. Okuwaki, H. Doi, Y. Mochizuki, J. Comp. Chem., 45 (2024) 898-902.</p>
+<p>[11] “Fragment molecular orbital calculations on large scale systems containing heavy metal atom”, T. Ishikawa, Y. Mochizuki, T. Nakano, S. Amari, H. Mori, H. Honda, T. Fujita, H. Tokiwa, S. Tanaka, Y. Komeiji, K. Fukuzawa, K. Tanaka, E. Miyoshi, Chem. Phys. Lett., 427 (2006) 159-165.</p>
+<p>[12] <a href="https://sourceforge.net/projects/smash-qc/">https://sourceforge.net/projects/smash-qc/</a></p>
+<p>[13] “Ab initio effective core potentials for molecular calculations. Potentials for the transition metal atoms Sc to Hg”, P. J. Hay, W. R. Watt, J. Chem. Phys. 82 (1985) 270-283.</p>
+<p>[14] “Ab initio effective core potentials for molecular calculations. Potentials for main group elements Na to Bi”, W. R. Watt, P. J. Hay, J. Chem. Phys. 82 (1985) 284-298.</p>
+<p>[15] “Ab initio effective core potentials for molecular calculations. Potentials for K to Au including the outermost core orbitals”, P. J. Hay, W. R. Watt, J. Chem. Phys. 82 (1985) 299-310.</p>
+<p>[16] <a href="https://www.basissetexchange.org/">https://www.basissetexchange.org/</a></p>
+<p>[17] “Configuration interaction singles method with multilayer fragment molecular orbital scheme”, Y. Mochizuki, S. Koikegami, S. Amari, K. Segawa, K. Kitaura, T. Nakano, Chem. Phys. Lett. 406 (2005) 283-288.</p>
+<p>[18] “Parallelized integral-direct CIS(D) calculations with multilayer fragment molecular orbital scheme”, Y. Mochizuki, K. Tanaka, K. Yamashita, T. Ishikawa, T. Nakano, S. Amari, K. Segawa, T. Murase, H. Tokiwa, M. Sakurai, Theor. Chem. Acc. 117 (2007) 541-553.</p>
+<p>[19] “Modification for spin-adapted version of configuration interaction singles with perturbative doubles”, Y. Mochizuki, K. Tanaka, Chem. Phys. Lett., 443 (2007) 389-397.</p>
+<p>[20] “A practical use of self-energy shift for the description of orbital relaxation”, Y. Mochizuki, Chem. Phys. Lett., 453 (2008) 109-116.</p>
+<p>[21] “Application of Dyson-corrected second-order perturbation theories”, Y. Mochizuki, Chem. Phys. Lett., 472 (2009) 143-148.</p>
+<p>[22] “Large-scale FMO-MP3 calculations on the surface proteins of influenza virus, hemagglutinin (HA) and neuraminidase (NA)”, Y. Mochizuki, K. Yamashita, K. Fukuzawa, K. Takematsu, H. Watanabe, N. Taguchi, Y. Okiyama, M. Tsuboi, T. Nakano, S. Tanaka, Chem. Phys. Lett., 493 (2010) 346-352. </p>
+<p>[23] “Prediction of quantitative interaction energy from low-cost FMO calculation by machine learning”, H. Doi, R. Yoshine, S. Matsuoka, K. Okuwaki, Y. Mochizuki, Jpn. J. Appl. Phys., 64 (2025) 077001-1-5.</p>
+<p>[24] “Automatic detection of interacting carbonyl oxygens in peptide bond for the fragment molecular orbital method”, R. Yoshine, H. Doi, K. Okuwaki, Y. Mochizuki, Chem. Lett., 55 (2026) upaf238-1-4.</p>
+<h2> Ver. 1系FMODD版とHPCI拠点での整備</h2>
+<p>2024年秋からFMODDグループ[25]との交流が再開し、Ver. 1 Rev. 22系[26]のFMODD独自改良版とVer. 2系との「将来的な再統合」を意識した連携活動が行われるようになっています。最初の実績としては、2025年3月に凍結領域（FD）近似下での部分構造最適化[27]が可能な2024年度版（V1DD-24）を大阪大学、理研R-CCSにVer. 2系と併存の形でライブラリ登録しています。また、リリース予定のFMODDの2026年度版には文献[10]の拡張PIEDAが移植されている一方、本Ver. 2 Rev. 12にFMO-HFエネルギー微分のFMODD版の改良が反映されています。</p>
+<p>文献[7]に明記していますが、ABINIT-MPは北海道大学～九州大学までの国内HPCI拠点（スーパーコンピュータセンター）ではライブラリプログラムとして利用できるようになっており、各所での機種の更新に対しても可能な限り対応しています。Ver. 2 Rev. 12についても、「富岳」を皮切りに2026年度にライブラリ整備を行います。</p>
+<hr />
+<p>[25] <a href="https://fmodd.jp/">https://fmodd.jp/</a></p>
+<p>[26] “FMOプログラムABINIT-MPの整備状況2020”, 望月祐志, 坂倉耕太, 渡邊啓正, 奥脇弘次, 加藤幸一郎, 渡辺尚貴, 沖山佳生, 福澤薫, 中野達也, J. Comp. Chem. Jpn., 19 (2020) 142-145.</p>
+<p>[27] “Geometry Optimization using the Frozen Domain and Partial Dimer Approach with the Fragment Molecular Orbital Method: Implementation, Benchmark, and Application for Ligand-Binding Site of Proteins”, K. Okuwaki, N. Watanabe, K. Kato, C. Watanabe, N. Nakayama, A. Kato, Y. Mochizuki, T. Nakano, T. Honma, and K. Fukuzawa, J. Chem. Inform. Model., 64 (2024) 9449-9458.</p>
+<h2> Open Ver. 2 Rev. 12 (2026年3月版)の主開発者</h2>
+<p>Ver. 2 Rev. 12のABINIT-MP本体の整備・開発では、中野達也氏（高度情報科学技術研究機構 利用支援部）、坂倉耕太氏（大阪大学 D3センター）、望月祐志（立教大学 理学部：取り纏め役：本稿執筆者）の3名が主に関わっています。また、土居英男氏（立教大学 理学部）と奥脇弘次氏（（株）JSOL＆立教大学 理学部&#038;大阪大学 大学院薬学研究科）は、Python系スクリプト群を開発しています。</p>
+<h2>今後の開発・整備</h2>
+<p>HPCI拠点では、近年GPU搭載のサブシステムが増えてきています。また、2030年に稼働が予定されている「富岳NEXT」では、1ノードに2基のCPU（富士通MONAKA-X）と4基のGPU（NVIDIA製は確定）が搭載されます。このため、ABINIT-MPでもGPU対応を急いでいます[5-7]。2026年春時点では、小原の垂直漸化式関係（VRR）[28]に基づく2電子積分周りの再構成とOpenACCディレクティブの挿入による改造がFMO-HFで（ほぼ）完了し、MP2エネルギーの積分変換は新規コードによる試行が進んでいるところです。FMO-HFに関しては、NVIDIAのGH200をノードに1基積むJCAHPCのMiyabi-Gでの多ノードテストが行われています[29]。図8は、HIVウイルスのプロテアーゼと阻害剤のリトナビルの複合体（PDB-ID 1MUI）の6-31G基底でのFMO-HFジョブのタイミングを16ノード起点で256ノードまで示したものですが、スケーリングとしては及第レベルです。MP2を新コードとしているのは、既存のDGEMMベースのコードではcuBLASを使っても好ましい加速が得られなかったためです。MPS/MIGなどのGPUのテンソルコア資源の実行時の分割も試みながら性能評価をしていますが、CPUのみの実行に比較してGPUも使うとFMO-MP2/6-31Gジョブで5倍程の加速が見えている段階です。チューニングが一段落した段階で、Ver. 2 Rev. 12の更新としてFMO-MP2エネルギー計算までをGPU対応としてRev. 16を2026年度内にリリースする予定で、Miyabi-G、名古屋大学の「不老・弐」タイプII、九州大学の「玄界」ノードグループB等でライブラリ公開します。なお、Ver. 2系はRev. 16で終了します。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2026/03/fig8.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2026/03/fig8.png" alt="" width="565" height="286" /></a></p>
+<p>文献[7]中に記していますが、GPU対応は米国のM. Gordonグループが大きく先行しており、GAMESS-USだけでなくEXESSなるGPU特化型の新しいプログラムも開発していますが、後者はオーストラリアのG. M. J. Barca氏らが主に進めています（文献情報は[7]のリンクを参照）。EXESSの本質的な特徴は、2電子積分を恒等分解（RI）近似で扱っていることで、これによって行列積ベースの処理が基本となるためGPUでの高速実行が可能となっています。ABINIT-MPにも2電子積分を近似するコレスキー分解（CD）が実装[30]されていますが、RIが最適化された基底での展開となるのに対し、CDでは自基底の積が基本となるために演算オーダーが1つ上がってしまい、加速と精度のバランス取りが困難であり、近年ではほとんど使われなくなりました。そこで、RIの実装で先行するPAICS [31,32]を参考に、RIベースの新しいプログラムFMO-Xの開発を別途始めています。「富岳NEXT」上では、FMO-MP2レベルまではFMO-Xが主に担っている想定です。</p>
+<p>開殻系と多参照系の扱いはVer. 3系で提供する予定です。2025年度の段階ではROHF計算の基幹部が完成し、スピン適合型CASSCFのプロトタイプの動作が確保できています[7]。相関エネルギーの補正は、ROHFにRMP2、CASSCFにNEVPT2として実装の準備を進めています。</p>
+<hr />
+<p>[28] “Efficient recursive computation of molecular integrals over Cartesian Gaussian functions”, S. Obara, A. Saika, J. Chem. Phys., 84 (1986) 3963-3974.</p>
+<p>[29] “フラグメント分子軌道法プログラムABINIT-MPのGPU による高速化”, 中野達也, 坂倉耕太, 成瀬彰, 片桐孝洋, 星野哲也, 大島聡史, 中島研吾, 石川岳志, 望月祐志, RIST NEWS, 71 (2025) 32-43.</p>
+<p>[30] “Acceleration of fragment molecular orbital calculations with Cholesky decomposition approach”, Y. Okiyama, T. Nakano, K. Yamashita, Y. Mochizuki, N. Taguchi, S. Tanaka, Chem. Phys. Lett., 490 (2010) 84-89.</p>
+<p>[31] “Fragment molecular orbital calculation using the RI-MP2 method”, T. Ishikawa, K. Kuwata, Chem. Phys. Lett., 474 (2009) 195-198.</p>
+<p>[32] “RI-MP2 Gradient Calculation of Large Molecules Using the Fragment Molecular Orbital Method”, T. Ishikawa, K. Kuwata, J. Phys. Chem. Lett., 3 (2012) 375-379.</p>
+<h2>謝辞</h2>
+<p>ABINIT-MPの研究開発は、既述のようにJHPCNの2021年度からの課題プロジェクト[8]で続けられています（2026年度も採択済）。この中で、片桐孝洋先生と星野哲也先生（名古屋大学 情報基盤センター）、大島聡史先生（九州大学 情報基盤研究開発センター）にはHPCの専門的なアドバイスをいただいています。SX-AT関係では、滝沢寛之先生（東北大学 サイバーサイエンスセンター）にもご支援いただいています。</p>
+<p>Ver. 2 Rev. 12向けの「富岳」での大規模なテスト計算は、感染症対策関係のHPCI課題{hp230017, hp240030, hp240526, hp250014}（代表者：望月祐志）の中で行ってきました。また、小規模FMOジョブを大量に実行して粗視化シミュレーションの一種である散逸粒子動力学（DPD）のパラメータを決めるアプローチ[33,34]を「富岳」上で推進する課題{hp230016, hp240013, hp250009}（代表者：望月祐志）とも連動しており、（株）JSOLの小沢拓部長には運営等でご協力いただいています。</p>
+<p>FMODD関係では、福澤薫先生（大阪大学 大学院薬学研究科）、田中成典先生（神戸大学 分子フォトサイエンス研究センター）、加藤幸一郎先生（九州大学 大学院工学研究院）と連携しています。</p>
+<p>SX-AT向けのベクトル化による高速化チューニング、ならびに解析機能の向上については長年NEC様からご支援をいただいており、実作業は加藤季広氏（NEC）と坂倉氏が担っています。また、複数の企業様からの立教大学へのご寄付や共同研究資金を得まして、Ver. 2系ABINIT-MPプログラムの研究開発と維持ができています。</p>
+<p>RI関係では、PAICSの作者である石川岳志先生（鹿児島大学 学術研究院理工学域工学系）にご教示いただくこともあります。</p>
+<p>HPCI拠点へのABINIT-MPのライブラリ整備やハンズオンセミナーでは、（一財）高度情報科学技術研究機構（RIST）に継続的にお世話になっています。</p>
+<p>最後に、「計算工学ナビ」サイトでのABINIT-MP関係の情報公開で長年ご支援いただいている東京大学生産技術研究所の革新的シミュレーション研究センターに謝意を表します。</p>
+<hr />
+<p>[33] “Fragment Molecular Orbital-based Parameterization Procedure for Mesoscopic Structure Prediction of Polymeric Materials”, K. Okuwaki, Y. Mochizuki, H. Doi, T. Ozawa, J. Phys. Chem. B, 122 (2018) 338-347.</p>
+<p>[34] “フラグメント分子軌道(FMO)法を用いた散逸粒子動力学シミュレーションのための有効相互作用パラメータ算出の自動化フレームワーク”, 奥脇弘次, 土居英男, 望月祐志, J. Comp. Chem. Jpn., 17 (2018) 102-109.</p>
+<h2>コンタクト</h2>
+<p>ABINIT-MPのOpenシリーズのご利用（Pythonスクリプト含む）にご関心のある方は、取り纏め責任者の立教大学の望月祐志（fullmoon -at- rikkyo.ac.jp）にメールにてご連絡いただければ適宜対応させていただきます（-at-を@に変換してください）。</p>
+		</div>	</article>
+					<article class="post-2684 post type-post status-publish format-standard has-post-thumbnail hentry category-reports">
+		<a href="https://www.cenav.org/abinit-mp-open_ver-2-rev-8/"><h1>ABINIT-MP Openシリーズ (Ver.2 Rev.8)</h1></a>
+				<div class="reports-body">		<p>※2021年9月版(Ver.2 Rev.4)に関するページは<a href="https://www.cenav.org/abinit-mp-open_ver-2-rev-4/">こちら</a>です</p>
+<p>※2020年6月版(Ver.1 Rev.22)に対応するBSV（BioStation Viewer）のWindows用インストーラは<a href="https://www2.rikkyo.ac.jp/web/fullmoon/BioStationViewerOpen1.0Rev.10-setup.exe">こちら</a>からダウンロードできます</p>
+<h2>はじめに</h2>
+<p>ABINIT-MP [1,2]のOpenシリーズはVer. 2系に移行し、初回のリリースが2021年9月のRev. 4 [3]、今回が2回目のRev. 8 [4]となります。Rev. 4の頁でも記していますが、Ver. 2系では機能の拡充と共に、常用されるFMO-MP2ジョブの高速化、さらに数万フラグメントの扱いを目指した整備が行われています。高速化については、計算機科学の高性能計算（HPC）の専門家グループとのコラボレーションの下、「富岳」に代表される富士通A64FX系のスパコンを意識しての改良作業となっています。2020年6月にリリースしたVer. 1系の最終版Rev. 22に比べるとFMO-MP2計算は、前回のVer. 2 Rev. 4では1.2～1.4倍の加速、今回のVer. 2 Rev. 8では1.5～2倍の加速となっています。大規模系への対応に関しては、タンパク質の水和モデルの扱いにおいて遠方の水分子をクラスターとしてまとめ、フラグメント総数を実効的に削減する前処理スクリプトを開発しました。これにより、新型コロナウイルスのスパイクタンパク質の扱いが可能となりました。</p>
+<p>機能面での強化では、PIEDAで局所応答分散（LRD）法によって分散力の寄与を電子相関の寄与と分離して評価できるようになった他、興味領域での励起エネルギーとイオン化エネルギーの算定が可能となりました。また、分子凝集系を想定した励起状態でのフラグメント間での結合パラメータを評価する機能も追加されました。</p>
+<p>Ver. 2系ではCPF（Check Point File）の書き出しが無効化されています。CPFの読み込みによるBSV（BioStation Viewer）を使った可視化的な解析については、今後も当面並行して提供するVer. 1 Rev. 22を使っていただくことになります。「富岳」を頂点とする国内HPCI拠点では、Ver. 2系の更新版と共にVer. 1 Rev. 22もライブラリとして利用できるようにしています。</p>
+<p>Ver. 2 Rev. 8では、2つのネームリスト（&amp;EXPROPと&amp;COUPLING）が追加されており、Ver. 1 Rev. 22とVer. 2 Rev. 4のajfファイルに追加しないと読み込みに失敗します。そのため、mkinp_ver2rev8-hd-2023august.py スクリプトを使ってVer. 2 Rev. 8用に転換する必要があります。</p>
+<hr />
+<p>[1] “Electron-correlated fragment-molecular-orbital calculations for biomolecular and nano systems”, S. Tanaka, Y. Mochizuki, Y. Komeiji, Y. Okiyama, K. Fukuzawa, Phys. Chem. Chem. Phys. 16 (2014) 10310-10344.</p>
+<p>[2] “The ABINIT-MP Program”, Y. Mochizuki, T. Nakano, K. Sakakura, Y. Okiyama, H. Watanabe, K. Kato, Y. Akinaga, S. Sato, J. Yamamoto, K. Yamashita, T. Murase, T. Ishikawa, Y. Komeiji, Y. Kato, N. Watanabe, T. Tsukamoto, H. Mori, K. Okuwaki, S. Tanaka, A. Kato, C. Watanabe, K. Fukuzawa (pp.53-67) in “Recent Advances of the Fragment Molecular Orbital Method &#8211; Enhanced Performance and Applicability”, ed. by Y. Mochizuki, S. Tanaka, K. Fukuzawa, (2021, Springer, Singapore).</p>
+<p>[3] “FMOプログラムABINIT-MPの整備状況2021”, 望月祐志, 中野達也, 佐藤伸哉, 坂倉耕太, 渡邊啓正, 奥脇弘次, 大島聡史, 片桐孝洋, J. Comp. Chem. Jpn., 20 (2021) 132-136.</p>
+<p>[4] “FMOプログラムABINIT-MPの整備状況2022”, 望月祐志, 中野達也, 坂倉耕太, 渡邊啓正, 佐藤伸哉, 奥脇弘次, 秋澤和輝, 土居英男, 大島聡史，片桐孝洋, J. Comp. Chem. Jpn., 21 (2022) 106-110.</p>
+<h2>Open Ver. 2 Rev. 8の高速化と大規模系対応</h2>
+<p>A64FX向けの高速化に関しては、「学際大規模情報基盤共同利用・共同研究拠点」（JHPCN）[5]の課題を通じてHPCの専門家とのコラボレーションの下で進めています。Rev. 4に対してRev. 8で追加的に実施した高速化作業は、レジスタスピルを減らすために2電子積分の生成ルーチン群にループ分割を行ったこと、Fock行列構築の最深部処理からif分岐を排除したことです。さらに、モノマーの自己無撞着場（SCC）の段階で2電子積分をバッファリングして各モノマーでのIn-core SCF計算を可としました。積分のバッファリングは、4つの軌道の角運動量の総和で指定できますが、実際の利用では対象系、基底関数の設定、ならびに使用する計算機のメモリの上限値に依存します。図1に、エイズウイルスのプロテアーゼにリガンド（ロピナビル）が結合した系のFMO-MP2/cc-pVDZジョブを名古屋大学の「不老」 Type I上でRev. 4とRev. 8で実行したタイミングを示します（MP2の積分変換は全段をDGEMMで処理）。Rev. 8での積分のバッファリングは、軌道角運動量の和で4までの積分が対象となっています。Rev. 4との比較では、モノマーSCFの加速が効いていることがわかりますが、ダイマーSCFも速くなっているのは積分ルーチンでのループ分割とFock行列計算の改良を反映しています。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig1.png"><img loading="lazy" class=" wp-image-2592 aligncenter" src="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig1.png" alt="" width="565" height="286" /></a></p>
+<p>大規模系への対応についてですが、ターゲットとしては古典分子動力学（MD）シミュレーションによって生成された数千残基のタンパク質の水和モデルが主になると想定されます。そこで今回は発想を変え、ABINIT-MP本体の改造ではなく、フラグメント分割の前処理を行って実効的なフラグメント総数を減らすことを考えました。つまり、タンパク質に隣接する水分子は水和に伴う電荷移動や分極を考慮するために個別に扱うのに対し、遠方の水はクラスターとしてまとめるという形です。クラスタリングによってO原子が4,5個となるため、残基部分との粒度差が小さくなって並列処理のバランスの改善も期待できます。実際の処理はPythonスクリプトを使って行っていますが、新型コロナウイルスのスパイクタンパク質（3.3千残基）のような糖タンパク質の糖鎖部分も自動でフラグメント化できるようになっています。図2は、スパイクタンパク質（PDB-ID=6XLU）の水和モデルで、MD由来の構造サンプルのフラグメント総数は1.8万ですが、この前処理によって1万にまで低減できました。「富岳」の8ラック利用では、FMO-MP2/6-31G*ジョブが2.1時間で完走します。2020年度の段階では、Ver. 1 Rev. 22プログラムの制約からスパイクタンパク質の計算[6]は水和は無し（また糖も無し）での条件でやらざるを得ず、忸怩たる思いがありました。しかし、Ver. 2 Rev. 8ではフラグメント総数が2万程度となる数千残基のタンパク質の水和モデルのFMO-MP2計算は（「富岳」であれば）ルーチン的に実行可能になりました。なお、この前処理スクリプトのご利用については当面は応相談とさせていただきます。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig2.png"><img loading="lazy" class=" wp-image-2593 aligncenter" src="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig2.png" alt="" width="326" height="315" /></a></p>
+<hr />
+<p>[5] 「学際大規模情報基盤共同利用・共同研究拠点（JHPCN）」&lt;https://jhpcn-kyoten.itc.u-tokyo.ac.jp/ja/&gt;, 課題番号： jh210036-NAH, jh220010, jh230001.</p>
+<p>[6] “Interaction analyses on SARS-CoV-2 spike protein based on fragment molecular orbital calculations”, K. Akisawa, R. Hatada, K. Okuwaki, Y. Mochizuki, K. Fukuzawa, Y. Komeiji, S. Tanaka, RSC Adv. 11 (2021) 3272-3279.</p>
+<h2>Open Ver. 2 Rev. 8の機能強化</h2>
+<p>機能強化では、相互作用エネルギーの成分分解であるPIEDA [7,8]でMP2などの電子相関計算でのエネルギー低下を“DI”（Dispersion Interaction：分散相互作用）としている点に対する修正案として、LRD（Local Response Dispersion）[9]によって分散力系の安定化寄与を別に算定し、過剰なイオン性の低減などの相関補正の寄与と分離して評価可能としました。文献[10]では、LRD計算を別途行っていましたが、今回の改良で単一ジョブで計算可になりました[11]。構造活性相関（QSAR）や機械学習では、各寄与を分けて記述子とすることで予測精度が改善される可能性があります。また、環境静電ポテンシャル由来のRESP電荷を使った“ES項（Electrostatic Interaction：静電相互作用）”に対する参考値の算定機能オプションも入りました[11]。</p>
+<p>機能追加では、多層FMO [12]の文脈で1電子励起CI（CIS）[13]とMP2的なエネルギー補正（CIS(D)：緩和エネルギーと差分相関エネルギーを評価）[14]が利用可能になりました[4]。&amp;EXPROPネームリストで指定しますが、元々は立教大学の古いローカル版にあったモジュールを移植した機能になります。これにより、例えばTrp-Cageの興味領域であるTrp部分のみの励起エネルギーの算定ができます。CIS(D)では、MP2振幅を部分的に再規格化し、さらに相関導入による差分緩和エネルギーを考慮するオプション[15]、ならびに緩和エネルギーに準粒子・2次グリーン関数[16]の自己エネルギーシフトを入れるオプション[17]もあります。図３は、Trp-CageのTrpの励起エネルギーを文献[15]の機能で計算した例になります（基底関数はcc-pVDZ）。なお、CIS(D)の拡張でMP2振幅への自己エネルギーシフト[18]は、Rev. 8では未だサポートできていません。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig3.png"><img loading="lazy" class=" wp-image-2591 aligncenter" src="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig3.png" alt="" width="432" height="229" /></a></p>
+<p>2次グリーン関数の機能は単独でも使え、標的分子系の荷電状態には注意が要りますが、興味領域のイオン化エネルギーを計算できます（&amp;EXPROPで指定）[4]。2次の自己エネルギーは、過大評価気味のクープマンスの値に比べると逆に過小評価に転じる傾向がありますが、pGW2スケーリング[19]を行うと妥当な値となります。なお、手動でのスケーリングパラメータも設定可能です。図4は、Trp-CageのTrpのイオン化エネルギーの算定値のリストです。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig4.png"><img loading="lazy" class=" wp-image-2590 aligncenter" src="http://www.cenav.org/wp-content/uploads/2023/09/abinitv2r8_fig4.png" alt="" width="455" height="465" /></a></p>
+<p>機能追加の最後は、分子凝集体でのフラグメント・ユニット間の励起状態のカップリングパラメータ[20,21]の算定です。この機能は、量子科学技術研究開発機構（QST）の藤田貴敏氏がローカル版のABINIT-MPに対して実装されていたモジュールの移植になり、&amp;COUPLINGネームリストで設定します。光応答性分子の結晶状態での解析などに有用と思われます。</p>
+<hr />
+<p>[7] “Pair Interaction Energy Decomposition Analysis”, D. G. Fedorov, K. Kitaura, J. Comp. Chem. 28 (2007) 222-237.</p>
+<p>[8] “相互作用エネルギー成分分割解析機能PIEDAの実装とタンパク質-リガンド間の相互作用解析”, 塚本貴志, 加藤幸一郎, 加藤昭史, 中野達也, 望月祐志, 福澤薫, J. Comp. Chem. Jpn., 14 (2015) 1-9.</p>
+<p>[9] “Density functional method including weak interactions: Dispersion coefficients based on the local response approximation”, T. Sato, H. Nakai, J. Chem. Phys. 131 (2009) 224104-1-12.</p>
+<p>[10] “Fragment Molecular Orbital Based Interaction Analyses on Complexes Between SARS-CoV-2 RBD Variants and ACE2”, K. Akisawa, R. Hatada, K. Okuwaki, S. Kitahara, Y. Tachino, Y. Mochizuki, Y. Komeiji, S. Tanaka, Jpn. J. Appl. Phys. 60 (2021) 090901-1-5.</p>
+<p>[11] “Enhancement of energy decomposition analysis in fragment molecular orbital calculations”, S. Matsuoka, K. Sakakura, Y. Akinaga, K. Akisawa, K. Okuwaki, H. Doi, Y. Mochizuki, to be submitted.</p>
+<p>[12] “Multilayer Formulation of the Fragment Molecular Orbital Method (FMO)”, D. G. Fedorov, T. Ishida, K. Kitaura, J. Phys. Chem. A, 109 (2005) 2638-2646.</p>
+<p>[13] “Configuration interaction singles method with multilayer fragment molecular orbital scheme”, Y. Mochizuki, S. Koikegami, S. Amari, K. Segawa, K. Kitaura, T. Nakano, Chem. Phys. Lett. 406 (2005) 283-288.</p>
+<p>[14] “Parallelized integral-direct CIS(D) calculations with multilayer fragment molecular orbital scheme”, Y. Mochizuki, K. Tanaka, K. Yamashita, T. Ishikawa, T. Nakano, S. Amari, K. Segawa, T. Murase, H. Tokiwa, M. Sakurai, Theor. Chem. Acc. 117 (2007) 541-553.</p>
+<p>[15] “Modification for spin-adapted version of configuration interaction singles with perturbative doubles”, Y. Mochizuki, K. Tanaka, Chem. Phys. Lett., 443 (2007) 389-397.</p>
+<p>[16] “Propagators in Quantum Chemistry, Second Edition”, J. Linderberg, Y. Öhrn, (2004, Wiley, Hoboken NJ).</p>
+<p>[17] “A practical use of self-energy shift for the description of orbital relaxation”, Y. Mochizuki, Chem. Phys. Lett., 453 (2008) 109-116.</p>
+<p>[18] “Application of Dyson-corrected second-order perturbation theories”, Y. Mochizuki, Chem. Phys. Lett., 472 (2009) 143-148.</p>
+<p>[19] “The parametrized second-order Green function times screened interaction (pGW2) approximation for calculation of outer valence ionization potentials”, C.-H. Hu, D. P. Chong, M. E. Casida, J. Elec. Spec. Rel. Phenom., 85 (1997) 39-46.</p>
+<p>[20] “Molecular orbital calculation of biomolecules with fragment molecular orbitals”, S. Tsuneyuki, T. Kobori, K. Akagi, K. Sodeyama, K. Terakura, H. Fukuyama, Chem. Phys. Lett. 476 (2009) 104-108.</p>
+<p>[21] “Charge-Transfer Matrix Elements by FMO-LCMO Approach: Hole Transfer in DNA with Parameter Tuned Range-Separated DFT”, H. Kitoh-Nishioka, K. Ando, Chem. Phys. Lett. 621 (2015) 96-101.</p>
+<h2>Open Ver. 2 Rev. 8 (2023年8月版)の開発者</h2>
+<p>Ver. 2 Rev. 8のABINIT-MP本体の整備・開発に関しては、中野達也氏（国立医薬品食品衛生研究所 医薬安全科学部）、坂倉耕太氏（計算科学振興財団）、望月祐志（立教大学 理学部：取り纏め役）の3名が主に関わりました。また、土居英男氏（立教大学 理学部）と奥脇弘次氏（JSOL＆立教大学 理学部）は、入力データの整形ツールや「富岳」でのジョブ実行ツールなどPython系スクリプトを多数開発し、ABINIT-MPの周辺環境の整備に尽力しました。</p>
+<h2>NEC SX-Aurora TSUBASA向けのベクトル化</h2>
+<p>立教大学とNECとの共同研究によって、需要の多いFMO-MP2計算のSX-Aurora TSUBASA（SX-AT）向けのベクトル化チューニングが続けられてきました。2022年度までは佐藤伸哉氏（NECソリューションイノベータ）、2023年度からは加藤季広氏（NEC）が坂倉耕太氏（前出）と連携して実作業に当たっています。Ver. 1 Rev. 22では、ベクトル化により、新型コロナウイルスのメインプロテアーゼとN3リガンドの複合体PDB-ID=6LU7のFMO-MP2/6-31G*計算で改良前に比べて4.6倍の高速化が達成されています[3]。ベクトル化部分はVer. 2 Rev. 4にも移植されていますが、Rev. 8に対してはこれからになりますので、東北大学と大阪大学のSX-ATではVer. 2 Rev. 4での利用となります。なお、ベクトル実行ではDGEMM処理の加速が期待されるため、テンソル縮約のコストが支配的な3次摂動のFMO-MP3計算についても、チューニングを検討しています。</p>
+<h2>HPCI拠点での整備</h2>
+<p>HPCI拠点でのスパコンの更新が続いており、各拠点でサブシステムを複数持ち、CPUも富士通のA64FX、IntelのXeon、NECの SX-AT、AMD のEPYCとあり、さらにNVIDIAのGPUも搭載されることが増えているため、全ての環境に対応するのは次第に難しくなってきています。ただ、計算機能によってはflat MPIでしか並列化されていないものもありますので、できるだけOpenMP/MPIの混成並列のバイナリとMPI並列のバイナリの両方をサブシステムに応じて揃えるようにしたいと思っています。</p>
+<p>文献[3]には、2021年度のHPCI拠点でのライブラリ整備状況が示されています。可視化解析のためにVer. 1 Rev. 22は今後も（できるだけ）残しますが、Ver. 2 Rev. 4を今回のVer. 2 Rev. 8と併存させるかどうかは拠点毎の事情・判断に依ります。なお、SX-ATについては2023年夏の時点ではVer. 2 Rev. 4までの対応です（上述）。</p>
+<p>Ver. 2 Rev. 8のHPCI拠点のライブラリ整備予定は、「富岳」（R-CCS）、「不老」（名古屋大学）、「Wisteria」（東京大学）を2023年度内に済ませ、その後で他拠点へと進めていきます（スパコン更新の状況に依存）。</p>
+<h2>Open Ver.2系の今後の開発整備</h2>
+<p>Rev. 8の次は、2年後にリリースを目指すRev. 12を想定しています。開殻系の扱いは、現在のUHF/UMP2に加え、スピン汚染の問題のないROHF/ROMP2の準備を始めています。機能面での追加に関しては、相対論効果の考慮が必要な重原子の扱いに対し、これまでのMCP（Model Core Potential）[22]だけでなく、石村和也氏（X-ability）のSMASH [23]からECP（Effective Core Potential）モジュールを移植します。これにより、GAUSSIANプログラムで常用されるLANL2DZ [24-26]が使えるようになりますので、例えばシスプラチン結合DNAの扱いでQM/MMモデルとの直接比較などが可能となり、利用者の利便性が向上するはずです。</p>
+<p>Rev. 12での高速化については、GPU対応との関係から垂直漸化式関係[27]に基づいて軌道タイプの組み合わせに応じて自動生成された2電子積分ルーチン群の再構成を行う予定です。GPU化については、FMO機能を省いたHF/SCF計算のミニアプリを成瀬彰氏（NVIDIA）がチューニングされ、Xeon単独に比してGPUによって6-8倍の加速が得られた経験があります[28]。このチューニングでは、NVIDIA-GPUのCUDAコアを埋めるために積分ルーチン群が軌道角運動量に応じてまとめられ、性能向上に繋がりました。2023年夏時点で、この方針をベースにABINIT-MP本体の改造をどう進めていくか検討しているところです。</p>
+<p>大学のHPCI拠点では、いくつかの異なる構成のサブシステムが設置されることが多くなってきていますので、GPU化とは別にA64FX、SX-ATあるいはXeon系の高速化も引き続き取り組んでいくことになりますが、上記の積分ルーチンの再構成は手動・自動チューニング作業の能率を上げると期待しています。</p>
+<p>大規模系対応については、Ver. 2 Rev. 8では見送った作業配列群の整理を再度行う予定です。これにより、水和タンパク質モデルで元のフラグメント数が4万程度の系でも扱えるようにしたいと考えています（水のクラスタリング処理は併用）。</p>
+<hr />
+<p>[22] “Fragment molecular orbital calculations on large scale systems containing heavy metal atom”, T. Ishikawa, Y. Mochizuki, T. Nakano, S. Amari, H. Mori, H. Honda, T. Fujita, H. Tokiwa, S. Tanaka, Y. Komeiji, K. Fukuzawa, K. Tanaka, E. Miyoshi, Chem. Phys. Lett., 427 (2006) 159-165.</p>
+<p>[23] https://sourceforge.net/projects/smash-qc/</p>
+<p>[24] “Ab initio effective core potentials for molecular calculations. Potentials for the transition metal atoms Sc to Hg”, P. J. Hay, W. R. Watt, J. Chem. Phys. 82 (1985) 270-283.</p>
+<p>[25] “Ab initio effective core potentials for molecular calculations. Potentials for main group elements Na to Bi”, W. R. Watt, P. J. Hay, J. Chem. Phys. 82 (1985) 284-298.</p>
+<p>[26] “Ab initio effective core potentials for molecular calculations. Potentials for K to Au including the outermost core orbitals”, P. J. Hay, W. R. Watt, J. Chem. Phys. 82 (1985) 299-310.</p>
+<p>[27] “Efficient recursive computation of molecular integrals over Cartesian Gaussian functions”, S. Obara, A. Saika, J. Chem. Phys., 84 (1986) 3963-3974.</p>
+<p>[28] “HF計算に特化したABINIT-MPミニアプリのGPU化の試み”, 望月祐志, 坂倉耕太, 成瀬彰, 古家真之介, 下川辺隆史, 芝隼人, 大島聡史, 星野哲也, 片桐孝洋, 理論化学討論会2023, 2023/5/19 (横浜).</p>
+<h2>謝辞</h2>
+<p>ABINIT-MP Open Ver. 2系のA64FX向けの高速化と大規模系への対応は、JHPCN [5]の継続課題{jh210036-NAH, jh220010, jh230001}「FMOプログラムABINIT-MPの高速化と超大規模系 への対応」（代表者：望月祐志）の中で展開されています。この中で、片桐孝洋先生（名古屋大学 情報基盤センター）、大島聡史先生（九州大学 情報基盤研究開発センター）にはHPCの専門的なアドバイスをいただいています[3,4]。2023年度からは、星野哲也先生（名古屋大学 情報基盤センター）と滝沢寛之先生（東北大学 サイバーサイエンスセンター）にもご支援いただいています。対象とするスパコンとしては、2021-2022年度は名古屋大学の「不老」 Type Iを作業拠点としたA64FX向けの対応のみでしたが、2023年度からはNECと立教大学とのこれまでの共同研究をベースに、東北大学の「AOBA-A/S」をプラットフォームとしたSX-AT向けの活動（滝沢先生関係）も公式に行っています。</p>
+<p>「富岳」での大規模なテスト計算は、感染症対策関係のHPCI課題{hp210026, hp220025, hp220352, hp230017}（代表者：望月祐志）の中で行っています。また、小規模FMOジョブを大量に実行して粗視化シミュレーションの一種である散逸粒子動力学（DPD）のパラメータを決めるアプローチ[29,30]を「富岳」上で推進する課題{hp210261, hp230016}（代表者：望月祐志）とも連動しています。資金面では、2022年度から立教SFRの支援を受けています。</p>
+<p>SX-AT向けのベクトル化による高速化チューニング、ならびに解析機能の向上については長年NEC様からご支援をいただいています。また、複数の企業様からの立教大学への指定寄付を得て、ABINIT-MPプログラムの研究開発と維持ができています。</p>
+<p>励起状態でのカップリングの算定機能では、モジュールを提供くださった藤田貴敏氏（前出）、ならびに機能の必要性をご議論いただき、さらに移植にご支援いただいた小沢拓氏と新田浩也氏（共にJSOL）にも感謝したいと思います。</p>
+<p>HPCI拠点へのABINIT-MPのライブラリ整備やハンズオンセミナーでは、（一財）高度情報科学技術研究機構（RIST）に継続的にお世話になっています。</p>
+<p>最後に、「計算工学ナビ」サイトでのABINIT-MP関係の情報公開で長年ご支援いただいている東京大学生産技術研究所の加藤千幸先生、同革新的シミュレーション研究センターにも謝意を表します。</p>
+<hr />
+<p>[29] “Fragment Molecular Orbital-based Parameterization Procedure for Mesoscopic Structure Prediction of Polymeric Materials”, K. Okuwaki, Y. Mochizuki, H. Doi, T. Ozawa, J. Phys. Chem. B, 122 (2018) 338-347.</p>
+<p>[30] “フラグメント分子軌道(FMO)法を用いた散逸粒子動力学シミュレーションのための有効相互作用パラメータ算出の自動化フレームワーク”, 奥脇弘次, 土居英男, 望月祐志, J. Comp. Chem. Jpn., 17 (2018) 102-109.</p>
+<h2>コンタクト</h2>
+<p>ABINIT-MPのOpenシリーズのご利用、あるいはプログラム開発にご相談のある方は、取り纏め責任者の立教大学の望月祐志（fullmoon -at- rikkyo.ac.jp）にメールにてご連絡いただければ適宜対応させていただきます（-at-を@に変換してください）。</p>
+		</div>	</article>
+					<article class="post-2580 post type-post status-publish format-standard has-post-thumbnail hentry category-reports">
+		<a href="https://www.cenav.org/abinit-mp-open_ver-2-rev-4/"><h1>ABINIT-MP Openシリーズ (Ver.2 Rev.4)</h1></a>
+				<div class="reports-body">		<p>※2020年6月版(Ver.1 Rev.22)に関するページは<a href="http://www.cenav.org/abinit-mp-open_ver-1-rev-22/">こちら</a>です</p>
+<p>※2020年6月版(Ver.1 Rev.22)に対応するBSV（BioStation Viewer）のWindows用インストーラは<a href="https://www2.rikkyo.ac.jp/web/fullmoon/BioStationViewerOpen1.0Rev.10-setup.exe">こちら</a>からダウンロードできます</p>
+<h2>はじめに</h2>
+<p>フラグメント分子軌道（FMO）計算のプログラムABINIT-MP [1,2]のOpenシリーズは、2021年度にVer. 2系に移行しました。Ver. 2系では、これまで通りの機能の拡充に加え、常用されるメラープレセット2次摂動（MP2）レベルのジョブの「富岳」（理研）などの富士通A64FX系スーパーコンピュータでの数倍を睨んだ高速化、ならびに将来的には数万フラグメントの系を扱える大規模化対応が進められています。</p>
+<p>A64FX向け高速化の第一段階として、SIMD（Single Instruction Multiple Data）化による2電子積分生成ルーチン群の改良が行われました。一方の大規模化対応では、フラグメント数の自乗的な配列を「FMO計算に本質的に必要なもの」のみに絞り込み、1万フラグメントの「壁」を超えました。この配列周りの改造に伴い、Ver. 1系までサポートされていた可視化インターフェースであるBSV（BioStation Viewer）での後解析のためのCPF（Check Point File）の書き出しを止めることになりました（BSV用にだけ保持する配列数が多数あるため）。標準的なスペックのWindows10 PCでは数千フラグメントの系のBSVでの可視化が困難であること、また分子動力学（MD）シミュレーションによって生成された多サンプル構造による統計的な相互作用エネルギー解析が増えてきていること、この2点もCPFのサポートを打ち切った判断の背景にはあります。</p>
+<p>BSVを使った可視化的な解析については、今後も併存的に提供するVer. 1 Rev. 22を使っていただくことになりますが、Ver. 2系で入っていく新機能や種々の改良は今後とも反映されないことをお断りしておきます。</p>
+<hr />
+<p>[1]“Electron-correlated fragment-molecular-orbital calculations for biomolecular and nano systems”, S. Tanaka, Y. Mochizuki, Y. Komeiji, Y. Okiyama, K. Fukuzawa, Phys. Chem. Chem. Phys. 16 (2014) 10310-10344.</p>
+<p>[2] “The ABINIT-MP Program”, Y. Mochizuki, T. Nakano, K. Sakakura, Y. Okiyama, H. Watanabe, K. Kato, Y. Akinaga, S. Sato, J. Yamamoto, K. Yamashita, T. Murase, T. Ishikawa, Y. Komeiji, Y. Kato, N. Watanabe, T. Tsukamoto, H. Mori, K. Okuwaki, S. Tanaka, A. Kato, C. Watanabe, K. Fukuzawa (pp.53-67) in “Recent Advances of the Fragment Molecular Orbital Method &#8211; Enhanced Performance and Applicability”, ed. by Y. Mochizuki, S. Tanaka, K. Fukuzawa, (2021, Springer, Singapore).</p>
+<h2>Open Ver. 2 Rev. 4</h2>
+<p>Ver. 2系の最初のリリース版がRev. 4（2021年8月）です。機能的には、CPHF（Coupled-Perturbed Hartree-Fock）/LR（Linear Response）による動的分極率の算定[3]、フラグメント間相互作用エネルギー（IFIE： Inter-Fragment Interaction Energy）の機械学習用[4,5]の記述子データのダンプが可能となりました。分極率の評価は、機能性材料の解析や設計などで有用と思わます。図1に、Dodecaneのcc-pVDZ基底での動的分極率の計算例を示します。また、図2のchignolinのFMO-MP2/cc-pVDZの計算例のように記述子データはpython系ツールでの後処理に便利な形で出力されます。</p>
+<p>A64FX実行環境での高速化に関しては、2電子積分のSIMD化によってFMO-MP2計算では、Ver. 1 Rev. 2に比べて若干速くなっています（系とノード数にも依存）。図3に、新型コロナウイルスのスパイクタンパク質のクローズ構造PDB-ID=6VXX（3.3千残基）のFMO-MP2/6-31G*計算のVer. 1 Rev. 22とVer. 2 Rev. 4の「富岳」の8ラック、つまり3072ノード（48スレッド×3072プロセス）での時間比較を示します。ジョブ時間の短縮は62.7分→51.9分で、ステップ毎の比較では、モノマーSCC（Self-Consistent-Charge）条件を満たすまでフラグメントのHF（Hartree-Fock）計算が繰り返されるステップが速くなっていることが分かります。その他、細かな改良も施して加速を得ています。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig1.png"><img loading="lazy" class="alignnone size-large wp-image-2590" src="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig1-533x400.png" alt="" width="533" height="400" srcset="https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig1-533x400.png 533w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig1-320x240.png 320w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig1-160x120.png 160w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig1.png 1440w" sizes="(max-width: 533px) 100vw, 533px" /></a></p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig2.png"><img loading="lazy" class="alignnone size-large wp-image-2591" src="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig2-600x274.png" alt="" width="600" height="274" srcset="https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig2-600x274.png 600w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig2-320x146.png 320w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig2-160x73.png 160w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig2.png 1433w" sizes="(max-width: 600px) 100vw, 600px" /></a></p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig3.png"><img loading="lazy" class="alignnone size-large wp-image-2592" src="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig3-600x295.png" alt="" width="600" height="295" srcset="https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig3-600x295.png 600w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig3-320x158.png 320w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig3-160x79.png 160w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig3.png 1428w" sizes="(max-width: 600px) 100vw, 600px" /></a></p>
+<p>大規模系への対応では、図4に示すインフルエンザウイルスのヘマグルチニンとFab抗体2つの複合体PDB-ID=1KENの水和モデル（MDで構造を生成）、総数で1.1万フラグメント（水とイオンが約9千個）の系のFMO-MP2/6-31G*ジョブが「富岳」の1ラックでは5.3時間で完走します。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig4.png"><img loading="lazy" class="alignnone size-large wp-image-2593" src="http://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig4-600x376.png" alt="" width="600" height="376" srcset="https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig4-600x376.png 600w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig4-320x200.png 320w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig4-160x100.png 160w, https://www.cenav.org/wp-content/uploads/2021/09/abinitv2r4_fig4.png 1427w" sizes="(max-width: 600px) 100vw, 600px" /></a></p>
+<hr />
+<p>[3] “Dynamic polarizability calculation with fragment molecular orbital scheme”, Y. Mochizuki, T. Ishikawa, K. Tanaka, H. Tokiwa, T. Nakano, S. Tanaka, Chem. Phys. Lett. 418 (2006) 418-422.</p>
+<p>[4] “フラグメント分子軌道(FMO)計算の結果の自動解析の試み”, 望月祐志, 奥沢明, 計算工学学会誌, 22 (2017) 3539-3542.</p>
+<p>[5] “FMOプログラムABINIT-MPの開発状況と機械学習との連携”, 望月祐志, 坂倉耕太, 秋永宜伸, 加藤幸一郎, 渡邊啓正, 沖山佳生, 中野達也, 古明地勇人,奥沢明, 福澤薫, 田中成典, J. Comp. Chem. Jpn., 16 (2017) 119-122.</p>
+<h2>Open Ver. 2 Rev. 4 (2021年8月版)の開発者</h2>
+<p>Ver. 2系の整備・開発は、下記のメンバで進められています（2021年8月時点）。</p>
+<p>望月祐志*（立教大学 理学部）, 中野達也（国立医薬品食品衛生研究所 医薬安全科学部）, 坂倉耕太（計算科学振興財団）, 渡邊啓正（HPCシステムズ）, 佐藤伸哉（NECソリューションイノベータ）, 奥脇弘次（立教大学 理学部）（*取り纏め責任者）</p>
+<h2>Open Ver. 2 Rev. 4のHPCI拠点への整備</h2>
+<p>Ver, 2 Rev. 4系は2021年9月から「富岳」、「不老 type I」（名古屋大学）、「Wisteria/Odyssey」（東京大学）のA64FXスーパーコンピュータに順次ライブラリプログラムとして順次登録されていきます。Ver. 1 Rev. 22も併存提供となります。また、実行バイナリには、Zn(II)含有タンパク質の6-31G*基底での計算のようにf型基底関数を要する系に対応する版が通常版と別に用意されます（バイナリのサイズも異なる）[6]。</p>
+<p>「SQUIDベクトルノード群」（大阪大学）と「AOBA-A」（東北大学）のNEC SX-Aurora TSUBASAのベクトル型スーパーコンピュータでは、ベクトル化チューニングが施されたVer. 1 Rev. 22が整備されています。このチューニングによって、新型コロナウイルスのメインプロテアーゼとN3リガンドの複合体PDB-ID=6LU7のFMO-MP2/6-31G*計算では4.6倍の高速化が達成されています。</p>
+<p>他に、「ITO Subsystem A」（九州大学）、「TSUBAME」（東京工業大学）、「Grand Chariot」（北海道大学）、「Wisteria/Aquarius」のIntel Xeon系スーパーコンピュータにもVer. 2 Rev. 4とVer. 1 Rev. 22をライブラリプログラムとして2021年内に整備見込みです。</p>
+<p>Intel Xeon Phi（Kinghts Landing）を積む「Oakforest-PAICS」（JCAHPC）は2022年３月での退役が近いですが、ハイパースレッディングによって少数ノードで効率よくFMO-MP2計算が実行[7]できますので、Ver. 2 Rev. 4とVer. 1 Rev. 22のライブラリ整備を行います（2021年10月を予定）。</p>
+<hr />
+<p>[6] “FMOプログラムABINIT-MPの整備状況2020”, 望月祐志, 坂倉耕太, 渡邊啓正, 奥脇弘次, 加藤幸一郎, 渡辺尚貴, 沖山佳生, 福澤薫, 中野達也, J. Comp. Chem. Jpn., 19 (2020) 142-145.</p>
+<p>[7] “FMOプログラムABINIT-MPのOakForest-PACS上での多層並列化と性能評価”, 渡邊啓正, 佐藤伸哉, 坂倉耕太, 齊藤天菜, 望月祐志, J. Comp. Chem. Jpn., 17 (2018) 147-149.</p>
+<h2>Open Ver.2系の今後のリリース</h2>
+<p>Open Ver. 2系では、Ver. 1系までの生物物理・創薬系での応用重視から一般の化学分野での利用を強く意識した機能強化が図られる予定です。</p>
+<p>Ver. 2の次のリリース版となるRev. 8では、IFIEの成分分析（PIEDA）[8,9]にLRD（Local Response Dispersion）機能[10]が入り、単一ジョブでの処理が可能となります。LRDもOpenMP/MPIの混成並列に対応します。通常のPIEDAでは、相関エネルギー補正を“DI”（分散：Dispersionの意）として括っているのですが、実際には分散力系の安定化エネルギーだけではなく、過剰なイオン性の低減などの電子相関の導入によるエネルギー低下も含まれており、個々のフラグメントの組み合わせによって両者の割合は変わります[11]。LRDではHF電子密度の多重極展開によって分散力系の安定化だけを算定しますので、“DI”の内訳を分けて解析できます。2021年8月時点で機能テスト中となっています。</p>
+<p>長年の懸案となっている、多層FMO（MFMO）[12]によるCIS（Configuration Interaction Singles）系の励起エネルギーの算定機能[13-16]もRev. 8で「復活」します（2021年度下期に作業予定）。また、スケーリング補正付の2次のグリーン関数によるイオン化ポテンシャルの計算[17]もできるようになります。</p>
+<p>Rev. 8での高速化と大規模系への対応は、FMO-MP2/6-31G*ジョブを基準に「可能な限りの向上」を図ることになりそうです。</p>
+<p>Rev. 8の次はRev. 12を想定しており、これまでのMCP（Model Core Potential）[18]だけでなく、石村和也氏のSMASH[19]からのECP（Effective Core Potential）モジュールの移植によりLANL2DZ[20-22]の使用を可能とする予定です。ECPの方がカバーしている重元素が多く、GAUSSIANの結果との比較も直截です。</p>
+<hr />
+<p>[8] “Pair Interaction Energy Decomposition Analysis”, D. G. Fedorov, K. Kitaura, J. Comp. Chem. 28 (2007) 222-237.</p>
+<p>[9] “相互作用エネルギー成分分割解析機能PIEDAの実装とタンパク質-リガンド間の相互作用解析”, 塚本貴志, 加藤幸一郎, 加藤昭史, 中野達也, 望月祐志, 福澤薫, J. Comp. Chem. Jpn., 14 (2015) 1-9.</p>
+<p>[10] “Density functional method including weak interactions: Dispersion coefficients based on the local response approximation”, T. Sato, H. Nakai, J. Chem. Phys. 131 (2009) 224104-1-12.</p>
+<p>[11] “Fragment Molecular Orbital Based Interaction Analyses on Complexes Between SARS-CoV-2 RBD Variants and ACE2”, K. Akisawa, R. Hatada, K. Okuwaki, S. Kitahara, Y. Tachino, Y. Mochizuki, Y. Komeiji, S. Tanaka, Jpn. J. Appl. Phys. 60 (2021) 090901-1-5.</p>
+<p>[12] “Multilayer Formulation of the Fragment Molecular Orbital Method (FMO)”, D. G. Fedorov, T. Ishida, K. Kitaura, J. Phys. Chem. A, 109 (2005) 2638-2646.</p>
+<p>[13] “Configuration interaction singles method with multilayer fragment molecular orbital scheme”, Y. Mochizuki, S. Koikegami, S. Amari, K. Segawa, K. Kitaura, T. Nakano, Chem. Phys. Lett. 406 (2005) 283-288.</p>
+<p>[14] “Parallelized integral-direct CIS(D) calculations with multilayer fragment molecular orbital scheme”, Y. Mochizuki, K. Tanaka, K. Yamashita, T. Ishikawa, T. Nakano, S. Amari, K. Segawa, T. Murase, H. Tokiwa, M. Sakurai, Theor. Chem. Acc. 117 (2007) 541-553.</p>
+<p>[15] “Modification for spin-adapted version of configuration interaction singles with perturbative doubles”, Y. Mochizuki, K. Tanaka, Chem. Phys. Lett., 443 (2007) 389-397.</p>
+<p>[16] “A practical use of self-energy shift for the description of orbital relaxation”, Y. Mochizuki, Chem. Phys. Lett., 453 (2008) 109-116.</p>
+<p>[17] J. Linderberg, Y. Öhrn, “Propagators in Quantum Chemistry, Second Edition”, (2004, Wiley, Hoboken NJ).</p>
+<p>[18] “Fragment molecular orbital calculations on large scale systems containing heavy metal atom”, T. Ishikawa, Y. Mochizuki, T. Nakano, S. Amari, H. Mori, H. Honda, T. Fujita, H. Tokiwa, S. Tanaka, Y. Komeiji, K. Fukuzawa, K. Tanaka, E. Miyoshi, Chem. Phys. Lett., 427 (2006) 159-165.</p>
+<p>[19] https://sourceforge.net/projects/smash-qc/</p>
+<p>[20] “Ab initio effective core potentials for molecular calculations. Potentials for the transition metal atoms Sc to Hg”, P. J. Hay, W. R. Watt, J. Chem. Phys. 82 (1985) 270-283.</p>
+<p>[21] “Ab initio effective core potentials for molecular calculations. Potentials for main group elements Na to Bi”, W. R. Watt, P. J. Hay, J. Chem. Phys. 82 (1985) 284-298.</p>
+<p>[22] “Ab initio effective core potentials for molecular calculations. Potentials for K to Au including the outermost core orbitals”, P. J. Hay, W. R. Watt, J. Chem. Phys. 82 (1985) 299-310.</p>
+<h2>謝辞</h2>
+<p>ABINIT-MP Open Ver. 2系のA64FX向けの高速化と大規模系への対応は、学際大規模情報基盤共同利用・共同研究拠点（JHPCN）の2021年度課題jh210036-NAH「FMOプログラムABINIT-MPの高速化と超大規模系 への対応」（代表者：望月祐志）の中で展開されており、A64FXスーパーコンピュータ「不老」を備える名古屋大学情報基盤センターの片桐孝洋・大島聡史先生の研究室とのコラボレーションで進行しています。また、富士通（株）様のサイエンティフィック・システム研究会（SS研）の「A64FXシステムアプリ性能検討WG」の活動とも連動しており、種々のサポートをいただいています。</p>
+<p>「富岳」でのテスト計算は、2021年度のHPCI課題hp210026「新規感染症のための計算科学的解析環境の整備」（代表者：望月祐志）の中で行っています。</p>
+<p>NEC SX-Aurora TSUBASA向けのベクトル化チューニング、さらに解析機能向上については日本電気（株）様からご支援をいただいています。また、数社様からの立教大学への寄付金を得て、2020～2021年度のABINIT-MPプログラムの研究開発と維持ができています。</p>
+<p>HPCI拠点へのABINIT-MPのライブラリ整備やハンズオンセミナーでお世話になっている（一財）高度情報科学技術研究機構（RIST）に謝意を表します。</p>
+<p>最後に、「計算工学ナビ」サイトでのABINIT-MPの情報公開で長年ご支援いただいている東京大学生産技術研究所の加藤千幸先生、同革新的シミュレーション研究センターにも感謝したいと思います。</p>
+<h2>コンタクト</h2>
+<p>ABINIT-MPのOpenシリーズの個別のご利用、あるいはプログラム開発にご関心のある方は、立教大学の望月祐志（fullmoon -at- rikkyo.ac.jp）にメールにてご連絡いただければ対応させていただきます（-at-を@に変換してください）。</p>
+		</div>	</article>
+					<article class="post-2485 post type-post status-publish format-standard has-post-thumbnail hentry category-reports">
+		<a href="https://www.cenav.org/abinit-mp-open_ver-1-rev-22/"><h1>ABINIT-MP Openシリーズ (Ver.1 Rev.22)</h1></a>
+				<div class="reports-body">		<p>※2019年3月版(Ver.1 Rev.15)に関するページは<a href="http://www.cenav.org/abinit-mp-open_ver-1-rev-15/">こちら</a>です</p>
+<h2>はじめに</h2>
+<p>ABINIT-MPは、フラグメント分子軌道（FMO）計算を高速に行えるソフトウェアです[1]。専用GUIのBioStation Viewerとの連携により、入力データの作成～計算結果の解析が容易に行えます。4体フラグメント展開（FMO4）による2次摂動計算も可能です。また、部分構造最適化や分子動力学の機能もあります。FMOエネルギー計算では、小規模のサーバから超並列スパコンまで対応しています（Flat MPIとOpenMP/MPI混成）。</p>
+<hr />
+<p>[1]“Electron-correlated fragment-molecular-orbital calculations for biomolecular and nano systems”, S. Tanaka, Y. Mochizuki, Y. Komeiji, Y. Okiyama, K. Fukuzawa, Phys. Chem. Chem. Phys. 16 (2014) 10310-10344.</p>
+<h2>特徴</h2>
+<p>ABINIT-MPは使い易いFMOプログラムで、4体フラグメント展開までが可能です。研究室単位のLinux/Intel系サーバに標準搭載されているMPI環境で動作しますし、特別な設定も必要ありません。また、煩雑で注意深さを要するフラグメント分割を伴う入力データの作成は随伴GUIのBioStation Viewer（Windowsで動作）を使うなどすれば容易に作成出来ます。また、フラグメント間相互作用エネルギー（IFIE）などの計算結果は膨大となりプリントからの理解はしばしば困難ですが、Viewerを使うと可視的・直観的に対象系の相互作用の様態を把握出来ます。</p>
+<h2>開発の経緯</h2>
+<p>ABINIT-MPプログラムは、東京大学生産技術研究所を拠点とする文科省系の「戦略的基盤ソフトウェアの開発」、「革新的シミュレーションソフトウェアの開発」、「HPCI戦略分野４ 次世代ものづくり」の一連のプロジェクト（代表：東京大学 加藤千幸教授）、さらにJST-CRESTの「シミュレーション技術の革新と実用化基盤の構築」（代表：神戸大学 田中成典教授）と立教大学SFR（担当：望月祐志）などの支援を得て、約20年に渡って開発が進められてきました。Intel Xeon (IA64)系バイナリは、Ver. 7が東京大学生産技術研究所の革新的シミュレーション研究センター[2]で利用可能となっています（2020年3月時点）。</p>
+<p>2015年度からは、東京大学工学研究科を代表拠点とする文科省プロジェクト「フラッグシップ2020 重点課題６」（代表：東京大学 吉村忍教授）[3]の中で、Openシリーズとして機能強化・高速化とリリースが行われてきました（取り纏め責任者：立教大学 望月祐志）。第一版は、バイナリで公開してきているVer. 7を元にメモリー要求の軽減などの改良を施したもので、2016年12月にまとまったVer. 1 Rev. 5 [4]です。Rev. 5は、「京」など幾つかのHPCI拠点にライブラリとして提供されました。</p>
+<p>Ver. 1 Rev. 5をベースとし、成分毎の相互作用エネルギー解析（PIEDA）[5]、局在化軌道による分散力の局所解析（FILM）[6]、電荷移動の軌道対解析（CAFI）[7]のなどの解析系の機能強化を図った版が2018年2月リリースのVer. 1 Rev. 10 [8]です。東京大学・筑波大学のJCAHPC管理のメニーコアCPU機であるOakForest-PACS向けには、利用頻度の高いMP2エネルギー計算でOpenMP/MPI/MPIの3階層の並列化実行も可能となりました。なお、2018年の秋から専用GUI であるBioStation Viewerの更新・整備の管轄者は星薬科大学の福澤薫准教授に移りました。</p>
+<p>2019年3月にリリースしたVer. 1 Rev. 15 [8]では、ペプチド結合部分のカルボニル酸素（&gt;C=O）による相互作用で、しばしば問題になってきた「相互作用フラグメントの帰属ズレ問題」[9]に対する解決策の一つとして、部分3体展開下でsp<sup>2</sup>混成炭素（BDA）でのフラグメント切断が可能となりました。エネルギー微分にも対応しています[13]。もう一つの新規機能は、局所応答分散（LRD）[10]によってMP2に代わって分散力による安定化エネルギーを算定出来るようになったことで（論文投稿を準備中）、計算コストとメモリー要求がMP2に比して低いので大きな系を扱うのに有利です。また、結合クラスター展開（CCSD(T)も可）と多体摂動（MBPT）のモジュール[11]が旧JST-CREST版から移植されました。その他、ポアソンボルツマン（PB）型の水和[12]でキャビティを定義する有効原子半径の汎用性を上げています。</p>
+<p>「フラッグシップ2020 重点課題６」の枠組みの中での最終版となったのが、Ver. 1 Rev. 20（2020年3月）です。この版では、PB水和での表面領域モデル（PBSA）[14]とPB条件下でのPIEDAの計算がサポートされました。さらに、FMO多層近似[15]によってタンパク質・リガンド複合体の全体ではなく、重要領域のファーマコフォアのみに3次までの摂動（MP3）計算[16]を行い、経験的スケーリング（MP2.5）によってCCSD(T)に近い相互作用エネルギー[17]を得ることも可能となりました。もう１つ追加の機能向上は、基底関数にf型が使えるようになったことで、Zn(II)を含むタンパク質の計算も6-31G*基底で行えます（エネルギー微分も可能）。</p>
+<p>Rev. 20に対し、PIEDA処理を大幅に高速化した版が2020年6月リリースのRev. 22です。この緊急改良は、2020年4月からの「富岳」（旧名はポスト「京」）の早期利用による新型コロナウイルスの対策プロジェクト[18]の中、3.3千残基のスパイクタンパク質の計算を行う際に必要となりましたが、結果としてオーバーヘッドは解消されました。最近の応用計算ではPIEDAが常用されていますので、この更新は大きな価値を持つと考え、Rev. 22を最新リリースの対象としました。</p>
+<p>HPCI拠点でのライブラリプログラムとしての登録は、高度情報科学技術研究機構（RIST）のご支援を2018年度の下期から受けており、これまでのVer. 1のRev. 10やRev. 15を整備していただいています。Rev. 22以降もこうしたご支援をいただける見込みです。</p>
+<hr />
+<p>[2] <a href="http://www.ciss.iis.u-tokyo.ac.jp/">http://www.ciss.iis.u-tokyo.ac.jp/</a></p>
+<p>[3] <a href="http://postk6.t.u-tokyo.ac.jp/">http://postk6.t.u-tokyo.ac.jp/</a></p>
+<p>[4] “FMOプログラムABINIT-MPの開発状況と機械学習との連携”, 望月祐志, 坂倉耕太, 秋永宜伸, 加藤幸一郎, 渡邊啓正, 沖山佳生, 中野達也, 古明地勇人,奥沢明, 福澤薫, 田中成典, J. Comp. Chem. Jpn., 16 (2017) 119.</p>
+<p>[5] “Pair Interaction Energy Decomposition Analysis”, D. G. Fedorov, K. Kitaura, J. Comp. Chem. 28 (2007) 222.</p>
+<p>[6] “Fragment interaction analysis based on local MP2”, T. Ishikawa, Y. Mochizuki, S. Amari, T. Nakano, H. Tokiwa, S. Tanaka, K. Tanaka, Theor. Chem. Acc. 118 (2007) 937.</p>
+<p>[7] &#8220;A configuration analysis for fragment interaction&#8221;, Y. Mochizuki, K. Fukuzawa, A. Kato, S. Tanaka, K. Kitaura, T. Nakano, Chem. Phys. Lett. 410 (2005) 247.</p>
+<p>[8] “ABINIT-MP Openシリーズの最新の開発状況について”, 望月祐志, 秋永宜伸, 坂倉耕太, 渡邊啓正, 加藤幸一郎, 渡辺尚貴, 奥脇弘次, 中野達也, 福澤薫, J. Comp. Chem. Jpn., 18 (2019) 129.</p>
+<p>[9] “Antigen-antibody interactions of influenza virus hemagglutinin revealed by the fragment molecular orbital calculation”, A. Yoshioka, K. Takematsu, I. Kurisaki, K. Fukuzawa, Y. Mochizuki, T. Nakano, E. Nobusawa, K. Nakajima, S. Tanaka, Theor. Chem. Acc. 130 (2011) 1197.</p>
+<p>[10] “Density functional method including weak interactions: Dispersion coefficients based on the local response approximation”, T. Sato, H. Nakai, J. Chem. Phys. 131 (2009) 224104-1.</p>
+<p>[11] “Higher-order correlated calculations based on fragment molecular orbital scheme”, Y. Mochizuki, K. Yamashita, T. Nakano, Y. Okiyama, K. Fukuzawa, N. Taguchi, S. Tanaka, Theor. Chem. Acc. 130 (2011) 515.</p>
+<p>[12] “Fragment Molecular Orbital Calculations with Implicit Solvent Based on the Poisson-Boltzmann Equation: Implementation and DNA Study”, Y. Okiyama, T. Nakano, C. Watanabe, K. Fukuzawa, Y. Mochiuzki, S. Tanaka, J. Phys. Chem. B 122 (2018) 4457.</p>
+<p>[13] “Fragmentation at sp<sup>2</sup> carbon in fragment molecular orbital (FMO) method”, Y. Akinaga, K. Kato, T. Nakano, K. Fukuzawa, Y. Mochizuki, J. Comp. Chem., 41 (2020) 1416.</p>
+<p>[14] “Fragment Molecular Orbital Calculations with Implicit Solvent Based on the Poisson-Boltzmann Equation: II. Protein and Its Ligand-Binding System Studies”, Y. Okiyama, C. Watanabe, K. Fukuzawa, Y. Mochiuzki, T. Nakano, S. Tanaka, J. Phys. Chem. B, 123 (2019) 957.</p>
+<p>[15] “Multilayer Formulation of the Fragment Molecular Orbital Method (FMO)”, D. G. Fedorov, T. Ishida, K. Kitaura, J. Phys. Chem. A, 109 (2005) 2638.</p>
+<p>[16] “Large-scale FMO-MP3 calculations on the surface proteins of influenza virus, hemagglutinin (HA) and neuraminidase (NA)”, Y. Mochizuki, K. Yamashita, K. Fukuzawa, K. Takematsu, H. Watanabe, N. Taguchi, Y. Okiyama, M. Tsuboi, T. Nakano, S. Tanaka, Chem. Phys. Lett., 493 (2010) 346.</p>
+<p>[17] “Fragment molecular orbital (FMO) calculations on DNA by a scaled third-order Moeller-Plesset perturbation (MP2.5) scheme”, H. Yamada, Y. Mochizuki, K. Fukuzawa, Y. Okiyama, and Y. Komeiji, Comp. Theor. Chem. 1101 (2017) 46.</p>
+<p>[18] <a href="https://www.r-ccs.riken.jp/library/topics/fugaku-coronavirus.html">https://www.r-ccs.riken.jp/library/topics/fugaku-coronavirus.html</a></p>
+<h2><strong>Open Ver. 1 Rev. 22 (2020年6月版)の主な機能</strong></h2>
+<p>Open Ver. 1 Rev. 22では、下記の機能が利用可能となっています。</p>
+<ul>
+<li>エネルギー</li>
+</ul>
+<p style="padding-left: 30px;">→ FMO4： HF, MP2 (CD)</p>
+<p style="padding-left: 30px;">→ FMO2：HF, LRD, MP2, MP3, CC/MBPT</p>
+<ul>
+<li>エネルギー微分</li>
+</ul>
+<p style="padding-left: 30px;">→ FMO4： HF, MP2</p>
+<p style="padding-left: 30px;">→ FMO2： MP2構造最適化（凍結領域可）, MD</p>
+<ul>
+<li>その他機能</li>
+</ul>
+<p style="padding-left: 40px;">→ SCIFIE, CAFI, 重要データ書出し（CPF, IDF）</p>
+<p style="padding-left: 40px;">→ MCP, PB水和, BSSE-CP</p>
+<p style="padding-left: 40px;">→ PIEDA, FILM</p>
+<p style="padding-left: 40px;">→ sp<sup>2</sup>炭素での切断 (部分FMO3)</p>
+<p style="padding-left: 40px;">→ GUI（BioStation Viewer）</p>
+<ul>
+<li>並列化環境（PC~スパコン）</li>
+</ul>
+<p style="padding-left: 30px;">→ MPI, OpenMP/MPI混成</p>
+<p style="padding-left: 30px;">→ MP2エネルギーはOpenMP/MPI/MPIの3階層混成</p>
+<p style="padding-left: 30px;">→ 最深部はBLAS処理 (DGEMM)</p>
+<p> <a href="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig02.jpeg"><img loading="lazy" class="alignnone wp-image-2504 size-medium" src="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig02-320x240.jpeg" alt="" width="320" height="240" srcset="https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig02-320x240.jpeg 320w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig02-533x400.jpeg 533w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig02-160x120.jpeg 160w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig02.jpeg 720w" sizes="(max-width: 320px) 100vw, 320px" /></a></p>
+<h2><strong>Open Ver. 1 Rev. 22 (2020年6月版)の開発者</strong></h2>
+<p>望月祐志*（立教大学 理学部）, 中野達也（国立医薬品食品衛生研究所 医薬安全科学部）, 坂倉耕太（FOCUS）, 沖山佳生（国立医薬品食品衛生研究所 医薬安全科学部）, 渡邊啓正（HPCシステムズ）, 加藤幸一郎（九州大学）, 渡辺尚貴（みずほ情報総研）, 秋永宜伸（ヴァイナス）, 佐藤伸哉（NECソリューションイノベータ）, 山本純一（NECソリューションイノベータ）, 山下勝美（元 NECソフト）, 村瀬匡（元 NECソフト）, 石川岳志（鹿児島大学 学術研究院 理工学域工学系）, 古明地勇人（産業技術総合研究所 バイオシステム部門）, 加藤雄司（元 立教大学 理学部）, 塚本貴志（みずほ情報総研）, 森寛敏（中央大学 理工学部）, 奥脇弘次（立教大学 理学部）, 田中成典（神戸大学大学院 システム情報学研究科）, 加藤昭史（スコーピオンテック）, 渡邉千鶴（理研 横浜）, 福澤薫**（星薬科大学 薬学部）　（*ABINIT-MP取り纏め責任者 / **BioStation Viewer責任者）</p>
+<h2>応用分野</h2>
+<p>ABINIT-MPのFMO計算は、開発当初から生体分子関係、特にタンパク質とリガンド（薬品分子）の複合系に対して主に用いられてきました。これは、計算で得られるフラグメント間相互作用エネルギーがアミノ酸残基間、あるいはリガンド-アミノ酸残基間の相互作用の状態を理解するのに好適なためです[1]。しかし、FMO計算は生体系に限られるだけでなく、水和凝集系や一般の高分子、あるいは固体[19-21]なども扱える潜在力を持っています。「フラッグシップ2020 重点課題６」の研究開発活動の中では、有効相互作用パラメータをFMOで求めて高分子の粗視化シミュレーションを行うマルチスケール計算手法と応用が進められ[22-24]、さらに脂質膜[25]やタンパク質[26]にも適用されました。</p>
+<p>ABINIT-MPの利活用が、今後こうした一般の化学工学や材料科学、あるいは応用物理関係の分野へも広がっていくことを期待していますし、そのための整備とエビデンスの集積を推進していきます。また、多構造サンプルの計算結果を統計的に解析する試み（機械学習も適宜利用）も始まっています[27,28]。</p>
+<p><a href="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig01.jpeg"><img loading="lazy" class="alignnone size-thumbnail wp-image-2505" src="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig01-160x120.jpeg" alt="" width="160" height="120" srcset="https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig01-160x120.jpeg 160w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig01-320x240.jpeg 320w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig01-533x400.jpeg 533w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig01.jpeg 720w" sizes="(max-width: 160px) 100vw, 160px" /></a><a href="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig03.jpeg"><img loading="lazy" class="alignnone size-thumbnail wp-image-2503" src="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig03-160x120.jpeg" alt="" width="160" height="120" srcset="https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig03-160x120.jpeg 160w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig03-320x240.jpeg 320w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig03-533x400.jpeg 533w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig03.jpeg 720w" sizes="(max-width: 160px) 100vw, 160px" /></a><a href="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig04.jpeg"><img loading="lazy" class="alignnone size-thumbnail wp-image-2502" src="http://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig04-160x120.jpeg" alt="" width="160" height="120" srcset="https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig04-160x120.jpeg 160w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig04-320x240.jpeg 320w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig04-533x400.jpeg 533w, https://www.cenav.org/wp-content/uploads/2020/03/abinit_v1r20_fig04.jpeg 720w" sizes="(max-width: 160px) 100vw, 160px" /></a></p>
+<hr />
+<p>[19] “Modeling of peptide &#8211; silica interaction based on four-body corrected fragment molecular orbital (FMO4) calculations”, Y. Okiyama, T. Tsukamoto, C. Watanabe, K. Fukuzawa, S. Tanaka, Y. Mochizuki, Chem. Phys. Lett., 566 (2013) 25.</p>
+<p>[20] “Modeling of hydroxyapatite &#8211; peptide interaction based on fragment molecular orbital method”, K. Kato, K. Fukuzawa, Y. Mochizuki, Chem. Phys. Lett., 629 (2015) 58.</p>
+<p>[21] “Interaction between calcite and adsorptive peptide analyzed by fragment molecular orbital method”, K. Kato, K. Fukuzawa, Y. Mochizuki, Jpn. J. Appl. Phys., 58 (2019) 120906.</p>
+<p>[22] “Fragment Molecular Orbital-based Parameterization Procedure for Mesoscopic Structure Prediction of Polymeric Materials”, K. Okuwaki, Y. Mochizuki, H. Doi, T. Ozawa, J. Phys. Chem. B 122 (2018) 338.</p>
+<p>[23] “フラグメント分子軌道(FMO)法を用いた散逸粒子動力学シミュレーションのための有効相互作用パラメータ算出の自動化フレームワーク”, 奥脇弘次, 土居英男, 望月祐志, J. Comp. Chem. Jpn. 17 (2018) 102.</p>
+<p>[24] “Theoretical Analyses on Water Cluster Structures in Polymer Electrolyte Membrane by Using Dissipative Particle Dynamics Simulations with Fragment Molecular Orbital Based Effective Parameters”, K. Okuwaki, Y. Mochizuki, H. Doi, S. Kawada, T. Ozawa, K. Yasuoka, RSC Adv. 8 (2018) 34582.</p>
+<p>[25] “Dissipative particle dynamics (DPD) simulations with fragment molecular orbital (FMO) based effective parameters for 1-Palmitoyl-2-oleoyl phosphatidyl choline (POPC) membrane”, H. Doi, K. Okuwaki, Y. Mochizuki, T. Ozawa, K. Yasuoka, Chem. Phys. Lett. 684 (2017) 427.</p>
+<p>[26] “Folding simulation of small proteins by dissipative particle dynamics (DPD) with non-empirical interaction parameters based on fragment molecular orbital calculations”, K. Okuwaki, H. Doi, K. Fukuzawa, Y. Mochizuki, Appl. Phys. Express 13 (2020) 017002.</p>
+<p>[27] “Destabilization of DNA through interstrand crosslinking by UO<sub>2</sub><sup>2+</sup>”, A. Rossberg, T. Abe, K. Okuwaki, A. Barkleit, K. Fukuzawa, T. Nakano, Y. Mochizuki, S. Tsushima, Chem. Comm. 55 (2019) 2015.</p>
+<p>[28] “Cm<sup>3+</sup>/Eu<sup>3+</sup> Induced Structural, Mechanistic and Functional Implications for Calmodulin”, B. Drobot, M. Schmidt, Y. Mochizuki, T. Abe, K. Okuwaki, F. Brulfert, S. Falke, S. A. Samsonov, Y. Komeiji, C. Betzel, T. Stumpf, J. Raff, S. Tsushima, Phys. Chem. Chem. Phys. 21 (2019) 21213.</p>
+<h2>Openシリーズの今後のリリース</h2>
+<p>ABINIT-MPには、主に開発の経緯的な事由から「ローカル版」が存在しています[1]。Openシリーズでは、Ver. 1 Rev. 20まで統合を図ってきましたが、励起エネルギー[29,30]や動的分極率[31]の算定については整備計画の変更もあり、残念ながら公開に至りませんでした。「フラッグシップ2020 重点課題６」は2019年度（2020年3月）で終了していますが、今後もリリースを続けていきたいと考えています。Ver. 1系の最終版の位置づけとなるRev. 25は2021年春の公開を目指しており、Rev. 22に上記の励起状態関係の機能、機械学習用データのダンプの機能、福澤准教授が参画されているAMED-BINDSプロジェクト[32]で整備中の凍結領域構造最適化[33]などが入る予定です。また、MP2エネルギー微分のベクトル化も対応予定です。</p>
+<p>Ver. 2はVer. 1 Rev. 25をベースとしますが、P系では鹿児島大学の石川岳志教授のPAICS [34]から2電子積分の恒等分解（RI）に基づくRI-MP2/MP3モジュール（C言語で記述）が移植されて使えるようになります（ローカル版での作業は既に完了）。一方、S系では石村和也氏のSMASH [35]から提供いただいている積分モジュールやDFT機能を前面に出すことになります（LRDでの数値積分でDFTのルーチンは既に一部を利用）。また、超大規模系となる1万フラグメントまでの対応も検討しています。</p>
+<p>OpenシリーズのHPCI拠点以外でのバイナリのオンデマンド的な提供は今後も継続し、以下のようなプラットフォームを対象（予定含む）とします（2020年6月時点）。</p>
+<ul>
+<li>PC： Windows 10 (64 bit)</li>
+<li>小規模サーバ： Intel Xeon (IA64) &amp; Xeon Phi (Knights Landing)</li>
+<li>スーパーコンピュータ： Intel Xeon系, 富士通-ARM系, NEC-SX系 (Vector)</li>
+</ul>
+<p>&nbsp;</p>
+<hr />
+<p>[29] “Configuration interaction singles method with multilayer fragment molecular orbital scheme”, Y. Mochizuki, S. Koikegami, S. Amari, K. Segawa, K. Kitaura, and T. Nakano, Chem. Phys. Lett. 406 (2005) 283.</p>
+<p>[30] “Parallelized integral-direct CIS(D) calculations with multilayer fragment molecular orbital scheme”, Y. Mochizuki, K. Tanaka, K. Yamashita, T. Ishikawa, T. Nakano, S. Amari, K. Segawa, T. Murase, H. Tokiwa, M. Sakurai, Theor. Chem. Acc. 117 (2007) 541.</p>
+<p>[31] “Dynamic polarizability calculation with fragment molecular orbital scheme”, Y. Mochizuki, T. Ishikawa, K. Tanaka, H. Tokiwa, T. Nakano, S. Tanaka, Chem. Phys. Lett. 418 (2006) 418.</p>
+<p>[32] <a href="https://www.binds.jp/">https://www.binds.jp/</a></p>
+<p>[33] “Geometry Optimization of the Active Site of a Large System with the Fragment Molecular Orbital Method”, D. G. Fedorov, Y. Alexeev, K. Kitaura, J. Phys. Chem. Lett. 2 (2011) 282.</p>
+<p>[34] <a href="http://www.paics.net/">http://www.paics.net/</a></p>
+<p>[35] <a href="http://smash-qc.sourceforge.net/">http://smash-qc.sourceforge.net/</a></p>
+<h2>FMO創薬コンソーシアム</h2>
+<p>2015年度から「FMO創薬コンソーシアム」（代表：星薬科大学 福澤薫 准教授）が産官学で組織され、「京」を計算資源としてABINIT-MPによるFMO計算基づくタンパク質・リガンドの相互作用解析が進められてきました[36]（2020年度はOakForest-PACS上で活動）。重要な創薬ターゲットが設定されており、当該領域の共有基盤となる知見（特にIFIEのデータセット）が蓄積されています（IFIEはデータベース公開）[37]。ABINIT-MPはOpenシリーズとして改良が続けられていきますが、このコンソーシアムは実践的な利用者コミュニティとして重要な役割を果たしていくことになります。追記となりますが、BioStation Viewerはサイト[36]からダウンロード可能です。</p>
+<hr />
+<p>[36] <a href="https://fmodd.jp/">https://fmodd.jp/</a></p>
+<p>[37] “Development of an automated fragment molecular orbital (FMO) calculation protocol toward construction of quantum mechanical calculation database for large biomolecules”, C. Watanabe, H. Watanabe, Y. Okiyama, D. Takaya, K. Fukuzawa, S. Tanaka, T. Honma, CBI-J. 19 (2019) 5.</p>
+<h2>開発系コンソーシアム</h2>
+<p>ABINIT-MPのOpenシリーズの開発や保守にソースレベルでコミットしていただくための産官学の枠組みです（コンタクト先：立教大学 望月祐志）。バグ情報と対策、新規開発の機能のシェアなど意図していますが、参画される企業様が商用に独自の高速化や改良を図ることは基本的に可とする方針です。現段階では、個別にご参画をお願い・確認させていただいており、分子科学研究所の藤田貴敏准教授からは励起状態計算機能[38,39]を提供いただくことになっています（リリースはVer. 2での予定）。その他にも、周期境界条件を課したFMOベースのMDの整備なども進んでいます。</p>
+<hr />
+<p>[38] “Development of the Fragment Molecular Orbital Method for Calculating Non-local Excitations in Large Molecular Systems”, T. Fujita, Y. Mochizuki, J. Phys. Chem. A 122 (2018) 3886.</p>
+<p>[39] “Development of the fragment-based COHSEX method for large and complex molecular systems”, T. Fujita, Y. Noguchi, Phys. Rev. B 98 (2018) 205140.</p>
+<h2>コンタクト</h2>
+<p>ABINIT-MPのOpenシリーズのご利用、あるいは開発系コンソーシアムにご関心のある方は、立教大学の望月祐志（fullmoon -at- rikkyo.ac.jp）にメールにてご連絡いただければと思います（-at-を@に変換してください）。ご所望の利用形態に応じて、個別に契約書面の取り交わしをさせていただき、ご提供したいと思います。よろしくお願いいたします。</p>
+		</div>	</article>
+					<article class="post-2420 post type-post status-publish format-standard has-post-thumbnail hentry category-reports">
+		<a href="https://www.cenav.org/abinit-mp-open_ver-1-rev-15/"><h1>ABINIT-MP Openシリーズ（Ver. 1 Rev. 15）</h1></a>
+				<div class="reports-body">		<p>※2018年2月版(Ver.1 Rev.10)に関するページは<a href="http://www.cenav.org/abinit-mp-open_ver-1-rev-10/">こちら</a>です</p>
+<h2>はじめに</h2>
+<p>ABINIT-MPは、フラグメント分子軌道（FMO）計算を高速に行えるソフトウェアです[1]。専用GUIのBioStation Viewerとの連携により、入力データの作成～計算結果の解析が容易に行えます。4体フラグメント展開（FMO4）による2次摂動計算も可能です。また、部分構造最適化や分子動力学の機能もあります。FMOエネルギー計算では、小規模のサーバから超並列機の「京」まで対応しています（Flat MPIとOpenMP/MPI混成）。</p>
+<hr />
+<p>[1]“Electron-correlated fragment-molecular-orbital calculations for biomolecular and nano systems”, S. Tanaka, Y. Mochizuki, Y. Komeiji, Y. Okiyama, K. Fukuzawa, Phys. Chem. Chem. Phys. 16 (2014) 10310-10344.</p>
+<h2>特徴</h2>
+<p>ABINIT-MPは使い易いFMOプログラムで、4体フラグメント展開までが可能です。研究室単位のLinux/Intel系サーバに標準搭載されているMPI環境で動作しますし、特別な設定も必要ありません。また、煩雑で注意深さを要するフラグメント分割を伴う入力データの作成は随伴GUIのBioStation Viewer（Windowsで動作）を使うなどすれば容易に作成出来ます。また、フラグメント間相互作用エネルギー（IFIE）などの計算結果は膨大となりプリントからの理解はしばしば困難ですが、Viewerを使うと可視的・直観的に対象系の相互作用の様態を把握出来ます。</p>
+<h2>開発の経緯</h2>
+<p>ABINIT-MPプログラムは、東京大学生産技術研究所を拠点とする「戦略的基盤ソフトウェアの開発」、「革新的シミュレーションソフトウェアの開発」、「HPCI戦略分野４ 次世代ものづくり」の一連のプロジェクト（代表：東京大学 加藤千幸教授）、さらにJST-CREST「シミュレーション技術の革新と実用化基盤の構築」（代表：神戸大学 田中成典教授）と立教大学SFR（担当：望月祐志）などの支援を得て、10年以上に渡って開発が進められてきました。Intel Xeon (IA64)系バイナリは、Ver.7が東京大学生産技術研究所の革新的シミュレーション研究センター[2]で利用可能となっています（2019年3月時点）。</p>
+<p>現在は、東京大学工学研究科を代表拠点とする「フラッグシップ2020 重点課題６」（代表：東京大学 吉村忍教授）[3]の中で、Openシリーズとして機能強化・高速化とリリースが行われています（取り纏め責任者：立教大学 望月祐志）。第一版は、バイナリで公開してきましたVer. 7を元にメモリー要求の軽減などの改良を施したもので、2016年12月にまとまったVer. 1 Rev. 5です。Rev. 5は、HPCI関係では理研AICSの「京」、東京工業大学のTSUBAME、東京大学・筑波大学のJCAHPCのOakForest-PACSにライブラリ（バイナリ）として提供されました。</p>
+<p>Ver. 1 Rev. 5をベースとして成分毎の相互作用エネルギー解析（PIEDA）[4]、局在化軌道による分散力の局所解析（FILM）[5]などの機能強化を図った版が2018年2月リリースのVer. 1 Rev. 10です。また、OakForest-PACS向けでは利用頻度の高いMP2エネルギーでOpenMP/MPI/MPIの3階層の並列化実行も可能となりました（OakForest-PACSなどのメニーコア環境への対応）。</p>
+<p>2019年3月リリース最新のVer. 1 Rev. 15では、ペプチド結合部分のカルボニル酸素（&gt;C=O）による相互作用で、しばしば問題になってきた「相互作用フラグメントの帰属ズレ問題」に対する解決策の一つとして、部分3体展開下でsp2混成炭素（BDA）でのフラグメント切断が可能となりました。エネルギー微分にも対応しています（論文投稿を準備中）。もう一つの新規機能は、局所応答分散（LRD）[6]によってMP2に代わって分散力による安定化エネルギーを算定出来るようになったことで（論文投稿を準備中）、計算コストとメモリー要求がMP2に比して低いので大きな系を扱うのに有利です。また、結合クラスター展開（CCSD(T)も可）と多体摂動（MBPT）のモジュール[7]が旧JST-CREST版から移植されました。その他、ポアソンボルツマン（PB）型の水和でキャビティを定義する有効原子半径の汎用性を上げています。</p>
+<hr />
+<p>[2] <a href="http://www.ciss.iis.u-tokyo.ac.jp/">http://www.ciss.iis.u-tokyo.ac.jp/</a></p>
+<p>[3] <a href="http://postk6.t.u-tokyo.ac.jp/">http://postk6.t.u-tokyo.ac.jp/</a></p>
+<p>[4] “Pair Interaction Energy Decomposition Analysis”, D. G. Fedorov, K. Kitaura, J. Comp. Chem. 28 (2007) 222.</p>
+<p>[5] “Fragment interaction analysis based on local MP2”, T. Ishikawa, Y. Mochizuki, S. Amari, T. Nakano, H. Tokiwa, S. Tanaka, K. Tanaka, Theor. Chem. Acc. 118 (2007) 937.</p>
+<p>[6] “Density functional method including weak interactions: Dispersion coefficients based on the local response approximation”, T. Sato, H. Nakai, J. Chem. Phys. 131 (2009) 224104-1.</p>
+<p>[7] “Higher-order correlated calculations based on fragment molecular orbital scheme”, Y. Mochizuki, K. Yamashita, T. Nakano, Y. Okiyama, K. Fukuzawa, N. Taguchi, and S. Tanaka, Theor. Chem. Acc. 130 (2011) 515.</p>
+<h2>Open Ver. 1 Rev. 15 (2019年3月版)の主な機能</h2>
+<p>上記にもありますが、Open Ver. 1 Rev. 15でのRev. 10に対しての機能追加の大きなポイントは、sp2炭素による切断（ペプチド結合でのフラグメント分割が可能）とLRDによる分散力補正（PIEDAでも可能）です。</p>
+<ul>
+<li>エネルギー</li>
+</ul>
+<p style="padding-left: 30px;">→ FMO4： HF, MP2 (CD)</p>
+<p style="padding-left: 30px;">→ FMO2：HF, LRD, MP2, MP3, CC/MBPT</p>
+<ul>
+<li>エネルギー微分</li>
+</ul>
+<p style="padding-left: 30px;">→ FMO4： HF, MP2</p>
+<p style="padding-left: 30px;">→ FMO2： MP2構造最適化, MD</p>
+<ul>
+<li>その他機能</li>
+</ul>
+<p style="padding-left: 30px;">→ sp2炭素での切断 (FMO3SL下)</p>
+<p style="padding-left: 30px;">→ SCIFIE, CAFI, 重要データ書出し</p>
+<p style="padding-left: 30px;">→ MCP, PB水和, BSSE-CP</p>
+<p style="padding-left: 30px;">→ PIEDA, FILM</p>
+<p style="padding-left: 30px;">→ GUI（BioStation Viewer）</p>
+<ul>
+<li>並列化環境（PC~スパコン）</li>
+</ul>
+<p style="padding-left: 30px;">→ MPI, OpenMP/MPI混成</p>
+<p style="padding-left: 30px;">→ MP2エネルギーはOpenMP/MPI/MPIの3階層混成</p>
+<p style="padding-left: 30px;">→ 最深部はBLAS処理 (DGEMM)</p>
+<p><img loading="lazy" class="alignnone wp-image-2422 size-full" src="http://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig1.png" alt="" width="521" height="299" srcset="https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig1.png 521w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig1-160x92.png 160w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig1-320x184.png 320w" sizes="(max-width: 521px) 100vw, 521px" /><img loading="lazy" class="alignnone wp-image-2423 size-full" src="http://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig2.png" alt="" width="467" height="252" srcset="https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig2.png 467w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig2-160x86.png 160w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig2-320x173.png 320w" sizes="(max-width: 467px) 100vw, 467px" /></p>
+<p>&nbsp;</p>
+<h2>Open Ver. 1 Rev. 15 (2019年3月版)の開発者</h2>
+<p>望月祐志*（立教大学 理学部）, 中野達也（国立医薬品食品衛生研究所 医薬安全科学部）, 坂倉耕太（NEC）, 沖山佳生（国立医薬品食品衛生研究所 医薬安全科学部）, 秋永宜伸（ヴァイナス）, 渡邊啓正（HPCシステムズ）, 加藤幸一郎（みずほ情報総研）, 佐藤伸哉（NECソリューションイノベータ）, 山本純一（NECソリューションイノベータ）, 山下勝美（元 NECソフト）, 村瀬匡（元 NECソフト）, 石川岳志（鹿児島大学 学術研究院 理工学域工学系）, 古明地勇人（産業技術総合研究所 バイオシステム部門）, 加藤雄司（元 立教大学 理学部）, 渡辺尚貴（みずほ情報総研）, 塚本貴志（みずほ情報総研）, 森寛敏（中央大学 理工学部）, 奥脇弘次（星薬科大学 薬学部）, 田中成典（神戸大学大学院 システム情報学研究科）, 加藤昭史（スコーピオンテック）, 渡邉千鶴（理研 横浜）, 福澤薫（星薬科大学 薬学部）</p>
+<p>（*取り纏め責任者）</p>
+<h2>応用分野</h2>
+<p>ABINIT-MPのFMO計算は、開発当初から生体分子関係、特にタンパク質とリガンド（薬品分子）の複合系に対して主に用いられてきました。これは、計算で得られるフラグメント間相互作用エネルギーがアミノ酸残基間、あるいはリガンド-アミノ酸残基間の相互作用の状態を理解するのに好適なためです[1]。しかし、FMO計算は生体系に限られるだけでなく、水和凝集系や一般の高分子、あるいは固体なども扱える潜在力を持っています。実際、「フラッグシップ2020 重点課題６」の研究開発活動の中では、有効相互作用パラメータをFMOで求めて高分子の粗視化シミュレーションを行うマルチスケール計算手法と応用が進められています[8-11]。ABINIT-MPの応用は、今後はこうした一般の化学工学や材料科学、あるいは応用物理関係の分野へも広がっていくことを期待していますし、そのための整備とエビデンスの集積を推進していきます。また、多構造サンプルの計算結果を統計的に解析する試み（機械学習も適宜利用）も始まっています[12,13]。</p>
+<p><img loading="lazy" class="alignnone wp-image-2424 size-large" src="http://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig3-600x387.png" alt="" width="600" height="387" srcset="https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig3-600x387.png 600w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig3-160x103.png 160w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig3-320x207.png 320w, https://www.cenav.org/wp-content/uploads/2019/03/abinitmp_open1rev15_fig3.png 886w" sizes="(max-width: 600px) 100vw, 600px" /></p>
+<p>&nbsp;</p>
+<hr />
+<p>[8] “Fragment Molecular Orbital-based Parameterization Procedure for Mesoscopic Structure Prediction of Polymeric Materials”, K. Okuwaki, Y. Mochizuki, H. Doi, T. Ozawa, J. Phys. Chem. B 122 (2018) 338.</p>
+<p>[9] “フラグメント分子軌道(FMO)法を用いた散逸粒子動力学シミュレーションのための有効相互作用パラメータ算出の自動化フレームワーク”, 奥脇弘次, 土居英男, 望月祐志, J. Comp. Chem. Jpn. 17 (2018) 102.</p>
+<p>[10] “Dissipative particle dynamics (DPD) simulations with fragment molecular orbital (FMO) based effective parameters for 1-Palmitoyl-2-oleoyl phosphatidyl choline (POPC) membrane”, H. Doi, K. Okuwaki, Y. Mochizuki, T. Ozawa, K. Yasuoka, Chem. Phys. Lett. 684 (2017) 427.</p>
+<p>[11] “Theoretical Analyses on Water Cluster Structures in Polymer Electrolyte Membrane by Using Dissipative Particle Dynamics Simulations with Fragment Molecular Orbital Based Effective Parameters”, K. Okuwaki, Y. Mochizuki, H. Doi, S. Kawada, T. Ozawa, K. Yasuoka, RSC Adv. 8 (2018) 34582.</p>
+<p>[12] “FMOプログラムABINIT-MPの開発状況と機械学習との連携”, 望月祐志, 坂倉耕太, 秋永宜伸, 加藤幸一郎, 渡邊啓正, 沖山佳生, 中野達也, 古明地勇人, 奥沢明, 福澤薫, 田中成典, J. Comp. Chem. Jpn. 16 (2017) 119.</p>
+<p>[13] “Destabilization of DNA through interstrand crosslinking by UO<sub>2</sub><sup>2+</sup>”, A. Rossberg, T. Abe, K. Okuwaki, A. Barkleit, K. Fukuzawa, T. Nakano, Y. Mochizuki, S. Tsushima, Chem. Comm. 55 (2019) 2015.</p>
+<h2>Openシリーズの今後のリリース</h2>
+<p>ABINIT-MPには、主に開発の経緯的な事由から「ローカル版」が存在しています[1]。これらでは、励起エネルギーや動的分極率の算定、さらに結合クラスター展開による高精度エネルギー計算などが利用出来ます。こうした機能に関心を持たれる方も居られますし、手持ちのマシン環境によっては再コンパイルやチューニングのためにソースを所望される場合もあります。こうした状況を改善すべく、「フラッグシップ2020 重点課題６」の研究開発の中で産官学を交えたコンソーシアム的な組織でABINIT-MPのソース共有を行い、継続的なコード開発・改良と保守を図っていく活動の中でリリースされていくのがOpenシリーズです。なお、GUI であるBioStation Viewerについては2018年の秋から星薬科大学の福澤薫准教授に更新・整備の管轄が移りました。</p>
+<p>2019年度は、Ver. 1 Rev. 15に対して旧JST-CREST系の励起エネルギー算定機能[14]の復活を図り、Rev. 20を調製します。また、福澤准教授関係の厚労省AMED/BINDS系の成果として、部分構造最適化に好適な凍結領域制限(FD)[15]の機能、それに国立医薬品食品衛生研究所の沖山佳生氏によるポアソン-ボルツマン型溶媒和の新しいモデル(PBSA)[16]も導入される予定です。リリースは2019年の10月の予定ですが、Ver. 1の更新としてはここまでとなります。</p>
+<p>大きな改造を伴いつつ整備を進めてきているOpen Ver.2では、石村和也氏のSMASH[17]から提供いただいている積分モジュールやDFT機能を前面に出すことになります（LRDでの数値積分でDFTのルーチンを既に一部利用）。また、また2電子積分の恒等分解（RI）のモジュール（C言語で記述）を鹿児島大学の石川岳志教授のPAICS[18]から移植（作業はほぼ完了）してRI-MP2エネルギーと微分が利用可能となります。Ver. 2のリリースは2020年の1月の見込みです。</p>
+<p>ソースの共有とは別にOpenシリーズでも従来のバイナリでの提供も続ける予定で、以下のようなプラットフォームを対象にしています（2019年3月時点）。</p>
+<ul>
+<li>PC： Windows (64 bit)</li>
+<li>小規模サーバ： Intel Xeon (IA64) &amp; Xeon Phi (Knights Corner &amp; Landing)</li>
+<li>スーパーコンピュータ： 富士通系｛「京」, FX-10, FX-100, OakForest-PACS｝</li>
+</ul>
+<p>この他、海洋研究開発機構 地球情報基盤センターのご支援により、ベクトル型スーパーコンピュータであるNECのSX-ACEにも対応作業を進めています。</p>
+<p>HPCI拠点でのライブラリプログラムとしての登録は、高度情報科学技術研究機構（RIST）のご支援を2018年度の下期から受けており、Ver. 1 Rev. 15等についても整備を進めていく予定です。</p>
+<hr />
+<p>[14] “Parallelized integral-direct CIS(D) calculations with multilayer fragment molecular orbital scheme”, Y. Mochizuki, K. Tanaka, K. Yamashita, T. Ishikawa, T. Nakano, S. Amari, K. Segawa, T. Murase, H. Tokiwa, M. Sakurai, Theor. Chem. Acc. 117 (2007) 541.</p>
+<p>[15] “Geometry Optimization of the Active Site of a Large System with the Fragment Molecular Orbital Method”, D. G. Fedorov, Y. Alexeev, K. Kitaura, J. Phys. Chem. Lett. 2 (2011) 282.</p>
+<p>[16] “Fragment Molecular Orbital Calculations with Implicit Solvent Based on the Poisson-Boltzmann Equation: II. Protein and Its Ligand-Binding System Studies”, Y. Okiyama, C. Watanabe, K. Fukuzawa, Y. Mochiuzki, T. Nakano, S. Tanaka, J. Phys. Chem. B, 123 (2019) 957.</p>
+<p>[17] <a href="http://smash-qc.sourceforge.net/">http://smash-qc.sourceforge.net/</a></p>
+<p>[18] <a href="http://www.paics.net/">http://www.paics.net/</a></p>
+<h2>FMO創薬コンソーシアム</h2>
+<p>2015年度から「FMO創薬コンソーシアム」（代表：星薬科大学 福澤薫 准教授）が産官学で組織され、「京」を計算資源としてABINIT-MPによるFMO計算基づくタンパク質・リガンドの相互作用解析が進められています[19]。重要な創薬ターゲットが設定されており、当該領域の共有基盤となる知見（特にIFIEのデータセット）が蓄積されています（IFIEはデータベース公開）[20]。ABINIT-MPはOpenシリーズとして改良が続けられていきますが、このコンソーシアムは実践的な利用者コミュニティとして重要な役割を果たしていくことになります。</p>
+<hr />
+<p>[19] <a href="http://eniac.scitec.kobe-u.ac.jp/fmodd/">http://eniac.scitec.kobe-u.ac.jp/fmodd/</a></p>
+<p>[20] “Development of an automated fragment molecular orbital (FMO) calculation protocol toward construction of quantum mechanical calculation database for large biomolecules”, C. Watanabe, H. Watanabe, Y. Okiyama, D. Takaya, K. Fukuzawa, S. Tanaka, T. Honma, CBI-J. 19 (2019) 5.</p>
+<h2>開発系コンソーシアム</h2>
+<p>ABINIT-MPのOpenシリーズの開発や保守にソースレベルでコミットしていただくための産官学の枠組みです（コンタクト先：立教大学 望月祐志）。バグ情報と対策、新規開発の機能のシェアなど意図していますが、参画される企業様が商用に独自の高速化や改良を図ることは基本的に可とする方針です。現初期段階では、個別にご参画をお願い・確認させていただいて立上げようとしているところです。今後、このコンソーシアムについても情報を更新していく予定です。</p>
+<h2>コンタクト</h2>
+<p>ABINIT-MPのOpenシリーズのご利用、あるいは開発系コンソーシアムにご関心のある方は、立教大学の望月祐志（fullmoon -at- rikkyo.ac.jp）にメールにてご連絡いただければと思います（-at-を@に変換してください）。ご所望の利用形態に応じて、個別に契約書面の取り交わしをさせていただき、ご提供したいと思います。よろしくお願いいたします。</p>
+		</div>	</article>
+				
+		<br />
+		<b><a href="https://www.cenav.org/page/2/?s=ABINIT-MP+Open" >次のページ↓</a></b>
+    </section>
+  </div>
+</div>
+
+<!--[footer]-->
+<footer>
+<!--footer-category-nav-wrap-->
+	<div id="footer-category-nav-wrap">
+		<div>
+		    <!--page-top-->
+  			<p><a href="#page-top">PAGE TOP</a></p>
+			<!--footer-category-nav-->
+			<nav id="footer-category-nav">
+
+				<ul  style="    border: medium none; margin: 0; padding: 0; width: 210px;">
+					<li>
+						<a href="/"><img src="/wp-content/themes/HPCI/img/footer-logo2.png" alt="計算工学ナビ"></a>
+					</li>
+				</ul>
+				<ul>
+					<li><a href="/">トップページ</a></li>
+					<li><a href="/category/reports/">レポート</a></li>
+					<li><a href="/category/news/">ニュース</a></li>
+				</ul>
+				<ul>
+					<li><a href="/">解析事例データベース</a></li>
+					<li><a href="/library/">ソフトウエアライブラリ</a></li>
+					<li><a href="/community/">コミュニティー</a></li>
+					<li><a href="/links/">リンク集</a></li>
+				</ul>
+				<ul>
+                			<li><a href="/about/">お問い合わせ</a></li>
+					<li><a href="/kdb/?p=303">ユーザー登録</a></li>
+					<li><a href="/kdb/wp-login.php">ログイン</a></li>
+					</ul>
+			</nav>
+			<!--/footer-category-nav-->
+		<br clear="all"><!--tf20220822-->
+		<p>&copy; Institute of Industrial Science, the University of Tokyo</p></div>
+	</div>
+	<!--/footer-category-nav-wrap-->
+</footer>
+<!--[/footer]-->
+
+</body>
+</html>

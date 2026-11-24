@@ -1,0 +1,505 @@
+{
+  "schema": "complete-cohort-model-comparison-v1",
+  "date_utc": "2026-10-20",
+  "new_QM_or_Boltz_or_FEP_inference": false,
+  "fep_source": "Published FEP+21-4 corrected ligand predictions, not local OpenFE or new FEP",
+  "label_tolerance_kcal_mol": 0.001,
+  "groups": {
+    "CDK2": {
+      "n": 16,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.8678583920310966,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "FMO_softcap": {
+        "pearson": 0.8662351108525429,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.6492279278479929,
+        "spearman": 0.6225167248233127,
+        "kendall": 0.4435185266405332
+      },
+      "FEP_max_label_difference_kcal_mol": 4.196166987213701e-07,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "local complete inference; sequence/SMILES, not fixed-pose rescoring",
+      "Boltz2": {
+        "pearson": 0.760144781538012,
+        "spearman": 0.8058823529411765,
+        "kendall": 0.6
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "JNK1": {
+      "n": 21,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.6141593425214715,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "FMO_softcap": {
+        "pearson": 0.6112891291628504,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.8405807068896394,
+        "spearman": 0.8769081332905015,
+        "kendall": 0.7112192093352798
+      },
+      "FEP_max_label_difference_kcal_mol": 4.5776367230132564e-07,
+      "FEP_verified_pose_aliases": {
+        "18628-1_flip": "18628-1"
+      },
+      "Boltz2_origin": "local complete inference; sequence/SMILES, not fixed-pose rescoring",
+      "Boltz2": {
+        "pearson": 0.7967275216155267,
+        "spearman": 0.8236440837128564,
+        "kendall": 0.6253001102209507
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "P38": {
+      "n": 34,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.5033110695877683,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "FMO_softcap": {
+        "pearson": 0.499828600998335,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.7023347762825072,
+        "spearman": 0.7230254144709588,
+        "kendall": 0.5426881815672913
+      },
+      "FEP_max_label_difference_kcal_mol": 4.5776367230132564e-07,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "local complete inference; sequence/SMILES, not fixed-pose rescoring",
+      "Boltz2": {
+        "pearson": 0.437638163539397,
+        "spearman": 0.5297448322735248,
+        "kendall": 0.3608710648728643
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "TYK2": {
+      "n": 16,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.7076479666324703,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "FMO_softcap": {
+        "pearson": 0.7606637595829225,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.9282753709071265,
+        "spearman": 0.9286242396300478,
+        "kendall": 0.8117225864930513
+      },
+      "FEP_max_label_difference_kcal_mol": 4.5776367230132564e-07,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "local complete inference; sequence/SMILES, not fixed-pose rescoring",
+      "Boltz2": {
+        "pearson": 0.8081316911911962,
+        "spearman": 0.75,
+        "kendall": 0.5833333333333334
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "Galectin3": {
+      "n": 26,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.5619957128130779,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "FMO_softcap": {
+        "pearson": 0.5684834762542197,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.8743399197578398,
+        "spearman": 0.8475359839242627,
+        "kendall": 0.6614938731890561
+      },
+      "FEP_max_label_difference_kcal_mol": 4.78599999986784e-06,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "local complete inference; sequence/SMILES, not fixed-pose rescoring",
+      "Boltz2": {
+        "pearson": 0.800343801698872,
+        "spearman": 0.824153460112685,
+        "kendall": 0.6470712280848168
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "FXa": {
+      "n": 27,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.6125753682038062,
+        "spearman": 0.5687681336301004,
+        "kendall": 0.39372365311003993
+      },
+      "FMO_softcap": {
+        "pearson": 0.6230876803299596,
+        "spearman": 0.5687681336301004,
+        "kendall": 0.39372365311003993
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.7505881112353114,
+        "spearman": 0.6844756605467981,
+        "kendall": 0.50784645111295
+      },
+      "FEP_max_label_difference_kcal_mol": 0.0,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "local complete inference; sequence/SMILES, not fixed-pose rescoring",
+      "Boltz2": {
+        "pearson": 0.6775312269163516,
+        "spearman": 0.6481453288763838,
+        "kendall": 0.4793157516122225
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "CHK1": {
+      "n": 13,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.4636220821244891,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "FMO_softcap": {
+        "pearson": 0.4415700416098103,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.784883755593687,
+        "spearman": 0.7647875185542139,
+        "kendall": 0.6064642345586981
+      },
+      "FEP_max_label_difference_kcal_mol": 4.981384277336076e-05,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "new complete missing-six comparator; all source protein chains, sequence/SMILES",
+      "Boltz2": {
+        "pearson": 0.8680911928112456,
+        "spearman": 0.87482888813036,
+        "kendall": 0.7354991780818254
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "CDK8": {
+      "n": 10,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.27411894151891825,
+        "spearman": 0.23636363636363633,
+        "kendall": 0.15555555555555553
+      },
+      "FMO_softcap": {
+        "pearson": 0.2666685958818213,
+        "spearman": 0.23636363636363633,
+        "kendall": 0.15555555555555553
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.6628589108471468,
+        "spearman": 0.6484848484848483,
+        "kendall": 0.37777777777777777
+      },
+      "FEP_max_label_difference_kcal_mol": 4.971923828200886e-05,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "new complete missing-six comparator; all source protein chains, sequence/SMILES",
+      "Boltz2": {
+        "pearson": 0.059566598363861856,
+        "spearman": 0.24848484848484845,
+        "kendall": 0.1111111111111111
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "BACE": {
+      "n": 36,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.21174767344688275,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "FMO_softcap": {
+        "pearson": 0.22511709896480897,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.6243425871104324,
+        "spearman": 0.5570224018810344,
+        "kendall": 0.4176048108351314
+      },
+      "FEP_max_label_difference_kcal_mol": 4.65393066306774e-07,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "new complete missing-six comparator; all source protein chains, sequence/SMILES",
+      "Boltz2": {
+        "pearson": -0.01308691457385127,
+        "spearman": -0.02356577563918563,
+        "kendall": -0.019169720420053188
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "HSP90": {
+      "n": 11,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.7493347554967278,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "FMO_softcap": {
+        "pearson": 0.7497473021592997,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.8293591823707807,
+        "spearman": 0.6514035610330967,
+        "kendall": 0.5235703144047361
+      },
+      "FEP_max_label_difference_kcal_mol": 4.196166987213701e-07,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "new complete missing-six comparator; all source protein chains, sequence/SMILES",
+      "Boltz2": {
+        "pearson": 0.8130942186191619,
+        "spearman": 0.8624216160156492,
+        "kendall": 0.7105597124064275
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "PTP1B": {
+      "n": 23,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.74537975262075,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "FMO_softcap": {
+        "pearson": 0.7408598337000865,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.9207358629329578,
+        "spearman": 0.875247953753636,
+        "kendall": 0.6693507741161742
+      },
+      "FEP_max_label_difference_kcal_mol": 3.8146972691777137e-07,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "new complete missing-six comparator; all source protein chains, sequence/SMILES",
+      "Boltz2": {
+        "pearson": 0.8521465743736828,
+        "spearman": 0.7867401047860458,
+        "kendall": 0.6307699364566077
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "FAAH": {
+      "n": 24,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": 0.7368320105673787,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "FMO_softcap": {
+        "pearson": 0.7319914244754567,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "FEPplus_21_4": {
+        "pearson": 0.8489903797327579,
+        "spearman": 0.6557947534893539,
+        "kendall": 0.5045380360052363
+      },
+      "FEP_max_label_difference_kcal_mol": 4.9481201171985845e-05,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "new complete missing-six comparator; all source protein chains, sequence/SMILES",
+      "Boltz2": {
+        "pearson": 0.4009587522746492,
+        "spearman": 0.3787780041705751,
+        "kendall": 0.25771367306742277
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "HIV1PROT": {
+      "n": 13,
+      "complete_identity_match": true,
+      "FMO_raw": {
+        "pearson": -0.14666558742438307,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "FMO_softcap": {
+        "pearson": -0.1480374278440529,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "FEPplus_21_4": {
+        "pearson": -0.006358039632464368,
+        "spearman": 0.05502068478807295,
+        "kendall": 0.03871048305693818
+      },
+      "FEP_max_label_difference_kcal_mol": 4.792785644447406e-05,
+      "FEP_verified_pose_aliases": {},
+      "Boltz2_origin": "local complete native-homodimer inference; sequence/SMILES",
+      "Boltz2": {
+        "pearson": -0.5792822166607996,
+        "spearman": -0.5639620190777477,
+        "kendall": -0.4000083249216945
+      },
+      "Boltz2_status": "COMPLETE_SAVED_RESULTS"
+    },
+    "OpenBind": {
+      "n": 490,
+      "n_crystals": 639,
+      "FMO_raw": {
+        "pearson": 0.3706641330313516,
+        "spearman": 0.44123953581997516,
+        "kendall": 0.28846763827986127
+      },
+      "FMO_softcap": {
+        "pearson": 0.41603679287183837,
+        "spearman": 0.44123953581997516,
+        "kendall": 0.28846763827986127
+      },
+      "Boltz2": {
+        "pearson": 0.412621598388777,
+        "spearman": 0.40106951817113007,
+        "kendall": 0.26334284904341393
+      },
+      "Boltz2_status": "PUBLISHED_BENCHMARK_SCORES_NOT_LOCAL_RERUN",
+      "Boltz2_origin": "benchmark boltz_2 column, matched 490 compounds; not local inference",
+      "FEPplus_21_4": null,
+      "FEP_status": "NO_MATCHED_REFERENCE_LOCATED"
+    }
+  },
+  "sources_sha256": {
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/evaluation.json": "f1689f886bf13b3f7b24cefb3f3641b82901ab30bf7df523b846fa75dad0998c",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/final_status.json": "2015fb0ef6616ea26804692a811fc6071e537f94daa09c239c89caadbad3030e",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/README.md": "17eafeab0ff7d96d4f3e817fbdc7cc34df4fef0bcaefc10604661bffaa9482bb",
+    "data/fmo87_cohort.csv": "19edfb8e2ccf3ab1029d848e4062d70cb35532d2b4fee63674f160b2a292997b",
+    "runs/fmo87/final/boltz_predictions.csv": "33f2f3698df854a237c73aeb0e6c55cfbfa79b364a9ded3056a27d4cc9d55389",
+    "FMOtpiefinal_HIV1lab/runs/HIV1PROT_boltz2_20261018/evaluation.json": "c8944be41493f569be306e9c7a56267df6bfd903a9dfb126282c88399d45672f",
+    "FMOtpiefinal_HIV1lab/runs/boltz2_missing6_20261020/verified_results.json": "991c3c76814d9c7370eb0b9da68561f24f16e4ca84ef80089b20d4d8b58aa200",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/CDK2/independent_verification.json": "93802a23ca4e2743408c7515aa9b59362791d6f3bdf881e33eebe766dbac531d",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/jacs_set/cdk2_out.csv": "2fdb8a065c282411c5f306d9c6409ca5ecb9f61129dcc06e2c3f64dc2dced8a3",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/JNK1/independent_verification.json": "243f3299b74a784e156f08f97036bf09b32964c764850ebb805276c2aa7c06c7",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/jacs_set/jnk1_manual_flips_symbmcorr_out.csv": "f1ac5c18470d1f9fffb07262670d29036bab9a3e1276eeb0033ce7a68177373d",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/jacs_set/jnk1_manual_flips_ligands.sdf": "880876d2494cc6f9d5851273e74935e7caa16c8892eeb4e4ceac444eae22a677",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/P38/independent_verification.json": "fdadc11c3929d418d8483518ea765694c6940e9af35477424825cb8e99f7e924",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/jacs_set/p38_out.csv": "f8e831ed723d2069c46de454ef65fe2b93c05b2f8ea6f1855695f5e1efbec00c",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/TYK2/independent_verification.json": "5e1117861c1e2a64c1cc3b11048cc028c44fd586cbc89f298ae77022a91f4844",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/jacs_set/tyk2_out.csv": "67191f5998cc3b4701c58cde28fae71f07ec102ecdb2b02dd709265e6d5d60f7",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/misc/galectin3_extra_ligands.sdf": "acbba8f2ecbf558cf0346972c2fe9223fa7ef076fea1ca6a5f6725f34a43daab",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/Galectin3/independent_verification.json": "8cb82da9afb08a95678094b9a204af5b4b15849bfd7318fd49761cdb66df1a1d",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/misc/galectin3_extra_out.csv": "7fcccd70a5ee5eaaf9259eeb747946b90218bb76a0e713564223d8fcf8f2421e",
+    "FMOtpiefinal_HIV1lab/datasets/evaluation_only/Galectin3.csv": "51776b4ee82ccb38eb1ea8c01e6d8259843b02e67075c8c875ffcd663800c9b4",
+    "runs/fmo87/boltz_external_analysis/Galectin3/blind_predictions.json": "0bb7691f37b9ded842df50841366bc3b0ac11cc7aa554bd2289509e39a666566",
+    "runs/fmo87/boltz_external_analysis/Galectin3/unblinded_comparison.json": "9eea34edb79d90d74d098597181821808f659e581ea064c89303da116a964694",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/opls_stress/fxa_yoshikawa_set_ligands.sdf": "e42d325e78906a8885859bb03ba9c3c113cd28a07fcf752a35c02615fb9ccab8",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/FXa/independent_verification.json": "be1446ffc653c4319b3df14a694b0e08642865b8a2696696acf5643fa4452619",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/opls_stress/fxa_yoshikawa_set_out.csv": "b7a837ec15bc40cf3f4f15a061fab756ff984a3b365bd65b416f5bf6cdb9a156",
+    "runs/fmo87/boltz_external_analysis/FXa/blind_predictions.json": "0f5588f51d9e0f37d8b86e024a414e5cbec90649108f7a2fee4fad1f39bc5b6c",
+    "runs/fmo87/boltz_external_analysis/FXa/unblinded_comparison.json": "06bda216c57613525525db8da0cb354b88e5c0c42e808603ebf45f4b80caed40",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/waterset/chk1_ligands.sdf": "007e3686b9950bff69c6794d555ca0aeab2f42049c48e60ceb5d2c1d0b5926f1",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/CHK1/independent_verification.json": "d60d012ea34d3b8a97f8b1a1f53a20c94af1561bb0ac53648666ccf974dba3ff",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/waterset/chk1_out.csv": "46d846e6428d7e262fa6e75f509b206ed791d619a5d37406f3b15205c98c1476",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/misc/cdk8_koehler_ligands.sdf": "520115336f16866af6e9fda0ddafb573c109bd368ab712e105249f996d38951c",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/CDK8/independent_verification.json": "3af11b26af1e44bca23907fd7adac9ab13ee01c0492f51d8cac73fdd380a2bf3",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/misc/cdk8_koehler_213_out.csv": "64cc2407992298f9d0b70ff25dc0d4996eb47c386c811e5d1696ce5345fc62d1",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/jacs_set/bace_ligands.sdf": "b57bb2f14d8c603100c4ba6227ef3dff6c30225244ebc4cf9a3e262e79b30fd3",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/BACE/independent_verification.json": "ae036e1ac9a9fa59ad448f4e6e9649202e5a3f0b7b29f7297abb0803c0f09cfd",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/jacs_set/bace_out.csv": "97953202e95399cee3e049e5c1a5cf6072c0a1975846ebdb324cae65bef96f1f",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/waterset/hsp90_kung_ligands.sdf": "a6057951c9a80c04862459a11827d76ce12b7802fd182dcbeca1b963b999be4c",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/HSP90/independent_verification.json": "e6d9e90e0cc8304e447b15bb466474f6af9d709e53c05882d86e742b84c9a85f",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/waterset/hsp90_kung_out.csv": "b2da872c584f7aca1e15214727d5a00802eeeec904698d796dd8bdfbdd143ce6",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/jacs_set/ptp1b_ligands.sdf": "28cb9a4537fcbc3041dfc1605b990b1968854f22b4ff1e1d9c1c833f06db632b",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/PTP1B/independent_verification.json": "dc4cfc12b5f1f5bac5752ecf710e9e4beb8835dfdaffedefb4adc6108422ec8a",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/jacs_set/ptp1b_out.csv": "fa3a146669f0ecacafc0693547c7e758d0a9c81dea307ea230125e7d76cd61c2",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/misc/hfaah_ligands.sdf": "7b0e493b4b035d0f7670a0d7931ce7a4a1906d56b22128f135fb475f6ce6dc7c",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/FAAH/independent_verification.json": "efda2476c76c7d2e5004b44aba0d615e296779cb516261153ad43bcbfe553de1",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/misc/hfaah_out.csv": "755591fc134fd4cf378b105f58c0e22cc2ec8e35ecde5ac6f8d2ccadde14f7a4",
+    "vendor/public_binding_free_energy_benchmark/fep_benchmark_inputs/structure_inputs/misc/hiv_prot_ekegren_ligands.sdf": "9e5208d19839c3a56ed81320fb63610139330872b6b9e8b899390fb1c21584b1",
+    "FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/HIV1PROT/independent_verification.json": "891ae54bc05448650110e45422cfc75b000e69fe514f5c84c7f4ea33488f6a62",
+    "vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/misc/hiv_prot_ekegren_out.csv": "b8db7932316b5af2a2aee79234855e369a04f8e45a8fa03a01c23dfbef71be8b",
+    "runs/openbind/score_distribution_audit/paired_compounds.csv": "4773539e757ed523fd7ed7d6851a2efbf54e27c5d6f83c9c11c71e06eba27622",
+    "runs/openbind/score_distribution_audit/audit.json": "c46e8141084553553848026ff1b858eba29aab57263bed13439f89eeda7662bf",
+    "vendor/openbind/EV-A71_2A_benchmark/affinity/outputs/compound_level_prediction_analysis.csv": "22e058639d8644cc4feb53152c26ea532f723761fa16a55425245001de2ef2a5"
+  },
+  "new_Boltz_supplement_inference": true,
+  "Boltz_supplement_timing": {
+    "end_to_end_wall_seconds": 13073.349556691945,
+    "per_target": {
+      "CHK1": {
+        "msa_attempts": 11.336071122437716,
+        "inference_attempts": 1596.4537183344364
+      },
+      "CDK8": {
+        "msa_attempts": 15.591491464525461,
+        "inference_attempts": 1382.9274130910635
+      },
+      "BACE": {
+        "msa_attempts": 15.013756059110165,
+        "inference_attempts": 3372.9080874733627
+      },
+      "HSP90": {
+        "msa_attempts": 11.436354856938124,
+        "inference_attempts": 1051.0326612778008
+      },
+      "PTP1B": {
+        "msa_attempts": 11.184583850204945,
+        "inference_attempts": 3053.398309480399
+      },
+      "FAAH": {
+        "msa_attempts": 11.536441557109356,
+        "inference_attempts": 2532.200850240886
+      }
+    },
+    "scope": "wall time including imports/model loads; not GPU kernel or full CPU accounting"
+  },
+  "original87_weighted": {
+    "FMO_raw": {
+      "pearson": 0.6346899344546217,
+      "spearman": 0.6312461176393578,
+      "kendall": 0.46928544696790003
+    },
+    "FMO_softcap": {
+      "pearson": 0.6420876560152954,
+      "spearman": 0.6312461176393578,
+      "kendall": 0.46928544696790003
+    },
+    "Boltz2": {
+      "pearson": 0.651763207792332,
+      "spearman": 0.6919766402566512,
+      "kendall": 0.5095891017660998
+    },
+    "FEPplus_21_4": {
+      "pearson": 0.7674900002111446,
+      "spearman": 0.779496440486976,
+      "kendall": 0.6146075790743234
+    }
+  },
+  "missing_complete_Boltz2": []
+}

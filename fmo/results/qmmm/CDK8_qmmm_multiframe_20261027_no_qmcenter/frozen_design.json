@@ -1,0 +1,20 @@
+{
+  "schema": "quanpol-multiframe-v2",
+  "labels_used": false,
+  "target": "CDK8",
+  "times_iterations": [
+    400,
+    800,
+    1200,
+    1600,
+    2000
+  ],
+  "repeats": [
+    0,
+    1,
+    2
+  ],
+  "scope": "one alchemical edge, finite shell DFTB3/MM diagnostic; not affinity ranking or FEP",
+  "swrb_angstrom": 6000.0,
+  "driver_sha256": "15b35f2d0fdc2a10566da9ceda8eee9f58f7aaa610efe014ccc87a00b9e4b128"
+}

@@ -1,0 +1,940 @@
+{
+  "schema": "matched-endpoint-MM-DFTB-internal-v1",
+  "targets": {
+    "BACE": {
+      "repeat_means": [
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": -43.55618298310132,
+          "DFTB_mean_hartree": -58.819210856400005
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": -44.93253417010544,
+          "DFTB_mean_hartree": -58.822016575
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 52.09006831465139,
+          "DFTB_mean_hartree": -55.715179277000004
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 46.346858655911646,
+          "DFTB_mean_hartree": -55.7308947256
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": -40.784188221763145,
+          "DFTB_mean_hartree": -58.8026031108
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": -38.6210005942281,
+          "DFTB_mean_hartree": -58.80892834480001
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": -43.09583742700431,
+          "DFTB_mean_hartree": -58.818435928199996
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 47.04144490233672,
+          "DFTB_mean_hartree": -55.722346064
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 47.34170848210727,
+          "DFTB_mean_hartree": -55.721450322200006
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 43.72957553090049,
+          "DFTB_mean_hartree": -55.727993745599996
+        }
+      ],
+      "bound_minus_solution_mean_internal_energy_kcal_mol": {
+        "0": {
+          "MM": -3.410683162271532,
+          "DFTB": -6.667029481600876
+        },
+        "10": {
+          "MM": 3.1808871801666854,
+          "DFTB": 0.5603927131608812
+        }
+      },
+      "B_minus_A_internal_energy_double_difference_kcal_mol": {
+        "MM": 6.591570342438217,
+        "DFTB": 7.227422194761758
+      },
+      "DFTB_minus_MM_double_difference_kcal_mol": 0.6358518523235404,
+      "matched_frames": [
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": -35.697817402997124,
+          "DFTB_hartree": -58.785846918
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": -35.949355427314096,
+          "DFTB_hartree": -58.793006061
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": -39.08275924209718,
+          "DFTB_hartree": -58.795193882
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": -49.90519879354124,
+          "DFTB_hartree": -58.829586164
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": -43.285810242866084,
+          "DFTB_hartree": -58.809382529
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 44.6032500820079,
+          "DFTB_hartree": -55.729757075
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 44.515484669132114,
+          "DFTB_hartree": -55.723301533
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 52.73367140938088,
+          "DFTB_hartree": -55.707302842
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 44.63888488906076,
+          "DFTB_hartree": -55.732349672
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": -43.75229851745276,
+          "DFTB_hartree": -58.812518408
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-13ecdd475210462d972ad714f505219b_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 48.71593346210196,
+          "DFTB_hartree": -55.719019198
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": -42.65488937504164,
+          "DFTB_hartree": -58.820712463
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": -42.563237567121384,
+          "DFTB_hartree": -58.817826798
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": -38.83558683406496,
+          "DFTB_hartree": -58.814423806
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 48.480519706725765,
+          "DFTB_hartree": -55.714395916
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 51.97835207226216,
+          "DFTB_hartree": -55.712413036
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": -25.29899067745974,
+          "DFTB_hartree": -58.779160249
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 44.85080542831062,
+          "DFTB_hartree": -55.727519386
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 49.31651578233857,
+          "DFTB_hartree": -55.724455884
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-45e841c5cb2345dabe849e1a385d7719_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 42.08234942089924,
+          "DFTB_hartree": -55.728467389
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": -37.163668978642434,
+          "DFTB_hartree": -58.816939173
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": -45.01933832490101,
+          "DFTB_hartree": -58.824803039
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": -39.52419883232092,
+          "DFTB_hartree": -58.807247317
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": -48.424195343222316,
+          "DFTB_hartree": -58.83104462
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": -45.3477856559349,
+          "DFTB_hartree": -58.812145492
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 45.121580622659295,
+          "DFTB_hartree": -55.72109008
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 41.27336336684535,
+          "DFTB_hartree": -55.735391668
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 41.45124774911214,
+          "DFTB_hartree": -55.717595516
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 51.502568425187306,
+          "DFTB_hartree": -55.721187383
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-b271b8fe8df849f08721b2a5e24b09fa_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 39.29911749069835,
+          "DFTB_hartree": -55.744704081
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": -45.19830279634285,
+          "DFTB_hartree": -58.824886934
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": -42.153739475898526,
+          "DFTB_hartree": -58.824742537
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": -45.168941194611314,
+          "DFTB_hartree": -58.81982776
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": -48.25235159981738,
+          "DFTB_hartree": -58.82637225
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": -37.007579848836556,
+          "DFTB_hartree": -58.800224801
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 53.943820668992096,
+          "DFTB_hartree": -55.714669927
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 49.74858081820708,
+          "DFTB_hartree": -55.71525857
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 54.64743901365578,
+          "DFTB_hartree": -55.706472241
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 49.95763636392717,
+          "DFTB_hartree": -55.718163853
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": -43.376343809896134,
+          "DFTB_hartree": -58.806991016
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 52.152864708474794,
+          "DFTB_hartree": -55.721331794
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": -44.677683899824466,
+          "DFTB_hartree": -58.831255587
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": -45.41521363578731,
+          "DFTB_hartree": -58.826264003
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": -45.178993855317565,
+          "DFTB_hartree": -58.825315964
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": -46.014435649701724,
+          "DFTB_hartree": -58.820256305
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 55.53088645467288,
+          "DFTB_hartree": -55.712641482
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 44.106357088627455,
+          "DFTB_hartree": -55.735672756
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 43.89071463214866,
+          "DFTB_hartree": -55.739294257
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 39.557743408229605,
+          "DFTB_hartree": -55.735283097
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 48.648591695879645,
+          "DFTB_hartree": -55.731582036
+        }
+      ],
+      "all_41_frame_MM_double_difference_kcal_mol": {
+        "total": 2.121081021951113,
+        "NonbondedForce": 2.531340102530771,
+        "HarmonicBondForce": -0.0660079718788058,
+        "PeriodicTorsionForce": -1.0366430526165828,
+        "HarmonicAngleForce": 0.6923919439157302,
+        "Nonbonded_LennardJones": -0.3956111869737562,
+        "Nonbonded_Coulomb": 2.926951289504526
+      }
+    },
+    "CDK8": {
+      "repeat_means": [
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 31.614722176996526,
+          "DFTB_mean_hartree": -47.322934056600005
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 42.21566804877978,
+          "DFTB_mean_hartree": -46.4819935964
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 31.4058618609671,
+          "DFTB_mean_hartree": -47.3237606058
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 30.80477137505349,
+          "DFTB_mean_hartree": -47.3283194556
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 31.037827526010773,
+          "DFTB_mean_hartree": -47.3214884202
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 39.07875558477533,
+          "DFTB_mean_hartree": -46.482906583399995
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 38.43236705029807,
+          "DFTB_mean_hartree": -46.4852040752
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "n_frames": 5,
+          "MM_mean_kcal_mol": 39.40122750995121,
+          "DFTB_mean_hartree": -46.4808133122
+        }
+      ],
+      "bound_minus_solution_mean_internal_energy_kcal_mol": {
+        "0": {
+          "MM": 0.5319019229860729,
+          "DFTB": 0.9969686036138634
+        },
+        "10": {
+          "MM": 3.2448846671049125,
+          "DFTB": 0.615624779292177
+        }
+      },
+      "B_minus_A_internal_energy_double_difference_kcal_mol": {
+        "MM": 2.7129827441188397,
+        "DFTB": -0.38134382432168645
+      },
+      "DFTB_minus_MM_double_difference_kcal_mol": -3.0943265684405263,
+      "matched_frames": [
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 31.830523466410146,
+          "DFTB_hartree": -47.32233167
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 34.41978765948067,
+          "DFTB_hartree": -47.315557764
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 29.112666436578625,
+          "DFTB_hartree": -47.327800152
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 26.41901802661058,
+          "DFTB_hartree": -47.337916738
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 35.24731371575547,
+          "DFTB_hartree": -47.315196705
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 38.29636066943121,
+          "DFTB_hartree": -46.482704107
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 46.7777015178103,
+          "DFTB_hartree": -46.467527006
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 41.5137160918461,
+          "DFTB_hartree": -46.483840997
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 26.990256424745283,
+          "DFTB_hartree": -47.333179082
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 34.416185960342034,
+          "DFTB_hartree": -46.485636911
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 34.389813684447,
+          "DFTB_hartree": -46.494823896
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 33.34048508241293,
+          "DFTB_hartree": -47.322092914
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 38.40055563683317,
+          "DFTB_hartree": -46.488511686
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 29.272343765064683,
+          "DFTB_hartree": -47.336353696
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 32.05571995370263,
+          "DFTB_hartree": -47.323758641
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 32.36505164934192,
+          "DFTB_hartree": -47.326212945
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 42.39278110102138,
+          "DFTB_hartree": -46.472661234
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 33.47782577993309,
+          "DFTB_hartree": -46.49757574
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 38.07423990580666,
+          "DFTB_hartree": -46.488154534
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 39.816432827896065,
+          "DFTB_hartree": -46.479117182
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 33.685197003985735,
+          "DFTB_hartree": -47.323107893
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 28.498495279114906,
+          "DFTB_hartree": -47.325255646
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 28.73891760319848,
+          "DFTB_hartree": -47.31563573
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 33.212070815164076,
+          "DFTB_hartree": -47.322732484
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 40.87736243772703,
+          "DFTB_hartree": -46.472934329
+        },
+        {
+          "leg": "solution",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 31.05445692859066,
+          "DFTB_hartree": -47.320710348
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 36.029721220039065,
+          "DFTB_hartree": -46.488164757
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 38.54066811872492,
+          "DFTB_hartree": -46.482483345
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 39.490971126768606,
+          "DFTB_hartree": -46.484852545
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 28.840245857964494,
+          "DFTB_hartree": -47.322588491
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 30.22559577881101,
+          "DFTB_hartree": -47.328677232
+        },
+        {
+          "leg": "solution",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 42.067414646496445,
+          "DFTB_hartree": -46.475631585
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 32.869305055409015,
+          "DFTB_hartree": -47.321378158
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 29.145497849802265,
+          "DFTB_hartree": -47.330760564
+        },
+        {
+          "leg": "bound",
+          "endpoint": 0,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 36.99296634299585,
+          "DFTB_hartree": -47.311265838
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 400,
+          "MM_total_kcal_mol": 44.236709215277635,
+          "DFTB_hartree": -46.476628462
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 2000,
+          "MM_total_kcal_mol": 39.7367197090773,
+          "DFTB_hartree": -46.488121345
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 1600,
+          "MM_total_kcal_mol": 35.63919222078279,
+          "DFTB_hartree": -46.494013773
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 1200,
+          "MM_total_kcal_mol": 44.00557682991484,
+          "DFTB_hartree": -46.482267976
+        },
+        {
+          "leg": "bound",
+          "endpoint": 10,
+          "trajectory": "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "iteration": 800,
+          "MM_total_kcal_mol": 47.46014226884633,
+          "DFTB_hartree": -46.468936426
+        }
+      ],
+      "all_41_frame_MM_double_difference_kcal_mol": {
+        "total": 0.14071070627232274,
+        "NonbondedForce": -0.28166135187853714,
+        "HarmonicBondForce": -0.2882467211398305,
+        "PeriodicTorsionForce": 0.9309280417721624,
+        "HarmonicAngleForce": -0.22030926248148042,
+        "Nonbonded_LennardJones": -0.12159381412012138,
+        "Nonbonded_Coulomb": -0.1600675377584162
+      }
+    }
+  },
+  "sources": {
+    "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_internal_energy.json": "3c722e21504cb8d56a9743e1003870e8310352f482a4a5fcd8c5e79659b34a56",
+    "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_dftb_internal_v2/status.json": "566b665ce2700dfc42720e1bb36db0a80aeb468cd1fc0d8d7354ab99c0295dcf",
+    "projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/endpoint_dftb_internal_v2/frozen_protocol.json": "f5fb00d4cf9f2a46217c5059faca3cb5b2ab992540ee48b3121eca131ba89f5b"
+  },
+  "labels_used": false,
+  "main_pipeline_changed": false,
+  "interpretation": "Comparisons use identical fixed frames, molecules and gas-phase isolation, but different MM/DFTB Hamiltonians.",
+  "warning": "Mean isolated potential differences are NOT free-energy corrections; do not subtract them from FEP or add to tPIE.",
+  "QM_wall_seconds": 146.33028094097972,
+  "QM_singlepoint_wall_seconds_sum": 506.59943471476436
+}

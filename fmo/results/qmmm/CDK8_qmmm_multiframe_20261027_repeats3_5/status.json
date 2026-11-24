@@ -1,0 +1,20 @@
+{
+  "schema": "quanpol-multiframe-v2",
+  "status": "FAILED",
+  "labels_used": false,
+  "target": "CDK8",
+  "times_iterations": [
+    400,
+    1200,
+    2000
+  ],
+  "repeats": [
+    3,
+    4,
+    5
+  ],
+  "scope": "one alchemical edge, finite shell DFTB3/MM diagnostic; not affinity ranking or FEP",
+  "driver_sha256": "fa519b5a96f0f61b8a31c33790728330945ddd05e84216bab4f5b75d740e1ec6",
+  "results": [],
+  "error": "ValueError('repeat index 3 outside 0..2 for bound endpoint 0')"
+}

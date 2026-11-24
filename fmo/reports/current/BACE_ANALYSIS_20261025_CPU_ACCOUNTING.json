@@ -1,0 +1,1652 @@
+{
+  "schema": "new-experiments-actual-gamess-cpu-accounting-v1",
+  "accepted_jobs": 396,
+  "cpu_hours_accepted_all_MPI_ranks": 9.705818333333333,
+  "groups": {
+    "BACE_hydrogen_normalized_strain_20261025/qa_optimizer_recovery": {
+      "n_accepted_jobs": 72,
+      "cpu_hours_all_MPI_ranks": 2.327119444444444,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13n/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 76.304
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 164.903
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/qa_optimizer_recovery/BACE/CAT-13e/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 84.583
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/qa_optimizer_recovery/BACE/CAT-13e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.23700000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4a/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.894
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 163.494
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4m/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 87.788
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.935
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17b/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 62.78
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.358
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13j/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 78.50999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.669
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13d/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 65.45100000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.981
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13b/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 62.251000000000005
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 152.548
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13a/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 67.903
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.261
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13h/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 71.771
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 161.10500000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13o/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 69.478
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.07
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13g/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 82.49799999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 170.011
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4k/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.298
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 164.16899999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17g/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.054
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.44299999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4l/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.274
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4l/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 161.73
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4j/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.838
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.867
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4n/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 69.41
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.585
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13i/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 78.475
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 165.47899999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17f/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 67.481
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 151.901
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4p/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 75.649
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4p/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.89299999999997
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13c/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 65.134
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 152.829
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-24/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 68.923
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-24/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.09199999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4i/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 73.21199999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.507
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4c/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.083
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.286
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17i/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 66.90899999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.842
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13k/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 98.775
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 153.978
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17a/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 61.001000000000005
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.761
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17c/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 64.152
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.78699999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4o/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 74.00800000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.87099999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17d/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 58.608000000000004
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 149.583
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4b/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.576
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.55700000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13f/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 64.102
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.287
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4d/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.116
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-4d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.163
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13m/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 86.64099999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.87
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17h/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 56.122
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.856
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17e/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 65.17
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-17e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.5
+        }
+      ]
+    },
+    "Galectin3_hydrogen_normalized_strain_20261025/qa_optimizer_recovery": {
+      "n_accepted_jobs": 52,
+      "cpu_hours_all_MPI_ranks": 1.3780452777777776,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18a/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.61500000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.56700000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18b/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 72.545
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.102
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18d/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.669
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.712
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18e/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 88.11099999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 98.21000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18f/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 107.294
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 99.349
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18g/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 106.47
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.21600000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18h/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 139.93900000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 98.855
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18i/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 144.29899999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/18i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 100.483
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17m/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 85.214
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.053
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17q/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 75.25
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17q/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 89.185
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17r/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 103.43100000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17r/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 90.644
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/qa_optimizer_recovery/Galectin3/17n/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 79.715
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/qa_optimizer_recovery/Galectin3/17n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.00200000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17p/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 144.748
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17p/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 89.674
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17o/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 78.54599999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.279
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17f/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 80.95599999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.278
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17e/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 113.731
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.91999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17g/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 102.98400000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.09100000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17a/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.275
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 89.728
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17j/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.42099999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.55099999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17l/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 81.602
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17l/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.821
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17c/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 77.97399999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.938
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17k/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 79.86500000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.16999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17b/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 85.581
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.36500000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17h_flip/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 116.95400000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17h_flip/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.541
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17i/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 99.958
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.83500000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17d/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 88.50200000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.745
+        }
+      ]
+    },
+    "CDK8_current_main_hydrogen_normalized_strain_20261025": {
+      "n_accepted_jobs": 20,
+      "cpu_hours_all_MPI_ranks": 0.35355277777777777,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/12/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 31.558999999999997
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/12/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.95
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/13/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 31.445
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/13/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 93.624
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/14/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 26.418
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/14/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.788
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/15/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 35.135000000000005
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/15/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.65899999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/16/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 37.926
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/16/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.398
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/17/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 38.339
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/17/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.21799999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/19/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 22.806
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/19/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.274
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/20/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 34.203
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/20/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.86
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/21/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 29.063
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/21/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.125
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/22/hydrogen/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 31.137
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_hydrogen_normalized_strain_20261025/CDK8/22/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.863
+        }
+      ]
+    },
+    "BACE_direction_preserving_hydrogen_20261025": {
+      "n_accepted_jobs": 72,
+      "cpu_hours_all_MPI_ranks": 1.6528119444444442,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13n/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.625
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.086
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13e/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 11.02
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.839
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.785
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.52300000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4m/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 11.28
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.136
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.99
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.675
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13j/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 12.078
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 161.74
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.489
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.39600000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.607
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 151.1
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 9.774000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 151.442
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13h/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.861
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.82
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13o/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.822
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.316
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13g/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 11.357
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.361
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4k/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 11.206
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.97500000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17g/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 10.347000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.815
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4l/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 11.077
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4l/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.7
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4j/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 11.366
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.973
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4n/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.122
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.99200000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.603
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.346
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17f/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.220000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.317
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4p/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.021
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4p/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.748
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.88
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.857
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-24/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.679
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-24/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 171.31799999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.166
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.253
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.672
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.26999999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.025
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.527
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13k/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.008
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.012
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.558
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 150.397
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.048
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.404
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4o/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.814
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.719
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.9379999999999997
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.025
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.447
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 169.086
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13f/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.014
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 165.148
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.74
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-4d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 161.166
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13m/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.252
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-13m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 150.83499999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17h/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.452999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 147.93
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17e/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.924
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_direction_preserving_hydrogen_20261025/BACE/CAT-17e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 149.608
+        }
+      ]
+    },
+    "Galectin3_direction_preserving_hydrogen_20261025": {
+      "n_accepted_jobs": 52,
+      "cpu_hours_all_MPI_ranks": 0.7347780555555555,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.823
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.424
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.4
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.274
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.745
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.538
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18e/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.54
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.224
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18f/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.666
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 99.826
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18g/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 6.1240000000000006
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.88900000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18h/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 7.447
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 103.32
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 7.585000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/18i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 105.908
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17m/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.844
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.437
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17q/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.289
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17q/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.91499999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17r/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.0
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17r/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.445
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17n/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.471
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 94.60900000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17p/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.432
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17p/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 102.00200000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17o/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.181
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 101.092
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17f/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.507
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 103.148
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17e/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.625
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 101.514
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17g/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.317
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 99.365
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.593999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.805
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17j/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.966
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.118
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17l/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.054
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17l/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.47800000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.943
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 89.885
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17k/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.83
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.98599999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.769
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 91.07900000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17h_flip/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.3149999999999995
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17h_flip/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.38
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.966
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.975
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.340999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_direction_preserving_hydrogen_20261025/Galectin3/17d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 92.791
+        }
+      ]
+    },
+    "CDK8_current_main_direction_preserving_hydrogen_20261025": {
+      "n_accepted_jobs": 20,
+      "cpu_hours_all_MPI_ranks": 0.2854352777777778,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/12/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.616
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/12/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 101.65899999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/13/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.3449999999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/13/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.039
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/14/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.54
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/14/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 98.809
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/15/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.287
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/15/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 101.093
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/16/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 2.886
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/16/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 101.08500000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/17/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.088
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/17/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 103.053
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/19/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 2.7880000000000003
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/19/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 96.155
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/20/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.422
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/20/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 95.601
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/21/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.1109999999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/21/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 101.023
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/22/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.953
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_current_main_direction_preserving_hydrogen_20261025/CDK8/22/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 97.01400000000001
+        }
+      ]
+    },
+    "BACE_graph_conjugated_amine_20261025": {
+      "n_accepted_jobs": 72,
+      "cpu_hours_all_MPI_ranks": 1.6500708333333334,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13n/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.742
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.555
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13e/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.412
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.04500000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.608
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.39600000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4m/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 6.004
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 161.816
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.759
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.909
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13j/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.6739999999999995
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.63400000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 6.723
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.57799999999997
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.550000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.792
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.902
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.502
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13h/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.692
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.506
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13o/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.304
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.859
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13g/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 6.396
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 163.434
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4k/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 6.031000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.859
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17g/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.851
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17g/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 156.0
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4l/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.018
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4l/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 157.322
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4j/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.154999999999999
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4j/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.954
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4n/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.688
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4n/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.668
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.968
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 158.99400000000003
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17f/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.918
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 155.198
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4p/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.102
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4p/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 163.607
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.4939999999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 163.717
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-24/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.731
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-24/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 163.226
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.686
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.68599999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.405
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.039
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17i/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.549
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17i/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 161.386
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13k/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.041
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13k/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 164.16
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17a/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.614000000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17a/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.551
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17c/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.265
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17c/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.428
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4o/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.516
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4o/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 162.55599999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.561
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.90800000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4b/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.707
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4b/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 164.227
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13f/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 4.898
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13f/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 163.38299999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4d/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.287
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-4d/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 160.185
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13m/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 5.023
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-13m/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 159.409
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17h/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.7800000000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17h/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 153.304
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17e/ligand/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 3.561
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_conjugated_amine_20261025/BACE/CAT-17e/complex/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 154.84699999999998
+        }
+      ]
+    },
+    "BACE_graph_nh2_original_production_20261025": {
+      "n_accepted_jobs": 36,
+      "cpu_hours_all_MPI_ranks": 1.324004722222222,
+      "rows": [
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13n/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 135.94
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13e/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 133.148
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4a/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 138.564
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4m/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 135.608
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17b/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 136.042
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13j/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 136.32999999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13d/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 136.803
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13b/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 133.939
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13a/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 133.641
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13h/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 133.986
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13o/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 139.304
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13g/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 141.16199999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4k/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 137.836
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17g/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 134.089
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4l/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 137.316
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4j/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 134.64499999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4n/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 139.178
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13i/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 138.21300000000002
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17f/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 128.79399999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4p/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 130.70999999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13c/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 128.736
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-24/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 129.388
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4i/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 129.938
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4c/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 130.394
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17i/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 125.221
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13k/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 130.083
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17a/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 128.977
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17c/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 124.69200000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4o/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 129.737
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17d/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 123.545
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4b/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 131.47199999999998
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13f/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 126.769
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-4d/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 130.404
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-13m/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 127.292
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17h/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 125.96600000000001
+        },
+        {
+          "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_graph_nh2_original_production_20261025/BACE/CAT-17e/run/gamess.log",
+          "cpu_seconds_all_MPI_ranks": 128.555
+        }
+      ]
+    }
+  },
+  "warning": "Actual compute plus busy data-server process CPU, not allocated slots or elapsed parallel wall time. Includes the two original unconverged RFO attempts separately; excludes Python setup/reporting and previously computed source references.",
+  "failed_optimizer_attempts": [
+    {
+      "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/BACE_hydrogen_normalized_strain_20261025/BACE/CAT-13e/hydrogen/gamess.log",
+      "cpu_seconds_all_MPI_ranks": 839.638
+    },
+    {
+      "log": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/Galectin3_hydrogen_normalized_strain_20261025/Galectin3/17n/hydrogen/gamess.log",
+      "cpu_seconds_all_MPI_ranks": 853.462
+    }
+  ],
+  "all_attempts": 398,
+  "cpu_hours_including_failed_attempts_all_MPI_ranks": 10.176123888888888
+}

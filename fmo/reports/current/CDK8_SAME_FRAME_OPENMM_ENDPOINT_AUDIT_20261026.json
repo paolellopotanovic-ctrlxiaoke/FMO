@@ -1,0 +1,231 @@
+{
+  "schema": "same-frame-openmm-endpoint-energy-v1",
+  "target": "CDK8",
+  "iteration": 2000,
+  "legs": {
+    "bound": {
+      "0": [
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "replica": 6,
+          "energy_kcal_mol": -326672.8650811027,
+          "parameters": {
+            "lambda_angles": 0.0,
+            "lambda_bonds": 0.0,
+            "lambda_electrostatics_core": 0.0,
+            "lambda_electrostatics_delete": 0.0,
+            "lambda_electrostatics_insert": 0.0,
+            "lambda_sterics_core": 0.0,
+            "lambda_sterics_delete": 0.0,
+            "lambda_sterics_insert": 0.0,
+            "lambda_torsions": 0.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "replica": 5,
+          "energy_kcal_mol": -326365.2671136975,
+          "parameters": {
+            "lambda_angles": 0.0,
+            "lambda_bonds": 0.0,
+            "lambda_electrostatics_core": 0.0,
+            "lambda_electrostatics_delete": 0.0,
+            "lambda_electrostatics_insert": 0.0,
+            "lambda_sterics_core": 0.0,
+            "lambda_sterics_delete": 0.0,
+            "lambda_sterics_insert": 0.0,
+            "lambda_torsions": 0.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "replica": 6,
+          "energy_kcal_mol": -326858.4019198351,
+          "parameters": {
+            "lambda_angles": 0.0,
+            "lambda_bonds": 0.0,
+            "lambda_electrostatics_core": 0.0,
+            "lambda_electrostatics_delete": 0.0,
+            "lambda_electrostatics_insert": 0.0,
+            "lambda_sterics_core": 0.0,
+            "lambda_sterics_delete": 0.0,
+            "lambda_sterics_insert": 0.0,
+            "lambda_torsions": 0.0
+          }
+        }
+      ],
+      "10": [
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc",
+          "replica": 5,
+          "energy_kcal_mol": -326339.4816409423,
+          "parameters": {
+            "lambda_angles": 1.0,
+            "lambda_bonds": 1.0,
+            "lambda_electrostatics_core": 1.0,
+            "lambda_electrostatics_delete": 1.0,
+            "lambda_electrostatics_insert": 1.0,
+            "lambda_sterics_core": 1.0,
+            "lambda_sterics_delete": 1.0,
+            "lambda_sterics_insert": 1.0,
+            "lambda_torsions": 1.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc",
+          "replica": 1,
+          "energy_kcal_mol": -326516.33249621216,
+          "parameters": {
+            "lambda_angles": 1.0,
+            "lambda_bonds": 1.0,
+            "lambda_electrostatics_core": 1.0,
+            "lambda_electrostatics_delete": 1.0,
+            "lambda_electrostatics_insert": 1.0,
+            "lambda_sterics_core": 1.0,
+            "lambda_sterics_delete": 1.0,
+            "lambda_sterics_insert": 1.0,
+            "lambda_torsions": 1.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc",
+          "replica": 1,
+          "energy_kcal_mol": -326820.0543811068,
+          "parameters": {
+            "lambda_angles": 1.0,
+            "lambda_bonds": 1.0,
+            "lambda_electrostatics_core": 1.0,
+            "lambda_electrostatics_delete": 1.0,
+            "lambda_electrostatics_insert": 1.0,
+            "lambda_sterics_core": 1.0,
+            "lambda_sterics_delete": 1.0,
+            "lambda_sterics_insert": 1.0,
+            "lambda_torsions": 1.0
+          }
+        }
+      ]
+    },
+    "solution": {
+      "0": [
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "replica": 3,
+          "energy_kcal_mol": -5920.091589295096,
+          "parameters": {
+            "lambda_angles": 0.0,
+            "lambda_bonds": 0.0,
+            "lambda_electrostatics_core": 0.0,
+            "lambda_electrostatics_delete": 0.0,
+            "lambda_electrostatics_insert": 0.0,
+            "lambda_sterics_core": 0.0,
+            "lambda_sterics_delete": 0.0,
+            "lambda_sterics_insert": 0.0,
+            "lambda_torsions": 0.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "replica": 8,
+          "energy_kcal_mol": -5782.8280361825855,
+          "parameters": {
+            "lambda_angles": 0.0,
+            "lambda_bonds": 0.0,
+            "lambda_electrostatics_core": 0.0,
+            "lambda_electrostatics_delete": 0.0,
+            "lambda_electrostatics_insert": 0.0,
+            "lambda_sterics_core": 0.0,
+            "lambda_sterics_delete": 0.0,
+            "lambda_sterics_insert": 0.0,
+            "lambda_torsions": 0.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "replica": 9,
+          "energy_kcal_mol": -5834.434753988178,
+          "parameters": {
+            "lambda_angles": 0.0,
+            "lambda_bonds": 0.0,
+            "lambda_electrostatics_core": 0.0,
+            "lambda_electrostatics_delete": 0.0,
+            "lambda_electrostatics_insert": 0.0,
+            "lambda_sterics_core": 0.0,
+            "lambda_sterics_delete": 0.0,
+            "lambda_sterics_insert": 0.0,
+            "lambda_torsions": 0.0
+          }
+        }
+      ],
+      "10": [
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-094c7fb13857450097a73791363a4fdd_attempt_0/simulation.nc",
+          "replica": 4,
+          "energy_kcal_mol": -5867.943049518629,
+          "parameters": {
+            "lambda_angles": 1.0,
+            "lambda_bonds": 1.0,
+            "lambda_electrostatics_core": 1.0,
+            "lambda_electrostatics_delete": 1.0,
+            "lambda_electrostatics_insert": 1.0,
+            "lambda_sterics_core": 1.0,
+            "lambda_sterics_delete": 1.0,
+            "lambda_sterics_insert": 1.0,
+            "lambda_torsions": 1.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-23fd6ae1fe6947b3bb81a20ff599f79c_attempt_0/simulation.nc",
+          "replica": 7,
+          "energy_kcal_mol": -5874.851615500617,
+          "parameters": {
+            "lambda_angles": 1.0,
+            "lambda_bonds": 1.0,
+            "lambda_electrostatics_core": 1.0,
+            "lambda_electrostatics_delete": 1.0,
+            "lambda_electrostatics_insert": 1.0,
+            "lambda_sterics_core": 1.0,
+            "lambda_sterics_delete": 1.0,
+            "lambda_sterics_insert": 1.0,
+            "lambda_torsions": 1.0
+          }
+        },
+        {
+          "trajectory": "../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/solution/shared/shared_HybridTopologyMultiStateSimulationUnit-c99964ef8400472d84d7346bbd078c89_attempt_0/simulation.nc",
+          "replica": 2,
+          "energy_kcal_mol": -5881.075489270938,
+          "parameters": {
+            "lambda_angles": 1.0,
+            "lambda_bonds": 1.0,
+            "lambda_electrostatics_core": 1.0,
+            "lambda_electrostatics_delete": 1.0,
+            "lambda_electrostatics_insert": 1.0,
+            "lambda_sterics_core": 1.0,
+            "lambda_sterics_delete": 1.0,
+            "lambda_sterics_insert": 1.0,
+            "lambda_torsions": 1.0
+          }
+        }
+      ]
+    }
+  },
+  "mean_energy_kcal_mol": {
+    "bound": {
+      "0": -326632.1780382118,
+      "10": -326558.6228394204
+    },
+    "solution": {
+      "0": -5845.784793155287,
+      "10": -5874.623384763395
+    }
+  },
+  "endpoint_binding_difference_kcal_mol": {
+    "0": -320786.3932450565,
+    "10": -320683.999454657
+  },
+  "endpoint_double_difference_kcal_mol": 102.39379039948108,
+  "interpretation": [
+    "These are the original OpenMM endpoint potential energies on the same saved physical frames.",
+    "They are a Hamiltonian audit, not an affinity or free-energy estimate.",
+    "The endpoint energy is only comparable to QuanPol after matching the selected environment and force terms."
+  ]
+}

@@ -1,0 +1,417 @@
+{
+  "status": "DIAGNOSTIC_ONLY_NOT_CONVERGED_FREE_ENERGY",
+  "labels_used": false,
+  "source_sha256": "0232ef6c746268a3560db1ed9362bf8591778a8ae6426eafbad514407e4c4e7b",
+  "driver_sha256": "9a03f03b75362dd4229f5e31b9009f2cb7c1d3f9b5784074ed01939d7f9615d7",
+  "temperature_kelvin": 298.15,
+  "requested_initial_ess_fraction": 0.8,
+  "states": {
+    "bound_0": {
+      "frames": 15,
+      "weight_ess_uncorrected": 1.711996250696809,
+      "largest_normalized_weight": 0.7310041786070213,
+      "repeat_diagnostics": {
+        "0": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.920642892958651,
+          "pooled_weight_fraction": 0.00906096597881172
+        },
+        "1": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.5585074012963516,
+          "pooled_weight_fraction": 0.9534509490439567
+        },
+        "2": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.8104771709850624,
+          "pooled_weight_fraction": 0.037488084977231606
+        }
+      },
+      "initial_coupling_for_requested_ess_fraction": 0.10513901026757705,
+      "all_frame_weights": [
+        {
+          "repeat": 0,
+          "iteration": 400,
+          "weight": 0.005461225712072117
+        },
+        {
+          "repeat": 0,
+          "iteration": 800,
+          "weight": 1.941714803570288e-06
+        },
+        {
+          "repeat": 0,
+          "iteration": 1200,
+          "weight": 1.3470240838714046e-08
+        },
+        {
+          "repeat": 0,
+          "iteration": 1600,
+          "weight": 0.0035946736820178563
+        },
+        {
+          "repeat": 0,
+          "iteration": 2000,
+          "weight": 3.111399677337185e-06
+        },
+        {
+          "repeat": 1,
+          "iteration": 400,
+          "weight": 0.22119246451730576
+        },
+        {
+          "repeat": 1,
+          "iteration": 800,
+          "weight": 0.7310041786070213
+        },
+        {
+          "repeat": 1,
+          "iteration": 1200,
+          "weight": 1.6941279529663423e-05
+        },
+        {
+          "repeat": 1,
+          "iteration": 1600,
+          "weight": 0.00013633224876049928
+        },
+        {
+          "repeat": 1,
+          "iteration": 2000,
+          "weight": 0.0011010323913394826
+        },
+        {
+          "repeat": 2,
+          "iteration": 400,
+          "weight": 0.012191443820632357
+        },
+        {
+          "repeat": 2,
+          "iteration": 800,
+          "weight": 2.0688427129728076e-07
+        },
+        {
+          "repeat": 2,
+          "iteration": 1200,
+          "weight": 0.00024033516562598563
+        },
+        {
+          "repeat": 2,
+          "iteration": 1600,
+          "weight": 5.2241981808197395e-06
+        },
+        {
+          "repeat": 2,
+          "iteration": 2000,
+          "weight": 0.025050874908521144
+        }
+      ]
+    },
+    "bound_10": {
+      "frames": 15,
+      "weight_ess_uncorrected": 2.3342055972854268,
+      "largest_normalized_weight": 0.6258148532004785,
+      "repeat_diagnostics": {
+        "0": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.261345376940876,
+          "pooled_weight_fraction": 0.7089583441537552
+        },
+        "1": {
+          "frames": 5,
+          "weight_ess_uncorrected": 2.062998857196538,
+          "pooled_weight_fraction": 0.1321808870457028
+        },
+        "2": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.1759164605422945,
+          "pooled_weight_fraction": 0.15886076880054195
+        }
+      },
+      "initial_coupling_for_requested_ess_fraction": 0.15293236445744512,
+      "all_frame_weights": [
+        {
+          "repeat": 0,
+          "iteration": 400,
+          "weight": 5.046095337704879e-06
+        },
+        {
+          "repeat": 0,
+          "iteration": 800,
+          "weight": 0.6258148532004785
+        },
+        {
+          "repeat": 0,
+          "iteration": 1200,
+          "weight": 1.3323959759193838e-05
+        },
+        {
+          "repeat": 0,
+          "iteration": 1600,
+          "weight": 0.08268245469250195
+        },
+        {
+          "repeat": 0,
+          "iteration": 2000,
+          "weight": 0.0004426662056778962
+        },
+        {
+          "repeat": 1,
+          "iteration": 400,
+          "weight": 0.08355977531952599
+        },
+        {
+          "repeat": 1,
+          "iteration": 800,
+          "weight": 0.03733597043576254
+        },
+        {
+          "repeat": 1,
+          "iteration": 1200,
+          "weight": 5.557083070056454e-05
+        },
+        {
+          "repeat": 1,
+          "iteration": 1600,
+          "weight": 0.009478431450650852
+        },
+        {
+          "repeat": 1,
+          "iteration": 2000,
+          "weight": 0.001751139009062839
+        },
+        {
+          "repeat": 2,
+          "iteration": 400,
+          "weight": 7.760442271727255e-05
+        },
+        {
+          "repeat": 2,
+          "iteration": 800,
+          "weight": 0.00016646993909667985
+        },
+        {
+          "repeat": 2,
+          "iteration": 1200,
+          "weight": 0.005868830043111824
+        },
+        {
+          "repeat": 2,
+          "iteration": 1600,
+          "weight": 0.14623418133706675
+        },
+        {
+          "repeat": 2,
+          "iteration": 2000,
+          "weight": 0.006513683058549421
+        }
+      ]
+    },
+    "solution_0": {
+      "frames": 15,
+      "weight_ess_uncorrected": 1.9712657437291832,
+      "largest_normalized_weight": 0.6436094556111678,
+      "repeat_diagnostics": {
+        "0": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.00056083536122,
+          "pooled_weight_fraction": 0.30347472692475363
+        },
+        "1": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.0715732699654301,
+          "pooled_weight_fraction": 0.6664273741751674
+        },
+        "2": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.1585969524022817,
+          "pooled_weight_fraction": 0.030097898900078888
+        }
+      },
+      "initial_coupling_for_requested_ess_fraction": 0.11040107843734222,
+      "all_frame_weights": [
+        {
+          "repeat": 0,
+          "iteration": 400,
+          "weight": 3.540281331961826e-05
+        },
+        {
+          "repeat": 0,
+          "iteration": 800,
+          "weight": 0.30338965732309703
+        },
+        {
+          "repeat": 0,
+          "iteration": 1200,
+          "weight": 4.690095573603225e-05
+        },
+        {
+          "repeat": 0,
+          "iteration": 1600,
+          "weight": 2.4800217326328277e-06
+        },
+        {
+          "repeat": 0,
+          "iteration": 2000,
+          "weight": 2.8581086832926433e-07
+        },
+        {
+          "repeat": 1,
+          "iteration": 400,
+          "weight": 0.006536881369573239
+        },
+        {
+          "repeat": 1,
+          "iteration": 800,
+          "weight": 0.0008550732714069648
+        },
+        {
+          "repeat": 1,
+          "iteration": 1200,
+          "weight": 0.0019887022454881335
+        },
+        {
+          "repeat": 1,
+          "iteration": 1600,
+          "weight": 0.01343726167753129
+        },
+        {
+          "repeat": 1,
+          "iteration": 2000,
+          "weight": 0.6436094556111678
+        },
+        {
+          "repeat": 2,
+          "iteration": 400,
+          "weight": 0.002081103184172662
+        },
+        {
+          "repeat": 2,
+          "iteration": 800,
+          "weight": 6.517780891617926e-09
+        },
+        {
+          "repeat": 2,
+          "iteration": 1200,
+          "weight": 0.02788427270686552
+        },
+        {
+          "repeat": 2,
+          "iteration": 1600,
+          "weight": 5.700702352032383e-06
+        },
+        {
+          "repeat": 2,
+          "iteration": 2000,
+          "weight": 0.00012681578890778134
+        }
+      ]
+    },
+    "solution_10": {
+      "frames": 15,
+      "weight_ess_uncorrected": 2.144619027469548,
+      "largest_normalized_weight": 0.5128850414476623,
+      "repeat_diagnostics": {
+        "0": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.9914209164488803,
+          "pooled_weight_fraction": 0.9625388275748288
+        },
+        "1": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.1018930564153733,
+          "pooled_weight_fraction": 0.03378118129962577
+        },
+        "2": {
+          "frames": 5,
+          "weight_ess_uncorrected": 1.1784092987239625,
+          "pooled_weight_fraction": 0.003679991125545385
+        }
+      },
+      "initial_coupling_for_requested_ess_fraction": 0.08935996139703768,
+      "all_frame_weights": [
+        {
+          "repeat": 0,
+          "iteration": 400,
+          "weight": 1.0150723694952092e-07
+        },
+        {
+          "repeat": 0,
+          "iteration": 800,
+          "weight": 0.5128850414476623
+        },
+        {
+          "repeat": 0,
+          "iteration": 1200,
+          "weight": 3.7220638598828673e-06
+        },
+        {
+          "repeat": 0,
+          "iteration": 1600,
+          "weight": 0.44964995432977894
+        },
+        {
+          "repeat": 0,
+          "iteration": 2000,
+          "weight": 8.226290651568926e-09
+        },
+        {
+          "repeat": 1,
+          "iteration": 400,
+          "weight": 0.00010758015816879529
+        },
+        {
+          "repeat": 1,
+          "iteration": 800,
+          "weight": 2.269952214952204e-07
+        },
+        {
+          "repeat": 1,
+          "iteration": 1200,
+          "weight": 8.794214554511562e-05
+        },
+        {
+          "repeat": 1,
+          "iteration": 1600,
+          "weight": 0.03214904068421098
+        },
+        {
+          "repeat": 1,
+          "iteration": 2000,
+          "weight": 0.0014363913164793822
+        },
+        {
+          "repeat": 2,
+          "iteration": 400,
+          "weight": 0.003378414435490547
+        },
+        {
+          "repeat": 2,
+          "iteration": 800,
+          "weight": 2.0825279896856385e-07
+        },
+        {
+          "repeat": 2,
+          "iteration": 1200,
+          "weight": 0.00027908150258595233
+        },
+        {
+          "repeat": 2,
+          "iteration": 1600,
+          "weight": 4.731200105313507e-07
+        },
+        {
+          "repeat": 2,
+          "iteration": 2000,
+          "weight": 2.181381465938575e-05
+        }
+      ]
+    }
+  },
+  "conservative_common_first_coupling": 0.08935996139703768,
+  "cautions": [
+    "Coupling values are diagnostic hints for the first step from the reference ensemble, not a complete lambda schedule.",
+    "No intermediate/target trajectories were sampled; this does not validate overlap for any subsequent bridge step.",
+    "ESS is not autocorrelation-corrected. The ESS-fraction threshold is an engineering heuristic, not a universal accuracy criterion.",
+    "Required before bridge dynamics: validate target forces, fixed-constraint manifold, periodic reference energy, and boundary smoothness."
+  ]
+}

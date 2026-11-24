@@ -1,0 +1,33 @@
+{
+  "schema": "same-frame-qmmm-mm-correction-v1",
+  "qm_mm_total_potential_kcal_mol": {
+    "bound_0": -34879.6617748573,
+    "bound_10": -34098.0509596605,
+    "solution_0": -32856.2791661266,
+    "solution_10": -32222.5610357906
+  },
+  "mm_only_potential_kcal_mol": {
+    "bound_0": -5184.8300876588,
+    "bound_10": -4923.5264902776,
+    "solution_0": -3163.3652460663,
+    "solution_10": -3055.7776856836
+  },
+  "qmmm_binding_difference_kcal_mol": {
+    "0": -2023.3826087306952,
+    "10": -1875.4899238698963
+  },
+  "mm_binding_difference_kcal_mol": {
+    "0": -2021.4648415924999,
+    "10": -1867.748804594
+  },
+  "qmmm_double_difference_kcal_mol": 147.8926848607989,
+  "mm_double_difference_kcal_mol": 153.71603699849993,
+  "qm_minus_mm_double_difference_kcal_mol": -5.823352137701022,
+  "status": "DIAGNOSTIC_COMPLETE",
+  "interpretation": [
+    "The MM-only values use the corrected LJSIGMA=1 QuanPol export.",
+    "This is a single-frame finite-shell diagnostic, not a free energy.",
+    "The previous -0.225 claim used mismatched 1-4 scaling and is superseded by this matched calculation.",
+    "This does not prove the QM correction is useless across frames; it establishes that multi-frame sampling is required before ranking claims."
+  ]
+}

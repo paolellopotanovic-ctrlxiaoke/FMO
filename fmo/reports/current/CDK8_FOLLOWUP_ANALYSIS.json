@@ -1,0 +1,1772 @@
+{
+  "generated_at_utc": "2026-10-21T13:12:46.595297+00:00",
+  "n": 10,
+  "production_changed": false,
+  "target_spearman": 0.6,
+  "goal_achieved_by_new_method": false,
+  "completed_controls": {
+    "input_pose": {
+      "status": "COMPLETE",
+      "n": 10,
+      "rows": [
+        {
+          "ligand": "12",
+          "experimental_dg": -9.83296,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -58.887,
+          "input_pose_three_state": -64.44641337172327,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -425.259,
+                "cavitation": 533.879,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 108.62,
+                "free_hartree": -765.455997271,
+                "internal_hartree": -765.629094886,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -5.87,
+                "cavitation": 38.578,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 32.708,
+                "free_hartree": -47.298665822,
+                "internal_hartree": -47.350788501,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "13",
+          "experimental_dg": -11.1972,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -55.512,
+          "input_pose_three_state": -56.719681511969796,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -428.86,
+                "cavitation": 535.442,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 106.582,
+                "free_hartree": -762.455598782,
+                "internal_hartree": -762.625448598,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -10.377,
+                "cavitation": 36.014,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 25.637,
+                "free_hartree": -44.310580664,
+                "internal_hartree": -44.351436012,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "14",
+          "experimental_dg": -11.0316,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -61.68,
+          "input_pose_three_state": -64.86354652952635,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -427.086,
+                "cavitation": 534.246,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 107.16,
+                "free_hartree": -764.925027906,
+                "internal_hartree": -765.095798777,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -9.818,
+                "cavitation": 38.888,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 29.071,
+                "free_hartree": -46.767031713,
+                "internal_hartree": -46.813359168,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "15",
+          "experimental_dg": -9.72018,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -64.07000000000001,
+          "input_pose_three_state": -68.63501965832003,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -426.75,
+                "cavitation": 533.869,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 107.119,
+                "free_hartree": -767.355445516,
+                "internal_hartree": -767.526150678,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -9.928,
+                "cavitation": 40.837,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 30.909,
+                "free_hartree": -49.191439098,
+                "internal_hartree": -49.240696364,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "16",
+          "experimental_dg": -10.6355,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -44.177,
+          "input_pose_three_state": -48.70026668330461,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -425.516,
+                "cavitation": 533.836,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 108.32,
+                "free_hartree": -767.368220475,
+                "internal_hartree": -767.540839142,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -9.333,
+                "cavitation": 42.02,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 32.687,
+                "free_hartree": -49.235982108,
+                "internal_hartree": -49.288072499,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "17",
+          "experimental_dg": -10.3953,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": 55.138000000000005,
+          "input_pose_three_state": 54.39693197590285,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -418.938,
+                "cavitation": 533.72,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 114.782,
+                "free_hartree": -768.869687181,
+                "internal_hartree": -769.052604432,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -9.634,
+                "cavitation": 43.101,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 33.466,
+                "free_hartree": -50.901744658,
+                "internal_hartree": -50.95507651,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "19",
+          "experimental_dg": -10.2248,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -52.766999999999996,
+          "input_pose_three_state": -58.39635105858803,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -427.898,
+                "cavitation": 535.582,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 107.684,
+                "free_hartree": -762.13449338,
+                "internal_hartree": -762.306098761,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -5.806,
+                "cavitation": 37.319,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 31.512,
+                "free_hartree": -43.986803319,
+                "internal_hartree": -44.03702145,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "20",
+          "experimental_dg": -10.2831,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -56.677,
+          "input_pose_three_state": -64.31497586478397,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -426.66,
+                "cavitation": 534.501,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 107.841,
+                "free_hartree": -764.612271342,
+                "internal_hartree": -764.784127135,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -5.613,
+                "cavitation": 40.129,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 34.515,
+                "free_hartree": -46.455149352,
+                "internal_hartree": -46.510153194,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "21",
+          "experimental_dg": -9.86234,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -57.286,
+          "input_pose_three_state": -63.68804683697813,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -425.985,
+                "cavitation": 534.617,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 108.632,
+                "free_hartree": -766.238913983,
+                "internal_hartree": -766.412030455,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -5.876,
+                "cavitation": 40.09,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 34.215,
+                "free_hartree": -48.082791068,
+                "internal_hartree": -48.137315729,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        },
+        {
+          "ligand": "22",
+          "experimental_dg": -11.2901,
+          "status": "SUCCEEDED",
+          "input_pose_tpie": -65.728,
+          "input_pose_three_state": -70.07539360991828,
+          "pcm_audit": {
+            "states": {
+              "complex": {
+                "electrostatic": -426.534,
+                "cavitation": 533.7,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 107.166,
+                "free_hartree": -764.375191703,
+                "internal_hartree": -764.545972008,
+                "automatic_idisp_disable_messages": 2
+              },
+              "ligand": {
+                "electrostatic": -9.681,
+                "cavitation": 40.121,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 30.44,
+                "free_hartree": -46.208889903,
+                "internal_hartree": -46.257399827,
+                "automatic_idisp_disable_messages": 0
+              },
+              "receptor": {
+                "electrostatic": -438.216,
+                "cavitation": 519.564,
+                "dispersion": 0.0,
+                "repulsion": 0.0,
+                "total": 81.348,
+                "free_hartree": -718.054629552,
+                "internal_hartree": -718.184265299,
+                "automatic_idisp_disable_messages": 2
+              }
+            },
+            "controls": {
+              "SOLVNT": "WATER",
+              "IEF": "-10",
+              "ICOMP": "0",
+              "ICAV": "1",
+              "IDISP": "0",
+              "IFMO": "-1"
+            },
+            "consistent": true
+          }
+        }
+      ],
+      "metrics": {
+        "input_pose_tpie": {
+          "pearson": 0.03702521728091203,
+          "spearman": -0.05454545454545454,
+          "kendall": -0.1111111111111111
+        },
+        "input_pose_three_state": {
+          "pearson": 0.006079822330806589,
+          "spearman": -0.09090909090909088,
+          "kendall": -0.1111111111111111
+        }
+      }
+    },
+    "gradient": {
+      "rows": [
+        {
+          "ligand": "13",
+          "step_angstrom": 0.001,
+          "status": "COMPLETE",
+          "atom_number": 589,
+          "axis": 2,
+          "analytic_hartree_bohr": 0.0487569,
+          "numerical_hartree_bohr": 0.04876315081330934,
+          "difference_hartree_bohr": 6.250813309342795e-06
+        },
+        {
+          "ligand": "13",
+          "step_angstrom": 0.0005,
+          "status": "COMPLETE",
+          "atom_number": 589,
+          "axis": 2,
+          "analytic_hartree_bohr": 0.0487569,
+          "numerical_hartree_bohr": 0.04874515879793006,
+          "difference_hartree_bohr": -1.1741202069939782e-05
+        },
+        {
+          "ligand": "17",
+          "step_angstrom": 0.001,
+          "status": "COMPLETE",
+          "atom_number": 589,
+          "axis": 2,
+          "analytic_hartree_bohr": 0.0395879,
+          "numerical_hartree_bohr": 0.03960600377943882,
+          "difference_hartree_bohr": 1.8103779438817524e-05
+        },
+        {
+          "ligand": "17",
+          "step_angstrom": 0.0005,
+          "status": "COMPLETE",
+          "atom_number": 589,
+          "axis": 2,
+          "analytic_hartree_bohr": 0.0395879,
+          "numerical_hartree_bohr": 0.03958774714817198,
+          "difference_hartree_bohr": -1.5285182802110553e-07
+        }
+      ],
+      "warning": "Two atoms/axes only, not exhaustive gradient validation; PCM tessellation and energy precision affect finite differences"
+    },
+    "amide_geometry": {
+      "rows": [
+        {
+          "ligand": "12",
+          "amide_torsions": {
+            "input": [],
+            "k10": [],
+            "qm_free": []
+          }
+        },
+        {
+          "ligand": "13",
+          "amide_torsions": {
+            "input": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  27
+                ],
+                "angle_deg": 1.823469120180331,
+                "departure_from_planarity_deg": 1.823469120180331
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -178.18641876049892,
+                "departure_from_planarity_deg": 1.813581239501076
+              }
+            ],
+            "k10": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  27
+                ],
+                "angle_deg": -11.485700676289792,
+                "departure_from_planarity_deg": 11.485700676289792
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -171.37914984713316,
+                "departure_from_planarity_deg": 8.620850152866836
+              }
+            ],
+            "qm_free": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  27
+                ],
+                "angle_deg": 1.0383408369568348,
+                "departure_from_planarity_deg": 1.0383408369568348
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -177.24311022381374,
+                "departure_from_planarity_deg": 2.756889776186256
+              }
+            ]
+          }
+        },
+        {
+          "ligand": "14",
+          "amide_torsions": {
+            "input": [
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  9
+                ],
+                "angle_deg": 1.8253361412311746,
+                "departure_from_planarity_deg": 1.8253361412311746
+              },
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  24
+                ],
+                "angle_deg": -178.18641876049892,
+                "departure_from_planarity_deg": 1.813581239501076
+              }
+            ],
+            "k10": [
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  9
+                ],
+                "angle_deg": -6.22941286092423,
+                "departure_from_planarity_deg": 6.22941286092423
+              },
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  24
+                ],
+                "angle_deg": -171.1729521510309,
+                "departure_from_planarity_deg": 8.827047848969102
+              }
+            ],
+            "qm_free": [
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  9
+                ],
+                "angle_deg": 3.5536842634997705,
+                "departure_from_planarity_deg": 3.5536842634997705
+              },
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  24
+                ],
+                "angle_deg": -178.6380021306034,
+                "departure_from_planarity_deg": 1.361997869396589
+              }
+            ]
+          }
+        },
+        {
+          "ligand": "15",
+          "amide_torsions": {
+            "input": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  23
+                ],
+                "angle_deg": -178.18437642042832,
+                "departure_from_planarity_deg": 1.8156235795716782
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": 1.8265265169581468,
+                "departure_from_planarity_deg": 1.8265265169581468
+              }
+            ],
+            "k10": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  23
+                ],
+                "angle_deg": -175.93901269204406,
+                "departure_from_planarity_deg": 4.060987307955941
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": 1.463583133981487,
+                "departure_from_planarity_deg": 1.463583133981487
+              }
+            ],
+            "qm_free": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  23
+                ],
+                "angle_deg": -172.72825031975185,
+                "departure_from_planarity_deg": 7.271749680248149
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": 4.443037136625935,
+                "departure_from_planarity_deg": 4.443037136625935
+              }
+            ]
+          }
+        },
+        {
+          "ligand": "16",
+          "amide_torsions": {
+            "input": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -178.18641876049892,
+                "departure_from_planarity_deg": 1.813581239501076
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  29
+                ],
+                "angle_deg": 1.4779253402134662,
+                "departure_from_planarity_deg": 1.4779253402134662
+              }
+            ],
+            "k10": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": 177.38259720298515,
+                "departure_from_planarity_deg": 2.6174027970148472
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  29
+                ],
+                "angle_deg": -11.42704405303597,
+                "departure_from_planarity_deg": 11.42704405303597
+              }
+            ],
+            "qm_free": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -177.24746868062292,
+                "departure_from_planarity_deg": 2.752531319377084
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  29
+                ],
+                "angle_deg": -0.6981550294720187,
+                "departure_from_planarity_deg": 0.6981550294720187
+              }
+            ]
+          }
+        },
+        {
+          "ligand": "17",
+          "amide_torsions": {
+            "input": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -178.18641876049892,
+                "departure_from_planarity_deg": 1.813581239501076
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  29
+                ],
+                "angle_deg": 1.4779253402134662,
+                "departure_from_planarity_deg": 1.4779253402134662
+              }
+            ],
+            "k10": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": 173.71058966010543,
+                "departure_from_planarity_deg": 6.289410339894573
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  29
+                ],
+                "angle_deg": -54.95669457113352,
+                "departure_from_planarity_deg": 54.95669457113352
+              }
+            ],
+            "qm_free": [
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  28
+                ],
+                "angle_deg": -175.4607470478689,
+                "departure_from_planarity_deg": 4.539252952131108
+              },
+              {
+                "atoms_zero_based": [
+                  9,
+                  8,
+                  7,
+                  29
+                ],
+                "angle_deg": -3.519731156751584,
+                "departure_from_planarity_deg": 3.519731156751584
+              }
+            ]
+          }
+        },
+        {
+          "ligand": "19",
+          "amide_torsions": {
+            "input": [],
+            "k10": [],
+            "qm_free": []
+          }
+        },
+        {
+          "ligand": "20",
+          "amide_torsions": {
+            "input": [],
+            "k10": [],
+            "qm_free": []
+          }
+        },
+        {
+          "ligand": "21",
+          "amide_torsions": {
+            "input": [],
+            "k10": [],
+            "qm_free": []
+          }
+        },
+        {
+          "ligand": "22",
+          "amide_torsions": {
+            "input": [
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  9
+                ],
+                "angle_deg": 1.8253361412311746,
+                "departure_from_planarity_deg": 1.8253361412311746
+              },
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  24
+                ],
+                "angle_deg": -178.18641876049892,
+                "departure_from_planarity_deg": 1.813581239501076
+              }
+            ],
+            "k10": [
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  9
+                ],
+                "angle_deg": -5.983135343902956,
+                "departure_from_planarity_deg": 5.983135343902956
+              },
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  24
+                ],
+                "angle_deg": -170.69219696689683,
+                "departure_from_planarity_deg": 9.30780303310317
+              }
+            ],
+            "qm_free": [
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  9
+                ],
+                "angle_deg": 3.568123340535058,
+                "departure_from_planarity_deg": 3.568123340535058
+              },
+              {
+                "atoms_zero_based": [
+                  10,
+                  8,
+                  7,
+                  24
+                ],
+                "angle_deg": -178.61414169439962,
+                "departure_from_planarity_deg": 1.3858583056003795
+              }
+            ]
+          }
+        }
+      ],
+      "warning": "Twist identifies sensitivity, not proof of erroneous chemistry or a direction for affinity improvement"
+    }
+  },
+  "mm_internal_geometry_diagnostic": {
+    "rows": [
+      {
+        "ligand": "12",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 25.13515602360855,
+            "components": {
+              "NonbondedForce": 2.4105133575801068,
+              "HarmonicBondForce": 4.072448926576299,
+              "PeriodicTorsionForce": 5.800895139574552,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 12.851298599877593
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 10.303578755226404,
+            "components": {
+              "NonbondedForce": -2.606267888712773,
+              "HarmonicBondForce": 1.1019177873709582,
+              "PeriodicTorsionForce": 6.768217857392595,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 5.039710999175623
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 14.5224665810735,
+            "components": {
+              "NonbondedForce": -0.13054174021848555,
+              "HarmonicBondForce": 1.1250386175233706,
+              "PeriodicTorsionForce": 5.374050342448908,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 8.153919361319707
+            }
+          },
+          "qm_bound": {
+            "total_kcal_mol": 16.114391039214667,
+            "components": {
+              "NonbondedForce": -0.8016624972981587,
+              "HarmonicBondForce": 1.7873253028062686,
+              "PeriodicTorsionForce": 7.825687763659076,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 7.303040470047481
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "13",
+        "energies": {
+          "input": {
+            "total_kcal_mol": -10.68091885307919,
+            "components": {
+              "NonbondedForce": -35.52453063688006,
+              "HarmonicBondForce": 3.6832828005832843,
+              "PeriodicTorsionForce": 8.88738780953711,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 12.272941173680477
+            }
+          },
+          "k10": {
+            "total_kcal_mol": -22.392422969071077,
+            "components": {
+              "NonbondedForce": -38.5598521354693,
+              "HarmonicBondForce": 1.36223247019036,
+              "PeriodicTorsionForce": 9.966335178657973,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 4.83886151754989
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": -18.152975240296108,
+            "components": {
+              "NonbondedForce": -34.90513969442291,
+              "HarmonicBondForce": 1.6779534068951727,
+              "PeriodicTorsionForce": 8.623886973100811,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.450324074130816
+            }
+          },
+          "qm_bound": {
+            "total_kcal_mol": -18.288101516330663,
+            "components": {
+              "NonbondedForce": -35.66916969156392,
+              "HarmonicBondForce": 1.8038743371232255,
+              "PeriodicTorsionForce": 9.808582674726868,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 5.768611163383171
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "14",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 13.681087362741764,
+            "components": {
+              "NonbondedForce": -11.309211307196168,
+              "HarmonicBondForce": 3.6665340817278724,
+              "PeriodicTorsionForce": 8.70697015562419,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 12.616794432585872
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 1.394190243412841,
+            "components": {
+              "NonbondedForce": -14.18152337967143,
+              "HarmonicBondForce": 1.0587986799219216,
+              "PeriodicTorsionForce": 9.754173792718774,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 4.762741150443576
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 5.343045074266129,
+            "components": {
+              "NonbondedForce": -11.701749085501325,
+              "HarmonicBondForce": 1.9234057987638928,
+              "PeriodicTorsionForce": 8.37332968798305,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.748058673020512
+            }
+          },
+          "qm_bound": {
+            "total_kcal_mol": 7.136344876977247,
+            "components": {
+              "NonbondedForce": -12.750563244621391,
+              "HarmonicBondForce": 2.4608586294786523,
+              "PeriodicTorsionForce": 10.91102274922477,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.515026742895216
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "15",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 245.990011750379,
+            "components": {
+              "NonbondedForce": 216.0998275768971,
+              "HarmonicBondForce": 5.269719460126379,
+              "PeriodicTorsionForce": 12.14371930595399,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 12.476745407401522
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 25.390994459087203,
+            "components": {
+              "NonbondedForce": 3.7251963633855776,
+              "HarmonicBondForce": 1.331907992584107,
+              "PeriodicTorsionForce": 13.321472710247141,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 7.012417392870377
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 31.538682523100622,
+            "components": {
+              "NonbondedForce": 7.527789578557234,
+              "HarmonicBondForce": 2.362413040093771,
+              "PeriodicTorsionForce": 12.63402076978818,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 9.01445913466144
+            }
+          },
+          "qm_bound": {
+            "total_kcal_mol": 32.26467222505314,
+            "components": {
+              "NonbondedForce": 5.958446731569133,
+              "HarmonicBondForce": 3.0229113882837315,
+              "PeriodicTorsionForce": 13.952361582651244,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 9.330952522549028
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "16",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 9.268235352549475,
+            "components": {
+              "NonbondedForce": -16.999851253577575,
+              "HarmonicBondForce": 3.9627782498456763,
+              "PeriodicTorsionForce": 8.912468437854294,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 13.392839918427079
+            }
+          },
+          "k10": {
+            "total_kcal_mol": -3.0681575116599578,
+            "components": {
+              "NonbondedForce": -19.84037550694925,
+              "HarmonicBondForce": 1.238933391820535,
+              "PeriodicTorsionForce": 9.990483652621556,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 5.542800950847202
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 0.33735186626279356,
+            "components": {
+              "NonbondedForce": -17.085729817685,
+              "HarmonicBondForce": 2.060561567483577,
+              "PeriodicTorsionForce": 8.34352066824095,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 7.0189994482232665
+            }
+          },
+          "qm_bound": {
+            "total_kcal_mol": 2.6824858938990537,
+            "components": {
+              "NonbondedForce": -18.4974902384795,
+              "HarmonicBondForce": 2.545289243489414,
+              "PeriodicTorsionForce": 11.986817535144786,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.647869353744355
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "17",
+        "energies": {
+          "input": {
+            "total_kcal_mol": -11.777808659169695,
+            "components": {
+              "NonbondedForce": -17.31043941013233,
+              "HarmonicBondForce": 5.060016785419698,
+              "PeriodicTorsionForce": -12.795020896889643,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 13.267634862432574
+            }
+          },
+          "k10": {
+            "total_kcal_mol": -9.864333228008052,
+            "components": {
+              "NonbondedForce": -20.555818358644203,
+              "HarmonicBondForce": 2.149133175737532,
+              "PeriodicTorsionForce": -2.1808005965396435,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 10.723152551438265
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": -19.01739055037685,
+            "components": {
+              "NonbondedForce": -17.24122289373363,
+              "HarmonicBondForce": 3.0457641847748733,
+              "PeriodicTorsionForce": -12.040398514692077,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 7.218466673273989
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "19",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 21.650169235208494,
+            "components": {
+              "NonbondedForce": -5.560468446837422,
+              "HarmonicBondForce": 3.349848274812933,
+              "PeriodicTorsionForce": 9.275716600476567,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 14.585072806756415
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 7.624933981054418,
+            "components": {
+              "NonbondedForce": -8.00642532068484,
+              "HarmonicBondForce": 1.1815345058710767,
+              "PeriodicTorsionForce": 9.726656706618025,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 4.723168089250157
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 10.928951915724475,
+            "components": {
+              "NonbondedForce": -5.4769337965221325,
+              "HarmonicBondForce": 1.0785045735790662,
+              "PeriodicTorsionForce": 8.967100096397063,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.36028104227048
+            }
+          },
+          "qm_bound": {
+            "total_kcal_mol": 11.700972237786813,
+            "components": {
+              "NonbondedForce": -6.5903695877300565,
+              "HarmonicBondForce": 1.3020266738171336,
+              "PeriodicTorsionForce": 10.84350199919222,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.145813152507514
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "20",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 30.20588080188171,
+            "components": {
+              "NonbondedForce": 4.901465354095081,
+              "HarmonicBondForce": 3.3766413347886655,
+              "PeriodicTorsionForce": 6.923805917121127,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 15.00396819587684
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 17.09362622987256,
+            "components": {
+              "NonbondedForce": 3.2906641054604493,
+              "HarmonicBondForce": 1.2004625791217287,
+              "PeriodicTorsionForce": 7.620553563260794,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 4.981945982029587
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 19.683474833609132,
+            "components": {
+              "NonbondedForce": 5.553904604137982,
+              "HarmonicBondForce": 1.0740478664547877,
+              "PeriodicTorsionForce": 6.263548531809809,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.791973831206552
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "21",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 1471.1589533548424,
+            "components": {
+              "NonbondedForce": 1467.1426850675766,
+              "HarmonicBondForce": 4.474025455658608,
+              "PeriodicTorsionForce": -13.03260413279625,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 12.57484696440362
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 11.591496161915785,
+            "components": {
+              "NonbondedForce": 16.92134430305906,
+              "HarmonicBondForce": 1.1801011811098705,
+              "PeriodicTorsionForce": -12.162566078043627,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 5.6526167557904845
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 14.72534236799663,
+            "components": {
+              "NonbondedForce": 18.213257572744833,
+              "HarmonicBondForce": 2.094056864174761,
+              "PeriodicTorsionForce": -11.117771561892184,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 5.535799492969218
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      },
+      {
+        "ligand": "22",
+        "energies": {
+          "input": {
+            "total_kcal_mol": 13.262699669932985,
+            "components": {
+              "NonbondedForce": -11.919158258522597,
+              "HarmonicBondForce": 3.857921582078009,
+              "PeriodicTorsionForce": 8.70696301229606,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 12.616973334081512
+            }
+          },
+          "k10": {
+            "total_kcal_mol": 0.7467144044480799,
+            "components": {
+              "NonbondedForce": -14.810359835045283,
+              "HarmonicBondForce": 0.9997308127662096,
+              "PeriodicTorsionForce": 9.704634172297093,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 4.852709254430062
+            }
+          },
+          "qm_free": {
+            "total_kcal_mol": 4.85008059958915,
+            "components": {
+              "NonbondedForce": -12.371975689496814,
+              "HarmonicBondForce": 2.1199791827845904,
+              "PeriodicTorsionForce": 8.294735574131204,
+              "CMMotionRemover": 0.0,
+              "HarmonicAngleForce": 6.807341532170171
+            }
+          }
+        },
+        "chemical_state": "same explicit-H input state; same molecule/charges for all geometries"
+      }
+    ],
+    "n": 10,
+    "warning": "Within-molecule energy differences only; never compare absolute ligand totals across different molecules"
+  },
+  "geometry_status": {
+    "12": "SUCCEEDED",
+    "13": "SUCCEEDED",
+    "14": "SUCCEEDED",
+    "15": "SUCCEEDED",
+    "16": "SUCCEEDED",
+    "17": "SUCCEEDED",
+    "19": "SUCCEEDED",
+    "20": "SUCCEEDED",
+    "21": "SUCCEEDED",
+    "22": "SUCCEEDED"
+  },
+  "geometry_complete": true,
+  "metrics": {
+    "tpie_pcm": {
+      "pearson": 0.27411894151891825,
+      "spearman": 0.23636363636363633,
+      "kendall": 0.15555555555555553
+    },
+    "three_state_pcm_bound": {
+      "pearson": -0.15451300149090447,
+      "spearman": 0.06666666666666665,
+      "kendall": 0.06666666666666667
+    },
+    "three_state_pcm_free_min": {
+      "pearson": -0.07572848829620513,
+      "spearman": 0.05454545454545454,
+      "kendall": 0.022222222222222223
+    },
+    "tpie_plus_ligand_strain": {
+      "pearson": 0.18361507359101842,
+      "spearman": 0.17575757575757575,
+      "kendall": 0.06666666666666667
+    },
+    "three_state_pcm_multistart": {
+      "pearson": 0.009719467095454598,
+      "spearman": -0.0303030303030303,
+      "kendall": -0.022222222222222223
+    },
+    "tpie_plus_multistart_strain": {
+      "pearson": 0.25980986572114784,
+      "spearman": 0.2606060606060606,
+      "kendall": 0.15555555555555553
+    },
+    "input_pose_tpie": {
+      "pearson": 0.03702521728091203,
+      "spearman": -0.05454545454545454,
+      "kendall": -0.1111111111111111
+    },
+    "input_pose_three_state": {
+      "pearson": 0.006079822330806589,
+      "spearman": -0.09090909090909088,
+      "kendall": -0.1111111111111111
+    },
+    "original_tpie": {
+      "pearson": 0.27411894151891825,
+      "spearman": 0.23636363636363633,
+      "kendall": 0.15555555555555553,
+      "leave_one_out_spearman_range_diagnostic_only": [
+        -0.049999999999999996,
+        0.4666666666666666
+      ],
+      "correct_pairs_of_45": 26
+    },
+    "qm_bound_tpie": {
+      "pearson": 0.092643632049037,
+      "spearman": 0.16363636363636364,
+      "kendall": 0.1111111111111111,
+      "leave_one_out_spearman_range_diagnostic_only": [
+        -0.15,
+        0.45
+      ],
+      "correct_pairs_of_45": 25
+    },
+    "qm_bound_three_state": {
+      "pearson": -0.1885080109637581,
+      "spearman": -0.07878787878787878,
+      "kendall": -0.022222222222222223,
+      "leave_one_out_spearman_range_diagnostic_only": [
+        -0.33333333333333337,
+        0.26666666666666666
+      ],
+      "correct_pairs_of_45": 22
+    },
+    "qm_bound_strain_hybrid": {
+      "pearson": 0.1721468052870681,
+      "spearman": 0.06666666666666665,
+      "kendall": 0.022222222222222223,
+      "leave_one_out_spearman_range_diagnostic_only": [
+        -0.13333333333333333,
+        0.4666666666666666
+      ],
+      "correct_pairs_of_45": 23
+    },
+    "fep_archived_dg": {
+      "pearson": 0.6628589108471468,
+      "spearman": 0.6484848484848483,
+      "kendall": 0.37777777777777777,
+      "leave_one_out_spearman_range_diagnostic_only": [
+        0.6,
+        0.6833333333333333
+      ],
+      "correct_pairs_of_45": 31
+    }
+  },
+  "optimization_last_steps": {
+    "12": "NSERCH:  43  E=     -765.4925761258  GRAD. MAX=  0.0000968  R.M.S.=  0.0000086",
+    "13": "NSERCH:  36  E=     -762.4914572023  GRAD. MAX=  0.0000937  R.M.S.=  0.0000074",
+    "14": "NSERCH:  43  E=     -764.9623265831  GRAD. MAX=  0.0000620  R.M.S.=  0.0000047",
+    "15": "NSERCH:  43  E=     -767.4287724499  GRAD. MAX=  0.0000752  R.M.S.=  0.0000065",
+    "16": "NSERCH:  36  E=     -767.4392753780  GRAD. MAX=  0.0000833  R.M.S.=  0.0000062",
+    "17": "NSERCH:  42  E=     -769.0867448220  GRAD. MAX=  0.0000695  R.M.S.=  0.0000065",
+    "19": "NSERCH:  35  E=     -762.1712130201  GRAD. MAX=  0.0000715  R.M.S.=  0.0000049",
+    "20": "NSERCH:  50  E=     -764.6493732265  GRAD. MAX=  0.0000570  R.M.S.=  0.0000044",
+    "21": "NSERCH:  96  E=     -766.3224568920  GRAD. MAX=  0.0000649  R.M.S.=  0.0000038",
+    "22": "NSERCH:  46  E=     -764.4102346990  GRAD. MAX=  0.0000750  R.M.S.=  0.0000055"
+  },
+  "archived_fep_rows": [
+    {
+      "ligand": "12",
+      "experimental_dg": -9.83295726776123,
+      "predicted_dg": -9.300000190734863,
+      "prediction_minus_experiment": 0.5329570770263672
+    },
+    {
+      "ligand": "13",
+      "experimental_dg": -11.19720458984375,
+      "predicted_dg": -11.390000343322754,
+      "prediction_minus_experiment": -0.1927957534790039
+    },
+    {
+      "ligand": "14",
+      "experimental_dg": -11.031554222106934,
+      "predicted_dg": -10.8100004196167,
+      "prediction_minus_experiment": 0.22155380249023438
+    },
+    {
+      "ligand": "15",
+      "experimental_dg": -9.720175743103027,
+      "predicted_dg": -10.170000076293945,
+      "prediction_minus_experiment": -0.44982433319091797
+    },
+    {
+      "ligand": "16",
+      "experimental_dg": -10.635504722595215,
+      "predicted_dg": -11.640000343322754,
+      "prediction_minus_experiment": -1.004495620727539
+    },
+    {
+      "ligand": "17",
+      "experimental_dg": -10.395273208618164,
+      "predicted_dg": -12.149999618530273,
+      "prediction_minus_experiment": -1.7547264099121094
+    },
+    {
+      "ligand": "19",
+      "experimental_dg": -10.224825859069824,
+      "predicted_dg": -10.100000381469727,
+      "prediction_minus_experiment": 0.12482547760009766
+    },
+    {
+      "ligand": "20",
+      "experimental_dg": -10.283149719238281,
+      "predicted_dg": -9.430000305175781,
+      "prediction_minus_experiment": 0.8531494140625
+    },
+    {
+      "ligand": "21",
+      "experimental_dg": -9.862342834472656,
+      "predicted_dg": -8.210000038146973,
+      "prediction_minus_experiment": 1.6523427963256836
+    },
+    {
+      "ligand": "22",
+      "experimental_dg": -11.290130615234375,
+      "predicted_dg": -11.279999732971191,
+      "prediction_minus_experiment": 0.010130882263183594
+    }
+  ],
+  "rank_diagnostics": {
+    "tpie": {
+      "squared_rank_displacement": 126.0,
+      "correct_pairs_of_45": 26,
+      "rows": [
+        {
+          "ligand": "12",
+          "experimental_rank": 9.0,
+          "predicted_rank": 6.0
+        },
+        {
+          "ligand": "13",
+          "experimental_rank": 2.0,
+          "predicted_rank": 9.0
+        },
+        {
+          "ligand": "14",
+          "experimental_rank": 3.0,
+          "predicted_rank": 4.0
+        },
+        {
+          "ligand": "15",
+          "experimental_rank": 10.0,
+          "predicted_rank": 3.0
+        },
+        {
+          "ligand": "16",
+          "experimental_rank": 4.0,
+          "predicted_rank": 2.0
+        },
+        {
+          "ligand": "17",
+          "experimental_rank": 5.0,
+          "predicted_rank": 5.0
+        },
+        {
+          "ligand": "19",
+          "experimental_rank": 7.0,
+          "predicted_rank": 10.0
+        },
+        {
+          "ligand": "20",
+          "experimental_rank": 6.0,
+          "predicted_rank": 8.0
+        },
+        {
+          "ligand": "21",
+          "experimental_rank": 8.0,
+          "predicted_rank": 7.0
+        },
+        {
+          "ligand": "22",
+          "experimental_rank": 1.0,
+          "predicted_rank": 1.0
+        }
+      ]
+    },
+    "fep": {
+      "squared_rank_displacement": 58.0,
+      "correct_pairs_of_45": 31,
+      "rows": [
+        {
+          "ligand": "12",
+          "experimental_rank": 9.0,
+          "predicted_rank": 9.0
+        },
+        {
+          "ligand": "13",
+          "experimental_rank": 2.0,
+          "predicted_rank": 3.0
+        },
+        {
+          "ligand": "14",
+          "experimental_rank": 3.0,
+          "predicted_rank": 5.0
+        },
+        {
+          "ligand": "15",
+          "experimental_rank": 10.0,
+          "predicted_rank": 6.0
+        },
+        {
+          "ligand": "16",
+          "experimental_rank": 4.0,
+          "predicted_rank": 2.0
+        },
+        {
+          "ligand": "17",
+          "experimental_rank": 5.0,
+          "predicted_rank": 1.0
+        },
+        {
+          "ligand": "19",
+          "experimental_rank": 7.0,
+          "predicted_rank": 7.0
+        },
+        {
+          "ligand": "20",
+          "experimental_rank": 6.0,
+          "predicted_rank": 8.0
+        },
+        {
+          "ligand": "21",
+          "experimental_rank": 8.0,
+          "predicted_rank": 10.0
+        },
+        {
+          "ligand": "22",
+          "experimental_rank": 1.0,
+          "predicted_rank": 4.0
+        }
+      ]
+    }
+  },
+  "experimental_range_kcal_mol": 1.5699200000000015,
+  "original_tpie_range_kcal_mol": 10.901000000000003,
+  "original_multistart_strain_range_kcal_mol": 18.716435801015948,
+  "sources_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/final_evaluation.json": "e02af645162ef377958122ba98236a59da0a4e6d1fbefd3efdbaaa50ab846f66",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/solution_sampling4/final_evaluation.json": "d9c1d5641aa343a258420edeefd1cb6a4b97e29481f5fff73c31535931e58ca0",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_input_pose_control_20261021/evaluation.json": "91215978780e7d5e6c12aa9b53c07d29a24021311515bfff6df236ae045dc59d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_bound_qm_20261021/gradient_check/evaluation.json": "2bb64f9bf47ba15172f861fc2ae1fc48cf659d5f17eb0045ff119fb98962ee1e",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_solution_cycle_consistent_20261021/amide_geometry_diagnostic.json": "09fc3a8cdd478e64a0858052299286e280b90e4cad04f49d5406f23f12100bbc",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/vendor/public_binding_free_energy_benchmark/21_4_results/ligand_predictions/misc/cdk8_koehler_213_out.csv": "64cc2407992298f9d0b70ff25dc0d4996eb47c386c811e5d1696ce5345fc62d1",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/CDK8_bound_qm_20261021/mm_internal/evaluation.json": "6b6011019d2c1c98ac36e5d6ae95aa910533b292615d75f631fae6fbd643ec16"
+  },
+  "limitations": [
+    "QM bound arm changes the geometry potential, removes positional restraint, and uses a capped pocket instead of whole-protein MM; not a pure one-variable model comparison",
+    "No entropy, water population free energy or converged QM/MM free energy correction computed",
+    "Finite-difference checks cover two atoms/axes only",
+    "Development set, not blind validation"
+  ]
+}

@@ -1,0 +1,193 @@
+{
+  "ligand": "CAT-4c",
+  "forcefield": "openff-2.2.0.offxml",
+  "nh2_indices": [
+    20
+  ],
+  "assignments": {
+    "Constraints": [
+      {
+        "atoms": [
+          20,
+          42
+        ],
+        "parameter": "{'smirks': '[#1:1]-[*:2]', 'id': 'c1'}"
+      },
+      {
+        "atoms": [
+          20,
+          49
+        ],
+        "parameter": "{'smirks': '[#1:1]-[*:2]', 'id': 'c1'}"
+      }
+    ],
+    "Bonds": [
+      {
+        "atoms": [
+          19,
+          20
+        ],
+        "parameter": "{'smirks': '[#6X3:1]-[#7X3:2]', 'id': 'b8', 'length': <Quantity(1.38950295, 'angstrom')>, 'k': <Quantity(658.526143, 'kilocalorie_per_mole / angstrom ** 2')>}"
+      },
+      {
+        "atoms": [
+          20,
+          42
+        ],
+        "parameter": "{'smirks': '[#7:1]-[#1:2]', 'id': 'b87', 'length': <Quantity(1.01860473, 'angstrom')>, 'k': <Quantity(961.980976, 'kilocalorie_per_mole / angstrom ** 2')>}"
+      },
+      {
+        "atoms": [
+          20,
+          49
+        ],
+        "parameter": "{'smirks': '[#7:1]-[#1:2]', 'id': 'b87', 'length': <Quantity(1.01860473, 'angstrom')>, 'k': <Quantity(961.980976, 'kilocalorie_per_mole / angstrom ** 2')>}"
+      }
+    ],
+    "Angles": [
+      {
+        "atoms": [
+          18,
+          19,
+          20
+        ],
+        "parameter": "{'smirks': '[*:1]~;!@[*;X3;r5:2]~;@[*;r5:3]', 'angle': <Quantity(124.801611, 'degree')>, 'k': <Quantity(101.803525, 'kilocalorie_per_mole / radian ** 2')>, 'id': 'a14'}"
+      },
+      {
+        "atoms": [
+          19,
+          20,
+          42
+        ],
+        "parameter": "{'smirks': '[#1:1]-[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]-[*:3]', 'angle': <Quantity(118.063661, 'degree')>, 'k': <Quantity(74.2096821, 'kilocalorie_per_mole / radian ** 2')>, 'id': 'a21'}"
+      },
+      {
+        "atoms": [
+          19,
+          20,
+          49
+        ],
+        "parameter": "{'smirks': '[#1:1]-[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]-[*:3]', 'angle': <Quantity(118.063661, 'degree')>, 'k': <Quantity(74.2096821, 'kilocalorie_per_mole / radian ** 2')>, 'id': 'a21'}"
+      },
+      {
+        "atoms": [
+          20,
+          19,
+          21
+        ],
+        "parameter": "{'smirks': '[*:1]~;!@[*;X3;r5:2]~;@[*;r5:3]', 'angle': <Quantity(124.801611, 'degree')>, 'k': <Quantity(101.803525, 'kilocalorie_per_mole / radian ** 2')>, 'id': 'a14'}"
+      },
+      {
+        "atoms": [
+          42,
+          20,
+          49
+        ],
+        "parameter": "{'smirks': '[#1:1]-[#7X3$(*~[#6X3,#6X2,#7X2+0]):2]-[*:3]', 'angle': <Quantity(118.063661, 'degree')>, 'k': <Quantity(74.2096821, 'kilocalorie_per_mole / radian ** 2')>, 'id': 'a21'}"
+      }
+    ],
+    "ProperTorsions": [
+      {
+        "atoms": [
+          11,
+          18,
+          19,
+          20
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3+1:2]=,:[#6X3:3]-,:[*:4]', 'periodicity1': 2, 'phase1': <Quantity(180.0, 'degree')>, 'id': 't87', 'k1': <Quantity(1.01249095, 'kilocalorie / mole')>, 'idivf1': 1.0}"
+      },
+      {
+        "atoms": [
+          18,
+          19,
+          20,
+          42
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3:2]-!@[#6X3:3](=[#8,#16,#7:4])-[#7X3]', 'periodicity1': 2, 'periodicity2': 1, 'phase1': <Quantity(180.0, 'degree')>, 'phase2': <Quantity(0.0, 'degree')>, 'id': 't79', 'k1': <Quantity(0.971661768, 'kilocalorie / mole')>, 'k2': <Quantity(0.798776238, 'kilocalorie / mole')>, 'idivf1': 1.0, 'idivf2': 1.0}"
+      },
+      {
+        "atoms": [
+          18,
+          19,
+          20,
+          49
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3:2]-!@[#6X3:3](=[#8,#16,#7:4])-[#7X3]', 'periodicity1': 2, 'periodicity2': 1, 'phase1': <Quantity(180.0, 'degree')>, 'phase2': <Quantity(0.0, 'degree')>, 'id': 't79', 'k1': <Quantity(0.971661768, 'kilocalorie / mole')>, 'k2': <Quantity(0.798776238, 'kilocalorie / mole')>, 'idivf1': 1.0, 'idivf2': 1.0}"
+      },
+      {
+        "atoms": [
+          20,
+          19,
+          18,
+          41
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3+1:2]=,:[#6X3:3]-,:[*:4]', 'periodicity1': 2, 'phase1': <Quantity(180.0, 'degree')>, 'id': 't87', 'k1': <Quantity(1.01249095, 'kilocalorie / mole')>, 'idivf1': 1.0}"
+      },
+      {
+        "atoms": [
+          20,
+          19,
+          21,
+          22
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3;r5:2]-@[#6X3;r5:3]~[*:4]', 'periodicity1': 2, 'phase1': <Quantity(180.0, 'degree')>, 'id': 't80', 'k1': <Quantity(1.46912827, 'kilocalorie / mole')>, 'idivf1': 1.0}"
+      },
+      {
+        "atoms": [
+          20,
+          19,
+          21,
+          23
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3;r5:2]-@[#6X3;r5:3]~[*:4]', 'periodicity1': 2, 'phase1': <Quantity(180.0, 'degree')>, 'id': 't80', 'k1': <Quantity(1.46912827, 'kilocalorie / mole')>, 'idivf1': 1.0}"
+      },
+      {
+        "atoms": [
+          21,
+          19,
+          20,
+          42
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3:2]-[#6X3$(*=[#8,#16,#7]):3]~[*:4]', 'periodicity1': 2, 'periodicity2': 1, 'phase1': <Quantity(180.0, 'degree')>, 'phase2': <Quantity(0.0, 'degree')>, 'id': 't75', 'k1': <Quantity(2.1305204, 'kilocalorie / mole')>, 'k2': <Quantity(0.294037905, 'kilocalorie / mole')>, 'idivf1': 1.0, 'idivf2': 1.0}"
+      },
+      {
+        "atoms": [
+          21,
+          19,
+          20,
+          49
+        ],
+        "parameter": "{'smirks': '[*:1]-[#7X3:2]-[#6X3$(*=[#8,#16,#7]):3]~[*:4]', 'periodicity1': 2, 'periodicity2': 1, 'phase1': <Quantity(180.0, 'degree')>, 'phase2': <Quantity(0.0, 'degree')>, 'id': 't75', 'k1': <Quantity(2.1305204, 'kilocalorie / mole')>, 'k2': <Quantity(0.294037905, 'kilocalorie / mole')>, 'idivf1': 1.0, 'idivf2': 1.0}"
+      }
+    ],
+    "ImproperTorsions": [
+      {
+        "atoms": [
+          18,
+          19,
+          20,
+          21
+        ],
+        "parameter": "{'smirks': '[*:1]~[#6X3:2](=[#7X2,#7X3+1:3])~[#7:4]', 'periodicity1': 2, 'phase1': <Quantity(180.0, 'degree')>, 'k1': <Quantity(10.1224698, 'kilocalorie / mole')>, 'id': 'i7'}"
+      },
+      {
+        "atoms": [
+          19,
+          20,
+          42,
+          49
+        ],
+        "parameter": "{'smirks': '[*:1]~[#7X3$(*~[#6X3]):2](~[*:3])~[*:4]', 'periodicity1': 2, 'phase1': <Quantity(180.0, 'degree')>, 'k1': <Quantity(1.2562625, 'kilocalorie / mole')>, 'id': 'i4'}"
+      }
+    ],
+    "vdW": [
+      {
+        "atoms": [
+          20
+        ],
+        "parameter": "{'smirks': '[#7:1]', 'epsilon': <Quantity(0.167691515, 'kilocalorie / mole')>, 'id': 'n20', 'rmin_half': <Quantity(1.79979832, 'angstrom')>}"
+      }
+    ]
+  },
+  "warning": "Typing inspection only, not proof a parameter is wrong or causal; assembly and environment still require controls"
+}

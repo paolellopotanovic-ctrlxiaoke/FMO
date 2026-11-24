@@ -1,0 +1,3314 @@
+{
+  "schema": "bace-structural-misranking-evidence-v1",
+  "n": 36,
+  "source_protocol_sha256": "f41f1814ba595953d7528b17e2c6f2b746552f74f716bf163d457f5c2aeebe79",
+  "metrics": {
+    "pearson": 0.21174767344688275,
+    "spearman": 0.16817979773101874,
+    "kendall": 0.11182336911697692
+  },
+  "cases": [
+    {
+      "ligand": "CAT-13n",
+      "experimental_minus_dG": 8.543,
+      "predicted_minus_tpie": 106.261,
+      "predicted_minus_experimental_rank": 9.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.637726293609705,
+      "residue_289_nearest_heavy_A": 2.9103695641619125,
+      "residue_502_nearest_heavy_A": 17.351353318977747
+    },
+    {
+      "ligand": "CAT-13e",
+      "experimental_minus_dG": 9.963,
+      "predicted_minus_tpie": 108.52600000000001,
+      "predicted_minus_experimental_rank": -7.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6479021885258516,
+      "residue_289_nearest_heavy_A": 3.001325207304267,
+      "residue_502_nearest_heavy_A": 17.366378954750466
+    },
+    {
+      "ligand": "CAT-4a",
+      "experimental_minus_dG": 7.933,
+      "predicted_minus_tpie": 104.91199999999999,
+      "predicted_minus_experimental_rank": 7.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6600981184911197,
+      "residue_289_nearest_heavy_A": 2.8616577363479365,
+      "residue_502_nearest_heavy_A": 17.209817372650996
+    },
+    {
+      "ligand": "CAT-4m",
+      "experimental_minus_dG": 9.153,
+      "predicted_minus_tpie": 109.015,
+      "predicted_minus_experimental_rank": 10.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.648639273287322,
+      "residue_289_nearest_heavy_A": 2.8603574951393753,
+      "residue_502_nearest_heavy_A": 17.449484433644454
+    },
+    {
+      "ligand": "CAT-17b",
+      "experimental_minus_dG": 10.023,
+      "predicted_minus_tpie": 102.976,
+      "predicted_minus_experimental_rank": -24.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6807567961305243,
+      "residue_289_nearest_heavy_A": 2.9314238861004043,
+      "residue_502_nearest_heavy_A": 17.338314422111512
+    },
+    {
+      "ligand": "CAT-13j",
+      "experimental_minus_dG": 8.733,
+      "predicted_minus_tpie": 108.39,
+      "predicted_minus_experimental_rank": 14.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6313382526767612,
+      "residue_289_nearest_heavy_A": 2.8729277749362234,
+      "residue_502_nearest_heavy_A": 17.400066292977165
+    },
+    {
+      "ligand": "CAT-13d",
+      "experimental_minus_dG": 10.473,
+      "predicted_minus_tpie": 108.854,
+      "predicted_minus_experimental_rank": -10.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6890314241376942,
+      "residue_289_nearest_heavy_A": 2.929385089058794,
+      "residue_502_nearest_heavy_A": 17.370677419145174
+    },
+    {
+      "ligand": "CAT-13b",
+      "experimental_minus_dG": 9.123,
+      "predicted_minus_tpie": 105.669,
+      "predicted_minus_experimental_rank": -2.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6784786726796965,
+      "residue_289_nearest_heavy_A": 2.8960226173149963,
+      "residue_502_nearest_heavy_A": 17.363130190147167
+    },
+    {
+      "ligand": "CAT-13a",
+      "experimental_minus_dG": 8.843,
+      "predicted_minus_tpie": 103.10900000000001,
+      "predicted_minus_experimental_rank": -2.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.668117126364581,
+      "residue_289_nearest_heavy_A": 2.966581534359034,
+      "residue_502_nearest_heavy_A": 17.368137090661165
+    },
+    {
+      "ligand": "CAT-13h",
+      "experimental_minus_dG": 9.633,
+      "predicted_minus_tpie": 108.654,
+      "predicted_minus_experimental_rank": -1.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6684143231514845,
+      "residue_289_nearest_heavy_A": 2.87157239156529,
+      "residue_502_nearest_heavy_A": 17.40546862339535
+    },
+    {
+      "ligand": "CAT-13o",
+      "experimental_minus_dG": 8.543,
+      "predicted_minus_tpie": 109.05,
+      "predicted_minus_experimental_rank": 21.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.645707088851673,
+      "residue_289_nearest_heavy_A": 2.9111662611400257,
+      "residue_502_nearest_heavy_A": 17.32124089088308
+    },
+    {
+      "ligand": "CAT-13g",
+      "experimental_minus_dG": 9.093,
+      "predicted_minus_tpie": 112.36800000000001,
+      "predicted_minus_experimental_rank": 22.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.637581847071289,
+      "residue_289_nearest_heavy_A": 2.931295447408876,
+      "residue_502_nearest_heavy_A": 17.356037134092567
+    },
+    {
+      "ligand": "CAT-4k",
+      "experimental_minus_dG": 7.853,
+      "predicted_minus_tpie": 105.419,
+      "predicted_minus_experimental_rank": 10.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6580914205497126,
+      "residue_289_nearest_heavy_A": 2.8552668877006933,
+      "residue_502_nearest_heavy_A": 17.01097131265584
+    },
+    {
+      "ligand": "CAT-17g",
+      "experimental_minus_dG": 9.743,
+      "predicted_minus_tpie": 101.938,
+      "predicted_minus_experimental_rank": -24.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.69523097340469,
+      "residue_289_nearest_heavy_A": 2.9478617674511125,
+      "residue_502_nearest_heavy_A": 17.27138758177814
+    },
+    {
+      "ligand": "CAT-4l",
+      "experimental_minus_dG": 9.343,
+      "predicted_minus_tpie": 104.90700000000001,
+      "predicted_minus_experimental_rank": -10.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.641087276104292,
+      "residue_289_nearest_heavy_A": 2.8704809701511698,
+      "residue_502_nearest_heavy_A": 17.003855268732444
+    },
+    {
+      "ligand": "CAT-4j",
+      "experimental_minus_dG": 9.023,
+      "predicted_minus_tpie": 105.113,
+      "predicted_minus_experimental_rank": 1.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6621393652474308,
+      "residue_289_nearest_heavy_A": 2.8480064957791087,
+      "residue_502_nearest_heavy_A": 16.96267278467636
+    },
+    {
+      "ligand": "CAT-4n",
+      "experimental_minus_dG": 9.093,
+      "predicted_minus_tpie": 106.96,
+      "predicted_minus_experimental_rank": 7.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.625311791006925,
+      "residue_289_nearest_heavy_A": 2.897006213317466,
+      "residue_502_nearest_heavy_A": 17.53671169290298
+    },
+    {
+      "ligand": "CAT-13i",
+      "experimental_minus_dG": 9.273,
+      "predicted_minus_tpie": 106.931,
+      "predicted_minus_experimental_rank": 0.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6971996589055105,
+      "residue_289_nearest_heavy_A": 2.8229179938496265,
+      "residue_502_nearest_heavy_A": 17.39227624550622
+    },
+    {
+      "ligand": "CAT-17f",
+      "experimental_minus_dG": 9.423,
+      "predicted_minus_tpie": 106.434,
+      "predicted_minus_experimental_rank": -5.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6861100126390935,
+      "residue_289_nearest_heavy_A": 2.9329152732392387,
+      "residue_502_nearest_heavy_A": 17.39824203763127
+    },
+    {
+      "ligand": "CAT-4p",
+      "experimental_minus_dG": 10.083,
+      "predicted_minus_tpie": 109.39800000000001,
+      "predicted_minus_experimental_rank": -3.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.644328837342284,
+      "residue_289_nearest_heavy_A": 2.8569249202595435,
+      "residue_502_nearest_heavy_A": 17.34049921426716
+    },
+    {
+      "ligand": "CAT-13c",
+      "experimental_minus_dG": 9.323,
+      "predicted_minus_tpie": 109.423,
+      "predicted_minus_experimental_rank": 12.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6858026733176046,
+      "residue_289_nearest_heavy_A": 2.8992983633976,
+      "residue_502_nearest_heavy_A": 17.36564729573879
+    },
+    {
+      "ligand": "CAT-24",
+      "experimental_minus_dG": 11.35,
+      "predicted_minus_tpie": 107.777,
+      "predicted_minus_experimental_rank": -16.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6870543351409903,
+      "residue_289_nearest_heavy_A": 2.8890984753033258,
+      "residue_502_nearest_heavy_A": 17.528818414257135
+    },
+    {
+      "ligand": "CAT-4i",
+      "experimental_minus_dG": 8.263,
+      "predicted_minus_tpie": 100.156,
+      "predicted_minus_experimental_rank": -2.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6112001072303883,
+      "residue_289_nearest_heavy_A": 2.925769129647793,
+      "residue_502_nearest_heavy_A": 17.135401658554727
+    },
+    {
+      "ligand": "CAT-4c",
+      "experimental_minus_dG": 7.853,
+      "predicted_minus_tpie": 102.24,
+      "predicted_minus_experimental_rank": 2.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.689524307382254,
+      "residue_289_nearest_heavy_A": 2.834507717399972,
+      "residue_502_nearest_heavy_A": 17.59096063323433
+    },
+    {
+      "ligand": "CAT-17i",
+      "experimental_minus_dG": 9.473,
+      "predicted_minus_tpie": 102.757,
+      "predicted_minus_experimental_rank": -18.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.638786084547209,
+      "residue_289_nearest_heavy_A": 2.9186947425176206,
+      "residue_502_nearest_heavy_A": 17.413684589999903
+    },
+    {
+      "ligand": "CAT-13k",
+      "experimental_minus_dG": 9.703,
+      "predicted_minus_tpie": 114.911,
+      "predicted_minus_experimental_rank": 10.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6531215577127245,
+      "residue_289_nearest_heavy_A": 2.874428812825254,
+      "residue_502_nearest_heavy_A": 17.392803828020373
+    },
+    {
+      "ligand": "CAT-17a",
+      "experimental_minus_dG": 10.733,
+      "predicted_minus_tpie": 109.42699999999999,
+      "predicted_minus_experimental_rank": -4.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6247940871618844,
+      "residue_289_nearest_heavy_A": 2.926249989320804,
+      "residue_502_nearest_heavy_A": 17.51952799021709
+    },
+    {
+      "ligand": "CAT-17c",
+      "experimental_minus_dG": 9.863,
+      "predicted_minus_tpie": 106.255,
+      "predicted_minus_experimental_rank": -14.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6866434448955063,
+      "residue_289_nearest_heavy_A": 2.925212129060045,
+      "residue_502_nearest_heavy_A": 17.371130820991475
+    },
+    {
+      "ligand": "CAT-4o",
+      "experimental_minus_dG": 9.383,
+      "predicted_minus_tpie": 106.942,
+      "predicted_minus_experimental_rank": -2.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6515401184971714,
+      "residue_289_nearest_heavy_A": 2.8570554772352597,
+      "residue_502_nearest_heavy_A": 17.197361977931383
+    },
+    {
+      "ligand": "CAT-17d",
+      "experimental_minus_dG": 9.423,
+      "predicted_minus_tpie": 99.616,
+      "predicted_minus_experimental_rank": -20.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.7047001682256746,
+      "residue_289_nearest_heavy_A": 2.956794209951041,
+      "residue_502_nearest_heavy_A": 17.0708128687535
+    },
+    {
+      "ligand": "CAT-4b",
+      "experimental_minus_dG": 9.633,
+      "predicted_minus_tpie": 109.483,
+      "predicted_minus_experimental_rank": 7.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6735379181900507,
+      "residue_289_nearest_heavy_A": 2.8658670590241972,
+      "residue_502_nearest_heavy_A": 17.235863598903308
+    },
+    {
+      "ligand": "CAT-13f",
+      "experimental_minus_dG": 9.093,
+      "predicted_minus_tpie": 109.276,
+      "predicted_minus_experimental_rank": 16.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.6490620981773887,
+      "residue_289_nearest_heavy_A": 2.9918871970714407,
+      "residue_502_nearest_heavy_A": 17.343103672641757
+    },
+    {
+      "ligand": "CAT-4d",
+      "experimental_minus_dG": 9.113,
+      "predicted_minus_tpie": 111.016,
+      "predicted_minus_experimental_rank": 19.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.679016610624128,
+      "residue_289_nearest_heavy_A": 2.865707068072381,
+      "residue_502_nearest_heavy_A": 17.50040845237619
+    },
+    {
+      "ligand": "CAT-13m",
+      "experimental_minus_dG": 8.763,
+      "predicted_minus_tpie": 114.235,
+      "predicted_minus_experimental_rank": 27.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.64444493230621,
+      "residue_289_nearest_heavy_A": 2.945676492760195,
+      "residue_502_nearest_heavy_A": 17.373893087042987
+    },
+    {
+      "ligand": "CAT-17h",
+      "experimental_minus_dG": 10.333,
+      "predicted_minus_tpie": 108.86099999999999,
+      "predicted_minus_experimental_rank": -8.0,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.689681393771388,
+      "residue_289_nearest_heavy_A": 2.924852987758529,
+      "residue_502_nearest_heavy_A": 17.407622956624493
+    },
+    {
+      "ligand": "CAT-17e",
+      "experimental_minus_dG": 10.023,
+      "predicted_minus_tpie": 103.763,
+      "predicted_minus_experimental_rank": -22.5,
+      "formal_charge": 1,
+      "residue_93_nearest_heavy_A": 2.683829167439685,
+      "residue_289_nearest_heavy_A": 2.967527590436187,
+      "residue_502_nearest_heavy_A": 17.198835832695192
+    }
+  ],
+  "dyad_protonation_geometry": [
+    {
+      "residue": "A:ASP:93",
+      "sidechain_OH_bonds": []
+    },
+    {
+      "residue": "A:ASP:289",
+      "sidechain_OH_bonds": [
+        {
+          "hydrogen": "HD2",
+          "oxygen": "OD2",
+          "distance_A": 0.9785146907430673
+        }
+      ]
+    }
+  ],
+  "fragment_variation": [
+    {
+      "fragment": "AASP93",
+      "mean_kcal_mol": -112.75116666666666,
+      "std_kcal_mol": 1.4607853956766614,
+      "range_kcal_mol": 5.004000000000005
+    },
+    {
+      "fragment": "AGLY291",
+      "mean_kcal_mol": 12.382472222222221,
+      "std_kcal_mol": 1.4399121016018672,
+      "range_kcal_mol": 5.23
+    },
+    {
+      "fragment": "AGLY72",
+      "mean_kcal_mol": -4.489722222222222,
+      "std_kcal_mol": 1.293133502842162,
+      "range_kcal_mol": 5.438000000000001
+    },
+    {
+      "fragment": "ATHR292",
+      "mean_kcal_mol": -14.438305555555555,
+      "std_kcal_mol": 1.2150612883363459,
+      "range_kcal_mol": 5.212999999999999
+    },
+    {
+      "fragment": "AGLY74",
+      "mean_kcal_mol": -0.08883333333333332,
+      "std_kcal_mol": 1.087947826057032,
+      "range_kcal_mol": 3.6100000000000003
+    },
+    {
+      "fragment": "ATYR132",
+      "mean_kcal_mol": -4.6940277777777775,
+      "std_kcal_mol": 0.9470775072737978,
+      "range_kcal_mol": 2.8520000000000003
+    },
+    {
+      "fragment": "AHOH1044",
+      "mean_kcal_mol": -0.23705555555555557,
+      "std_kcal_mol": 0.6868192769104567,
+      "range_kcal_mol": 2.895
+    },
+    {
+      "fragment": "AGLN73",
+      "mean_kcal_mol": -0.6516388888888888,
+      "std_kcal_mol": 0.6410311204431054,
+      "range_kcal_mol": 3.594
+    },
+    {
+      "fragment": "AALA396",
+      "mean_kcal_mol": 7.377222222222222,
+      "std_kcal_mol": 0.5774062747951737,
+      "range_kcal_mol": 2.511
+    },
+    {
+      "fragment": "ATHR293",
+      "mean_kcal_mol": -13.18311111111111,
+      "std_kcal_mol": 0.56410321050209,
+      "range_kcal_mol": 3.122
+    },
+    {
+      "fragment": "ASER96",
+      "mean_kcal_mol": 9.48527777777778,
+      "std_kcal_mol": 0.5606032272428172,
+      "range_kcal_mol": 2.3409999999999993
+    },
+    {
+      "fragment": "ATRP137",
+      "mean_kcal_mol": -0.0871388888888889,
+      "std_kcal_mol": 0.5328474950040571,
+      "range_kcal_mol": 1.7970000000000002
+    },
+    {
+      "fragment": "AARG189",
+      "mean_kcal_mol": 17.537666666666667,
+      "std_kcal_mol": 0.4539462768018061,
+      "range_kcal_mol": 1.985999999999997
+    },
+    {
+      "fragment": "ATYR75",
+      "mean_kcal_mol": -6.711305555555556,
+      "std_kcal_mol": 0.45352843959854533,
+      "range_kcal_mol": 2.096
+    },
+    {
+      "fragment": "AHOH1043",
+      "mean_kcal_mol": -3.65525,
+      "std_kcal_mol": 0.43367034170874286,
+      "range_kcal_mol": 2.116
+    },
+    {
+      "fragment": "AHOH1028",
+      "mean_kcal_mol": -2.3073888888888887,
+      "std_kcal_mol": 0.41170231139729657,
+      "range_kcal_mol": 1.499
+    },
+    {
+      "fragment": "AVAL130",
+      "mean_kcal_mol": 0.6520555555555556,
+      "std_kcal_mol": 0.3787588608750402,
+      "range_kcal_mol": 1.211
+    },
+    {
+      "fragment": "APHE170",
+      "mean_kcal_mol": -7.73372222222222,
+      "std_kcal_mol": 0.3288243883824036,
+      "range_kcal_mol": 1.2679999999999998
+    },
+    {
+      "fragment": "AASP289",
+      "mean_kcal_mol": -0.68275,
+      "std_kcal_mol": 0.3038907310019325,
+      "range_kcal_mol": 1.148
+    },
+    {
+      "fragment": "AARG296",
+      "mean_kcal_mol": 18.168305555555555,
+      "std_kcal_mol": 0.29729603834155,
+      "range_kcal_mol": 1.3620000000000019
+    },
+    {
+      "fragment": "AHOH1030",
+      "mean_kcal_mol": 1.9796111111111112,
+      "std_kcal_mol": 0.29436053835935594,
+      "range_kcal_mol": 1.223
+    },
+    {
+      "fragment": "APHE169",
+      "mean_kcal_mol": -1.7987777777777778,
+      "std_kcal_mol": 0.29245171596836206,
+      "range_kcal_mol": 1.162
+    },
+    {
+      "fragment": "AILE179",
+      "mean_kcal_mol": -0.0074722222222222195,
+      "std_kcal_mol": 0.2643321233800714,
+      "range_kcal_mol": 1.175
+    },
+    {
+      "fragment": "AHOH1041",
+      "mean_kcal_mol": 0.3127777777777778,
+      "std_kcal_mol": 0.2615557207589396,
+      "range_kcal_mol": 1.206
+    },
+    {
+      "fragment": "ALYS70",
+      "mean_kcal_mol": 11.916277777777779,
+      "std_kcal_mol": 0.2512595615771678,
+      "range_kcal_mol": 1.0410000000000004
+    },
+    {
+      "fragment": "ASER71",
+      "mean_kcal_mol": -2.7244166666666665,
+      "std_kcal_mol": 0.24709921253078354,
+      "range_kcal_mol": 1.272
+    },
+    {
+      "fragment": "ALEU91",
+      "mean_kcal_mol": 1.3127222222222223,
+      "std_kcal_mol": 0.1927922905200066,
+      "range_kcal_mol": 0.7430000000000001
+    },
+    {
+      "fragment": "AVAL92",
+      "mean_kcal_mol": -2.2860833333333335,
+      "std_kcal_mol": 0.1875262018729353,
+      "range_kcal_mol": 0.756
+    },
+    {
+      "fragment": "ATRP176",
+      "mean_kcal_mol": 0.1086388888888889,
+      "std_kcal_mol": 0.1773938106113341,
+      "range_kcal_mol": 0.761
+    },
+    {
+      "fragment": "AASN98",
+      "mean_kcal_mol": -5.873416666666667,
+      "std_kcal_mol": 0.16733339558431773,
+      "range_kcal_mol": 0.5999999999999996
+    },
+    {
+      "fragment": "ALYS168",
+      "mean_kcal_mol": 8.415750000000001,
+      "std_kcal_mol": 0.16270241666579152,
+      "range_kcal_mol": 0.7259999999999991
+    },
+    {
+      "fragment": "ATHR94",
+      "mean_kcal_mol": -6.463666666666666,
+      "std_kcal_mol": 0.16094547040673268,
+      "range_kcal_mol": 0.6500000000000004
+    },
+    {
+      "fragment": "AILE171",
+      "mean_kcal_mol": -2.6286111111111112,
+      "std_kcal_mol": 0.16047572986761335,
+      "range_kcal_mol": 0.871
+    },
+    {
+      "fragment": "ASER97",
+      "mean_kcal_mol": -4.356694444444445,
+      "std_kcal_mol": 0.15729021645149457,
+      "range_kcal_mol": 0.5499999999999998
+    },
+    {
+      "fragment": "AGLY95",
+      "mean_kcal_mol": 12.3155,
+      "std_kcal_mol": 0.1444317408943677,
+      "range_kcal_mol": 0.5890000000000004
+    },
+    {
+      "fragment": "AHOH1053",
+      "mean_kcal_mol": -3.7296666666666667,
+      "std_kcal_mol": 0.1337007437858477,
+      "range_kcal_mol": 0.5550000000000002
+    },
+    {
+      "fragment": "APRO131",
+      "mean_kcal_mol": -4.566194444444445,
+      "std_kcal_mol": 0.12664688868495844,
+      "range_kcal_mol": 0.5060000000000002
+    },
+    {
+      "fragment": "ASER290",
+      "mean_kcal_mol": -4.904194444444444,
+      "std_kcal_mol": 0.10189968363391202,
+      "range_kcal_mol": 0.4530000000000003
+    },
+    {
+      "fragment": "AHOH1034",
+      "mean_kcal_mol": -3.22425,
+      "std_kcal_mol": 0.0989560438331642,
+      "range_kcal_mol": 0.38000000000000034
+    },
+    {
+      "fragment": "AHOH1033",
+      "mean_kcal_mol": 0.5869722222222223,
+      "std_kcal_mol": 0.08773586815965516,
+      "range_kcal_mol": 0.347
+    },
+    {
+      "fragment": "ATYR259",
+      "mean_kcal_mol": 2.831833333333333,
+      "std_kcal_mol": 0.06270942690076368,
+      "range_kcal_mol": 0.3810000000000002
+    },
+    {
+      "fragment": "AILE287",
+      "mean_kcal_mol": 3.3347222222222226,
+      "std_kcal_mol": 0.04676038869189692,
+      "range_kcal_mol": 0.18199999999999994
+    },
+    {
+      "fragment": "ALEU215",
+      "mean_kcal_mol": 0.9781666666666664,
+      "std_kcal_mol": 0.045257596047514496,
+      "range_kcal_mol": 0.18600000000000005
+    },
+    {
+      "fragment": "AVAL393",
+      "mean_kcal_mol": -0.6855555555555557,
+      "std_kcal_mol": 0.024390850338742037,
+      "range_kcal_mol": 0.10499999999999998
+    },
+    {
+      "fragment": "AVAL288",
+      "mean_kcal_mol": -1.7083888888888887,
+      "std_kcal_mol": 0.02036101637085735,
+      "range_kcal_mol": 0.07800000000000007
+    }
+  ],
+  "similar_reversed_pairs": [
+    {
+      "first": "CAT-13g",
+      "second": "CAT-17a",
+      "morgan_tanimoto": 0.803921568627451,
+      "delta_experimental_minus_dG": -1.6400000000000006,
+      "delta_predicted_minus_tpie": 2.9410000000000167,
+      "delta_tpie_components": [
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 3.188999999999993
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": 2.588
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": -1.9660000000000002
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -1.3490000000000002
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -1.263
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.971
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": -0.9420000000000002
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": -0.835
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.761
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.6140000000000001
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": 0.5909999999999993
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": -0.546
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": -0.484
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": -0.45699999999999985
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.45399999999999996
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.4289999999999998
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 0.41799999999999926
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.4059999999999999
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.4039999999999999
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.3879999999999999
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": 0.3739999999999988
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": 0.3129999999999997
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": -0.28099999999999997
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": -0.2469999999999999
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.20000000000000107
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.17400000000000038
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.16299999999999998
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.14100000000000001
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.14099999999999996
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.09600000000000009
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.09299999999999997
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.09200000000000008
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.08800000000000008
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": 0.08800000000000002
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.08399999999999963
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": -0.07900000000000018
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.07199999999999918
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.06400000000000006
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.052999999999999936
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.039000000000000146
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.03200000000000003
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": -0.026999999999999913
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.020000000000000018
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": 0.0129999999999999
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.01200000000000001
+        }
+      ]
+    },
+    {
+      "first": "CAT-4k",
+      "second": "CAT-4l",
+      "morgan_tanimoto": 0.7254901960784313,
+      "delta_experimental_minus_dG": -1.4900000000000002,
+      "delta_predicted_minus_tpie": 0.5119999999999862,
+      "delta_tpie_components": [
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -1.3599999999999999
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 1.0709999999999997
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 1.0339999999999998
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.8280000000000001
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.7789999999999999
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.757
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.5060000000000002
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.40700000000000003
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.3800000000000008
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.314
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.31300000000000017
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -0.2729999999999997
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": -0.26599999999999824
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.232999999999997
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.22100000000000009
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 0.19599999999999795
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.18900000000000006
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.16299999999999998
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.09499999999999975
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.08999999999999997
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.08799999999999919
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -0.07399999999999984
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.05999999999999961
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.052000000000000046
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": 0.04699999999999971
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": 0.04200000000000004
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": -0.04099999999999948
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.034999999999999976
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": -0.03299999999999992
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.02700000000000001
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.025000000000000355
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.022999999999999687
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": 0.02200000000000024
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.02200000000000002
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.02100000000000002
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": -0.017999999999999794
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.01699999999999946
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.01100000000000012
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.009000000000000341
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.008000000000000007
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.006999999999999895
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.006999999999999673
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.004999999999999893
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.0029999999999998916
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.0020000000000000018
+        }
+      ]
+    },
+    {
+      "first": "CAT-4a",
+      "second": "CAT-4l",
+      "morgan_tanimoto": 0.7083333333333334,
+      "delta_experimental_minus_dG": -1.4100000000000001,
+      "delta_predicted_minus_tpie": 0.004999999999981242,
+      "delta_tpie_components": [
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -1.2349999999999999
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 0.9480000000000075
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -0.7200000000000006
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": 0.633
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.5150000000000006
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.44700000000000006
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.41800000000000015
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.373
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": -0.26500000000000057
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": 0.23100000000000076
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 0.21300000000000008
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.19899999999999984
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.19599999999999973
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -0.1850000000000005
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.17799999999999994
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.17100000000000004
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.15300000000000047
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": 0.14699999999999935
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.13500000000000023
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.125
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.117
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": 0.1039999999999992
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.09500000000000064
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.09100000000000019
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.09100000000000019
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": -0.08999999999999986
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.08900000000000041
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.07000000000000028
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.06499999999999995
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.05500000000000016
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.04800000000000004
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.043999999999999595
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.039000000000000146
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.038000000000000034
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": 0.02299999999999991
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": -0.019000000000000017
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.018999999999999684
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.007000000000000006
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.004999999999999005
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": 0.0040000000000000036
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.0040000000000000036
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.0040000000000000036
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.0030000000000001137
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": -0.0020000000000000018
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.0
+        }
+      ]
+    },
+    {
+      "first": "CAT-13d",
+      "second": "CAT-13g",
+      "morgan_tanimoto": 0.8958333333333334,
+      "delta_experimental_minus_dG": 1.3800000000000008,
+      "delta_predicted_minus_tpie": -3.51400000000001,
+      "delta_tpie_components": [
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": -2.5759999999999934
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 2.344
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 1.6910000000000007
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.855
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.819
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.78
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.7469999999999999
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": -0.616
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.5810000000000001
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 0.5490000000000013
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.532
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": 0.432
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.42
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.4049999999999998
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.3520000000000003
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.30400000000000027
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.3000000000000007
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.2920000000000007
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.2609999999999999
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.2560000000000002
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.23599999999999888
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.2029999999999994
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": 0.19599999999999973
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.18999999999999995
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": -0.1869999999999994
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.17599999999999927
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.15100000000000158
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.14000000000000012
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.12199999999999989
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.10699999999999932
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.10000000000000053
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.07399999999999984
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.06300000000000017
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.062000000000000055
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.05400000000000005
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.04600000000000004
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.04500000000000037
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": -0.040000000000000036
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.03699999999999992
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": -0.03000000000000025
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.028999999999999915
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.010999999999999677
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": -0.006000000000000005
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.0030000000000000027
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.0020000000000000018
+        }
+      ]
+    },
+    {
+      "first": "CAT-13d",
+      "second": "CAT-13f",
+      "morgan_tanimoto": 0.9148936170212766,
+      "delta_experimental_minus_dG": 1.3800000000000008,
+      "delta_predicted_minus_tpie": -0.42199999999999704,
+      "delta_tpie_components": [
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": -2.8900000000000006
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 1.8050000000000002
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 1.0130000000000017
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.5980000000000025
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 0.5920000000000005
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.589
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.518
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.502
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": -0.491
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": -0.35800000000000054
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.32900000000000007
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.3200000000000003
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.26699999999999946
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.25899999999999945
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.2430000000000001
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.20599999999999952
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.20400000000000063
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.20199999999999996
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": 0.19099999999999984
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.18799999999999994
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.1769999999999996
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.16799999999999993
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.16500000000000004
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": -0.16300000000000003
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.1120000000000001
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.09800000000000009
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.09699999999999998
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": -0.08599999999999985
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.08499999999999996
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": -0.07299999999999995
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.0649999999999995
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.06000000000000005
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.04999999999999982
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": 0.048
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.04599999999999982
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.036999999999999034
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.03600000000000003
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.03499999999999992
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.031000000000000583
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": -0.03000000000000025
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.029
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.020000000000000018
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.01100000000000001
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.006000000000000005
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.0030000000000000027
+        }
+      ]
+    },
+    {
+      "first": "CAT-4p",
+      "second": "CAT-13m",
+      "morgan_tanimoto": 0.7222222222222222,
+      "delta_experimental_minus_dG": 1.3200000000000003,
+      "delta_predicted_minus_tpie": -4.836999999999989,
+      "delta_tpie_components": [
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 2.824
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": 1.211
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -1.004999999999999
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 0.8699999999999903
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.8400000000000001
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": 0.525
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 0.41000000000000014
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.372
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 0.36600000000000144
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.32699999999999996
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": -0.31700000000000017
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.289
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.27000000000000135
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.24099999999999966
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.22499999999999964
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.18200000000000016
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.1739999999999995
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.16900000000000004
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": -0.15299999999999958
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.09499999999999975
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": -0.08899999999999952
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": -0.08799999999999997
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.0860000000000003
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.08500000000000085
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.07100000000000017
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.06400000000000006
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.06000000000000005
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.05299999999999905
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": -0.045999999999999985
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": -0.04300000000000001
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.038000000000000256
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": -0.03699999999999992
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": 0.032
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -0.025000000000000355
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.02400000000000002
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.020999999999997243
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": -0.015999999999999903
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.01499999999999968
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": 0.01200000000000001
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.006000000000000227
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.0050000000000000044
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.004999999999999893
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": -0.0030000000000001137
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.002000000000000224
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.0019999999999997797
+        }
+      ]
+    },
+    {
+      "first": "CAT-13g",
+      "second": "CAT-17h",
+      "morgan_tanimoto": 0.7321428571428571,
+      "delta_experimental_minus_dG": -1.2400000000000002,
+      "delta_predicted_minus_tpie": 3.507000000000019,
+      "delta_tpie_components": [
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 4.087999999999994
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": -2.154
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -1.7110000000000003
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -1.242
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -1.0490000000000013
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.843
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.8069999999999999
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.8039999999999999
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": -0.7829999999999999
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.6179999999999986
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.594
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": -0.5620000000000012
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": 0.5539999999999985
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": -0.49999999999999994
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.43300000000000005
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": 0.433
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.39099999999999996
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.383
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 0.3540000000000001
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": 0.3500000000000014
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": -0.3490000000000002
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": 0.31599999999999984
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": 0.30599999999999916
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -0.2799999999999998
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.274
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": 0.26399999999999935
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": -0.2469999999999999
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": -0.21499999999999986
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.2110000000000003
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.18500000000000005
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.1549999999999998
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.10499999999999998
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": -0.0990000000000002
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.09200000000000008
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": -0.06800000000000006
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.051000000000000156
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.040000000000000036
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": -0.03399999999999992
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": -0.03100000000000014
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.03000000000000025
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.02799999999999958
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.01699999999999946
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": -0.0129999999999999
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.008000000000000007
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.0
+        }
+      ]
+    },
+    {
+      "first": "CAT-13f",
+      "second": "CAT-17h",
+      "morgan_tanimoto": 0.7454545454545455,
+      "delta_experimental_minus_dG": -1.2400000000000002,
+      "delta_predicted_minus_tpie": 0.41500000000000625,
+      "delta_tpie_components": [
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 4.402000000000001
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": -1.6150000000000002
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -1.298
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -1.0920000000000005
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -1.0330000000000013
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.618
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": -0.5919999999999999
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.506
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.469
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 0.4240000000000004
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": -0.42099999999999993
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.41500000000000026
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": 0.40500000000000114
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.39400000000000013
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": 0.3420000000000005
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": -0.3270000000000002
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.31700000000000006
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": 0.3130000000000006
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.27199999999999935
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.23899999999999988
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": 0.23399999999999999
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.18000000000000016
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": 0.16799999999999926
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": -0.16300000000000026
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.15700000000000003
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.1509999999999998
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.1299999999999999
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.10999999999999943
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.09600000000000009
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": -0.08300000000000018
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.06600000000000072
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.06499999999999995
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": -0.05999999999999961
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.05600000000000094
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.052000000000000046
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.0519999999999996
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": 0.041999999999999996
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.020999999999999908
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.019000000000000128
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.016999999999999904
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": -0.0129999999999999
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.008000000000000007
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": -0.008000000000000007
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.006999999999999999
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.004999999999999893
+        }
+      ]
+    },
+    {
+      "first": "CAT-4k",
+      "second": "CAT-4j",
+      "morgan_tanimoto": 0.7916666666666666,
+      "delta_experimental_minus_dG": -1.17,
+      "delta_predicted_minus_tpie": 0.3059999999999974,
+      "delta_tpie_components": [
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -2.933
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 1.5990000000000002
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 1.4139999999999997
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.6159999999999999
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 0.4959999999999951
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.42900000000000027
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.35599999999999987
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.25900000000000034
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.258
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -0.22799999999999976
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 0.20200000000000173
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": -0.15700000000000003
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.133
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": -0.1120000000000001
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.1080000000000001
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.10400000000000009
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.092
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.06099999999999994
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.05699999999999994
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.054999999999999716
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": 0.05100000000000002
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.04799999999999993
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 0.040000000000000924
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": -0.038999999999997925
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.033999999999999975
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.03200000000000003
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.030999999999999694
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.02800000000000047
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": 0.027000000000000135
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.027000000000000024
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.02499999999999991
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": 0.021000000000000796
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.019999999999999962
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.016999999999999904
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": 0.016000000000000014
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.014999999999999986
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.013999999999999901
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.0129999999999999
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.012000000000000455
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.01200000000000001
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.008000000000000007
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.007000000000000006
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": -0.0030000000000001137
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.002000000000000224
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.001000000000000334
+        }
+      ]
+    },
+    {
+      "first": "CAT-24",
+      "second": "CAT-17h",
+      "morgan_tanimoto": 0.7333333333333333,
+      "delta_experimental_minus_dG": 1.0169999999999995,
+      "delta_predicted_minus_tpie": -1.083999999999989,
+      "delta_tpie_components": [
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -2.003
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 1.5350000000000001
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 1.5149999999999997
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": 1.045
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": -0.8819999999999997
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": -0.6749999999999998
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.641
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.6269999999999998
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": 0.6260000000000012
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.612
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.5289999999999999
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": -0.5230000000000001
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": 0.44599999999999973
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": -0.44399999999999995
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.379
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.33899999999999864
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -0.3349999999999995
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": 0.329
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": 0.3249999999999993
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": 0.307
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": 0.2730000000000006
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": -0.25099999999999945
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": 0.17600000000000016
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.16999999999999993
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": -0.1670000000000016
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -0.1590000000000007
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": -0.1589999999999998
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": 0.14499999999999957
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.13099999999999978
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.10100000000000042
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.09799999999999998
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": -0.09100000000000019
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": -0.08600000000000008
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": 0.07200000000000006
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": 0.062000000000000055
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.050000000000000266
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.039000000000000035
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.0389999999999997
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.036000000000000476
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": -0.030999999999999917
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": -0.030999999999999694
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": -0.03000000000000025
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": -0.029000000000000026
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": -0.016999999999999904
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.016000000000000014
+        }
+      ]
+    },
+    {
+      "first": "CAT-13e",
+      "second": "CAT-13g",
+      "morgan_tanimoto": 0.9375,
+      "delta_experimental_minus_dG": 0.8699999999999992,
+      "delta_predicted_minus_tpie": -3.8419999999999987,
+      "delta_tpie_components": [
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 1.1450000000000005
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 0.9499999999999993
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.8680000000000021
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.607
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.548
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": -0.52
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": -0.5160000000000053
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.516
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.508
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.48199999999999976
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.45899999999999996
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": 0.381
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.298
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.2539999999999978
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": -0.2370000000000001
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.21499999999999986
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.12699999999999978
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": 0.12
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.11699999999999999
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.11599999999999966
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.11099999999999999
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.10899999999999999
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.09699999999999998
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": 0.07899999999999974
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 0.07000000000000028
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.06600000000000028
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.06400000000000006
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": 0.06300000000000017
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.05900000000000105
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.05900000000000016
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.057000000000000384
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.052999999999999936
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.04899999999999993
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.04699999999999971
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.04499999999999993
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.040999999999999925
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": -0.03900000000000148
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.03600000000000003
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.03499999999999992
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.03200000000000003
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": -0.02400000000000002
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.0029999999999996696
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.0029999999999992255
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 0.002000000000000668
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.0010000000000000009
+        }
+      ]
+    },
+    {
+      "first": "CAT-13e",
+      "second": "CAT-13f",
+      "morgan_tanimoto": 0.9574468085106383,
+      "delta_experimental_minus_dG": 0.8699999999999992,
+      "delta_predicted_minus_tpie": -0.7499999999999858,
+      "delta_tpie_components": [
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": -0.8300000000000125
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 0.6060000000000008
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": -0.395
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.325
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 0.27200000000000024
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.247
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.23499999999999943
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.219
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.21000000000000085
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.137
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 0.11299999999999955
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": 0.10899999999999999
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.10500000000000043
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.09299999999999997
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.08699999999999997
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.08100000000000007
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -0.07699999999999996
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": 0.07399999999999984
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.0730000000000004
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": -0.07000000000000028
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.06799999999999999
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.06799999999999962
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.06599999999999995
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.06400000000000006
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": -0.06099999999999994
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": -0.053999999999999826
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": -0.04800000000000004
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.0470000000000006
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": -0.04600000000000004
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": 0.03799999999999981
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -0.03799999999999937
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.034000000000000696
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.03400000000000025
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": 0.025000000000000355
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.02200000000000024
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": 0.020000000000000018
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": -0.013000000000001677
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.0129999999999999
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.01200000000000001
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.009000000000000008
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.0030000000000001137
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.002999999999999999
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.0029999999999996696
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.0010000000000000009
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": 0.0
+        }
+      ]
+    },
+    {
+      "first": "CAT-17f",
+      "second": "CAT-17e",
+      "morgan_tanimoto": 0.7213114754098361,
+      "delta_experimental_minus_dG": -0.5999999999999996,
+      "delta_predicted_minus_tpie": 2.6709999999999923,
+      "delta_tpie_components": [
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": 5.167
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": 4.821999999999999
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": -4.406000000000001
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -2.555
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": -2.2430000000000003
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": -1.2929999999999922
+        },
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": -1.2059999999999995
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 1.0439999999999996
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 0.9829999999999988
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.6619999999999999
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.6519999999999999
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.6000000000000014
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": -0.5489999999999999
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": -0.5400000000000009
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.5170000000000003
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.47999999999999865
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": 0.42700000000000005
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.364
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.2899999999999998
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.28800000000000003
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.258
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.25
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.24399999999999977
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.23799999999999955
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": -0.23699999999999966
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.22500000000000003
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.1700000000000017
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": -0.15100000000000002
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.14700000000000024
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.121
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.11299999999999999
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.11099999999999999
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": 0.09999999999999964
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.08899999999999997
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.08599999999999997
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": 0.08200000000000074
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": -0.0730000000000004
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": -0.06299999999999972
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.05699999999999994
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.050000000000000266
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": 0.04299999999999993
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": 0.013000000000000012
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": -0.011999999999999567
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": -0.010999999999999996
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.008999999999999453
+        }
+      ]
+    },
+    {
+      "first": "CAT-4b",
+      "second": "CAT-4d",
+      "morgan_tanimoto": 0.7959183673469388,
+      "delta_experimental_minus_dG": 0.5199999999999996,
+      "delta_predicted_minus_tpie": -1.5330000000000013,
+      "delta_tpie_components": [
+        {
+          "fragment": "ATHR293",
+          "delta_tpie_kcal_mol": 1.1159999999999997
+        },
+        {
+          "fragment": "AGLY291",
+          "delta_tpie_kcal_mol": -0.7889999999999997
+        },
+        {
+          "fragment": "AALA396",
+          "delta_tpie_kcal_mol": 0.49899999999999967
+        },
+        {
+          "fragment": "AHOH1043",
+          "delta_tpie_kcal_mol": 0.39400000000000013
+        },
+        {
+          "fragment": "AHOH1030",
+          "delta_tpie_kcal_mol": 0.3900000000000001
+        },
+        {
+          "fragment": "AGLY72",
+          "delta_tpie_kcal_mol": -0.3650000000000002
+        },
+        {
+          "fragment": "ATHR292",
+          "delta_tpie_kcal_mol": 0.31400000000000006
+        },
+        {
+          "fragment": "AGLY74",
+          "delta_tpie_kcal_mol": -0.31099999999999994
+        },
+        {
+          "fragment": "ASER71",
+          "delta_tpie_kcal_mol": 0.28200000000000003
+        },
+        {
+          "fragment": "ATYR75",
+          "delta_tpie_kcal_mol": 0.274
+        },
+        {
+          "fragment": "ATRP176",
+          "delta_tpie_kcal_mol": -0.272
+        },
+        {
+          "fragment": "APHE169",
+          "delta_tpie_kcal_mol": -0.20599999999999996
+        },
+        {
+          "fragment": "ALEU91",
+          "delta_tpie_kcal_mol": -0.17700000000000005
+        },
+        {
+          "fragment": "AGLN73",
+          "delta_tpie_kcal_mol": 0.17099999999999993
+        },
+        {
+          "fragment": "ALYS70",
+          "delta_tpie_kcal_mol": -0.15300000000000047
+        },
+        {
+          "fragment": "ALEU215",
+          "delta_tpie_kcal_mol": 0.14600000000000002
+        },
+        {
+          "fragment": "AHOH1041",
+          "delta_tpie_kcal_mol": 0.141
+        },
+        {
+          "fragment": "ATYR132",
+          "delta_tpie_kcal_mol": 0.1349999999999998
+        },
+        {
+          "fragment": "AHOH1044",
+          "delta_tpie_kcal_mol": -0.132
+        },
+        {
+          "fragment": "AILE171",
+          "delta_tpie_kcal_mol": 0.11299999999999999
+        },
+        {
+          "fragment": "AARG296",
+          "delta_tpie_kcal_mol": -0.07499999999999929
+        },
+        {
+          "fragment": "AVAL92",
+          "delta_tpie_kcal_mol": -0.07199999999999984
+        },
+        {
+          "fragment": "APHE170",
+          "delta_tpie_kcal_mol": 0.06400000000000006
+        },
+        {
+          "fragment": "ALYS168",
+          "delta_tpie_kcal_mol": -0.06300000000000061
+        },
+        {
+          "fragment": "ATRP137",
+          "delta_tpie_kcal_mol": 0.04200000000000004
+        },
+        {
+          "fragment": "ASER96",
+          "delta_tpie_kcal_mol": 0.0389999999999997
+        },
+        {
+          "fragment": "AILE179",
+          "delta_tpie_kcal_mol": -0.03
+        },
+        {
+          "fragment": "AGLY95",
+          "delta_tpie_kcal_mol": 0.018000000000000682
+        },
+        {
+          "fragment": "ASER290",
+          "delta_tpie_kcal_mol": 0.018000000000000682
+        },
+        {
+          "fragment": "AHOH1053",
+          "delta_tpie_kcal_mol": -0.016000000000000014
+        },
+        {
+          "fragment": "AARG189",
+          "delta_tpie_kcal_mol": 0.015000000000000568
+        },
+        {
+          "fragment": "AASP93",
+          "delta_tpie_kcal_mol": 0.012000000000000455
+        },
+        {
+          "fragment": "AHOH1033",
+          "delta_tpie_kcal_mol": 0.01100000000000001
+        },
+        {
+          "fragment": "AVAL130",
+          "delta_tpie_kcal_mol": 0.010000000000000009
+        },
+        {
+          "fragment": "AILE287",
+          "delta_tpie_kcal_mol": 0.008999999999999897
+        },
+        {
+          "fragment": "AVAL288",
+          "delta_tpie_kcal_mol": -0.008000000000000007
+        },
+        {
+          "fragment": "AASP289",
+          "delta_tpie_kcal_mol": -0.0040000000000000036
+        },
+        {
+          "fragment": "ATHR94",
+          "delta_tpie_kcal_mol": -0.0030000000000001137
+        },
+        {
+          "fragment": "APRO131",
+          "delta_tpie_kcal_mol": -0.0030000000000001137
+        },
+        {
+          "fragment": "ATYR259",
+          "delta_tpie_kcal_mol": -0.0030000000000001137
+        },
+        {
+          "fragment": "ASER97",
+          "delta_tpie_kcal_mol": 0.002000000000000668
+        },
+        {
+          "fragment": "AASN98",
+          "delta_tpie_kcal_mol": -0.0019999999999997797
+        },
+        {
+          "fragment": "AVAL393",
+          "delta_tpie_kcal_mol": 0.0010000000000000009
+        },
+        {
+          "fragment": "AHOH1034",
+          "delta_tpie_kcal_mol": 0.0009999999999998899
+        },
+        {
+          "fragment": "AHOH1028",
+          "delta_tpie_kcal_mol": 0.0
+        }
+      ]
+    }
+  ],
+  "pair_thresholds": {
+    "morgan_radius": 2,
+    "tanimoto_min": 0.7,
+    "abs_experimental_gap_kcal_min": 0.5
+  },
+  "interpretation": "Exploratory attribution, not causal validation or a new ranking score. No fragment deleted, no MW correction, no label-directed preparation."
+}

@@ -1,0 +1,923 @@
+{
+  "status": "COMPLETE",
+  "n_expected": 36,
+  "n_received": 36,
+  "failed": [],
+  "missing": [],
+  "targets": {
+    "CDK8": {
+      "first": "12",
+      "second": "20",
+      "n_independent_repeats": 3,
+      "repeats": {
+        "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-1217af691c3e4b57bde8ee50f004ec2b_attempt_0/simulation.nc": {
+          "ligand_means_kcal_mol": {
+            "12": {
+              "tPIE": -57.92966666666666,
+              "ES": -13.061666666666667,
+              "EX": 1.3993333333333335,
+              "CT": -1.317,
+              "DI": -42.41466666666667,
+              "SOLV": -2.53
+            },
+            "20": {
+              "tPIE": -55.70033333333333,
+              "ES": -9.455333333333334,
+              "EX": 0.35133333333333333,
+              "CT": -0.39999999999999997,
+              "DI": -42.683,
+              "SOLV": -3.5126666666666666
+            }
+          },
+          "B_minus_A_kcal_mol": {
+            "tPIE": 2.2293333333333294,
+            "ES": 3.6063333333333336,
+            "EX": -1.0480000000000003,
+            "CT": 0.917,
+            "DI": -0.26833333333333087,
+            "SOLV": -0.9826666666666668
+          }
+        },
+        "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/simulation.nc": {
+          "ligand_means_kcal_mol": {
+            "12": {
+              "tPIE": -53.99866666666666,
+              "ES": -8.807,
+              "EX": -1.485,
+              "CT": -0.9396666666666667,
+              "DI": -41.77066666666667,
+              "SOLV": -0.997
+            },
+            "20": {
+              "tPIE": -59.601333333333336,
+              "ES": -8.196333333333333,
+              "EX": -2.5533333333333332,
+              "CT": -0.49700000000000005,
+              "DI": -44.41733333333334,
+              "SOLV": -3.938
+            }
+          },
+          "B_minus_A_kcal_mol": {
+            "tPIE": -5.6026666666666785,
+            "ES": 0.6106666666666669,
+            "EX": -1.0683333333333331,
+            "CT": 0.4426666666666666,
+            "DI": -2.6466666666666683,
+            "SOLV": -2.9410000000000003
+          }
+        },
+        "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/simulation.nc": {
+          "ligand_means_kcal_mol": {
+            "12": {
+              "tPIE": -62.275666666666666,
+              "ES": -14.162999999999998,
+              "EX": -0.8400000000000002,
+              "CT": -1.1153333333333333,
+              "DI": -44.25233333333333,
+              "SOLV": -1.907333333333333
+            },
+            "20": {
+              "tPIE": -58.95466666666667,
+              "ES": -10.749333333333334,
+              "EX": -0.40099999999999997,
+              "CT": -1.3683333333333334,
+              "DI": -43.49099999999999,
+              "SOLV": -2.9459999999999997
+            }
+          },
+          "B_minus_A_kcal_mol": {
+            "tPIE": 3.320999999999998,
+            "ES": 3.413666666666664,
+            "EX": 0.4390000000000002,
+            "CT": -0.2530000000000001,
+            "DI": 0.7613333333333401,
+            "SOLV": -1.0386666666666666
+          }
+        }
+      },
+      "mean_B_minus_A_kcal_mol": {
+        "tPIE": -0.01744444444445037,
+        "ES": 2.543555555555555,
+        "EX": -0.559111111111111,
+        "CT": 0.3688888888888888,
+        "DI": -0.7178888888888864,
+        "SOLV": -1.654111111111111
+      },
+      "repeat_std_B_minus_A_kcal_mol": {
+        "tPIE": 4.867644654397189,
+        "ES": 1.676700540855075,
+        "EX": 0.864449364453294,
+        "CT": 0.5884788614473508,
+        "DI": 1.7479105091932374,
+        "SOLV": 1.114830148165746
+      },
+      "baseline_tpie_B_minus_A_kcal_mol": 1.965999999999994,
+      "receptor_fragment_B_minus_A_kcal_mol": [
+        {
+          "fragment_id": 1,
+          "mean": 0.23555555555555538,
+          "repeat_std": 0.42014763719082965,
+          "fragment_name": "AVAL27",
+          "baseline_B_minus_A": 0.07000000000000006,
+          "ensemble_shift_from_baseline": 0.16555555555555532
+        },
+        {
+          "fragment_id": 2,
+          "mean": 0.3052222222222222,
+          "repeat_std": 0.1665500703269916,
+          "fragment_name": "AGLY28",
+          "baseline_B_minus_A": 0.20799999999999996,
+          "ensemble_shift_from_baseline": 0.09722222222222221
+        },
+        {
+          "fragment_id": 3,
+          "mean": 0.018333333333333313,
+          "repeat_std": 0.5021667496404401,
+          "fragment_name": "AARG29",
+          "baseline_B_minus_A": -0.712,
+          "ensemble_shift_from_baseline": 0.7303333333333333
+        },
+        {
+          "fragment_id": 4,
+          "mean": 0.5489999999999999,
+          "repeat_std": 0.8186922498717085,
+          "fragment_name": "ATYR32",
+          "baseline_B_minus_A": -0.9400000000000004,
+          "ensemble_shift_from_baseline": 1.4890000000000003
+        },
+        {
+          "fragment_id": 5,
+          "mean": -0.1538888888888891,
+          "repeat_std": 0.3305114443023342,
+          "fragment_name": "AVAL35",
+          "baseline_B_minus_A": 0.13899999999999935,
+          "ensemble_shift_from_baseline": -0.2928888888888884
+        },
+        {
+          "fragment_id": 6,
+          "mean": -0.03655555555555545,
+          "repeat_std": 0.4840689038801232,
+          "fragment_name": "AALA50",
+          "baseline_B_minus_A": -0.03100000000000014,
+          "ensemble_shift_from_baseline": -0.005555555555555314
+        },
+        {
+          "fragment_id": 7,
+          "mean": -0.11888888888888889,
+          "repeat_std": 0.21906222691112057,
+          "fragment_name": "ALEU51",
+          "baseline_B_minus_A": 0.04999999999999999,
+          "ensemble_shift_from_baseline": -0.16888888888888887
+        },
+        {
+          "fragment_id": 8,
+          "mean": -2.4760000000000004,
+          "repeat_std": 4.4442338047307,
+          "fragment_name": "ALYS52",
+          "baseline_B_minus_A": -3.2279999999999998,
+          "ensemble_shift_from_baseline": 0.7519999999999993
+        },
+        {
+          "fragment_id": 9,
+          "mean": 1.245555555555555,
+          "repeat_std": 1.7357681723514082,
+          "fragment_name": "AGLU66",
+          "baseline_B_minus_A": 1.0290000000000004,
+          "ensemble_shift_from_baseline": 0.21655555555555472
+        },
+        {
+          "fragment_id": 10,
+          "mean": 0.22955555555555543,
+          "repeat_std": 0.24855165645379607,
+          "fragment_name": "AILE79",
+          "baseline_B_minus_A": -0.06200000000000028,
+          "ensemble_shift_from_baseline": 0.2915555555555557
+        },
+        {
+          "fragment_id": 11,
+          "mean": -0.23233333333333342,
+          "repeat_std": 0.7747621857347224,
+          "fragment_name": "APHE97",
+          "baseline_B_minus_A": 0.15100000000000002,
+          "ensemble_shift_from_baseline": -0.3833333333333334
+        },
+        {
+          "fragment_id": 12,
+          "mean": -0.2446666666666666,
+          "repeat_std": 0.3352413724136354,
+          "fragment_name": "AASP98",
+          "baseline_B_minus_A": 0.30600000000000005,
+          "ensemble_shift_from_baseline": -0.5506666666666666
+        },
+        {
+          "fragment_id": 13,
+          "mean": 0.5344444444444444,
+          "repeat_std": 0.8206559255547656,
+          "fragment_name": "ATYR99",
+          "baseline_B_minus_A": 0.10400000000000009,
+          "ensemble_shift_from_baseline": 0.4304444444444443
+        },
+        {
+          "fragment_id": 14,
+          "mean": -0.5194444444444443,
+          "repeat_std": 0.12296988490111073,
+          "fragment_name": "AALA100",
+          "baseline_B_minus_A": -0.24099999999999966,
+          "ensemble_shift_from_baseline": -0.2784444444444446
+        },
+        {
+          "fragment_id": 15,
+          "mean": 0.42533333333333334,
+          "repeat_std": 0.227941756693337,
+          "fragment_name": "AGLU101",
+          "baseline_B_minus_A": 0.15000000000000002,
+          "ensemble_shift_from_baseline": 0.2753333333333333
+        },
+        {
+          "fragment_id": 16,
+          "mean": 0.09022222222222225,
+          "repeat_std": 0.1362556149029925,
+          "fragment_name": "AHIS102",
+          "baseline_B_minus_A": -0.025999999999999995,
+          "ensemble_shift_from_baseline": 0.11622222222222224
+        },
+        {
+          "fragment_id": 17,
+          "mean": -0.8063333333333333,
+          "repeat_std": 1.3068657586420696,
+          "fragment_name": "AASP103",
+          "baseline_B_minus_A": 0.19800000000000018,
+          "ensemble_shift_from_baseline": -1.0043333333333335
+        },
+        {
+          "fragment_id": 18,
+          "mean": -0.024444444444444418,
+          "repeat_std": 0.04565247143527006,
+          "fragment_name": "ALEU104",
+          "baseline_B_minus_A": -0.05499999999999999,
+          "ensemble_shift_from_baseline": 0.030555555555555575
+        },
+        {
+          "fragment_id": 19,
+          "mean": 0.16977777777777772,
+          "repeat_std": 0.5106797575925784,
+          "fragment_name": "ATRP105",
+          "baseline_B_minus_A": 0.0040000000000000036,
+          "ensemble_shift_from_baseline": 0.16577777777777772
+        },
+        {
+          "fragment_id": 20,
+          "mean": 0.2456666666666666,
+          "repeat_std": 0.2747040832119779,
+          "fragment_name": "AHIS106",
+          "baseline_B_minus_A": 0.11100000000000021,
+          "ensemble_shift_from_baseline": 0.13466666666666638
+        },
+        {
+          "fragment_id": 21,
+          "mean": -0.4268888888888889,
+          "repeat_std": 0.6580628417588277,
+          "fragment_name": "AALA155",
+          "baseline_B_minus_A": -0.009000000000000119,
+          "ensemble_shift_from_baseline": -0.41788888888888875
+        },
+        {
+          "fragment_id": 22,
+          "mean": -1.5926666666666671,
+          "repeat_std": 0.2140516552402974,
+          "fragment_name": "AASN156",
+          "baseline_B_minus_A": -0.5680000000000001,
+          "ensemble_shift_from_baseline": -1.024666666666667
+        },
+        {
+          "fragment_id": 23,
+          "mean": -0.6178888888888888,
+          "repeat_std": 0.2994553079868204,
+          "fragment_name": "AILE157",
+          "baseline_B_minus_A": 0.173,
+          "ensemble_shift_from_baseline": -0.7908888888888888
+        },
+        {
+          "fragment_id": 24,
+          "mean": -1.1679999999999997,
+          "repeat_std": 0.11966202405107546,
+          "fragment_name": "ALEU158",
+          "baseline_B_minus_A": -0.03700000000000081,
+          "ensemble_shift_from_baseline": -1.130999999999999
+        },
+        {
+          "fragment_id": 25,
+          "mean": 0.10211111111111117,
+          "repeat_std": 0.3002636495802635,
+          "fragment_name": "AALA172",
+          "baseline_B_minus_A": -0.03700000000000003,
+          "ensemble_shift_from_baseline": 0.13911111111111119
+        },
+        {
+          "fragment_id": 26,
+          "mean": 0.9547777777777776,
+          "repeat_std": 2.618731697540567,
+          "fragment_name": "AASP173",
+          "baseline_B_minus_A": 5.4,
+          "ensemble_shift_from_baseline": -4.445222222222223
+        },
+        {
+          "fragment_id": 27,
+          "mean": 0.699333333333333,
+          "repeat_std": 0.9472495857891825,
+          "fragment_name": "AARG356",
+          "baseline_B_minus_A": -0.1379999999999999,
+          "ensemble_shift_from_baseline": 0.8373333333333329
+        },
+        {
+          "fragment_id": 28,
+          "mean": 3.052,
+          "repeat_std": 1.9653797201671852,
+          "fragment_name": "AHOH604",
+          "baseline_B_minus_A": 0.031,
+          "ensemble_shift_from_baseline": 3.021
+        },
+        {
+          "fragment_id": 29,
+          "mean": 1.6028888888888888,
+          "repeat_std": 1.383188037884997,
+          "fragment_name": "AHOH699",
+          "baseline_B_minus_A": -0.14300000000000002,
+          "ensemble_shift_from_baseline": 1.7458888888888888
+        },
+        {
+          "fragment_id": 30,
+          "mean": 0.005111111111111066,
+          "repeat_std": 0.8698894778669894,
+          "fragment_name": "AHOH701",
+          "baseline_B_minus_A": 0.04200000000000004,
+          "ensemble_shift_from_baseline": -0.03688888888888897
+        },
+        {
+          "fragment_id": 31,
+          "mean": -0.807111111111111,
+          "repeat_std": 0.3847409421839488,
+          "fragment_name": "AHOH707",
+          "baseline_B_minus_A": 0.03599999999999992,
+          "ensemble_shift_from_baseline": -0.8431111111111109
+        },
+        {
+          "fragment_id": 32,
+          "mean": -1.257222222222222,
+          "repeat_std": 1.6797594514735774,
+          "fragment_name": "AHOH710",
+          "baseline_B_minus_A": -0.009000000000000008,
+          "ensemble_shift_from_baseline": -1.2482222222222221
+        }
+      ],
+      "ligands": {
+        "12": {
+          "baseline_tpie_kcal_mol": -62.586999999999996,
+          "mean_tpie_kcal_mol": -58.06799999999999,
+          "repeat_std_tpie_kcal_mol": 4.140233608545944
+        },
+        "20": {
+          "baseline_tpie_kcal_mol": -60.621,
+          "mean_tpie_kcal_mol": -58.08544444444445,
+          "repeat_std_tpie_kcal_mol": 2.0907201399765847
+        }
+      },
+      "convergence_proven": false,
+      "fixed_time_slice_sensitivity": {
+        "400": {
+          "production_ns": 1.0,
+          "mean_B_minus_A_kcal_mol": -0.8423333333333337,
+          "repeat_std_B_minus_A_kcal_mol": 6.043077472061178,
+          "n_independent_repeats": 3
+        },
+        "1200": {
+          "production_ns": 3.0,
+          "mean_B_minus_A_kcal_mol": 3.0279999999999987,
+          "repeat_std_B_minus_A_kcal_mol": 6.824258714322021,
+          "n_independent_repeats": 3
+        },
+        "2000": {
+          "production_ns": 5.0,
+          "mean_B_minus_A_kcal_mol": -2.2380000000000044,
+          "repeat_std_B_minus_A_kcal_mol": 6.7459041647506375,
+          "n_independent_repeats": 3
+        }
+      }
+    },
+    "BACE": {
+      "first": "CAT-13n",
+      "second": "CAT-4i",
+      "n_independent_repeats": 3,
+      "repeats": {
+        "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/simulation.nc": {
+          "ligand_means_kcal_mol": {
+            "CAT-13n": {
+              "tPIE": -125.99566666666665,
+              "ES": -27.21066666666667,
+              "EX": 2.393666666666667,
+              "CT": -4.1209999999999996,
+              "DI": -50.656666666666666,
+              "SOLV": -46.39633333333334
+            },
+            "CAT-4i": {
+              "tPIE": -127.76766666666668,
+              "ES": -32.285666666666664,
+              "EX": 6.485666666666667,
+              "CT": -4.390333333333333,
+              "DI": -48.47233333333333,
+              "SOLV": -49.1
+            }
+          },
+          "B_minus_A_kcal_mol": {
+            "tPIE": -1.772000000000034,
+            "ES": -5.074999999999996,
+            "EX": 4.0920000000000005,
+            "CT": -0.26933333333333387,
+            "DI": 2.184333333333335,
+            "SOLV": -2.7036666666666633
+          }
+        },
+        "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/simulation.nc": {
+          "ligand_means_kcal_mol": {
+            "CAT-13n": {
+              "tPIE": -120.33266666666668,
+              "ES": -16.017,
+              "EX": 0.22366666666666699,
+              "CT": -3.4619999999999997,
+              "DI": -52.65200000000001,
+              "SOLV": -48.428666666666665
+            },
+            "CAT-4i": {
+              "tPIE": -119.08533333333332,
+              "ES": -33.52733333333334,
+              "EX": 6.694,
+              "CT": -4.266666666666667,
+              "DI": -44.468999999999994,
+              "SOLV": -43.51499999999999
+            }
+          },
+          "B_minus_A_kcal_mol": {
+            "tPIE": 1.2473333333333585,
+            "ES": -17.51033333333334,
+            "EX": 6.470333333333333,
+            "CT": -0.8046666666666669,
+            "DI": 8.183000000000014,
+            "SOLV": 4.913666666666671
+          }
+        },
+        "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/BACE/edge_000/bound/shared/shared_HybridTopologyMultiStateSimulationUnit-f2f82f46ba2e4efcb90d7711954b1f62_attempt_0/simulation.nc": {
+          "ligand_means_kcal_mol": {
+            "CAT-13n": {
+              "tPIE": -128.44133333333335,
+              "ES": -24.203000000000007,
+              "EX": 2.011,
+              "CT": -3.4463333333333335,
+              "DI": -53.83533333333333,
+              "SOLV": -48.972
+            },
+            "CAT-4i": {
+              "tPIE": -120.40633333333334,
+              "ES": -23.611000000000004,
+              "EX": 5.657,
+              "CT": -5.679333333333332,
+              "DI": -47.189,
+              "SOLV": -49.580999999999996
+            }
+          },
+          "B_minus_A_kcal_mol": {
+            "tPIE": 8.03500000000001,
+            "ES": 0.5920000000000023,
+            "EX": 3.646,
+            "CT": -2.2329999999999988,
+            "DI": 6.646333333333331,
+            "SOLV": -0.6089999999999947
+          }
+        }
+      },
+      "mean_B_minus_A_kcal_mol": {
+        "tPIE": 2.5034444444444452,
+        "ES": -7.3311111111111105,
+        "EX": 4.736111111111111,
+        "CT": -1.1023333333333332,
+        "DI": 5.671222222222227,
+        "SOLV": 0.5336666666666711
+      },
+      "repeat_std_B_minus_A_kcal_mol": {
+        "tPIE": 5.022715758689991,
+        "ES": 9.259651507321273,
+        "EX": 1.5183458226099333,
+        "CT": 1.015111214487248,
+        "DI": 3.1159479622907265,
+        "SOLV": 3.935124789776191
+      },
+      "baseline_tpie_B_minus_A_kcal_mol": 6.10499999999999,
+      "receptor_fragment_B_minus_A_kcal_mol": [
+        {
+          "fragment_id": 1,
+          "mean": -0.5455555555555556,
+          "repeat_std": 1.5346244322791638,
+          "fragment_name": "ALYS70",
+          "baseline_B_minus_A": 0.39000000000000057,
+          "ensemble_shift_from_baseline": -0.9355555555555561
+        },
+        {
+          "fragment_id": 2,
+          "mean": 0.3721111111111111,
+          "repeat_std": 0.746969085581736,
+          "fragment_name": "ASER71",
+          "baseline_B_minus_A": -0.08000000000000007,
+          "ensemble_shift_from_baseline": 0.4521111111111112
+        },
+        {
+          "fragment_id": 3,
+          "mean": 2.0736666666666665,
+          "repeat_std": 1.362013990791251,
+          "fragment_name": "AGLY72",
+          "baseline_B_minus_A": -0.3120000000000003,
+          "ensemble_shift_from_baseline": 2.385666666666667
+        },
+        {
+          "fragment_id": 4,
+          "mean": -1.628666666666667,
+          "repeat_std": 0.5982868134190419,
+          "fragment_name": "AGLN73",
+          "baseline_B_minus_A": 0.28,
+          "ensemble_shift_from_baseline": -1.908666666666667
+        },
+        {
+          "fragment_id": 5,
+          "mean": 2.5148888888888887,
+          "repeat_std": 0.4205050314579856,
+          "fragment_name": "AGLY74",
+          "baseline_B_minus_A": 1.933,
+          "ensemble_shift_from_baseline": 0.5818888888888887
+        },
+        {
+          "fragment_id": 6,
+          "mean": 0.5878888888888891,
+          "repeat_std": 0.5590774477588869,
+          "fragment_name": "ATYR75",
+          "baseline_B_minus_A": 0.266,
+          "ensemble_shift_from_baseline": 0.3218888888888891
+        },
+        {
+          "fragment_id": 7,
+          "mean": 0.4567777777777778,
+          "repeat_std": 0.48153692985565993,
+          "fragment_name": "ALEU91",
+          "baseline_B_minus_A": 0.18400000000000016,
+          "ensemble_shift_from_baseline": 0.2727777777777776
+        },
+        {
+          "fragment_id": 8,
+          "mean": 0.4316666666666668,
+          "repeat_std": 0.78817701057567,
+          "fragment_name": "AVAL92",
+          "baseline_B_minus_A": 0.19500000000000028,
+          "ensemble_shift_from_baseline": 0.23666666666666653
+        },
+        {
+          "fragment_id": 9,
+          "mean": -5.408333333333336,
+          "repeat_std": 1.0174169908809971,
+          "fragment_name": "AASP93",
+          "baseline_B_minus_A": -1.0760000000000076,
+          "ensemble_shift_from_baseline": -4.332333333333328
+        },
+        {
+          "fragment_id": 10,
+          "mean": -0.03233333333333318,
+          "repeat_std": 0.7303141637526809,
+          "fragment_name": "ATHR94",
+          "baseline_B_minus_A": -0.12199999999999989,
+          "ensemble_shift_from_baseline": 0.0896666666666667
+        },
+        {
+          "fragment_id": 11,
+          "mean": -0.14355555555555574,
+          "repeat_std": 0.3423022273004004,
+          "fragment_name": "AGLY95",
+          "baseline_B_minus_A": 0.2110000000000003,
+          "ensemble_shift_from_baseline": -0.35455555555555607
+        },
+        {
+          "fragment_id": 12,
+          "mean": -2.138111111111111,
+          "repeat_std": 1.9839158061585997,
+          "fragment_name": "ASER96",
+          "baseline_B_minus_A": -0.48799999999999955,
+          "ensemble_shift_from_baseline": -1.6501111111111113
+        },
+        {
+          "fragment_id": 13,
+          "mean": -0.9936666666666669,
+          "repeat_std": 0.31845791628478,
+          "fragment_name": "ASER97",
+          "baseline_B_minus_A": -0.3420000000000005,
+          "ensemble_shift_from_baseline": -0.6516666666666664
+        },
+        {
+          "fragment_id": 14,
+          "mean": 0.3464444444444445,
+          "repeat_std": 1.7104984761867041,
+          "fragment_name": "AASN98",
+          "baseline_B_minus_A": 0.0389999999999997,
+          "ensemble_shift_from_baseline": 0.3074444444444448
+        },
+        {
+          "fragment_id": 15,
+          "mean": -0.960888888888889,
+          "repeat_std": 1.1120420322458504,
+          "fragment_name": "AVAL130",
+          "baseline_B_minus_A": -0.10599999999999998,
+          "ensemble_shift_from_baseline": -0.854888888888889
+        },
+        {
+          "fragment_id": 16,
+          "mean": -0.26199999999999957,
+          "repeat_std": 0.1315425575410653,
+          "fragment_name": "APRO131",
+          "baseline_B_minus_A": 0.17899999999999938,
+          "ensemble_shift_from_baseline": -0.44099999999999895
+        },
+        {
+          "fragment_id": 17,
+          "mean": 0.928888888888889,
+          "repeat_std": 2.040635422099187,
+          "fragment_name": "ATYR132",
+          "baseline_B_minus_A": -0.774,
+          "ensemble_shift_from_baseline": 1.702888888888889
+        },
+        {
+          "fragment_id": 18,
+          "mean": -2.4886666666666666,
+          "repeat_std": 0.7982639496641029,
+          "fragment_name": "ATRP137",
+          "baseline_B_minus_A": -0.449,
+          "ensemble_shift_from_baseline": -2.0396666666666667
+        },
+        {
+          "fragment_id": 19,
+          "mean": -1.093111111111111,
+          "repeat_std": 0.25002985006979783,
+          "fragment_name": "ALYS168",
+          "baseline_B_minus_A": -0.13000000000000078,
+          "ensemble_shift_from_baseline": -0.9631111111111101
+        },
+        {
+          "fragment_id": 20,
+          "mean": -0.5647777777777777,
+          "repeat_std": 0.7807576329959773,
+          "fragment_name": "APHE169",
+          "baseline_B_minus_A": 0.28400000000000003,
+          "ensemble_shift_from_baseline": -0.8487777777777777
+        },
+        {
+          "fragment_id": 21,
+          "mean": 0.7042222222222226,
+          "repeat_std": 0.6708033602689748,
+          "fragment_name": "APHE170",
+          "baseline_B_minus_A": 0.7160000000000002,
+          "ensemble_shift_from_baseline": -0.011777777777777554
+        },
+        {
+          "fragment_id": 22,
+          "mean": 0.7597777777777776,
+          "repeat_std": 0.7390670044299347,
+          "fragment_name": "AILE171",
+          "baseline_B_minus_A": -0.41400000000000015,
+          "ensemble_shift_from_baseline": 1.1737777777777776
+        },
+        {
+          "fragment_id": 23,
+          "mean": 0.49722222222222223,
+          "repeat_std": 1.7169357825735598,
+          "fragment_name": "ATRP176",
+          "baseline_B_minus_A": 0.28,
+          "ensemble_shift_from_baseline": 0.2172222222222222
+        },
+        {
+          "fragment_id": 24,
+          "mean": 0.5800000000000001,
+          "repeat_std": 0.36199493550785106,
+          "fragment_name": "AILE179",
+          "baseline_B_minus_A": -0.447,
+          "ensemble_shift_from_baseline": 1.0270000000000001
+        },
+        {
+          "fragment_id": 25,
+          "mean": 1.1374444444444443,
+          "repeat_std": 1.9710031662789098,
+          "fragment_name": "AARG189",
+          "baseline_B_minus_A": -0.3999999999999986,
+          "ensemble_shift_from_baseline": 1.5374444444444428
+        },
+        {
+          "fragment_id": 26,
+          "mean": -0.16544444444444442,
+          "repeat_std": 0.24436864986539714,
+          "fragment_name": "ALEU215",
+          "baseline_B_minus_A": 0.08299999999999996,
+          "ensemble_shift_from_baseline": -0.24844444444444438
+        },
+        {
+          "fragment_id": 27,
+          "mean": 0.361888888888889,
+          "repeat_std": 0.8365774410147664,
+          "fragment_name": "ATYR259",
+          "baseline_B_minus_A": 0.08099999999999996,
+          "ensemble_shift_from_baseline": 0.280888888888889
+        },
+        {
+          "fragment_id": 28,
+          "mean": -0.7156666666666669,
+          "repeat_std": 0.9168573741015803,
+          "fragment_name": "AILE287",
+          "baseline_B_minus_A": -0.05900000000000016,
+          "ensemble_shift_from_baseline": -0.6566666666666667
+        },
+        {
+          "fragment_id": 29,
+          "mean": 0.172777777777778,
+          "repeat_std": 0.4448410868979981,
+          "fragment_name": "AVAL288",
+          "baseline_B_minus_A": -0.04500000000000015,
+          "ensemble_shift_from_baseline": 0.21777777777777815
+        },
+        {
+          "fragment_id": 30,
+          "mean": -4.523444444444444,
+          "repeat_std": 4.340068795324349,
+          "fragment_name": "AASP289",
+          "baseline_B_minus_A": 0.692,
+          "ensemble_shift_from_baseline": -5.2154444444444445
+        },
+        {
+          "fragment_id": 31,
+          "mean": 0.7333333333333337,
+          "repeat_std": 1.1267990060343507,
+          "fragment_name": "ASER290",
+          "baseline_B_minus_A": -0.0039999999999995595,
+          "ensemble_shift_from_baseline": 0.7373333333333333
+        },
+        {
+          "fragment_id": 32,
+          "mean": 0.8537777777777773,
+          "repeat_std": 1.4733445449548301,
+          "fragment_name": "AGLY291",
+          "baseline_B_minus_A": 2.0630000000000006,
+          "ensemble_shift_from_baseline": -1.2092222222222233
+        },
+        {
+          "fragment_id": 33,
+          "mean": 0.8706666666666664,
+          "repeat_std": 4.165642260737765,
+          "fragment_name": "ATHR292",
+          "baseline_B_minus_A": 1.4649999999999999,
+          "ensemble_shift_from_baseline": -0.5943333333333335
+        },
+        {
+          "fragment_id": 34,
+          "mean": 2.6244444444444444,
+          "repeat_std": 1.4253221987923872,
+          "fragment_name": "ATHR293",
+          "baseline_B_minus_A": 0.44400000000000084,
+          "ensemble_shift_from_baseline": 2.1804444444444435
+        },
+        {
+          "fragment_id": 35,
+          "mean": -0.7442222222222222,
+          "repeat_std": 0.9200737490569468,
+          "fragment_name": "AARG296",
+          "baseline_B_minus_A": 0.5240000000000009,
+          "ensemble_shift_from_baseline": -1.268222222222223
+        },
+        {
+          "fragment_id": 36,
+          "mean": -0.13255555555555565,
+          "repeat_std": 0.27920568549872843,
+          "fragment_name": "AVAL393",
+          "baseline_B_minus_A": -0.03199999999999992,
+          "ensemble_shift_from_baseline": -0.10055555555555573
+        },
+        {
+          "fragment_id": 37,
+          "mean": 0.6895555555555554,
+          "repeat_std": 0.2811880219776501,
+          "fragment_name": "AALA396",
+          "baseline_B_minus_A": 0.8919999999999995,
+          "ensemble_shift_from_baseline": -0.2024444444444441
+        },
+        {
+          "fragment_id": 38,
+          "mean": 0.8775555555555558,
+          "repeat_std": 6.160839826709536,
+          "fragment_name": "AHOH1028",
+          "baseline_B_minus_A": -0.17200000000000015,
+          "ensemble_shift_from_baseline": 1.049555555555556
+        },
+        {
+          "fragment_id": 39,
+          "mean": -0.8682222222222217,
+          "repeat_std": 3.3460877708706884,
+          "fragment_name": "AHOH1030",
+          "baseline_B_minus_A": 0.6529999999999998,
+          "ensemble_shift_from_baseline": -1.5212222222222214
+        },
+        {
+          "fragment_id": 40,
+          "mean": -0.13266666666666657,
+          "repeat_std": 4.814130462618468,
+          "fragment_name": "AHOH1033",
+          "baseline_B_minus_A": -0.14300000000000002,
+          "ensemble_shift_from_baseline": 0.010333333333333444
+        },
+        {
+          "fragment_id": 41,
+          "mean": 1.4734444444444446,
+          "repeat_std": 2.811739701350064,
+          "fragment_name": "AHOH1034",
+          "baseline_B_minus_A": -0.10999999999999988,
+          "ensemble_shift_from_baseline": 1.5834444444444444
+        },
+        {
+          "fragment_id": 42,
+          "mean": 1.4826666666666666,
+          "repeat_std": 4.083339605437359,
+          "fragment_name": "AHOH1041",
+          "baseline_B_minus_A": -0.618,
+          "ensemble_shift_from_baseline": 2.1006666666666667
+        },
+        {
+          "fragment_id": 43,
+          "mean": 1.840111111111111,
+          "repeat_std": 2.464682407607595,
+          "fragment_name": "AHOH1043",
+          "baseline_B_minus_A": 1.467,
+          "ensemble_shift_from_baseline": 0.37311111111111095
+        },
+        {
+          "fragment_id": 44,
+          "mean": 2.0159999999999996,
+          "repeat_std": 2.8293469407464173,
+          "fragment_name": "AHOH1044",
+          "baseline_B_minus_A": -0.857,
+          "ensemble_shift_from_baseline": 2.8729999999999993
+        },
+        {
+          "fragment_id": 45,
+          "mean": 0.658111111111111,
+          "repeat_std": 0.5432062564413608,
+          "fragment_name": "AHOH1053",
+          "baseline_B_minus_A": -0.03599999999999959,
+          "ensemble_shift_from_baseline": 0.6941111111111106
+        }
+      ],
+      "ligands": {
+        "CAT-13n": {
+          "baseline_tpie_kcal_mol": -106.261,
+          "mean_tpie_kcal_mol": -124.92322222222224,
+          "repeat_std_tpie_kcal_mol": 4.159353506567163
+        },
+        "CAT-4i": {
+          "baseline_tpie_kcal_mol": -100.156,
+          "mean_tpie_kcal_mol": -122.41977777777778,
+          "repeat_std_tpie_kcal_mol": 4.678268582063886
+        }
+      },
+      "convergence_proven": false,
+      "fixed_time_slice_sensitivity": {
+        "400": {
+          "production_ns": 1.0,
+          "mean_B_minus_A_kcal_mol": -0.24600000000000932,
+          "repeat_std_B_minus_A_kcal_mol": 11.74844930192917,
+          "n_independent_repeats": 3
+        },
+        "1200": {
+          "production_ns": 3.0,
+          "mean_B_minus_A_kcal_mol": 3.8190000000000026,
+          "repeat_std_B_minus_A_kcal_mol": 11.161541963366886,
+          "n_independent_repeats": 3
+        },
+        "2000": {
+          "production_ns": 5.0,
+          "mean_B_minus_A_kcal_mol": 3.937333333333337,
+          "repeat_std_B_minus_A_kcal_mol": 15.05250760947603,
+          "n_independent_repeats": 3
+        }
+      }
+    }
+  },
+  "labels_used": false,
+  "cohort_ranking_available": false,
+  "binding_free_energy_claim_allowed": false,
+  "scope": "Matched same frames; only water slots replaced by fixed-count closest actual MD waters to ligand N/O/S. Same protein, ligand, caps, PCM and fragment count; not a binding free energy or default water policy.",
+  "main_pipeline_changed": false,
+  "report_driver_sha256": "8de44e55f055ea8f8a5de7f23f875251ebe823ae6478da1c92c570715fcab5d5",
+  "source_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/frozen_protocol.json": "6005d2ee8ce06293c70c7f7d33ca5869ff7d39ca22ed440720ab392e6eb6cae5",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/local_water_tpie_control_20261024_v2/progress.json": "e64641c2eb8719018cbf211a2e709fb455127080f2c9c786c6941334897f2cd1",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/conformer_tpie_control_20261024/progress.json": "2dc7da77ed0ddf971340fc0bb35b6061b1c2927faab4d5a67548d2b4430bf6ed",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/../sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/final_endpoint_audit_20261023/free_energy_snapshot.json": "0b9fe3ad75b5d5ce1c93afdd0a3c43de3dd977d828153bb1aafab461c9997d51"
+  }
+}

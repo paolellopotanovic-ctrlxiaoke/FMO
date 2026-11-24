@@ -1,0 +1,515 @@
+{
+  "schema": "quanpol-multiframe-summary-v1",
+  "status": "COMPLETE",
+  "target": "CDK8",
+  "shell_angstrom": 12.0,
+  "swrb_angstrom": 6000.0,
+  "labels_used": false,
+  "frame_times_iterations": [
+    400,
+    800,
+    1200,
+    1600,
+    2000
+  ],
+  "independent_repeat_indices": [
+    0,
+    1,
+    2
+  ],
+  "paired_single_points": 60,
+  "gamess_jobs": 120,
+  "sum_gamess_wall_seconds": 722.5138778425753,
+  "mean_paired_qm_mm_wall_seconds": 12.041897964042922,
+  "fixed_frame_cycles": 15,
+  "all_scf_converged_and_gamess_normal": true,
+  "all_matched_mm_parity_passed_0p1_kcal_mol": true,
+  "mm_parity_abs_kcal_mol": {
+    "n": 60,
+    "mean": 0.013122445531151546,
+    "sample_sd": 0.012400851334510254,
+    "median": 0.00978951988395238,
+    "min": 6.094769560149871e-07,
+    "max": 0.029971913400913763
+  },
+  "no_bond_warning_occurrences": 272494,
+  "gamess_log_audit": {
+    "logs_found": 120,
+    "zero_step_optimizer_fail_messages": 120,
+    "potential_recorded_at_zero_step_before_message": 120
+  },
+  "cycle_correction_kcal_mol": {
+    "n": 15,
+    "mean": -3.20329861240607,
+    "sample_sd": 3.5949826939158482,
+    "median": -3.335345027393487,
+    "min": -8.32536894760051,
+    "max": 4.532183684495976
+  },
+  "cycle_correction_by_iteration": {
+    "400": {
+      "n": 3,
+      "mean": -0.08464603606747308,
+      "sample_sd": 2.569984982765566,
+      "median": -0.11290177739647334,
+      "min": -2.6403866487016785,
+      "max": 2.4993503178957326
+    },
+    "800": {
+      "n": 3,
+      "mean": -4.860906272229234,
+      "sample_sd": 2.7738044244406965,
+      "median": -3.9000352601979102,
+      "min": -7.987383380095707,
+      "max": -2.6953001763940847
+    },
+    "1200": {
+      "n": 3,
+      "mean": -5.03723022933021,
+      "sample_sd": 1.5510440386708069,
+      "median": -5.405029291101528,
+      "min": -6.3713163694956165,
+      "max": -3.335345027393487
+    },
+    "1600": {
+      "n": 3,
+      "mean": -2.191097212935953,
+      "sample_sd": 6.4489816069787915,
+      "median": -2.780106375703326,
+      "min": -8.32536894760051,
+      "max": 4.532183684495976
+    },
+    "2000": {
+      "n": 3,
+      "mean": -3.842613311467479,
+      "sample_sd": 2.503604011183933,
+      "median": -4.675849755301897,
+      "min": -5.823352137700567,
+      "max": -1.0286380413999723
+    }
+  },
+  "cycle_mean_by_repeat_kcal_mol": {
+    "0": -3.1525539960384776,
+    "1": -3.46634461345966,
+    "2": -2.9909972277200723
+  },
+  "between_repeat_sd_of_mean_kcal_mol": 0.24170239210666833,
+  "term_cycle_mean_kcal_mol": {
+    "bond_stretching_kcal_mol": 1.1801284867133444,
+    "bond_angle_bending_kcal_mol": -0.274257228400058,
+    "dihedral_rotation_kcal_mol": -1.832631544420135,
+    "lj_repulsion_kcal_mol": -0.2774000552138659,
+    "lj_dispersion_kcal_mol": 1.1239783313932017,
+    "charge_kcal_mol": -7.395307166845972
+  },
+  "term_cycle_statistics_kcal_mol": {
+    "bond_stretching_kcal_mol": {
+      "n": 15,
+      "mean": 1.1801284867133444,
+      "sample_sd": 4.753528125079686,
+      "median": 1.2414695163000014,
+      "min": -5.819118698999816,
+      "max": 8.142609348699864
+    },
+    "bond_angle_bending_kcal_mol": {
+      "n": 15,
+      "mean": -0.274257228400058,
+      "sample_sd": 5.813270531484053,
+      "median": -0.0779979089000058,
+      "min": -9.124640012000553,
+      "max": 9.254929917899872
+    },
+    "dihedral_rotation_kcal_mol": {
+      "n": 15,
+      "mean": -1.832631544420135,
+      "sample_sd": 4.401348502428336,
+      "median": -1.312971352599952,
+      "min": -9.600126522199847,
+      "max": 4.088019622199818
+    },
+    "lj_repulsion_kcal_mol": {
+      "n": 15,
+      "mean": -0.2774000552138659,
+      "sample_sd": 4.607837457992743,
+      "median": -1.9632761080019918,
+      "min": -8.597961230801047,
+      "max": 6.95978086809896
+    },
+    "lj_dispersion_kcal_mol": {
+      "n": 15,
+      "mean": 1.1239783313932017,
+      "sample_sd": 2.0580718126319413,
+      "median": 1.081060312499062,
+      "min": -3.6649531094009262,
+      "max": 4.216746087800857
+    },
+    "charge_kcal_mol": {
+      "n": 15,
+      "mean": -7.395307166845972,
+      "sample_sd": 8.623193055663204,
+      "median": -7.804994714399982,
+      "min": -21.091370292200736,
+      "max": 7.361036221700942
+    }
+  },
+  "qm_hidden_residual_cycle_kcal_mol": {
+    "n": 15,
+    "mean": 4.272190564367095,
+    "sample_sd": 9.864145433867668,
+    "median": 6.8828678192985535,
+    "min": -11.610136734198022,
+    "max": 21.663121490601043
+  },
+  "qm_center_cycle_kcal_mol": {
+    "n": 15,
+    "mean": 0.0,
+    "sample_sd": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "max": 0.0
+  },
+  "qm_center_nonzero_single_points": 0,
+  "max_abs_breakdown_closure_kcal_mol": 5.980993478260643e-12,
+  "largest_absolute_cycle": {
+    "repeat": 2,
+    "iteration": 1600,
+    "correction_kcal_mol": -8.32536894760051,
+    "term_breakdown_kcal_mol": {
+      "bond_stretching_kcal_mol": 3.1597386120001065,
+      "bond_angle_bending_kcal_mol": 6.7680666518999715,
+      "dihedral_rotation_kcal_mol": 2.9571717544995852,
+      "lj_repulsion_kcal_mol": 1.8206991333995575,
+      "lj_dispersion_kcal_mol": 0.43145959799960565,
+      "charge_kcal_mol": -16.806037162497887
+    },
+    "qm_center_cycle_kcal_mol": 0.0,
+    "qm_hidden_residual_kcal_mol": -6.656467534896365,
+    "breakdown_closure_kcal_mol": 5.083933274363517e-12
+  },
+  "delta_u_by_state_kcal_mol": {
+    "bound_0": {
+      "n": 15,
+      "mean": -29697.31667284036,
+      "sample_sd": 3.073414845486165,
+      "median": -29697.4071966364,
+      "min": -29702.1590088706,
+      "max": -29691.6071796409
+    },
+    "bound_10": {
+      "n": 15,
+      "mean": -29175.508005702653,
+      "sample_sd": 2.15484884665258,
+      "median": -29176.0558027737,
+      "min": -29178.822351561197,
+      "max": -29171.873572476597
+    },
+    "solution_0": {
+      "n": 15,
+      "mean": -29697.018603231125,
+      "sample_sd": 3.0489729299886106,
+      "median": -29697.655939802098,
+      "min": -29701.5803587962,
+      "max": -29690.6738551377
+    },
+    "solution_10": {
+      "n": 15,
+      "mean": -29172.006637481012,
+      "sample_sd": 3.341744490223535,
+      "median": -29172.2798917824,
+      "min": -29177.4174045288,
+      "max": -29166.783350107
+    }
+  },
+  "single_state_zwanzig_weight_ess_diagnostic": {
+    "bound_0": {
+      "n_frames": 15,
+      "effective_sample_size": 1.711996250696809,
+      "temperature_kelvin": 298.15,
+      "beta_per_kcal_mol": 1.6878065856071314,
+      "naive_finite_sample_zwanzig_kcal_mol": -29700.740176808584
+    },
+    "bound_10": {
+      "n_frames": 15,
+      "effective_sample_size": 2.334205597285427,
+      "temperature_kelvin": 298.15,
+      "beta_per_kcal_mol": 1.6878065856071314,
+      "naive_finite_sample_zwanzig_kcal_mol": -29177.495570692518
+    },
+    "solution_0": {
+      "n_frames": 15,
+      "effective_sample_size": 1.9712657437291832,
+      "temperature_kelvin": 298.15,
+      "beta_per_kcal_mol": 1.6878065856071314,
+      "naive_finite_sample_zwanzig_kcal_mol": -29700.23696610641
+    },
+    "solution_10": {
+      "n_frames": 15,
+      "effective_sample_size": 2.144619027469548,
+      "temperature_kelvin": 298.15,
+      "beta_per_kcal_mol": 1.6878065856071314,
+      "naive_finite_sample_zwanzig_kcal_mol": -29176.208529845626
+    }
+  },
+  "naive_finite_sample_zwanzig_binding_correction_kcal_mol": -0.7838301447191043,
+  "naive_finite_sample_zwanzig_correction_by_repeat_kcal_mol": {
+    "0": -2.683067293044587,
+    "1": -1.3799355606970494,
+    "2": -2.8845151740715664
+  },
+  "cycles": [
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "correction_kcal_mol": -0.11290177739647334,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -1.796729347999908,
+        "bond_angle_bending_kcal_mol": 3.4684688905997714,
+        "dihedral_rotation_kcal_mol": -7.522659486099739,
+        "lj_repulsion_kcal_mol": -3.4946268786009114,
+        "lj_dispersion_kcal_mol": -0.06225996270018186,
+        "charge_kcal_mol": -7.804994714399982
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 17.09989972180483,
+      "breakdown_closure_kcal_mol": 3.552713678800501e-13
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "correction_kcal_mol": -7.987383380095707,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 6.776994097899986,
+        "bond_angle_bending_kcal_mol": -7.176594473600142,
+        "dihedral_rotation_kcal_mol": 3.2541885536987003,
+        "lj_repulsion_kcal_mol": 6.5764131905009435,
+        "lj_dispersion_kcal_mol": -1.2234122108999372,
+        "charge_kcal_mol": -9.176355538299504
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": -7.018616999397636,
+      "breakdown_closure_kcal_mol": -1.8820500713445654e-12
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "correction_kcal_mol": -6.3713163694956165,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 7.508681335600116,
+        "bond_angle_bending_kcal_mol": 4.854518280699681,
+        "dihedral_rotation_kcal_mol": 4.088019622199818,
+        "lj_repulsion_kcal_mol": -1.0889411367011235,
+        "lj_dispersion_kcal_mol": 1.4235352493988103,
+        "charge_kcal_mol": -11.54699298649939
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": -11.610136734198022,
+      "breakdown_closure_kcal_mol": -4.494182803682634e-12
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "correction_kcal_mol": 4.532183684495976,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 1.2414695163000014,
+        "bond_angle_bending_kcal_mol": 3.341462497500152,
+        "dihedral_rotation_kcal_mol": -5.948907461999946,
+        "lj_repulsion_kcal_mol": -1.9632761080019918,
+        "lj_dispersion_kcal_mol": 0.9699777338993272,
+        "charge_kcal_mol": -0.6920359184991867
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 7.583493425299821,
+      "breakdown_closure_kcal_mol": 2.2009061240169103e-12
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "correction_kcal_mol": -5.823352137700567,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 7.370719014800171,
+        "bond_angle_bending_kcal_mol": -6.4999165339998655,
+        "dihedral_rotation_kcal_mol": -1.312971352599952,
+        "lj_repulsion_kcal_mol": -2.6125095553009032,
+        "lj_dispersion_kcal_mol": 2.155439557900536,
+        "charge_kcal_mol": -1.5753885798976626
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": -3.348724688607035,
+      "breakdown_closure_kcal_mol": -4.144240506320784e-12
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "correction_kcal_mol": -2.6403866487016785,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -3.955158773699954,
+        "bond_angle_bending_kcal_mol": 9.254929917899872,
+        "dihedral_rotation_kcal_mol": -5.747421947099626,
+        "lj_repulsion_kcal_mol": 6.804023082499725,
+        "lj_dispersion_kcal_mol": -3.6649531094009262,
+        "charge_kcal_mol": -21.091370292200736
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 15.75956447329736,
+      "breakdown_closure_kcal_mol": -2.6076918402395677e-12
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "correction_kcal_mol": -3.9000352601979102,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 8.142609348699864,
+        "bond_angle_bending_kcal_mol": 4.225819588800169,
+        "dihedral_rotation_kcal_mol": 3.7361880189989556,
+        "lj_repulsion_kcal_mol": -3.6636153243991885,
+        "lj_dispersion_kcal_mol": 4.216746087800857,
+        "charge_kcal_mol": -18.0942197019981
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": -2.4635632781064487,
+      "breakdown_closure_kcal_mol": -5.980993478260643e-12
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "correction_kcal_mol": -3.335345027393487,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 2.5218795235998135,
+        "bond_angle_bending_kcal_mol": -3.169340915799978,
+        "dihedral_rotation_kcal_mol": -2.297553492999592,
+        "lj_repulsion_kcal_mol": -4.1706497596997,
+        "lj_dispersion_kcal_mol": 3.712423570399551,
+        "charge_kcal_mol": -7.958913430099983
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 8.026809477210918,
+      "breakdown_closure_kcal_mol": 4.515499085755437e-12
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "correction_kcal_mol": -2.780106375703326,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -0.9158721936002223,
+        "bond_angle_bending_kcal_mol": -8.000466404199594,
+        "dihedral_rotation_kcal_mol": -2.825750341299946,
+        "lj_repulsion_kcal_mol": 6.95978086809896,
+        "lj_dispersion_kcal_mol": 0.6352197789004776,
+        "charge_kcal_mol": 6.4912051401997815
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": -5.12422322380371,
+      "breakdown_closure_kcal_mol": -9.272582701669307e-13
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "correction_kcal_mol": -4.675849755301897,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -0.46780970830005053,
+        "bond_angle_bending_kcal_mol": -9.124640012000553,
+        "dihedral_rotation_kcal_mol": -1.21835394920023,
+        "lj_repulsion_kcal_mol": -2.849063588601439,
+        "lj_dispersion_kcal_mol": 1.4746792158005064,
+        "charge_kcal_mol": -1.2671127871999488
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 8.77645107420176,
+      "breakdown_closure_kcal_mol": 1.9415580254644738e-12
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "correction_kcal_mol": 2.4993503178957326,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 2.4762505249000277,
+        "bond_angle_bending_kcal_mol": -3.8355166128005873,
+        "dihedral_rotation_kcal_mol": -5.917659405699599,
+        "lj_repulsion_kcal_mol": -8.597961230801047,
+        "lj_dispersion_kcal_mol": 4.130333001300187,
+        "charge_kcal_mol": 7.361036221700942
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 6.8828678192985535,
+      "breakdown_closure_kcal_mol": 2.744471316873387e-12
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "correction_kcal_mol": -2.6953001763940847,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -5.819118698999816,
+        "bond_angle_bending_kcal_mol": -1.380010157099612,
+        "dihedral_rotation_kcal_mol": 1.5595798946995227,
+        "lj_repulsion_kcal_mol": -2.5489505983000527,
+        "lj_dispersion_kcal_mol": 1.081060312499062,
+        "charge_kcal_mol": -17.25098241979822
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 21.663121490601043,
+      "breakdown_closure_kcal_mol": -3.986144747614162e-12
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "correction_kcal_mol": -5.405029291101528,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -4.336730699500058,
+        "bond_angle_bending_kcal_mol": 3.2373587649998505,
+        "dihedral_rotation_kcal_mol": -9.600126522199847,
+        "lj_repulsion_kcal_mol": 1.1548494408993975,
+        "lj_dispersion_kcal_mol": 1.7644969361012954,
+        "charge_kcal_mol": -5.972580024700619
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 8.347702813302021,
+      "breakdown_closure_kcal_mol": 3.566924533515703e-12
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "correction_kcal_mol": -8.32536894760051,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": 3.1597386120001065,
+        "bond_angle_bending_kcal_mol": 6.7680666518999715,
+        "dihedral_rotation_kcal_mol": 2.9571717544995852,
+        "lj_repulsion_kcal_mol": 1.8206991333995575,
+        "lj_dispersion_kcal_mol": 0.43145959799960565,
+        "charge_kcal_mol": -16.806037162497887
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": -6.656467534896365,
+      "breakdown_closure_kcal_mol": 5.083933274363517e-12
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "correction_kcal_mol": -1.0286380413999723,
+      "term_breakdown_kcal_mol": {
+        "bond_stretching_kcal_mol": -4.204995250999911,
+        "bond_angle_bending_kcal_mol": -0.0779979089000058,
+        "dihedral_rotation_kcal_mol": -0.693217051200131,
+        "lj_repulsion_kcal_mol": 3.512827636799784,
+        "lj_dispersion_kcal_mol": -0.18507078810114308,
+        "charge_kcal_mol": -5.544865308499084
+      },
+      "qm_center_cycle_kcal_mol": 0.0,
+      "qm_hidden_residual_kcal_mol": 6.164680629499344,
+      "breakdown_closure_kcal_mol": -1.1741718708435656e-12
+    }
+  ],
+  "source_runs": [
+    {
+      "path": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/runs/CDK8_qmmm_multiframe_20261027_no_qmcenter/status.json",
+      "driver_sha256": "15b35f2d0fdc2a10566da9ceda8eee9f58f7aaa610efe014ccc87a00b9e4b128"
+    }
+  ],
+  "interpretation_limits": [
+    "These are sparse fixed-frame potential-energy double differences, not a binding free energy or corrected FEP result.",
+    "Single-state exponential-weight ESS was computed from 3 repeats and 5 fixed frames per repeat, without autocorrelation correction; this is only a diagnostic, not validated free-energy reweighting.",
+    "The finite-shell correction is not a correction to full periodic QM/MM. Reweighting a PME trajectory would require explicitly defining a subtractive target H_target = H_MM,PME + delta_local, then validating ensemble overlap and convergence for that approximate model.",
+    "The matched MM parity validates the reconstructed finite-shell FFDATA model, not equivalence to periodic PME/OpenFE.",
+    "FFDATA POL values are zero and IDOPOL=0; the calculation does not include mutual induced-dipole polarization in the MM environment.",
+    "No cycle or repeat was removed; all frozen repeats and frame times are included."
+  ]
+}

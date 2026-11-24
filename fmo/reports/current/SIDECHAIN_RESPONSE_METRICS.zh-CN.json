@@ -1,0 +1,333 @@
+{
+  "groups": {
+    "Galectin3": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.5619957128130779,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "baseline_soft": {
+        "pearson": 0.5684834762542199,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "output": {
+        "pearson": 0.5619957128130779,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "output_soft": {
+        "pearson": 0.5684834762542199,
+        "spearman": 0.5436196961888985,
+        "kendall": 0.38700432301723486
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 26
+    },
+    "CHK1": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.4636220821244891,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "baseline_soft": {
+        "pearson": 0.4415700416098103,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "output": {
+        "pearson": 0.4636220821244891,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "output_soft": {
+        "pearson": 0.4415700416098103,
+        "spearman": 0.44291651254398723,
+        "kendall": 0.34839434751244364
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 13
+    },
+    "BACE": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.21174767344688275,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "baseline_soft": {
+        "pearson": 0.22511709896480894,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "output": {
+        "pearson": 0.21174767344688275,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "output_soft": {
+        "pearson": 0.22511709896480894,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 36
+    },
+    "FXa": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.6125766294285312,
+        "spearman": 0.5687681336301004,
+        "kendall": 0.39372365311003993
+      },
+      "baseline_soft": {
+        "pearson": 0.6230890550262097,
+        "spearman": 0.5687681336301004,
+        "kendall": 0.39372365311003993
+      },
+      "output": {
+        "pearson": 0.6125766294285312,
+        "spearman": 0.5687681336301004,
+        "kendall": 0.39372365311003993
+      },
+      "output_soft": {
+        "pearson": 0.6230890550262097,
+        "spearman": 0.5687681336301004,
+        "kendall": 0.39372365311003993
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 27
+    },
+    "CDK2": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.8678583920310965,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "baseline_soft": {
+        "pearson": 0.866235110852543,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "output": {
+        "pearson": 0.8678583920310965,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "output_soft": {
+        "pearson": 0.866235110852543,
+        "spearman": 0.8558823529411764,
+        "kendall": 0.6833333333333333
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 16
+    },
+    "JNK1": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.6141593425214715,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "baseline_soft": {
+        "pearson": 0.6112891291628504,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "output": {
+        "pearson": 0.6141593425214715,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "output_soft": {
+        "pearson": 0.6112891291628504,
+        "spearman": 0.6281260480680853,
+        "kendall": 0.47255504512881
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 21
+    },
+    "P38": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.5033110695877683,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "baseline_soft": {
+        "pearson": 0.49982860099833504,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "output": {
+        "pearson": 0.5033110695877683,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "output_soft": {
+        "pearson": 0.49982860099833504,
+        "spearman": 0.48126645126004114,
+        "kendall": 0.3285542530932048
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 34
+    },
+    "TYK2": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.7076479666324702,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "baseline_soft": {
+        "pearson": 0.7606637595829229,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "output": {
+        "pearson": 0.7076479666324702,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "output_soft": {
+        "pearson": 0.7606637595829229,
+        "spearman": 0.7294117647058823,
+        "kendall": 0.5499999999999999
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 16
+    },
+    "HSP90": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.749334755496728,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "baseline_soft": {
+        "pearson": 0.7497473021592997,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "output": {
+        "pearson": 0.749334755496728,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "output_soft": {
+        "pearson": 0.7497473021592997,
+        "spearman": 0.7248011453748541,
+        "kendall": 0.5983660736054126
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 11
+    },
+    "PTP1B": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.74537975262075,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "baseline_soft": {
+        "pearson": 0.7408598337000867,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "output": {
+        "pearson": 0.74537975262075,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "output_soft": {
+        "pearson": 0.7408598337000867,
+        "spearman": 0.7575466040424127,
+        "kendall": 0.6148010773058075
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 23
+    },
+    "FAAH": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": 0.7368320105673787,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "baseline_soft": {
+        "pearson": 0.7319914244754567,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "output": {
+        "pearson": 0.7368320105673787,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "output_soft": {
+        "pearson": 0.7319914244754567,
+        "spearman": 0.7018917321829027,
+        "kendall": 0.5408357364372676
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 24
+    },
+    "HIV1PROT": {
+      "action": "KEEP_BASELINE_MECHANISM_NOT_DETECTED",
+      "baseline": {
+        "pearson": -0.14666558742438307,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "baseline_soft": {
+        "pearson": -0.14803742784405294,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "output": {
+        "pearson": -0.14666558742438307,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "output_soft": {
+        "pearson": -0.14803742784405294,
+        "spearman": -0.046767582069862,
+        "kendall": 0.03871048305693818
+      },
+      "execution_path": "REUSE_VERIFIED_BASELINE",
+      "n": 13
+    },
+    "CDK8": {
+      "action": "ACCEPT_LOCAL_REPAIR_RESEARCH_CONTROL",
+      "baseline": {
+        "pearson": 0.27411894151891825,
+        "spearman": 0.23636363636363633,
+        "kendall": 0.15555555555555553
+      },
+      "baseline_soft": {
+        "pearson": 0.2666685958818213,
+        "spearman": 0.23636363636363633,
+        "kendall": 0.15555555555555553
+      },
+      "output": {
+        "pearson": 0.7050025891225833,
+        "spearman": 0.6969696969696969,
+        "kendall": 0.5111111111111111
+      },
+      "output_soft": {
+        "pearson": 0.6989944369449753,
+        "spearman": 0.6969696969696969,
+        "kendall": 0.5111111111111111
+      },
+      "execution_path": "REUSE_COMPLETED_GRAPH_CANDIDATE",
+      "n": 10
+    }
+  },
+  "decision_sha256": "199dd1d8efba87d0ad8ccaca8e2c4795bf9222158938b3c801a5aea1aa3d4993",
+  "verification_sha256": "8e507cf581b0f68737cf36ddbc3f04c792591dc38a077f468d8708958cc2388c",
+  "new_qm_in_this_report": 0,
+  "production_default_changed": false
+}

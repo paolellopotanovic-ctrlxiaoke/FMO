@@ -1,0 +1,396 @@
+{
+  "status": "COMPLETE_DIAGNOSTIC_ONLY",
+  "labels_used": false,
+  "qm_evaluations": 0,
+  "current_pilot_modified": false,
+  "states": {
+    "b0": [
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81403,
+        "mm_hamiltonian_error_kj_mol": 3.202492716955021,
+        "reference_acceptance_probability": 0.2747562307312789
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81404,
+        "mm_hamiltonian_error_kj_mol": -6.935221488587558,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81405,
+        "mm_hamiltonian_error_kj_mol": -18.863291579997167,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81406,
+        "mm_hamiltonian_error_kj_mol": 2.64438702724874,
+        "reference_acceptance_probability": 0.34413071468133566
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81407,
+        "mm_hamiltonian_error_kj_mol": -2.0570133335422724,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81408,
+        "mm_hamiltonian_error_kj_mol": -10.507804025663063,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81409,
+        "mm_hamiltonian_error_kj_mol": -4.387383857974783,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81410,
+        "mm_hamiltonian_error_kj_mol": -11.639082841342315,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81403,
+        "mm_hamiltonian_error_kj_mol": 3.41155580827035,
+        "reference_acceptance_probability": 0.25253482750287265
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81404,
+        "mm_hamiltonian_error_kj_mol": -7.2240339000709355,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81405,
+        "mm_hamiltonian_error_kj_mol": -19.42186525813304,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81406,
+        "mm_hamiltonian_error_kj_mol": 2.4388667491730303,
+        "reference_acceptance_probability": 0.37387724286976143
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81407,
+        "mm_hamiltonian_error_kj_mol": -1.7690318068489432,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81408,
+        "mm_hamiltonian_error_kj_mol": -10.700254565104842,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81409,
+        "mm_hamiltonian_error_kj_mol": -4.150636950973421,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81410,
+        "mm_hamiltonian_error_kj_mol": -11.432505364064127,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81403,
+        "mm_hamiltonian_error_kj_mol": 3.5821618414483964,
+        "reference_acceptance_probability": 0.23573952113082003
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81404,
+        "mm_hamiltonian_error_kj_mol": -7.531655950471759,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81405,
+        "mm_hamiltonian_error_kj_mol": -19.57311810576357,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81406,
+        "mm_hamiltonian_error_kj_mol": 2.418575116433203,
+        "reference_acceptance_probability": 0.37695019438876026
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81407,
+        "mm_hamiltonian_error_kj_mol": -1.5207374354358763,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81408,
+        "mm_hamiltonian_error_kj_mol": -10.769070554058999,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81409,
+        "mm_hamiltonian_error_kj_mol": -4.033408524701372,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81410,
+        "mm_hamiltonian_error_kj_mol": -11.266407702118158,
+        "reference_acceptance_probability": 1.0
+      }
+    ],
+    "b10": [
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81403,
+        "mm_hamiltonian_error_kj_mol": -5.799005520297214,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81404,
+        "mm_hamiltonian_error_kj_mol": -7.117151734884828,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81405,
+        "mm_hamiltonian_error_kj_mol": -4.389663603855297,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81406,
+        "mm_hamiltonian_error_kj_mol": -11.311390949878842,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81407,
+        "mm_hamiltonian_error_kj_mol": -4.158819158328697,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81408,
+        "mm_hamiltonian_error_kj_mol": -13.090730731375515,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81409,
+        "mm_hamiltonian_error_kj_mol": -11.408692299155518,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.5,
+        "steps": 100,
+        "proposal_fs": 50,
+        "seed": 81410,
+        "mm_hamiltonian_error_kj_mol": -6.444345369702205,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81403,
+        "mm_hamiltonian_error_kj_mol": -5.489654748700559,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81404,
+        "mm_hamiltonian_error_kj_mol": -6.196264144498855,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81405,
+        "mm_hamiltonian_error_kj_mol": -3.8072301181964576,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81406,
+        "mm_hamiltonian_error_kj_mol": -10.40050903847441,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81407,
+        "mm_hamiltonian_error_kj_mol": -2.9166216645389795,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81408,
+        "mm_hamiltonian_error_kj_mol": -13.365317474352196,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81409,
+        "mm_hamiltonian_error_kj_mol": -10.894694721093401,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.25,
+        "steps": 200,
+        "proposal_fs": 50,
+        "seed": 81410,
+        "mm_hamiltonian_error_kj_mol": -5.688231654232368,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81403,
+        "mm_hamiltonian_error_kj_mol": -5.415341749321669,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81404,
+        "mm_hamiltonian_error_kj_mol": -5.907695380039513,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81405,
+        "mm_hamiltonian_error_kj_mol": -3.4957532847765833,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81406,
+        "mm_hamiltonian_error_kj_mol": -10.309904534602538,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81407,
+        "mm_hamiltonian_error_kj_mol": -2.4907595845870674,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81408,
+        "mm_hamiltonian_error_kj_mol": -13.489926259266213,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81409,
+        "mm_hamiltonian_error_kj_mol": -10.773059270577505,
+        "reference_acceptance_probability": 1.0
+      },
+      {
+        "timestep_fs": 0.1,
+        "steps": 500,
+        "proposal_fs": 50,
+        "seed": 81410,
+        "mm_hamiltonian_error_kj_mol": -5.497310198843479,
+        "reference_acceptance_probability": 1.0
+      }
+    ]
+  }
+}

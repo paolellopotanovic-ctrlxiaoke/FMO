@@ -1,0 +1,32 @@
+{
+  "source": "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/production/CDK8/edge_000/bound/transformation.json",
+  "sha256": "eec02c67bbd37e73cbfc78994056e746b11332fc073a9831e7e714d4ff32ce19",
+  "thermo_settings": {
+    "__class__": "ThermoSettings",
+    "__module__": "gufe.settings.models",
+    ":is_custom:": true,
+    "temperature": {
+      "magnitude": 298.15,
+      "unit": "kelvin",
+      ":is_custom:": true,
+      "pint_unit_registry": "openff_units"
+    },
+    "pressure": {
+      "magnitude": 1,
+      "unit": "bar",
+      ":is_custom:": true,
+      "pint_unit_registry": "openff_units"
+    },
+    "ph": null,
+    "redox_potential": null
+  },
+  "constraints": "hbonds",
+  "hydrogen_mass_amu": 3.0,
+  "nonbonded_method": "PME",
+  "integrator_timestep": {
+    "magnitude": 4.0,
+    "unit": "femtosecond",
+    ":is_custom:": true,
+    "pint_unit_registry": "openff_units"
+  }
+}

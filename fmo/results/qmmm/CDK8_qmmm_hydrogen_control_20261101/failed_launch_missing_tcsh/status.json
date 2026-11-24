@@ -1,0 +1,14 @@
+{
+  "status": "FAILED",
+  "schema": "quanpol-internal-hydrogen-control-v1",
+  "labels_used": false,
+  "expected_points": 60,
+  "source_sha256": "94b2e8840ff23e961fecdca8e1873857585260734a2f7d76a94d02421e1e99f7",
+  "driver_sha256": "fe2cf578fd5e2ec986a397ce438fb2f25fdbddd405b6ffb3207d898e18135328",
+  "selection": "ALL_FROZEN_SOURCE_FRAMES",
+  "operation": "isolated_MM_hydrogen_only_minimization_fixed_heavy_atoms",
+  "target_unchanged": false,
+  "production_pipeline_modified": false,
+  "rows": [],
+  "error": "ValueError: GAMESS process failed: /inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/runs/CDK8_qmmm_hydrogen_control_20261101/hcontrol_r0_i400_bound_0.stdout"
+}

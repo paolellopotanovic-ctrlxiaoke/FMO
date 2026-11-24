@@ -1,0 +1,17 @@
+{
+  "status": "INCOMPLETE",
+  "n_expected": 40,
+  "n_received": 40,
+  "failed": [
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/conformer_tpie_control_20261024/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-98331aac0b5f40f19c13c81191d272ae_attempt_0/iteration_400",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/conformer_tpie_control_20261024/BACE/CAT-4i/shared_HybridTopologyMultiStateSimulationUnit-d8a7d7d89e9045bf8e9e64d33c4cdfff_attempt_0/iteration_2000",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/conformer_tpie_control_20261024/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-21dfc51710e949cab3cbd33af044f13f_attempt_0/iteration_1200",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/matched_openfe_20261022_cuda128/conformer_tpie_control_20261024/CDK8/20/shared_HybridTopologyMultiStateSimulationUnit-ec9d7c603997411f8a11fba5e8a668c9_attempt_0/iteration_1200"
+  ],
+  "missing": [],
+  "cohort_ranking_available": false,
+  "binding_free_energy_claim_allowed": false,
+  "scope": "Ligand internal conformers only: heavy-atom self-fit removes MD pose; source receptor, caps, charges, PCM and fragments unchanged. Not same-frame full-complex FMO or a free energy.",
+  "targets": {},
+  "report_driver_sha256": "7e150b6d5951f484b56fbfbf16b9c6b5c3c06796ea75da03be0d6d6f45f9fabf"
+}

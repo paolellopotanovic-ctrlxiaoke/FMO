@@ -1,0 +1,47 @@
+{
+  "status": "PASSED_PILOT_INTEGRITY_NOT_FREE_ENERGY_CONVERGENCE",
+  "states": {
+    "b0": {
+      "passed": true,
+      "qm_evaluations": 49,
+      "normal_scf_converged_logs": 49,
+      "samples_including_rejections": 48,
+      "saved_full_system_frames_checked": 15,
+      "max_snapshot_shell_coordinate_error_angstrom": 5.009326287108706e-13,
+      "acceptance_algebra_and_rejected_state_retention_passed": true,
+      "composed_target_force_gate_passed": true
+    },
+    "b10": {
+      "passed": true,
+      "qm_evaluations": 49,
+      "normal_scf_converged_logs": 49,
+      "samples_including_rejections": 48,
+      "saved_full_system_frames_checked": 15,
+      "max_snapshot_shell_coordinate_error_angstrom": 5.009326287108706e-13,
+      "acceptance_algebra_and_rejected_state_retention_passed": true,
+      "composed_target_force_gate_passed": true
+    },
+    "s0": {
+      "passed": true,
+      "qm_evaluations": 49,
+      "normal_scf_converged_logs": 49,
+      "samples_including_rejections": 48,
+      "saved_full_system_frames_checked": 15,
+      "max_snapshot_shell_coordinate_error_angstrom": 5.009326287108706e-13,
+      "acceptance_algebra_and_rejected_state_retention_passed": true,
+      "composed_target_force_gate_passed": true
+    },
+    "s10": {
+      "passed": true,
+      "qm_evaluations": 49,
+      "normal_scf_converged_logs": 49,
+      "samples_including_rejections": 48,
+      "saved_full_system_frames_checked": 15,
+      "max_snapshot_shell_coordinate_error_angstrom": 5.000444502911705e-13,
+      "acceptance_algebra_and_rejected_state_retention_passed": true,
+      "composed_target_force_gate_passed": true
+    }
+  },
+  "full_free_energy_converged": false,
+  "labels_used": false
+}

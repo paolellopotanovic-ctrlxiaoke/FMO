@@ -1,0 +1,1428 @@
+{
+  "schema": "bace-contact-mechanism-verification-v1",
+  "groups": {
+    "contact_carboxylates": {
+      "status": "COMPLETE_INDEPENDENTLY_VERIFIED",
+      "n": 36,
+      "metrics": {
+        "pearson": 0.0697152343290872,
+        "spearman": -0.0032193682567193483,
+        "kendall": -0.012779813613368792
+      },
+      "soft_metrics": {
+        "pearson": 0.09227010397822741,
+        "spearman": -0.0032193682567193483,
+        "kendall": -0.012779813613368792
+      },
+      "baseline_metrics": {
+        "pearson": 0.21174767344688275,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "baseline_soft_metrics": {
+        "pearson": 0.22511709896480894,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "geometry_and_qm": {
+        "CAT-13n": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "d76b0d87d0d107b630102af97a4aa9588e8cb66ba41242778349d3b1a443782b",
+          "log_sha256": "3e3455a382f7508a77e7e1ffa725408028a958a653302be5415e4ae907e12243"
+        },
+        "CAT-13e": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "fa01474986d18fb49510b48631376a486dd57a4aea8d9f93a1c77a0440783c92",
+          "log_sha256": "924a7b60daecc2109056e1e8e300a552e321288bcb3a5fff03f1f7d8abf65aec"
+        },
+        "CAT-4a": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "44559e76976c52a96bb80955e98d9d8b043ee06763395a41aed0139bf5e84d8b",
+          "log_sha256": "43b2a6c45cd10f680e6d665df34cf3df22346b662a9ee3bb8d8329927af0742a"
+        },
+        "CAT-4m": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "94f0d9961545f4174bbaf40d823d0c4bebad141d3f28a60a66bec280f03b91f2",
+          "log_sha256": "21cd35553b16d272b169f69c47950b20b013bc542368875b7367dafa210a5117"
+        },
+        "CAT-17b": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "2c1b86eb30da2996c78cd557af8b361baa7f7934a9f7b0aaa964de92e1195673",
+          "log_sha256": "4014acde9352604f637aa6816ab855daf5e6ca5798236b44be42ad3a53125495"
+        },
+        "CAT-13j": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "0664ee3aa17dc82ee3869f8f11abccf91a47ca3a7b27fa9271ff4d26684f8d5f",
+          "log_sha256": "2d6cc107bf287b8069d25deac5a9ca3f1bed0ef0125eddb16913579340179838"
+        },
+        "CAT-13d": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "51b6cede74b991b02730845c2b4c50cbdf46c022731290af889dfd56cb785123",
+          "log_sha256": "84dd49b0d8402cc202ada44630cd34319235a34c685934dffa91802eef97f7e0"
+        },
+        "CAT-13b": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "8c49ab66c6d883ba4cf46b79e4b24d1f63f0df54a78ce99d8d386332c580b702",
+          "log_sha256": "e69a83e440d3ecbf8844f5e881859640fe0a1a792af0fa7b66fec6644f2c6bb6"
+        },
+        "CAT-13a": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 32,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "66095a4dbeed3e019db903870cf98963d1f918e53b02dc1797cb99dc0613699d",
+          "log_sha256": "b32f71516dc2fdffcc12f5ec9b7081088da5290a811b19b59a694ec2847e9d7e"
+        },
+        "CAT-13h": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "c16904c27723d2405cde3a1bce6bbd41e7a62fc652f82619bc52e392e5061486",
+          "log_sha256": "4de51f27be3b52c682091995353614f041d28f1ce51e93c2960ce7725546f0fa"
+        },
+        "CAT-13o": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "4104a4b96c7f90f10329fdc6b74c831392831e910f7ca15d0a58b5adb0df6b57",
+          "log_sha256": "2707d0accd665cf15426bd40535e32e79022afb9643fe3773fd1f4f9a4dc6664"
+        },
+        "CAT-13g": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "a4bf35ae548f193c7ceac37eacb08f98024113255145e55f214b78068c95dc54",
+          "log_sha256": "34c9a16e9905fd61794f0c513088fe230053c89489abdf952c0c6062611abd8c"
+        },
+        "CAT-4k": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "60b29e2645a3de340a1083491641459a23446993c575d58773634d18d73b01da",
+          "log_sha256": "16e57d25401ce46f2d117cc34e3f9d77cf716c6e03c649f510828f75515497cd"
+        },
+        "CAT-17g": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "0702de705a3bc417d7b310679aae2fedddf530ebc2c5a7003bf94dd2f5e0fd49",
+          "log_sha256": "ca4ba6cfb6587cfd3c03c6e3fe872742b479b9b780221c1bffcd50722eaff11c"
+        },
+        "CAT-4l": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "6318b99edb80cc37c04bec386de78a8bb07565600e0b3af6b1817984489017c1",
+          "log_sha256": "de96a080f6f32d7db475bbe9c246f6b081f5d0a1740199375fde3e747dbc4966"
+        },
+        "CAT-4j": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "610e8a23f69c9a59a5781c9f805c57a474f25dab8504e0da1fcfe3e9d9d958b4",
+          "log_sha256": "100be5e2ed3dcc63aa25259de81096a3968d5a3322b9f9883e28ec6ae5e6d6bf"
+        },
+        "CAT-4n": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "83918d8f8e713d7aebb20002ddffdfdbeb3c0e682b19a5866f06cf4f6f4498de",
+          "log_sha256": "36bfd00103c84b583b11d6a0910fad108b539030c8918641d5d3f2dee99d9189"
+        },
+        "CAT-13i": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "321bf13f8fc28e824ebdc3ac308a9b7b1a77b8629ea76386d025f6087d103aaf",
+          "log_sha256": "81c3caf34e53070c8ddf4cda902f3d924d4fb63cc7dac26d367e0d67eb2eb696"
+        },
+        "CAT-17f": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "3ae192fe14d1e72237998bc7599c281b578d8f6d50f87706af3d0776dc1f1eba",
+          "log_sha256": "a04698778394dfac0382c64084cddeccbc855fcb0502435a1c172ac8ce6581c0"
+        },
+        "CAT-4p": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "36a575b7e5c1d2584ab76cb6f78d2ce269959919e2b4a00bdc707de3801c7d52",
+          "log_sha256": "c65aaeb8b51592f9419c3cba46ab9e9afa2763d9fac75cd839f897695c38eac2"
+        },
+        "CAT-13c": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "ff67e2d3a3fe3359eff2399421e937cde598aaca75199445e81bc3be259ca966",
+          "log_sha256": "4ccf050e5c301cf5ca32b4561570abc148befc384e5140e63b13eae34ec0cfdf"
+        },
+        "CAT-24": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "78b9420086253b6aa5dc32db3bad38bf65471c7b4549acfff57839a3418d79e0",
+          "log_sha256": "e8d64080d430ff0661e502d7b37ba99bc1c3359576f22002122ee7e053f6e7ed"
+        },
+        "CAT-4i": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "2a7c50063596ac5516a5bcced019c12b0e9e15ebeb29147a883d6d18d5d3e044",
+          "log_sha256": "3dc0202df52fe4100ffecd3964dce2cf79eaf7e46bbf39bb2f24b9274af49a07"
+        },
+        "CAT-4c": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "43d49fd8fbc0d427cf6d9af078d1ace808d3c70ebcbf7b33388462ce2452750b",
+          "log_sha256": "fd39fc7eb2d51f7a1e7fd17752c847bb7c961c307b928bff52873c8653c58ad3"
+        },
+        "CAT-17i": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "962c6f1df53ce1e40aa51c77dcb0ba8b7e13da6a88dc71d60ea01ba201dfbf08",
+          "log_sha256": "ea0fc914f65adea9282623e5a4f6b96916ef0f885ab69653603317d3e5ea72b5"
+        },
+        "CAT-13k": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "aa053d0be0789766a07ad7d0ddf4bb08b0b84ef9eaa6bb7e7969af4cf9884cea",
+          "log_sha256": "54dce789d8b23da0b710daa4a728a3639a95e9cb9a5419b4c29ac6ca37ea9bc9"
+        },
+        "CAT-17a": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "3f71f345d5290a67deb6b8817e176ba04af3698e62e937bfc02a254ce4731106",
+          "log_sha256": "d4a41f081078471a29268e7c9a1bbda9b01b4fd15086b8caeb260bd84db2040b"
+        },
+        "CAT-17c": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "354df645baf56c37f257c1d0420d0b73c86f2b168583e9f0165a0c630708c491",
+          "log_sha256": "c765b5024e7664eac1fae45daeee4e36531d30f6ede838a3fc4b84b32b6bed81"
+        },
+        "CAT-4o": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "4c63feadffafc53bdba4320c006d34e317f3a04fd9ff4eed7254e1fda1632502",
+          "log_sha256": "07007fcc505ace28f0a6bd63bf5cb6b3ded015532c339944630ae82766d67ffd"
+        },
+        "CAT-17d": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "a6b3ade30392d134a8934f0b555350f0bc130be35756da5e12801d30a3f8fbf2",
+          "log_sha256": "c02dc3c73ac0a615d0ed24b2023905bcb6ab42159a25581298b78883e3844cab"
+        },
+        "CAT-4b": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "15c30abdab325a3266c1a9e7bd0a066486cb685f3ee7f883640378602ea2594f",
+          "log_sha256": "782f937c77900ae5b55270cf282877119a47c95127fe111506f800ebe39b9b27"
+        },
+        "CAT-13f": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "e01a34984163475a4b55c419c84d364ee24f25f5902fd23bf458c974a77376d1",
+          "log_sha256": "1fc66fd4abf1e09478c895b377edd8e2cb71ef1f097a196823c5b5511a84fe8b"
+        },
+        "CAT-4d": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 39,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "703d9f964ff0efc999136f94db1ef16aa84cc8148adcceb8c3782e3f4fd97c96",
+          "log_sha256": "7fd2fb5cc33af8a5414c412ee88090f2b020e3b65beb11f5ab48e42a84cd9988"
+        },
+        "CAT-13m": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "fe5fe77e5f02dc02e4d1970e4c7fe31d069e94e5391a856489d8473bf57a8454",
+          "log_sha256": "4eb6662d2d0aaef763aa246993a41e39d484d7f24eb495fa451429a5b92ce748"
+        },
+        "CAT-17h": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "80769a1a81581980b0b3319f106425b5a56585608e6a57724d1ae5671939cbbd",
+          "log_sha256": "9ac341525d5533897c243ec581d9c817372351206c8979b19315df6a008b46e1"
+        },
+        "CAT-17e": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": null,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "01feab8ee5e5527781d7a902bfdfbdac822dd732178da8951b4017f93832ed65",
+          "log_sha256": "dbece6028363958bc35f8cd47131f91126174a2b990d283f5a3ea2da867efb82"
+        }
+      }
+    },
+    "water_hydrogens_only": {
+      "status": "COMPLETE_INDEPENDENTLY_VERIFIED",
+      "n": 36,
+      "metrics": {
+        "pearson": 0.19688621242807122,
+        "spearman": 0.07584831612830785,
+        "kendall": 0.057509161260159564
+      },
+      "soft_metrics": {
+        "pearson": 0.18201086850731907,
+        "spearman": 0.07584831612830785,
+        "kendall": 0.057509161260159564
+      },
+      "baseline_metrics": {
+        "pearson": 0.21174767344688275,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "baseline_soft_metrics": {
+        "pearson": 0.22511709896480894,
+        "spearman": 0.16817979773101874,
+        "kendall": 0.11182336911697692
+      },
+      "geometry_and_qm": {
+        "CAT-13n": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "15d8f5cc7770d1801d1dfdaa92f5f9f5b845415b2759cd32cc0907f10af6f591",
+          "log_sha256": "965fc093c2310d7d3e09c98ea5cb2be27e799d7bb0f9703566794db639371f69"
+        },
+        "CAT-13e": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "6b0099df8327e876b4226722d70733dda72ea19b28692e88cd4be079724a97f2",
+          "log_sha256": "51447a55526fdd795839ce757ff9d58bc0356b466d71e04abf7da185f1d45a88"
+        },
+        "CAT-4a": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "eddc233e2d1b97efe556661ff1f1449e8510b318d7ed0e2afb86f470c52b2d83",
+          "log_sha256": "b89fde8bf06705236b143844e8b3bae1584ee50c109c2ba0d2dbde446dc7b1db"
+        },
+        "CAT-4m": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "bf610c4bb892e565cabe9f9cb7ead1b74f7fc40568a521d0ef12f13defee483a",
+          "log_sha256": "ffc506ccbc4d061b0170437bddae5c8849584cae5c0e743da64d1e5a54679722"
+        },
+        "CAT-17b": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 13,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "a1704560f85c17a88b8d3c0f06a187544565dd8b5f751198e246132fe9d4b07d",
+          "log_sha256": "637ac1388193dae81d219a9e69e087a8ac92904b2c7a471e98e04ecbd7c4b623"
+        },
+        "CAT-13j": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "a72b9fac5332ff43f9e484346bbb42f6b89a7b9d78ee886b88fb492c2603e73d",
+          "log_sha256": "26bc6a3e11447c25bba5f9565aaa36e29fecba46dd7f86428ffa0bf0a2ebea0e"
+        },
+        "CAT-13d": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "bf1bc82e5b120129d83fe4a44a2c0ce91957aa2860cf42362b165a0dc01a6b13",
+          "log_sha256": "cbf593ef5a2df5de445a283b29ad3dfff99ffd3000fb16f2836eb1918ad473f0"
+        },
+        "CAT-13b": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "47dd0ed6f19f4d8b7e36d87daad390e8fa71b3faf535abf159eaf33e38c72963",
+          "log_sha256": "06df2bfd8c758e3101f714fb9d5677dd2c16163b33b5532b90e427d963587fae"
+        },
+        "CAT-13a": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "2d1899de2eaf87c256a60b942cc5c98871c193194af67f8cd96139f12cc73d05",
+          "log_sha256": "2c95f71f833f555d2aabfd3f3409948788f3ee43a74d5967d992bbd03ac20716"
+        },
+        "CAT-13h": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "8f752655ec1a9d09f12144fca9fdd083525a3ff75d815be2fa8fe39c0a8cfaf4",
+          "log_sha256": "b29da7cca0b84592589cce420d02eba9564f54f609732c9851c7f11d28a1f301"
+        },
+        "CAT-13o": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "2baa56edd4d99ac28b6e49f241c4d43ad7eeffe0a5af221219f76cfc21cdad52",
+          "log_sha256": "86dabb12b3d8a791d1f6de09d4bdab255987df5c4c8da402e8050a83ff6ea245"
+        },
+        "CAT-13g": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "7f1b062cb7115e038c644310542bc64f58c9f1c305a072675058dae1a745784e",
+          "log_sha256": "2cf4d2ab4dda6c2b5a5b0d8c77ece63719c96f01a0e493d02196426975991141"
+        },
+        "CAT-4k": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "91afbd7baa833144787bd8e4f345c417ac7e84894810c49b906f4b38b021ddd0",
+          "log_sha256": "9dd7e393154fb45c9d2f67ae73e29b3c59dd10ffa9bc146176be8e3645ea3ea8"
+        },
+        "CAT-17g": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "7a22a8107111f2adc5e16422cfbeebd65c4983264647a52b6592832c8b069455",
+          "log_sha256": "567297a49eb9a71257c5e17a715c75e6c89edb1e5e45c118abb0d077f8dab41c"
+        },
+        "CAT-4l": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "5e806ebf1b3193bcbf9e4a0dd824f27874ca588f4daddba3d656bd9ea61db52e",
+          "log_sha256": "4a9e48d2eb2769f07024a51cf7fb2eedead9b2c59acca4d41b75c1bccb5aa719"
+        },
+        "CAT-4j": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "4088e3c46aedcd8246e8550187959e70208877e9c451bdd35bdf4c4a1b26ba65",
+          "log_sha256": "1022ced894c0cdb5af910f32007538c7bfe01b9fb8bcead12ffbc3a279be3427"
+        },
+        "CAT-4n": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 37,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "bdafabd00206e8d04d3c01206ebc971a970df13075d89c278378565a899b4340",
+          "log_sha256": "a023329c892819b8e3d8f68c4368672d6c26e09320e5e7e90caf4ee918cc495e"
+        },
+        "CAT-13i": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 13,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "087a2c015926d492406b55db8ec077dc91c1a0a5370f68603a2367362ea54d6a",
+          "log_sha256": "c57729bef6d8387e80c41ecbe0a7b0561468b6f8e1a0890484942b8a71e1723b"
+        },
+        "CAT-17f": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "7a75888d994949633f3c751c4ba522c4076ac73efcece68143581e621a33d817",
+          "log_sha256": "608e2dcebf5900740ba612730559f6aee3ba2d8c663e00d247c25ed058761cca"
+        },
+        "CAT-4p": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "4c36ab548b06ecf3fcf792417387459eb1da1aecbc0d8d1fa4cc0cc4ab35031d",
+          "log_sha256": "45e1811369cde130a8ec510d60c155625d459850a5698a87c4b98507279c5cd5"
+        },
+        "CAT-13c": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "588f64d45339a8620a2cf44e3825eb01517e3d6c0342f99dffc7ea0c1bcdd633",
+          "log_sha256": "a14afe7f6f314602cdf12f99982b5e9a00db062488ff6940017bc25be0d7df9f"
+        },
+        "CAT-24": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 13,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "b875db20cd2ad4f76f7acf4a450a258c449591921b4d20a6d9e5faa0648536c2",
+          "log_sha256": "ef399e11ecfdcd5c2ddb77c6fe92c1ba6ad674b94ffcc92fd3daa13b9002b835"
+        },
+        "CAT-4i": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "550ec29bca38f84a7dfbcd8bd57529fe70bf097a799cdb1fdb3d968dd18eee99",
+          "log_sha256": "039626401831154b1a520c2dd8702c664faaf221ebd0bf402dbfb964cbb5f833"
+        },
+        "CAT-4c": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "cc339de539b3a9baf6e916054cfe9afc2f2e372863279eb9969682397b31c5e8",
+          "log_sha256": "ddf028028263f163f64afab56c82f4822e9862ffb29bb9e95b96044d6e734d34"
+        },
+        "CAT-17i": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "6260a635656e2c45acbc20c6ca647275f2b593b5958a90ecc0c01057477e2ee9",
+          "log_sha256": "7fe64e1d09cd7bba5a2bc193d608c6ecf6bec5352db88c6dfae42812b25a52ec"
+        },
+        "CAT-13k": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "0ca86483121af63e8616473e94e2f84187adb617e804d0e2c7cc1104fa3deff4",
+          "log_sha256": "64583ab3615250910ecd24efaa8430d42ad0099424e8bcbfce125508af9f407e"
+        },
+        "CAT-17a": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "2fe89073dd6b7701fd30dff119f004d8bc5893049d78b48c512873a5991203a8",
+          "log_sha256": "0dceea946b1f88b434f3d021e5e5ee174bb61ddacac41302a75fb358dd8c21d8"
+        },
+        "CAT-17c": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "44dd8979ede713ed364356672125ed6a1542d5d81f9d1d63e52a2fa04b92483b",
+          "log_sha256": "fd87e18b22bbff3944d472b90a729a4776cc1668876353e4708023d3218d5676"
+        },
+        "CAT-4o": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "cb6b592ee573a195c5752b4e5326ee3de6b1bddc76aa7cd8be2742bfc16ba5e7",
+          "log_sha256": "b2764c4aa093f285bfd543728d901502566ce627e328168a29e22274646415d6"
+        },
+        "CAT-17d": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 33,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "811cba695ce50c7b154b614b376b47ff22191ba6141f50d25c2578be1a694ce2",
+          "log_sha256": "d66f35c6f0ed81602524cbc26969d4f76e7389e74dd08dfd007a09b34f9754e2"
+        },
+        "CAT-4b": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 13,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 38,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "62839647ce22fead5fd648c213e7c4f5c010e91e4dc24a8e8a82e7dac3496d8c",
+          "log_sha256": "c1fccc3c2cc729a7863a96df1bd85397d6c9f3fea40bfd809a0a4bafb4b6475c"
+        },
+        "CAT-13f": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 35,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "91cd95deac53ab080f095f07c1270e257565d3694bc4ce9206426581d2dcad71",
+          "log_sha256": "27de814a28139140390949af4b64fbb828069bb7fb49a1721480701a7b3c5cd9"
+        },
+        "CAT-4d": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 13,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 39,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "625d4feb37d8cab9527fb7d7c96c95618403aa50647f12632b9afbf66c8cf71c",
+          "log_sha256": "cfd482d0a5ccca5a1e07c7f988ebfec6d761a0edbf05b2cef738a7ce2c76dd80"
+        },
+        "CAT-13m": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 36,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "5b57d039f423374f48e1e1fe93afb32a51e05f3c6bd9c14a74fc00da29e62aff",
+          "log_sha256": "0c4861b18876199174e69228cc7b8513e9d4a4c3576a2400bbe1ad64c5614eac"
+        },
+        "CAT-17h": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 12,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "bf1013365448f08d3f5b66cd6484a1f53ffdc1e207dfa1bbad13476660ca65cb",
+          "log_sha256": "001eb09264298479a6e003ff5d85450c3973c2e3e954c2f1a63532afc1c6ab3d"
+        },
+        "CAT-17e": {
+          "max_fixed_receptor_displacement_A": 0.0,
+          "max_fixed_ligand_displacement_A": 0.0,
+          "convergence": {
+            "schema": "strict-final-fmo2-scf-convergence-v1",
+            "n_fragments": 46,
+            "nonconverged_residual_overflow_iterations": [],
+            "free_monomer_initial_guess_verified": false,
+            "final_scc_iteration": 13,
+            "n_strict_final_monomers": 46,
+            "n_strict_quantum_dimers": 34,
+            "early_monomer_failures": [],
+            "final_scf_requested_tolerance": 1e-08,
+            "final_fmo_requested_tolerance": 1e-07,
+            "all_early_failures_replaced_by_strict_final_monomers": true
+          },
+          "input_sha256": "2cfc7e405fb209081be2f9f3e79990794b1b30ec4b5271b0a207d61da2cb9263",
+          "log_sha256": "dd5994f8570370b3cf5963c9684dbb39d5505edffcb01934b2ac5d2ab5740f9c"
+        }
+      }
+    }
+  },
+  "frozen_protocol_sha256": "83068dde275e2a3789254c6cd44670ecb6faff7ff50b7ce6e70a59bf6d76b123",
+  "production_rule_adopted": false,
+  "no_partial_cohort_metrics": true
+}

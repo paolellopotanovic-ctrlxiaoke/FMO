@@ -1,0 +1,1050 @@
+{
+  "date": "2026-10-21",
+  "new_QM": false,
+  "production_changed": false,
+  "local_geometry": {
+    "P38/2ff": {
+      "ligand_donor_contacts": [
+        {
+          "donor": "N4x",
+          "hydrogen": "H18x",
+          "acceptor": "C:MET:109:O",
+          "DA_A": 2.9820352110597215,
+          "pre_k10_DA_A": 2.8323091974570853,
+          "HA_A": 2.0040094810154976,
+          "DHA_degrees": 160.0918223944691
+        },
+        {
+          "donor": "O3x",
+          "hydrogen": "H20x",
+          "acceptor": "C:ASP:112:OD2",
+          "DA_A": 2.816566881861677,
+          "pre_k10_DA_A": 2.980793387673825,
+          "HA_A": 1.8376218326957252,
+          "DHA_degrees": 167.3843553855677
+        }
+      ],
+      "receptor_donor_proximity_not_chemical_acceptor_validation": [
+        {
+          "donor": "C:MET:109:N",
+          "hydrogen": "H",
+          "acceptor": "N1x",
+          "DA_A": 3.054314325671148,
+          "HA_A": 2.0481061984184312,
+          "DHA_degrees": 168.2608185632565
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H1",
+          "acceptor": "O1x",
+          "DA_A": 3.0940786997101406,
+          "HA_A": 3.374486923963404,
+          "DHA_degrees": 65.36111609273925
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H1",
+          "acceptor": "O2x",
+          "DA_A": 2.8499294728115627,
+          "HA_A": 3.3115991605265265,
+          "DHA_degrees": 54.52113277429384
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H2",
+          "acceptor": "O1x",
+          "DA_A": 3.0940786997101406,
+          "HA_A": 2.429684959001886,
+          "DHA_degrees": 123.32172871002611
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H2",
+          "acceptor": "O2x",
+          "DA_A": 2.8499294728115627,
+          "HA_A": 1.8897428396477653,
+          "DHA_degrees": 159.94733113857066
+        }
+      ],
+      "ASP_states": [
+        {
+          "chain": "C",
+          "number": "101",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "112",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "124",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "125",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "145",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "150",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "161",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "168",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "176",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "177",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "205",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "227",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "230",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "283",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "292",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "294",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "313",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "315",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "316",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "321",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "324",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "331",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "335",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "343",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "43",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "88",
+          "sidechain_H_names": []
+        }
+      ]
+    },
+    "P38/2l": {
+      "ligand_donor_contacts": [
+        {
+          "donor": "N4x",
+          "hydrogen": "H16x",
+          "acceptor": "C:MET:109:O",
+          "DA_A": 2.928581226464446,
+          "pre_k10_DA_A": 2.8093228846111664,
+          "HA_A": 1.956155668652166,
+          "DHA_degrees": 158.67498343215857
+        }
+      ],
+      "receptor_donor_proximity_not_chemical_acceptor_validation": [
+        {
+          "donor": "C:MET:109:N",
+          "hydrogen": "H",
+          "acceptor": "N1x",
+          "DA_A": 3.0471852585624006,
+          "HA_A": 2.044374965606848,
+          "DHA_degrees": 166.93281954372424
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H1",
+          "acceptor": "O2x",
+          "DA_A": 3.086330183243523,
+          "HA_A": 3.37493362897702,
+          "DHA_degrees": 64.8884392189385
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H1",
+          "acceptor": "O3x",
+          "DA_A": 2.831634863466685,
+          "HA_A": 3.2780892300240994,
+          "DHA_degrees": 55.35339334331637
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H2",
+          "acceptor": "O2x",
+          "DA_A": 3.086330183243523,
+          "HA_A": 2.419808670122496,
+          "DHA_degrees": 123.47568689970284
+        },
+        {
+          "donor": "C:HOH:381:O",
+          "hydrogen": "H2",
+          "acceptor": "O3x",
+          "DA_A": 2.831634863466685,
+          "HA_A": 1.873012012775145,
+          "DHA_degrees": 159.5255636005632
+        }
+      ],
+      "ASP_states": [
+        {
+          "chain": "C",
+          "number": "101",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "112",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "124",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "125",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "145",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "150",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "161",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "168",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "176",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "177",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "205",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "227",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "230",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "283",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "292",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "294",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "313",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "315",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "316",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "321",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "324",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "331",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "335",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "343",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "43",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "C",
+          "number": "88",
+          "sidechain_H_names": []
+        }
+      ]
+    },
+    "BACE/CAT-4k": {
+      "ligand_donor_contacts": [
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:93:OD1",
+          "DA_A": 2.6580914205497126,
+          "pre_k10_DA_A": 2.6287759128537367,
+          "HA_A": 1.7146358213918187,
+          "DHA_degrees": 149.54403941696359
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:93:OD2",
+          "DA_A": 3.439332202623062,
+          "pre_k10_DA_A": 3.4826773608819996,
+          "HA_A": 2.6412697703945365,
+          "DHA_degrees": 133.8477441276385
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:289:OD1",
+          "DA_A": 2.872173567178697,
+          "pre_k10_DA_A": 2.7549706713502413,
+          "HA_A": 2.8274474354088355,
+          "DHA_degrees": 81.99610760144616
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:289:OD2",
+          "DA_A": 2.8552668877006933,
+          "pre_k10_DA_A": 2.756119337038945,
+          "HA_A": 3.4557689448225553,
+          "DHA_degrees": 47.16230907403745
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H19x",
+          "acceptor": "A:ASP:93:OD1",
+          "DA_A": 2.6580914205497126,
+          "pre_k10_DA_A": 2.6287759128537367,
+          "HA_A": 2.8425755926623992,
+          "DHA_degrees": 69.24386096580258
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H19x",
+          "acceptor": "A:ASP:93:OD2",
+          "DA_A": 3.439332202623062,
+          "pre_k10_DA_A": 3.4826773608819996,
+          "HA_A": 4.000658695764987,
+          "DHA_degrees": 50.08147726575504
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H19x",
+          "acceptor": "A:ASP:289:OD1",
+          "DA_A": 2.872173567178697,
+          "pre_k10_DA_A": 2.7549706713502413,
+          "HA_A": 2.442653270523674,
+          "DHA_degrees": 104.69440639657375
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H19x",
+          "acceptor": "A:ASP:289:OD2",
+          "DA_A": 2.8552668877006933,
+          "pre_k10_DA_A": 2.756119337038945,
+          "HA_A": 2.539603709242842,
+          "DHA_degrees": 97.54620488038853
+        },
+        {
+          "donor": "N3x",
+          "hydrogen": "H5x",
+          "acceptor": "A:ASP:93:OD2",
+          "DA_A": 2.7773406344919236,
+          "pre_k10_DA_A": 2.693553567315862,
+          "HA_A": 1.7777989200131716,
+          "DHA_degrees": 161.60532113480022
+        }
+      ],
+      "receptor_donor_proximity_not_chemical_acceptor_validation": [
+        {
+          "donor": "A:ASP:289:OD2",
+          "hydrogen": "HD2",
+          "acceptor": "N2x",
+          "DA_A": 2.8552668877006933,
+          "HA_A": 1.9835458149485736,
+          "DHA_degrees": 147.13586944746547
+        }
+      ],
+      "ASP_states": [
+        {
+          "chain": "A",
+          "number": "123",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "144",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "167",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "191",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "192",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "199",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "241",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "273",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "277",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "284",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "289",
+          "sidechain_H_names": [
+            "HD2"
+          ]
+        },
+        {
+          "chain": "A",
+          "number": "320",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "372",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "378",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "379",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "407",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "424",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "439",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "442",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "65",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "93",
+          "sidechain_H_names": []
+        }
+      ]
+    },
+    "BACE/CAT-4l": {
+      "ligand_donor_contacts": [
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:93:OD1",
+          "DA_A": 2.641087276104292,
+          "pre_k10_DA_A": 2.6328591113084636,
+          "HA_A": 1.7252678052986425,
+          "DHA_degrees": 145.21410306387764
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:93:OD2",
+          "DA_A": 3.4109957490445515,
+          "pre_k10_DA_A": 3.489927578045138,
+          "HA_A": 2.6077095313703946,
+          "DHA_degrees": 134.29876503083452
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:289:OD1",
+          "DA_A": 2.881090245028781,
+          "pre_k10_DA_A": 2.749701165581453,
+          "HA_A": 2.8751706036338094,
+          "DHA_degrees": 79.97589961263652
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H4x",
+          "acceptor": "A:ASP:289:OD2",
+          "DA_A": 2.8704809701511698,
+          "pre_k10_DA_A": 2.7475996251273584,
+          "HA_A": 3.4930167477411267,
+          "DHA_degrees": 45.855370708253886
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H18x",
+          "acceptor": "A:ASP:93:OD1",
+          "DA_A": 2.641087276104292,
+          "pre_k10_DA_A": 2.6328591113084636,
+          "HA_A": 2.755800246752292,
+          "DHA_degrees": 72.86060385761269
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H18x",
+          "acceptor": "A:ASP:93:OD2",
+          "DA_A": 3.4109957490445515,
+          "pre_k10_DA_A": 3.489927578045138,
+          "HA_A": 3.938691280108154,
+          "DHA_degrees": 52.08230560597113
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H18x",
+          "acceptor": "A:ASP:289:OD1",
+          "DA_A": 2.881090245028781,
+          "pre_k10_DA_A": 2.749701165581453,
+          "HA_A": 2.3787736336188026,
+          "DHA_degrees": 109.5785760160808
+        },
+        {
+          "donor": "N2x",
+          "hydrogen": "H18x",
+          "acceptor": "A:ASP:289:OD2",
+          "DA_A": 2.8704809701511698,
+          "pre_k10_DA_A": 2.7475996251273584,
+          "HA_A": 2.5284255970860596,
+          "DHA_degrees": 99.20893906981154
+        },
+        {
+          "donor": "N3x",
+          "hydrogen": "H5x",
+          "acceptor": "A:ASP:93:OD2",
+          "DA_A": 2.7619726646004303,
+          "pre_k10_DA_A": 2.687341626961485,
+          "HA_A": 1.7654633952591605,
+          "DHA_degrees": 160.95243828031394
+        }
+      ],
+      "receptor_donor_proximity_not_chemical_acceptor_validation": [
+        {
+          "donor": "A:ASP:289:OD2",
+          "hydrogen": "HD2",
+          "acceptor": "N2x",
+          "DA_A": 2.8704809701511698,
+          "HA_A": 2.0024010587292453,
+          "DHA_degrees": 146.6263969056219
+        }
+      ],
+      "ASP_states": [
+        {
+          "chain": "A",
+          "number": "123",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "144",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "167",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "191",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "192",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "199",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "241",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "273",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "277",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "284",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "289",
+          "sidechain_H_names": [
+            "HD2"
+          ]
+        },
+        {
+          "chain": "A",
+          "number": "320",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "372",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "378",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "379",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "407",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "424",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "439",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "442",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "65",
+          "sidechain_H_names": []
+        },
+        {
+          "chain": "A",
+          "number": "93",
+          "sidechain_H_names": []
+        }
+      ]
+    }
+  },
+  "pair_concentration": {
+    "OpenBind": {
+      "n_wrong_single_crystal_pairs": 53,
+      "median_top_fragment_absolute_share": 0.15893271461716943,
+      "dominant_fragment_counts": {
+        "AASN129": 16,
+        "AGLY127": 3,
+        "APRO107": 6,
+        "AGLU85": 6,
+        "ATHR126": 3,
+        "AGLU88": 1,
+        "AARG93": 4,
+        "AGLY128": 2,
+        "ASER87": 5,
+        "AGLU106": 2,
+        "AASP39": 3,
+        "AHIS21": 1,
+        "ATYR89": 1
+      }
+    },
+    "P38": {
+      "n_wrong_single_crystal_pairs": 5,
+      "median_top_fragment_absolute_share": 0.17269808842842546,
+      "dominant_fragment_counts": {
+        "CASP112": 2,
+        "CGLY110": 2,
+        "CASP168": 1
+      }
+    },
+    "CHK1": {
+      "n_wrong_single_crystal_pairs": 1,
+      "median_top_fragment_absolute_share": 0.24286524286524272,
+      "dominant_fragment_counts": {
+        "ALYS38": 1
+      }
+    },
+    "BACE": {
+      "n_wrong_single_crystal_pairs": 7,
+      "median_top_fragment_absolute_share": 0.14468490540356582,
+      "dominant_fragment_counts": {
+        "AASP93": 1,
+        "AHOH1043": 2,
+        "AHOH1044": 1,
+        "AGLY74": 1,
+        "ATHR293": 1,
+        "AGLY72": 1
+      }
+    },
+    "CDK2": {
+      "n_wrong_single_crystal_pairs": 0,
+      "median_top_fragment_absolute_share": null,
+      "dominant_fragment_counts": {}
+    },
+    "TYK2": {
+      "n_wrong_single_crystal_pairs": 4,
+      "median_top_fragment_absolute_share": 0.1543532495119333,
+      "dominant_fragment_counts": {
+        "AGLY904": 1,
+        "AARG901": 2,
+        "APRO982": 1
+      }
+    },
+    "FAAH": {
+      "n_wrong_single_crystal_pairs": 2,
+      "median_top_fragment_absolute_share": 0.19011989560938003,
+      "dominant_fragment_counts": {
+        "AASP237": 2
+      }
+    }
+  },
+  "OpenBind_charge_audit": [
+    {
+      "id": "157",
+      "ligand": "A71EV2A-x5836a",
+      "charged_amide_N_matches": [
+        [
+          19,
+          21,
+          20
+        ]
+      ],
+      "upstream_source_charge": 1,
+      "raw_crystal_source_charge": 1,
+      "raw_crystal_source_smiles": "CSc1ccc(-c2cn[nH]c2)cc1CC(=O)N1C[C@@H](C([NH3+])=O)C[C@@H]2C[C@@H]21",
+      "prepared_charge": 1,
+      "benchmark_charge": 0,
+      "source_smiles": "CSc1ccc(-c2cn[nH]c2)cc1CC(=O)N1C[C@@H](C([NH3+])=O)C[C@@H]2C[C@@H]21",
+      "original_source_smiles": "CSc1ccc(-c2cn[nH]c2)cc1CC(=O)N1C[C@@H](C([NH3+])=O)C[C@@H]2C[C@@H]21"
+    },
+    {
+      "id": "187",
+      "ligand": "A71EV2A-x7369a",
+      "charged_amide_N_matches": [],
+      "upstream_source_charge": 1,
+      "raw_crystal_source_charge": 1,
+      "raw_crystal_source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1CC(=O)N1C[C@@H](C(N)=O)C[C@@H]2C[C@@H]21",
+      "prepared_charge": 1,
+      "benchmark_charge": 0,
+      "source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1CC(=O)N1C[C@@H](C(N)=O)C[C@@H]2C[C@@H]21",
+      "original_source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1CC(=O)N1C[C@@H](C(N)=O)C[C@@H]2C[C@@H]21"
+    },
+    {
+      "id": "188",
+      "ligand": "A71EV2A-x7046a",
+      "charged_amide_N_matches": [],
+      "upstream_source_charge": 1,
+      "raw_crystal_source_charge": 1,
+      "raw_crystal_source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1OC(=O)N1C[C@@H](C(N)=O)C[C@H]2C[C@H]21",
+      "prepared_charge": 1,
+      "benchmark_charge": 0,
+      "source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1OC(=O)N1C[C@@H](C(N)=O)C[C@H]2C[C@H]21",
+      "original_source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1OC(=O)N1C[C@@H](C(N)=O)C[C@H]2C[C@H]21"
+    },
+    {
+      "id": "189",
+      "ligand": "A71EV2A-x7368a",
+      "charged_amide_N_matches": [],
+      "upstream_source_charge": 1,
+      "raw_crystal_source_charge": 1,
+      "raw_crystal_source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1OC(=O)N1C[C@@H](C(N)=O)C[C@@H]2C[C@@H]21",
+      "prepared_charge": 1,
+      "benchmark_charge": 0,
+      "source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1OC(=O)N1C[C@@H](C(N)=O)C[C@@H]2C[C@@H]21",
+      "original_source_smiles": "CSc1ccc(C2=CC[N@@H+](C)CC2)cc1OC(=O)N1C[C@@H](C(N)=O)C[C@@H]2C[C@@H]21"
+    },
+    {
+      "id": "190",
+      "ligand": "A71EV2A-x6827a",
+      "charged_amide_N_matches": [],
+      "upstream_source_charge": 1,
+      "raw_crystal_source_charge": 1,
+      "raw_crystal_source_smiles": "CSc1ccc(C2=CC[NH2+]CC2)cc1CC(=O)N1CCC[C@H](C(N)=O)C1",
+      "prepared_charge": 1,
+      "benchmark_charge": 0,
+      "source_smiles": "CSc1ccc(C2=CC[NH2+]CC2)cc1CC(=O)N1CCC[C@H](C(N)=O)C1",
+      "original_source_smiles": "CSc1ccc(C2=CC[NH2+]CC2)cc1CC(=O)N1CCC[C@H](C(N)=O)C1"
+    },
+    {
+      "id": "297",
+      "ligand": "A71EV2A-x6838a",
+      "charged_amide_N_matches": [
+        [
+          19,
+          21,
+          20
+        ]
+      ],
+      "upstream_source_charge": 1,
+      "raw_crystal_source_charge": 1,
+      "raw_crystal_source_smiles": "CSc1ncnc(N2CCCC2)c1CC(=O)N1C[C@@H](C([NH3+])=O)C[C@@H]2C[C@@H]21",
+      "prepared_charge": 1,
+      "benchmark_charge": 0,
+      "source_smiles": "CSc1ncnc(N2CCCC2)c1CC(=O)N1C[C@@H](C([NH3+])=O)C[C@@H]2C[C@@H]21",
+      "original_source_smiles": "CSc1ncnc(N2CCCC2)c1CC(=O)N1C[C@@H](C([NH3+])=O)C[C@@H]2C[C@@H]21"
+    }
+  ],
+  "sources_sha256": {
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/FMO-github-release/docs/SIZE_STRUCTURE_INTERACTIONS.json": "a44135fde06db038e948076da0ad6900f7f7b14e4c0e7d8f8f4915a69229dbe0",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/P38/run/qm/full_target_fmo/minimized/2ff/minimized_complex.pdb": "e67859d2a1de1ced26bfe5526dc52afe57f3c57d383a6aa1baebf3eb7481c4b0",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/P38/run/qm/full_target_fmo/ligands_no_properties.sdf": "7c782decc5b84abf34eb8bf5e38835bfff877ba641991d3c9b9641b38e3fb599",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/P38/run/qm/full_target_fmo/minimized/2l/minimized_complex.pdb": "661dd887cd3db74db9eefe63eebc8722da808b1947b8ef47659a13157e267f20",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/BACE/run/qm/full_target_fmo/minimized/CAT-4k/minimized_complex.pdb": "b7bdc52b063302281e3ff4ca29b9ea223af4f27cf2d67b8656dfc8a7211358c9",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/BACE/run/qm/full_target_fmo/ligands_no_properties.sdf": "623c7be8095baef53222f9041fbf8632fe3ad417b0a485407263c26098342bde",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/BACE/run/qm/full_target_fmo/minimized/CAT-4l/minimized_complex.pdb": "ce0d2e712fd7025d52e0abb9a56e315c14054001e29dee5dd4810700eff9849f",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/OpenBind/cases/A71EV2A-x7132a/run/qm/full_target_fmo/minimized/A71EV2A-x7132a/minimized_complex.pdb": "68d2e089b9062f454646a24442026c4f06d1f6e82b640c351b542321a2fae00c",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/OpenBind/cases/A71EV2A-x7247a/run/qm/full_target_fmo/minimized/A71EV2A-x7247a/minimized_complex.pdb": "05ed9c760084fef1c77f868127fbdb339be3a16fbbec824ed523f9c34511c705",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/OpenBind/cases/A71EV2A-x7132a/run/structure_input/original.pdb": "9dfb0a0b0a5cddca0f78e3c671566dbb3f2f126f92046c49c9c708d683a272dc",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/FMOtpiefinal_HIV1lab/runs/all_accelerated_robust_20261020/OpenBind/cases/A71EV2A-x7247a/run/structure_input/original.pdb": "38746571b58626ab6509d19adce585c68d18c443fb382e5e0b03d2ba25a5fae9",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x5836a/openbind_ligands.sdf": "773af81a8eb15e658f7a5ea57a2d018befa28b01b5390cc53c7b6c8c75bf80d3",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x5836a/case.json": "9bdb463f65022da8a97157021eed785beedc7293d8747cd924cd8a38e2a9688c",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/A71EV2A_data/data/A71EV2A-x5836a/A71EV2A-x5836a_ligand.sdf": "29dc4c7ee6c3216192d9cfb47521aa05802b49bbfb9c3c65ce00fa2b0b556ce0",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x7369a/openbind_ligands.sdf": "401e3635b73c6f01237900782f62a7817e9595d293fb71b233b471961da0cac7",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x7369a/case.json": "32a5d868520d041f3c80d829fcb2c0be5bf18e4a2c7bd9962cfe9255a192643a",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/A71EV2A_data/data/A71EV2A-x7369a/A71EV2A-x7369a_ligand.sdf": "f7cfff9a682a20d5b49d3ff2094bcbe25bf560c72de14f3302d47720285bf61d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x7046a/openbind_ligands.sdf": "53684e5053067c995ee2cbb58e9d72415e52befe83fad51778ffa06d258bd05a",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x7046a/case.json": "ff71338cacd918610d98048a161193563e701c8f31a1c4be225fb55db6c589c8",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/A71EV2A_data/data/A71EV2A-x7046a/A71EV2A-x7046a_ligand.sdf": "2615d957fd8b8761bd5f2390f221373c929bcd3b163d24a80ffeeda4078b6873",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x7368a/openbind_ligands.sdf": "1f2ca71431660015a6651cb73ec501e76e74f6bd69b638dd43c9ae958e3dd96d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x7368a/case.json": "4ab8861ac89f3410fd3f7dd8cc1937e6495174af9c6d710bcf9ea3b3543bb24d",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/A71EV2A_data/data/A71EV2A-x7368a/A71EV2A-x7368a_ligand.sdf": "c8fba6ed74826cf4db29e535b5b30c1cc0bc1bcb21f4d9d64655543f75d9642b",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x6827a/openbind_ligands.sdf": "9f00314cc278fa792d8e3fe796884a2b508b170ec0e4997dda6162c2488d717c",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x6827a/case.json": "b8461f8f01367aeabeb1681957ab2076d73e9a905a23aa6e1ab3b8b9a672fdcb",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/A71EV2A_data/data/A71EV2A-x6827a/A71EV2A-x6827a_ligand.sdf": "c186260bdd0b1e1a0f01f662a498504d8f7b250ca8654b40309514544b59fb3b",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x6838a/openbind_ligands.sdf": "ca102d211189e7df53544706d39b6d9c6f8d2f7210d183cb1005f79280b819a2",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/cases/A71EV2A-x6838a/case.json": "db8113284702ca3dedd21286ed9f4ab675f852855a959cd6a354906910f221a3",
+    "/inspire/ssd/tenant_predefaa-9a1b-4522-bb10-8850f313be13/global_user/3078-linziqian/projects/sophosqm-style-fmo-baseline/runs/openbind/A71EV2A_data/data/A71EV2A-x6838a/A71EV2A-x6838a_ligand.sdf": "fac903075b029584c664bdc25717be08ebe911c2d1d509c8cc3e17d30c9f7c8f"
+  },
+  "OpenBind_308_318_receptor_alignment": {
+    "n_CA": 139,
+    "CA_RMSD_A": 0.23244669241722804,
+    "max_CA_deviation_A": 1.4438381079948202,
+    "local_residue_heavy_RMSD": {
+      "21": {
+        "n_shared": 10,
+        "RMSD_A": 0.10084873844738333
+      },
+      "39": {
+        "n_shared": 8,
+        "RMSD_A": 0.11497442197958886
+      },
+      "88": {
+        "n_shared": 9,
+        "RMSD_A": 0.526638821385053
+      },
+      "93": {
+        "n_shared": 11,
+        "RMSD_A": 0.19613337653161564
+      },
+      "129": {
+        "n_shared": 8,
+        "RMSD_A": 3.0621753773934715
+      }
+    },
+    "source_preservation": [
+      {
+        "ligand": "A71EV2A-x7132a",
+        "ASN129_source_to_prepared_RMSD_A": 0.0
+      },
+      {
+        "ligand": "A71EV2A-x7247a",
+        "ASN129_source_to_prepared_RMSD_A": 0.0
+      }
+    ]
+  },
+  "OpenBind_charge_subset_sensitivity_not_corrected_performance": {
+    "all490": {
+      "n": 490,
+      "MW": {
+        "pearson": 0.5422728532402016,
+        "spearman": 0.48578421519226234,
+        "kendall": 0.31485620167520706
+      },
+      "FMO_frozen_softcap": {
+        "pearson": 0.41603679287183837,
+        "spearman": 0.44123953581997516,
+        "kendall": 0.28846763827986127
+      }
+    },
+    "unchanged484": {
+      "n": 484,
+      "MW": {
+        "pearson": 0.5370821116677746,
+        "spearman": 0.47485003500779904,
+        "kendall": 0.30809019052591047
+      },
+      "FMO_frozen_softcap": {
+        "pearson": 0.3900492202661645,
+        "spearman": 0.4234784551077458,
+        "kendall": 0.27502716392611853
+      }
+    }
+  }
+}

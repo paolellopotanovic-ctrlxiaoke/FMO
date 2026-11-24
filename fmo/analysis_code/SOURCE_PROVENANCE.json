@@ -1,0 +1,644 @@
+{
+  "schema": "fmotpiefinal-release-export-v1",
+  "source_version": "0.1.0.dev2026102004",
+  "release_version": "0.1.0rc1",
+  "module_renames": {
+    "fmo_workflow": "cli",
+    "run_fmo_new_target": "target_workflow",
+    "run_fmo87_external_holdout": "target_stages",
+    "rescue_fmo_new_target": "single_case_rescue",
+    "rescue_fmo_target_cohort": "cohort_rescue",
+    "intake_fmo_target": "target_intake",
+    "freeze_fmo_affinity_protocol": "protocol",
+    "audit_fmo_new_target_structure": "target_geometry",
+    "audit_fmo_external_structure_quality": "geometry_audit",
+    "audit_fmo_pocket_selection": "pocket_audit",
+    "audit_fmo_receptor_chains": "chain_selection",
+    "decide_fmo_structure_treatment": "water_policy",
+    "apply_fmo_structure_treatment": "structure_treatment",
+    "prepare_fmo_pdbfixer": "structure_repair",
+    "intake_fmo_molecular_interface": "interface_intake",
+    "score_fmo_interface": "interface_scoring",
+    "relative_total_energy": "bound_geometry"
+  },
+  "excluded": [
+    "experiments",
+    "validation",
+    "datasets",
+    "runs",
+    "reports",
+    "sophosqm_baseline",
+    "core/isoprotonic.py",
+    "core/special_minimization.py",
+    "unused three-state-energy functions"
+  ],
+  "files": [
+    {
+      "source": "src/fmotpiefinal/__init__.py",
+      "exported": "src/fmotpiefinal/__init__.py",
+      "source_sha256": "88558fa4c0ab0048c02f2be5dde633da6758cf6df83d5437449f0056a27a6e16",
+      "exported_sha256": "8b8d211f4f194529988fb9a2f1b3f7dca10338ad3131889d3693ec2208727bb1",
+      "change": "release-metadata"
+    },
+    {
+      "source": "src/fmotpiefinal/core/__init__.py",
+      "exported": "src/fmotpiefinal/core/__init__.py",
+      "source_sha256": "9f099a000e150b10c5cefd2db65470535ce6d739343d4fb62089fe744481b141",
+      "exported_sha256": "9f099a000e150b10c5cefd2db65470535ce6d739343d4fb62089fe744481b141",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/carbonyl_repair.py",
+      "exported": "src/fmotpiefinal/core/carbonyl_repair.py",
+      "source_sha256": "44dee854a04108c2518fbf29e4ec6045c88e768bbcbc6e28be7ab9f8791d8938",
+      "exported_sha256": "44dee854a04108c2518fbf29e4ec6045c88e768bbcbc6e28be7ab9f8791d8938",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/chemical_graph_policy.py",
+      "exported": "src/fmotpiefinal/core/chemical_graph_policy.py",
+      "source_sha256": "06aacc34ed9a427a50315cfb776cd651e4d9ed18095691022acbd816848488b4",
+      "exported_sha256": "06aacc34ed9a427a50315cfb776cd651e4d9ed18095691022acbd816848488b4",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/chemical_model_requirements.py",
+      "exported": "src/fmotpiefinal/core/chemical_model_requirements.py",
+      "source_sha256": "bd264f22126e88a47ba0bed98cf58c13d1020c11c5b4271f3ca4b9fc46bd2550",
+      "exported_sha256": "bd264f22126e88a47ba0bed98cf58c13d1020c11c5b4271f3ca4b9fc46bd2550",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/chemical_preflight.py",
+      "exported": "src/fmotpiefinal/core/chemical_preflight.py",
+      "source_sha256": "b861b11db388b06e8adfdd713d42ae18b7fb5b800cc12d8a2119de1152282da0",
+      "exported_sha256": "b861b11db388b06e8adfdd713d42ae18b7fb5b800cc12d8a2119de1152282da0",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/cohort_failure_gate.py",
+      "exported": "src/fmotpiefinal/core/cohort_failure_gate.py",
+      "source_sha256": "eb45b961637bbc6f75d7f75b0e48f61442f050c8f60348d0239fa6c17478b488",
+      "exported_sha256": "eb45b961637bbc6f75d7f75b0e48f61442f050c8f60348d0239fa6c17478b488",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/component_inventory.py",
+      "exported": "src/fmotpiefinal/core/component_inventory.py",
+      "source_sha256": "e637f213faffa0ac24c04f00c84a5af919488182b9ef22a83f86d08a4da8f06c",
+      "exported_sha256": "e637f213faffa0ac24c04f00c84a5af919488182b9ef22a83f86d08a4da8f06c",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/counterion_preparation.py",
+      "exported": "src/fmotpiefinal/core/counterion_preparation.py",
+      "source_sha256": "d9c913a93ca7ed4a7a4565dd25726c385aed7a805f037c4680f0ebf078428ef1",
+      "exported_sha256": "d9c913a93ca7ed4a7a4565dd25726c385aed7a805f037c4680f0ebf078428ef1",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/fmo_convergence.py",
+      "exported": "src/fmotpiefinal/core/fmo_convergence.py",
+      "source_sha256": "5978f8893fb4633473ccf911b4e103d293649bbcf7a9fa8e563eff3da60e252b",
+      "exported_sha256": "5978f8893fb4633473ccf911b4e103d293649bbcf7a9fa8e563eff3da60e252b",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/fmo_input.py",
+      "exported": "src/fmotpiefinal/core/fmo_input.py",
+      "source_sha256": "45e9ed5fd748b853c2d76b4691ee291fdef51a03480a9f53c31cd23d422d15c2",
+      "exported_sha256": "45e9ed5fd748b853c2d76b4691ee291fdef51a03480a9f53c31cd23d422d15c2",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/fmo_soscf.py",
+      "exported": "src/fmotpiefinal/core/fmo_soscf.py",
+      "source_sha256": "591003d77f9fdfe294c2553a85e5daf56da3d9caacc8a79f7b1278f1f7d0082b",
+      "exported_sha256": "591003d77f9fdfe294c2553a85e5daf56da3d9caacc8a79f7b1278f1f7d0082b",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/fmo_soscf_onset.py",
+      "exported": "src/fmotpiefinal/core/fmo_soscf_onset.py",
+      "source_sha256": "ed588b901e83a51cb6f47fe359973187cf9271f56c9bdf6d1965908d224b19e0",
+      "exported_sha256": "ed588b901e83a51cb6f47fe359973187cf9271f56c9bdf6d1965908d224b19e0",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/fragmentation.py",
+      "exported": "src/fmotpiefinal/core/fragmentation.py",
+      "source_sha256": "db55b1a3e2547b928c6423c7629cfdcf0c42a461328a88814d651ee2d840872d",
+      "exported_sha256": "db55b1a3e2547b928c6423c7629cfdcf0c42a461328a88814d651ee2d840872d",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/gamess.py",
+      "exported": "src/fmotpiefinal/core/gamess.py",
+      "source_sha256": "3624efa147ace0fb5f7b9787d1bb5eab4f1053ad419e104e33b6fce8c33a5586",
+      "exported_sha256": "3624efa147ace0fb5f7b9787d1bb5eab4f1053ad419e104e33b6fce8c33a5586",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/graph_preparation.py",
+      "exported": "src/fmotpiefinal/core/graph_preparation.py",
+      "source_sha256": "dfd5aaa3b0c1a43d5ecf9f3b06443e1adce4bd1e7c7c39661efc15c15474ec68",
+      "exported_sha256": "dfd5aaa3b0c1a43d5ecf9f3b06443e1adce4bd1e7c7c39661efc15c15474ec68",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/interface_pieda.py",
+      "exported": "src/fmotpiefinal/core/interface_pieda.py",
+      "source_sha256": "f68f30e926569e6a03cd8f4ccb8771f2a3b2f3a0d05e825a6dde8c7535c8ebed",
+      "exported_sha256": "f68f30e926569e6a03cd8f4ccb8771f2a3b2f3a0d05e825a6dde8c7535c8ebed",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/local_bond_repair.py",
+      "exported": "src/fmotpiefinal/core/local_bond_repair.py",
+      "source_sha256": "a42092b57969165c71ba2d4306cc43dc8aeba442e035454991f6f1859e6edbef",
+      "exported_sha256": "a42092b57969165c71ba2d4306cc43dc8aeba442e035454991f6f1859e6edbef",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/minimization.py",
+      "exported": "src/fmotpiefinal/core/minimization.py",
+      "source_sha256": "7450b2ffdeca669ab55f695d01e7c9170783aeec59b4d60120317af379d88902",
+      "exported_sha256": "7dfcc43718b88fce6063bb06c5fd712b118f99751a007176565e6b6d4af56c03",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/parser.py",
+      "exported": "src/fmotpiefinal/core/parser.py",
+      "source_sha256": "ab3056cf650c200ec0ad79d159fbae5292f0741ffd2871d37295092fe2fd98ab",
+      "exported_sha256": "ab3056cf650c200ec0ad79d159fbae5292f0741ffd2871d37295092fe2fd98ab",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/preparation.py",
+      "exported": "src/fmotpiefinal/core/preparation.py",
+      "source_sha256": "1ee885039d4ae27e3b9da55964805a8994e096506cfac23dba332a921879ffc5",
+      "exported_sha256": "1ee885039d4ae27e3b9da55964805a8994e096506cfac23dba332a921879ffc5",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/receptor_chemical_graph.py",
+      "exported": "src/fmotpiefinal/core/receptor_chemical_graph.py",
+      "source_sha256": "7adfbf6a7aa5ae9c27d76cde04838095ae0c16069383eae74a296ab6274f5f0a",
+      "exported_sha256": "7adfbf6a7aa5ae9c27d76cde04838095ae0c16069383eae74a296ab6274f5f0a",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/relative_total_energy.py",
+      "exported": "src/fmotpiefinal/core/bound_geometry.py",
+      "source_sha256": "627134106427d6a657c00c9c01a8570ee076889246e0372fd9615d7c56db1604",
+      "exported_sha256": "e729850687531f251d9c498affe91168eb5ff8b13f44bf96a614416e9e62994b",
+      "change": "exact-function-extraction"
+    },
+    {
+      "source": "src/fmotpiefinal/core/runner.py",
+      "exported": "src/fmotpiefinal/core/runner.py",
+      "source_sha256": "8b71ea2ba6a9490374e17c385ddeb1dec3f45f1df66d99fc1247e1afc8d4a279",
+      "exported_sha256": "8b71ea2ba6a9490374e17c385ddeb1dec3f45f1df66d99fc1247e1afc8d4a279",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/scc_convergence.py",
+      "exported": "src/fmotpiefinal/core/scc_convergence.py",
+      "source_sha256": "cc33fbbd27d93c67715924fde104edb940822d53375ef054a22b6a5909ae2d83",
+      "exported_sha256": "cc33fbbd27d93c67715924fde104edb940822d53375ef054a22b6a5909ae2d83",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/scf_stall.py",
+      "exported": "src/fmotpiefinal/core/scf_stall.py",
+      "source_sha256": "6848c1b5a1efa0d66e325198b5b3d851c89948c6f52af8bef15cd9b56310be8d",
+      "exported_sha256": "6848c1b5a1efa0d66e325198b5b3d851c89948c6f52af8bef15cd9b56310be8d",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/special_chemistry.py",
+      "exported": "src/fmotpiefinal/core/special_chemistry.py",
+      "source_sha256": "d373bee23eb26a892757e5c09b5b7301b34f5c154033c0a5ac408e2399a35bf8",
+      "exported_sha256": "d373bee23eb26a892757e5c09b5b7301b34f5c154033c0a5ac408e2399a35bf8",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/special_dispatch.py",
+      "exported": "src/fmotpiefinal/core/special_dispatch.py",
+      "source_sha256": "bb3a2f22249efae89ab9024218ae25188699c8a36eff7d849658582c23b95cb4",
+      "exported_sha256": "bb3a2f22249efae89ab9024218ae25188699c8a36eff7d849658582c23b95cb4",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/stage_execution.py",
+      "exported": "src/fmotpiefinal/core/stage_execution.py",
+      "source_sha256": "cc4abd1b7c2d40dd438f009193ebca2b78493d2d266083e83a5fcfee28e0a691",
+      "exported_sha256": "b8c296660a0c9cd0fda212580fd5da1ac4e61eede7b11a73a3e279f4d7d4ee21",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/structure.py",
+      "exported": "src/fmotpiefinal/core/structure.py",
+      "source_sha256": "ccbee9a611ad216be2eded4b6a54f652fed934f1e27a6a6fb167b3949a63fddc",
+      "exported_sha256": "ccbee9a611ad216be2eded4b6a54f652fed934f1e27a6a6fb167b3949a63fddc",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/structure_input.py",
+      "exported": "src/fmotpiefinal/core/structure_input.py",
+      "source_sha256": "f9c2bb6fa23743db80bbec94383314462b3ba4522d51dcdd96fd7403f46109f6",
+      "exported_sha256": "f9c2bb6fa23743db80bbec94383314462b3ba4522d51dcdd96fd7403f46109f6",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/tartrate.py",
+      "exported": "src/fmotpiefinal/core/tartrate.py",
+      "source_sha256": "8a0d1f5b50ffc39a414f0880a3c9966ac3977b38a321bf5bba8c658be97990d5",
+      "exported_sha256": "8a0d1f5b50ffc39a414f0880a3c9966ac3977b38a321bf5bba8c658be97990d5",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/terminal_caps.py",
+      "exported": "src/fmotpiefinal/core/terminal_caps.py",
+      "source_sha256": "8def79f5404ca63b56f6bfd02c6f2d455566de8c679dec01659e8669b3b3a5b2",
+      "exported_sha256": "8def79f5404ca63b56f6bfd02c6f2d455566de8c679dec01659e8669b3b3a5b2",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/water_hydrogen_clash.py",
+      "exported": "src/fmotpiefinal/core/water_hydrogen_clash.py",
+      "source_sha256": "6e97df03ed749290cd9ec4eb3fe57f0df44cc53e0abdb66d9935398bb9351a0e",
+      "exported_sha256": "6e97df03ed749290cd9ec4eb3fe57f0df44cc53e0abdb66d9935398bb9351a0e",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/core/water_hydrogen_transfer.py",
+      "exported": "src/fmotpiefinal/core/water_hydrogen_transfer.py",
+      "source_sha256": "4300679fef47e223a9fc613152a5891a201b1236a0690d5d3010b40cec112811",
+      "exported_sha256": "4300679fef47e223a9fc613152a5891a201b1236a0690d5d3010b40cec112811",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/diagnostics.py",
+      "exported": "src/fmotpiefinal/diagnostics.py",
+      "source_sha256": "f16767d9aec9d9dadeee9464d97bfb40255f15c7c2def447742e6ba6dd9e1a89",
+      "exported_sha256": "f16767d9aec9d9dadeee9464d97bfb40255f15c7c2def447742e6ba6dd9e1a89",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/__init__.py",
+      "exported": "src/fmotpiefinal/pipeline/__init__.py",
+      "source_sha256": "5c5b15e3f1a58859183872bbf0e2c1ac8b74167ce6ba03141b78d35d6780c54e",
+      "exported_sha256": "5c5b15e3f1a58859183872bbf0e2c1ac8b74167ce6ba03141b78d35d6780c54e",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/apply_fmo_structure_treatment.py",
+      "exported": "src/fmotpiefinal/pipeline/structure_treatment.py",
+      "source_sha256": "2a23cdd5eb2181371dafefd2128047acc2392b8c34b6e32d7ebdf12d644b6f9a",
+      "exported_sha256": "2a23cdd5eb2181371dafefd2128047acc2392b8c34b6e32d7ebdf12d644b6f9a",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/audit_fmo_external_structure_quality.py",
+      "exported": "src/fmotpiefinal/pipeline/geometry_audit.py",
+      "source_sha256": "47a492a7e470171f1eac4b16a9e7019353d8e53f27f723b3f20bfd54b819e9a0",
+      "exported_sha256": "47a492a7e470171f1eac4b16a9e7019353d8e53f27f723b3f20bfd54b819e9a0",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/audit_fmo_new_target_structure.py",
+      "exported": "src/fmotpiefinal/pipeline/target_geometry.py",
+      "source_sha256": "bae064be8fadf438c92b467b4e648674a0cf6aac6dba30b83c5d26b9d88daf14",
+      "exported_sha256": "dbc7c13dd86ceae69b79ecb9eee6add40e41ec023e6ced80c4041e9eae97a3bf",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/audit_fmo_pocket_selection.py",
+      "exported": "src/fmotpiefinal/pipeline/pocket_audit.py",
+      "source_sha256": "58495f474f4f2209bc42387cb3047b84c11bc151df4ce3d861b698ca7b1a9da7",
+      "exported_sha256": "5c2a591b3ff949d5f14820e8b75dff263af9497520c0067d5c945fd06250245c",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/audit_fmo_receptor_chains.py",
+      "exported": "src/fmotpiefinal/pipeline/chain_selection.py",
+      "source_sha256": "2e5a4dee5741a1c526fb48d3760ef6bdb0bae14661e9521d1416345749310524",
+      "exported_sha256": "2e5a4dee5741a1c526fb48d3760ef6bdb0bae14661e9521d1416345749310524",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/decide_fmo_structure_treatment.py",
+      "exported": "src/fmotpiefinal/pipeline/water_policy.py",
+      "source_sha256": "cbd5df140243577e22da9e45c2ccb64a798a3a59b9fddc82361a5c572ebc2ba5",
+      "exported_sha256": "cbd5df140243577e22da9e45c2ccb64a798a3a59b9fddc82361a5c572ebc2ba5",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/fmo_workflow.py",
+      "exported": "src/fmotpiefinal/pipeline/cli.py",
+      "source_sha256": "0c8d71522178124c10d5b206572abe4a3203972d1c5d2b050720a56506ca39f4",
+      "exported_sha256": "ae128f7eb9fb12975c1e9e7139d4bbda7b723f7deb147dcb0fdb2ab2cd32b3d7",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/freeze_fmo_affinity_protocol.py",
+      "exported": "src/fmotpiefinal/pipeline/protocol.py",
+      "source_sha256": "461881a58018dc44e3e44594466f5de7f9d1ab2a9128569d9b1114186be67579",
+      "exported_sha256": "1369b4e0c47332f1c67a50789da488c46a652ec6b674b5a7c238c0c1d06661a3",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/intake_fmo_molecular_interface.py",
+      "exported": "src/fmotpiefinal/pipeline/interface_intake.py",
+      "source_sha256": "39dfd800701945cfccb3816edad800e4855fd2cb1ca640f9a6c19104fcb7f574",
+      "exported_sha256": "e0f5c260f2dab0c6a88608b7fd651c8a5cc5df28c1b43b5a2bf2fc4dad672ad8",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/intake_fmo_target.py",
+      "exported": "src/fmotpiefinal/pipeline/target_intake.py",
+      "source_sha256": "648669b30104793c07e7de7111c1f021d45386efa4304a0af2749adcdf29f665",
+      "exported_sha256": "f3aa76e77ddfd994386dff1f41f0b515aa2c27dd8568a3224a6a0c6e77254229",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/prepare_fmo_pdbfixer.py",
+      "exported": "src/fmotpiefinal/pipeline/structure_repair.py",
+      "source_sha256": "df78d8ca64ec48c470018ea561d4ea62f2688841c912a84fa0ec47d1ee7b26b9",
+      "exported_sha256": "df78d8ca64ec48c470018ea561d4ea62f2688841c912a84fa0ec47d1ee7b26b9",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/rescue_fmo_new_target.py",
+      "exported": "src/fmotpiefinal/pipeline/single_case_rescue.py",
+      "source_sha256": "0076d23298ca9430bd128315bb4546803cabf8cb645669bb9fdc5c2fd7517ae9",
+      "exported_sha256": "e4b54ec97130595c81b783161c6a5ce767be7fd44e0bc5669fa47f6a2f09694a",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/rescue_fmo_target_cohort.py",
+      "exported": "src/fmotpiefinal/pipeline/cohort_rescue.py",
+      "source_sha256": "ca7755ea16033e9233619ddbeaad73465dc6e74dac552c416064dd16812d0725",
+      "exported_sha256": "c1fd4af5aae3e18c4352d573cd74dfb75b0da0bd26d3ddf7b8d5f26294961504",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/run_fmo87_external_holdout.py",
+      "exported": "src/fmotpiefinal/pipeline/target_stages.py",
+      "source_sha256": "f850f58ea1ed0a1d0b33197d735982196a35c966f39fc2eec1d94af740cdbdbb",
+      "exported_sha256": "91cd3cd10c2c13f16508e8de6782aa71ebcf0959259651ddd1ca036ce976dbf4",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/run_fmo_new_target.py",
+      "exported": "src/fmotpiefinal/pipeline/target_workflow.py",
+      "source_sha256": "3793132eee4cbd70ecd094dbaccd1521f24ae54b09747f20fb8fe43c1eb5404d",
+      "exported_sha256": "c328cc335ef268359a1531b1bb58791bd64218406f13341eb4649477edd65cc9",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/pipeline/score_fmo_interface.py",
+      "exported": "src/fmotpiefinal/pipeline/interface_scoring.py",
+      "source_sha256": "b9b02c96c39232ae6c50c9f2f006b8f601d7d35eea054f07a85aa6cf35a922d2",
+      "exported_sha256": "b9b02c96c39232ae6c50c9f2f006b8f601d7d35eea054f07a85aa6cf35a922d2",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/preparation_sensitivity.py",
+      "exported": "src/fmotpiefinal/preparation_sensitivity.py",
+      "source_sha256": "23a215e7eb351ea554a11f587408a48f0d3319915f53727c3339084819e172a6",
+      "exported_sha256": "1031014a691e885b741a4734b0fc95b63d5b80f0648e90abfe19ffb0ee2596bc",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/scoring.py",
+      "exported": "src/fmotpiefinal/scoring.py",
+      "source_sha256": "f01acfffc8067fa9c9e4080f98a0d00921381348fe1b4436e0e2753985524712",
+      "exported_sha256": "f01acfffc8067fa9c9e4080f98a0d00921381348fe1b4436e0e2753985524712",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "src/fmotpiefinal/references/retrospective_targets_20261016.json",
+      "exported": "src/fmotpiefinal/references/retrospective_targets_20261016.json",
+      "source_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+      "exported_sha256": "68f09fd10730a38a8df1889eaa20b11882db7d4e71b0463925b8c16c151cf1c1",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_carbonyl_repair.py",
+      "exported": "tests/test_carbonyl_repair.py",
+      "source_sha256": "3ddd22f4d5be908d1c11392308752648f50810d7a851b962fafe5e9cdec4b293",
+      "exported_sha256": "3ddd22f4d5be908d1c11392308752648f50810d7a851b962fafe5e9cdec4b293",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_chemical_model_requirements.py",
+      "exported": "tests/test_chemical_model_requirements.py",
+      "source_sha256": "f9784099517df869225e3f8278c4c46908028ce888355bf451b53bb49c4262e1",
+      "exported_sha256": "f9784099517df869225e3f8278c4c46908028ce888355bf451b53bb49c4262e1",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_chemical_preflight.py",
+      "exported": "tests/test_chemical_preflight.py",
+      "source_sha256": "439c7d3ba804284d285a0bdbbbfabdd7673ee232e8cb39641be02febee098b41",
+      "exported_sha256": "439c7d3ba804284d285a0bdbbbfabdd7673ee232e8cb39641be02febee098b41",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_cli_structured_errors.py",
+      "exported": "tests/test_cli_structured_errors.py",
+      "source_sha256": "19381adb491e033b26eb57e31ff4ae69801d65981bd25839ee011af35d38242d",
+      "exported_sha256": "bdd1e035f687f3949124b8d1b5893fbeb071cd16ceb2efdf7e26d1bd14b98b02",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_cohort_failure_gate.py",
+      "exported": "tests/test_cohort_failure_gate.py",
+      "source_sha256": "7b2cee7b757ad6a835b30125c6500c8ace182797ffa64df47ee81ae2cfce7ae1",
+      "exported_sha256": "a94b6ee851db14a5573d57623bb8d33b981bcc043721eea68cf71d210dcac543",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_cohort_ligand_scf_rescue.py",
+      "exported": "tests/test_cohort_ligand_scf_rescue.py",
+      "source_sha256": "7acdc691001b18c202df16e2b88093101da7ef9acc7d851d89a20b9112c5676a",
+      "exported_sha256": "12aab392d32a8f68dd0beca88b5ec801745ba66e435f5e517c9611d297407f65",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_component_inventory.py",
+      "exported": "tests/test_component_inventory.py",
+      "source_sha256": "34810f7f48de718f6c4a45f2d1845c265463e5fb99dc1a2a62aa456172590cb3",
+      "exported_sha256": "04a57e1b8b3c7355ece664b8999679e85915312941ab8a06b3d5bed6625270ce",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_counterion_preparation.py",
+      "exported": "tests/test_counterion_preparation.py",
+      "source_sha256": "cba99e07bb3c559cc313f920c04b660d1300ba180a4fdd935fe2323301267ba2",
+      "exported_sha256": "cba99e07bb3c559cc313f920c04b660d1300ba180a4fdd935fe2323301267ba2",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_final_fmo_convergence.py",
+      "exported": "tests/test_final_fmo_convergence.py",
+      "source_sha256": "63aa75c88f37c4016203ffca692dd4a8e9e1326cbfa45cda5e08ee8a77267536",
+      "exported_sha256": "63aa75c88f37c4016203ffca692dd4a8e9e1326cbfa45cda5e08ee8a77267536",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_fmo_soscf.py",
+      "exported": "tests/test_fmo_soscf.py",
+      "source_sha256": "3c117f99d4176889a91c1bc0c4e5bfee731fcea08a17912df2c153a9b1b7921d",
+      "exported_sha256": "fc2239619a1e8b9ed2ab9eabfa85fb42e5fdc95a9770020b9be36abcffda1ed0",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_graph_preparation.py",
+      "exported": "tests/test_graph_preparation.py",
+      "source_sha256": "5a1995118bc108a66ee59ae6cc250b148328ccc78cc6dd267efd9e76a9530112",
+      "exported_sha256": "5a1995118bc108a66ee59ae6cc250b148328ccc78cc6dd267efd9e76a9530112",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_graph_rescue_handoff.py",
+      "exported": "tests/test_graph_rescue_handoff.py",
+      "source_sha256": "14221c1803c0572b3f48cb06b1f1e663f9a7e48988c0f4eb07bf8fb5a95f10e9",
+      "exported_sha256": "b5118979e0d117f8972c366369f3c475bd5209b1f74edf21430803519c3d5b6d",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_local_bond_repair.py",
+      "exported": "tests/test_local_bond_repair.py",
+      "source_sha256": "5826820155930dd4bc5b4041e46b95676e85d7aa9e7fd9c363b7dfa2b61b064d",
+      "exported_sha256": "5826820155930dd4bc5b4041e46b95676e85d7aa9e7fd9c363b7dfa2b61b064d",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_minimization_parallel.py",
+      "exported": "tests/test_minimization_parallel.py",
+      "source_sha256": "c253210bcbe6f61b2e313f64d3f85800c7a595bd4a6773e3c082887857eb4886",
+      "exported_sha256": "c253210bcbe6f61b2e313f64d3f85800c7a595bd4a6773e3c082887857eb4886",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_preparation_sensitivity.py",
+      "exported": "tests/test_preparation_sensitivity.py",
+      "source_sha256": "a4c760181dd30ddbb6e941a80893b35b2f307d59b974b874b93abe90c09ea1dc",
+      "exported_sha256": "a4c760181dd30ddbb6e941a80893b35b2f307d59b974b874b93abe90c09ea1dc",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_prepared_receptor_copy.py",
+      "exported": "tests/test_prepared_receptor_copy.py",
+      "source_sha256": "237127a202fa30b26c2b5375865807e08f3604cf6150aca7d60a4fd8543aa8c0",
+      "exported_sha256": "7f0473d20ac53459e8df51fc5d4fa532c9f49b4a7ca08dd26000d07477c09dbc",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_retained_component_region.py",
+      "exported": "tests/test_retained_component_region.py",
+      "source_sha256": "b7e90983a845498bc95fcabf5202a6be0ce7ac5b3922704bf3749fd51ca5ccf6",
+      "exported_sha256": "544c1b79efffaab9dec531f352f449e95500803f6c6e021d882d023bca9499d1",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_scc_convergence.py",
+      "exported": "tests/test_scc_convergence.py",
+      "source_sha256": "d61615a9a608eb92a9d09f3787c97369629f64e9fdffb920327e9ec0ec2a0cd5",
+      "exported_sha256": "d61615a9a608eb92a9d09f3787c97369629f64e9fdffb920327e9ec0ec2a0cd5",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_scf_stall.py",
+      "exported": "tests/test_scf_stall.py",
+      "source_sha256": "eb51297f0d5125545a796db8a315c0c9fcde6f6c209b1dae11fd40a1334257de",
+      "exported_sha256": "eb51297f0d5125545a796db8a315c0c9fcde6f6c209b1dae11fd40a1334257de",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_scoring.py",
+      "exported": "tests/test_scoring.py",
+      "source_sha256": "af8f90334da246656a6f51dd3ea1ad9ab83900c1c6b773b7f38fea0d9fe689c9",
+      "exported_sha256": "bdb4a6bc0133a419cb8536f4395e4226811d86e50fc4763fc46b37206210dd32",
+      "change": "installed-test-path-adaptation"
+    },
+    {
+      "source": "tests/test_single_ligand_rescue.py",
+      "exported": "tests/test_single_ligand_rescue.py",
+      "source_sha256": "66075e340bf28cc80d09225a20151d95ff87bcd3db5d11b1f40a26ed4e24bfb3",
+      "exported_sha256": "c094883ded799a977f993c089ee5e5390a09036b212dc7097639729874e16328",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_special_chemistry.py",
+      "exported": "tests/test_special_chemistry.py",
+      "source_sha256": "9cf8218aeb241ff38d741c32ee0636608541075869a9cc7de0b4450de8b3eb10",
+      "exported_sha256": "9cf8218aeb241ff38d741c32ee0636608541075869a9cc7de0b4450de8b3eb10",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_special_dispatch.py",
+      "exported": "tests/test_special_dispatch.py",
+      "source_sha256": "57467fdccc25c574e0faef13879e869877bb0a16459ccfef2a32d5843f1b894c",
+      "exported_sha256": "57467fdccc25c574e0faef13879e869877bb0a16459ccfef2a32d5843f1b894c",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_stage_execution.py",
+      "exported": "tests/test_stage_execution.py",
+      "source_sha256": "6b7f969ea551a2e4847d8d64e3f4d1d35f183c1314656b340d1df5d34edae357",
+      "exported_sha256": "3c47dff9c01ffd3015624b5e410df98f796e476ea2d0ed3e2c9c691d4c5089c3",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_structure_input.py",
+      "exported": "tests/test_structure_input.py",
+      "source_sha256": "0001bf4ae111d733ef981c674e9566cf8d967f8b38a49f452811ebb887b4410b",
+      "exported_sha256": "0001bf4ae111d733ef981c674e9566cf8d967f8b38a49f452811ebb887b4410b",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_tartrate.py",
+      "exported": "tests/test_tartrate.py",
+      "source_sha256": "f9a693b4ffdd7eb5d86407513eb26ca07fd794fea6760c364db5e1e03c787ecb",
+      "exported_sha256": "f9a693b4ffdd7eb5d86407513eb26ca07fd794fea6760c364db5e1e03c787ecb",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_terminal_caps.py",
+      "exported": "tests/test_terminal_caps.py",
+      "source_sha256": "b5fcc655ffeafb82e2879756118691221e3160f84197bbf6dbc5c045ff4861f0",
+      "exported_sha256": "b5fcc655ffeafb82e2879756118691221e3160f84197bbf6dbc5c045ff4861f0",
+      "change": "module-and-output-label-renaming"
+    },
+    {
+      "source": "tests/test_water_hydrogen_clash.py",
+      "exported": "tests/test_water_hydrogen_clash.py",
+      "source_sha256": "1eb4d13de17a7edfcae65ed43b88245bc95708637c76e51246129dbd3470cf84",
+      "exported_sha256": "1eb4d13de17a7edfcae65ed43b88245bc95708637c76e51246129dbd3470cf84",
+      "change": "module-and-output-label-renaming"
+    }
+  ],
+  "verification": {
+    "status": "PASS",
+    "checks": {
+      "release-metadata": 1,
+      "module-and-output-label-renaming": 81,
+      "exact-function-extraction": 1,
+      "installed-test-path-adaptation": 1
+    },
+    "helper_function_AST_equivalent": true
+  },
+  "maintained_additions_sha256": {
+    "src/fmotpiefinal/doctor.py": "a8cf1994f32402b785c186897044dc068b263e29ec11f0432699692f502c6732",
+    "tests/test_doctor.py": "57fa97705406b077d061cf38f1b7d7486dccdb94593b8cc54bbbb530a94786de"
+  },
+  "repository_integration": {
+    "base_commit": "7b99ca7bbc47a5d66ac4d40daf99cc13f33c390d",
+    "runtime_scientific_code_changed": false,
+    "addition": "Offline environment diagnostics and CLI entrypoint; no changes to preparation, QM or scoring"
+  }
+}

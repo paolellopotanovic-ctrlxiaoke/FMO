@@ -1,0 +1,1498 @@
+{
+  "status": "COMPLETE_INDEPENDENTLY_VERIFIED",
+  "target": "BACE",
+  "n": 36,
+  "metrics": {
+    "matched_tpie": {
+      "pearson": 0.23190766913887587,
+      "spearman": 0.17675469183567405,
+      "kendall": 0.11031347756413944
+    },
+    "original_total_strain_score": {
+      "pearson": 0.38468092997452696,
+      "spearman": 0.31845990795467793,
+      "kendall": 0.22045178483061165
+    },
+    "graph_repaired_tpie": {
+      "pearson": 0.28674108541566784,
+      "spearman": 0.25111072402410917,
+      "kendall": 0.16933253037713647
+    },
+    "graph_repaired_tpie_plus_local_strain": {
+      "pearson": 0.34998736094977817,
+      "spearman": 0.2889704947231287,
+      "kendall": 0.20447701781390068
+    }
+  },
+  "scores": {
+    "CAT-13a": {
+      "matched_tpie": -101.053,
+      "original_total_strain_score": -84.06534087734944,
+      "graph_repaired_tpie": -91.85199999999999,
+      "graph_repaired_local_strain": 9.349343347769096,
+      "graph_repaired_tpie_plus_local_strain": -82.5026566522309
+    },
+    "CAT-13b": {
+      "matched_tpie": -103.35900000000001,
+      "original_total_strain_score": -81.91793563287253,
+      "graph_repaired_tpie": -89.919,
+      "graph_repaired_local_strain": 11.689711467368058,
+      "graph_repaired_tpie_plus_local_strain": -78.22928853263194
+    },
+    "CAT-13c": {
+      "matched_tpie": -107.122,
+      "original_total_strain_score": -87.06250880920071,
+      "graph_repaired_tpie": -94.684,
+      "graph_repaired_local_strain": 11.4605148869846,
+      "graph_repaired_tpie_plus_local_strain": -83.2234851130154
+    },
+    "CAT-13d": {
+      "matched_tpie": -106.502,
+      "original_total_strain_score": -85.69500132591767,
+      "graph_repaired_tpie": -95.28,
+      "graph_repaired_local_strain": 12.10810027165015,
+      "graph_repaired_tpie_plus_local_strain": -83.17189972834986
+    },
+    "CAT-13e": {
+      "matched_tpie": -106.159,
+      "original_total_strain_score": -81.93426156278919,
+      "graph_repaired_tpie": -98.527,
+      "graph_repaired_local_strain": 17.4713327575974,
+      "graph_repaired_tpie_plus_local_strain": -81.0556672424026
+    },
+    "CAT-13f": {
+      "matched_tpie": -106.781,
+      "original_total_strain_score": -87.89332627615812,
+      "graph_repaired_tpie": -99.02799999999999,
+      "graph_repaired_local_strain": 12.333398135671933,
+      "graph_repaired_tpie_plus_local_strain": -86.69460186432806
+    },
+    "CAT-13g": {
+      "matched_tpie": -109.81299999999999,
+      "original_total_strain_score": -88.76517762249256,
+      "graph_repaired_tpie": -100.07600000000001,
+      "graph_repaired_local_strain": 12.493741239012877,
+      "graph_repaired_tpie_plus_local_strain": -87.58225876098713
+    },
+    "CAT-13h": {
+      "matched_tpie": -106.402,
+      "original_total_strain_score": -82.93798000302814,
+      "graph_repaired_tpie": -94.199,
+      "graph_repaired_local_strain": 15.272169329891483,
+      "graph_repaired_tpie_plus_local_strain": -78.92683067010852
+    },
+    "CAT-13i": {
+      "matched_tpie": -104.547,
+      "original_total_strain_score": -80.50918031986913,
+      "graph_repaired_tpie": -87.828,
+      "graph_repaired_local_strain": 13.66286167025499,
+      "graph_repaired_tpie_plus_local_strain": -74.16513832974502
+    },
+    "CAT-13j": {
+      "matched_tpie": -106.062,
+      "original_total_strain_score": -81.27247542571679,
+      "graph_repaired_tpie": -94.006,
+      "graph_repaired_local_strain": 13.654358289370638,
+      "graph_repaired_tpie_plus_local_strain": -80.35164171062937
+    },
+    "CAT-13k": {
+      "matched_tpie": -112.323,
+      "original_total_strain_score": -91.36378572528399,
+      "graph_repaired_tpie": -100.06899999999999,
+      "graph_repaired_local_strain": 12.037733869267562,
+      "graph_repaired_tpie_plus_local_strain": -88.03126613073243
+    },
+    "CAT-13m": {
+      "matched_tpie": -111.936,
+      "original_total_strain_score": -90.14908441375012,
+      "graph_repaired_tpie": -102.845,
+      "graph_repaired_local_strain": 14.673016381447539,
+      "graph_repaired_tpie_plus_local_strain": -88.17198361855246
+    },
+    "CAT-13n": {
+      "matched_tpie": -104.018,
+      "original_total_strain_score": -78.74922887010793,
+      "graph_repaired_tpie": -93.16199999999999,
+      "graph_repaired_local_strain": 15.92980427878411,
+      "graph_repaired_tpie_plus_local_strain": -77.23219572121589
+    },
+    "CAT-13o": {
+      "matched_tpie": -106.852,
+      "original_total_strain_score": -79.96508273953587,
+      "graph_repaired_tpie": -96.19500000000001,
+      "graph_repaired_local_strain": 18.801687355627095,
+      "graph_repaired_tpie_plus_local_strain": -77.39331264437291
+    },
+    "CAT-17a": {
+      "matched_tpie": -107.014,
+      "original_total_strain_score": -83.00015557434202,
+      "graph_repaired_tpie": -96.95400000000001,
+      "graph_repaired_local_strain": 14.094642154223102,
+      "graph_repaired_tpie_plus_local_strain": -82.85935784577691
+    },
+    "CAT-17b": {
+      "matched_tpie": -100.651,
+      "original_total_strain_score": -79.58870223394212,
+      "graph_repaired_tpie": -89.713,
+      "graph_repaired_local_strain": 13.235579801701892,
+      "graph_repaired_tpie_plus_local_strain": -76.4774201982981
+    },
+    "CAT-17c": {
+      "matched_tpie": -103.879,
+      "original_total_strain_score": -82.27442423419127,
+      "graph_repaired_tpie": -92.357,
+      "graph_repaired_local_strain": 12.65626556528779,
+      "graph_repaired_tpie_plus_local_strain": -79.70073443471222
+    },
+    "CAT-17d": {
+      "matched_tpie": -97.626,
+      "original_total_strain_score": -78.32496758781718,
+      "graph_repaired_tpie": -87.663,
+      "graph_repaired_local_strain": 11.6424543563883,
+      "graph_repaired_tpie_plus_local_strain": -76.0205456436117
+    },
+    "CAT-17e": {
+      "matched_tpie": -101.575,
+      "original_total_strain_score": -81.26004593725004,
+      "graph_repaired_tpie": -92.07,
+      "graph_repaired_local_strain": 13.30164148909293,
+      "graph_repaired_tpie_plus_local_strain": -78.76835851090706
+    },
+    "CAT-17f": {
+      "matched_tpie": -104.242,
+      "original_total_strain_score": -84.38928447607115,
+      "graph_repaired_tpie": -93.07799999999999,
+      "graph_repaired_local_strain": 11.158163252116932,
+      "graph_repaired_tpie_plus_local_strain": -81.91983674788305
+    },
+    "CAT-17g": {
+      "matched_tpie": -99.745,
+      "original_total_strain_score": -79.7411080311278,
+      "graph_repaired_tpie": -89.194,
+      "graph_repaired_local_strain": 11.760137483153388,
+      "graph_repaired_tpie_plus_local_strain": -77.43386251684662
+    },
+    "CAT-17h": {
+      "matched_tpie": -106.631,
+      "original_total_strain_score": -86.08269524414789,
+      "graph_repaired_tpie": -95.254,
+      "graph_repaired_local_strain": 12.050536945067254,
+      "graph_repaired_tpie_plus_local_strain": -83.20346305493275
+    },
+    "CAT-17i": {
+      "matched_tpie": -100.64,
+      "original_total_strain_score": -78.26480934204065,
+      "graph_repaired_tpie": -89.966,
+      "graph_repaired_local_strain": 12.897286934197965,
+      "graph_repaired_tpie_plus_local_strain": -77.06871306580203
+    },
+    "CAT-24": {
+      "matched_tpie": -105.56,
+      "original_total_strain_score": -85.11433006621658,
+      "graph_repaired_tpie": -93.536,
+      "graph_repaired_local_strain": 12.914499519068897,
+      "graph_repaired_tpie_plus_local_strain": -80.6215004809311
+    },
+    "CAT-4a": {
+      "matched_tpie": -102.39,
+      "original_total_strain_score": -79.46389492940376,
+      "graph_repaired_tpie": -89.177,
+      "graph_repaired_local_strain": 12.73684217432273,
+      "graph_repaired_tpie_plus_local_strain": -76.44015782567728
+    },
+    "CAT-4b": {
+      "matched_tpie": -106.781,
+      "original_total_strain_score": -83.46600911055194,
+      "graph_repaired_tpie": -93.12299999999999,
+      "graph_repaired_local_strain": 13.520400704393474,
+      "graph_repaired_tpie_plus_local_strain": -79.60259929560652
+    },
+    "CAT-4c": {
+      "matched_tpie": -99.313,
+      "original_total_strain_score": -71.52600448525865,
+      "graph_repaired_tpie": -84.296,
+      "graph_repaired_local_strain": 19.082006505353803,
+      "graph_repaired_tpie_plus_local_strain": -65.2139934946462
+    },
+    "CAT-4d": {
+      "matched_tpie": -108.176,
+      "original_total_strain_score": -85.37039243615881,
+      "graph_repaired_tpie": -94.372,
+      "graph_repaired_local_strain": 13.278244170846657,
+      "graph_repaired_tpie_plus_local_strain": -81.09375582915334
+    },
+    "CAT-4i": {
+      "matched_tpie": -97.919,
+      "original_total_strain_score": -75.34436612337717,
+      "graph_repaired_tpie": -88.845,
+      "graph_repaired_local_strain": 12.872424381322213,
+      "graph_repaired_tpie_plus_local_strain": -75.97257561867778
+    },
+    "CAT-4j": {
+      "matched_tpie": -102.684,
+      "original_total_strain_score": -80.51165491708204,
+      "graph_repaired_tpie": -88.908,
+      "graph_repaired_local_strain": 12.04979460135821,
+      "graph_repaired_tpie_plus_local_strain": -76.85820539864179
+    },
+    "CAT-4k": {
+      "matched_tpie": -102.85600000000001,
+      "original_total_strain_score": -80.36316763090429,
+      "graph_repaired_tpie": -89.42399999999999,
+      "graph_repaired_local_strain": 12.147138891052519,
+      "graph_repaired_tpie_plus_local_strain": -77.27686110894747
+    },
+    "CAT-4l": {
+      "matched_tpie": -102.51400000000001,
+      "original_total_strain_score": -78.15521989154892,
+      "graph_repaired_tpie": -89.909,
+      "graph_repaired_local_strain": 13.317464767989266,
+      "graph_repaired_tpie_plus_local_strain": -76.59153523201074
+    },
+    "CAT-4m": {
+      "matched_tpie": -106.43900000000001,
+      "original_total_strain_score": -83.27455616349201,
+      "graph_repaired_tpie": -93.438,
+      "graph_repaired_local_strain": 12.410840334885421,
+      "graph_repaired_tpie_plus_local_strain": -81.02715966511458
+    },
+    "CAT-4n": {
+      "matched_tpie": -104.765,
+      "original_total_strain_score": -81.74912593407845,
+      "graph_repaired_tpie": -93.59,
+      "graph_repaired_local_strain": 13.438959387307525,
+      "graph_repaired_tpie_plus_local_strain": -80.15104061269248
+    },
+    "CAT-4o": {
+      "matched_tpie": -104.368,
+      "original_total_strain_score": -81.44534811403767,
+      "graph_repaired_tpie": -91.053,
+      "graph_repaired_local_strain": 12.411676177507148,
+      "graph_repaired_tpie_plus_local_strain": -78.64132382249285
+    },
+    "CAT-4p": {
+      "matched_tpie": -107.098,
+      "original_total_strain_score": -83.91144963223144,
+      "graph_repaired_tpie": -94.171,
+      "graph_repaired_local_strain": 14.160423972392307,
+      "graph_repaired_tpie_plus_local_strain": -80.0105760276077
+    }
+  },
+  "geometry": {
+    "CAT-13a": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            25,
+            38
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.375702555361619,
+          "bound_departure_degrees": 53.15343283680085,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13b": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "2": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 18,
+          "center": 17,
+          "hydrogens": [
+            37,
+            41
+          ],
+          "other_nitrogens": [
+            16,
+            19
+          ],
+          "original_departure_degrees": 3.8648032140044544,
+          "bound_departure_degrees": 62.06554460085895,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13c": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "3": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 19,
+          "center": 18,
+          "hydrogens": [
+            40,
+            44
+          ],
+          "other_nitrogens": [
+            17,
+            20
+          ],
+          "original_departure_degrees": 3.8516921743029497,
+          "bound_departure_degrees": 57.05615606214924,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13d": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            27,
+            42
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.287733337141222,
+          "bound_departure_degrees": 57.897548898436874,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13e": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            28,
+            45
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.140008262000008,
+          "bound_departure_degrees": 50.309520060758686,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13f": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            48
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.276133827604504,
+          "bound_departure_degrees": 49.55143324972311,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13g": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            51
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 5.213225299823005,
+          "bound_departure_degrees": 54.17930179882961,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13h": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            28,
+            45
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 2.124995884220708,
+          "bound_departure_degrees": 54.57025584986432,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13i": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            28,
+            45
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.996806420279176,
+          "bound_departure_degrees": 62.577812507661015,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13j": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 6.530791858550105,
+          "bound_departure_degrees": 62.72519089309428,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13k": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.9337728665210214,
+          "bound_departure_degrees": 56.42321234959765,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13m": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            43
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 2.9667398037064174,
+          "bound_departure_degrees": 50.766176687135555,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13n": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "S"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            43
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 5.465911236745315,
+          "bound_departure_degrees": 59.18754221947729,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-13o": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            41
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.8057133539729073,
+          "bound_departure_degrees": 55.70216971677006,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17a": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            28,
+            42
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 6.8468383037063125,
+          "bound_departure_degrees": 59.405455270929814,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17b": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 18,
+          "center": 17,
+          "hydrogens": [
+            40,
+            46
+          ],
+          "other_nitrogens": [
+            16,
+            19
+          ],
+          "original_departure_degrees": 4.606458894835074,
+          "bound_departure_degrees": 54.92589806336386,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17c": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            28,
+            43
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.4197176201600605,
+          "bound_departure_degrees": 58.83470797924156,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17d": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            26,
+            41
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.6143852999754915,
+          "bound_departure_degrees": 53.985651639724,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17e": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 18,
+          "center": 17,
+          "hydrogens": [
+            39,
+            45
+          ],
+          "other_nitrogens": [
+            16,
+            19
+          ],
+          "original_departure_degrees": 3.4341182080794637,
+          "bound_departure_degrees": 52.474618306867406,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17f": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            28,
+            42
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.657792568491298,
+          "bound_departure_degrees": 57.70575405356269,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17g": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            27,
+            41
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.3977406393154865,
+          "bound_departure_degrees": 56.08929502951963,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17h": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            27,
+            41
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.8471365946050873,
+          "bound_departure_degrees": 57.24280737259942,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-17i": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 17,
+          "center": 16,
+          "hydrogens": [
+            38,
+            44
+          ],
+          "other_nitrogens": [
+            15,
+            18
+          ],
+          "original_departure_degrees": 7.685016215615294,
+          "bound_departure_degrees": 59.5039563146899,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-24": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "13": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 19,
+          "center": 18,
+          "hydrogens": [
+            40,
+            46
+          ],
+          "other_nitrogens": [
+            17,
+            20
+          ],
+          "original_departure_degrees": 1.4842878886934148,
+          "bound_departure_degrees": 53.165309351809675,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4a": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            45
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.990251857842982,
+          "bound_departure_degrees": 61.12163974491469,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4b": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "12": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 21,
+          "center": 20,
+          "hydrogens": [
+            43,
+            49
+          ],
+          "other_nitrogens": [
+            19,
+            22
+          ],
+          "original_departure_degrees": 3.8119878825631166,
+          "bound_departure_degrees": 60.934316977438364,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4c": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 20,
+          "center": 19,
+          "hydrogens": [
+            42,
+            49
+          ],
+          "other_nitrogens": [
+            18,
+            21
+          ],
+          "original_departure_degrees": 2.7649424939760774,
+          "bound_departure_degrees": 57.86437764037384,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4d": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "13": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 22,
+          "center": 21,
+          "hydrogens": [
+            46,
+            52
+          ],
+          "other_nitrogens": [
+            20,
+            23
+          ],
+          "original_departure_degrees": 3.8081258921830528,
+          "bound_departure_degrees": 60.54085641774964,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4i": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 7.354802720953862,
+          "bound_departure_degrees": 58.800383684726334,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4j": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.9084969732340324,
+          "bound_departure_degrees": 60.676336980345866,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4k": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.7760552739080633,
+          "bound_departure_degrees": 61.28494699175797,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4l": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            29,
+            43
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.16311183120981,
+          "bound_departure_degrees": 62.76319654221388,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4m": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "11": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 20,
+          "center": 19,
+          "hydrogens": [
+            41,
+            47
+          ],
+          "other_nitrogens": [
+            18,
+            21
+          ],
+          "original_departure_degrees": 4.015793418184729,
+          "bound_departure_degrees": 62.22408452177186,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4n": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            31,
+            45
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 6.1835741727470905,
+          "bound_departure_degrees": 58.54853073395168,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4o": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 3.693044751030397,
+          "bound_departure_degrees": 61.717981495098954,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    },
+    "CAT-4p": {
+      "chemical_screen": {
+        "stereochemistry_3d": {
+          "5": "R"
+        },
+        "stereo_changed": false,
+        "bond_distance_flags": [],
+        "possible_hydrogen_transfer_flags": [],
+        "passed_screen": true,
+        "scope": "Geometry screen only; no tautomer populations, bond-order reassignment, Hessian or pKa guarantee"
+      },
+      "max_heavy_displacement_A": 0.0,
+      "graph_diagnostics": [
+        {
+          "nitrogen": 3,
+          "center": 2,
+          "hydrogens": [
+            30,
+            44
+          ],
+          "other_nitrogens": [
+            1,
+            4
+          ],
+          "original_departure_degrees": 4.477511122680842,
+          "bound_departure_degrees": 57.323191658107824,
+          "new_deformation_flag": true,
+          "already_flagged_input": false
+        }
+      ],
+      "pcm_consistent": true
+    }
+  },
+  "production_default_changed": false,
+  "driver_sha256": "7207005de98c3f2c8f78b0f68ad1d969871d2c394f40c6deadd851886746f6b9",
+  "frozen_protocol_sha256": "bbb160dcda195eba88c57225f40ae514b2499493451c00f093d05aa07c3573cb",
+  "paired_comparisons": {
+    "pure_vs_matched_tpie": {
+      "pair_changes": {
+        "corrected": 55,
+        "regressed": 36,
+        "unchanged": 530,
+        "tied": 9
+      },
+      "paired_bootstrap_95_percent_delta": {
+        "pearson": [
+          -0.07576963912191007,
+          0.18818061308626002
+        ],
+        "spearman": [
+          -0.07952700037673403,
+          0.23894857456150081
+        ],
+        "kendall": [
+          -0.04773120190764729,
+          0.17737635519027456
+        ]
+      },
+      "bootstrap_valid_samples": 4000,
+      "seed": 20261024,
+      "leave_one_out_spearman_delta_range": [
+        0.04433738788373462,
+        0.09653917064166917
+      ],
+      "warning": "Development-set paired bootstrap; does not correct repeated method exploration or prove transfer"
+    },
+    "combined_vs_original_strain": {
+      "pair_changes": {
+        "corrected": 30,
+        "regressed": 35,
+        "unchanged": 557,
+        "tied": 8
+      },
+      "paired_bootstrap_95_percent_delta": {
+        "pearson": [
+          -0.15915616995077625,
+          0.07141897254443913
+        ],
+        "spearman": [
+          -0.15155619961423414,
+          0.09516270691796672
+        ],
+        "kendall": [
+          -0.11774891373741285,
+          0.0860217996338425
+        ]
+      },
+      "bootstrap_valid_samples": 4000,
+      "seed": 20261024,
+      "leave_one_out_spearman_delta_range": [
+        -0.05675847250201066,
+        -0.0007007218827408956
+      ],
+      "warning": "Development-set paired bootstrap; does not correct repeated method exploration or prove transfer"
+    }
+  }
+}

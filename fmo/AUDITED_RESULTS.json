@@ -1,0 +1,133 @@
+{
+  "scope": "Existing local results audited; no new MD/QM computation",
+  "openfe": {
+    "CDK8": {
+      "ligands": [
+        "12",
+        "20"
+      ],
+      "experimental": -0.4501399999999993,
+      "binding_repeats_minus_shared_solution_mean": [
+        -0.5704440539814151,
+        -0.6381386160551168,
+        -0.4962801204730827
+      ],
+      "mean": -0.5682875968365382,
+      "bound_repeat_sd_only": 0.07095382951442977,
+      "solution_repeat_sd": 0.03331754250872938,
+      "full_uncertainty_estimated": false
+    },
+    "BACE": {
+      "ligands": [
+        "CAT-13n",
+        "CAT-4i"
+      ],
+      "experimental": 0.27999999999999936,
+      "binding_repeats_minus_shared_solution_mean": [
+        2.018568620192582,
+        2.7235894434880237,
+        2.799756300196762
+      ],
+      "mean": 2.513971454625789,
+      "bound_repeat_sd_only": 0.43071838106652033,
+      "solution_repeat_sd": 0.08658039972679384,
+      "full_uncertainty_estimated": false
+    }
+  },
+  "structure": {
+    "BACE": {
+      "bound": {
+        "0": {
+          "ligand_self_fit_rmsd_angstrom": 0.7114561884382192,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.901098003232382,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 2.821138211382114,
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": 0.98215768733692,
+          "minimum_protein_ligand_heavy_distance_angstrom": 2.759087209779073,
+          "distance_only_water_bridge_count": 1.8699186991869918
+        },
+        "10": {
+          "ligand_self_fit_rmsd_angstrom": 0.6349164111482322,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.794012218956056,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 3.5284552845528454,
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": 1.3269862077829193,
+          "minimum_protein_ligand_heavy_distance_angstrom": 2.753496082817636,
+          "distance_only_water_bridge_count": 1.9593495934959348
+        }
+      },
+      "solution": {
+        "0": {
+          "ligand_self_fit_rmsd_angstrom": 2.102822934322402,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.868598439829136,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 9.032520325203253
+        },
+        "10": {
+          "ligand_self_fit_rmsd_angstrom": 1.97753274810839,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.739586052855825,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 8.601626016260163
+        }
+      }
+    },
+    "CDK8": {
+      "bound": {
+        "0": {
+          "ligand_self_fit_rmsd_angstrom": 0.34039903530713495,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.425157645853554,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 1.4552845528455285,
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": 0.7416359116588789,
+          "minimum_protein_ligand_heavy_distance_angstrom": 2.992074210469316,
+          "distance_only_water_bridge_count": 1.1544715447154472
+        },
+        "10": {
+          "ligand_self_fit_rmsd_angstrom": 0.5122652384675478,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.3732183658010593,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 0.7317073170731707,
+          "local_receptor_fit_ligand_pose_rmsd_angstrom": 0.8502173484660779,
+          "minimum_protein_ligand_heavy_distance_angstrom": 2.99993037983654,
+          "distance_only_water_bridge_count": 0.7073170731707317
+        }
+      },
+      "solution": {
+        "0": {
+          "ligand_self_fit_rmsd_angstrom": 1.48271004095061,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.796271719583651,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 8.211382113821138
+        },
+        "10": {
+          "ligand_self_fit_rmsd_angstrom": 1.454649121744298,
+          "heavy_atom_unweighted_radius_of_gyration_angstrom": 3.7933395800551746,
+          "water_oxygen_within_3p5A_of_ligand_heteroatom": 6.691056910569106
+        }
+      }
+    }
+  },
+  "internal_energy": {
+    "BACE": {
+      "MM": {
+        "internal_energy_double_difference_kcal_mol": 1.4009719424313403,
+        "repeat_standard_error_diagnostic_kcal_mol": 1.0269578750585144
+      },
+      "DFTB": {
+        "internal_energy_double_difference_kcal_mol": -0.1439788806658271,
+        "repeat_standard_error_diagnostic_kcal_mol": 1.9534514113858905
+      },
+      "model_difference": {
+        "internal_energy_double_difference_kcal_mol": -1.5449508230969968,
+        "repeat_standard_error_diagnostic_kcal_mol": 1.0925722406310427
+      }
+    },
+    "CDK8": {
+      "MM": {
+        "internal_energy_double_difference_kcal_mol": 0.8170089800746504,
+        "repeat_standard_error_diagnostic_kcal_mol": 0.7614439031236258
+      },
+      "DFTB": {
+        "internal_energy_double_difference_kcal_mol": -1.208839505589102,
+        "repeat_standard_error_diagnostic_kcal_mol": 0.7071114887198784
+      },
+      "model_difference": {
+        "internal_energy_double_difference_kcal_mol": -2.0258484856637624,
+        "repeat_standard_error_diagnostic_kcal_mol": 0.32035619801310733
+      }
+    }
+  }
+}

@@ -1,0 +1,378 @@
+{
+  "status": "COMPLETE_LOGS_REVERIFIED",
+  "target": "CDK2",
+  "n": 16,
+  "strain_kcal_mol": {
+    "min": 17.723894653243537,
+    "median": 29.847917977800194,
+    "max": 76.47801019836174,
+    "std": 16.538613983781744
+  },
+  "tpie_std_kcal_mol": 7.532043435123947,
+  "minus_strain_vs_affinity": {
+    "pearson": -0.7372291757852306,
+    "spearman": -0.8470588235294119,
+    "kendall": -0.7
+  },
+  "rows": {
+    "17": {
+      "matched_tpie": -69.342,
+      "local_ligand_strain": 17.723894653243537,
+      "matched_tpie_plus_ligand_strain": -51.618105346756465,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "29": {
+      "matched_tpie": -86.834,
+      "local_ligand_strain": 41.90348817635624,
+      "matched_tpie_plus_ligand_strain": -44.93051182364376,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "28": {
+      "matched_tpie": -90.04599999999999,
+      "local_ligand_strain": 49.97801025953365,
+      "matched_tpie_plus_ligand_strain": -40.067989740466345,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "32": {
+      "matched_tpie": -88.411,
+      "local_ligand_strain": 76.47801019836174,
+      "matched_tpie_plus_ligand_strain": -11.932989801638257,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "FAILED",
+          "error": "input/log/executable changed or QM incomplete"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "rfo_500",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "26": {
+      "matched_tpie": -78.219,
+      "local_ligand_strain": 19.981092667152918,
+      "matched_tpie_plus_ligand_strain": -58.23790733284707,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "21": {
+      "matched_tpie": -71.582,
+      "local_ligand_strain": 18.13470879066839,
+      "matched_tpie_plus_ligand_strain": -53.4472912093316,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "30": {
+      "matched_tpie": -79.232,
+      "local_ligand_strain": 41.741824165581264,
+      "matched_tpie_plus_ligand_strain": -37.490175834418736,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "22": {
+      "matched_tpie": -73.855,
+      "local_ligand_strain": 24.19799335591317,
+      "matched_tpie_plus_ligand_strain": -49.657006644086835,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "31": {
+      "matched_tpie": -84.20400000000001,
+      "local_ligand_strain": 35.49784259968722,
+      "matched_tpie_plus_ligand_strain": -48.70615740031279,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "1h1r": {
+      "matched_tpie": -69.271,
+      "local_ligand_strain": 19.308676105087915,
+      "matched_tpie_plus_ligand_strain": -49.96232389491209,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "1oiy": {
+      "matched_tpie": -80.657,
+      "local_ligand_strain": 40.44310796771371,
+      "matched_tpie_plus_ligand_strain": -40.21389203228629,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "1h1s": {
+      "matched_tpie": -91.941,
+      "local_ligand_strain": 56.01390905630603,
+      "matched_tpie_plus_ligand_strain": -35.927090943693976,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "1oiu": {
+      "matched_tpie": -77.108,
+      "local_ligand_strain": 39.172889485100505,
+      "matched_tpie_plus_ligand_strain": -37.9351105148995,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "20": {
+      "matched_tpie": -82.287,
+      "local_ligand_strain": 22.118706828092375,
+      "matched_tpie_plus_ligand_strain": -60.168293171907635,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "1oi9": {
+      "matched_tpie": -75.113,
+      "local_ligand_strain": 19.104742428622114,
+      "matched_tpie_plus_ligand_strain": -56.00825757137788,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    },
+    "1h1q": {
+      "matched_tpie": -67.211,
+      "local_ligand_strain": 18.120821378496974,
+      "matched_tpie_plus_ligand_strain": -49.09017862150303,
+      "attempts": [
+        {
+          "state": "complex",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "ligand",
+          "profile": "original",
+          "status": "SUCCEEDED"
+        },
+        {
+          "state": "free_ligand_minimum",
+          "profile": "original_200",
+          "status": "SUCCEEDED"
+        }
+      ]
+    }
+  },
+  "warning": "Post-hoc diagnostic; no weight adjustment or case exclusion"
+}

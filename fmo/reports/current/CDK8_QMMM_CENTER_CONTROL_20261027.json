@@ -1,0 +1,168 @@
+{
+  "schema": "quanpol-qm-center-factorial-comparison-v1",
+  "status": "COMPLETE",
+  "target": "CDK8",
+  "labels_used": false,
+  "with_center_swrb_angstrom": 1001.0,
+  "without_center_swrb_angstrom": 6000.0,
+  "max_coordinate_box_diagonal_bound_angstrom": 122.34721030143443,
+  "qm_center_restraint_branch_threshold_angstrom": 5291.772109029999,
+  "fixed_frame_count": 15,
+  "with_center_cycle_mean_kcal_mol": -1.5983898643794723,
+  "without_center_cycle_mean_kcal_mol": -3.20329861240607,
+  "with_center_cycle_sample_sd_kcal_mol": 8.244388295702544,
+  "without_center_cycle_sample_sd_kcal_mol": 3.5949826939158482,
+  "qm_center_cycle_mean_kcal_mol": 1.6049087480266666,
+  "qm_center_cycle_max_abs_kcal_mol": 23.2648028588,
+  "qm_center_single_point_max_abs_kcal_mol": 23.2648028588,
+  "qm_center_nonzero_single_point_count": 3,
+  "without_center_single_point_max_abs_kcal_mol": 0.0,
+  "without_center_nonzero_single_point_count": 0,
+  "max_abs_closure_error_kcal_mol": 2.079836303181537e-12,
+  "max_abs_single_point_closure_error_kcal_mol": 2.079836303181537e-12,
+  "mm_max_abs_change_kcal_mol": 0.0,
+  "mm_single_point_max_abs_change_kcal_mol": 0.0,
+  "openmm_ffdata_single_point_max_abs_change_kcal_mol": 0.0,
+  "cycles": [
+    {
+      "repeat": 0,
+      "iteration": 400,
+      "with_center_kcal_mol": -0.11290177739647334,
+      "without_center_kcal_mol": -0.11290177739647334,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 0,
+      "iteration": 800,
+      "with_center_kcal_mol": -7.987383380095707,
+      "without_center_kcal_mol": -7.987383380095707,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 0,
+      "iteration": 1200,
+      "with_center_kcal_mol": -6.3713163694956165,
+      "without_center_kcal_mol": -6.3713163694956165,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 0,
+      "iteration": 1600,
+      "with_center_kcal_mol": 4.532183684495976,
+      "without_center_kcal_mol": 4.532183684495976,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 0,
+      "iteration": 2000,
+      "with_center_kcal_mol": -5.823352137700567,
+      "without_center_kcal_mol": -5.823352137700567,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 1,
+      "iteration": 400,
+      "with_center_kcal_mol": -2.6403866487016785,
+      "without_center_kcal_mol": -2.6403866487016785,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 1,
+      "iteration": 800,
+      "with_center_kcal_mol": -4.16579050979999,
+      "without_center_kcal_mol": -3.9000352601979102,
+      "qm_center_component_kcal_mol": -0.2657552496,
+      "observed_cycle_shift_kcal_mol": 0.26575524960207986,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 1,
+      "iteration": 1200,
+      "with_center_kcal_mol": -3.335345027393487,
+      "without_center_kcal_mol": -3.335345027393487,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 1,
+      "iteration": 1600,
+      "with_center_kcal_mol": -2.780106375703326,
+      "without_center_kcal_mol": -2.780106375703326,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 1,
+      "iteration": 2000,
+      "with_center_kcal_mol": -4.675849755301897,
+      "without_center_kcal_mol": -4.675849755301897,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 2,
+      "iteration": 400,
+      "with_center_kcal_mol": 25.76415317669671,
+      "without_center_kcal_mol": 2.4993503178957326,
+      "qm_center_component_kcal_mol": 23.2648028588,
+      "observed_cycle_shift_kcal_mol": -23.264802858800977,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 2,
+      "iteration": 800,
+      "with_center_kcal_mol": -1.6207165651940159,
+      "without_center_kcal_mol": -2.6953001763940847,
+      "qm_center_component_kcal_mol": 1.0745836112,
+      "observed_cycle_shift_kcal_mol": -1.0745836112000688,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 2,
+      "iteration": 1200,
+      "with_center_kcal_mol": -5.405029291101528,
+      "without_center_kcal_mol": -5.405029291101528,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 2,
+      "iteration": 1600,
+      "with_center_kcal_mol": -8.32536894760051,
+      "without_center_kcal_mol": -8.32536894760051,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    },
+    {
+      "repeat": 2,
+      "iteration": 2000,
+      "with_center_kcal_mol": -1.0286380413999723,
+      "without_center_kcal_mol": -1.0286380413999723,
+      "qm_center_component_kcal_mol": 0.0,
+      "observed_cycle_shift_kcal_mol": 0.0,
+      "mm_max_abs_change_kcal_mol": 0.0
+    }
+  ],
+  "interpretation_limits": [
+    "This is a single Hamiltonian-factor sensitivity control on sparse fixed frames, not an affinity estimate or free energy.",
+    "The QM-center term is a GAMESS finite-shell algorithm restraint; removing it does not validate the remaining finite-shell model against PME.",
+    "All selected frames are retained; no frame is deleted based on observed energy or affinity."
+  ]
+}
